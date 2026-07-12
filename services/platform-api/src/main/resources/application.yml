@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: testhub-platform-api
+  datasource:
+    url: ${TESTHUB_DB_URL:jdbc:mysql://localhost:13307/testhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${TESTHUB_DB_USERNAME:testhub}
+    password: ${TESTHUB_DB_PASSWORD:testhub_dev_password}
+  data:
+    redis:
+      host: ${TESTHUB_REDIS_HOST:localhost}
+      port: ${TESTHUB_REDIS_PORT:6380}
+      password: ${TESTHUB_REDIS_PASSWORD:testhub_redis_password}
+  session:
+    timeout: 8h
+    redis:
+      namespace: testhub:session
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        name: TESTHUB_SESSION
+        http-only: true
+        same-site: lax
+        secure: ${TESTHUB_SECURE_COOKIE:false}
+      tracking-modes: cookie
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
+testhub:
+  security:
+    # Local development fallback only. Production must provide a dedicated Base64-encoded AES key.
+    encryption-key: ${TESTHUB_ENCRYPTION_KEY:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+  storage:
+    endpoint: ${TESTHUB_MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${TESTHUB_MINIO_ACCESS_KEY:testhub}
+    secret-key: ${TESTHUB_MINIO_SECRET_KEY:testhub_minio_password}
+    bucket: ${TESTHUB_MINIO_BUCKET:testhub-files}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
