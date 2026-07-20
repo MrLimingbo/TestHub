@@ -14,6 +14,30 @@ export default tseslint.config(
     },
   },
   {
+    files: ['services/api-runner/**/*.js', 'services/jmeter-runner/**/*.js'],
+    languageOptions: {
+      globals: {
+        URL: 'readonly',
+        clearInterval: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        setInterval: 'readonly',
+        setTimeout: 'readonly',
+      },
+    },
+  },
+  {
+    files: ['services/testhub-cli/**/*.js'],
+    languageOptions: {
+      globals: {
+        Buffer: 'readonly',
+        process: 'readonly',
+        Response: 'readonly',
+        URL: 'readonly',
+      },
+    },
+  },
+  {
     files: ['**/*.vue'],
     languageOptions: { parserOptions: { parser: tseslint.parser } },
     rules: {

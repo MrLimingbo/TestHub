@@ -22,11 +22,12 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
+    include: ['src/**/*.test.ts'],
     setupFiles: ['./src/test/setup.ts'],
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:8080',
+      '/api/': 'http://localhost:8080',
     },
   },
 })

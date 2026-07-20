@@ -45,4 +45,21 @@ public class SecretCipher {
             throw new IllegalStateException("环境密钥加密失败", exception);
         }
     }
+
+    public String decrypt(String encryptedValue) {
+        try {
+            if (encryptedValue == null || !encryptedValue.startsWith(VERSION + ":")) {
+                throw new IllegalArgumentException("不支持的密钥密文版本");
+            }
+            byte[] payload = Base64.getUrlDecoder().decode(encryptedValue.substring((VERSION + ":").length()));
+            if (payload.length <= NONCE_LENGTH_BYTES) throw new IllegalArgumentException("密钥密文长度不合法");
+            byte[] nonce = java.util.Arrays.copyOfRange(payload, 0, NONCE_LENGTH_BYTES);
+            byte[] cipherText = java.util.Arrays.copyOfRange(payload, NONCE_LENGTH_BYTES, payload.length);
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_LENGTH_BITS, nonce));
+            return new String(cipher.doFinal(cipherText), StandardCharsets.UTF_8);
+        } catch (Exception exception) {
+            throw new IllegalStateException("环境密钥解密失败", exception);
+        }
+    }
 }

@@ -2,8 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 
 const moduleRoutes = [
-  ['api-design', '/api-design'],
-  ['mock', '/mock'],
   ['ui-automation', '/ui-automation'],
   ['mobile-automation', '/mobile-automation'],
   ['plugins', '/plugins'],
@@ -13,6 +11,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/login', component: () => import('@/pages/LoginPage.vue'), meta: { public: true } },
+    { path: '/mock/share/:shareKey', component: () => import('@/pages/MockSharePage.vue'), meta: { public: true } },
     {
       path: '/',
       component: () => import('@/layouts/AppShell.vue'),
@@ -20,7 +19,12 @@ const router = createRouter({
         { path: '', redirect: '/dashboard' },
         { path: 'dashboard', component: () => import('@/pages/DashboardPage.vue') },
         { path: 'functional', component: () => import('@/pages/FunctionalTestingPage.vue') },
+        { path: 'functional/plans', component: () => import('@/pages/FunctionalPlansPage.vue') },
+        { path: 'functional/governance', component: () => import('@/pages/FunctionalGovernancePage.vue') },
+        { path: 'functional/delivery', component: () => import('@/pages/FunctionalDeliveryPage.vue') },
+        { path: 'api-design', component: () => import('@/pages/ApiDesignPage.vue') },
         ...moduleRoutes,
+        { path: 'mock', component: () => import('@/pages/MockServicePage.vue') },
         { path: 'api-debug', component: () => import('@/pages/ApiDebugPage.vue') },
         { path: 'api-automation', component: () => import('@/pages/AutomationPage.vue') },
         { path: 'performance', component: () => import('@/pages/PerformancePage.vue') },

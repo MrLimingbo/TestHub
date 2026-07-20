@@ -36,6 +36,12 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
 testhub:
+  runner:
+    # Disabled by default. HTTP execution additionally requires a verified Runner that advertises executionEnabled=true.
+    http-execution-enabled: ${TESTHUB_API_RUNNER_HTTP_EXECUTION_ENABLED:false}
+  performance-runner:
+    # Local development fallback only. Production must inject a dedicated signing key.
+    heartbeat-key: ${TESTHUB_PERFORMANCE_RUNNER_HEARTBEAT_KEY:testhub-performance-runner-local-development-key-2026}
   security:
     # Local development fallback only. Production must provide a dedicated Base64-encoded AES key.
     encryption-key: ${TESTHUB_ENCRYPTION_KEY:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
