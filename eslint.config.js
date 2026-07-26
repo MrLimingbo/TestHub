@@ -45,6 +45,7 @@ export default tseslint.config(
         URL: 'readonly',
         __dirname: 'readonly',
         console: 'readonly',
+        exports: 'readonly',
         module: 'readonly',
         process: 'readonly',
         require: 'readonly',

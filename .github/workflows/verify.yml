@@ -30,7 +30,21 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
-      - run: docker compose up -d mysql redis minio
+      - name: Start test dependencies
+        run: |
+          for attempt in 1 2 3; do
+            if docker compose pull mysql redis minio && docker compose up -d --wait mysql redis minio; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              docker compose ps
+              docker compose logs --no-color mysql redis minio
+              exit 1
+            fi
+
+            sleep "$((attempt * 10))"
+          done
       - run: chmod +x mvnw && ./mvnw -pl services/platform-api test
       - if: always()
         run: docker compose down -v
