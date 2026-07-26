@@ -529,13 +529,12 @@ class ApiAutomationExecutionFlowTests {
         )).withStreamKey(ApiRunnerProtocol.SCRIPT_RESULT_STREAM));
         runnerScriptResults.consume();
 
-        MvcResult response = mvc.perform(get("/api/v1/projects/{projectId}/api-automation/executions/{executionId}/script-results",
-                        projectId, executionId).cookie(administrator.sessionCookie()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
-                .andExpect(jsonPath("$.data[0].phase").value("PRE_REQUEST"))
-                .andExpect(jsonPath("$.data[0].testCount").value(3))
-                .andExpect(jsonPath("$.data[0].passedCount").value(2))
-                .andExpect(jsonPath("$.data[0].failedCount").value(1)).andReturn();
+        MvcResult response = awaitScriptResultCount(administrator, projectId, executionId, 1);
+        JsonNode scriptResults = json(response).at("/data");
+        org.junit.jupiter.api.Assertions.assertEquals("PRE_REQUEST", scriptResults.get(0).path("phase").asText());
+        org.junit.jupiter.api.Assertions.assertEquals(3, scriptResults.get(0).path("testCount").asInt());
+        org.junit.jupiter.api.Assertions.assertEquals(2, scriptResults.get(0).path("passedCount").asInt());
+        org.junit.jupiter.api.Assertions.assertEquals(1, scriptResults.get(0).path("failedCount").asInt());
         org.junit.jupiter.api.Assertions.assertFalse(response.getResponse().getContentAsString().contains("must-not-be-persisted"));
 
         MvcResult report = mvc.perform(get("/api/v1/projects/{projectId}/api-automation/executions/{executionId}/report",
@@ -766,6 +765,23 @@ class ApiAutomationExecutionFlowTests {
         MvcResult context = mvc.perform(get("/api/v1/access/context").cookie(session.sessionCookie())).andExpect(status().isOk()).andReturn();
         String organizationId = json(context).at("/data/organizations/0/id").asText();
         return json(context).at("/data/projects/" + organizationId + "/0/id").asText();
+    }
+
+    private MvcResult awaitScriptResultCount(LoginSession administrator, String projectId, String executionId, int expectedCount)
+            throws Exception {
+        MvcResult response = null;
+        for (int attempt = 0; attempt < 20; attempt++) {
+            runnerScriptResults.consume();
+            response = mvc.perform(get("/api/v1/projects/{projectId}/api-automation/executions/{executionId}/script-results",
+                            projectId, executionId).cookie(administrator.sessionCookie()))
+                    .andExpect(status().isOk()).andReturn();
+            if (json(response).at("/data").size() == expectedCount) return response;
+            Thread.sleep(50);
+        }
+        org.junit.jupiter.api.Assertions.assertNotNull(response);
+        org.junit.jupiter.api.Assertions.assertEquals(expectedCount, json(response).at("/data").size(),
+                "Runner script result was not persisted before the verification deadline");
+        return response;
     }
 
     private JsonNode json(MvcResult result) throws Exception { return objectMapper.readTree(result.getResponse().getContentAsString()); }
