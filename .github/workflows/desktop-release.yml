@@ -11,12 +11,6 @@ permissions:
 jobs:
   macos:
     runs-on: macos-latest
-    env:
-      CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
-      CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
-      APPLE_ID: ${{ secrets.APPLE_ID }}
-      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -30,8 +24,20 @@ jobs:
       - run: pnpm desktop:test
       - if: startsWith(github.ref, 'refs/tags/desktop-v')
         run: node scripts/desktop/verify-signing.mjs mac
+        env:
+          CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       - if: startsWith(github.ref, 'refs/tags/desktop-v')
         run: pnpm --filter @testhub/desktop package:mac:signed
+        env:
+          CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       - if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
         run: pnpm desktop:package:mac
       - uses: actions/upload-artifact@v4
@@ -42,9 +48,6 @@ jobs:
 
   windows:
     runs-on: windows-latest
-    env:
-      CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
-      CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -58,7 +61,16 @@ jobs:
       - run: pnpm desktop:test
       - if: startsWith(github.ref, 'refs/tags/desktop-v')
         run: node scripts/desktop/verify-signing.mjs win
-      - run: pnpm desktop:package:win
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+      - if: startsWith(github.ref, 'refs/tags/desktop-v')
+        run: pnpm desktop:package:win
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+      - if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
+        run: pnpm desktop:package:win
       - uses: actions/upload-artifact@v4
         with:
           name: TestHub-Windows
