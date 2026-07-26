@@ -3,6 +3,7 @@ export interface MetricCard {
   value: string
   delta: string
   tone: 'blue' | 'green' | 'orange' | 'violet'
+  caption?: string
 }
 
 export interface TableColumn {

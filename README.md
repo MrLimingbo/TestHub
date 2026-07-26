@@ -1,6 +1,16 @@
 # TestHub
 
-企业私有化的一站式测试开发平台。当前已完成阶段 1 UI 以及阶段 2 基础平台：身份会话、RBAC、项目参数、环境密钥、系统配置、审计日志、通知模板、任务中心和 MinIO 文件服务。
+企业私有化的一站式测试开发平台。阶段 1–9 已完成：测试资产、接口与自动化执行、性能、质量报表、Web/移动自动化，以及受控插件与企业适配器基础。阶段 10 正在进行生产加固；部署基线见 [生产部署文档](docs/production-deployment.md)，备份与恢复操作见 [备份与恢复运行手册](docs/backup-recovery.md)，发布门禁与密钥轮换见 [发布供应链与密钥轮换](docs/release-security.md)。
+
+## 桌面安装包
+
+TestHub 保留现有的浏览器访问、Vite 开发、Docker Compose 和 Kubernetes 部署方式；桌面端是安全的企业客户端，连接同一个已部署的 TestHub Web 服务，不复制控制面、数据库或 Runner。安装包与发布流程见[桌面安装包与发布](docs/desktop-packaging.md)。
+
+```bash
+npx pnpm@10.13.1 desktop:test
+npx pnpm@10.13.1 desktop:package:mac  # 在 macOS 生成 release/desktop/TestHub.dmg
+npx pnpm@10.13.1 desktop:package:win  # 仅在 Windows 生成 release/desktop/TestHub.exe
+```
 
 ## 本地运行
 

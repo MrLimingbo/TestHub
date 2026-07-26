@@ -14,9 +14,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ['services/api-runner/**/*.js', 'services/jmeter-runner/**/*.js'],
+    files: ['services/api-runner/**/*.js', 'services/jmeter-runner/**/*.js', 'services/playwright-runner/**/*.js', 'services/appium-runner/**/*.js'],
     languageOptions: {
       globals: {
+        AbortSignal: 'readonly',
         URL: 'readonly',
         clearInterval: 'readonly',
         console: 'readonly',
@@ -38,6 +39,31 @@ export default tseslint.config(
     },
   },
   {
+    files: ['apps/desktop/**/*.{cjs,js}', 'scripts/desktop/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        URL: 'readonly',
+        __dirname: 'readonly',
+        console: 'readonly',
+        module: 'readonly',
+        process: 'readonly',
+        require: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    files: ['apps/desktop/app/src/ui/**/*.js'],
+    languageOptions: {
+      globals: {
+        document: 'readonly',
+        window: 'readonly',
+      },
+    },
+  },
+  {
     files: ['**/*.vue'],
     languageOptions: { parserOptions: { parser: tseslint.parser } },
     rules: {
@@ -45,6 +71,7 @@ export default tseslint.config(
       'vue/max-attributes-per-line': 'off',
       'vue/html-self-closing': 'off',
       'vue/singleline-html-element-content-newline': 'off',
+      'vue/multiline-html-element-content-newline': 'off',
     },
   },
 )

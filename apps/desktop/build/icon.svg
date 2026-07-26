@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title>TestHub</title>
+  <defs>
+    <linearGradient id="surface" x1="112" y1="96" x2="912" y2="928" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#165DFF"/>
+      <stop offset="1" stop-color="#0E42D2"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="300" y1="238" x2="708" y2="766" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B8D5FF"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="236" fill="url(#surface)"/>
+  <path d="M254 274c0-30 24-54 54-54h408c30 0 54 24 54 54v136c0 30-24 54-54 54H592v290c0 30-24 54-54 54H486c-30 0-54-24-54-54V464H308c-30 0-54-24-54-54V274Z" fill="url(#accent)"/>
+  <path d="M308 220h408c30 0 54 24 54 54v136c0 30-24 54-54 54H308c-30 0-54-24-54-54V274c0-30 24-54 54-54Z" fill="#FFF" fill-opacity=".18"/>
+</svg>

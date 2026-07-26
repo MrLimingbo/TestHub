@@ -28,6 +28,7 @@ const sections = [
     { path: '/audit', label: '权限与审计', icon: 'IconLock' },
     { path: '/integrations', label: '通知与集成', icon: 'IconLink' },
     { path: '/plugins', label: '插件中心', icon: 'IconStorage' },
+    { path: '/operations', label: '运行与发布', icon: 'IconSettings' },
   ] },
 ]
 

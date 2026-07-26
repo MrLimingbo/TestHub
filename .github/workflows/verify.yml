@@ -30,4 +30,32 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
+      - run: docker compose up -d mysql redis minio
       - run: chmod +x mvnw && ./mvnw -pl services/platform-api test
+      - if: always()
+        run: docker compose down -v
+
+  release-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: chmod +x mvnw scripts/security/*.sh scripts/operations/*.sh scripts/deployment/*.sh && bash -n scripts/security/*.sh scripts/operations/*.sh scripts/deployment/*.sh
+      - run: docker compose --env-file .env.production.example -f compose.production.yaml config --quiet
+      - run: scripts/deployment/validate-helm-chart.sh
+      - run: TESTHUB_SECURITY_ARTIFACT_DIR=artifacts/security scripts/security/release-gate.sh
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-artifacts
+          path: artifacts/security
+          if-no-files-found: warn

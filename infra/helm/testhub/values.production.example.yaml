@@ -1,0 +1,56 @@
+# Copy outside the repository and replace every endpoint, host and image reference for the target environment.
+# Runtime credentials belong only in the existing Kubernetes Secret named below.
+api:
+  image:
+    repository: registry.example.com/testhub/platform-api
+    tag: "0.1.0"
+    # Prefer a real immutable digest in production, for example sha256:...
+    digest: ""
+  existingSecret: testhub-runtime
+  config:
+    dbUrl: jdbc:mysql://mysql.testhub.svc.cluster.local:3306/testhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=true
+    dbUsername: testhub
+    redisHost: redis.testhub.svc.cluster.local
+    redisPort: "6379"
+    minioEndpoint: https://minio.internal.example.com
+    minioBucket: testhub-files
+    corsAllowedOrigins: https://testhub.example.com
+    serverMaxThreads: "200"
+    serverMinSpareThreads: "20"
+    serverAcceptCount: "100"
+    serverMaxConnections: "8192"
+    serverConnectionTimeout: 10s
+    dbPoolMaxSize: "20"
+    dbPoolMinIdle: "5"
+    dbConnectionTimeoutMs: "3000"
+    dbValidationTimeoutMs: "1000"
+    capacityBaselineRequestCount: "60"
+    capacityBaselineConcurrency: "6"
+    capacityBaselineP95LatencyMs: "500"
+    capacityBaselineMaxErrorPercent: "1"
+web:
+  image:
+    repository: registry.example.com/testhub/web
+    tag: "0.1.0"
+    # Prefer a real immutable digest in production, for example sha256:...
+    digest: ""
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: production-acme
+  hosts:
+    - host: testhub.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: testhub-web-tls
+      hosts: [testhub.example.com]
+serviceMonitor:
+  enabled: true
+  additionalLabels:
+    release: kube-prometheus-stack
+networkPolicy:
+  # Enable only after setting selectors for the installed Prometheus pods and validating all external dependencies.
+  enabled: false

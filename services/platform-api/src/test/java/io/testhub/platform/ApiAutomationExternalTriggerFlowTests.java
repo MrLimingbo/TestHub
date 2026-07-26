@@ -88,7 +88,7 @@ class ApiAutomationExternalTriggerFlowTests {
         assertTrue(secret.startsWith("thw_"));
         String stored = jdbc.sql("SELECT secret_ciphertext FROM api_automation_webhook_trigger WHERE id = :id")
                 .param("id", webhookId).query(String.class).single();
-        assertTrue(stored.startsWith("v1:"));
+        assertTrue(stored.startsWith("v2:"));
         assertFalse(stored.contains(secret));
         MvcResult listed = mvc.perform(get("/api/v1/projects/{projectId}/api-automation/webhook-triggers", projectId)
                         .cookie(administrator.sessionCookie())).andExpect(status().isOk()).andReturn();

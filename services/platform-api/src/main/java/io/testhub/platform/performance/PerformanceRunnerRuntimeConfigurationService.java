@@ -17,15 +17,19 @@ public class PerformanceRunnerRuntimeConfigurationService {
     private static final Pattern TEMPLATE = Pattern.compile("\\$\\{[A-Za-z_][A-Za-z0-9_]{0,63}}");
     private static final String TEMPLATE_URL_SENTINEL = "__testhub_data_variable__";
     private final PerformanceTestExecutionRepository executions;
+    private final PerformanceRunnerStatusService runners;
     private final AuditService audit;
 
-    public PerformanceRunnerRuntimeConfigurationService(PerformanceTestExecutionRepository executions, AuditService audit) {
+    public PerformanceRunnerRuntimeConfigurationService(PerformanceTestExecutionRepository executions,
+                                                        PerformanceRunnerStatusService runners, AuditService audit) {
         this.executions = executions;
+        this.runners = runners;
         this.audit = audit;
     }
 
     @Transactional
     public PerformanceRunnerRuntimeConfiguration issue(String runnerId, String taskId, String executionId) {
+        if (!runners.isTrustedExecutionEnabled(runnerId)) throw rejected();
         PerformanceTestExecution execution = executions.findByTask(taskId, executionId)
                 .orElseThrow(this::rejected);
         if (!ELIGIBLE_STATUSES.contains(execution.status())

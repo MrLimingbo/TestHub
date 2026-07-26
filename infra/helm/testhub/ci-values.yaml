@@ -1,0 +1,43 @@
+api:
+  existingSecret: testhub-ci-runtime
+  image:
+    repository: testhub/platform-api
+    tag: ci
+  config:
+    dbUrl: jdbc:mysql://mysql:3306/testhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    dbUsername: testhub
+    redisHost: redis
+    redisPort: "6379"
+    minioEndpoint: http://minio:9000
+    minioBucket: testhub-files
+    corsAllowedOrigins: https://testhub.example.com
+    serverMaxThreads: "200"
+    serverMinSpareThreads: "20"
+    serverAcceptCount: "100"
+    serverMaxConnections: "8192"
+    serverConnectionTimeout: 10s
+    dbPoolMaxSize: "20"
+    dbPoolMinIdle: "5"
+    dbConnectionTimeoutMs: "3000"
+    dbValidationTimeoutMs: "1000"
+    capacityBaselineRequestCount: "60"
+    capacityBaselineConcurrency: "6"
+    capacityBaselineP95LatencyMs: "500"
+    capacityBaselineMaxErrorPercent: "1"
+web:
+  image:
+    repository: testhub/web
+    tag: ci
+ingress:
+  enabled: true
+  className: nginx
+serviceMonitor:
+  enabled: true
+networkPolicy:
+  enabled: true
+  prometheus:
+    enabled: true
+    namespaceSelector:
+      kubernetes.io/metadata.name: monitoring
+    podSelector:
+      app.kubernetes.io/name: prometheus

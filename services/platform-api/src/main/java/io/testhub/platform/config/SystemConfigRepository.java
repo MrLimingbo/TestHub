@@ -35,6 +35,11 @@ public class SystemConfigRepository {
         jdbc.sql("DELETE FROM system_config WHERE config_key = :key AND secret = FALSE").param("key", key).update();
     }
 
+    public java.util.Optional<String> findNonSecretValue(String key) {
+        return jdbc.sql("SELECT config_value FROM system_config WHERE config_key = :key AND secret = FALSE")
+                .param("key", key).query(String.class).optional();
+    }
+
     private Instant instant(Timestamp timestamp) {
         return timestamp == null ? null : timestamp.toInstant();
     }

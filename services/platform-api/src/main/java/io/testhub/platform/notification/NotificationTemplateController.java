@@ -60,6 +60,8 @@ public class NotificationTemplateController {
                                   @NotBlank String channel,
                                   @NotBlank @Size(max = 255) String subjectTemplate,
                                   @NotBlank @Size(max = 20_000) String bodyTemplate,
+                                  @Size(max = 2048) String targetUrl,
+                                  @Size(max = 512) String signingSecret,
                                   boolean enabled) {
         public TemplateRequest {
             if (channel != null) {
@@ -68,7 +70,8 @@ public class NotificationTemplateController {
         }
 
         NotificationTemplateService.TemplateInput toInput() {
-            return new NotificationTemplateService.TemplateInput(name, eventCode, channel, subjectTemplate, bodyTemplate, enabled);
+            return new NotificationTemplateService.TemplateInput(name, eventCode, channel, subjectTemplate, bodyTemplate,
+                    targetUrl, signingSecret, enabled);
         }
     }
 }

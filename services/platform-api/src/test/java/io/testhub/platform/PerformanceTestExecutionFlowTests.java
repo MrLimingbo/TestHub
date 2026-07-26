@@ -17,7 +17,11 @@ import jakarta.servlet.http.Cookie;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,20 +29,26 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class PerformanceTestExecutionFlowTests {
+    private static final String RUNNER_ID = "jmeter-runner-test";
+    private static final String HEARTBEAT_KEY = "testhub-performance-runner-local-development-key-2026";
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private JdbcClient jdbc;
     @Autowired private PerformanceTestExecutionService executions;
     @Autowired private PerformanceRunnerRuntimeConfigurationService runtime;
+    @Autowired private StringRedisTemplate redis;
 
     @AfterEach
     void clean() {
+        redis.delete("testhub:runner:jmeter:heartbeat:v1:" + RUNNER_ID);
+        redis.opsForSet().remove("testhub:runner:jmeter:members:v1", RUNNER_ID);
         jdbc.sql("DELETE FROM performance_test_execution WHERE plan_name LIKE '压测执行验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_thread_group WHERE name LIKE '压测执行验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_plan WHERE name LIKE '压测执行验收 %'").update();
@@ -69,7 +79,8 @@ class PerformanceTestExecutionFlowTests {
         String executionId = json(created).at("/data/id").asText();
         String taskId = json(created).at("/data/taskId").asText();
 
-        PerformanceRunnerRuntimeConfiguration configuration = runtime.issue("jmeter-runner-test", taskId, executionId);
+        heartbeat(RUNNER_ID);
+        PerformanceRunnerRuntimeConfiguration configuration = runtime.issue(RUNNER_ID, taskId, executionId);
         org.junit.jupiter.api.Assertions.assertEquals(6, configuration.artifactVersion());
         PerformanceRunnerRuntimeConfiguration.ThreadGroup group = configuration.threadGroups().getFirst();
         org.junit.jupiter.api.Assertions.assertEquals("POST", group.requestMethod());
@@ -197,6 +208,26 @@ class PerformanceTestExecutionFlowTests {
                         .header(csrf.headerName(), csrf.token()).content("{\"timeoutSeconds\":120}"))
                 .andExpect(status().isOk()).andReturn();
         return new Execution(json(result).at("/data/id").asText(), json(result).at("/data/taskId").asText());
+    }
+
+    private void heartbeat(String runnerId) throws Exception {
+        Instant startedAt = Instant.now().minusSeconds(5);
+        Instant heartbeatAt = Instant.now();
+        Map<String, Object> heartbeat = new LinkedHashMap<>();
+        heartbeat.put("runnerId", runnerId); heartbeat.put("runnerType", "jmeter"); heartbeat.put("protocolVersion", "1");
+        heartbeat.put("runnerVersion", "0.1.0-test"); heartbeat.put("executionEnabled", true);
+        heartbeat.put("startedAt", startedAt.toString()); heartbeat.put("heartbeatAt", heartbeatAt.toString());
+        heartbeat.put("trustVersion", "1");
+        heartbeat.put("signature", hmac(String.join("\n", runnerId, "jmeter", "1", "0.1.0-test", "true",
+                startedAt.toString(), heartbeatAt.toString())));
+        redis.opsForSet().add("testhub:runner:jmeter:members:v1", runnerId);
+        redis.opsForValue().set("testhub:runner:jmeter:heartbeat:v1:" + runnerId, objectMapper.writeValueAsString(heartbeat), Duration.ofMinutes(1));
+    }
+
+    private String hmac(String payload) throws Exception {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(HEARTBEAT_KEY.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        return java.util.HexFormat.of().formatHex(mac.doFinal(payload.getBytes(StandardCharsets.UTF_8)));
     }
 
     private void complete(Execution execution, String runnerId, long samples, long successes, long errors, int p95) {

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "testhub.apiConfigName" . }}
+  labels:
+    {{- include "testhub.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+data:
+  TESTHUB_DB_URL: {{ required "api.config.dbUrl is required" .Values.api.config.dbUrl | quote }}
+  TESTHUB_DB_USERNAME: {{ required "api.config.dbUsername is required" .Values.api.config.dbUsername | quote }}
+  TESTHUB_REDIS_HOST: {{ required "api.config.redisHost is required" .Values.api.config.redisHost | quote }}
+  TESTHUB_REDIS_PORT: {{ .Values.api.config.redisPort | quote }}
+  TESTHUB_MINIO_ENDPOINT: {{ required "api.config.minioEndpoint is required" .Values.api.config.minioEndpoint | quote }}
+  TESTHUB_MINIO_BUCKET: {{ .Values.api.config.minioBucket | quote }}
+  TESTHUB_CORS_ALLOWED_ORIGINS: {{ required "api.config.corsAllowedOrigins is required" .Values.api.config.corsAllowedOrigins | quote }}
+  TESTHUB_SECURE_COOKIE: "true"
+  SERVER_FORWARD_HEADERS_STRATEGY: framework
+  TESTHUB_SERVER_MAX_THREADS: {{ .Values.api.config.serverMaxThreads | quote }}
+  TESTHUB_SERVER_MIN_SPARE_THREADS: {{ .Values.api.config.serverMinSpareThreads | quote }}
+  TESTHUB_SERVER_ACCEPT_COUNT: {{ .Values.api.config.serverAcceptCount | quote }}
+  TESTHUB_SERVER_MAX_CONNECTIONS: {{ .Values.api.config.serverMaxConnections | quote }}
+  TESTHUB_SERVER_CONNECTION_TIMEOUT: {{ .Values.api.config.serverConnectionTimeout | quote }}
+  TESTHUB_DB_POOL_MAX_SIZE: {{ .Values.api.config.dbPoolMaxSize | quote }}
+  TESTHUB_DB_POOL_MIN_IDLE: {{ .Values.api.config.dbPoolMinIdle | quote }}
+  TESTHUB_DB_CONNECTION_TIMEOUT_MS: {{ .Values.api.config.dbConnectionTimeoutMs | quote }}
+  TESTHUB_DB_VALIDATION_TIMEOUT_MS: {{ .Values.api.config.dbValidationTimeoutMs | quote }}
+  TESTHUB_CAPACITY_BASELINE_REQUEST_COUNT: {{ .Values.api.config.capacityBaselineRequestCount | quote }}
+  TESTHUB_CAPACITY_BASELINE_CONCURRENCY: {{ .Values.api.config.capacityBaselineConcurrency | quote }}
+  TESTHUB_CAPACITY_BASELINE_P95_LATENCY_MS: {{ .Values.api.config.capacityBaselineP95LatencyMs | quote }}
+  TESTHUB_CAPACITY_BASELINE_MAX_ERROR_PERCENT: {{ .Values.api.config.capacityBaselineMaxErrorPercent | quote }}

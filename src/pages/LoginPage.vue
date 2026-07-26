@@ -44,11 +44,11 @@ const login = async () => {
         <div class="eyebrow">欢迎回来</div>
         <h2>登录 TestHub</h2>
         <p>进入星云科技的质量工作空间</p>
-        <a-form :model="form" layout="vertical" @submit-success="login">
+        <a-form :model="form" layout="vertical">
           <a-form-item field="email" label="账号"><a-input v-model="form.email" size="large" placeholder="请输入账号"><template #prefix><icon-user /></template></a-input></a-form-item>
           <a-form-item field="password" label="密码"><a-input-password v-model="form.password" size="large" placeholder="请输入密码"><template #prefix><icon-lock /></template></a-input-password></a-form-item>
           <div class="login-options"><a-checkbox default-checked>保持登录</a-checkbox><a-link>忘记密码？</a-link></div>
-          <a-button type="primary" html-type="submit" long size="large" :loading="loading">进入工作空间</a-button>
+          <a-button type="primary" html-type="button" long size="large" :loading="loading" @click="login">进入工作空间</a-button>
         </a-form>
         <div class="demo-hint"><icon-info-circle /> 初始账号：admin@testhub.local / TestHub2026!</div>
       </div>

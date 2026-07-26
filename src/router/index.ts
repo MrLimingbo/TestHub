@@ -1,12 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 
-const moduleRoutes = [
-  ['ui-automation', '/ui-automation'],
-  ['mobile-automation', '/mobile-automation'],
-  ['plugins', '/plugins'],
-].map(([moduleKey, path]) => ({ path, component: () => import('@/pages/ModulePage.vue'), props: { moduleKey } }))
-
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -23,7 +17,10 @@ const router = createRouter({
         { path: 'functional/governance', component: () => import('@/pages/FunctionalGovernancePage.vue') },
         { path: 'functional/delivery', component: () => import('@/pages/FunctionalDeliveryPage.vue') },
         { path: 'api-design', component: () => import('@/pages/ApiDesignPage.vue') },
-        ...moduleRoutes,
+        { path: 'ui-automation', component: () => import('@/pages/UiAutomationPage.vue') },
+        { path: 'mobile-automation', component: () => import('@/pages/MobileAutomationPage.vue') },
+        { path: 'plugins', component: () => import('@/pages/PluginsPage.vue') },
+        { path: 'operations', component: () => import('@/pages/OperationsPage.vue') },
         { path: 'mock', component: () => import('@/pages/MockServicePage.vue') },
         { path: 'api-debug', component: () => import('@/pages/ApiDebugPage.vue') },
         { path: 'api-automation', component: () => import('@/pages/AutomationPage.vue') },
