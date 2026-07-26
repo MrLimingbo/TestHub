@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["api", "web"],
+  "properties": {
+    "api": {
+      "type": "object",
+      "required": ["existingSecret", "image", "config"],
+      "properties": {
+        "existingSecret": {"type": "string", "minLength": 1},
+        "replicaCount": {"type": "integer", "minimum": 1},
+        "image": {"$ref": "#/definitions/image"}
+      }
+    },
+    "web": {
+      "type": "object",
+      "required": ["image"],
+      "properties": {
+        "replicaCount": {"type": "integer", "minimum": 1},
+        "image": {"$ref": "#/definitions/image"}
+      }
+    }
+  },
+  "definitions": {
+    "image": {
+      "type": "object",
+      "required": ["repository", "tag"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "tag": {"type": "string", "minLength": 1, "not": {"const": "latest"}},
+        "digest": {"type": "string"},
+        "pullPolicy": {"enum": ["Always", "IfNotPresent", "Never"]}
+      }
+    }
+  }
+}

@@ -29,6 +29,12 @@ public class AuditService {
                 detail == null ? Map.of() : Map.copyOf(detail), null));
     }
 
+    public void recordSystem(String organizationId, String projectId, String action, String resourceType, String resourceId,
+                             Map<String, Object> detail) {
+        repository.insert(new AuditLogEntry(UlidCreator.getUlid().toString(), null, organizationId, projectId, action,
+                resourceType, resourceId, "SUCCESS", "system", null, detail == null ? Map.of() : Map.copyOf(detail), null));
+    }
+
     public List<AuditLogEntry> recent(String projectId, String action, int limit) {
         return repository.findRecent(projectId, action, Math.min(Math.max(limit, 1), 200));
     }

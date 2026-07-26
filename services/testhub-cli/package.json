@@ -1,0 +1,17 @@
+{
+  "name": "@testhub/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TestHub API automation command-line client",
+  "bin": {
+    "testhub": "src/index.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "lint": "node --check src/cli.js && node --check src/index.js",
+    "test": "node --test"
+  }
+}

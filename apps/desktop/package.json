@@ -1,0 +1,58 @@
+{
+  "name": "@testhub/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TestHub secure desktop client",
+  "author": "TestHub",
+  "scripts": {
+    "dev": "electron app",
+    "test": "node --test test/**/*.test.cjs",
+    "package:dir": "electron-builder --dir --publish never",
+    "package:mac": "electron-builder --mac dmg --universal --publish never",
+    "package:mac:signed": "electron-builder --mac dmg --universal --publish never -c.mac.notarize=true",
+    "package:win": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "io.testhub.desktop",
+    "productName": "TestHub",
+    "asar": true,
+    "beforeBuild": "./build/skip-runtime-dependency-copy.cjs",
+    "directories": {
+      "app": "app",
+      "output": "../../release/desktop",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**",
+      "package.json",
+      "!test/**"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "target": [
+        "dmg"
+      ],
+      "artifactName": "TestHub.${ext}"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "TestHub.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TestHub"
+    }
+  }
+}

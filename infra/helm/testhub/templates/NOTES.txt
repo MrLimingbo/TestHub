@@ -1,0 +1,4 @@
+1. Create the existing runtime secret before applying this chart. It must contain all secret environment keys documented in docs/kubernetes-deployment.md.
+2. Use a values file with immutable image digests or versioned tags. Never use latest.
+3. Run scripts/deployment/helm-release.sh plan before apply. Apply uses --atomic and waits for readiness; rollback changes workloads only and never reverses Flyway data migrations.
+4. The API service is internal. Expose only the Web service through a TLS-enabled Ingress.

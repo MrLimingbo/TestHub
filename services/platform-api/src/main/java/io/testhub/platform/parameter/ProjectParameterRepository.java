@@ -27,6 +27,16 @@ public class ProjectParameterRepository {
                         rs.getString("updated_by"), timestamp(rs.getTimestamp("updated_at")))).list();
     }
 
+    public List<String> findNonSecretKeysByProject(String projectId, String environmentCode) {
+        return jdbc.sql("""
+                SELECT parameter_key
+                FROM project_parameter
+                WHERE project_id = :projectId AND secret = FALSE AND environment_code = :environmentCode
+                ORDER BY parameter_key
+                """).param("projectId", projectId).param("environmentCode", environmentCode)
+                .query(String.class).list();
+    }
+
     public List<String> findEnvironmentCodes(String projectId) {
         return jdbc.sql("""
                 SELECT DISTINCT environment_code FROM project_parameter WHERE project_id = :projectId AND secret = FALSE
@@ -72,6 +82,17 @@ public class ProjectParameterRepository {
                 """).param("projectId", projectId).query(String.class).list();
     }
 
+    public List<DebugParameter> findForDebug(String projectId, String environmentCode) {
+        return jdbc.sql("""
+                SELECT parameter_key, parameter_value, secret
+                FROM project_parameter
+                WHERE project_id = :projectId AND environment_code = :environmentCode
+                ORDER BY secret, parameter_key
+                """).param("projectId", projectId).param("environmentCode", environmentCode)
+                .query((rs, rowNumber) -> new DebugParameter(rs.getString("parameter_key"),
+                        rs.getString("parameter_value"), rs.getBoolean("secret"))).list();
+    }
+
     public void upsertSecret(String id, String organizationId, String projectId, String environmentCode, String key,
                              String encryptedValue, String updatedBy) {
         jdbc.sql("""
@@ -92,5 +113,8 @@ public class ProjectParameterRepository {
 
     private Instant timestamp(Timestamp timestamp) {
         return timestamp == null ? null : timestamp.toInstant();
+    }
+
+    public record DebugParameter(String key, String value, boolean secret) {
     }
 }

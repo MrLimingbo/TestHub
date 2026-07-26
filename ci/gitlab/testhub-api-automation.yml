@@ -1,0 +1,28 @@
+# Copy this job into .gitlab-ci.yml or include it from a project-local pipeline.
+# Configure TESTHUB_URL, TESTHUB_PROJECT_ID, TESTHUB_SCENARIO_ID and TESTHUB_TOKEN
+# as protected and masked CI/CD variables. Adjust `stage` if this project has no `test` stage.
+testhub_api_automation:
+  image: node:22-alpine
+  stage: test
+  variables:
+    TESTHUB_EXECUTION_TIMEOUT: "300"
+    TESTHUB_WAIT_TIMEOUT: "900"
+    TESTHUB_POLL_INTERVAL: "5"
+  before_script:
+    - test -n "${TESTHUB_URL:-}"
+    - test -n "${TESTHUB_PROJECT_ID:-}"
+    - test -n "${TESTHUB_SCENARIO_ID:-}"
+    - test -n "${TESTHUB_TOKEN:-}"
+  script:
+    - mkdir -p artifacts
+    - >-
+      node services/testhub-cli/src/index.js execution run
+      --timeout "$TESTHUB_EXECUTION_TIMEOUT"
+      --wait-timeout "$TESTHUB_WAIT_TIMEOUT"
+      --poll-interval "$TESTHUB_POLL_INTERVAL"
+      --report-output "./artifacts/testhub-execution-report.json"
+  artifacts:
+    when: always
+    expire_in: 14 days
+    paths:
+      - artifacts/testhub-execution-report.json

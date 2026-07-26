@@ -1,6 +1,16 @@
 # TestHub
 
-企业私有化的一站式测试开发平台。当前已完成阶段 1 UI 以及阶段 2 基础平台：身份会话、RBAC、项目参数、环境密钥、系统配置、审计日志、通知模板、任务中心和 MinIO 文件服务。
+企业私有化的一站式测试开发平台。阶段 1–9 已完成：测试资产、接口与自动化执行、性能、质量报表、Web/移动自动化，以及受控插件与企业适配器基础。阶段 10 正在进行生产加固；部署基线见 [生产部署文档](docs/production-deployment.md)，备份与恢复操作见 [备份与恢复运行手册](docs/backup-recovery.md)，发布门禁与密钥轮换见 [发布供应链与密钥轮换](docs/release-security.md)。
+
+## 桌面安装包
+
+TestHub 保留现有的浏览器访问、Vite 开发、Docker Compose 和 Kubernetes 部署方式；桌面端是安全的企业客户端，连接同一个已部署的 TestHub Web 服务，不复制控制面、数据库或 Runner。安装包与发布流程见[桌面安装包与发布](docs/desktop-packaging.md)。
+
+```bash
+npx pnpm@10.13.1 desktop:test
+npx pnpm@10.13.1 desktop:package:mac  # 在 macOS 生成 release/desktop/TestHub.dmg
+npx pnpm@10.13.1 desktop:package:win  # 仅在 Windows 生成 release/desktop/TestHub.exe
+```
 
 ## 本地运行
 
@@ -24,6 +34,44 @@ PATH=/opt/homebrew/opt/openjdk@21/bin:$PATH \
 - `tester@testhub.local`（测试工程师）
 
 以上账号的初始密码均为 `TestHub2026!`。
+
+### API Runner 骨架
+
+阶段 5 新增独立 Node.js API Runner。默认只注册 Redis 心跳并执行安全预检；只有完成签名校验、双端显式开启和 Origin 白名单配置后，才会执行受限 HTTP 请求、状态码提取/断言、固定等待、状态条件和有界循环。GET/HEAD/OPTIONS 还可对网络失败、408、429、5xx 在固定 250ms 间隔内有界重试（最多 3 次）。前后置脚本仅在受限 Runner 容器中隔离运行；Runner 不会交接环境密钥。
+
+```bash
+npx pnpm@10.13.1 --filter @testhub/api-runner start
+```
+
+也可通过 Docker Compose 的可选 profile 启动：
+
+```bash
+docker compose --profile runner up -d --build api-runner
+```
+
+协议、Stream 名称与安全边界见 [API Runner Redis Streams 协议 v1](docs/api-runner-protocol-v1.md)。
+
+### 接口自动化 CLI
+
+`services/testhub-cli` 提供零依赖的 Node.js 22+ CLI，供 GitHub Actions、GitLab CI 或 Jenkins 提交场景执行、读取脱敏报告，并在归档前校验报告工件的 ETag 与 SHA-256：
+
+```bash
+export TESTHUB_URL='http://localhost:8080'
+export TESTHUB_PROJECT_ID='01...'
+export TESTHUB_SCENARIO_ID='01...'
+export TESTHUB_TOKEN='thp_...'
+
+node services/testhub-cli/src/index.js execution run \
+  --timeout 300 --wait-timeout 900 --poll-interval 5 \
+  --report-output './artifacts/testhub-execution-report.json'
+node services/testhub-cli/src/index.js --help
+```
+
+CI 可使用 `execution wait --wait-timeout 900 --poll-interval 5` 等待执行终态：成功退出码为 `0`，业务执行失败为 `2`，客户端等待超时为 `3`。它只输出脱敏的状态摘要。
+
+GitLab 项目可直接复用 [CI 模板](ci/gitlab/testhub-api-automation.yml)，使用受保护且脱敏的变量运行一键门禁并归档报告工件。
+
+完整的令牌范围、下载校验和 CI 配置示例见 [接口自动化 CLI、CI 与签名 Webhook](docs/automation-cli-ci-examples.md)。
 
 ## 校验
 

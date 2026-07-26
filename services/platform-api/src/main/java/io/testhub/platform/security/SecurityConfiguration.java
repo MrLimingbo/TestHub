@@ -2,6 +2,7 @@ package io.testhub.platform.security;
 
 import io.testhub.platform.account.AccountUserDetailsService;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -41,16 +43,30 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, DaoAuthenticationProvider provider,
                                             SecurityApiErrorHandler errorHandler,
-                                            PersonalAccessTokenAuthenticationFilter tokenAuthenticationFilter) throws Exception {
+                                            PersonalAccessTokenAuthenticationFilter tokenAuthenticationFilter,
+                                            @Value("${testhub.security.cors.allowed-origins}") List<String> allowedOrigins) throws Exception {
         CookieCsrfTokenRepository csrfTokens = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfTokens.setCookiePath("/");
         return http
                 .csrf(csrf -> csrf.csrfTokenRepository(csrfTokens)
                         .ignoringRequestMatchers(request -> {
                             String authorization = request.getHeader("Authorization");
-                            return authorization != null && authorization.startsWith("Bearer ");
+                            return (authorization != null && authorization.startsWith("Bearer "))
+                                    || request.getRequestURI().startsWith(request.getContextPath() + "/internal/api-runner/")
+                                    || request.getRequestURI().startsWith(request.getContextPath() + "/internal/performance-runner/")
+                                    || request.getRequestURI().startsWith(request.getContextPath() + "/internal/ui-automation-runner/")
+                                    || request.getRequestURI().startsWith(request.getContextPath() + "/internal/mobile-automation-runner/")
+                                    || request.getRequestURI().startsWith(request.getContextPath() + "/api/v1/mock/")
+                                    || request.getRequestURI().startsWith(request.getContextPath()
+                                    + "/api/v1/integrations/api-automation/webhooks/");
                         }))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource(allowedOrigins)))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(policy -> policy.policyDirectives("default-src 'self'; base-uri 'self'; "
+                                + "frame-ancestors 'self'; form-action 'self'"))
+                        .referrerPolicy(policy -> policy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                        .frameOptions(frame -> frame.sameOrigin())
+                        .permissionsPolicy(policy -> policy.policy("camera=(), geolocation=(), microphone=(), payment=()")))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .securityContext(context -> context.requireExplicitSave(false))
                 .requestCache(requestCache -> requestCache.disable())
@@ -63,19 +79,30 @@ public class SecurityConfiguration {
                 .httpBasic(basic -> basic.disable())
                 .logout(logout -> logout.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // Health is intentionally detail-free and expected to be reachable by container/Kubernetes probes.
+                        .requestMatchers("/actuator/health/**", "/actuator/info", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // Prometheus must only be reachable on the internal API network in production Compose/Kubernetes.
+                        .requestMatchers("/actuator/prometheus").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/mock/**").permitAll()
+                        .requestMatchers("/api/v1/mock-shares/**").permitAll()
+                        .requestMatchers("/api/v1/integrations/api-automation/webhooks/**").permitAll()
+                        .requestMatchers("/internal/api-runner/**").permitAll()
+                        .requestMatchers("/internal/performance-runner/**").permitAll()
+                        .requestMatchers("/internal/ui-automation-runner/**").permitAll()
+                        .requestMatchers("/internal/mobile-automation-runner/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
                 .build();
     }
 
-    private CorsConfigurationSource corsConfigurationSource() {
+    private CorsConfigurationSource corsConfigurationSource(List<String> allowedOrigins) {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN", "X-Request-Id"));
+        configuration.setAllowedOrigins(allowedOrigins.stream().map(String::trim).filter(value -> !value.isBlank()).toList());
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-XSRF-TOKEN", "X-Request-Id",
+                "X-TestHub-Webhook-Timestamp", "X-TestHub-Webhook-Nonce", "X-TestHub-Webhook-Signature"));
         configuration.setExposedHeaders(List.of("X-Request-Id"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

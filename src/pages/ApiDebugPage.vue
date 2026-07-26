@@ -1,60 +1,781 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import CodeEditor from '@/components/CodeEditor.vue'
 import PageHeader from '@/components/PageHeader.vue'
 
-const method = ref('GET')
-const url = ref('https://api.example.com/users/{{userId}}')
-const activeTab = ref('params')
-const loading = ref(false)
-const response = ref(`{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "id": "01JZ4B8KHY7PKR",
-    "name": "林晓",
-    "role": "QA Architect",
-    "active": true
-  }
-}`)
-const body = ref(`{
-  "name": "{{userName}}",
-  "role": "tester"
-}`)
-const send = async () => {
-  loading.value = true
-  await new Promise((resolve) => setTimeout(resolve, 700))
-  loading.value = false
-  Message.success('Mock 请求执行成功 · 200 OK · 326 ms')
+interface ApiEnvelope<T> { data: T }
+interface Organization { id: string; name: string }
+interface Project { id: string; organizationId: string; name: string; code: string }
+interface Context { organizations: Organization[]; projects: Record<string, Project[]> }
+interface Header { name: string; value: string }
+interface DebugResult { historyId: string; success: boolean; statusCode: number | null; statusText: string | null; durationMs: number; responseHeaders: Header[]; body: string; truncated: boolean; errorMessage: string | null }
+interface History { id: string; projectId: string; method: string; requestUrl: string; responseStatus: number | null; durationMs: number; responseSize: number; result: string; errorMessage: string | null; createdAt: string }
+interface Parameter { id: string; environmentCode: string; key: string; value: string }
+interface Secret { id: string; environmentCode: string; key: string }
+interface ParameterCollection { environments: string[]; parameters: Parameter[] }
+interface SecretCollection { environments: string[]; secrets: Secret[] }
+interface WebSocketSession { id: string; status: 'CONNECTING' | 'OPEN' | 'RECONNECTING' | 'CLOSED' | 'ERROR'; target: string; messageCount: number; connectedAt: string; closedAt: string | null; closeReason: string | null; autoReconnect: boolean; reconnectAttempts: number; maxReconnectAttempts: number; selectedSubprotocol: string }
+interface WebSocketMessage { id: string; direction: 'IN' | 'OUT'; payload: string; truncated: boolean; createdAt: string }
+interface GrpcResult { historyId: string; success: boolean; status: string; durationMs: number; body: string; truncated: boolean; errorMessage: string | null }
+interface GrpcMethodSummary { name: string; callType: 'UNARY' | 'CLIENT_STREAMING' | 'SERVER_STREAMING' | 'BIDI_STREAMING' }
+interface GrpcDiscoveryResult { services: string[]; methods: GrpcMethodSummary[]; truncated: boolean }
+interface GrpcDescriptor { id: string; name: string; sourceFormat: 'PROTO3' | 'DESCRIPTOR_SET'; sizeBytes: number; serviceCount: number; sourceCount: number; createdAt: string }
+interface GrpcStreamSession { id: string; status: 'OPEN' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'LIMIT_REACHED'; target: string; service: string; method: string; tls: boolean; environmentCode: string | null; authType: string; metadataCount: number; messageCount: number; responseBytes: number; createdAt: string; closedAt: string | null; closeReason: string | null }
+interface GrpcStreamMessage { id: string; payload: string; truncated: boolean; sizeBytes: number; createdAt: string }
+interface GrpcClientStreamSession { id: string; status: 'OPEN' | 'HALF_CLOSED' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'LIMIT_REACHED'; target: string; service: string; method: string; tls: boolean; environmentCode: string | null; authType: string; metadataCount: number; sentMessageCount: number; sentBytes: number; responseBytes: number; responseBody: string; responseTruncated: boolean; createdAt: string; closedAt: string | null; closeReason: string | null }
+interface GrpcBidiStreamSession { id: string; status: 'OPEN' | 'HALF_CLOSED' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'LIMIT_REACHED'; target: string; service: string; method: string; tls: boolean; environmentCode: string | null; authType: string; metadataCount: number; sentMessageCount: number; sentBytes: number; receivedMessageCount: number; responseBytes: number; createdAt: string; closedAt: string | null; closeReason: string | null }
+
+const context = ref<Context | null>(null)
+const projectId = ref('')
+const method = ref('POST')
+const url = ref('https://postman-echo.com/post')
+const body = ref('{\n  "source": "testhub-api-debug"\n}')
+const headersText = ref('Content-Type: application/json\nX-TestHub-Debug: browser-preview')
+const protocolType = ref<'HTTP' | 'GRAPHQL' | 'SOAP' | 'WEBSOCKET' | 'GRPC'>('HTTP')
+const graphql = reactive({ query: 'query Health { health }', variables: '{\n  "source": "testhub"\n}', operationName: '' })
+const soap = reactive({ envelope: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">\n  <soapenv:Header/>\n  <soapenv:Body>\n    <Ping/>\n  </soapenv:Body>\n</soapenv:Envelope>', action: '' })
+const grpc = reactive({ tls: false, service: 'main.GrpcbinService', method: 'Unary', requestJson: '{\n  "message": "Hello from TestHub"\n}', timeoutMs: 10_000 })
+const grpcMetadataText = ref('x-testhub-trace: browser-preview')
+const grpcAuth = reactive({ type: 'NONE', token: '', username: '', password: '', key: 'x-api-key', value: '' })
+const grpcDiscovery = reactive({ loading: false, services: [] as string[], methods: [] as GrpcMethodSummary[] })
+const grpcDescriptor = reactive({ selectedId: '', name: '', files: [] as File[], importing: false, items: [] as GrpcDescriptor[] })
+const grpcStream = reactive<{ session: GrpcStreamSession | null; messages: GrpcStreamMessage[] }>({ session: null, messages: [] })
+const grpcClientStream = reactive<{ session: GrpcClientStreamSession | null }>({ session: null })
+const grpcBidiStream = reactive<{ session: GrpcBidiStreamSession | null; messages: GrpcStreamMessage[] }>({ session: null, messages: [] })
+const webSocket = reactive<{ session: WebSocketSession | null; message: string; messages: WebSocketMessage[]; subscriptionDraft: string; subscriptions: string[]; subprotocolsText: string; autoReconnect: boolean; maxReconnectAttempts: number; reconnectDelayMs: number }>({
+  session: null, message: 'Hello from TestHub', messages: [], subscriptionDraft: '{"type":"subscribe","topic":"orders"}', subscriptions: [], subprotocolsText: '', autoReconnect: true, maxReconnectAttempts: 3, reconnectDelayMs: 1000,
+})
+const environment = ref('')
+const environments = ref<string[]>([])
+const parameters = ref<Parameter[]>([])
+const secrets = ref<Secret[]>([])
+const auth = reactive({ type: 'NONE', token: '', username: '', password: '', key: 'X-API-Key', value: '', placement: 'HEADER' })
+const requestTab = ref('body')
+const responseTab = ref('body')
+const loading = ref(true)
+const sending = ref(false)
+const history = ref<History[]>([])
+const result = ref<DebugResult | null>(null)
+const responseBody = ref('发送一次请求后，在这里查看服务的真实响应。')
+let webSocketPollTimer: number | undefined
+let grpcStreamPollTimer: number | undefined
+let grpcClientStreamPollTimer: number | undefined
+let grpcBidiStreamPollTimer: number | undefined
+
+const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
+const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value))
+const statusColor = computed(() => !result.value ? 'gray' : result.value.success && (result.value.statusCode ?? 500) < 400 ? 'green' : 'red')
+const statusText = computed(() => !result.value ? '等待发送' : result.value.statusText?.startsWith('gRPC') ? result.value.statusText : result.value.success ? `${result.value.statusCode} ${result.value.statusText ?? ''}` : '连接失败')
+const responseHeadersText = computed(() => result.value?.responseHeaders.map((header) => `${header.name}: ${header.value}`).join('\n') || '暂无响应头')
+const webSocketStatusColor = computed(() => ({ OPEN: 'green', CONNECTING: 'arcoblue', RECONNECTING: 'orange', CLOSED: 'gray', ERROR: 'red' }[webSocket.session?.status ?? 'CLOSED']))
+const grpcSelectedCallType = computed<GrpcMethodSummary['callType']>(() => grpcDiscovery.methods.find((item) => item.name === grpc.method)?.callType ?? 'UNARY')
+const grpcStreamStatusColor = computed(() => ({ OPEN: 'green', COMPLETED: 'arcoblue', CANCELLED: 'gray', FAILED: 'red', LIMIT_REACHED: 'orange' }[grpcStream.session?.status ?? 'CANCELLED']))
+const grpcClientStreamStatusColor = computed(() => ({ OPEN: 'green', HALF_CLOSED: 'orange', COMPLETED: 'arcoblue', CANCELLED: 'gray', FAILED: 'red', LIMIT_REACHED: 'orange' }[grpcClientStream.session?.status ?? 'CANCELLED']))
+const grpcBidiStreamStatusColor = computed(() => ({ OPEN: 'green', HALF_CLOSED: 'orange', COMPLETED: 'arcoblue', CANCELLED: 'gray', FAILED: 'red', LIMIT_REACHED: 'orange' }[grpcBidiStream.session?.status ?? 'CANCELLED']))
+const variableCaption = computed(() => protocolType.value === 'WEBSOCKET'
+  ? 'WebSocket 会解析当前环境变量和环境密钥；密钥只在服务端握手、订阅帧或消息生成时使用，不会回显或写入历史。'
+  : protocolType.value === 'GRPC'
+    ? 'gRPC Unary、服务端流、客户端流与双向流会解析当前环境变量和环境密钥；请求、响应 JSON、Metadata 与认证值只用于本次调用，不会写入历史。'
+  : '使用 {{VARIABLE_NAME}} 引用当前环境变量。动态值支持 {{$timestamp}}、{{$isoTimestamp}} 和 {{$randomUUID}}。')
+const variables = computed(() => [
+  ...parameters.value.map((parameter) => ({ key: parameter.key, secret: false, preview: parameter.value })),
+  ...secrets.value.map((secret) => ({ key: secret.key, secret: true, preview: '已加密，仅执行时解析' })),
+])
+const date = (value: string) => new Intl.DateTimeFormat('zh-CN', { dateStyle: 'short', timeStyle: 'medium' }).format(new Date(value))
+
+async function read<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(path, { credentials: 'include', ...init })
+  const envelope = await response.json().catch(() => ({})) as ApiEnvelope<T> & { message?: string }
+  if (!response.ok) throw new Error(envelope.message ?? '请求失败，请稍后重试')
+  return envelope.data
 }
+
+async function mutate<T>(path: string, bodyValue: unknown): Promise<T> {
+  const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  return read<T>(path, { method: 'POST', headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: JSON.stringify(bodyValue) })
+}
+
+async function mutateForm<T>(path: string, form: FormData): Promise<T> {
+  const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  const response = await fetch(path, { method: 'POST', credentials: 'include', headers: { [csrf.headerName]: csrf.token }, body: form })
+  const envelope = await response.json().catch(() => ({})) as ApiEnvelope<T> & { message?: string }
+  if (!response.ok) throw new Error(envelope.message ?? '请求失败，请稍后重试')
+  return envelope.data
+}
+
+function headers() {
+  return headersText.value.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
+    const separator = line.indexOf(':')
+    if (separator <= 0) throw new Error('请求头每行需使用“名称: 值”格式')
+    return { name: line.slice(0, separator).trim(), value: line.slice(separator + 1).trim() }
+  })
+}
+
+function grpcMetadata() {
+  return grpcMetadataText.value.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
+    const separator = line.indexOf(':')
+    if (separator <= 0) throw new Error('Metadata 每行需使用“名称: 值”格式')
+    return { key: line.slice(0, separator).trim(), value: line.slice(separator + 1).trim() }
+  })
+}
+
+async function loadHistory() {
+  if (!projectId.value) return
+  history.value = await read<History[]>(`/api/v1/projects/${projectId.value}/api-debug/history?limit=20`)
+}
+
+async function loadEnvironment() {
+  if (!projectId.value) return
+  const [parameterData, secretData] = await Promise.all([
+    read<ParameterCollection>(`/api/v1/projects/${projectId.value}/parameters`),
+    read<SecretCollection>(`/api/v1/projects/${projectId.value}/secrets`),
+  ])
+  environments.value = [...new Set([...parameterData.environments, ...secretData.environments])].sort()
+  if (environment.value && !environments.value.includes(environment.value)) environment.value = ''
+  if (!environment.value && environments.value.length) environment.value = environments.value[0]
+  parameters.value = parameterData.parameters.filter((parameter) => parameter.environmentCode === environment.value)
+  secrets.value = secretData.secrets.filter((secret) => secret.environmentCode === environment.value)
+}
+
+async function loadGrpcDescriptors() {
+  if (!projectId.value) return
+  grpcDescriptor.items = await read<GrpcDescriptor[]>(`/api/v1/projects/${projectId.value}/api-debug/grpc/descriptors`)
+  if (grpcDescriptor.selectedId && !grpcDescriptor.items.some((item) => item.id === grpcDescriptor.selectedId)) grpcDescriptor.selectedId = ''
+}
+
+async function load() {
+  loading.value = true
+  try {
+    context.value = await read<Context>('/api/v1/access/context')
+    projectId.value = projects.value[0]?.id ?? ''
+    await Promise.all([loadEnvironment(), loadHistory(), loadGrpcDescriptors()])
+  } catch (error) { Message.error(error instanceof Error ? error.message : '加载接口调试器失败') } finally { loading.value = false }
+}
+
+async function changeProject() {
+  stopWebSocketPolling()
+  stopGrpcStreamPolling()
+  stopGrpcClientStreamPolling()
+  stopGrpcBidiStreamPolling()
+  webSocket.session = null
+  webSocket.messages = []
+  grpcStream.session = null
+  grpcStream.messages = []
+  grpcClientStream.session = null
+  grpcBidiStream.session = null
+  grpcBidiStream.messages = []
+  grpcDiscovery.services = []
+  grpcDiscovery.methods = []
+  grpcDescriptor.selectedId = ''
+  grpcDescriptor.items = []
+  grpcDescriptor.files = []
+  result.value = null
+  responseBody.value = '已切换项目，请发送新的请求。'
+  environment.value = ''
+  try { await Promise.all([loadEnvironment(), loadHistory(), loadGrpcDescriptors()]) } catch (error) { Message.error(error instanceof Error ? error.message : '加载项目调试配置失败') }
+}
+
+async function changeEnvironment() {
+  grpcDiscovery.services = []
+  grpcDiscovery.methods = []
+  try { await loadEnvironment() } catch (error) { Message.error(error instanceof Error ? error.message : '加载环境变量失败') }
+}
+
+function changeProtocol() {
+  stopGrpcStreamPolling()
+  stopGrpcClientStreamPolling()
+  stopGrpcBidiStreamPolling()
+  requestTab.value = 'body'
+  if (protocolType.value === 'WEBSOCKET') {
+    method.value = 'GET'
+    if (url.value === 'https://postman-echo.com/post') url.value = 'wss://ws.postman-echo.com/raw'
+    result.value = null
+    responseBody.value = 'WebSocket 消息会显示在请求编辑器中，不写入 HTTP 执行历史。'
+    return
+  }
+  if (protocolType.value === 'GRPC') {
+    method.value = 'POST'
+    if (url.value === 'https://postman-echo.com/post' || url.value.startsWith('ws')) url.value = 'grpcb.in:9000'
+    result.value = null
+    responseBody.value = '输入 gRPC 服务、方法与 JSON 请求体后调用。Unary、服务端流、客户端流或双向流数据仅在本次调用中保留。'
+    return
+  }
+  if (protocolType.value !== 'HTTP') method.value = 'POST'
+}
+
+async function send() {
+  if (protocolType.value === 'WEBSOCKET') {
+    await connectWebSocket()
+    return
+  }
+  if (protocolType.value === 'GRPC') {
+    if (grpcSelectedCallType.value === 'SERVER_STREAMING') await sendGrpcServerStream()
+    else if (grpcSelectedCallType.value === 'CLIENT_STREAMING') await startGrpcClientStream()
+    else if (grpcSelectedCallType.value === 'BIDI_STREAMING') await startGrpcBidiStream()
+    else await sendGrpc()
+    return
+  }
+  sending.value = true
+  result.value = null
+  try {
+    const response = await mutate<DebugResult>(`/api/v1/projects/${projectId.value}/api-debug/execute`, { method: method.value, url: url.value, headers: headers(), body: body.value, timeoutMs: 10_000, environmentCode: environment.value || null, auth: { ...auth }, protocol: { type: protocolType.value, query: graphql.query, variables: graphql.variables, operationName: graphql.operationName, envelope: soap.envelope, soapAction: soap.action } })
+    result.value = response
+    responseBody.value = response.success ? (response.body || '(目标服务未返回响应体)') : (response.errorMessage ?? '连接目标服务失败')
+    await loadHistory()
+    if (response.success) Message.success(`请求完成 · ${response.statusCode} · ${response.durationMs} ms`)
+    else Message.warning(response.errorMessage ?? '请求未能连接到目标服务')
+  } catch (error) {
+    responseBody.value = error instanceof Error ? error.message : '发送请求失败'
+    Message.error(responseBody.value)
+  } finally { sending.value = false }
+}
+
+function grpcCallPayload() {
+  return {
+    endpoint: url.value, tls: grpc.tls, service: grpc.service, method: grpc.method, requestJson: grpc.requestJson,
+    timeoutMs: grpc.timeoutMs, environmentCode: environment.value || null, metadata: grpcMetadata(), auth: { ...grpcAuth },
+    descriptorId: grpcDescriptor.selectedId || null,
+  }
+}
+
+async function sendGrpc() {
+  if (!projectId.value) return
+  sending.value = true
+  result.value = null
+  try {
+    const response = await mutate<GrpcResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/unary`, grpcCallPayload())
+    result.value = {
+      historyId: response.historyId, success: response.success, statusCode: response.success ? 0 : null,
+      statusText: `gRPC ${response.status}`, durationMs: response.durationMs, responseHeaders: [], body: response.body,
+      truncated: response.truncated, errorMessage: response.errorMessage,
+    }
+    responseBody.value = response.success ? (response.body || '(目标服务未返回响应体)') : (response.errorMessage ?? '目标 gRPC 服务不可用')
+    await loadHistory()
+    if (response.success) Message.success(`gRPC Unary 调用完成 · ${response.durationMs} ms`)
+    else Message.warning(response.errorMessage ?? 'gRPC Unary 调用失败')
+  } catch (error) {
+    responseBody.value = error instanceof Error ? error.message : 'gRPC Unary 调用失败'
+    Message.error(responseBody.value)
+  } finally { sending.value = false }
+}
+
+function stopGrpcStreamPolling() {
+  if (grpcStreamPollTimer !== undefined) window.clearInterval(grpcStreamPollTimer)
+  grpcStreamPollTimer = undefined
+}
+
+function startGrpcStreamPolling() {
+  stopGrpcStreamPolling()
+  grpcStreamPollTimer = window.setInterval(() => { void loadGrpcStreamMessages() }, 1000)
+}
+
+async function loadGrpcStreamMessages() {
+  if (!projectId.value || !grpcStream.session?.id) return
+  try {
+    const [session, messages] = await Promise.all([
+      read<GrpcStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/streams/${grpcStream.session.id}`),
+      read<GrpcStreamMessage[]>(`/api/v1/projects/${projectId.value}/api-debug/grpc/streams/${grpcStream.session.id}/messages`),
+    ])
+    grpcStream.session = session
+    grpcStream.messages = messages
+    if (session.status !== 'OPEN') stopGrpcStreamPolling()
+  } catch (error) {
+    stopGrpcStreamPolling()
+    Message.error(error instanceof Error ? error.message : '读取 gRPC 流式消息失败')
+  }
+}
+
+async function sendGrpcServerStream() {
+  if (!projectId.value) return
+  if (grpcStream.session?.status === 'OPEN') {
+    await loadGrpcStreamMessages()
+    Message.info('当前服务端流仍在运行，已刷新消息')
+    return
+  }
+  sending.value = true
+  result.value = null
+  grpcStream.messages = []
+  try {
+    grpcStream.session = await mutate<GrpcStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/server-stream`, grpcCallPayload())
+    await loadGrpcStreamMessages()
+    if (grpcStream.session?.status === 'OPEN') startGrpcStreamPolling()
+    responseBody.value = '服务端流已启动，请在上方流式消息面板查看实时响应。'
+    Message.success('gRPC 服务端流已启动')
+  } catch (error) {
+    responseBody.value = error instanceof Error ? error.message : 'gRPC 服务端流启动失败'
+    Message.error(responseBody.value)
+  } finally { sending.value = false }
+}
+
+async function cancelGrpcServerStream() {
+  if (!projectId.value || !grpcStream.session || grpcStream.session.status !== 'OPEN') return
+  sending.value = true
+  try {
+    grpcStream.session = await mutate<GrpcStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/streams/${grpcStream.session.id}/cancel`, {})
+    await loadGrpcStreamMessages()
+    stopGrpcStreamPolling()
+    Message.success('gRPC 服务端流已取消')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '取消 gRPC 服务端流失败') } finally { sending.value = false }
+}
+
+function stopGrpcClientStreamPolling() {
+  if (grpcClientStreamPollTimer !== undefined) window.clearInterval(grpcClientStreamPollTimer)
+  grpcClientStreamPollTimer = undefined
+}
+
+function startGrpcClientStreamPolling() {
+  stopGrpcClientStreamPolling()
+  grpcClientStreamPollTimer = window.setInterval(() => { void loadGrpcClientStream() }, 1000)
+}
+
+async function loadGrpcClientStream() {
+  if (!projectId.value || !grpcClientStream.session?.id) return
+  try {
+    const session = await read<GrpcClientStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/client-streams/${grpcClientStream.session.id}`)
+    grpcClientStream.session = session
+    if (!['OPEN', 'HALF_CLOSED'].includes(session.status)) stopGrpcClientStreamPolling()
+  } catch (error) {
+    stopGrpcClientStreamPolling()
+    Message.error(error instanceof Error ? error.message : '读取 gRPC 客户端流状态失败')
+  }
+}
+
+function grpcClientStreamStartPayload() {
+  return {
+    endpoint: url.value, tls: grpc.tls, service: grpc.service, method: grpc.method, timeoutMs: grpc.timeoutMs,
+    environmentCode: environment.value || null, metadata: grpcMetadata(), auth: { ...grpcAuth }, descriptorId: grpcDescriptor.selectedId || null,
+  }
+}
+
+async function startGrpcClientStream() {
+  if (!projectId.value) return
+  if (['OPEN', 'HALF_CLOSED'].includes(grpcClientStream.session?.status ?? '')) {
+    await loadGrpcClientStream()
+    Message.info('当前客户端流仍在运行，已刷新状态')
+    return
+  }
+  sending.value = true
+  result.value = null
+  try {
+    grpcClientStream.session = await mutate<GrpcClientStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/client-streams`, grpcClientStreamStartPayload())
+    startGrpcClientStreamPolling()
+    responseBody.value = '客户端流已建立。请在下方提交 JSON 消息，完成发送后查看服务端响应。'
+    Message.success('gRPC 客户端流已建立')
+  } catch (error) {
+    responseBody.value = error instanceof Error ? error.message : 'gRPC 客户端流建立失败'
+    Message.error(responseBody.value)
+  } finally { sending.value = false }
+}
+
+async function sendGrpcClientStreamMessage() {
+  if (!projectId.value || grpcClientStream.session?.status !== 'OPEN') return
+  sending.value = true
+  try {
+    grpcClientStream.session = await mutate<GrpcClientStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/client-streams/${grpcClientStream.session.id}/messages`, { requestJson: grpc.requestJson })
+    Message.success(`已提交第 ${grpcClientStream.session.sentMessageCount} 条客户端流消息`)
+  } catch (error) { Message.error(error instanceof Error ? error.message : '提交 gRPC 客户端流消息失败') } finally { sending.value = false }
+}
+
+async function completeGrpcClientStream() {
+  if (!projectId.value || grpcClientStream.session?.status !== 'OPEN') return
+  sending.value = true
+  try {
+    grpcClientStream.session = await mutate<GrpcClientStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/client-streams/${grpcClientStream.session.id}/complete`, {})
+    await loadGrpcClientStream()
+    Message.success('已完成客户端消息发送，正在等待服务端响应')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '完成 gRPC 客户端流失败') } finally { sending.value = false }
+}
+
+async function cancelGrpcClientStream() {
+  if (!projectId.value || !grpcClientStream.session || !['OPEN', 'HALF_CLOSED'].includes(grpcClientStream.session.status)) return
+  sending.value = true
+  try {
+    grpcClientStream.session = await mutate<GrpcClientStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/client-streams/${grpcClientStream.session.id}/cancel`, {})
+    stopGrpcClientStreamPolling()
+    Message.success('gRPC 客户端流已取消')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '取消 gRPC 客户端流失败') } finally { sending.value = false }
+}
+
+function stopGrpcBidiStreamPolling() {
+  if (grpcBidiStreamPollTimer !== undefined) window.clearInterval(grpcBidiStreamPollTimer)
+  grpcBidiStreamPollTimer = undefined
+}
+
+function startGrpcBidiStreamPolling() {
+  stopGrpcBidiStreamPolling()
+  grpcBidiStreamPollTimer = window.setInterval(() => { void loadGrpcBidiStream() }, 1000)
+}
+
+async function loadGrpcBidiStream() {
+  if (!projectId.value || !grpcBidiStream.session?.id) return
+  try {
+    const [session, messages] = await Promise.all([
+      read<GrpcBidiStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/bidi-streams/${grpcBidiStream.session.id}`),
+      read<GrpcStreamMessage[]>(`/api/v1/projects/${projectId.value}/api-debug/grpc/bidi-streams/${grpcBidiStream.session.id}/messages`),
+    ])
+    grpcBidiStream.session = session
+    grpcBidiStream.messages = messages
+    if (!['OPEN', 'HALF_CLOSED'].includes(session.status)) stopGrpcBidiStreamPolling()
+  } catch (error) {
+    stopGrpcBidiStreamPolling()
+    Message.error(error instanceof Error ? error.message : '读取 gRPC 双向流状态失败')
+  }
+}
+
+function grpcBidiStreamStartPayload() {
+  return {
+    endpoint: url.value, tls: grpc.tls, service: grpc.service, method: grpc.method, timeoutMs: grpc.timeoutMs,
+    environmentCode: environment.value || null, metadata: grpcMetadata(), auth: { ...grpcAuth }, descriptorId: grpcDescriptor.selectedId || null,
+  }
+}
+
+async function startGrpcBidiStream() {
+  if (!projectId.value) return
+  if (['OPEN', 'HALF_CLOSED'].includes(grpcBidiStream.session?.status ?? '')) {
+    await loadGrpcBidiStream()
+    Message.info('当前 gRPC 双向流仍在运行，已刷新状态')
+    return
+  }
+  sending.value = true
+  result.value = null
+  grpcBidiStream.messages = []
+  try {
+    grpcBidiStream.session = await mutate<GrpcBidiStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/bidi-streams`, grpcBidiStreamStartPayload())
+    startGrpcBidiStreamPolling()
+    responseBody.value = '双向流已建立。请在下方反复提交 JSON 消息并查看实时响应；完成发送后仍会继续接收服务端消息。'
+    Message.success('gRPC 双向流已建立')
+  } catch (error) {
+    responseBody.value = error instanceof Error ? error.message : 'gRPC 双向流建立失败'
+    Message.error(responseBody.value)
+  } finally { sending.value = false }
+}
+
+async function sendGrpcBidiStreamMessage() {
+  if (!projectId.value || grpcBidiStream.session?.status !== 'OPEN') return
+  sending.value = true
+  try {
+    grpcBidiStream.session = await mutate<GrpcBidiStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/bidi-streams/${grpcBidiStream.session.id}/messages`, { requestJson: grpc.requestJson })
+    Message.success(`已提交第 ${grpcBidiStream.session.sentMessageCount} 条双向流消息`)
+  } catch (error) { Message.error(error instanceof Error ? error.message : '提交 gRPC 双向流消息失败') } finally { sending.value = false }
+}
+
+async function completeGrpcBidiStream() {
+  if (!projectId.value || grpcBidiStream.session?.status !== 'OPEN') return
+  sending.value = true
+  try {
+    grpcBidiStream.session = await mutate<GrpcBidiStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/bidi-streams/${grpcBidiStream.session.id}/complete`, {})
+    await loadGrpcBidiStream()
+    Message.success('已完成双向流客户端消息发送，仍可接收服务端消息')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '完成 gRPC 双向流失败') } finally { sending.value = false }
+}
+
+async function cancelGrpcBidiStream() {
+  if (!projectId.value || !grpcBidiStream.session || !['OPEN', 'HALF_CLOSED'].includes(grpcBidiStream.session.status)) return
+  sending.value = true
+  try {
+    grpcBidiStream.session = await mutate<GrpcBidiStreamSession>(`/api/v1/projects/${projectId.value}/api-debug/grpc/bidi-streams/${grpcBidiStream.session.id}/cancel`, {})
+    stopGrpcBidiStreamPolling()
+    Message.success('gRPC 双向流已取消')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '取消 gRPC 双向流失败') } finally { sending.value = false }
+}
+
+function grpcDiscoveryPayload(service: string | null) {
+  return {
+    endpoint: url.value, tls: grpc.tls, service, timeoutMs: grpc.timeoutMs, environmentCode: environment.value || null,
+    metadata: grpcMetadata(), auth: { ...grpcAuth },
+  }
+}
+
+async function discoverGrpcServices() {
+  if (!projectId.value) return
+  grpcDiscovery.loading = true
+  try {
+    const response = grpcDescriptor.selectedId
+      ? await read<GrpcDiscoveryResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/descriptors/${grpcDescriptor.selectedId}/discovery`)
+      : await mutate<GrpcDiscoveryResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/discovery`, grpcDiscoveryPayload(null))
+    grpcDiscovery.services = response.services
+    grpcDiscovery.methods = []
+    if (!response.services.length) Message.info('目标服务未返回可发现的 gRPC 服务')
+    else Message.success(`已发现 ${response.services.length}${response.truncated ? '+' : ''} 个服务`)
+    if (response.truncated) Message.warning('发现结果已限制为前 500 项')
+  } catch (error) { Message.error(error instanceof Error ? error.message : 'gRPC 服务发现失败') } finally { grpcDiscovery.loading = false }
+}
+
+async function discoverGrpcMethods() {
+  if (!projectId.value) return
+  if (!grpc.service.trim()) { Message.warning('请先填写或选择服务名称'); return }
+  grpcDiscovery.loading = true
+  try {
+    const response = grpcDescriptor.selectedId
+      ? await read<GrpcDiscoveryResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/descriptors/${grpcDescriptor.selectedId}/discovery?service=${encodeURIComponent(grpc.service)}`)
+      : await mutate<GrpcDiscoveryResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/discovery`, grpcDiscoveryPayload(grpc.service))
+    grpcDiscovery.methods = response.methods
+    if (!response.methods.length) Message.info('目标服务未返回可发现的方法')
+    else Message.success(`已发现 ${response.methods.length}${response.truncated ? '+' : ''} 个方法`)
+    if (response.truncated) Message.warning('发现结果已限制为前 500 项')
+  } catch (error) { Message.error(error instanceof Error ? error.message : 'gRPC 方法发现失败') } finally { grpcDiscovery.loading = false }
+}
+
+function grpcCallType(value: GrpcMethodSummary['callType']) {
+  return ({ UNARY: 'Unary', CLIENT_STREAMING: '客户端流', SERVER_STREAMING: '服务端流', BIDI_STREAMING: '双向流' } as const)[value]
+}
+
+function selectGrpcFiles(event: Event) {
+  const input = event.target as HTMLInputElement
+  grpcDescriptor.files = Array.from(input.files ?? [])
+  if (!grpcDescriptor.name && grpcDescriptor.files.length) grpcDescriptor.name = grpcDescriptor.files[0].name.replace(/\.(proto|desc|pb|bin)$/i, '')
+}
+
+async function importGrpcDescriptor() {
+  if (!projectId.value) return
+  if (!grpcDescriptor.name.trim()) { Message.warning('请填写描述符名称'); return }
+  if (!grpcDescriptor.files.length) { Message.warning('请选择 .proto 或 FileDescriptorSet 文件'); return }
+  grpcDescriptor.importing = true
+  try {
+    const form = new FormData()
+    form.append('name', grpcDescriptor.name.trim())
+    grpcDescriptor.files.forEach((file) => form.append('files', file))
+    const imported = await mutateForm<GrpcDescriptor>(`/api/v1/projects/${projectId.value}/api-debug/grpc/descriptors`, form)
+    grpcDescriptor.items = [imported, ...grpcDescriptor.items.filter((item) => item.id !== imported.id)]
+    grpcDescriptor.selectedId = imported.id
+    grpcDescriptor.files = []
+    grpcDescriptor.name = ''
+    grpcDiscovery.services = []
+    grpcDiscovery.methods = []
+    await discoverGrpcServices()
+    Message.success(`已导入离线描述符：${imported.name}`)
+  } catch (error) { Message.error(error instanceof Error ? error.message : 'Proto 导入失败') } finally { grpcDescriptor.importing = false }
+}
+
+async function deleteGrpcDescriptor() {
+  if (!projectId.value || !grpcDescriptor.selectedId) return
+  const target = grpcDescriptor.items.find((item) => item.id === grpcDescriptor.selectedId)
+  try {
+    const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+    await read<unknown>(`/api/v1/projects/${projectId.value}/api-debug/grpc/descriptors/${grpcDescriptor.selectedId}`, { method: 'DELETE', headers: { [csrf.headerName]: csrf.token } })
+    grpcDescriptor.items = grpcDescriptor.items.filter((item) => item.id !== grpcDescriptor.selectedId)
+    grpcDescriptor.selectedId = ''
+    grpcDiscovery.services = []
+    grpcDiscovery.methods = []
+    Message.success(`已删除离线描述符：${target?.name ?? ''}`)
+  } catch (error) { Message.error(error instanceof Error ? error.message : '删除离线描述符失败') }
+}
+
+async function changeGrpcDescriptor() {
+  grpcDiscovery.services = []
+  grpcDiscovery.methods = []
+  if (grpcDescriptor.selectedId) await discoverGrpcServices()
+}
+
+function stopWebSocketPolling() {
+  if (webSocketPollTimer !== undefined) window.clearInterval(webSocketPollTimer)
+  webSocketPollTimer = undefined
+}
+
+function startWebSocketPolling() {
+  stopWebSocketPolling()
+  webSocketPollTimer = window.setInterval(() => { void loadWebSocketMessages() }, 2000)
+}
+
+async function loadWebSocketMessages() {
+  if (!projectId.value || !webSocket.session?.id) return
+  try {
+    const [session, messages] = await Promise.all([
+      read<WebSocketSession>(`/api/v1/projects/${projectId.value}/api-debug/websocket/sessions/${webSocket.session.id}`),
+      read<WebSocketMessage[]>(`/api/v1/projects/${projectId.value}/api-debug/websocket/sessions/${webSocket.session.id}/messages`),
+    ])
+    webSocket.session = session
+    webSocket.messages = messages
+    if (session.status === 'CLOSED' || session.status === 'ERROR') stopWebSocketPolling()
+  } catch (error) {
+    stopWebSocketPolling()
+    Message.error(error instanceof Error ? error.message : '读取 WebSocket 消息失败')
+  }
+}
+
+async function connectWebSocket() {
+  if (!projectId.value) return
+  if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '')) {
+    await loadWebSocketMessages()
+    Message.info(webSocket.session?.status === 'OPEN' ? 'WebSocket 已连接，已刷新消息' : 'WebSocket 正在连接或重连')
+    return
+  }
+  sending.value = true
+  try {
+    webSocket.session = await mutate<WebSocketSession>(`/api/v1/projects/${projectId.value}/api-debug/websocket/connect`, {
+      url: url.value,
+      headers: headers(),
+      environmentCode: environment.value || null,
+      auth: { ...auth },
+      subprotocols: webSocket.subprotocolsText.split(',').map((item) => item.trim()).filter(Boolean),
+      subscriptions: webSocket.subscriptions,
+      reconnect: { enabled: webSocket.autoReconnect, maxAttempts: webSocket.maxReconnectAttempts, delayMs: webSocket.reconnectDelayMs },
+    })
+    await loadWebSocketMessages()
+    startWebSocketPolling()
+    Message.success('WebSocket 已连接')
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : '连接 WebSocket 失败')
+  } finally { sending.value = false }
+}
+
+async function sendWebSocketMessage() {
+  if (!projectId.value || !webSocket.session) return
+  if (webSocket.session.status !== 'OPEN') { Message.warning('请先建立 WebSocket 连接'); return }
+  sending.value = true
+  try {
+    webSocket.session = await mutate<WebSocketSession>(`/api/v1/projects/${projectId.value}/api-debug/websocket/sessions/${webSocket.session.id}/messages`, { message: webSocket.message })
+    await loadWebSocketMessages()
+  } catch (error) { Message.error(error instanceof Error ? error.message : '发送 WebSocket 消息失败') } finally { sending.value = false }
+}
+
+async function closeWebSocket() {
+  if (!projectId.value || !webSocket.session) return
+  sending.value = true
+  try {
+    webSocket.session = await mutate<WebSocketSession>(`/api/v1/projects/${projectId.value}/api-debug/websocket/sessions/${webSocket.session.id}/close`, {})
+    await loadWebSocketMessages()
+    stopWebSocketPolling()
+    Message.success('WebSocket 已关闭')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '关闭 WebSocket 失败') } finally { sending.value = false }
+}
+
+function addSubscription() {
+  const value = webSocket.subscriptionDraft.trim()
+  if (!value) { Message.warning('请输入订阅帧内容'); return }
+  if (webSocket.subscriptions.length >= 12) { Message.warning('当前会话最多保存 12 条订阅帧'); return }
+  if (value.length > 32000) { Message.warning('单条订阅帧不能超过 32000 字符'); return }
+  webSocket.subscriptions.push(value)
+  webSocket.subscriptionDraft = ''
+}
+
+function removeSubscription(index: number) {
+  webSocket.subscriptions.splice(index, 1)
+}
+
+function clearResponse() {
+  result.value = null
+  responseBody.value = '响应已清空。'
+}
+
+async function copyResponse() {
+  if (!result.value || !navigator.clipboard) return
+  try { await navigator.clipboard.writeText(responseBody.value); Message.success('响应已复制') } catch { Message.warning('浏览器未授予剪贴板权限') }
+}
+
+onMounted(load)
+onBeforeUnmount(() => {
+  stopWebSocketPolling()
+  stopGrpcStreamPolling()
+  stopGrpcClientStreamPolling()
+  stopGrpcBidiStreamPolling()
+})
 </script>
 
 <template>
   <div class="page api-debug-page">
-    <PageHeader eyebrow="API 工作台" title="接口调试" description="在统一环境中完成请求构造、鉴权、脚本、断言与响应分析。" action="保存为用例" @action="Message.success('已保存为接口用例')" />
-    <section class="debug-workspace">
-      <aside class="request-tree">
-        <div class="tree-title"><strong>接口目录</strong><a-button size="mini" shape="circle"><icon-plus /></a-button></div>
-        <a-input-search size="small" placeholder="搜索接口" />
-        <div class="tree-group"><span><icon-down /> 用户中心</span><button class="tree-item active"><b class="method get">GET</b><span>用户详情</span></button><button class="tree-item"><b class="method post">POST</b><span>创建用户</span></button><button class="tree-item"><b class="method put">PUT</b><span>更新资料</span></button></div>
-        <div class="tree-group"><span><icon-right /> 订单服务</span></div><div class="tree-group"><span><icon-right /> 支付服务</span></div>
-      </aside>
-      <div class="request-editor">
-        <div class="request-bar"><a-select v-model="method" :style="{ width: '108px' }"><a-option>GET</a-option><a-option>POST</a-option><a-option>PUT</a-option><a-option>DELETE</a-option></a-select><a-input v-model="url" /><a-button type="primary" :loading="loading" @click="send">发送 <icon-send /></a-button></div>
-        <div class="environment-bar"><a-tag color="green">开发环境</a-tag><span>变量 12</span><span>Cookie 3</span><span>客户端证书</span><a-button type="text" size="small">环境设置</a-button></div>
-        <a-tabs v-model:active-key="activeTab" class="request-tabs">
-          <a-tab-pane key="params" title="Params"><a-table :pagination="false" :columns="[{ title: '', dataIndex: 'enabled', slotName: 'enabled', width: 44 }, { title: '参数名', dataIndex: 'key' }, { title: '参数值', dataIndex: 'value' }, { title: '说明', dataIndex: 'description' }]" :data="[{ enabled: true, key: 'userId', value: '10086', description: '用户唯一标识' }, { enabled: false, key: 'include', value: 'permissions', description: '扩展字段' }]"><template #enabled="{ record }"><a-checkbox :default-checked="record.enabled" /></template></a-table></a-tab-pane>
-          <a-tab-pane key="body" title="Body"><CodeEditor v-model="body" :height="250" /></a-tab-pane>
-          <a-tab-pane key="headers" title="Headers"><div class="empty-mini"><icon-file /> 已自动添加 6 个请求头</div></a-tab-pane>
-          <a-tab-pane key="auth" title="Auth"><div class="auth-card"><span>Bearer Token</span><code v-pre>{{token}}</code><a-button size="small">编辑</a-button></div></a-tab-pane>
-          <a-tab-pane key="scripts" title="前后置脚本"><CodeEditor v-model="body" language="javascript" :height="250" /></a-tab-pane>
-        </a-tabs>
-        <section class="response-panel">
-          <div class="response-head"><div><strong>响应</strong><a-tag color="green">200 OK</a-tag><span>326 ms</span><span>1.24 KB</span></div><div><a-button size="small">保存示例</a-button><a-button size="small">生成断言</a-button></div></div>
-          <a-tabs default-active-key="body" size="small"><a-tab-pane key="body" title="Body"><CodeEditor v-model="response" :height="275" /></a-tab-pane><a-tab-pane key="headers" title="Headers (8)"></a-tab-pane><a-tab-pane key="tests" title="断言 (4)"></a-tab-pane></a-tabs>
-        </section>
-      </div>
+    <PageHeader eyebrow="API WORKBENCH" title="接口调试" description="构造 HTTP、GraphQL、SOAP、WebSocket 与 gRPC 请求，解析环境变量并保留脱敏执行历史。" action="清空响应" @action="clearResponse" />
+    <section class="debug-summary panel">
+      <div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code }}</small></div>
+      <a-select v-model="projectId" :style="{ width: '240px' }" @change="changeProject"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select>
+      <div><span>安全策略</span><strong>受限网络</strong><small>拦截内网、回环与重定向</small></div>
+      <div><span>请求历史</span><strong>{{ history.length }}</strong><small>仅保存脱敏摘要</small></div>
     </section>
+    <a-spin :loading="loading">
+      <section class="debug-workspace">
+        <aside class="request-tree">
+          <div class="tree-title"><div><strong>最近请求</strong><small>项目级执行历史</small></div><a-button size="mini" @click="loadHistory"><icon-refresh /></a-button></div>
+          <div v-if="history.length" class="history-list"><div v-for="item in history" :key="item.id" class="history-item"><div><a-tag size="small" :color="item.method === 'GET' ? 'green' : item.method === 'POST' ? 'arcoblue' : 'orange'">{{ item.method }}</a-tag><a-tag size="small" :color="item.result === 'COMPLETED' && (item.responseStatus ?? 500) < 400 ? 'green' : 'red'">{{ item.responseStatus ?? '失败' }}</a-tag></div><code>{{ item.requestUrl }}</code><small>{{ item.durationMs }} ms · {{ date(item.createdAt) }}</small></div></div>
+          <a-empty v-else description="还没有调试记录" />
+        </aside>
+        <div class="request-editor">
+          <div class="request-bar">
+            <a-select v-if="protocolType !== 'WEBSOCKET' && protocolType !== 'GRPC'" v-model="method" :style="{ width: '108px' }"><a-option v-for="item in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']" :key="item">{{ item }}</a-option></a-select>
+            <a-tag v-else :color="protocolType === 'GRPC' ? 'orange' : 'purple'" class="protocol-method">{{ protocolType === 'GRPC' ? 'gRPC' : 'WS' }}</a-tag>
+            <a-input v-model="url" :placeholder="protocolType === 'WEBSOCKET' ? 'wss://ws.postman-echo.com/raw' : protocolType === 'GRPC' ? 'grpc.example.com:443' : 'https://api.example.com/v1/orders'" />
+            <a-button type="primary" :loading="sending" @click="send">{{ protocolType === 'WEBSOCKET' ? '连接' : protocolType === 'GRPC' ? '调用' : '发送' }} <icon-send /></a-button>
+          </div>
+          <div class="environment-bar">
+            <a-select v-model="protocolType" size="small" :style="{ width: '128px' }" @change="changeProtocol"><a-option value="HTTP">HTTP</a-option><a-option value="GRAPHQL">GraphQL</a-option><a-option value="SOAP">SOAP</a-option><a-option value="WEBSOCKET">WebSocket</a-option><a-option value="GRPC">gRPC</a-option></a-select>
+            <a-select v-model="environment" size="small" allow-clear placeholder="不使用环境" :style="{ width: '165px' }" @change="changeEnvironment"><a-option v-for="item in environments" :key="item" :value="item">{{ item }}</a-option></a-select>
+            <a-tag color="arcoblue">{{ environment || '无环境' }}</a-tag><span>变量 {{ variables.length }}</span><span>密钥 {{ secrets.length }}</span><span>{{ protocolType === 'WEBSOCKET' ? '消息上限 32 KB' : protocolType === 'GRPC' ? grpcSelectedCallType === 'SERVER_STREAMING' ? '服务端流 · 100 条 / 512 KB' : grpcSelectedCallType === 'CLIENT_STREAMING' ? '客户端流 · 100 条 / 512 KB' : grpcSelectedCallType === 'BIDI_STREAMING' ? '双向流 · 双向各 100 条 / 512 KB' : 'Unary · 响应上限 512 KB' : '超时 10 秒' }}</span>
+            <a-button type="text" size="small" @click="Message.info('当前 gRPC 支持在线反射或离线 Proto/DescriptorSet 发现、Unary、服务端流、客户端流与双向流；流式调用仅保留当前内存会话，每个方向均受 100 条消息与 512 KB 上限约束。')">查看边界</a-button>
+          </div>
+          <a-tabs v-model:active-key="requestTab" class="request-tabs">
+            <a-tab-pane key="body" :title="protocolType === 'GRAPHQL' ? 'GraphQL' : protocolType === 'SOAP' ? 'SOAP' : protocolType === 'WEBSOCKET' ? 'WebSocket' : protocolType === 'GRPC' ? `gRPC ${grpcSelectedCallType === 'SERVER_STREAMING' ? '服务端流' : grpcSelectedCallType === 'CLIENT_STREAMING' ? '客户端流' : grpcSelectedCallType === 'BIDI_STREAMING' ? '双向流' : 'Unary'}` : 'Body'">
+              <template v-if="protocolType === 'HTTP'"><div class="editor-caption">请求体会按 UTF-8 发送；请求方法为 GET 时请通常保持为空。</div><CodeEditor v-model="body" :height="230" /></template>
+              <template v-else-if="protocolType === 'GRAPHQL'"><div class="editor-caption">GraphQL 以 JSON 请求体发送，系统自动补充 <code>Content-Type: application/json</code>。GraphQL 仅支持 POST。</div><a-form :model="graphql" layout="vertical" class="protocol-form"><a-form-item label="Operation Name（可选）"><a-input v-model="graphql.operationName" placeholder="例如：FindOrder" /></a-form-item><a-form-item label="Query" required><CodeEditor v-model="graphql.query" language="graphql" :height="180" /></a-form-item><a-form-item label="Variables（JSON 对象）"><CodeEditor v-model="graphql.variables" :height="150" /></a-form-item></a-form></template>
+              <template v-else-if="protocolType === 'SOAP'"><div class="editor-caption">SOAP 1.1 以 XML Envelope 发送，系统自动补充 <code>Content-Type: text/xml</code>。SOAP 仅支持 POST。</div><a-form :model="soap" layout="vertical" class="protocol-form"><a-form-item label="SOAPAction（可选）"><a-input v-model="soap.action" placeholder="例如：urn:OrderService/Ping" /></a-form-item><a-form-item label="SOAP Envelope" required><CodeEditor v-model="soap.envelope" language="xml" :height="270" /></a-form-item></a-form></template>
+              <template v-else-if="protocolType === 'GRPC'">
+                <div class="editor-caption">使用在线服务端反射，或导入项目级 <code>.proto</code> / FileDescriptorSet 后离线发现服务与方法；两种来源都会把 JSON 转为 Protobuf 请求。离线描述符不会向目标发送反射请求；本节点支持 Unary、受限服务端流、客户端流与双向流。</div>
+                <section class="descriptor-panel">
+                  <div class="descriptor-head"><div><strong>描述符来源</strong><small>未选择时使用在线反射；导入后仅保存已校验的编译描述符集，不保存原始请求、认证或响应。</small></div><a-tag :color="grpcDescriptor.selectedId ? 'green' : 'arcoblue'">{{ grpcDescriptor.selectedId ? '离线描述符' : '在线反射' }}</a-tag></div>
+                  <div class="descriptor-select-row"><a-select v-model="grpcDescriptor.selectedId" allow-clear placeholder="在线反射（默认）" @change="changeGrpcDescriptor"><a-option v-for="item in grpcDescriptor.items" :key="item.id" :value="item.id">{{ item.name }} · {{ item.serviceCount }} 服务 · {{ item.sourceFormat === 'PROTO3' ? 'Proto3' : 'DescriptorSet' }}</a-option></a-select><a-popconfirm content="删除后无法恢复该项目的离线描述符，是否继续？" @ok="deleteGrpcDescriptor"><a-button status="danger" :disabled="!grpcDescriptor.selectedId">删除</a-button></a-popconfirm></div>
+                  <div class="descriptor-import-row"><a-input v-model="grpcDescriptor.name" :max-length="128" placeholder="描述符名称，例如：订单服务 Proto" /><label class="proto-file-input"><input type="file" accept=".proto,.desc,.pb,.bin" multiple @change="selectGrpcFiles" /><span>{{ grpcDescriptor.files.length ? `已选 ${grpcDescriptor.files.length} 个文件` : '选择 Proto 文件' }}</span></label><a-button :loading="grpcDescriptor.importing" @click="importGrpcDescriptor">导入</a-button></div>
+                  <small class="descriptor-help">支持最多 16 个总计 512 KB 的 <code>.proto</code> 文件（可解析同批次平铺文件的 import），或一个 protoc 生成的 <code>FileDescriptorSet</code>（.desc/.pb）。</small>
+                </section>
+                <a-form :model="grpc" layout="vertical" class="protocol-form">
+                  <div class="auth-grid"><a-form-item label="服务" required><div class="discovery-field"><a-input v-model="grpc.service" placeholder="例如：example.v1.OrderService" /><a-button :loading="grpcDiscovery.loading" @click="discoverGrpcServices">发现服务</a-button></div><a-select v-if="grpcDiscovery.services.length" v-model="grpc.service" class="discovery-select" allow-search placeholder="从已发现服务中选择" @change="grpcDiscovery.methods = []"><a-option v-for="item in grpcDiscovery.services" :key="item" :value="item">{{ item }}</a-option></a-select></a-form-item><a-form-item label="方法" required><div class="discovery-field"><a-input v-model="grpc.method" placeholder="例如：GetOrder" /><a-button :loading="grpcDiscovery.loading" @click="discoverGrpcMethods">发现方法</a-button></div><a-select v-if="grpcDiscovery.methods.length" v-model="grpc.method" class="discovery-select" allow-search placeholder="从已发现方法中选择"><a-option v-for="item in grpcDiscovery.methods" :key="item.name" :value="item.name">{{ item.name }} · {{ grpcCallType(item.callType) }}</a-option></a-select><small v-if="grpcDiscovery.methods.some((item) => item.callType !== 'UNARY')" class="discovery-tip">服务端流、客户端流与双向流均可直接调用；双向流会同时展示发送进度与实时响应。</small></a-form-item></div>
+                  <div class="auth-grid"><a-form-item label="传输安全"><a-checkbox v-model="grpc.tls">使用 TLS</a-checkbox></a-form-item><a-form-item label="超时（毫秒）"><a-input-number v-model="grpc.timeoutMs" :min="500" :max="['CLIENT_STREAMING', 'BIDI_STREAMING'].includes(grpcSelectedCallType) ? 60000 : 10000" :step="500" /></a-form-item></div><a-form-item :label="['CLIENT_STREAMING', 'BIDI_STREAMING'].includes(grpcSelectedCallType) ? '待提交消息 JSON' : '请求 JSON'" required><CodeEditor v-model="grpc.requestJson" :height="245" /></a-form-item>
+                </a-form>
+                <section v-if="grpcStream.session || grpcSelectedCallType === 'SERVER_STREAMING'" class="grpc-stream-panel">
+                  <div class="grpc-stream-head"><div><strong>服务端流消息</strong><a-tag :color="grpcStreamStatusColor">{{ grpcStream.session?.status ?? '未启动' }}</a-tag><small v-if="grpcStream.session">{{ grpcStream.session.target }} · {{ grpcStream.session.messageCount }}/100 条 · {{ grpcStream.session.responseBytes }} / 524288 bytes</small></div><div><a-button size="small" :disabled="!grpcStream.session" @click="loadGrpcStreamMessages">刷新消息</a-button><a-button size="small" status="danger" :loading="sending" :disabled="grpcStream.session?.status !== 'OPEN'" @click="cancelGrpcServerStream">取消</a-button></div></div>
+                  <div v-if="grpcStream.session?.closeReason" class="grpc-stream-close">{{ grpcStream.session.closeReason }}</div>
+                  <div v-if="grpcStream.messages.length" class="grpc-stream-messages"><article v-for="item in grpcStream.messages" :key="item.id" class="grpc-stream-message"><div><a-tag size="small" color="green">收到</a-tag><small>{{ date(item.createdAt) }} · {{ item.sizeBytes }} bytes<template v-if="item.truncated"> · 已截断</template></small></div><pre>{{ item.payload }}</pre></article></div>
+                  <a-empty v-else :description="grpcStream.session ? '正在等待服务端消息' : '选择服务端流方法后，点击调用开始接收消息'" />
+                </section>
+                <section v-if="grpcClientStream.session || grpcSelectedCallType === 'CLIENT_STREAMING'" class="grpc-stream-panel grpc-client-stream-panel">
+                  <div class="grpc-stream-head"><div><strong>客户端流控制</strong><a-tag :color="grpcClientStreamStatusColor">{{ grpcClientStream.session?.status ?? '未建立' }}</a-tag><small v-if="grpcClientStream.session">{{ grpcClientStream.session.target }} · 已发送 {{ grpcClientStream.session.sentMessageCount }}/100 条 · {{ grpcClientStream.session.sentBytes }} / 524288 bytes</small></div><div><a-button size="small" :disabled="!grpcClientStream.session" @click="loadGrpcClientStream">刷新状态</a-button><a-button size="small" type="primary" :loading="sending" :disabled="grpcClientStream.session?.status !== 'OPEN'" @click="sendGrpcClientStreamMessage">提交当前消息</a-button><a-button size="small" :loading="sending" :disabled="grpcClientStream.session?.status !== 'OPEN'" @click="completeGrpcClientStream">完成发送</a-button><a-button size="small" status="danger" :loading="sending" :disabled="!grpcClientStream.session || !['OPEN', 'HALF_CLOSED'].includes(grpcClientStream.session.status)" @click="cancelGrpcClientStream">取消</a-button></div></div>
+                  <div v-if="grpcClientStream.session?.closeReason" class="grpc-stream-close">{{ grpcClientStream.session.closeReason }}</div>
+                  <div class="client-stream-help">先点击顶部“调用”建立客户端流，再反复编辑并提交上方 JSON 消息；点击“完成发送”后会半关闭请求方向并等待服务端的最终响应。消息和响应仅保存在当前内存会话。</div>
+                  <article v-if="grpcClientStream.session?.responseBody" class="grpc-stream-message"><div><a-tag size="small" color="green">最终响应</a-tag><small>{{ grpcClientStream.session.responseBytes }} bytes<template v-if="grpcClientStream.session.responseTruncated"> · 已截断</template></small></div><pre>{{ grpcClientStream.session.responseBody }}</pre></article>
+                  <a-empty v-else :description="grpcClientStream.session ? grpcClientStream.session.status === 'HALF_CLOSED' ? '已完成发送，正在等待服务端最终响应' : '客户端流已建立，可提交上方 JSON 消息' : '选择客户端流方法后，点击调用建立会话'" />
+                </section>
+                <section v-if="grpcBidiStream.session || grpcSelectedCallType === 'BIDI_STREAMING'" class="grpc-stream-panel grpc-bidi-stream-panel">
+                  <div class="grpc-stream-head"><div><strong>双向流控制</strong><a-tag :color="grpcBidiStreamStatusColor">{{ grpcBidiStream.session?.status ?? '未建立' }}</a-tag><small v-if="grpcBidiStream.session">{{ grpcBidiStream.session.target }} · 发送 {{ grpcBidiStream.session.sentMessageCount }}/100 条 · 接收 {{ grpcBidiStream.session.receivedMessageCount }}/100 条 · {{ grpcBidiStream.session.responseBytes }} / 524288 bytes</small></div><div><a-button size="small" :disabled="!grpcBidiStream.session" @click="loadGrpcBidiStream">刷新状态</a-button><a-button size="small" type="primary" :loading="sending" :disabled="grpcBidiStream.session?.status !== 'OPEN'" @click="sendGrpcBidiStreamMessage">提交当前消息</a-button><a-button size="small" :loading="sending" :disabled="grpcBidiStream.session?.status !== 'OPEN'" @click="completeGrpcBidiStream">完成发送</a-button><a-button size="small" status="danger" :loading="sending" :disabled="!grpcBidiStream.session || !['OPEN', 'HALF_CLOSED'].includes(grpcBidiStream.session.status)" @click="cancelGrpcBidiStream">取消</a-button></div></div>
+                  <div v-if="grpcBidiStream.session?.closeReason" class="grpc-stream-close">{{ grpcBidiStream.session.closeReason }}</div>
+                  <div class="client-stream-help">先点击顶部“调用”建立双向流；每次提交上方 JSON 后会继续接收服务端消息。点击“完成发送”只半关闭客户端方向，服务端仍可继续推送响应；所有双向消息只保留在当前内存会话。</div>
+                  <div v-if="grpcBidiStream.messages.length" class="grpc-stream-messages"><article v-for="item in grpcBidiStream.messages" :key="item.id" class="grpc-stream-message"><div><a-tag size="small" color="green">收到</a-tag><small>{{ date(item.createdAt) }} · {{ item.sizeBytes }} bytes<template v-if="item.truncated"> · 已截断</template></small></div><pre>{{ item.payload }}</pre></article></div>
+                  <a-empty v-else :description="grpcBidiStream.session ? grpcBidiStream.session.status === 'HALF_CLOSED' ? '已完成客户端发送，仍在等待服务端消息' : '双向流已建立，可提交上方 JSON 消息并等待实时响应' : '选择双向流方法后，点击调用建立会话'" />
+                </section>
+              </template>
+              <template v-else>
+                <div class="editor-caption">连接仅允许公开可访问的 <code>ws://</code> 或 <code>wss://</code> 目标。会话、认证值和文本消息仅保存在服务端内存，不会写入调试历史；连接前保存的订阅帧会在每次成功连接后自动发送。</div>
+                <section class="websocket-panel">
+                  <div class="websocket-head"><div><strong>连接状态</strong><a-tag :color="webSocketStatusColor">{{ webSocket.session?.status ?? '未连接' }}</a-tag><small v-if="webSocket.session">{{ webSocket.session.target }} · {{ webSocket.session.messageCount }} 条消息<template v-if="webSocket.session.autoReconnect"> · 重连 {{ webSocket.session.reconnectAttempts }}/{{ webSocket.session.maxReconnectAttempts }}</template><template v-if="webSocket.session.selectedSubprotocol"> · {{ webSocket.session.selectedSubprotocol }}</template></small></div><div><a-button size="small" :loading="sending" @click="connectWebSocket">连接</a-button><a-button size="small" status="danger" :disabled="!webSocket.session || webSocket.session.status === 'CLOSED'" @click="closeWebSocket">关闭</a-button></div></div>
+                  <div v-if="webSocket.session?.closeReason" class="websocket-close">{{ webSocket.session.closeReason }}</div>
+                  <div class="subscription-box"><div class="subscription-title"><strong>订阅帧</strong><small>保存到当前会话，首次连接和自动重连后均会发送；不会持久化。</small></div><a-textarea v-model="webSocket.subscriptionDraft" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" :auto-size="{ minRows: 2, maxRows: 5 }" placeholder="例如：{&quot;type&quot;:&quot;subscribe&quot;,&quot;topic&quot;:&quot;orders&quot;}" :max-length="32000" show-word-limit /><div class="subscription-actions"><a-button size="small" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" @click="addSubscription">保存订阅帧</a-button><span>{{ webSocket.subscriptions.length }}/12</span></div><div v-if="webSocket.subscriptions.length" class="subscription-list"><article v-for="(item, index) in webSocket.subscriptions" :key="`${index}-${item}`"><code>{{ item }}</code><a-button size="mini" status="danger" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" @click="removeSubscription(index)">移除</a-button></article></div></div>
+                  <a-textarea v-model="webSocket.message" :auto-size="{ minRows: 3, maxRows: 6 }" placeholder="输入要发送的文本消息" :max-length="32000" show-word-limit />
+                  <div class="websocket-send"><a-button type="primary" :loading="sending" :disabled="webSocket.session?.status !== 'OPEN'" @click="sendWebSocketMessage">发送文本消息 <icon-send /></a-button><a-button size="small" @click="loadWebSocketMessages">刷新消息</a-button></div>
+                  <div v-if="webSocket.messages.length" class="websocket-messages"><article v-for="item in webSocket.messages" :key="item.id" class="websocket-message" :class="item.direction.toLowerCase()"><div><a-tag size="small" :color="item.direction === 'IN' ? 'green' : 'arcoblue'">{{ item.direction === 'IN' ? '收到' : '发送' }}</a-tag><small>{{ date(item.createdAt) }}<template v-if="item.truncated"> · 已截断</template></small></div><pre>{{ item.payload }}</pre></article></div>
+                  <a-empty v-else description="连接后即可查看实时文本消息" />
+                </section>
+              </template>
+            </a-tab-pane>
+            <a-tab-pane key="headers" :title="protocolType === 'GRPC' ? 'Metadata' : 'Headers'">
+              <template v-if="protocolType !== 'GRPC'"><div class="editor-caption">每行一个请求头，格式为“名称: 值”。{{ protocolType === 'WEBSOCKET' ? 'WebSocket 的 Upgrade 与 Sec-WebSocket-* 握手头由客户端自动处理。' : 'GraphQL 与 SOAP 会补充协议 Content-Type；Host、Content-Length 等传输层请求头会被拒绝。' }}</div><a-textarea v-model="headersText" :auto-size="{ minRows: 11, maxRows: 13 }" placeholder="Content-Type: application/json" /></template>
+              <template v-else><div class="editor-caption">每行一个 ASCII Metadata，格式为“名称: 值”。最多 32 项、总长度 24 KB；<code>grpc-</code> 保留前缀和 <code>-bin</code> 二进制 Metadata 不可用。Metadata 会同时用于服务反射、Unary、服务端流、客户端流与双向流调用，且不写入历史。</div><a-textarea v-model="grpcMetadataText" :auto-size="{ minRows: 11, maxRows: 13 }" placeholder="x-request-id: {{$randomUUID}}" /></template>
+            </a-tab-pane>
+            <a-tab-pane key="auth" :title="protocolType === 'GRPC' ? '认证' : 'Auth'">
+              <template v-if="protocolType !== 'GRPC'"><div class="editor-caption">认证配置会在服务端解析并只用于当前请求或 WebSocket 握手，密钥不会回显或写入历史。</div><a-form :model="auth" layout="vertical" class="auth-form"><a-form-item label="认证类型"><a-select v-model="auth.type"><a-option value="NONE">无认证</a-option><a-option value="BEARER">Bearer Token</a-option><a-option value="BASIC">Basic Auth</a-option><a-option value="API_KEY">API Key</a-option></a-select></a-form-item><a-form-item v-if="auth.type === 'BEARER'" label="Token"><a-input-password v-model="auth.token" placeholder="{{API_TOKEN}} 或直接填写 Token" /></a-form-item><template v-if="auth.type === 'BASIC'"><a-form-item label="用户名"><a-input v-model="auth.username" placeholder="{{API_USERNAME}}" /></a-form-item><a-form-item label="密码"><a-input-password v-model="auth.password" placeholder="{{API_PASSWORD}}" /></a-form-item></template><template v-if="auth.type === 'API_KEY'"><div class="auth-grid"><a-form-item label="参数名称"><a-input v-model="auth.key" placeholder="X-API-Key" /></a-form-item><a-form-item label="放置位置"><a-select v-model="auth.placement"><a-option value="HEADER">Header</a-option><a-option value="QUERY">Query</a-option></a-select></a-form-item></div><a-form-item label="参数值"><a-input-password v-model="auth.value" placeholder="{{API_KEY}}" /></a-form-item></template></a-form></template>
+              <template v-else><div class="editor-caption">认证值仅在服务端执行期解析，并作为 gRPC Metadata 附加到反射、Unary、服务端流、客户端流和双向流调用；不会回显或写入历史。API Key 仅支持 Metadata 位置。</div><a-form :model="grpcAuth" layout="vertical" class="auth-form"><a-form-item label="认证类型"><a-select v-model="grpcAuth.type"><a-option value="NONE">无认证</a-option><a-option value="BEARER">Bearer Token</a-option><a-option value="BASIC">Basic Auth</a-option><a-option value="API_KEY">API Key</a-option></a-select></a-form-item><a-form-item v-if="grpcAuth.type === 'BEARER'" label="Token"><a-input-password v-model="grpcAuth.token" placeholder="{{API_TOKEN}} 或直接填写 Token" /></a-form-item><template v-if="grpcAuth.type === 'BASIC'"><a-form-item label="用户名"><a-input v-model="grpcAuth.username" placeholder="{{API_USERNAME}}" /></a-form-item><a-form-item label="密码"><a-input-password v-model="grpcAuth.password" placeholder="{{API_PASSWORD}}" /></a-form-item></template><template v-if="grpcAuth.type === 'API_KEY'"><a-form-item label="Metadata 名称"><a-input v-model="grpcAuth.key" placeholder="x-api-key" /></a-form-item><a-form-item label="参数值"><a-input-password v-model="grpcAuth.value" placeholder="{{API_KEY}}" /></a-form-item></template></a-form></template>
+            </a-tab-pane>
+            <a-tab-pane v-if="protocolType === 'WEBSOCKET'" key="connection" title="连接"><div class="editor-caption">子协议由客户端生成 <code>Sec-WebSocket-Protocol</code> 握手头；自动重连仅在目标异常断开时触发，手动关闭不会重连。</div><a-form :model="webSocket" layout="vertical" class="auth-form"><a-form-item label="子协议（可选，逗号分隔）"><a-input v-model="webSocket.subprotocolsText" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" placeholder="graphql-transport-ws, mqtt" /></a-form-item><a-form-item><a-checkbox v-model="webSocket.autoReconnect" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'">目标异常关闭时自动重连</a-checkbox></a-form-item><div v-if="webSocket.autoReconnect" class="auth-grid"><a-form-item label="最多重连次数"><a-input-number v-model="webSocket.maxReconnectAttempts" :min="1" :max="5" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" /></a-form-item><a-form-item label="重连间隔（毫秒）"><a-input-number v-model="webSocket.reconnectDelayMs" :min="100" :max="10000" :step="100" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" /></a-form-item></div></a-form></a-tab-pane>
+            <a-tab-pane key="variables" title="变量"><div class="editor-caption">{{ variableCaption }}</div><a-table :data="variables" :pagination="false" size="small" row-key="key"><template #columns><a-table-column title="变量"><template #cell="{ record }"><code>{{ '{' + '{' + record.key + '}' + '}' }}</code></template></a-table-column><a-table-column title="类型"><template #cell="{ record }"><a-tag :color="record.secret ? 'orange' : 'green'">{{ record.secret ? '环境密钥' : '项目参数' }}</a-tag></template></a-table-column><a-table-column title="说明"><template #cell="{ record }"><span>{{ record.preview }}</span></template></a-table-column></template></a-table><a-empty v-if="!variables.length" description="当前环境没有可用变量"><template #extra><router-link to="/project-settings/parameters">前往项目参数</router-link></template></a-empty></a-tab-pane>
+            <a-tab-pane key="security" title="安全边界"><div class="security-note"><icon-safe /><div><strong>本节点不执行脚本，也不保存请求体、响应体、请求头、认证值或 WebSocket 消息到数据库。</strong><span>{{ protocolType === 'WEBSOCKET' ? 'WebSocket 目标必须为公开可访问的 WS/WSS 地址；内网、回环、链路本地地址和手工握手头均会被拦截。' : protocolType === 'GRPC' ? 'gRPC 目标必须为公开可访问的主机:端口；内网、回环、链路本地地址会被拦截。在线反射描述符仅在本次调用内存中存在；导入的离线描述符是项目级、已校验的编译资产，调用时不会请求远端反射。服务端流、客户端流与双向流数据仅保存在当前控制面内存会话；每个方向限制为 100 条消息、总计 512 KB，达到上限会自动取消。双向流完成发送后仍会继续接收响应。JSON、ASCII Metadata、认证值与响应均不写入历史。' : '请求目标必须是可公开访问的 HTTP/HTTPS 地址；内网、回环、链路本地地址和重定向均会被拦截。' }}</span></div></div></a-tab-pane>
+          </a-tabs>
+          <section v-if="protocolType !== 'WEBSOCKET'" class="response-panel">
+            <div class="response-head"><div><strong>响应</strong><a-tag :color="statusColor">{{ statusText }}</a-tag><span v-if="result">{{ result.durationMs }} ms</span><span v-if="result">{{ result.truncated ? '已截断至 512 KB' : `${result.body.length} 字符` }}</span></div><div><a-button size="small" :disabled="!result" @click="copyResponse">复制响应</a-button></div></div>
+            <a-tabs v-model:active-key="responseTab" size="small"><a-tab-pane key="body" title="Body"><pre class="response-code">{{ responseBody }}</pre></a-tab-pane><a-tab-pane key="headers" :title="`Headers (${result?.responseHeaders.length ?? 0})`"><pre class="response-code">{{ responseHeadersText }}</pre></a-tab-pane></a-tabs>
+          </section>
+        </div>
+      </section>
+    </a-spin>
   </div>
 </template>
+
+<style scoped>
+.debug-summary{display:grid;grid-template-columns:1.5fr 1fr .9fr .65fr;gap:18px;align-items:center;margin-bottom:20px}.debug-summary>div{display:grid;gap:4px}.debug-summary span,.debug-summary small,.tree-title small,.history-item small,.editor-caption{color:var(--color-text-3);font-size:12px}.debug-summary strong{font-size:20px}.tree-title>div{display:grid;gap:3px}.history-list{display:grid;gap:7px;margin-top:14px}.history-item{display:grid;gap:7px;padding:10px;border:1px solid var(--color-border-2);border-radius:8px;background:#fff}.history-item>div{display:flex;gap:5px}.history-item code{overflow:hidden;color:var(--color-text-2);font-size:11px;text-overflow:ellipsis;white-space:nowrap}.editor-caption{padding:5px 0 12px;line-height:1.6}.auth-form,.protocol-form{max-width:620px}.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.discovery-field{display:flex;gap:8px}.discovery-field .arco-input-wrapper{min-width:0;flex:1}.discovery-select{width:100%;margin-top:8px}.discovery-tip{display:block;margin-top:7px;color:var(--color-text-3);font-size:12px}.descriptor-panel{display:grid;gap:10px;max-width:820px;margin:0 0 16px;padding:13px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.descriptor-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.descriptor-head>div{display:grid;gap:3px}.descriptor-head strong{font-size:13px}.descriptor-head small,.descriptor-help{color:var(--color-text-3);font-size:12px;line-height:1.55}.descriptor-select-row,.descriptor-import-row{display:flex;gap:8px;align-items:center}.descriptor-select-row .arco-select,.descriptor-import-row .arco-input-wrapper{min-width:0;flex:1}.proto-file-input{display:inline-flex;position:relative;align-items:center;justify-content:center;min-width:138px;height:32px;padding:0 11px;overflow:hidden;border:1px solid var(--color-border-2);border-radius:4px;background:var(--color-bg-2);color:var(--color-text-2);font-size:12px;cursor:pointer}.proto-file-input:hover{border-color:rgb(var(--primary-6));color:rgb(var(--primary-6))}.proto-file-input input{position:absolute;inset:0;opacity:0;cursor:pointer}.protocol-method{display:flex;align-items:center;justify-content:center;margin:0;min-width:108px}.security-note{display:flex;gap:12px;align-items:flex-start;margin:12px 0;padding:16px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.security-note>div{display:grid;gap:6px}.security-note span{color:var(--color-text-3);font-size:13px;line-height:1.65}.websocket-panel{display:grid;gap:13px}.websocket-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:12px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.websocket-head>div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.websocket-head strong{font-size:14px}.websocket-head small,.websocket-close{color:var(--color-text-3);font-size:12px}.websocket-close{padding:9px 11px;border-left:3px solid var(--color-border-3);background:var(--color-fill-1)}.subscription-box{display:grid;gap:9px;padding:12px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.subscription-title{display:grid;gap:3px}.subscription-title strong{font-size:13px}.subscription-title small,.subscription-actions span{color:var(--color-text-3);font-size:12px}.subscription-actions{display:flex;align-items:center;gap:8px}.subscription-list{display:grid;gap:7px}.subscription-list article{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px;border:1px solid var(--color-border-2);border-radius:6px;background:#fff}.subscription-list code{max-height:72px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}.websocket-send{display:flex;gap:8px;align-items:center}.websocket-messages{display:grid;gap:8px;max-height:390px;overflow:auto;padding-right:3px}.websocket-message{display:grid;gap:7px;padding:10px;border:1px solid var(--color-border-2);border-radius:8px;background:#fff}.websocket-message.in{border-left:3px solid rgb(var(--green-6))}.websocket-message.out{border-left:3px solid rgb(var(--arcoblue-6))}.websocket-message>div{display:flex;align-items:center;gap:7px}.websocket-message small{color:var(--color-text-3);font-size:11px}.websocket-message pre{max-height:180px;margin:0;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.response-code{min-height:230px;margin:0;padding:14px;overflow:auto;border:1px solid var(--color-border-2);border-radius:7px;background:#172033;color:#c5d7f7;font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}@media (max-width:900px){.debug-summary{grid-template-columns:1fr 1fr}.debug-workspace{grid-template-columns:1fr}.request-tree{border-right:0;border-bottom:1px solid var(--color-border-2);max-height:280px;overflow:auto}}@media (max-width:640px){.debug-summary,.auth-grid{grid-template-columns:1fr}.descriptor-select-row,.descriptor-import-row{align-items:stretch;flex-direction:column}.proto-file-input{min-height:32px}.request-bar{grid-template-columns:95px 1fr}.request-bar .arco-btn{grid-column:1 / -1}.environment-bar{flex-wrap:wrap}.environment-bar .arco-btn{margin-left:0}.websocket-head{align-items:stretch;flex-direction:column}}
+.grpc-stream-panel{display:grid;gap:12px;max-width:820px;margin-top:16px}.grpc-stream-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:12px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.grpc-stream-head>div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.grpc-stream-head strong{font-size:14px}.grpc-stream-head small,.grpc-stream-close,.client-stream-help{color:var(--color-text-3);font-size:12px}.grpc-stream-close,.client-stream-help{padding:9px 11px;border-left:3px solid var(--color-border-3);background:var(--color-fill-1);line-height:1.6}.grpc-stream-messages{display:grid;gap:8px;max-height:390px;overflow:auto;padding-right:3px}.grpc-stream-message{display:grid;gap:7px;padding:10px;border:1px solid var(--color-border-2);border-left:3px solid rgb(var(--green-6));border-radius:8px;background:#fff}.grpc-stream-message>div{display:flex;align-items:center;gap:7px}.grpc-stream-message small{color:var(--color-text-3);font-size:11px}.grpc-stream-message pre{max-height:180px;margin:0;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}@media (max-width:640px){.grpc-stream-head{align-items:stretch;flex-direction:column}}
+</style>

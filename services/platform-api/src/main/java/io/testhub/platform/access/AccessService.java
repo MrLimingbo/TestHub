@@ -78,6 +78,32 @@ public class AccessService {
         return project;
     }
 
+    /**
+     * Execution is intentionally narrower than a general project write. CI uses
+     * the dedicated {@code run:execute} scope; browser users still require an
+     * allowed project role.
+     */
+    public ProjectSummary requireApiAutomationExecution(AuthenticatedPrincipal principal, String projectId,
+                                                         Set<String> permittedRoles) {
+        ProjectSummary project = access.findProject(projectId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "项目不存在"));
+        if (principal.tokenProjectId() != null && !principal.tokenProjectId().equals(projectId)) {
+            throw new AccessDeniedException("令牌无权访问该项目");
+        }
+        if (principal.webhookTriggerId() != null || principal.automationScheduleId() != null) {
+            return project;
+        }
+        if (principal instanceof ApiTokenPrincipal tokenPrincipal
+                && !tokenPrincipal.scopes().contains("run:execute")) {
+            throw new AccessDeniedException("令牌没有触发执行权限范围");
+        }
+        List<String> roles = access.findRoles(principal.userId(), project.organizationId(), projectId);
+        if (roles.stream().noneMatch(permittedRoles::contains)) {
+            throw new AccessDeniedException("没有触发接口自动化执行的权限");
+        }
+        return project;
+    }
+
     public void requireSystemAdmin(AuthenticatedPrincipal principal) {
         if (principal.tokenProjectId() != null || !access.hasRole(principal.userId(), "SYSTEM_ADMIN")) {
             throw new AccessDeniedException("仅系统管理员可访问");

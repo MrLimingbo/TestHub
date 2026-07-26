@@ -5,11 +5,11 @@ import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
 import io.testhub.platform.audit.AuditService;
 import io.testhub.platform.security.AuthenticatedPrincipal;
+import io.testhub.platform.security.SecretCipher;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,11 +21,16 @@ public class NotificationTemplateService {
     private final NotificationTemplateRepository templates;
     private final AccessService access;
     private final AuditService audit;
+    private final SecretCipher cipher;
+    private final WebhookTargetPolicy targetPolicy;
 
-    public NotificationTemplateService(NotificationTemplateRepository templates, AccessService access, AuditService audit) {
+    public NotificationTemplateService(NotificationTemplateRepository templates, AccessService access, AuditService audit,
+                                       SecretCipher cipher, WebhookTargetPolicy targetPolicy) {
         this.templates = templates;
         this.access = access;
         this.audit = audit;
+        this.cipher = cipher;
+        this.targetPolicy = targetPolicy;
     }
 
     public List<NotificationTemplate> list(AuthenticatedPrincipal principal, String projectId) {
@@ -37,10 +42,11 @@ public class NotificationTemplateService {
     public NotificationTemplate create(AuthenticatedPrincipal principal, String projectId, TemplateInput input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
         validate(input);
+        TemplateDelivery delivery = delivery(input, null, true);
         String id = UlidCreator.getUlid().toString();
         templates.insert(id, project.organizationId(), projectId, input.name().trim(), normalizeEvent(input.eventCode()),
-                normalizeChannel(input.channel()), input.subjectTemplate().trim(), input.bodyTemplate().trim(), input.enabled(),
-                principal.userId());
+                normalizeChannel(input.channel()), input.subjectTemplate().trim(), input.bodyTemplate().trim(), delivery.targetUrl(),
+                delivery.signingSecretCiphertext(), input.enabled(), principal.userId());
         audit.record(principal, project.organizationId(), projectId, "NOTIFICATION_TEMPLATE_CREATED",
                 "NOTIFICATION_TEMPLATE", id, java.util.Map.of("name", input.name().trim(), "channel", normalizeChannel(input.channel())));
         return templates.findByProject(projectId).stream().filter(template -> template.id().equals(id)).findFirst().orElseThrow();
@@ -50,8 +56,12 @@ public class NotificationTemplateService {
     public NotificationTemplate update(AuthenticatedPrincipal principal, String projectId, String templateId, TemplateInput input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
         validate(input);
+        NotificationTemplateRepository.StoredNotificationTemplate current = templates.findStored(templateId, projectId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "通知模板不存在"));
+        TemplateDelivery delivery = delivery(input, current.signingSecretCiphertext(), false);
         templates.update(templateId, projectId, input.name().trim(), normalizeEvent(input.eventCode()), normalizeChannel(input.channel()),
-                input.subjectTemplate().trim(), input.bodyTemplate().trim(), input.enabled(), principal.userId());
+                input.subjectTemplate().trim(), input.bodyTemplate().trim(), delivery.targetUrl(), delivery.signingSecretCiphertext(),
+                input.enabled(), principal.userId());
         audit.record(principal, project.organizationId(), projectId, "NOTIFICATION_TEMPLATE_UPDATED",
                 "NOTIFICATION_TEMPLATE", templateId, java.util.Map.of());
         return templates.findByProject(projectId).stream().filter(template -> template.id().equals(templateId)).findFirst()
@@ -77,6 +87,26 @@ public class NotificationTemplateService {
         normalizeChannel(input.channel());
     }
 
+    private TemplateDelivery delivery(TemplateInput input, String existingCiphertext, boolean creating) {
+        if (!"WEBHOOK".equals(normalizeChannel(input.channel()))) return new TemplateDelivery(null, null);
+        if (input.targetUrl() == null || input.targetUrl().isBlank()) {
+            // Older generic Webhook templates remain valid but cannot be dispatched until a target and secret are configured.
+            return new TemplateDelivery(null, null);
+        }
+        String targetUrl = targetPolicy.normalizeAndAssertAllowed(input.targetUrl());
+        String providedSecret = input.signingSecret() == null ? "" : input.signingSecret().trim();
+        if (providedSecret.isEmpty()) {
+            if (creating || existingCiphertext == null || existingCiphertext.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Webhook 签名密钥不能为空");
+            }
+            return new TemplateDelivery(targetUrl, existingCiphertext);
+        }
+        if (providedSecret.length() > 512) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Webhook 签名密钥不能超过 512 字符");
+        }
+        return new TemplateDelivery(targetUrl, cipher.encrypt(providedSecret));
+    }
+
     private String normalizeEvent(String value) {
         String normalized = value.trim().toLowerCase(Locale.ROOT);
         if (!normalized.matches("[a-z][a-z0-9_.-]{1,79}")) {
@@ -94,6 +124,9 @@ public class NotificationTemplateService {
     }
 
     public record TemplateInput(String name, String eventCode, String channel, String subjectTemplate,
-                                String bodyTemplate, boolean enabled) {
+                                String bodyTemplate, String targetUrl, String signingSecret, boolean enabled) {
+    }
+
+    private record TemplateDelivery(String targetUrl, String signingSecretCiphertext) {
     }
 }

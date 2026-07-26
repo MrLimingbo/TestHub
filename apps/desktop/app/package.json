@@ -1,0 +1,8 @@
+{
+  "name": "testhub-desktop-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TestHub secure desktop client runtime",
+  "author": "TestHub",
+  "main": "src/main.cjs"
+}

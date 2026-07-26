@@ -1,0 +1,59 @@
+groups:
+  - name: testhub-platform-api
+    rules:
+      - alert: TestHubApiUnavailable
+        expr: up{job="testhub-platform-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: TestHub Platform API is unavailable
+          runbook: Check API logs, dependency health, and the protected readiness endpoint before attempting recovery.
+
+      - alert: TestHubApiServerErrorRateHigh
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="testhub-platform-api",status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(http_server_requests_seconds_count{job="testhub-platform-api"}[5m])), 0.001) > 0.02
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: TestHub API 5xx error rate exceeds 2 percent
+          runbook: Correlate request IDs with protected logs; do not retry destructive workflows automatically.
+
+      - alert: TestHubApiP95LatencyHigh
+        expr: |
+          histogram_quantile(0.95, sum by (le) (
+            rate(http_server_requests_seconds_bucket{job="testhub-platform-api",uri!~"/actuator.*"}[5m])
+          )) > 0.75
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: TestHub API p95 latency exceeds 750 milliseconds
+          runbook: Compare with the release capacity baseline before changing thread or pool limits.
+
+      - alert: TestHubJvmHeapPressureHigh
+        expr: |
+          jvm_memory_used_bytes{job="testhub-platform-api",area="heap"}
+          /
+          clamp_min(jvm_memory_max_bytes{job="testhub-platform-api",area="heap"}, 1) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: TestHub JVM heap pressure exceeds 85 percent
+          runbook: Inspect allocation and GC metrics; do not raise the container limit without a measured baseline.
+
+      - alert: TestHubDatabasePoolSaturationHigh
+        expr: |
+          hikaricp_connections_active{job="testhub-platform-api"}
+          /
+          clamp_min(hikaricp_connections_max{job="testhub-platform-api"}, 1) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: TestHub database connection pool saturation exceeds 80 percent
+          runbook: Check slow queries and MySQL capacity before increasing the pool size.

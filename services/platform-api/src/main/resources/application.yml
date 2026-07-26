@@ -5,6 +5,11 @@ spring:
     url: ${TESTHUB_DB_URL:jdbc:mysql://localhost:13307/testhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
     username: ${TESTHUB_DB_USERNAME:testhub}
     password: ${TESTHUB_DB_PASSWORD:testhub_dev_password}
+    hikari:
+      maximum-pool-size: ${TESTHUB_DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${TESTHUB_DB_POOL_MIN_IDLE:5}
+      connection-timeout: ${TESTHUB_DB_CONNECTION_TIMEOUT_MS:3000}
+      validation-timeout: ${TESTHUB_DB_VALIDATION_TIMEOUT_MS:1000}
   data:
     redis:
       host: ${TESTHUB_REDIS_HOST:localhost}
@@ -23,6 +28,13 @@ spring:
     locations: classpath:db/migration
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: ${TESTHUB_SERVER_MAX_THREADS:200}
+      min-spare: ${TESTHUB_SERVER_MIN_SPARE_THREADS:20}
+    accept-count: ${TESTHUB_SERVER_ACCEPT_COUNT:100}
+    max-connections: ${TESTHUB_SERVER_MAX_CONNECTIONS:8192}
+    connection-timeout: ${TESTHUB_SERVER_CONNECTION_TIMEOUT:10s}
   servlet:
     session:
       cookie:
@@ -36,16 +48,58 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
 testhub:
+  runner:
+    # Disabled by default. HTTP execution additionally requires a verified Runner that advertises executionEnabled=true.
+    http-execution-enabled: ${TESTHUB_API_RUNNER_HTTP_EXECUTION_ENABLED:false}
+  performance-runner:
+    # Local development fallback only. Production must inject a dedicated signing key.
+    heartbeat-key: ${TESTHUB_PERFORMANCE_RUNNER_HEARTBEAT_KEY:testhub-performance-runner-local-development-key-2026}
+  ui-automation-runner:
+    # Local development fallback only. Production must inject a dedicated signing key.
+    heartbeat-key: ${TESTHUB_UI_AUTOMATION_RUNNER_HEARTBEAT_KEY:testhub-ui-automation-runner-local-development-key-2026}
+  mobile-automation-runner:
+    # Local development fallback only. Production must inject a dedicated signing key.
+    heartbeat-key: ${TESTHUB_MOBILE_AUTOMATION_RUNNER_HEARTBEAT_KEY:testhub-mobile-automation-runner-local-development-key-2026}
   security:
     # Local development fallback only. Production must provide a dedicated Base64-encoded AES key.
     encryption-key: ${TESTHUB_ENCRYPTION_KEY:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+    # Keyed v2 ciphertext enables staged rotation. Previous values use keyId:Base64Key;... and must be removed after rekey verification.
+    encryption-key-id: ${TESTHUB_ENCRYPTION_KEY_ID:primary}
+    previous-encryption-keys: ${TESTHUB_PREVIOUS_ENCRYPTION_KEYS:}
+    secret-rekey:
+      # Off by default. Enable only in a reviewed maintenance window after every API replica has the new key and old fallback key.
+      enabled: ${TESTHUB_SECRET_REKEY_ENABLED:false}
+    cors:
+      # Comma-separated browser origins. Production must replace the local defaults with its public HTTPS origin.
+      allowed-origins: ${TESTHUB_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   storage:
     endpoint: ${TESTHUB_MINIO_ENDPOINT:http://localhost:9000}
     access-key: ${TESTHUB_MINIO_ACCESS_KEY:testhub}
     secret-key: ${TESTHUB_MINIO_SECRET_KEY:testhub_minio_password}
     bucket: ${TESTHUB_MINIO_BUCKET:testhub-files}
+  operations:
+    capacity:
+      # Baseline applies only to the readiness endpoint; it is not a business-workload capacity guarantee.
+      request-count: ${TESTHUB_CAPACITY_BASELINE_REQUEST_COUNT:60}
+      concurrency: ${TESTHUB_CAPACITY_BASELINE_CONCURRENCY:6}
+      p95-latency-ms: ${TESTHUB_CAPACITY_BASELINE_P95_LATENCY_MS:500}
+      max-error-percent: ${TESTHUB_CAPACITY_BASELINE_MAX_ERROR_PERCENT:1}
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+    prometheus:
+      access: unrestricted
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: testhub-platform-api

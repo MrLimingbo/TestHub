@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; form-action 'none'; connect-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+    <title>TestHub · 连接服务器</title>
+    <link rel="stylesheet" href="setup.css" />
+  </head>
+  <body>
+    <main class="card">
+      <div class="mark">T</div>
+      <p class="eyebrow">TESTHUB DESKTOP</p>
+      <h1>连接 TestHub 服务</h1>
+      <p class="description">桌面端与现有 Web 控制台使用同一个 TestHub 服务。它不会存储账号、密码或访问令牌。</p>
+      <form id="server-form">
+        <label for="server-url">服务地址</label>
+        <input id="server-url" name="server-url" type="url" inputmode="url" autocomplete="url" placeholder="https://testhub.example.com" required />
+        <p class="hint">生产环境必须使用 HTTPS；本机开发可使用 http://127.0.0.1:5173。</p>
+        <p id="error" class="error" role="alert" hidden></p>
+        <button id="connect" type="submit">保存并连接</button>
+      </form>
+    </main>
+    <script src="setup-renderer.js"></script>
+  </body>
+</html>

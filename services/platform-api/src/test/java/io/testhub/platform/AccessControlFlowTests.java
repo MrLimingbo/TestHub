@@ -157,7 +157,7 @@ class AccessControlFlowTests {
         String secretId = json(listed).at("/data/secrets/0/id").asText();
         String storedValue = jdbc.sql("SELECT parameter_value FROM project_parameter WHERE id = :id")
                 .param("id", secretId).query(String.class).single();
-        assertTrue(storedValue.startsWith("v1:"));
+        assertTrue(storedValue.startsWith("v2:"));
         assertFalse(storedValue.contains(rawSecret));
 
         MvcResult deleteCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
