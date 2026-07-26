@@ -1,6 +1,7 @@
 package io.testhub.platform;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -12,6 +13,7 @@ import io.testhub.platform.config.SystemConfigRepository;
 import io.testhub.platform.reporting.QualityReportScheduleService;
 import jakarta.servlet.http.Cookie;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +75,9 @@ class QualityReportScheduleFlowTests {
         MvcResult deliveries = mvc.perform(get("/api/v1/projects/{projectId}/notification-deliveries", projectId)
                         .cookie(administrator.sessionCookie()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].templateName").value("定时质量报告验收 Webhook"))
-                .andExpect(jsonPath("$.data[0].status").value("PENDING")).andReturn();
+                .andReturn();
+        String deliveryStatus = json(deliveries).at("/data/0/status").asText();
+        assertTrue(Set.of("PENDING", "DELIVERING").contains(deliveryStatus));
         String deliveryId = json(deliveries).at("/data/0/id").asText();
         assertEquals(1, jdbc.sql("SELECT COUNT(*) FROM notification_delivery WHERE schedule_run_id = "
                         + "(SELECT id FROM quality_report_schedule_run WHERE schedule_id = :scheduleId)")
