@@ -170,7 +170,7 @@ public class QualityReportScheduleService {
                 .map(projectId -> access.requireProjectParameterWrite(principal, projectId, WRITERS)).toList();
         String organizationId = projects.getFirst().organizationId();
         if (projects.stream().anyMatch(project -> !organizationId.equals(project.organizationId()))) {
-            throw rejected("同一定时报告只能选择同一组织的项目");
+            throw rejected("所选项目暂无法合并到同一定时报告");
         }
         String cron = required(input.cronExpression(), "Cron 表达式", 160);
         if (!org.quartz.CronExpression.isValidExpression(cron)) throw rejected("Cron 表达式不合法（使用 Quartz 六或七段格式）");

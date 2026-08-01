@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSessionStore } from '@/stores/session'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -10,7 +11,8 @@ interface Context { organizations: Organization[]; projects: Record<string, Proj
 interface ExecutionTask { id: string; organizationId: string; projectId: string; taskType: string; name: string; status: string; progress: number; requestedBy: string; createdAt: string; updatedAt: string }
 
 const context = ref<Context | null>(null)
-const projectId = ref('')
+const session = useSessionStore()
+const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) })
 const tasks = ref<ExecutionTask[]>([])
 const loading = ref(true)
 const visible = ref(false)
@@ -48,7 +50,7 @@ async function load() {
   loading.value = true
   try {
     context.value = await read<Context>('/api/v1/access/context')
-    projectId.value = projects.value[0]?.id ?? ''
+    projectId.value = session.resolveProjectId(projects.value)
     await loadTasks()
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载任务失败') } finally { loading.value = false }
 }

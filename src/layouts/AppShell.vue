@@ -12,8 +12,7 @@ const sections = [
   { label: '总览', items: [{ path: '/dashboard', label: '工作台', icon: 'IconDashboard' }] },
   { label: '测试工作', items: [
     { path: '/functional', label: '功能测试', icon: 'IconSafe' },
-    { path: '/api-design', label: '接口设计', icon: 'IconBook' },
-    { path: '/api-debug', label: '接口调试', icon: 'IconThunderbolt' },
+    { path: '/api-testing', label: '接口测试', icon: 'IconThunderbolt' },
     { path: '/api-automation', label: '接口自动化', icon: 'IconCode' },
     { path: '/mock', label: 'Mock 服务', icon: 'IconCloud' },
     { path: '/performance', label: '性能测试', icon: 'IconFire' },
@@ -32,7 +31,8 @@ const sections = [
   ] },
 ]
 
-const title = computed(() => sections.flatMap((section) => section.items).find((item) => item.path === route.path)?.label ?? 'TestHub')
+const title = computed(() => sections.flatMap((section) => section.items)
+  .find((item) => route.path === item.path || route.path.startsWith(`${item.path}/`))?.label ?? 'TestHub')
 const logout = async () => { await session.signOut(); await router.push('/login') }
 </script>
 
@@ -57,23 +57,20 @@ const logout = async () => { await session.signOut(); await router.push('/login'
     </aside>
     <main class="workspace">
       <header class="topbar">
-        <div class="topbar-title"><span class="topbar-path">交易中台 V3</span><icon-right /><strong>{{ title }}</strong></div>
+        <div class="topbar-title"><strong>{{ title }}</strong></div>
         <div class="topbar-actions">
-          <a-select v-model="session.organization" size="small" :style="{ width: '132px' }" aria-label="选择组织">
-            <a-option>星云科技</a-option><a-option>极光实验室</a-option>
-          </a-select>
-          <a-select v-model="session.project" size="small" :style="{ width: '150px' }" aria-label="选择项目">
-            <a-option>交易中台 V3</a-option><a-option>会员增长平台</a-option>
+          <a-select :model-value="session.projectId" size="small" :style="{ width: '190px' }" placeholder="请先选择项目" aria-label="选择项目" @change="session.selectProject(String($event))">
+            <a-option v-for="project in session.projects" :key="project.id" :value="project.id">{{ project.name }}</a-option>
           </a-select>
           <a-button shape="circle"><icon-search /></a-button>
           <a-badge :count="3" dot><a-button shape="circle"><icon-notification /></a-button></a-badge>
           <a-dropdown trigger="click">
-            <button class="user-chip"><a-avatar :size="30">林</a-avatar><span>林晓</span><icon-down /></button>
+            <button class="user-chip"><a-avatar :size="30">{{ session.profile?.displayName.slice(0, 1) ?? '用' }}</a-avatar><span>{{ session.profile?.displayName ?? '当前用户' }}</span><icon-down /></button>
             <template #content><a-doption>个人中心</a-doption><a-doption @click="logout">退出登录</a-doption></template>
           </a-dropdown>
         </div>
       </header>
-      <div class="page-scroll"><router-view /></div>
+      <div class="page-scroll"><router-view :key="`${route.path}:${session.projectId}`" /></div>
     </main>
   </div>
 </template>

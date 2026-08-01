@@ -1,7 +1,7 @@
 package io.testhub.platform.access;
 
 import com.github.f4b6a3.ulid.UlidCreator;
-import io.testhub.platform.account.UserAccountRepository;
+import io.testhub.platform.account.AccountManagementService;
 import io.testhub.platform.audit.AuditService;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import java.nio.charset.StandardCharsets;
@@ -29,13 +29,14 @@ public class AccessService {
     private static final SecureRandom RANDOM = new SecureRandom();
     private final AccessRepository access;
     private final TokenRepository tokens;
-    private final UserAccountRepository accounts;
+    private final AccountManagementService accountManagement;
     private final AuditService audit;
 
-    public AccessService(AccessRepository access, TokenRepository tokens, UserAccountRepository accounts, AuditService audit) {
+    public AccessService(AccessRepository access, TokenRepository tokens,
+                         AccountManagementService accountManagement, AuditService audit) {
         this.access = access;
         this.tokens = tokens;
-        this.accounts = accounts;
+        this.accountManagement = accountManagement;
         this.audit = audit;
     }
 
@@ -44,7 +45,7 @@ public class AccessService {
             ProjectSummary project = requireProjectAccess(principal, principal.tokenProjectId(), false);
             OrganizationSummary organization = access.findOrganizationsForUser(principal.userId()).stream()
                     .filter(candidate -> candidate.id().equals(project.organizationId())).findFirst()
-                    .orElseThrow(() -> new AccessDeniedException("令牌无权访问该组织"));
+                    .orElseThrow(() -> new AccessDeniedException("令牌无权访问该工作空间"));
             return new AccessContext(List.of(organization), java.util.Map.of(organization.id(), List.of(project)));
         }
         List<OrganizationSummary> organizations = access.findOrganizationsForUser(principal.userId());
@@ -55,6 +56,50 @@ public class AccessService {
     public List<ProjectMember> members(AuthenticatedPrincipal principal, String projectId) {
         requireProjectAccess(principal, projectId, false);
         return access.findProjectMembers(projectId);
+    }
+
+    public ProjectSummary project(AuthenticatedPrincipal principal, String projectId) {
+        return requireProjectAccess(principal, projectId, false);
+    }
+
+    @Transactional
+    public ProjectSummary createProject(AuthenticatedPrincipal principal, String name, String code,
+                                        String description) {
+        OrganizationSummary organization = requireWorkspaceManage(principal);
+        String normalizedCode = normalizeProjectCode(code);
+        if (access.findProjectByCode(organization.id(), normalizedCode).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "项目标识已存在");
+        }
+        String id = UlidCreator.getUlid().toString();
+        access.insertProject(id, organization.id(), normalizeProjectName(name), normalizedCode,
+                normalizeDescription(description), principal.userId());
+        audit.record(principal, organization.id(), id, "PROJECT_CREATED", "PROJECT", id,
+                java.util.Map.of("name", name.trim(), "code", normalizedCode));
+        return access.findProject(id).orElseThrow();
+    }
+
+    @Transactional
+    public ProjectSummary updateProject(AuthenticatedPrincipal principal, String projectId, String name,
+                                        String code, String description) {
+        ProjectSummary project = requireProjectAccess(principal, projectId, true);
+        String normalizedCode = normalizeProjectCode(code);
+        access.findProjectByCode(project.organizationId(), normalizedCode)
+                .filter(candidate -> !candidate.id().equals(projectId))
+                .ifPresent(candidate -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "项目标识已存在");
+                });
+        access.updateProject(projectId, normalizeProjectName(name), normalizedCode, normalizeDescription(description));
+        audit.record(principal, project.organizationId(), projectId, "PROJECT_UPDATED", "PROJECT", projectId,
+                java.util.Map.of("name", name.trim(), "code", normalizedCode));
+        return access.findProject(projectId).orElseThrow();
+    }
+
+    @Transactional
+    public void deleteProject(AuthenticatedPrincipal principal, String projectId) {
+        ProjectSummary project = requireProjectAccess(principal, projectId, true);
+        access.softDeleteProject(projectId);
+        audit.record(principal, project.organizationId(), projectId, "PROJECT_DELETED", "PROJECT", projectId,
+                java.util.Map.of("name", project.name(), "code", project.code()));
     }
 
     public ProjectSummary requireProjectRead(AuthenticatedPrincipal principal, String projectId) {
@@ -111,19 +156,18 @@ public class AccessService {
     }
 
     @Transactional
-    public ProjectMember upsertMember(AuthenticatedPrincipal principal, String projectId, String email, String roleCode) {
+    public ProjectMember upsertMember(AuthenticatedPrincipal principal, String projectId, String account, String roleCode) {
         ProjectSummary project = requireProjectAccess(principal, projectId, true);
         String normalizedRole = roleCode.trim().toUpperCase(Locale.ROOT);
         if (ROLE_DEFINITIONS.stream().noneMatch(role -> role.code().equals(normalizedRole))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "不支持的项目角色");
         }
-        var account = accounts.findByEmail(email.trim().toLowerCase(Locale.ROOT))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "未找到该本地账号"));
-        access.deleteProjectMemberships(account.id(), projectId);
+        var userAccount = accountManagement.resolveOrCreateForProjectMember(principal, project, account);
+        access.deleteProjectMemberships(userAccount.id(), projectId);
         String membershipId = UlidCreator.getUlid().toString();
-        access.insertMembership(membershipId, account.id(), project.organizationId(), projectId, normalizedRole);
+        access.insertMembership(membershipId, userAccount.id(), project.organizationId(), projectId, normalizedRole);
         audit.record(principal, project.organizationId(), projectId, "MEMBERSHIP_UPSERTED", "PROJECT_MEMBER", membershipId,
-                java.util.Map.of("email", account.email(), "roleCode", normalizedRole));
+                java.util.Map.of("account", userAccount.account(), "roleCode", normalizedRole));
         return access.findProjectMembers(projectId).stream().filter(member -> member.membershipId().equals(membershipId))
                 .findFirst().orElseThrow();
     }
@@ -195,6 +239,38 @@ public class AccessService {
             throw new AccessDeniedException("没有项目访问权限");
         }
         return project;
+    }
+
+    private OrganizationSummary requireWorkspaceManage(AuthenticatedPrincipal principal) {
+        if (principal.tokenProjectId() != null) {
+            throw new AccessDeniedException("项目令牌不能创建项目");
+        }
+        return access.findOrganizationsForUser(principal.userId()).stream()
+                .filter(workspace -> {
+                    List<String> roles = access.findRoles(principal.userId(), workspace.id(), "");
+                    return roles.contains("SYSTEM_ADMIN") || roles.contains("ORG_ADMIN");
+                })
+                .findFirst()
+                .orElseThrow(() -> new AccessDeniedException("没有项目创建权限"));
+    }
+
+    private String normalizeProjectName(String value) {
+        if (value == null || value.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "项目名称不能为空");
+        }
+        return value.trim();
+    }
+
+    private String normalizeProjectCode(String value) {
+        String normalized = value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+        if (!normalized.matches("[a-z0-9][a-z0-9_-]{1,63}")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "项目标识需为 2-64 位小写字母、数字、下划线或连字符");
+        }
+        return normalized;
+    }
+
+    private String normalizeDescription(String value) {
+        return value == null ? "" : value.trim();
     }
 
     private String sha256(String value) {

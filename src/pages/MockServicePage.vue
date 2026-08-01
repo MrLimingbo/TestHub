@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import CodeEditor from '@/components/CodeEditor.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSessionStore } from '@/stores/session'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -14,7 +15,8 @@ interface SmartMockExample { apiId: string; name: string; method: string; path: 
 interface MockShare { id: string; serverId: string; organizationId: string; projectId: string; shareKey: string; name: string; expiresAt: string | null; revokedAt: string | null; createdBy: string; createdAt: string }
 
 const context = ref<Context | null>(null)
-const projectId = ref('')
+const session = useSessionStore()
+const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) })
 const servers = ref<MockServer[]>([])
 const rules = ref<MockRule[]>([])
 const smartExamples = ref<SmartMockExample[]>([])
@@ -81,7 +83,7 @@ async function load() {
   loading.value = true
   try {
     context.value = await read<Context>('/api/v1/access/context')
-    projectId.value = projects.value[0]?.id ?? ''
+    projectId.value = session.resolveProjectId(projects.value)
     await loadServers()
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载 Mock 服务失败') } finally { loading.value = false }
 }

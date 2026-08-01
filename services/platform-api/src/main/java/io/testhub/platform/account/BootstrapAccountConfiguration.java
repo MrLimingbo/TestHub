@@ -37,7 +37,8 @@ public class BootstrapAccountConfiguration {
     private UserAccount ensureAccount(UserAccountRepository accounts, PasswordEncoder passwordEncoder, String email,
                                       String displayName) {
         return accounts.findByEmail(email).orElseGet(() -> {
-            UserAccount account = new UserAccount(UlidCreator.getUlid().toString(), email, displayName,
+            UserAccount account = new UserAccount(UlidCreator.getUlid().toString(), email.substring(0, email.indexOf('@')),
+                    email, displayName,
                     passwordEncoder.encode("TestHub2026!"), true);
             accounts.insert(account);
             return account;

@@ -81,6 +81,16 @@ public class FunctionalTestExecutionService {
         return requirePlan(projectId, planId);
     }
 
+    @Transactional
+    public void deletePlan(AuthenticatedPrincipal principal, String projectId, String planId) {
+        ProjectSummary project = writeAccess(principal, projectId);
+        requirePlan(projectId, planId);
+        executions.deleteRunsByPlan(projectId, planId);
+        executions.clearPlanCases(planId);
+        if (executions.deletePlan(projectId, planId) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "测试计划不存在");
+        audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_PLAN_DELETED", "FUNCTIONAL_TEST_PLAN", planId, Map.of());
+    }
+
     public List<FunctionalTestPlanCase> listPlanCases(AuthenticatedPrincipal principal, String projectId, String planId) {
         access.requireProjectRead(principal, projectId);
         requirePlan(projectId, planId);

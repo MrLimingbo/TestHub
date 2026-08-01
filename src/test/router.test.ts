@@ -21,11 +21,33 @@ describe('router access', () => {
   })
 
   it('allows signed-in users to open every product module', async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: { id: '01TEST', email: 'admin@testhub.local', displayName: '管理员', authenticatedAt: '2026-07-11T00:00:00Z' } }), { status: 200 }))
-    const routes = ['/dashboard', '/functional', '/functional/plans', '/functional/governance', '/functional/delivery', '/api-design', '/api-debug', '/api-automation', '/mock', '/performance', '/reports', '/project-settings', '/system-settings', '/audit', '/integrations', '/tasks', '/ui-automation', '/mobile-automation', '/plugins', '/operations']
+    globalThis.fetch = vi.fn(async (input: string | URL | Request) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+      if (url.endsWith('/api/v1/access/context')) {
+        return new Response(JSON.stringify({
+          data: {
+            organizations: [{ id: 'ORG-1', name: '星云科技', code: 'nebula' }],
+            projects: { 'ORG-1': [{ id: 'PROJECT-1', organizationId: 'ORG-1', name: '交易中台 V3', code: 'trade-v3', status: 'ACTIVE' }] },
+          },
+        }), { status: 200 })
+      }
+      return new Response(JSON.stringify({ data: { id: '01TEST', email: 'admin@testhub.local', displayName: '管理员', authenticatedAt: '2026-07-11T00:00:00Z' } }), { status: 200 })
+    })
+    const routes = ['/dashboard', '/functional', '/functional/requirements', '/functional/cases', '/functional/plans', '/functional/governance', '/functional/delivery', '/functional/versions', '/api-testing/interfaces', '/api-testing/quick-request', '/api-automation', '/mock', '/performance', '/reports', '/project-settings', '/project-settings/members', '/project-settings/environments', '/project-settings/files', '/project-settings/logs', '/system-settings/accounts', '/system-settings/parameters', '/audit', '/integrations', '/tasks', '/ui-automation', '/mobile-automation', '/plugins', '/operations']
     for (const path of routes) {
       await router.push(path)
       expect(router.currentRoute.value.path).toBe(path)
     }
+
+    await router.push('/api-testing')
+    expect(router.currentRoute.value.path).toBe('/api-testing/interfaces')
+
+    await router.push('/api-design?source=legacy&catalog=orders')
+    expect(router.currentRoute.value.path).toBe('/api-testing/interfaces')
+    expect(router.currentRoute.value.query).toEqual({ source: 'legacy', catalog: 'orders' })
+
+    await router.push('/api-debug?source=legacy&environment=test')
+    expect(router.currentRoute.value.path).toBe('/api-testing/quick-request')
+    expect(router.currentRoute.value.query).toEqual({ source: 'legacy', environment: 'test' })
   }, 30_000)
 })

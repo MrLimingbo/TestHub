@@ -7,13 +7,13 @@ import { useSessionStore } from '@/stores/session'
 const router = useRouter()
 const session = useSessionStore()
 const loading = ref(false)
-const form = reactive({ email: 'admin@testhub.local', password: 'TestHub2026!' })
+const form = reactive({ account: 'admin', password: 'TestHub2026!' })
 
 const login = async () => {
-  if (!form.email || !form.password) return
+  if (!form.account || !form.password) return
   loading.value = true
   try {
-    await session.login(form.email, form.password)
+    await session.login(form.account, form.password)
     await router.push('/dashboard')
   } catch (error) {
     Message.error(error instanceof Error ? error.message : '登录失败')
@@ -45,12 +45,12 @@ const login = async () => {
         <h2>登录 TestHub</h2>
         <p>进入星云科技的质量工作空间</p>
         <a-form :model="form" layout="vertical">
-          <a-form-item field="email" label="账号"><a-input v-model="form.email" size="large" placeholder="请输入账号"><template #prefix><icon-user /></template></a-input></a-form-item>
+          <a-form-item field="account" label="账号"><a-input v-model="form.account" size="large" placeholder="请输入账号或邮箱"><template #prefix><icon-user /></template></a-input></a-form-item>
           <a-form-item field="password" label="密码"><a-input-password v-model="form.password" size="large" placeholder="请输入密码"><template #prefix><icon-lock /></template></a-input-password></a-form-item>
           <div class="login-options"><a-checkbox default-checked>保持登录</a-checkbox><a-link>忘记密码？</a-link></div>
           <a-button type="primary" html-type="button" long size="large" :loading="loading" @click="login">进入工作空间</a-button>
         </a-form>
-        <div class="demo-hint"><icon-info-circle /> 初始账号：admin@testhub.local / TestHub2026!</div>
+        <div class="demo-hint"><icon-info-circle /> 初始账号：admin / TestHub2026!</div>
       </div>
       <footer>© 2026 TestHub · 企业级一站式测试开发平台</footer>
     </section>

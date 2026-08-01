@@ -1,4 +1,7 @@
 package io.testhub.platform.access;
 
-public record ProjectSummary(String id, String organizationId, String name, String code, String status) {
+import java.time.Instant;
+
+public record ProjectSummary(String id, String organizationId, String name, String code, String status,
+                             String description, String createdByName, Instant createdAt, Instant updatedAt) {
 }

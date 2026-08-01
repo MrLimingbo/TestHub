@@ -1,0 +1,20 @@
+CREATE TABLE api_definition_case (
+    id CHAR(26) PRIMARY KEY,
+    organization_id CHAR(26) NOT NULL,
+    project_id CHAR(26) NOT NULL,
+    api_id CHAR(26) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    environment_code VARCHAR(64) NULL,
+    request_snapshot JSON NOT NULL,
+    expected_status SMALLINT UNSIGNED NULL,
+    response_validation TEXT NOT NULL,
+    saved_response_body MEDIUMTEXT NOT NULL,
+    created_by CHAR(26) NOT NULL,
+    updated_by CHAR(26) NOT NULL,
+    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    CONSTRAINT fk_api_definition_case_project FOREIGN KEY (project_id) REFERENCES project(id),
+    CONSTRAINT fk_api_definition_case_api FOREIGN KEY (api_id) REFERENCES api_definition(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_api_definition_case_name (api_id, name),
+    KEY idx_api_definition_case_project_api (project_id, api_id, updated_at)
+) ENGINE=InnoDB;

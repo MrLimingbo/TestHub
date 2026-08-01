@@ -1,8 +1,21 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { useRoute } from 'vue-router'
 import CodeEditor from '@/components/CodeEditor.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
+import { useSessionStore } from '@/stores/session'
+import {
+  apiDebugDraftFromHistory,
+  apiDebugDraftFromQuery,
+  buildApiDebugCurlCommand,
+  isRedactedApiDebugUrl,
+  readApiDebugRouteDraft,
+  removeApiDebugRouteDraft,
+  type ApiDebugRequestAuth,
+  type ApiDebugRouteDraft,
+} from '@/utils/apiDebugDraft'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -15,6 +28,9 @@ interface Parameter { id: string; environmentCode: string; key: string; value: s
 interface Secret { id: string; environmentCode: string; key: string }
 interface ParameterCollection { environments: string[]; parameters: Parameter[] }
 interface SecretCollection { environments: string[]; secrets: Secret[] }
+interface Catalog { id: string; parentId: string | null; name: string; sortOrder: number }
+interface FlatCatalog extends Catalog { depth: number }
+interface ImportResult { format: string; importedCount: number; items: string[] }
 interface WebSocketSession { id: string; status: 'CONNECTING' | 'OPEN' | 'RECONNECTING' | 'CLOSED' | 'ERROR'; target: string; messageCount: number; connectedAt: string; closedAt: string | null; closeReason: string | null; autoReconnect: boolean; reconnectAttempts: number; maxReconnectAttempts: number; selectedSubprotocol: string }
 interface WebSocketMessage { id: string; direction: 'IN' | 'OUT'; payload: string; truncated: boolean; createdAt: string }
 interface GrpcResult { historyId: string; success: boolean; status: string; durationMs: number; body: string; truncated: boolean; errorMessage: string | null }
@@ -27,7 +43,9 @@ interface GrpcClientStreamSession { id: string; status: 'OPEN' | 'HALF_CLOSED' |
 interface GrpcBidiStreamSession { id: string; status: 'OPEN' | 'HALF_CLOSED' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'LIMIT_REACHED'; target: string; service: string; method: string; tls: boolean; environmentCode: string | null; authType: string; metadataCount: number; sentMessageCount: number; sentBytes: number; receivedMessageCount: number; responseBytes: number; createdAt: string; closedAt: string | null; closeReason: string | null }
 
 const context = ref<Context | null>(null)
-const projectId = ref('')
+const route = useRoute()
+const sessionStore = useSessionStore()
+const projectId = computed({ get: () => sessionStore.projectId, set: (value: string) => sessionStore.selectProject(value) })
 const method = ref('POST')
 const url = ref('https://postman-echo.com/post')
 const body = ref('{\n  "source": "testhub-api-debug"\n}')
@@ -50,18 +68,25 @@ const environment = ref('')
 const environments = ref<string[]>([])
 const parameters = ref<Parameter[]>([])
 const secrets = ref<Secret[]>([])
-const auth = reactive({ type: 'NONE', token: '', username: '', password: '', key: 'X-API-Key', value: '', placement: 'HEADER' })
+const auth = reactive<ApiDebugRequestAuth>({ type: 'NONE', token: '', username: '', password: '', key: 'X-API-Key', value: '', placement: 'HEADER' })
 const requestTab = ref('body')
 const responseTab = ref('body')
 const loading = ref(true)
 const sending = ref(false)
 const history = ref<History[]>([])
+const catalogs = ref<Catalog[]>([])
 const result = ref<DebugResult | null>(null)
 const responseBody = ref('发送一次请求后，在这里查看服务的真实响应。')
+const saveInterfaceDialog = ref(false)
+const savingInterface = ref(false)
+const replayingHistoryId = ref('')
+const saveInterfaceForm = reactive({ catalogId: '', name: '' })
+const saveInterfaceErrors = reactive<Record<string, string>>({})
 let webSocketPollTimer: number | undefined
 let grpcStreamPollTimer: number | undefined
 let grpcClientStreamPollTimer: number | undefined
 let grpcBidiStreamPollTimer: number | undefined
+let routeDraftApplied = false
 
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
 const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value))
@@ -82,12 +107,31 @@ const variables = computed(() => [
   ...parameters.value.map((parameter) => ({ key: parameter.key, secret: false, preview: parameter.value })),
   ...secrets.value.map((secret) => ({ key: secret.key, secret: true, preview: '已加密，仅执行时解析' })),
 ])
+const catalogOptions = computed<FlatCatalog[]>(() => {
+  const result: FlatCatalog[] = []
+  const visited = new Set<string>()
+  const visit = (parentId: string | null, depth: number) => {
+    catalogs.value
+      .filter((catalog) => catalog.parentId === parentId && !visited.has(catalog.id))
+      .sort((left, right) => left.sortOrder - right.sortOrder || left.name.localeCompare(right.name))
+      .forEach((catalog) => {
+        visited.add(catalog.id)
+        result.push({ ...catalog, depth })
+        visit(catalog.id, depth + 1)
+      })
+  }
+  visit(null, 0)
+  catalogs.value
+    .filter((catalog) => !visited.has(catalog.id))
+    .forEach((catalog) => result.push({ ...catalog, depth: 0 }))
+  return result
+})
 const date = (value: string) => new Intl.DateTimeFormat('zh-CN', { dateStyle: 'short', timeStyle: 'medium' }).format(new Date(value))
 
 async function read<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, { credentials: 'include', ...init })
-  const envelope = await response.json().catch(() => ({})) as ApiEnvelope<T> & { message?: string }
-  if (!response.ok) throw new Error(envelope.message ?? '请求失败，请稍后重试')
+  const envelope = await response.json().catch(() => ({})) as ApiEnvelope<T> & { code?: string; message?: string; details?: Record<string, unknown> }
+  if (!response.ok) throw toApiRequestError(response, envelope)
   return envelope.data
 }
 
@@ -125,13 +169,22 @@ async function loadHistory() {
   history.value = await read<History[]>(`/api/v1/projects/${projectId.value}/api-debug/history?limit=20`)
 }
 
-async function loadEnvironment() {
+async function loadCatalogs() {
+  if (!projectId.value) return
+  catalogs.value = await read<Catalog[]>(`/api/v1/projects/${projectId.value}/api-design/catalogs`)
+}
+
+async function loadEnvironment(preferredEnvironment?: string) {
   if (!projectId.value) return
   const [parameterData, secretData] = await Promise.all([
     read<ParameterCollection>(`/api/v1/projects/${projectId.value}/parameters`),
     read<SecretCollection>(`/api/v1/projects/${projectId.value}/secrets`),
   ])
   environments.value = [...new Set([...parameterData.environments, ...secretData.environments])].sort()
+  if (preferredEnvironment?.trim() && !environments.value.includes(preferredEnvironment.trim())) {
+    environments.value = [...environments.value, preferredEnvironment.trim()].sort()
+  }
+  if (preferredEnvironment !== undefined) environment.value = preferredEnvironment.trim()
   if (environment.value && !environments.value.includes(environment.value)) environment.value = ''
   if (!environment.value && environments.value.length) environment.value = environments.value[0]
   parameters.value = parameterData.parameters.filter((parameter) => parameter.environmentCode === environment.value)
@@ -148,9 +201,38 @@ async function load() {
   loading.value = true
   try {
     context.value = await read<Context>('/api/v1/access/context')
-    projectId.value = projects.value[0]?.id ?? ''
-    await Promise.all([loadEnvironment(), loadHistory(), loadGrpcDescriptors()])
-  } catch (error) { Message.error(error instanceof Error ? error.message : '加载接口调试器失败') } finally { loading.value = false }
+    projectId.value = sessionStore.resolveProjectId(projects.value)
+    const routeDraft = readApiDebugRouteDraft(window.sessionStorage, route.query.draft)
+      ?? apiDebugDraftFromQuery(route.query as Record<string, unknown>)
+    await loadEnvironment(routeDraft?.environment)
+    applyRouteDraft(routeDraft)
+    removeApiDebugRouteDraft(window.sessionStorage, route.query.draft)
+    await Promise.all([loadHistory(), loadGrpcDescriptors(), loadCatalogs()])
+  } catch (error) { Message.error(error instanceof Error ? error.message : '加载快捷请求工作台失败') } finally { loading.value = false }
+}
+
+function applyRouteDraft(draft: ApiDebugRouteDraft | null) {
+  if (routeDraftApplied) return
+  routeDraftApplied = true
+  if (!draft) return
+  if (draft.protocol) {
+    protocolType.value = draft.protocol
+    changeProtocol()
+  }
+  if (draft.method) method.value = draft.method
+  if (draft.url) url.value = draft.url
+  if (draft.environment !== undefined) environment.value = draft.environment
+  if (draft.headers !== undefined) {
+    if (protocolType.value === 'GRPC') grpcMetadataText.value = draft.headers
+    else headersText.value = draft.headers
+  }
+  if (draft.body !== undefined) {
+    if (protocolType.value === 'GRAPHQL') graphql.query = draft.body
+    else if (protocolType.value === 'SOAP') soap.envelope = draft.body
+    else if (protocolType.value === 'WEBSOCKET') webSocket.message = draft.body
+    else if (protocolType.value === 'GRPC') grpc.requestJson = draft.body
+    else body.value = draft.body
+  }
 }
 
 async function changeProject() {
@@ -173,7 +255,9 @@ async function changeProject() {
   result.value = null
   responseBody.value = '已切换项目，请发送新的请求。'
   environment.value = ''
-  try { await Promise.all([loadEnvironment(), loadHistory(), loadGrpcDescriptors()]) } catch (error) { Message.error(error instanceof Error ? error.message : '加载项目调试配置失败') }
+  catalogs.value = []
+  saveInterfaceDialog.value = false
+  try { await Promise.all([loadEnvironment(), loadHistory(), loadGrpcDescriptors(), loadCatalogs()]) } catch (error) { Message.error(error instanceof Error ? error.message : '加载项目调试配置失败') }
 }
 
 async function changeEnvironment() {
@@ -654,6 +738,115 @@ function removeSubscription(index: number) {
   webSocket.subscriptions.splice(index, 1)
 }
 
+function suggestedInterfaceName() {
+  try {
+    const parsed = new URL(url.value)
+    const parts = parsed.pathname.split('/').filter(Boolean)
+    const resource = decodeURIComponent(parts.at(-1) ?? parsed.hostname)
+    return `${method.value.toUpperCase()} ${resource}`
+  } catch {
+    return `${method.value.toUpperCase()} ${url.value.trim()}`.slice(0, 200)
+  }
+}
+
+function loadHistoryRequest(item: History, notify = true): boolean {
+  const draft = apiDebugDraftFromHistory(item)
+  if (!draft) {
+    if (notify) Message.warning('仅 HTTP 请求历史支持载入与重发')
+    return false
+  }
+  protocolType.value = 'HTTP'
+  changeProtocol()
+  method.value = draft.method ?? 'GET'
+  url.value = draft.url ?? ''
+  requestTab.value = 'body'
+  result.value = null
+  responseBody.value = '已载入历史请求。历史仅保存脱敏的 Method 与 URL，重发会沿用当前 Header、Auth 与 Body。'
+  if (notify) Message.success('已载入历史请求，可检查参数后再次发送')
+  return true
+}
+
+async function replayHistoryRequest(item: History) {
+  if (!loadHistoryRequest(item, false)) {
+    Message.warning('仅 HTTP 请求历史支持载入与重发')
+    return
+  }
+  if (isRedactedApiDebugUrl(item.requestUrl)) {
+    Message.warning('该历史 URL 含已脱敏参数，请补充真实参数后再发送')
+    return
+  }
+  replayingHistoryId.value = item.id
+  try {
+    await send()
+  } finally {
+    replayingHistoryId.value = ''
+  }
+}
+
+async function openSaveInterface() {
+  if (protocolType.value !== 'HTTP') {
+    Message.warning('当前仅支持将 HTTP 快捷请求保存为正式接口')
+    return
+  }
+  if (!catalogs.value.length) {
+    try {
+      await loadCatalogs()
+    } catch (error) {
+      Message.error(error instanceof Error ? error.message : '加载接口目录失败')
+      return
+    }
+  }
+  if (!catalogOptions.value.length) {
+    Message.warning('请先在接口管理中创建接口目录')
+    return
+  }
+  clearFormErrors(saveInterfaceErrors)
+  saveInterfaceForm.catalogId = catalogOptions.value[0].id
+  saveInterfaceForm.name = suggestedInterfaceName()
+  saveInterfaceDialog.value = true
+}
+
+async function saveAsInterface() {
+  clearFormErrors(saveInterfaceErrors)
+  if (!saveInterfaceForm.catalogId) saveInterfaceErrors.catalogId = '请选择接口目录'
+  if (!saveInterfaceForm.name.trim()) saveInterfaceErrors.name = '请输入接口名称'
+  if (!url.value.trim()) saveInterfaceErrors.form = '请输入请求 URL'
+  if (Object.keys(saveInterfaceErrors).length) return false
+
+  let requestHeaders: Header[]
+  try {
+    requestHeaders = headers()
+  } catch (error) {
+    saveInterfaceErrors.form = error instanceof Error ? error.message : '请求头格式不合法'
+    return false
+  }
+
+  savingInterface.value = true
+  try {
+    const curl = buildApiDebugCurlCommand({
+      method: method.value,
+      url: url.value,
+      headers: requestHeaders,
+      body: body.value,
+      auth: { ...auth },
+    })
+    const imported = await mutate<ImportResult>(
+      `/api/v1/projects/${projectId.value}/api-design/interchange/curl/import`,
+      { catalogId: saveInterfaceForm.catalogId, name: saveInterfaceForm.name.trim(), command: curl.command },
+    )
+    saveInterfaceDialog.value = false
+    Message.success(`已保存为正式接口：${imported.items[0] ?? saveInterfaceForm.name.trim()}`)
+    if (curl.secretsRemoved) Message.info('敏感值已替换为环境变量占位符，未写入接口资产')
+    return true
+  } catch (error) {
+    Object.assign(saveInterfaceErrors, formErrorsFrom(error))
+    if (!Object.keys(saveInterfaceErrors).length) saveInterfaceErrors.form = error instanceof Error ? error.message : '保存正式接口失败'
+    return false
+  } finally {
+    savingInterface.value = false
+  }
+}
+
 function clearResponse() {
   result.value = null
   responseBody.value = '响应已清空。'
@@ -675,7 +868,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="page api-debug-page">
-    <PageHeader eyebrow="API WORKBENCH" title="接口调试" description="构造 HTTP、GraphQL、SOAP、WebSocket 与 gRPC 请求，解析环境变量并保留脱敏执行历史。" action="清空响应" @action="clearResponse" />
+    <nav class="quick-workspace-tabbar" aria-label="接口测试工作区标签">
+      <router-link to="/api-testing/interfaces" class="quick-workspace-tab"><icon-book /><span>接口管理</span></router-link>
+      <span class="quick-workspace-tab active"><icon-thunderbolt /><span>快捷请求</span></span>
+    </nav>
+    <PageHeader eyebrow="API TESTING WORKBENCH" title="快捷请求与高级调试" description="作为接口测试模块的临时请求工作台，可从正式接口载入运行草稿，并继续调试 HTTP、GraphQL、SOAP、WebSocket 与 gRPC 请求。" action="清空响应" @action="clearResponse" />
     <section class="debug-summary panel">
       <div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code }}</small></div>
       <a-select v-model="projectId" :style="{ width: '240px' }" @change="changeProject"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select>
@@ -685,15 +882,26 @@ onBeforeUnmount(() => {
     <a-spin :loading="loading">
       <section class="debug-workspace">
         <aside class="request-tree">
-          <div class="tree-title"><div><strong>最近请求</strong><small>项目级执行历史</small></div><a-button size="mini" @click="loadHistory"><icon-refresh /></a-button></div>
-          <div v-if="history.length" class="history-list"><div v-for="item in history" :key="item.id" class="history-item"><div><a-tag size="small" :color="item.method === 'GET' ? 'green' : item.method === 'POST' ? 'arcoblue' : 'orange'">{{ item.method }}</a-tag><a-tag size="small" :color="item.result === 'COMPLETED' && (item.responseStatus ?? 500) < 400 ? 'green' : 'red'">{{ item.responseStatus ?? '失败' }}</a-tag></div><code>{{ item.requestUrl }}</code><small>{{ item.durationMs }} ms · {{ date(item.createdAt) }}</small></div></div>
+          <div class="tree-title"><div><strong>最近请求</strong><small>项目级执行历史</small></div><a-button size="mini" aria-label="刷新最近请求" @click="loadHistory"><icon-refresh /></a-button></div>
+          <div v-if="history.length" class="history-list">
+            <div v-for="item in history" :key="item.id" class="history-item">
+              <div><a-tag size="small" :color="item.method === 'GET' ? 'green' : item.method === 'POST' ? 'arcoblue' : 'orange'">{{ item.method }}</a-tag><a-tag size="small" :color="item.result === 'COMPLETED' && (item.responseStatus ?? 500) < 400 ? 'green' : 'red'">{{ item.responseStatus ?? '失败' }}</a-tag></div>
+              <code :title="item.requestUrl">{{ item.requestUrl }}</code>
+              <small>{{ item.durationMs }} ms · {{ date(item.createdAt) }}</small>
+              <div class="history-actions">
+                <a-button size="mini" :disabled="item.method === 'GRPC' || sending" @click="loadHistoryRequest(item)">载入</a-button>
+                <a-button size="mini" type="primary" :loading="replayingHistoryId === item.id" :disabled="item.method === 'GRPC' || sending" @click="replayHistoryRequest(item)">重发</a-button>
+              </div>
+            </div>
+          </div>
           <a-empty v-else description="还没有调试记录" />
         </aside>
         <div class="request-editor">
-          <div class="request-bar">
+          <div class="request-bar" :class="{ 'request-bar--saveable': protocolType === 'HTTP' }">
             <a-select v-if="protocolType !== 'WEBSOCKET' && protocolType !== 'GRPC'" v-model="method" :style="{ width: '108px' }"><a-option v-for="item in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']" :key="item">{{ item }}</a-option></a-select>
             <a-tag v-else :color="protocolType === 'GRPC' ? 'orange' : 'purple'" class="protocol-method">{{ protocolType === 'GRPC' ? 'gRPC' : 'WS' }}</a-tag>
             <a-input v-model="url" :placeholder="protocolType === 'WEBSOCKET' ? 'wss://ws.postman-echo.com/raw' : protocolType === 'GRPC' ? 'grpc.example.com:443' : 'https://api.example.com/v1/orders'" />
+            <a-button v-if="protocolType === 'HTTP'" :disabled="sending" @click="openSaveInterface"><icon-save /> 保存为接口</a-button>
             <a-button type="primary" :loading="sending" @click="send">{{ protocolType === 'WEBSOCKET' ? '连接' : protocolType === 'GRPC' ? '调用' : '发送' }} <icon-send /></a-button>
           </div>
           <div class="environment-bar">
@@ -772,10 +980,26 @@ onBeforeUnmount(() => {
         </div>
       </section>
     </a-spin>
+    <a-modal v-model:visible="saveInterfaceDialog" title="保存为正式接口" width="560px" ok-text="保存" :ok-loading="savingInterface" :on-before-ok="saveAsInterface">
+      <a-form :model="saveInterfaceForm" layout="vertical">
+        <a-alert type="info">保存后会在接口管理中创建 1.0.0 初始版本。Header、Auth、URL 和 JSON Body 中识别出的敏感值将替换为环境变量占位符。</a-alert>
+        <a-form-item label="接口目录" required :validate-status="saveInterfaceErrors.catalogId ? 'error' : undefined" :help="saveInterfaceErrors.catalogId">
+          <a-select v-model="saveInterfaceForm.catalogId" placeholder="选择接口目录" @change="delete saveInterfaceErrors.catalogId">
+            <a-option v-for="catalog in catalogOptions" :key="catalog.id" :value="catalog.id">{{ '\u3000'.repeat(catalog.depth) }}{{ catalog.name }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="接口名称" required :validate-status="saveInterfaceErrors.name ? 'error' : undefined" :help="saveInterfaceErrors.name">
+          <a-input v-model="saveInterfaceForm.name" :max-length="200" show-word-limit placeholder="例如：创建订单" @input="delete saveInterfaceErrors.name" />
+        </a-form-item>
+        <a-alert v-if="saveInterfaceErrors.form" type="error">{{ saveInterfaceErrors.form }}</a-alert>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <style scoped>
+.quick-workspace-tabbar{display:flex;align-items:stretch;height:48px;margin:-26px -28px 22px;border-bottom:1px solid #e7e9ee;background:#fff}.quick-workspace-tab{position:relative;display:flex;min-width:145px;align-items:center;justify-content:center;gap:8px;padding:0 18px;border-right:1px solid #eceef2;color:#6c768b;text-decoration:none}.quick-workspace-tab.active{color:#6f53cc;font-weight:650}.quick-workspace-tab.active::after{position:absolute;right:14px;bottom:0;left:14px;height:2px;background:#8c62e8;content:""}
+.request-bar.request-bar--saveable{grid-template-columns:108px minmax(0,1fr) auto 105px}.history-actions{justify-content:flex-end}.history-actions .arco-btn{flex:1}.api-debug-page :deep(.arco-modal-body .arco-alert){margin-bottom:16px}
 .debug-summary{display:grid;grid-template-columns:1.5fr 1fr .9fr .65fr;gap:18px;align-items:center;margin-bottom:20px}.debug-summary>div{display:grid;gap:4px}.debug-summary span,.debug-summary small,.tree-title small,.history-item small,.editor-caption{color:var(--color-text-3);font-size:12px}.debug-summary strong{font-size:20px}.tree-title>div{display:grid;gap:3px}.history-list{display:grid;gap:7px;margin-top:14px}.history-item{display:grid;gap:7px;padding:10px;border:1px solid var(--color-border-2);border-radius:8px;background:#fff}.history-item>div{display:flex;gap:5px}.history-item code{overflow:hidden;color:var(--color-text-2);font-size:11px;text-overflow:ellipsis;white-space:nowrap}.editor-caption{padding:5px 0 12px;line-height:1.6}.auth-form,.protocol-form{max-width:620px}.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.discovery-field{display:flex;gap:8px}.discovery-field .arco-input-wrapper{min-width:0;flex:1}.discovery-select{width:100%;margin-top:8px}.discovery-tip{display:block;margin-top:7px;color:var(--color-text-3);font-size:12px}.descriptor-panel{display:grid;gap:10px;max-width:820px;margin:0 0 16px;padding:13px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.descriptor-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.descriptor-head>div{display:grid;gap:3px}.descriptor-head strong{font-size:13px}.descriptor-head small,.descriptor-help{color:var(--color-text-3);font-size:12px;line-height:1.55}.descriptor-select-row,.descriptor-import-row{display:flex;gap:8px;align-items:center}.descriptor-select-row .arco-select,.descriptor-import-row .arco-input-wrapper{min-width:0;flex:1}.proto-file-input{display:inline-flex;position:relative;align-items:center;justify-content:center;min-width:138px;height:32px;padding:0 11px;overflow:hidden;border:1px solid var(--color-border-2);border-radius:4px;background:var(--color-bg-2);color:var(--color-text-2);font-size:12px;cursor:pointer}.proto-file-input:hover{border-color:rgb(var(--primary-6));color:rgb(var(--primary-6))}.proto-file-input input{position:absolute;inset:0;opacity:0;cursor:pointer}.protocol-method{display:flex;align-items:center;justify-content:center;margin:0;min-width:108px}.security-note{display:flex;gap:12px;align-items:flex-start;margin:12px 0;padding:16px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.security-note>div{display:grid;gap:6px}.security-note span{color:var(--color-text-3);font-size:13px;line-height:1.65}.websocket-panel{display:grid;gap:13px}.websocket-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:12px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.websocket-head>div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.websocket-head strong{font-size:14px}.websocket-head small,.websocket-close{color:var(--color-text-3);font-size:12px}.websocket-close{padding:9px 11px;border-left:3px solid var(--color-border-3);background:var(--color-fill-1)}.subscription-box{display:grid;gap:9px;padding:12px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.subscription-title{display:grid;gap:3px}.subscription-title strong{font-size:13px}.subscription-title small,.subscription-actions span{color:var(--color-text-3);font-size:12px}.subscription-actions{display:flex;align-items:center;gap:8px}.subscription-list{display:grid;gap:7px}.subscription-list article{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px;border:1px solid var(--color-border-2);border-radius:6px;background:#fff}.subscription-list code{max-height:72px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}.websocket-send{display:flex;gap:8px;align-items:center}.websocket-messages{display:grid;gap:8px;max-height:390px;overflow:auto;padding-right:3px}.websocket-message{display:grid;gap:7px;padding:10px;border:1px solid var(--color-border-2);border-radius:8px;background:#fff}.websocket-message.in{border-left:3px solid rgb(var(--green-6))}.websocket-message.out{border-left:3px solid rgb(var(--arcoblue-6))}.websocket-message>div{display:flex;align-items:center;gap:7px}.websocket-message small{color:var(--color-text-3);font-size:11px}.websocket-message pre{max-height:180px;margin:0;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.response-code{min-height:230px;margin:0;padding:14px;overflow:auto;border:1px solid var(--color-border-2);border-radius:7px;background:#172033;color:#c5d7f7;font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}@media (max-width:900px){.debug-summary{grid-template-columns:1fr 1fr}.debug-workspace{grid-template-columns:1fr}.request-tree{border-right:0;border-bottom:1px solid var(--color-border-2);max-height:280px;overflow:auto}}@media (max-width:640px){.debug-summary,.auth-grid{grid-template-columns:1fr}.descriptor-select-row,.descriptor-import-row{align-items:stretch;flex-direction:column}.proto-file-input{min-height:32px}.request-bar{grid-template-columns:95px 1fr}.request-bar .arco-btn{grid-column:1 / -1}.environment-bar{flex-wrap:wrap}.environment-bar .arco-btn{margin-left:0}.websocket-head{align-items:stretch;flex-direction:column}}
 .grpc-stream-panel{display:grid;gap:12px;max-width:820px;margin-top:16px}.grpc-stream-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:12px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.grpc-stream-head>div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.grpc-stream-head strong{font-size:14px}.grpc-stream-head small,.grpc-stream-close,.client-stream-help{color:var(--color-text-3);font-size:12px}.grpc-stream-close,.client-stream-help{padding:9px 11px;border-left:3px solid var(--color-border-3);background:var(--color-fill-1);line-height:1.6}.grpc-stream-messages{display:grid;gap:8px;max-height:390px;overflow:auto;padding-right:3px}.grpc-stream-message{display:grid;gap:7px;padding:10px;border:1px solid var(--color-border-2);border-left:3px solid rgb(var(--green-6));border-radius:8px;background:#fff}.grpc-stream-message>div{display:flex;align-items:center;gap:7px}.grpc-stream-message small{color:var(--color-text-3);font-size:11px}.grpc-stream-message pre{max-height:180px;margin:0;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}@media (max-width:640px){.grpc-stream-head{align-items:stretch;flex-direction:column}}
 </style>

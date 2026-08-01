@@ -61,6 +61,16 @@ public class FunctionalTestExecutionRepository {
                 .param("description", description).param("userId", userId).update();
     }
 
+    public void deleteRunsByPlan(String projectId, String planId) {
+        jdbc.sql("DELETE FROM functional_test_run WHERE project_id = :projectId AND plan_id = :planId")
+                .param("projectId", projectId).param("planId", planId).update();
+    }
+
+    public int deletePlan(String projectId, String planId) {
+        return jdbc.sql("DELETE FROM functional_test_plan WHERE project_id = :projectId AND id = :planId")
+                .param("projectId", projectId).param("planId", planId).update();
+    }
+
     public void clearPlanCases(String planId) {
         jdbc.sql("DELETE FROM functional_test_plan_case WHERE plan_id = :planId").param("planId", planId).update();
     }

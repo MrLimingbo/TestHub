@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSessionStore } from '@/stores/session'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -42,7 +43,8 @@ type ExecutionVariableSource = 'SCENARIO' | 'PROJECT_PARAMETER' | 'EXECUTION_PRO
 interface AutomationExecutionConfigurationPreview { scenarioId: string; scenarioVersion: number; environmentCode: string; executionProfileId: string | null; executionProfileVersion: number | null; variableReferences: Array<{ name: string; source: ExecutionVariableSource; secret: boolean; locations: Array<{ stepId: string; configKey: string }> }> }
 
 const context = ref<Context | null>(null)
-const projectId = ref('')
+const session = useSessionStore()
+const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) })
 const scenarios = ref<Scenario[]>([])
 const detail = ref<ScenarioDetail | null>(null)
 const revisions = ref<Revision[]>([])
@@ -313,7 +315,7 @@ async function load() {
   loading.value = true
   try {
     context.value = await read<Context>('/api/v1/access/context')
-    projectId.value = projects.value[0]?.id ?? ''
+    projectId.value = session.resolveProjectId(projects.value)
     await Promise.all([loadScenarios(), loadRunnerStatus(), loadExecutions(), loadDataSets(), loadReusableSteps(), loadExecutionProfiles(), loadWebhooks(), loadSchedules()])
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载接口自动化场景失败') } finally { loading.value = false }
 }

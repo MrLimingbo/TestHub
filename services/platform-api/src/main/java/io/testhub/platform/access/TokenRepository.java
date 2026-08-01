@@ -50,13 +50,14 @@ public class TokenRepository {
 
     public Optional<TokenAuthentication> findActiveByHash(String tokenHash) {
         return jdbc.sql("""
-                SELECT t.id, t.project_id, t.scopes, u.id AS user_id, u.email, u.display_name, u.password_hash, u.enabled
+                SELECT t.id, t.project_id, t.scopes, u.id AS user_id, u.account, u.email, u.display_name,
+                       u.password_hash, u.enabled
                 FROM personal_access_token t JOIN user_account u ON u.id = t.user_id
                 WHERE t.token_hash = :tokenHash AND t.revoked_at IS NULL AND u.enabled = TRUE
                   AND (t.expires_at IS NULL OR t.expires_at > CURRENT_TIMESTAMP(3))
                 """).param("tokenHash", tokenHash).query((rs, rowNumber) -> new TokenAuthentication(
                 rs.getString("id"), rs.getString("project_id"), parseScopes(rs.getString("scopes")), new UserAccount(
-                rs.getString("user_id"), rs.getString("email"), rs.getString("display_name"),
+                rs.getString("user_id"), rs.getString("account"), rs.getString("email"), rs.getString("display_name"),
                 rs.getString("password_hash"), rs.getBoolean("enabled")))).optional();
     }
 

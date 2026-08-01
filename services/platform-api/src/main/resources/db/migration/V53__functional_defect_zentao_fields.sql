@@ -1,0 +1,17 @@
+ALTER TABLE functional_defect
+    ADD COLUMN display_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE AFTER id,
+    ADD COLUMN catalog_id CHAR(26) NULL AFTER project_id,
+    ADD COLUMN priority VARCHAR(8) NOT NULL DEFAULT 'P1' AFTER severity,
+    ADD COLUMN confirmed TINYINT(1) NOT NULL DEFAULT 0 AFTER status,
+    ADD COLUMN assignee_id CHAR(26) NULL AFTER confirmed,
+    ADD COLUMN resolution VARCHAR(24) NULL AFTER assignee_id,
+    ADD COLUMN resolved_by CHAR(26) NULL AFTER resolution,
+    ADD COLUMN resolved_at TIMESTAMP(3) NULL AFTER resolved_by,
+    ADD COLUMN closed_by CHAR(26) NULL AFTER resolved_at,
+    ADD COLUMN closed_at TIMESTAMP(3) NULL AFTER closed_by,
+    ADD CONSTRAINT fk_functional_defect_catalog FOREIGN KEY (catalog_id) REFERENCES functional_catalog(id),
+    ADD CONSTRAINT fk_functional_defect_assignee FOREIGN KEY (assignee_id) REFERENCES user_account(id),
+    ADD CONSTRAINT fk_functional_defect_resolved_by FOREIGN KEY (resolved_by) REFERENCES user_account(id),
+    ADD CONSTRAINT fk_functional_defect_closed_by FOREIGN KEY (closed_by) REFERENCES user_account(id),
+    ADD KEY idx_functional_defect_catalog (project_id, catalog_id, status),
+    ADD KEY idx_functional_defect_assignee (project_id, assignee_id, status);

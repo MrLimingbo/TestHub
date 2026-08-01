@@ -28,7 +28,7 @@ interface Dashboard { periodDays: number; generatedAt: string; summary: Dashboar
 
 const session = useSessionStore()
 const context = ref<Context | null>(null)
-const projectId = ref('')
+const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) })
 const periodDays = ref(7)
 const dashboard = ref<Dashboard | null>(null)
 const loading = ref(true)
@@ -117,7 +117,7 @@ async function loadDashboard() {
 async function initialize() {
   try {
     context.value = await read<Context>('/api/v1/access/context')
-    projectId.value = projects.value[0]?.id ?? ''
+    projectId.value = session.resolveProjectId(projects.value)
     await loadDashboard()
   } catch (error) {
     loading.value = false
@@ -180,7 +180,7 @@ onMounted(() => { void initialize() })
         </article>
         <article class="panel">
           <div class="panel-title"><div><h3>快捷开始</h3><p>创建常用测试资产</p></div></div>
-          <div class="quick-grid"><router-link to="/functional"><icon-safe />新建用例</router-link><router-link to="/api-debug"><icon-thunderbolt />调试接口</router-link><router-link to="/api-automation"><icon-robot />编排场景</router-link><router-link to="/performance"><icon-fire />发起压测</router-link></div>
+          <div class="quick-grid"><router-link to="/functional/cases"><icon-safe />新建用例</router-link><router-link to="/api-testing/quick-request"><icon-thunderbolt />调试接口</router-link><router-link to="/api-automation"><icon-robot />编排场景</router-link><router-link to="/performance"><icon-fire />发起压测</router-link></div>
         </article>
       </section>
       <a-empty v-else-if="!loading" description="未能加载项目质量工作台，请刷新后重试" />

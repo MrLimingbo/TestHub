@@ -4,7 +4,6 @@ import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.Map;
@@ -39,8 +38,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ApiResponse<ProfileResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest servletRequest) {
+        String identifier = request.identifier();
+        if (identifier == null || identifier.isBlank()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "账号不能为空");
+        }
         Authentication authenticated = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(request.email().trim().toLowerCase(), request.password()));
+                UsernamePasswordAuthenticationToken.unauthenticated(identifier.trim().toLowerCase(), request.password()));
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authenticated);
         SecurityContextHolder.setContext(context);
@@ -64,12 +68,16 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) {
+    public record LoginRequest(String account, String email, @NotBlank String password) {
+        String identifier() {
+            return account == null || account.isBlank() ? email : account;
+        }
     }
 
-    public record ProfileResponse(String id, String email, String displayName, Instant authenticatedAt) {
+    public record ProfileResponse(String id, String account, String email, String displayName, Instant authenticatedAt) {
         static ProfileResponse from(PlatformUserPrincipal principal) {
-            return new ProfileResponse(principal.account().id(), principal.account().email(), principal.account().displayName(), Instant.now());
+            return new ProfileResponse(principal.account().id(), principal.account().account(), principal.account().email(),
+                    principal.account().displayName(), Instant.now());
         }
     }
 }

@@ -34,6 +34,10 @@ class AccessControlFlowTests {
 
     @AfterEach
     void removeTestTokens() {
+        jdbc.sql("""
+                DELETE FROM membership
+                WHERE user_id IN (SELECT id FROM user_account WHERE account IN ('test', 'account-management-test'))
+                """).update();
         jdbc.sql("DELETE FROM personal_access_token WHERE name = :name")
                 .param("name", "test-access-token").update();
         jdbc.sql("DELETE FROM project_parameter WHERE parameter_key IN ('TEST_PARAMETER_URL', 'TEST_SECRET_VALUE')").update();
@@ -48,6 +52,67 @@ class AccessControlFlowTests {
                    OR detail LIKE '%test-execution-task%'
                    OR detail LIKE '%test-access-token%'
                 """).update();
+        jdbc.sql("DELETE FROM audit_log WHERE detail LIKE '%project-management-test%'").update();
+        jdbc.sql("""
+                DELETE FROM audit_log
+                WHERE resource_id IN (SELECT id FROM user_account
+                                      WHERE account LIKE 'test-deleted-%'
+                                         OR account LIKE 'account-management-test-deleted-%'
+                                         OR email IN ('test@testhub.local', 'account-management-test@testhub.local'))
+                   OR detail LIKE '%\"account\":\"test\"%'
+                   OR detail LIKE '%account-management-test%'
+                """).update();
+        jdbc.sql("""
+                DELETE FROM user_account
+                WHERE account IN ('test', 'account-management-test')
+                   OR account LIKE 'test-deleted-%'
+                   OR account LIKE 'account-management-test-deleted-%'
+                   OR email IN ('test@testhub.local', 'account-management-test@testhub.local')
+                """).update();
+        jdbc.sql("DELETE FROM project WHERE name LIKE '项目管理测试%'").update();
+    }
+
+    @Test
+    void systemAdministratorCanCreateUpdateAndSoftDeleteProject() throws Exception {
+        LoginSession administrator = login("admin@testhub.local");
+        MvcResult csrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+
+        MvcResult created = mvc.perform(post("/api/v1/projects")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(administrator.sessionCookie(), csrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(json(csrf).at("/data/headerName").asText(), json(csrf).at("/data/token").asText())
+                        .content("{\"name\":\"项目管理测试\",\"code\":\"project-management-test\","
+                                + "\"description\":\"创建项目\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("项目管理测试"))
+                .andExpect(jsonPath("$.data.description").value("创建项目"))
+                .andReturn();
+        String projectId = json(created).at("/data/id").asText();
+
+        MvcResult updateCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
+                        "/api/v1/projects/{projectId}", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(administrator.sessionCookie(), updateCsrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(json(updateCsrf).at("/data/headerName").asText(), json(updateCsrf).at("/data/token").asText())
+                        .content("{\"name\":\"项目管理测试（更新）\",\"code\":\"project-management-updated\","
+                                + "\"description\":\"更新项目\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.code").value("project-management-updated"))
+                .andExpect(jsonPath("$.data.description").value("更新项目"));
+
+        MvcResult deleteCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
+                        "/api/v1/projects/{projectId}", projectId)
+                        .cookie(administrator.sessionCookie(), deleteCsrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(json(deleteCsrf).at("/data/headerName").asText(), json(deleteCsrf).at("/data/token").asText()))
+                .andExpect(status().isNoContent());
+
+        mvc.perform(get("/api/v1/projects/{projectId}", projectId).cookie(administrator.sessionCookie()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -88,8 +153,119 @@ class AccessControlFlowTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(tester.sessionCookie(), csrf.getResponse().getCookie("XSRF-TOKEN"))
                         .header(json(csrf).at("/data/headerName").asText(), json(csrf).at("/data/token").asText())
-                        .content("{\"email\":\"lead@testhub.local\",\"roleCode\":\"VIEWER\"}"))
+                        .content("{\"account\":\"lead@testhub.local\",\"roleCode\":\"VIEWER\"}"))
                 .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("AUTH_FORBIDDEN"));
+    }
+
+    @Test
+    void missingProjectMemberAccountIsCreatedWithDefaultPasswordAndAddedToProject() throws Exception {
+        LoginSession administrator = login("admin@testhub.local");
+        String projectId = projectId(administrator);
+        MvcResult csrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+
+        mvc.perform(post("/api/v1/projects/{projectId}/members", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(administrator.sessionCookie(), csrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(json(csrf).at("/data/headerName").asText(), json(csrf).at("/data/token").asText())
+                        .content("{\"account\":\"test\",\"roleCode\":\"VIEWER\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.account").value("test"))
+                .andExpect(jsonPath("$.data.roleCode").value("VIEWER"));
+
+        mvc.perform(get("/api/v1/accounts").param("keyword", "test@testhub.local").param("page", "1").param("pageSize", "1")
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.items[0].email").value("test@testhub.local"));
+
+        MvcResult loginCsrf = mvc.perform(get("/api/v1/auth/csrf")).andExpect(status().isOk()).andReturn();
+        JsonNode loginCsrfData = json(loginCsrf).path("data");
+        mvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(loginCsrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(loginCsrfData.path("headerName").asText(), loginCsrfData.path("token").asText())
+                        .content("{\"account\":\"test\",\"password\":\"admin\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.account").value("test"));
+    }
+
+    @Test
+    void systemAdministratorCanCreateUpdateAndDeleteAccount() throws Exception {
+        LoginSession administrator = login("admin");
+        MvcResult csrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+
+        MvcResult created = mvc.perform(post("/api/v1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(administrator.sessionCookie(), csrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(json(csrf).at("/data/headerName").asText(), json(csrf).at("/data/token").asText())
+                        .content("{\"account\":\"account-management-test\",\"displayName\":\"账号测试\","
+                                + "\"email\":\"account-management-test@testhub.local\",\"phone\":\"13800000000\","
+                                + "\"enabled\":true}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.account").value("account-management-test"))
+                .andExpect(jsonPath("$.data.phone").value("13800000000"))
+                .andReturn();
+        String accountId = json(created).at("/data/id").asText();
+
+        MvcResult updateCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
+                        "/api/v1/accounts/{id}", accountId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(administrator.sessionCookie(), updateCsrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(json(updateCsrf).at("/data/headerName").asText(),
+                                json(updateCsrf).at("/data/token").asText())
+                        .content("{\"account\":\"account-management-test\",\"displayName\":\"账号测试已更新\","
+                                + "\"email\":\"account-management-test@testhub.local\",\"phone\":\"13900000000\","
+                                + "\"enabled\":true}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.displayName").value("账号测试已更新"))
+                .andExpect(jsonPath("$.data.phone").value("13900000000"));
+
+        MvcResult passwordCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
+                        "/api/v1/accounts/{id}/password", accountId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(administrator.sessionCookie(), passwordCsrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(json(passwordCsrf).at("/data/headerName").asText(),
+                                json(passwordCsrf).at("/data/token").asText())
+                        .content("{\"password\":\"Changed123!\"}"))
+                .andExpect(status().isNoContent());
+        String passwordAuditDetail = jdbc.sql("""
+                SELECT CAST(detail AS CHAR) FROM audit_log
+                WHERE action = 'ACCOUNT_PASSWORD_CHANGED' AND resource_id = :accountId
+                ORDER BY created_at DESC LIMIT 1
+                """).param("accountId", accountId).query(String.class).single();
+        assertFalse(passwordAuditDetail.contains("Changed123!"));
+
+        MvcResult loginCsrf = mvc.perform(get("/api/v1/auth/csrf")).andExpect(status().isOk()).andReturn();
+        JsonNode loginCsrfData = json(loginCsrf).path("data");
+        mvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(loginCsrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(loginCsrfData.path("headerName").asText(), loginCsrfData.path("token").asText())
+                        .content("{\"account\":\"account-management-test\",\"password\":\"Changed123!\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.account").value("account-management-test"));
+
+        MvcResult deleteCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
+                        "/api/v1/accounts/{id}", accountId)
+                        .cookie(administrator.sessionCookie(), deleteCsrf.getResponse().getCookie("XSRF-TOKEN"))
+                        .header(json(deleteCsrf).at("/data/headerName").asText(),
+                                json(deleteCsrf).at("/data/token").asText()))
+                .andExpect(status().isNoContent());
+
+        mvc.perform(get("/api/v1/accounts").param("keyword", "account-management-test")
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items").isEmpty())
+                .andExpect(jsonPath("$.data.total").value(0));
     }
 
     @Test

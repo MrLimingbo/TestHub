@@ -93,7 +93,7 @@ public class FunctionalAssetExchangeService {
                         row.priority(), row.status(), row.description()));
             } else {
                 assets.createCase(principal, projectId, new FunctionalAssetService.CaseInput(row.catalogId(), row.requirementId(), row.code(), row.title(),
-                        row.priority(), row.status(), row.precondition(), row.steps(), row.expectedResult()));
+                        row.priority(), row.status(), "FUNCTIONAL", row.precondition(), row.steps(), row.expectedResult()));
             }
         }
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_ASSET_IMPORTED", "FUNCTIONAL_" + safeType.name(), projectId,
@@ -103,7 +103,7 @@ public class FunctionalAssetExchangeService {
 
     private void writeExportRows(Sheet sheet, String projectId, AssetKind type) {
         Map<String, String> catalogNames = new HashMap<>();
-        catalogs.findByProject(projectId).forEach(catalog -> catalogNames.put(catalog.id(), catalog.name()));
+        catalogs.findByProject(projectId, type.name()).forEach(catalog -> catalogNames.put(catalog.id(), catalog.name()));
         if (type == AssetKind.REQUIREMENTS) {
             int rowNumber = 1;
             for (FunctionalRequirement requirement : requirements.findByProject(projectId, null)) {
@@ -147,7 +147,7 @@ public class FunctionalAssetExchangeService {
         List<ImportError> errors = new ArrayList<>();
         if (rows.isEmpty()) return List.of(new ImportError(0, "Excel 中没有可导入的数据行"));
         Map<String, List<FunctionalCatalog>> catalogsByName = new HashMap<>();
-        catalogs.findByProject(projectId).forEach(catalog -> catalogsByName.computeIfAbsent(catalog.name(), ignored -> new ArrayList<>()).add(catalog));
+        catalogs.findByProject(projectId, type.name()).forEach(catalog -> catalogsByName.computeIfAbsent(catalog.name(), ignored -> new ArrayList<>()).add(catalog));
         Set<String> existingCodes = new HashSet<>();
         if (type == AssetKind.REQUIREMENTS) requirements.findByProject(projectId, null).forEach(item -> existingCodes.add(item.requirementCode()));
         else cases.findByProject(projectId, null).forEach(item -> existingCodes.add(item.caseCode()));

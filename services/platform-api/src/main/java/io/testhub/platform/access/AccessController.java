@@ -5,7 +5,6 @@ import io.testhub.platform.shared.api.ApiResponse;
 import io.testhub.platform.parameter.ProjectParameterService;
 import io.testhub.platform.parameter.EnvironmentSecretService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,6 +43,31 @@ public class AccessController {
         return ApiResponse.of(AccessService.ROLE_DEFINITIONS);
     }
 
+    @PostMapping("/projects")
+    public ApiResponse<ProjectSummary> createProject(Authentication authentication,
+                                                      @Valid @RequestBody ProjectRequest request) {
+        return ApiResponse.of(access.createProject(principal(authentication), request.name(), request.code(),
+                request.description()));
+    }
+
+    @GetMapping("/projects/{projectId}")
+    public ApiResponse<ProjectSummary> project(Authentication authentication, @PathVariable String projectId) {
+        return ApiResponse.of(access.project(principal(authentication), projectId));
+    }
+
+    @PutMapping("/projects/{projectId}")
+    public ApiResponse<ProjectSummary> updateProject(Authentication authentication, @PathVariable String projectId,
+                                                      @Valid @RequestBody ProjectRequest request) {
+        return ApiResponse.of(access.updateProject(principal(authentication), projectId, request.name(),
+                request.code(), request.description()));
+    }
+
+    @DeleteMapping("/projects/{projectId}")
+    public ResponseEntity<Void> deleteProject(Authentication authentication, @PathVariable String projectId) {
+        access.deleteProject(principal(authentication), projectId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/projects/{projectId}/members")
     public ApiResponse<List<ProjectMember>> members(Authentication authentication, @PathVariable String projectId) {
         return ApiResponse.of(access.members(principal(authentication), projectId));
@@ -51,7 +76,7 @@ public class AccessController {
     @PostMapping("/projects/{projectId}/members")
     public ApiResponse<ProjectMember> saveMember(Authentication authentication, @PathVariable String projectId,
                                                    @Valid @RequestBody MemberRequest request) {
-        return ApiResponse.of(access.upsertMember(principal(authentication), projectId, request.email(), request.roleCode()));
+        return ApiResponse.of(access.upsertMember(principal(authentication), projectId, request.account(), request.roleCode()));
     }
 
     @DeleteMapping("/projects/{projectId}/members/{membershipId}")
@@ -128,7 +153,11 @@ public class AccessController {
         return (AuthenticatedPrincipal) authentication.getPrincipal();
     }
 
-    public record MemberRequest(@NotBlank @Email String email, @NotBlank String roleCode) {
+    public record MemberRequest(@NotBlank @Size(max = 160) String account, @NotBlank String roleCode) {
+    }
+
+    public record ProjectRequest(@NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 64) String code,
+                                 @Size(max = 2000) String description) {
     }
 
     public record TokenRequest(@NotBlank @Size(max = 120) String name, @NotEmpty List<String> scopes,

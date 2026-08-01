@@ -29,7 +29,7 @@ export const modules: Record<string, ModuleDefinition> = {
   'api-design': { key: 'api-design', title: '接口设计与文档', eyebrow: 'API 资产', description: '统一维护接口定义、数据模型、示例、版本与在线文档。', action: '新建接口', ...defaults },
   mock: { key: 'mock', title: 'Mock 服务', eyebrow: 'API 资产', description: '以接口示例和规则快速生成稳定、可协作的模拟服务。', action: '新建 Mock', ...defaults },
   'project-settings': { key: 'project-settings', title: '项目设置', eyebrow: '项目治理', description: '维护成员、环境、参数、通知与项目级安全策略。', action: '添加成员', ...defaults },
-  'system-settings': { key: 'system-settings', title: '系统设置', eyebrow: '平台治理', description: '管理组织、用户、认证、安全策略与基础设施配置。', action: '新建组织', ...defaults },
+  'system-settings': { key: 'system-settings', title: '系统设置', eyebrow: '平台治理', description: '管理用户、认证、安全策略与基础设施配置。', action: '新建配置', ...defaults },
   audit: { key: 'audit', title: '权限与审计', eyebrow: '安全中心', description: '跟踪高风险操作、权限变化和关键资源访问记录。', action: '导出审计日志', ...defaults },
   integrations: { key: 'integrations', title: '通知与集成', eyebrow: '连接中心', description: '通过 Webhook、邮件和 CI/CD 将测试能力融入交付流程。', action: '新建连接', ...defaults },
   tasks: { key: 'tasks', title: '任务中心', eyebrow: '运行态', description: '统一查看执行队列、定时任务、运行日志与失败重试。', action: '创建定时任务', ...defaults },
