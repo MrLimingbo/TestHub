@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSessionStore } from '@/stores/session'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -11,7 +12,8 @@ interface NotificationTemplate { id: string; name: string; eventCode: string; ch
 interface NotificationDelivery { id: string; templateName: string; eventCode: string; channel: string; targetUrl: string; status: string; attemptCount: number; nextAttemptAt: string; deliveredAt: string | null; responseStatus: number | null; lastError: string | null; createdAt: string }
 
 const context = ref<Context | null>(null)
-const projectId = ref('')
+const session = useSessionStore()
+const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) })
 const templates = ref<NotificationTemplate[]>([])
 const deliveries = ref<NotificationDelivery[]>([])
 const loading = ref(true)
@@ -50,7 +52,7 @@ async function load() {
   loading.value = true
   try {
     context.value = await read<Context>('/api/v1/access/context')
-    projectId.value = projects.value[0]?.id ?? ''
+    projectId.value = session.resolveProjectId(projects.value)
     await loadTemplates()
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载通知模板失败') } finally { loading.value = false }
 }

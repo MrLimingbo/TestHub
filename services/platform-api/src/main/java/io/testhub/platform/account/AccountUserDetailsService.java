@@ -15,7 +15,7 @@ public class AccountUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        return accounts.findByEmail(username)
+        return accounts.findByAccountOrEmail(username)
                 .map(PlatformUserPrincipal::new)
                 .orElseThrow(() -> new UsernameNotFoundException("账号或密码错误"));
     }

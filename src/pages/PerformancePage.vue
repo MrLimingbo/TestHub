@@ -4,6 +4,7 @@ import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import PerformanceExecutionChart from '@/components/PerformanceExecutionChart.vue'
 import PerformanceResourceChart from '@/components/PerformanceResourceChart.vue'
+import { useSessionStore } from '@/stores/session'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -171,7 +172,8 @@ interface PerformanceReport {
 }
 
 const context = ref<Context | null>(null)
-const projectId = ref('')
+const session = useSessionStore()
+const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) })
 const plans = ref<Plan[]>([])
 const selectedPlanId = ref('')
 const selectedDetail = ref<PlanDetail | null>(null)
@@ -329,7 +331,7 @@ async function load() {
   loading.value = true
   try {
     context.value = await read<Context>('/api/v1/access/context')
-    projectId.value = projects.value[0]?.id ?? ''
+    projectId.value = session.resolveProjectId(projects.value)
     if (projectId.value) { await loadPlans(); await loadOperationalData() }
   } catch (error) {
     Message.error(error instanceof Error ? error.message : '加载压测计划失败')

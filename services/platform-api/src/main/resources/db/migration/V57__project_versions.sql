@@ -1,0 +1,22 @@
+CREATE TABLE project_version (
+    id CHAR(26) PRIMARY KEY,
+    display_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
+    organization_id CHAR(26) NOT NULL,
+    project_id CHAR(26) NOT NULL,
+    version_number VARCHAR(100) NOT NULL,
+    build_numbers TEXT NOT NULL,
+    status VARCHAR(24) NOT NULL DEFAULT 'UNSTARTED',
+    planned_release_date DATE NULL,
+    actual_release_date DATE NULL,
+    description TEXT NOT NULL,
+    created_by CHAR(26) NOT NULL,
+    updated_by CHAR(26) NOT NULL,
+    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    CONSTRAINT fk_project_version_organization FOREIGN KEY (organization_id) REFERENCES organization(id),
+    CONSTRAINT fk_project_version_project FOREIGN KEY (project_id) REFERENCES project(id),
+    CONSTRAINT fk_project_version_created_by FOREIGN KEY (created_by) REFERENCES user_account(id),
+    CONSTRAINT fk_project_version_updated_by FOREIGN KEY (updated_by) REFERENCES user_account(id),
+    UNIQUE KEY uk_project_version_number (project_id, version_number),
+    KEY idx_project_version_status_date (project_id, status, planned_release_date)
+) ENGINE=InnoDB;

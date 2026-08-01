@@ -17,7 +17,7 @@ public class FunctionalRequirementRepository {
 
     public List<FunctionalRequirement> findByProject(String projectId, String catalogId) {
         return jdbc.sql("""
-                SELECT id, organization_id, project_id, catalog_id, requirement_code, title, priority, status,
+                SELECT id, display_id, organization_id, project_id, catalog_id, requirement_code, title, priority, status,
                        description, created_by, updated_by, created_at, updated_at
                 FROM functional_requirement
                 WHERE project_id = :projectId AND (:catalogId IS NULL OR catalog_id = :catalogId)
@@ -27,7 +27,7 @@ public class FunctionalRequirementRepository {
 
     public Optional<FunctionalRequirement> findById(String projectId, String id) {
         return jdbc.sql("""
-                SELECT id, organization_id, project_id, catalog_id, requirement_code, title, priority, status,
+                SELECT id, display_id, organization_id, project_id, catalog_id, requirement_code, title, priority, status,
                        description, created_by, updated_by, created_at, updated_at
                 FROM functional_requirement WHERE project_id = :projectId AND id = :id
                 """).param("projectId", projectId).param("id", id).query((rs, row) -> map(rs)).optional();
@@ -64,7 +64,7 @@ public class FunctionalRequirementRepository {
     }
 
     private FunctionalRequirement map(java.sql.ResultSet rs) throws java.sql.SQLException {
-        return new FunctionalRequirement(rs.getString("id"), rs.getString("organization_id"), rs.getString("project_id"),
+        return new FunctionalRequirement(rs.getString("id"), rs.getLong("display_id"), rs.getString("organization_id"), rs.getString("project_id"),
                 rs.getString("catalog_id"), rs.getString("requirement_code"), rs.getString("title"),
                 rs.getString("priority"), rs.getString("status"), rs.getString("description"),
                 rs.getString("created_by"), rs.getString("updated_by"), instant(rs.getTimestamp("created_at")),

@@ -1,8 +1,10 @@
 package io.testhub.platform;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,10 +35,10 @@ class FunctionalDeliveryFlowTests {
 
     @AfterEach
     void cleanDeliveryAssets() {
-        jdbc.sql("DELETE FROM functional_defect WHERE defect_code LIKE 'FLOW_%'").update();
+        jdbc.sql("DELETE FROM functional_defect WHERE defect_code LIKE 'FLOW_%' OR title LIKE 'FLOW_%'").update();
         jdbc.sql("DELETE FROM functional_case WHERE case_code LIKE 'FLOW_%'").update();
         jdbc.sql("DELETE FROM functional_requirement WHERE requirement_code LIKE 'FLOW_%'").update();
-        jdbc.sql("DELETE FROM functional_catalog WHERE name = '交付验收目录'").update();
+        jdbc.sql("DELETE FROM functional_catalog WHERE name IN ('交付验收目录', '缺陷验收目录')").update();
     }
 
     @Test
@@ -46,9 +48,16 @@ class FunctionalDeliveryFlowTests {
         String organizationId = jdbc.sql("SELECT organization_id FROM project WHERE id = :id").param("id", projectId).query(String.class).single();
         String userId = jdbc.sql("SELECT id FROM user_account WHERE email = 'admin@testhub.local'").query(String.class).single();
         String catalogId = UlidCreator.getUlid().toString();
+        String defectCatalogId = UlidCreator.getUlid().toString();
         String caseId = UlidCreator.getUlid().toString();
         jdbc.sql("INSERT INTO functional_catalog (id, organization_id, project_id, name, created_by) VALUES (:id, :org, :project, '交付验收目录', :user)")
                 .param("id", catalogId).param("org", organizationId).param("project", projectId).param("user", userId).update();
+        jdbc.sql("""
+                INSERT INTO functional_catalog
+                    (id, organization_id, project_id, scope, name, created_by)
+                VALUES (:id, :org, :project, 'DELIVERY', '缺陷验收目录', :user)
+                """).param("id", defectCatalogId).param("org", organizationId).param("project", projectId)
+                .param("user", userId).update();
         jdbc.sql("""
                 INSERT INTO functional_case (id, organization_id, project_id, catalog_id, case_code, title, priority, status,
                                              precondition, steps, expected_result, created_by, updated_by)
@@ -58,9 +67,29 @@ class FunctionalDeliveryFlowTests {
         Csrf csrf = csrf(administrator);
         MvcResult defect = mvc.perform(post("/api/v1/projects/{projectId}/functional/defects", projectId).contentType(MediaType.APPLICATION_JSON)
                         .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token())
-                        .content("{\"defectCode\":\"FLOW_BUG_001\",\"title\":\"订单提交失败\",\"severity\":\"MAJOR\",\"status\":\"OPEN\",\"source\":\"TESTHUB\",\"description\":\"复现后无法生成订单\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.defectCode").value("FLOW_BUG_001")).andReturn();
+                        .content("{\"catalogId\":\"" + defectCatalogId + "\",\"title\":\"FLOW_订单提交失败\","
+                                + "\"dueDate\":\"2026-08-31\",\"bugType\":\"SECURITY\",\"keywords\":\"订单 支付\","
+                                + "\"browsers\":[\"CHROME\",\"EDGE\"],\"operatingSystems\":[\"WINDOWS\",\"LINUX\"],"
+                                + "\"ccUserIds\":[\"" + userId + "\"],\"severity\":\"MAJOR\",\"priority\":\"P0\","
+                                + "\"status\":\"OPEN\",\"confirmed\":true,\"assigneeId\":\"" + userId + "\","
+                                + "\"source\":\"TESTHUB\",\"description\":\"<p><strong>[步骤]</strong></p><p>复现后无法生成订单</p>\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.displayId").isNumber())
+                .andExpect(jsonPath("$.data.defectCode").isNotEmpty())
+                .andExpect(jsonPath("$.data.catalogId").value(defectCatalogId))
+                .andExpect(jsonPath("$.data.dueDate").value("2026-08-31"))
+                .andExpect(jsonPath("$.data.bugType").value("SECURITY"))
+                .andExpect(jsonPath("$.data.keywords").value("订单 支付"))
+                .andExpect(jsonPath("$.data.browsers[0]").value("CHROME"))
+                .andExpect(jsonPath("$.data.browsers[1]").value("EDGE"))
+                .andExpect(jsonPath("$.data.operatingSystems[0]").value("WINDOWS"))
+                .andExpect(jsonPath("$.data.ccUserIds[0]").value(userId))
+                .andExpect(jsonPath("$.data.priority").value("P0"))
+                .andExpect(jsonPath("$.data.confirmed").value(true))
+                .andExpect(jsonPath("$.data.assigneeId").value(userId))
+                .andExpect(jsonPath("$.data.assignedBy").value(userId))
+                .andExpect(jsonPath("$.data.createdByName").isNotEmpty()).andReturn();
         String defectId = json(defect).at("/data/id").asText();
+        String defectCode = json(defect).at("/data/defectCode").asText();
         csrf = csrf(administrator);
         mvc.perform(post("/api/v1/projects/{projectId}/functional/defects/{defectId}/links", projectId, defectId).contentType(MediaType.APPLICATION_JSON)
                         .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token())
@@ -70,6 +99,21 @@ class FunctionalDeliveryFlowTests {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].assetLabel").value("交付关联用例"));
 
         csrf = csrf(administrator);
+        mvc.perform(put("/api/v1/projects/{projectId}/functional/defects/{defectId}", projectId, defectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"catalogId\":\"" + defectCatalogId + "\",\"defectCode\":\"" + defectCode + "\",\"title\":\"FLOW_订单提交失败\",\"severity\":\"MAJOR\",\"priority\":\"P0\",\"status\":\"RESOLVED\",\"confirmed\":true,\"assigneeId\":\"" + userId + "\",\"resolution\":\"FIXED\",\"source\":\"TESTHUB\",\"description\":\"复现后无法生成订单\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("RESOLVED"))
+                .andExpect(jsonPath("$.data.resolution").value("FIXED"))
+                .andExpect(jsonPath("$.data.resolvedBy").value(userId))
+                .andExpect(jsonPath("$.data.resolvedAt").isNotEmpty())
+                .andExpect(jsonPath("$.data.dueDate").value("2026-08-31"))
+                .andExpect(jsonPath("$.data.bugType").value("SECURITY"))
+                .andExpect(jsonPath("$.data.browsers[0]").value("CHROME"))
+                .andExpect(jsonPath("$.data.ccUserIds[0]").value(userId));
+
+        csrf = csrf(administrator);
         mvc.perform(multipart("/api/v1/projects/{projectId}/functional/assets/import", projectId)
                         .file(requirementWorkbook()).param("type", "REQUIREMENTS").cookie(administrator.sessionCookie(), csrf.cookie())
                         .header(csrf.headerName(), csrf.token()))
@@ -77,6 +121,11 @@ class FunctionalDeliveryFlowTests {
         mvc.perform(get("/api/v1/projects/{projectId}/functional/assets/export", projectId).param("type", "REQUIREMENTS")
                         .cookie(administrator.sessionCookie()))
                 .andExpect(status().isOk()).andExpect(header().string("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+
+        csrf = csrf(administrator);
+        mvc.perform(delete("/api/v1/projects/{projectId}/functional/defects/{defectId}", projectId, defectId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token()))
+                .andExpect(status().isNoContent());
     }
 
     private MockMultipartFile requirementWorkbook() throws Exception {

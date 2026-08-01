@@ -21,6 +21,8 @@ public class FunctionalAssetService {
     private static final Set<String> PRIORITIES = Set.of("P0", "P1", "P2", "P3");
     private static final Set<String> REQUIREMENT_STATUSES = Set.of("DRAFT", "REVIEWING", "APPROVED", "ARCHIVED");
     private static final Set<String> CASE_STATUSES = Set.of("DRAFT", "READY", "BLOCKED", "ARCHIVED");
+    private static final Set<String> CASE_TYPES = Set.of("UNIT", "API", "FUNCTIONAL", "INSTALLATION", "CONFIGURATION", "PERFORMANCE", "SECURITY", "OTHER");
+    private static final Set<String> CATALOG_SCOPES = Set.of("REQUIREMENTS", "CASES", "PLANS", "GOVERNANCE", "DELIVERY");
 
     private final FunctionalCatalogRepository catalogs;
     private final FunctionalRequirementRepository requirements;
@@ -37,9 +39,9 @@ public class FunctionalAssetService {
         this.audit = audit;
     }
 
-    public List<FunctionalCatalog> listCatalogs(AuthenticatedPrincipal principal, String projectId) {
+    public List<FunctionalCatalog> listCatalogs(AuthenticatedPrincipal principal, String projectId, String scope) {
         access.requireProjectRead(principal, projectId);
-        return catalogs.findByProject(projectId);
+        return catalogs.findByProject(projectId, normalizeCatalogScope(scope, "REQUIREMENTS"));
     }
 
     @Transactional
@@ -47,16 +49,17 @@ public class FunctionalAssetService {
         ProjectSummary project = writeAccess(principal, projectId);
         if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录参数不能为空");
         String name = required(input.name(), 160, "目录名称");
+        String scope = normalizeCatalogScope(input.scope(), "REQUIREMENTS");
         String parentId = blankToNull(input.parentId());
-        if (parentId != null) requireCatalog(projectId, parentId);
+        validateCatalogParent(projectId, scope, parentId, null);
         String id = UlidCreator.getUlid().toString();
         try {
-            catalogs.insert(id, project.organizationId(), projectId, parentId, name, input.sortOrder(), principal.userId());
+            catalogs.insert(id, project.organizationId(), projectId, scope, parentId, name, input.sortOrder(), principal.userId());
         } catch (DataIntegrityViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "同级目录名称已存在", exception);
         }
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_CATALOG_CREATED", "FUNCTIONAL_CATALOG", id,
-                Map.of("name", name));
+                Map.of("name", name, "scope", scope));
         return catalogs.findById(projectId, id).orElseThrow();
     }
 
@@ -66,16 +69,22 @@ public class FunctionalAssetService {
         ProjectSummary project = writeAccess(principal, projectId);
         if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录参数不能为空");
         String name = required(input.name(), 160, "目录名称");
-        requireCatalog(projectId, catalogId);
+        FunctionalCatalog existing = requireCatalog(projectId, catalogId);
+        String scope = normalizeCatalogScope(input.scope(), existing.scope());
+        if (!existing.scope().equals(scope)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录所属 Tab 创建后不能修改");
+        }
+        String parentId = blankToNull(input.parentId());
+        validateCatalogParent(projectId, scope, parentId, catalogId);
         try {
-            if (catalogs.update(projectId, catalogId, name, input.sortOrder()) == 0) {
+            if (catalogs.update(projectId, catalogId, parentId, name, input.sortOrder()) == 0) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "目录不存在");
             }
         } catch (DataIntegrityViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "同级目录名称已存在", exception);
         }
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_CATALOG_UPDATED", "FUNCTIONAL_CATALOG", catalogId,
-                Map.of("name", name));
+                Map.of("name", name, "scope", scope));
         return catalogs.findById(projectId, catalogId).orElseThrow();
     }
 
@@ -94,7 +103,7 @@ public class FunctionalAssetService {
 
     public List<FunctionalRequirement> listRequirements(AuthenticatedPrincipal principal, String projectId, String catalogId) {
         access.requireProjectRead(principal, projectId);
-        if (catalogId != null && !catalogId.isBlank()) requireCatalog(projectId, catalogId);
+        if (catalogId != null && !catalogId.isBlank()) requireCatalog(projectId, catalogId, "REQUIREMENTS");
         return requirements.findByProject(projectId, blankToNull(catalogId));
     }
 
@@ -102,7 +111,7 @@ public class FunctionalAssetService {
     public FunctionalRequirement createRequirement(AuthenticatedPrincipal principal, String projectId, RequirementInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validateRequirement(input);
-        requireCatalog(projectId, input.catalogId());
+        requireCatalog(projectId, input.catalogId(), "REQUIREMENTS");
         String id = UlidCreator.getUlid().toString();
         try {
             requirements.insert(id, project.organizationId(), projectId, input.catalogId(), normalizeCode(input.requirementCode(), "需求编号"),
@@ -120,7 +129,7 @@ public class FunctionalAssetService {
     public FunctionalRequirement updateRequirement(AuthenticatedPrincipal principal, String projectId, String id, RequirementInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validateRequirement(input);
-        requireCatalog(projectId, input.catalogId());
+        requireCatalog(projectId, input.catalogId(), "REQUIREMENTS");
         try {
             if (requirements.update(projectId, id, input.catalogId(), normalizeCode(input.requirementCode(), "需求编号"),
                     required(input.title(), 200, "需求标题"), normalizePriority(input.priority()), normalizeRequirementStatus(input.status()),
@@ -145,7 +154,7 @@ public class FunctionalAssetService {
 
     public List<FunctionalCase> listCases(AuthenticatedPrincipal principal, String projectId, String catalogId) {
         access.requireProjectRead(principal, projectId);
-        if (catalogId != null && !catalogId.isBlank()) requireCatalog(projectId, catalogId);
+        if (catalogId != null && !catalogId.isBlank()) requireCatalog(projectId, catalogId, "CASES");
         return cases.findByProject(projectId, blankToNull(catalogId));
     }
 
@@ -153,12 +162,12 @@ public class FunctionalAssetService {
     public FunctionalCase createCase(AuthenticatedPrincipal principal, String projectId, CaseInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validateCase(input);
-        requireCatalog(projectId, input.catalogId());
+        requireCatalog(projectId, input.catalogId(), "CASES");
         if (input.requirementId() != null && !input.requirementId().isBlank()) requireRequirement(projectId, input.requirementId());
         String id = UlidCreator.getUlid().toString();
         try {
             cases.insert(id, project.organizationId(), projectId, input.catalogId(), blankToNull(input.requirementId()),
-                    normalizeCode(input.caseCode(), "用例编号"), required(input.title(), 200, "用例标题"), normalizePriority(input.priority()),
+                    normalizeCode(input.caseCode(), "用例编号"), normalizeCaseType(input.caseType()), required(input.title(), 200, "用例标题"), normalizePriority(input.priority()),
                     normalizeCaseStatus(input.status()), text(input.precondition()), text(input.steps()), text(input.expectedResult()), principal.userId());
         } catch (DataIntegrityViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "用例编号已存在", exception);
@@ -172,11 +181,11 @@ public class FunctionalAssetService {
     public FunctionalCase updateCase(AuthenticatedPrincipal principal, String projectId, String id, CaseInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validateCase(input);
-        requireCatalog(projectId, input.catalogId());
+        requireCatalog(projectId, input.catalogId(), "CASES");
         if (input.requirementId() != null && !input.requirementId().isBlank()) requireRequirement(projectId, input.requirementId());
         try {
             if (cases.update(projectId, id, input.catalogId(), blankToNull(input.requirementId()), normalizeCode(input.caseCode(), "用例编号"),
-                    required(input.title(), 200, "用例标题"), normalizePriority(input.priority()), normalizeCaseStatus(input.status()),
+                    normalizeCaseType(input.caseType()), required(input.title(), 200, "用例标题"), normalizePriority(input.priority()), normalizeCaseStatus(input.status()),
                     text(input.precondition()), text(input.steps()), text(input.expectedResult()), principal.userId()) == 0) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "用例不存在");
             }
@@ -200,6 +209,29 @@ public class FunctionalAssetService {
 
     private FunctionalCatalog requireCatalog(String projectId, String id) {
         return catalogs.findById(projectId, id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录不存在"));
+    }
+
+    private FunctionalCatalog requireCatalog(String projectId, String id, String scope) {
+        FunctionalCatalog catalog = requireCatalog(projectId, id);
+        if (!catalog.scope().equals(scope)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录不属于当前 Tab");
+        }
+        return catalog;
+    }
+
+    private void validateCatalogParent(String projectId, String scope, String parentId, String catalogId) {
+        if (parentId == null) return;
+        if (parentId.equals(catalogId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录不能设为自己的父级");
+        }
+        FunctionalCatalog parent = requireCatalog(projectId, parentId, scope);
+        Set<String> visited = new java.util.HashSet<>();
+        while (parent.parentId() != null) {
+            if (!visited.add(parent.id()) || parent.parentId().equals(catalogId)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录父级不能形成循环");
+            }
+            parent = requireCatalog(projectId, parent.parentId(), scope);
+        }
     }
 
     private FunctionalRequirement requireRequirement(String projectId, String id) {
@@ -246,6 +278,20 @@ public class FunctionalAssetService {
         return normalized;
     }
 
+    private String normalizeCaseType(String value) {
+        String normalized = value == null || value.isBlank() ? "FUNCTIONAL" : value.trim().toUpperCase(Locale.ROOT);
+        if (!CASE_TYPES.contains(normalized)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "用例类型不合法");
+        return normalized;
+    }
+
+    private String normalizeCatalogScope(String value, String defaultScope) {
+        String normalized = value == null || value.isBlank() ? defaultScope : value.trim().toUpperCase(Locale.ROOT);
+        if (!CATALOG_SCOPES.contains(normalized)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录所属 Tab 不合法");
+        }
+        return normalized;
+    }
+
     private String required(String value, int max, String label) {
         if (value == null || value.isBlank() || value.trim().length() > max) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, label + "不能为空且不能超过" + max + "个字符");
@@ -261,9 +307,9 @@ public class FunctionalAssetService {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
-    public record CatalogInput(String name, String parentId, int sortOrder) { }
+    public record CatalogInput(String name, String parentId, int sortOrder, String scope) { }
     public record RequirementInput(String catalogId, String requirementCode, String title, String priority,
                                    String status, String description) { }
     public record CaseInput(String catalogId, String requirementId, String caseCode, String title, String priority,
-                            String status, String precondition, String steps, String expectedResult) { }
+                            String status, String caseType, String precondition, String steps, String expectedResult) { }
 }

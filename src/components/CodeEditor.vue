@@ -2,7 +2,7 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 self.MonacoEnvironment = {
   getWorker(_: string, label: string) {
@@ -14,6 +14,7 @@ const props = withDefaults(defineProps<{ modelValue: string; language?: string; 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const host = ref<HTMLDivElement>()
 let editor: monaco.editor.IStandaloneCodeEditor | undefined
+let applyingExternalValue = false
 
 onMounted(() => {
   if (!host.value) return
@@ -28,8 +29,26 @@ onMounted(() => {
     scrollBeyondLastLine: false,
     padding: { top: 12 },
   })
-  editor.onDidChangeModelContent(() => emit('update:modelValue', editor?.getValue() ?? ''))
+  editor.onDidChangeModelContent(() => {
+    if (!applyingExternalValue) emit('update:modelValue', editor?.getValue() ?? '')
+  })
 })
+
+watch(() => props.modelValue, (value) => {
+  if (!editor || editor.getValue() === value) return
+  applyingExternalValue = true
+  try {
+    editor.setValue(value)
+  } finally {
+    applyingExternalValue = false
+  }
+})
+
+watch(() => props.language, (language) => {
+  const model = editor?.getModel()
+  if (model) monaco.editor.setModelLanguage(model, language)
+})
+
 onBeforeUnmount(() => editor?.dispose())
 </script>
 

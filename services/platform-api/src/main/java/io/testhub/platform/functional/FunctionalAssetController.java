@@ -28,8 +28,9 @@ public class FunctionalAssetController {
     }
 
     @GetMapping("/catalogs")
-    public ApiResponse<List<FunctionalCatalog>> catalogs(Authentication authentication, @PathVariable String projectId) {
-        return ApiResponse.of(assets.listCatalogs(principal(authentication), projectId));
+    public ApiResponse<List<FunctionalCatalog>> catalogs(Authentication authentication, @PathVariable String projectId,
+                                                          @RequestParam(defaultValue = "REQUIREMENTS") String scope) {
+        return ApiResponse.of(assets.listCatalogs(principal(authentication), projectId, scope));
     }
 
     @PostMapping("/catalogs")
@@ -107,8 +108,8 @@ public class FunctionalAssetController {
         return (AuthenticatedPrincipal) authentication.getPrincipal();
     }
 
-    public record CatalogRequest(@NotBlank @Size(max = 160) String name, String parentId, int sortOrder) {
-        FunctionalAssetService.CatalogInput toInput() { return new FunctionalAssetService.CatalogInput(name, parentId, sortOrder); }
+    public record CatalogRequest(@NotBlank @Size(max = 160) String name, String parentId, int sortOrder, String scope) {
+        FunctionalAssetService.CatalogInput toInput() { return new FunctionalAssetService.CatalogInput(name, parentId, sortOrder, scope); }
     }
 
     public record RequirementRequest(@NotBlank @Size(max = 26) String catalogId,
@@ -123,11 +124,11 @@ public class FunctionalAssetController {
     public record CaseRequest(@NotBlank @Size(max = 26) String catalogId, String requirementId,
                               @NotBlank @Size(max = 40) String caseCode,
                               @NotBlank @Size(max = 200) String title,
-                              String priority, String status, @Size(max = 20_000) String precondition,
+                              String priority, String status, String caseType, @Size(max = 20_000) String precondition,
                               @NotBlank @Size(max = 20_000) String steps,
                               @NotBlank @Size(max = 20_000) String expectedResult) {
         FunctionalAssetService.CaseInput toInput() {
-            return new FunctionalAssetService.CaseInput(catalogId, requirementId, caseCode, title, priority, status,
+            return new FunctionalAssetService.CaseInput(catalogId, requirementId, caseCode, title, priority, status, caseType,
                     precondition, steps, expectedResult);
         }
     }

@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSessionStore } from '@/stores/session'
 
 interface Envelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -19,7 +20,7 @@ interface Artifact { id: string; artifactType: 'SCREENSHOT'; originalName: strin
 interface Snapshot { devices: Device[]; applications: App[]; elements: Element[]; scenarios: Scenario[]; executions: Execution[] }
 interface Report { execution: Execution; summary: { totalSteps: number; passedSteps: number; failedSteps: number; totalDurationMillis: number }; steps: Array<{ id: string; stepSequence: number; stepName: string; stepType: StepType; outcome: string; durationMillis: number; errorMessage?: string }> }
 
-const context = ref<Context | null>(null); const projectId = ref(''); const assets = ref<Snapshot>({ devices: [], applications: [], elements: [], scenarios: [], executions: [] }); const loading = ref(true); const saving = ref(false); const selectedScenarioId = ref(''); const deviceVisible = ref(false); const appVisible = ref(false); const elementVisible = ref(false); const scenarioVisible = ref(false); const executeVisible = ref(false); const reportVisible = ref(false); const report = ref<Report | null>(null); const reportArtifacts = ref<Artifact[]>([]); const executionTarget = ref<Scenario | null>(null)
+const session = useSessionStore(); const context = ref<Context | null>(null); const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) }); const assets = ref<Snapshot>({ devices: [], applications: [], elements: [], scenarios: [], executions: [] }); const loading = ref(true); const saving = ref(false); const selectedScenarioId = ref(''); const deviceVisible = ref(false); const appVisible = ref(false); const elementVisible = ref(false); const scenarioVisible = ref(false); const executeVisible = ref(false); const reportVisible = ref(false); const report = ref<Report | null>(null); const reportArtifacts = ref<Artifact[]>([]); const executionTarget = ref<Scenario | null>(null)
 const deviceForm = reactive({ name: '', platform: 'ANDROID' as Platform, udid: '', automationName: 'UiAutomator2', capabilitiesText: '{}', enabled: true })
 const appForm = reactive({ name: '', platform: 'ANDROID' as Platform, appIdentifier: '', versionName: '', appFileId: '', enabled: true })
 const elementForm = reactive({ name: '', platform: 'ANDROID' as Platform, locatorStrategy: 'ACCESSIBILITY_ID', locatorValue: '', description: '' })
@@ -34,7 +35,7 @@ const date = (value?: string) => value ? new Intl.DateTimeFormat('zh-CN', { date
 async function read<T>(url: string, init?: RequestInit): Promise<T> { const response = await fetch(url, { credentials: 'include', ...init }); const body = await response.json().catch(() => ({})) as Envelope<T> & { message?: string }; if (!response.ok) throw new Error(body.message ?? '请求失败，请稍后重试'); return body.data }
 async function mutate<T>(url: string, method: 'POST' | 'DELETE', body?: unknown): Promise<T> { const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf'); return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) }) }
 async function loadAssets() { if (!projectId.value) return; assets.value = await read<Snapshot>(`/api/v1/projects/${projectId.value}/mobile-automation`); if (!assets.value.scenarios.some((item) => item.id === selectedScenarioId.value)) selectedScenarioId.value = assets.value.scenarios[0]?.id ?? '' }
-async function load() { loading.value = true; try { context.value = await read<Context>('/api/v1/access/context'); projectId.value = projects.value[0]?.id ?? ''; await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '加载移动端自动化资源失败') } finally { loading.value = false } }
+async function load() { loading.value = true; try { context.value = await read<Context>('/api/v1/access/context'); projectId.value = session.resolveProjectId(projects.value); await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '加载移动端自动化资源失败') } finally { loading.value = false } }
 async function changeProject() { selectedScenarioId.value = ''; try { await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '切换项目失败') } }
 function parse(text: string, label: string) { try { const value = JSON.parse(text || '{}'); if (!value || Array.isArray(value) || typeof value !== 'object') throw new Error(); return value as Record<string, string> } catch { throw new Error(`${label}必须是 JSON 对象`) } }
 function resetDevice() { Object.assign(deviceForm, { name: '', platform: 'ANDROID', udid: '', automationName: 'UiAutomator2', capabilitiesText: '{}', enabled: true }) }

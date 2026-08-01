@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public record UserAccount(
         String id,
+        String account,
         String email,
         String displayName,
         String passwordHash,

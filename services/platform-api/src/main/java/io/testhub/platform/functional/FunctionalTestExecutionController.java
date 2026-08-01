@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -41,6 +42,12 @@ public class FunctionalTestExecutionController {
     public ApiResponse<FunctionalTestPlan> updatePlan(Authentication authentication, @PathVariable String projectId,
                                                        @PathVariable String planId, @Valid @RequestBody PlanRequest request) {
         return ApiResponse.of(executions.updatePlan(principal(authentication), projectId, planId, request.toInput()));
+    }
+
+    @DeleteMapping("/plans/{planId}")
+    public ResponseEntity<Void> deletePlan(Authentication authentication, @PathVariable String projectId, @PathVariable String planId) {
+        executions.deletePlan(principal(authentication), projectId, planId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/plans/{planId}")

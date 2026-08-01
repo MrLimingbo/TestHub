@@ -1,6 +1,7 @@
 package io.testhub.platform;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -96,6 +97,15 @@ class FunctionalExecutionFlowTests {
                 .andExpect(jsonPath("$.data.status").value("COMPLETED"))
                 .andExpect(jsonPath("$.data.passedCount").value(1))
                 .andExpect(jsonPath("$.data.notRunCount").value(0));
+
+        csrf = csrf(administrator);
+        mvc.perform(delete("/api/v1/projects/{projectId}/functional/plans/{planId}", projectId, planId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token()))
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/api/v1/projects/{projectId}/functional/plans/{planId}", projectId, planId)
+                        .cookie(administrator.sessionCookie())).andExpect(status().isNotFound());
+        org.junit.jupiter.api.Assertions.assertEquals(0, jdbc.sql("SELECT COUNT(*) FROM functional_test_run WHERE id = :id")
+                .param("id", runId).query(Integer.class).single());
     }
 
     private LoginSession login(String email) throws Exception {

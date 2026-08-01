@@ -5,6 +5,7 @@ import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -68,10 +69,22 @@ public class FunctionalDefectController {
 
     private AuthenticatedPrincipal principal(Authentication authentication) { return (AuthenticatedPrincipal) authentication.getPrincipal(); }
 
-    public record DefectRequest(@NotBlank @Size(max = 40) String defectCode, @NotBlank @Size(max = 200) String title,
-                                String severity, String status, @Size(max = 24) String source, @Size(max = 1000) String externalUrl,
-                                @Size(max = 20_000) String description) {
-        FunctionalDefectService.DefectInput toInput() { return new FunctionalDefectService.DefectInput(defectCode, title, severity, status, source, externalUrl, description); }
+    public record DefectRequest(@Size(max = 26) String catalogId, @Size(max = 40) String defectCode,
+                                @NotBlank @Size(max = 200) String title, LocalDate dueDate,
+                                @Size(max = 32) String bugType, @Size(max = 500) String keywords,
+                                @Size(max = 7) List<@Size(max = 24) String> browsers,
+                                @Size(max = 5) List<@Size(max = 24) String> operatingSystems,
+                                @Size(max = 50) List<@Size(max = 26) String> ccUserIds,
+                                String severity, String priority,
+                                String status, Boolean confirmed, @Size(max = 26) String assigneeId,
+                                @Size(max = 24) String resolution, @Size(max = 24) String source,
+                                @Size(max = 1000) String externalUrl,
+                                @NotBlank @Size(max = 20_000) String description) {
+        FunctionalDefectService.DefectInput toInput() {
+            return new FunctionalDefectService.DefectInput(catalogId, defectCode, title, dueDate, bugType, keywords,
+                    browsers, operatingSystems, ccUserIds, severity, priority, status, confirmed, assigneeId,
+                    resolution, source, externalUrl, description);
+        }
     }
     public record DefectLinkRequest(@NotBlank @Size(max = 24) String assetType, @NotBlank @Size(max = 26) String assetId) {
         FunctionalDefectService.DefectLinkInput toInput() { return new FunctionalDefectService.DefectLinkInput(assetType, assetId); }

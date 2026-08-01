@@ -10,6 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,39 +50,76 @@ class FunctionalAssetFlowTests {
 
         MvcResult catalog = mvc.perform(post("/api/v1/projects/{projectId}/functional/catalogs", projectId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
-                        .header(csrf.headerName(), csrf.token()).content("{\"name\":\"验收目录-订单\",\"sortOrder\":1}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.name").value("验收目录-订单")).andReturn();
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"name\":\"验收目录-订单\",\"sortOrder\":1,\"scope\":\"REQUIREMENTS\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.name").value("验收目录-订单"))
+                .andExpect(jsonPath("$.data.scope").value("REQUIREMENTS")).andReturn();
         String catalogId = json(catalog).at("/data/id").asText();
+
+        csrf = csrf(administrator);
+        MvcResult caseCatalog = mvc.perform(post("/api/v1/projects/{projectId}/functional/catalogs", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"name\":\"验收目录-订单\",\"sortOrder\":1,\"scope\":\"CASES\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.name").value("验收目录-订单"))
+                .andExpect(jsonPath("$.data.scope").value("CASES")).andReturn();
+        String caseCatalogId = json(caseCatalog).at("/data/id").asText();
+
+        mvc.perform(get("/api/v1/projects/{projectId}/functional/catalogs", projectId)
+                        .param("scope", "REQUIREMENTS").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.id == '" + catalogId + "')]").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.id == '" + caseCatalogId + "')]").isEmpty());
+        mvc.perform(get("/api/v1/projects/{projectId}/functional/catalogs", projectId)
+                        .param("scope", "CASES").cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.id == '" + caseCatalogId + "')]").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.id == '" + catalogId + "')]").isEmpty());
 
         csrf = csrf(administrator);
         MvcResult requirement = mvc.perform(post("/api/v1/projects/{projectId}/functional/requirements", projectId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
                         .header(csrf.headerName(), csrf.token())
                         .content("{\"catalogId\":\"" + catalogId + "\",\"requirementCode\":\"ACCEPT_REQ\",\"title\":\"提交订单\",\"priority\":\"P1\",\"status\":\"DRAFT\",\"description\":\"订单提交后生成交易记录\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.requirementCode").value("ACCEPT_REQ")).andReturn();
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.requirementCode").value("ACCEPT_REQ"))
+                .andExpect(jsonPath("$.data.displayId").isNumber()).andReturn();
         String requirementId = json(requirement).at("/data/id").asText();
+
+        csrf = csrf(administrator);
+        mvc.perform(post("/api/v1/projects/{projectId}/functional/cases", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"catalogId\":\"" + catalogId + "\",\"requirementId\":\"" + requirementId + "\",\"caseCode\":\"ACCEPT_WRONG_SCOPE\",\"title\":\"错误目录用例\",\"priority\":\"P1\",\"status\":\"READY\",\"precondition\":\"\",\"steps\":\"点击提交\",\"expectedResult\":\"展示提交成功\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("目录不属于当前 Tab"));
 
         csrf = csrf(administrator);
         MvcResult testCase = mvc.perform(post("/api/v1/projects/{projectId}/functional/cases", projectId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
                         .header(csrf.headerName(), csrf.token())
-                        .content("{\"catalogId\":\"" + catalogId + "\",\"requirementId\":\"" + requirementId + "\",\"caseCode\":\"ACCEPT_CASE\",\"title\":\"成功提交订单\",\"priority\":\"P1\",\"status\":\"READY\",\"precondition\":\"用户已登录\",\"steps\":\"1. 打开订单页\\n2. 点击提交\",\"expectedResult\":\"展示提交成功\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.caseCode").value("ACCEPT_CASE")).andReturn();
+                        .content("{\"catalogId\":\"" + caseCatalogId + "\",\"requirementId\":\"" + requirementId + "\",\"caseCode\":\"ACCEPT_CASE\",\"title\":\"成功提交订单\",\"priority\":\"P1\",\"status\":\"READY\",\"caseType\":\"API\",\"precondition\":\"用户已登录\",\"steps\":\"1. 打开订单页\\n2. 点击提交\",\"expectedResult\":\"展示提交成功\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.caseCode").value("ACCEPT_CASE"))
+                .andExpect(jsonPath("$.data.displayId").isNumber())
+                .andExpect(jsonPath("$.data.caseType").value("API"))
+                .andExpect(jsonPath("$.data.createdByName").isNotEmpty()).andReturn();
         String caseId = json(testCase).at("/data/id").asText();
 
         mvc.perform(get("/api/v1/projects/{projectId}/functional/requirements", projectId)
                         .param("catalogId", catalogId).cookie(administrator.sessionCookie()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(requirementId));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(requirementId))
+                .andExpect(jsonPath("$.data[0].displayId").isNumber());
         mvc.perform(get("/api/v1/projects/{projectId}/functional/cases", projectId)
-                        .param("catalogId", catalogId).cookie(administrator.sessionCookie()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(caseId));
+                        .param("catalogId", caseCatalogId).cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(caseId))
+                .andExpect(jsonPath("$.data[0].displayId").isNumber());
 
         csrf = csrf(administrator);
         mvc.perform(put("/api/v1/projects/{projectId}/functional/cases/{caseId}", projectId, caseId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
                         .header(csrf.headerName(), csrf.token())
-                        .content("{\"catalogId\":\"" + catalogId + "\",\"requirementId\":\"" + requirementId + "\",\"caseCode\":\"ACCEPT_CASE\",\"title\":\"提交订单-更新\",\"priority\":\"P0\",\"status\":\"READY\",\"precondition\":\"用户已登录\",\"steps\":\"点击提交\",\"expectedResult\":\"展示提交成功\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.title").value("提交订单-更新"));
+                        .content("{\"catalogId\":\"" + caseCatalogId + "\",\"requirementId\":\"" + requirementId + "\",\"caseCode\":\"ACCEPT_CASE\",\"title\":\"提交订单-更新\",\"priority\":\"P0\",\"status\":\"READY\",\"caseType\":\"PERFORMANCE\",\"precondition\":\"用户已登录\",\"steps\":\"点击提交\",\"expectedResult\":\"展示提交成功\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.title").value("提交订单-更新"))
+                .andExpect(jsonPath("$.data.caseType").value("PERFORMANCE"));
 
         csrf = csrf(administrator);
         mvc.perform(delete("/api/v1/projects/{projectId}/functional/cases/{caseId}", projectId, caseId)
@@ -93,6 +133,49 @@ class FunctionalAssetFlowTests {
         mvc.perform(delete("/api/v1/projects/{projectId}/functional/catalogs/{catalogId}", projectId, catalogId)
                         .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token()))
                 .andExpect(status().isNoContent());
+        csrf = csrf(administrator);
+        mvc.perform(delete("/api/v1/projects/{projectId}/functional/catalogs/{catalogId}", projectId, caseCatalogId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void catalogsAreIsolatedAcrossEveryFunctionalTab() throws Exception {
+        LoginSession administrator = login("admin@testhub.local");
+        String projectId = projectId(administrator);
+        Map<String, String> catalogIds = new LinkedHashMap<>();
+
+        for (String scope : List.of("REQUIREMENTS", "CASES", "PLANS", "GOVERNANCE", "DELIVERY")) {
+            Csrf csrf = csrf(administrator);
+            MvcResult result = mvc.perform(post("/api/v1/projects/{projectId}/functional/catalogs", projectId)
+                            .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                            .header(csrf.headerName(), csrf.token())
+                            .content("{\"name\":\"验收目录-相同名称\",\"sortOrder\":1,\"scope\":\"" + scope + "\"}"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.scope").value(scope))
+                    .andReturn();
+            catalogIds.put(scope, json(result).at("/data/id").asText());
+        }
+
+        for (Map.Entry<String, String> catalog : catalogIds.entrySet()) {
+            var result = mvc.perform(get("/api/v1/projects/{projectId}/functional/catalogs", projectId)
+                            .param("scope", catalog.getKey()).cookie(administrator.sessionCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data[?(@.id == '" + catalog.getValue() + "')]").isNotEmpty());
+            for (String otherCatalogId : catalogIds.values()) {
+                if (!otherCatalogId.equals(catalog.getValue())) {
+                    result.andExpect(jsonPath("$.data[?(@.id == '" + otherCatalogId + "')]").isEmpty());
+                }
+            }
+        }
+
+        for (String catalogId : catalogIds.values()) {
+            Csrf csrf = csrf(administrator);
+            mvc.perform(delete("/api/v1/projects/{projectId}/functional/catalogs/{catalogId}", projectId, catalogId)
+                            .cookie(administrator.sessionCookie(), csrf.cookie())
+                            .header(csrf.headerName(), csrf.token()))
+                    .andExpect(status().isNoContent());
+        }
     }
 
     private LoginSession login(String email) throws Exception {
