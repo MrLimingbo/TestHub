@@ -39,6 +39,20 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- Keep the Spring Framework patch line ahead of the release security gate. -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>6.2.19</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- Spring Session brings this dependency transitively; pin the fixed patch release. -->
+      <dependency>
+        <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-commons</artifactId>
+        <version>3.5.12</version>
+      </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk18on</artifactId>
