@@ -41,13 +41,13 @@ public class ApiDebugController {
     @PostMapping("/execute")
     public ApiResponse<ApiDebugService.DebugResult> execute(Authentication authentication, @PathVariable String projectId,
                                                              @Valid @RequestBody ExecuteRequest request) {
-        return ApiResponse.of(debug.execute(principal(authentication), projectId,
-                new ApiDebugService.DebugRequest(request.method(), request.url(), request.headers().stream()
-                        .map(header -> new ApiDebugService.HeaderInput(header.name(), header.value())).toList(), request.body(), request.timeoutMs(),
-                        request.environmentCode(), request.auth() == null ? null : new ApiDebugService.AuthInput(request.auth().type(), request.auth().token(),
-                                request.auth().username(), request.auth().password(), request.auth().key(), request.auth().value(), request.auth().placement()),
-                        request.protocol() == null ? null : new ApiDebugService.ProtocolInput(request.protocol().type(), request.protocol().query(), request.protocol().variables(),
-                                request.protocol().operationName(), request.protocol().envelope(), request.protocol().soapAction()))));
+        return ApiResponse.of(debug.execute(principal(authentication), projectId, debugRequest(request)));
+    }
+
+    @PostMapping("/drafts")
+    public ApiResponse<ApiDebugHistory> saveDraft(Authentication authentication, @PathVariable String projectId,
+                                                   @Valid @RequestBody ExecuteRequest request) {
+        return ApiResponse.of(debug.saveDraft(principal(authentication), projectId, debugRequest(request)));
     }
 
     @PostMapping("/grpc/unary")
@@ -234,6 +234,15 @@ public class ApiDebugController {
         return (AuthenticatedPrincipal) authentication.getPrincipal();
     }
 
+    private ApiDebugService.DebugRequest debugRequest(ExecuteRequest request) {
+        return new ApiDebugService.DebugRequest(request.method(), request.url(), request.headers().stream()
+                .map(header -> new ApiDebugService.HeaderInput(header.name(), header.value())).toList(), request.body(), request.timeoutMs(),
+                request.environmentCode(), request.auth() == null ? null : new ApiDebugService.AuthInput(request.auth().type(), request.auth().token(),
+                        request.auth().username(), request.auth().password(), request.auth().key(), request.auth().value(), request.auth().placement()),
+                request.protocol() == null ? null : new ApiDebugService.ProtocolInput(request.protocol().type(), request.protocol().query(), request.protocol().variables(),
+                        request.protocol().operationName(), request.protocol().envelope(), request.protocol().soapAction()), request.name());
+    }
+
     public record HeaderRequest(@NotBlank @Size(max = 200) String name, @NotNull @Size(max = 16_000) String value) {
     }
     public record AuthRequest(@Size(max = 20) String type, @Size(max = 20_000) String token, @Size(max = 2_000) String username,
@@ -309,7 +318,7 @@ public class ApiDebugController {
                                  @Size(max = 48) List<@Valid HeaderRequest> headers, @Size(max = 100_000) String body,
                                  @Min(500) @Max(10_000) Integer timeoutMs,
                                  @Pattern(regexp = "[a-z0-9][a-z0-9_-]{0,63}") String environmentCode, @Valid AuthRequest auth,
-                                 @Valid ProtocolRequest protocol) {
+                                 @Valid ProtocolRequest protocol, @Size(max = 128) String name) {
         public ExecuteRequest {
             headers = headers == null ? List.of() : List.copyOf(headers);
         }

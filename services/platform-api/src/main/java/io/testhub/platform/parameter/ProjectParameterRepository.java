@@ -62,6 +62,22 @@ public class ProjectParameterRepository {
                 .param("id", id).param("projectId", projectId).update();
     }
 
+    public void deleteNonSecretKey(String projectId, String environmentCode, String key) {
+        jdbc.sql("""
+                DELETE FROM project_parameter
+                WHERE project_id = :projectId AND environment_code = :environmentCode
+                  AND parameter_key = :key AND secret = FALSE
+                """).param("projectId", projectId).param("environmentCode", environmentCode).param("key", key)
+                .update();
+    }
+
+    public void deleteByEnvironment(String projectId, String environmentCode) {
+        jdbc.sql("""
+                DELETE FROM project_parameter
+                WHERE project_id = :projectId AND environment_code = :environmentCode
+                """).param("projectId", projectId).param("environmentCode", environmentCode).update();
+    }
+
     public List<EnvironmentSecret> findSecretsByProject(String projectId, String environmentCode) {
         return jdbc.sql("""
                 SELECT id, environment_code, parameter_key, updated_by, updated_at

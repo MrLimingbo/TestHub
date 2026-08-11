@@ -5,7 +5,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.containsString;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,6 +75,33 @@ class ApiDebugFlowTests {
                         .header(csrf.headerName(), csrf.token())
                         .content("{\"method\":\"GET\",\"url\":\"http://127.0.0.1:8080/actuator/health\",\"headers\":[]}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void savesEncryptedQuickRequestDraftWithoutExecutingTransport() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        Csrf csrf = csrf(administrator);
+        Map<String, Object> request = Map.of(
+                "name", "订单查询快捷请求",
+                "method", "POST", "url", "https://8.8.8.8/api/v1/draft-acceptance?token=should-not-persist",
+                "headers", List.of(Map.of("name", "Content-Type", "value", "application/json")),
+                "body", "{\"source\":\"saved-draft\"}", "timeoutMs", 1000);
+
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/drafts", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.result").value("DRAFT"))
+                .andExpect(jsonPath("$.data.requestUrl").value("https://8.8.8.8/api/v1/draft-acceptance?token=***"))
+                .andExpect(jsonPath("$.data.replayDraft").value(containsString("saved-draft")))
+                .andExpect(jsonPath("$.data.replayDraft").value(containsString("订单查询快捷请求")));
+
+        assertNull(transport.latest());
+        mvc.perform(get("/api/v1/projects/{projectId}/api-debug/history", projectId).cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].result").value("DRAFT"))
+                .andExpect(jsonPath("$.data[0].responseStatus").doesNotExist());
     }
 
     @Test

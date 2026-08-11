@@ -69,6 +69,10 @@ class AccessControlFlowTests {
                    OR account LIKE 'account-management-test-deleted-%'
                    OR email IN ('test@testhub.local', 'account-management-test@testhub.local')
                 """).update();
+        jdbc.sql("""
+                DELETE FROM project_environment
+                WHERE project_id IN (SELECT id FROM project WHERE name LIKE '项目管理测试%')
+                """).update();
         jdbc.sql("DELETE FROM project WHERE name LIKE '项目管理测试%'").update();
     }
 
@@ -89,6 +93,11 @@ class AccessControlFlowTests {
                 .andExpect(jsonPath("$.data.description").value("创建项目"))
                 .andReturn();
         String projectId = json(created).at("/data/id").asText();
+        mvc.perform(get("/api/v1/projects/{projectId}/environments", projectId)
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].environmentCode").value("test"))
+                .andExpect(jsonPath("$.data[0].defaultEnvironment").value(true));
 
         MvcResult updateCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
                 .andExpect(status().isOk()).andReturn();

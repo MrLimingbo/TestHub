@@ -95,15 +95,15 @@ public class GrpcDebugService {
         try {
             GrpcDebugTransport.Response response = transport.unary(new GrpcDebugTransport.Request(request.target().host(), request.target().port(),
                     request.tls(), request.service(), request.method(), request.requestJson(), request.timeoutMs(), request.metadata(), request.descriptorProtos()));
-            if (response.responseJson().length() > MAX_RESPONSE_LENGTH) return failed(project, principal, request, started, "RESOURCE_EXHAUSTED");
+            if (response.responseJson().length() > MAX_RESPONSE_LENGTH) return failed(project, principal, request, input, started, "RESOURCE_EXHAUSTED");
             int durationMs = elapsedMs(started);
-            ApiDebugHistory item = saved(project, principal, request, Status.Code.OK.value(), durationMs, response.responseJson().length(), "COMPLETED", null);
+            ApiDebugHistory item = saved(project, principal, request, input, Status.Code.OK.value(), durationMs, response.responseJson().length(), "COMPLETED", null);
             history.insert(item);
             audit.record(principal, project.organizationId(), projectId, "GRPC_DEBUG_EXECUTED", "API_DEBUG_HISTORY", item.id(),
                     auditDetails(request, "OK"));
             return new GrpcResult(item.id(), true, "OK", durationMs, response.responseJson(), false, null);
         } catch (GrpcDebugTransport.TransportException exception) {
-            return failed(project, principal, request, started, exception.status());
+            return failed(project, principal, request, input, started, exception.status());
         }
     }
 
@@ -487,20 +487,28 @@ public class GrpcDebugService {
                 bidiStreamAuditDetails(session));
     }
 
-    private GrpcResult failed(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, long started, String status) {
+    private GrpcResult failed(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, UnaryRequest input, long started, String status) {
         String safeMessage = safeMessage(status);
         int durationMs = elapsedMs(started);
-        ApiDebugHistory item = saved(project, principal, request, grpcCode(status), durationMs, 0, "FAILED", safeMessage);
+        ApiDebugHistory item = saved(project, principal, request, input, grpcCode(status), durationMs, 0, "FAILED", safeMessage);
         history.insert(item);
         audit.record(principal, project.organizationId(), project.id(), "GRPC_DEBUG_EXECUTED", "API_DEBUG_HISTORY", item.id(),
                 auditDetails(request, status));
         return new GrpcResult(item.id(), false, status, durationMs, "", false, safeMessage);
     }
 
-    private ApiDebugHistory saved(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, Integer status,
+    private ApiDebugHistory saved(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, UnaryRequest input, Integer status,
                                   int durationMs, int responseSize, String result, String error) {
-        return new ApiDebugHistory(UlidCreator.getUlid().toString(), project.organizationId(), project.id(), "GRPC",
-                request.historyTarget(), status, durationMs, responseSize, result, error, principal.userId(), null);
+        return new ApiDebugHistory(UlidCreator.getUlid().toString(), project.organizationId(), project.id(), "GRPC", "GRPC",
+                request.historyTarget(), status, durationMs, responseSize, result, error, encryptedReplayDraft(input), principal.userId(), null);
+    }
+
+    private String encryptedReplayDraft(UnaryRequest input) {
+        try {
+            return cipher.encrypt(json.writeValueAsString(Map.of("protocol", "GRPC", "request", input)));
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("无法加密保存 gRPC 回放草稿", exception);
+        }
     }
 
     private ValidatedRequest resolve(String projectId, UnaryRequest input) {

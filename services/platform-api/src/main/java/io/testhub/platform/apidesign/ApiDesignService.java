@@ -264,6 +264,11 @@ public class ApiDesignService {
         return repository.findCases(projectId, apiId);
     }
 
+    public List<ApiDefinitionCase> cases(AuthenticatedPrincipal principal, String projectId) {
+        access.requireProjectRead(principal, projectId);
+        return repository.findCasesByProject(projectId);
+    }
+
     @Transactional
     public ApiDefinitionCase createCase(AuthenticatedPrincipal principal, String projectId, String apiId, CaseInput input) {
         ProjectSummary project = writeAccess(principal, projectId);

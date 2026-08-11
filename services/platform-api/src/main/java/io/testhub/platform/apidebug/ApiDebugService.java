@@ -8,6 +8,7 @@ import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
 import io.testhub.platform.audit.AuditService;
 import io.testhub.platform.parameter.ProjectParameterRepository;
+import io.testhub.platform.parameter.ProjectEnvironmentRepository;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.security.SecretCipher;
 import java.net.InetAddress;
@@ -43,9 +44,11 @@ public class ApiDebugService {
     private final ProjectParameterRepository parameters;
     private final SecretCipher cipher;
     private final ObjectMapper json;
+    private final ProjectEnvironmentRepository environments;
 
     public ApiDebugService(ApiDebugHistoryRepository history, ApiDebugTransport transport, AccessService access, AuditService audit,
-                           ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json) {
+                           ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json,
+                           ProjectEnvironmentRepository environments) {
         this.history = history;
         this.transport = transport;
         this.access = access;
@@ -53,11 +56,12 @@ public class ApiDebugService {
         this.parameters = parameters;
         this.cipher = cipher;
         this.json = json;
+        this.environments = environments;
     }
 
     public List<ApiDebugHistory> history(AuthenticatedPrincipal principal, String projectId, int limit) {
-        access.requireProjectRead(principal, projectId);
-        return history.findRecent(projectId, Math.min(Math.max(limit, 1), 100));
+        access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        return history.findRecent(projectId, Math.min(Math.max(limit, 1), 100)).stream().map(this::withReplayDraft).toList();
     }
 
     public DebugResult execute(AuthenticatedPrincipal principal, String projectId, DebugRequest input) {
@@ -67,7 +71,7 @@ public class ApiDebugService {
         try {
             ApiDebugTransport.TransportResponse response = transport.execute(request.method(), request.url(), request.headers(), request.body(), request.timeoutMs());
             int durationMs = elapsedMs(started);
-            ApiDebugHistory item = saved(project, principal, request, response.statusCode(), durationMs, response.body().length(), "COMPLETED", null);
+            ApiDebugHistory item = saved(project, principal, request, input, response.statusCode(), durationMs, response.body().length(), "COMPLETED", null);
             history.insert(item);
             audit.record(principal, project.organizationId(), projectId, "API_DEBUG_EXECUTED", "API_DEBUG_HISTORY", item.id(),
                     Map.of("method", request.method(), "environment", request.environmentCode() == null ? "none" : request.environmentCode(), "status", response.statusCode()));
@@ -75,30 +79,60 @@ public class ApiDebugService {
                     response.body(), response.truncated(), null);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            return failed(project, principal, request, started, "请求已被中断");
+            return failed(project, principal, request, input, started, "请求已被中断");
         } catch (Exception exception) {
-            return failed(project, principal, request, started, "连接目标服务失败");
+            return failed(project, principal, request, input, started, "连接目标服务失败");
         }
     }
 
-    private DebugResult failed(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, long started, String message) {
+    public ApiDebugHistory saveDraft(AuthenticatedPrincipal principal, String projectId, DebugRequest input) {
+        ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        ValidatedRequest request = resolveAndValidate(projectId, input);
+        ApiDebugHistory item = saved(project, principal, request, input, null, 0, 0, "DRAFT", null);
+        history.insert(item);
+        audit.record(principal, project.organizationId(), projectId, "API_DEBUG_DRAFT_SAVED", "API_DEBUG_HISTORY", item.id(),
+                Map.of("method", request.method(), "protocol", request.protocol(),
+                        "environment", request.environmentCode() == null ? "none" : request.environmentCode()));
+        return withReplayDraft(item);
+    }
+
+    private DebugResult failed(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, DebugRequest input, long started, String message) {
         int durationMs = elapsedMs(started);
-        ApiDebugHistory item = saved(project, principal, request, null, durationMs, 0, "FAILED", message);
+        ApiDebugHistory item = saved(project, principal, request, input, null, durationMs, 0, "FAILED", message);
         history.insert(item);
         audit.record(principal, project.organizationId(), project.id(), "API_DEBUG_EXECUTED", "API_DEBUG_HISTORY", item.id(),
                 Map.of("method", request.method(), "environment", request.environmentCode() == null ? "none" : request.environmentCode(), "status", "FAILED"));
         return new DebugResult(item.id(), false, null, null, durationMs, List.of(), "", false, message);
     }
 
-    private ApiDebugHistory saved(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request,
+    private ApiDebugHistory saved(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, DebugRequest input,
                                   Integer status, int durationMs, int responseSize, String result, String error) {
-        return new ApiDebugHistory(UlidCreator.getUlid().toString(), project.organizationId(), project.id(), request.method(),
-                request.historyUrl(), status, durationMs, responseSize, result, error, principal.userId(), null);
+        return new ApiDebugHistory(UlidCreator.getUlid().toString(), project.organizationId(), project.id(), request.method(), request.protocol(),
+                request.historyUrl(), status, durationMs, responseSize, result, error, encryptedReplayDraft(request.protocol(), input), principal.userId(), null);
+    }
+
+    private ApiDebugHistory withReplayDraft(ApiDebugHistory entry) {
+        String draft = entry.replayDraft() == null ? null : cipher.decrypt(entry.replayDraft());
+        return new ApiDebugHistory(entry.id(), entry.organizationId(), entry.projectId(), entry.method(), entry.protocol(), entry.requestUrl(),
+                entry.responseStatus(), entry.durationMs(), entry.responseSize(), entry.result(), entry.errorMessage(), draft, entry.createdBy(), entry.createdAt());
+    }
+
+    private String encryptedReplayDraft(String protocol, DebugRequest input) {
+        try {
+            return cipher.encrypt(json.writeValueAsString(Map.of("protocol", protocol, "request", input)));
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("无法加密保存快捷请求回放草稿", exception);
+        }
     }
 
     private ValidatedRequest resolveAndValidate(String projectId, DebugRequest input) {
         if (input == null) throw rejected("调试请求不能为空");
         String environmentCode = normalizeEnvironment(input.environmentCode());
+        if (environmentCode != null) {
+            var selectedEnvironment = environments.findByCode(projectId, environmentCode)
+                    .orElseThrow(() -> rejected("请选择当前项目中已存在的运行环境"));
+            if (!selectedEnvironment.enabled()) throw rejected("所选运行环境已停用");
+        }
         ResolutionContext variables = variables(projectId, environmentCode);
         ProtocolRequest protocol = protocol(input.protocol(), variables, input.body());
         String method = input.method() == null ? "" : input.method().trim().toUpperCase(Locale.ROOT);
@@ -118,7 +152,7 @@ public class ApiDebugService {
         url = safeHttpUrl(applied.url().toString());
         int timeoutMs = input.timeoutMs() == null ? 10_000 : input.timeoutMs();
         if (timeoutMs < 500 || timeoutMs > 10_000) throw rejected("超时时间应在 500 到 10000 毫秒之间");
-        return new ValidatedRequest(method, url, applied.headers(), body, timeoutMs, environmentCode, historyUrl(url, variables.secretValues()));
+        return new ValidatedRequest(method, protocol.type(), url, applied.headers(), body, timeoutMs, environmentCode, historyUrl(url, variables.secretValues()));
     }
 
     private ProtocolRequest protocol(ProtocolInput input, ResolutionContext variables, String httpBody) {
@@ -334,12 +368,12 @@ public class ApiDebugService {
     public record ProtocolInput(String type, String query, String variables, String operationName, String envelope, String soapAction) {
     }
     public record DebugRequest(String method, String url, List<HeaderInput> headers, String body, Integer timeoutMs,
-                               String environmentCode, AuthInput auth, ProtocolInput protocol) {
+                               String environmentCode, AuthInput auth, ProtocolInput protocol, String name) {
     }
     public record DebugResult(String historyId, boolean success, Integer statusCode, String statusText, int durationMs,
                               List<ApiDebugTransport.Header> responseHeaders, String body, boolean truncated, String errorMessage) {
     }
-    private record ValidatedRequest(String method, URI url, List<ApiDebugTransport.Header> headers, String body, int timeoutMs,
+    private record ValidatedRequest(String method, String protocol, URI url, List<ApiDebugTransport.Header> headers, String body, int timeoutMs,
                                     String environmentCode, String historyUrl) {
     }
     private record AuthApplied(URI url, List<ApiDebugTransport.Header> headers) {

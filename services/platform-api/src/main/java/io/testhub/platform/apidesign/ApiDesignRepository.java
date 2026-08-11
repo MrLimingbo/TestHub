@@ -181,6 +181,14 @@ public class ApiDesignRepository {
                 .query((rs, row) -> definitionCase(rs)).list();
     }
 
+    public List<ApiDefinitionCase> findCasesByProject(String projectId) {
+        return jdbc.sql(caseQuery("""
+                WHERE c.project_id = :projectId
+                ORDER BY c.updated_at DESC, c.name
+                """)).param("projectId", projectId)
+                .query((rs, row) -> definitionCase(rs)).list();
+    }
+
     public Optional<ApiDefinitionCase> findCase(String projectId, String apiId, String caseId) {
         return jdbc.sql(caseQuery("""
                 WHERE c.project_id = :projectId AND c.api_id = :apiId AND c.id = :caseId

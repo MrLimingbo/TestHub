@@ -1,17 +1,24 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { Message } from '@arco-design/web-vue'
+import { Message, Modal } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
 import ApiDefinitionEditor from '@/components/api-testing/ApiDefinitionEditor.vue'
+import ApiDebugPage from '@/pages/ApiDebugPage.vue'
 import ApiInterfaceWorkbench from '@/components/api-testing/ApiInterfaceWorkbench.vue'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
 import { useSessionStore } from '@/stores/session'
 import {
+  apiTreeDisplayText,
+  availableCatalogMoveTargets as catalogMoveTargets,
   buildApiManagementTreeRows,
+  interfaceRouteQuery,
+  nextApiCopyPath,
   nextWorkspaceTabAfterClose,
+  type ApiTreeDisplayMode,
   type ApiTreeStatusFilter,
 } from '@/utils/apiManagementTree'
-import { formatApiParameterLines, parseApiParameterLines } from '@/utils/apiTesting'
+import { apiCaseType, formatApiParameterLines, parseApiParameterLines } from '@/utils/apiTesting'
+import { apiDebugDraftFromHistory, apiDebugRequestNameFromReplayDraft, storeApiDebugRouteDraft, type ApiDebugRouteDraft } from '@/utils/apiDebugDraft'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -21,7 +28,14 @@ interface Catalog { id: string; parentId: string | null; name: string; sortOrder
 interface ApiDefinition { id: string; catalogId: string; method: string; path: string; name: string; status: string; currentVersionId: string | null; versionCount: number; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string }
 interface Parameter { name: string; type: string; required: boolean; example: string; description: string }
 interface ApiVersion { id: string; versionName: string; summary: string; description: string; requestHeaders: string; requestQuery: string; requestPath: string; requestBody: string; responseBody: string; exampleResponse: string; status: string; publishedAt: string | null; createdAt: string }
+interface ApiTreeCase { id: string; apiId: string; name: string; responseValidation: string }
 interface ImportResult { format: string; importedCount: number; items: string[] }
+interface QuickRequestHistory { id: string; method: string; protocol?: string; requestUrl: string; responseStatus: number | null; durationMs: number; result: string; createdAt: string; replayDraft?: string; localDraft?: ApiDebugRouteDraft }
+interface QuickRequestFolder { id: string; parentId: string | null; name: string }
+interface QuickRequestFolderRow extends QuickRequestFolder { depth: number }
+type QuickRequestTreeRow =
+  | { key: string; kind: 'folder'; folder: QuickRequestFolder; depth: number }
+  | { key: string; kind: 'request'; item: QuickRequestHistory; depth: number }
 
 const context = ref<Context | null>(null)
 const session = useSessionStore()
@@ -49,7 +63,16 @@ const expandedCatalogIds = ref<Set<string>>(new Set())
 const statusFilter = ref<ApiTreeStatusFilter>('ALL')
 const multiSelectMode = ref(false)
 const treeCollapsed = ref(false)
-const selectedCaseCounts = reactive<Record<string, number>>({})
+const interfaceRootExpanded = ref(true)
+const apiTreeDisplayMode = ref<ApiTreeDisplayMode>('NAME')
+const quickRequestRootExpanded = ref(true)
+const quickRequestHistory = ref<QuickRequestHistory[]>([])
+const quickRequestFolders = ref<QuickRequestFolder[]>([])
+const quickRequestCopies = ref<QuickRequestHistory[]>([])
+const quickRequestHiddenIds = ref<string[]>([])
+const quickRequestFolderIds = ref<Record<string, string>>({})
+const apiCases = ref<ApiTreeCase[]>([])
+const expandedApiCaseIds = ref<Set<string>>(new Set())
 const interchangeKind = ref<'OPENAPI' | 'CURL' | 'POSTMAN' | 'HAR'>('OPENAPI')
 const specInput = ref<HTMLInputElement | null>(null)
 const specFileName = ref('')
@@ -63,6 +86,7 @@ const definitionErrors = reactive<Record<string, string>>({})
 const versionErrors = reactive<Record<string, string>>({})
 const interchangeForm = reactive({ catalogId: '', document: '', name: '', command: "curl -X POST 'https://api.example.com/api/v1/orders?dryRun=true' -H 'Authorization: Bearer <token>' --data-raw '{\"name\":\"示例\"}'" })
 let versionLoadGeneration = 0
+let caseOpenNonce = 0
 
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
 const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value))
@@ -82,7 +106,60 @@ const treeRows = computed(() => buildApiManagementTreeRows(
 ))
 const visibleApiCount = computed(() => treeRows.value.filter((row) => row.kind === 'api').length)
 const statusFilterLabel = computed(() => ({ ALL: '全部接口', PUBLISHED: '已发布', DRAFT: '草稿' }[statusFilter.value]))
+const isQuickRequest = computed(() => route.path.endsWith('/quick-request'))
+const caseOpenRequest = computed(() => {
+  if (typeof route.query.caseRequest !== 'string') return 0
+  const request = Number(route.query.caseRequest)
+  return Number.isSafeInteger(request) && request > 0 ? request : 0
+})
+const debugCaseRequest = computed(() => typeof route.query.debugCase === 'string' ? route.query.debugCase : '')
+const debugCasesByApi = computed(() => {
+  const grouped = new Map<string, ApiTreeCase[]>()
+  apiCases.value.forEach((item) => {
+    if (apiCaseType(item.responseValidation) !== 'DEBUG') return
+    grouped.set(item.apiId, [...(grouped.get(item.apiId) ?? []), item])
+  })
+  return grouped
+})
+const quickRequestFolderRows = computed<QuickRequestFolderRow[]>(() => {
+  const rows: QuickRequestFolderRow[] = []
+  const visited = new Set<string>()
+  const appendChildren = (parentId: string | null, depth: number) => {
+    quickRequestFolders.value
+      .filter((folder) => folder.parentId === parentId && !visited.has(folder.id))
+      .forEach((folder) => {
+        visited.add(folder.id)
+        rows.push({ ...folder, depth })
+        appendChildren(folder.id, depth + 1)
+      })
+  }
+  appendChildren(null, 0)
+  quickRequestFolders.value
+    .filter((folder) => !visited.has(folder.id))
+    .forEach((folder) => rows.push({ ...folder, depth: 0 }))
+  return rows
+})
+const visibleQuickRequestItems = computed(() => [...quickRequestHistory.value, ...quickRequestCopies.value]
+  .filter((item) => !quickRequestHiddenIds.value.includes(item.id)))
+const quickRequestTreeRows = computed<QuickRequestTreeRow[]>(() => {
+  const rows: QuickRequestTreeRow[] = []
+  const validFolderIds = new Set(quickRequestFolderRows.value.map((folder) => folder.id))
+  quickRequestFolderRows.value.forEach((folder) => {
+    rows.push({ key: `folder:${folder.id}`, kind: 'folder', folder, depth: folder.depth })
+    visibleQuickRequestItems.value
+      .filter((item) => quickRequestFolderIds.value[item.id] === folder.id)
+      .forEach((item) => rows.push({ key: `request:${item.id}`, kind: 'request', item, depth: folder.depth + 1 }))
+  })
+  visibleQuickRequestItems.value
+    .filter((item) => {
+      const folderId = quickRequestFolderIds.value[item.id]
+      return !folderId || !validFolderIds.has(folderId)
+    })
+    .forEach((item) => rows.push({ key: `request:${item.id}`, kind: 'request', item, depth: 0 }))
+  return rows
+})
 const methodClass = (method: string) => `method-${method.toLowerCase()}`
+const apiTreeLabel = (api: ApiDefinition) => apiTreeDisplayText(api, apiTreeDisplayMode.value)
 const parseParams = (value: string) => { try { return JSON.parse(value) as Parameter[] } catch { return [] } }
 const actorName = (id: string) => id === session.profile?.id ? session.profile.displayName : id || '未记录'
 
@@ -119,12 +196,16 @@ function syncOpenTabs(definitionData: ApiDefinition[]) {
   }
 }
 async function loadAssets() {
-  const [catalogData, definitionData] = await Promise.all([
+  const [catalogData, definitionData, historyData, caseData] = await Promise.all([
     read<Catalog[]>(`/api/v1/projects/${projectId.value}/api-design/catalogs`),
     read<ApiDefinition[]>(`/api/v1/projects/${projectId.value}/api-design/definitions`),
+    read<QuickRequestHistory[]>(`/api/v1/projects/${projectId.value}/api-debug/history?limit=20`),
+    read<ApiTreeCase[]>(`/api/v1/projects/${projectId.value}/api-design/cases`),
   ])
   catalogs.value = catalogData
   definitions.value = definitionData
+  quickRequestHistory.value = historyData
+  apiCases.value = caseData
   selectedApiIds.value = selectedApiIds.value.filter((id) => definitionData.some((api) => api.id === id))
   const requestedId = typeof route.query.apiId === 'string' ? route.query.apiId : ''
   if (requestedId && definitionData.some((api) => api.id === requestedId)) selectedApiId.value = requestedId
@@ -144,7 +225,8 @@ async function changeProject() {
   selectedApiId.value = ''
   openApiIds.value = []
   expandedCatalogIds.value = new Set()
-  try { await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '加载失败') }
+  expandedApiCaseIds.value = new Set()
+  try { await loadAssets(); loadQuickRequestTreeState(); loadApiTreePreferences() } catch (error) { Message.error(error instanceof Error ? error.message : '加载失败') }
 }
 function toggleCatalog(catalogId: string) {
   const expanded = new Set(expandedCatalogIds.value)
@@ -153,9 +235,430 @@ function toggleCatalog(catalogId: string) {
   expandedCatalogIds.value = expanded
   selectedCatalogId.value = catalogId
 }
+function apiTreePreferenceKey() { return `testhub:api-tree:${projectId.value}:display-mode` }
+function loadApiTreePreferences() {
+  apiTreeDisplayMode.value = window.localStorage.getItem(apiTreePreferenceKey()) === 'URL' ? 'URL' : 'NAME'
+}
+function setApiTreeDisplayMode(mode: ApiTreeDisplayMode) {
+  apiTreeDisplayMode.value = mode
+  window.localStorage.setItem(apiTreePreferenceKey(), mode)
+}
+function availableCatalogMoveTargets(catalog: Catalog) {
+  return catalogMoveTargets(catalogs.value, catalog.id)
+}
+async function loadQuickRequestHistory() {
+  if (!projectId.value) return
+  try {
+    quickRequestHistory.value = await read<QuickRequestHistory[]>(`/api/v1/projects/${projectId.value}/api-debug/history?limit=20`)
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : '加载快捷请求历史失败')
+  }
+}
+async function openQuickRequest() {
+  quickRequestRootExpanded.value = true
+  if (!isQuickRequest.value) await router.push('/api-testing/quick-request')
+}
+async function newQuickRequest(folderId = '') {
+  quickRequestRootExpanded.value = true
+  await router.push({ path: '/api-testing/quick-request', query: { newRequest: String(Date.now()), ...(folderId ? { folderId } : {}) } })
+}
+function quickRequestStorageKey(name: string) { return `testhub:quick-request:${projectId.value}:${name}` }
+function quickRequestLabel(item: QuickRequestHistory) {
+  return item.localDraft?.name?.trim() || apiDebugRequestNameFromReplayDraft(item.replayDraft) || item.requestUrl
+}
+function saveQuickRequestTreeState() {
+  window.localStorage.setItem(quickRequestStorageKey('folders'), JSON.stringify(quickRequestFolders.value))
+  window.localStorage.setItem(quickRequestStorageKey('hidden'), JSON.stringify(quickRequestHiddenIds.value))
+  window.localStorage.setItem(quickRequestStorageKey('folder-ids'), JSON.stringify(quickRequestFolderIds.value))
+  window.sessionStorage.setItem(quickRequestStorageKey('copies'), JSON.stringify(quickRequestCopies.value))
+}
+function loadQuickRequestTreeState() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(quickRequestStorageKey('folders')) ?? '[]') as unknown
+    quickRequestFolders.value = Array.isArray(stored)
+      ? stored
+        .filter((folder): folder is { id: string; parentId?: string | null; name: string } => Boolean(folder) && typeof folder.id === 'string' && typeof folder.name === 'string')
+        .map((folder) => ({ id: folder.id, parentId: typeof folder.parentId === 'string' ? folder.parentId : null, name: folder.name }))
+      : []
+    const hidden = JSON.parse(window.localStorage.getItem(quickRequestStorageKey('hidden')) ?? '[]') as unknown
+    quickRequestHiddenIds.value = Array.isArray(hidden) ? hidden.filter((id): id is string => typeof id === 'string') : []
+    const folderIds = JSON.parse(window.localStorage.getItem(quickRequestStorageKey('folder-ids')) ?? '{}') as unknown
+    quickRequestFolderIds.value = folderIds && typeof folderIds === 'object' && !Array.isArray(folderIds)
+      ? Object.fromEntries(Object.entries(folderIds).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
+      : {}
+    const copies = JSON.parse(window.sessionStorage.getItem(quickRequestStorageKey('copies')) ?? '[]') as unknown
+    quickRequestCopies.value = Array.isArray(copies)
+      ? copies.filter((item): item is QuickRequestHistory => Boolean(item) && typeof item.id === 'string' && typeof item.method === 'string' && typeof item.requestUrl === 'string')
+      : []
+  } catch {
+    quickRequestFolders.value = []
+    quickRequestHiddenIds.value = []
+    quickRequestFolderIds.value = {}
+    quickRequestCopies.value = []
+  }
+}
+function addQuickRequestFolder(parentId: string | null = null) {
+  const name = window.prompt('请输入快捷请求目录名称')?.trim()
+  if (!name) return
+  quickRequestFolders.value.push({ id: globalThis.crypto?.randomUUID?.() ?? String(Date.now()), parentId, name })
+  saveQuickRequestTreeState()
+}
+function renameQuickRequestFolder(folder: QuickRequestFolder) {
+  const name = window.prompt('请输入快捷请求目录名称', folder.name)?.trim()
+  if (!name) return
+  quickRequestFolders.value = quickRequestFolders.value.map((item) => item.id === folder.id ? { ...item, name } : item)
+  saveQuickRequestTreeState()
+}
+function copyQuickRequestFolder(folder: QuickRequestFolder) {
+  const copied: QuickRequestFolder[] = []
+  const copyBranch = (source: QuickRequestFolder, parentId: string | null, isRoot: boolean) => {
+    const id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${copied.length}`
+    copied.push({ id, parentId, name: isRoot ? `${source.name} 副本` : source.name })
+    quickRequestFolders.value
+      .filter((candidate) => candidate.parentId === source.id)
+      .forEach((child) => copyBranch(child, id, false))
+  }
+  copyBranch(folder, folder.parentId, true)
+  quickRequestFolders.value.push(...copied)
+  saveQuickRequestTreeState()
+  Message.success('快捷请求目录已复制')
+}
+function deleteQuickRequestFolder(folder: QuickRequestFolder) {
+  const deletedIds = new Set([folder.id])
+  let foundChild = true
+  while (foundChild) {
+    foundChild = false
+    quickRequestFolders.value.forEach((item) => {
+      if (item.parentId && deletedIds.has(item.parentId) && !deletedIds.has(item.id)) {
+        deletedIds.add(item.id)
+        foundChild = true
+      }
+    })
+  }
+  quickRequestFolders.value = quickRequestFolders.value.filter((item) => !deletedIds.has(item.id))
+  quickRequestFolderIds.value = Object.fromEntries(
+    Object.entries(quickRequestFolderIds.value).filter(([, folderId]) => !deletedIds.has(folderId)),
+  )
+  saveQuickRequestTreeState()
+  Message.success('快捷请求目录已删除')
+}
+function confirmDeleteQuickRequestFolder(folder: QuickRequestFolder) {
+  Modal.confirm({
+    title: '删除快捷请求目录',
+    content: `删除“${folder.name}”会同时删除其子目录，确定继续吗？`,
+    okText: '删除',
+    okButtonProps: { status: 'danger' },
+    onOk: () => deleteQuickRequestFolder(folder),
+  })
+}
+function draftFromQuickRequest(item: QuickRequestHistory): ApiDebugRouteDraft | null {
+  const storedDraft = item.localDraft ?? apiDebugDraftFromHistory(item)
+  if (storedDraft) return storedDraft
+  const protocol = (item.protocol ?? item.method).toUpperCase()
+  if (protocol === 'GRPC') {
+    const match = item.requestUrl.match(/^grpc(s)?:\/\/([^/]+)\/(.+)\/([^/]+)$/i)
+    if (!match) return null
+    return {
+      replayDraft: JSON.stringify({
+        protocol: 'GRPC',
+        request: {
+          endpoint: match[2],
+          tls: Boolean(match[1]),
+          service: match[3],
+          method: match[4],
+          requestJson: '{}',
+          timeoutMs: 10_000,
+          metadata: [],
+          auth: { type: 'NONE' },
+        },
+      }),
+    }
+  }
+  if (protocol === 'WEBSOCKET') return { protocol: 'WEBSOCKET', url: item.requestUrl }
+  if (protocol === 'GRAPHQL' || protocol === 'SOAP') return { protocol, method: 'POST', url: item.requestUrl }
+  return null
+}
+function copyQuickRequest(item: QuickRequestHistory) {
+  const draft = draftFromQuickRequest(item)
+  if (!draft) {
+    Message.warning('当前请求没有可复制的回放配置')
+    return
+  }
+  const id = `copy:${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`
+  quickRequestCopies.value.push({ ...item, id, createdAt: new Date().toISOString(), localDraft: draft })
+  const folderId = quickRequestFolderIds.value[item.id]
+  if (folderId) quickRequestFolderIds.value = { ...quickRequestFolderIds.value, [id]: folderId }
+  saveQuickRequestTreeState()
+  Message.success('快捷请求已复制')
+}
+function moveQuickRequest(item: QuickRequestHistory, folderId: string | null) {
+  const nextFolderIds = { ...quickRequestFolderIds.value }
+  if (folderId) nextFolderIds[item.id] = folderId
+  else delete nextFolderIds[item.id]
+  quickRequestFolderIds.value = nextFolderIds
+  saveQuickRequestTreeState()
+  const folder = folderId ? quickRequestFolders.value.find((candidate) => candidate.id === folderId) : null
+  Message.success(folder ? `已移动到“${folder.name}”` : '已移动到快捷请求根目录')
+}
+function deleteQuickRequest(item: QuickRequestHistory) {
+  if (item.localDraft) quickRequestCopies.value = quickRequestCopies.value.filter((candidate) => candidate.id !== item.id)
+  else quickRequestHiddenIds.value = [...new Set([...quickRequestHiddenIds.value, item.id])]
+  const nextFolderIds = { ...quickRequestFolderIds.value }
+  delete nextFolderIds[item.id]
+  quickRequestFolderIds.value = nextFolderIds
+  saveQuickRequestTreeState()
+  Message.success('快捷请求已删除')
+}
+function confirmDeleteQuickRequest(item: QuickRequestHistory) {
+  Modal.confirm({
+    title: '删除快捷请求',
+    content: `确定删除“${quickRequestLabel(item)}”吗？执行历史不会受到影响。`,
+    okText: '删除',
+    okButtonProps: { status: 'danger' },
+    onOk: () => deleteQuickRequest(item),
+  })
+}
+async function loadQuickRequest(item: QuickRequestHistory) {
+  const draft = draftFromQuickRequest(item)
+  if (!draft) {
+    Message.warning('仅 HTTP 请求历史支持载入与重发')
+    return
+  }
+  const draftKey = storeApiDebugRouteDraft(window.sessionStorage, draft)
+  quickRequestRootExpanded.value = true
+  await router.push({ path: '/api-testing/quick-request', query: { draft: draftKey } })
+}
+function openHttpDefinition(catalogId = '', method = 'GET') {
+  if (!prepareDefinition()) return
+  if (catalogId) definitionForm.catalogId = catalogId
+  definitionForm.method = method
+  definitionDialog.value = true
+}
+async function openProtocolQuickRequest(protocol: 'GRAPHQL' | 'SOAP' | 'WEBSOCKET' | 'GRPC') {
+  const defaults: Record<typeof protocol, ApiDebugRouteDraft> = {
+    GRAPHQL: { protocol: 'GRAPHQL', method: 'POST', url: 'https://api.example.com/graphql', body: 'query Example {\n  __typename\n}' },
+    SOAP: { protocol: 'SOAP', method: 'POST', url: 'https://api.example.com/soap', body: '<?xml version="1.0" encoding="UTF-8"?>\n<Envelope />' },
+    WEBSOCKET: { protocol: 'WEBSOCKET', url: 'wss://ws.postman-echo.com/raw' },
+    GRPC: { protocol: 'GRPC', url: 'grpc.example.com:443', body: '{}' },
+  }
+  const draft = storeApiDebugRouteDraft(window.sessionStorage, defaults[protocol])
+  await router.push({ path: '/api-testing/quick-request', query: { draft, source: 'interface-menu' } })
+}
+function copyText(value: string, success: string) {
+  return navigator.clipboard.writeText(value)
+    .then(() => Message.success(success))
+    .catch(() => Message.error('复制失败，请检查浏览器剪贴板权限'))
+}
+function currentApiLink(api: ApiDefinition) {
+  return new URL(router.resolve({ path: '/api-testing/interfaces', query: { apiId: api.id } }).href, window.location.origin).href
+}
+async function renameCatalog(catalog: Catalog) {
+  const name = window.prompt('请输入接口目录名称', catalog.name)?.trim()
+  if (!name || name === catalog.name) return
+  try {
+    await mutate<Catalog>(`/api/v1/projects/${projectId.value}/api-design/catalogs/${catalog.id}`, 'PUT', {
+      name,
+      parentId: catalog.parentId,
+      sortOrder: catalog.sortOrder,
+    })
+    await loadAssets()
+    Message.success('接口目录已重命名')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '重命名目录失败') }
+}
+async function moveCatalog(catalog: Catalog, parentId: string | null) {
+  if (catalog.parentId === parentId) return
+  try {
+    await mutate<Catalog>(`/api/v1/projects/${projectId.value}/api-design/catalogs/${catalog.id}`, 'PUT', {
+      name: catalog.name,
+      parentId,
+      sortOrder: catalog.sortOrder,
+    })
+    await loadAssets()
+    const parent = parentId ? catalogs.value.find((item) => item.id === parentId) : null
+    Message.success(parent ? `目录已移动到“${parent.name}”` : '目录已移动到接口根目录')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '移动目录失败') }
+}
+function uniqueCatalogCopyName(catalog: Catalog) {
+  const siblingNames = new Set(catalogs.value.filter((item) => item.parentId === catalog.parentId).map((item) => item.name))
+  const base = `${catalog.name} 副本`
+  let candidate = base
+  let suffix = 2
+  while (siblingNames.has(candidate)) candidate = `${base} ${suffix++}`
+  return candidate
+}
+function currentVersionOf(api: ApiDefinition, items: ApiVersion[]) {
+  return items.find((version) => version.id === api.currentVersionId) ?? items[0]
+}
+function versionExample(value: string) {
+  try { return JSON.parse(value || '{}') as Record<string, unknown> } catch { return {} }
+}
+async function createDefinitionCopy(api: ApiDefinition, catalogId: string, routeRegistry: ApiDefinition[]) {
+  const items = await read<ApiVersion[]>(`/api/v1/projects/${projectId.value}/api-design/definitions/${api.id}/versions`)
+  const version = currentVersionOf(api, items)
+  if (!version) throw new Error(`接口“${api.name}”没有可复制的版本`)
+  const created = await mutate<ApiDefinition>(`/api/v1/projects/${projectId.value}/api-design/definitions`, 'POST', {
+    catalogId,
+    method: api.method,
+    path: nextApiCopyPath(api.method, api.path, routeRegistry),
+    name: `${api.name} 副本`.slice(0, 200),
+    versionName: version.versionName,
+    summary: version.summary,
+    description: version.description,
+    headers: parseParams(version.requestHeaders),
+    query: parseParams(version.requestQuery),
+    pathParameters: parseParams(version.requestPath),
+    requestBody: version.requestBody,
+    responseBody: version.responseBody,
+    exampleResponse: versionExample(version.exampleResponse),
+  })
+  routeRegistry.push(created)
+  return created
+}
+async function copyDefinition(api: ApiDefinition) {
+  saving.value = true
+  try {
+    const created = await createDefinitionCopy(api, api.catalogId, [...definitions.value])
+    await loadAssets()
+    await selectApi(created.id)
+    Message.success('接口已复制，副本请求路径已自动避让冲突')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '复制接口失败') } finally { saving.value = false }
+}
+async function copyCatalog(catalog: Catalog) {
+  saving.value = true
+  const routeRegistry = [...definitions.value]
+  try {
+    const copyBranch = async (source: Catalog, parentId: string | null, root: boolean) => {
+      const created = await mutate<Catalog>(`/api/v1/projects/${projectId.value}/api-design/catalogs`, 'POST', {
+        name: root ? uniqueCatalogCopyName(source) : source.name,
+        parentId,
+        sortOrder: source.sortOrder,
+      })
+      for (const api of definitions.value.filter((item) => item.catalogId === source.id)) {
+        await createDefinitionCopy(api, created.id, routeRegistry)
+      }
+      for (const child of catalogs.value.filter((item) => item.parentId === source.id)) {
+        await copyBranch(child, created.id, false)
+      }
+      return created
+    }
+    const created = await copyBranch(catalog, catalog.parentId, true)
+    await loadAssets()
+    expandedCatalogIds.value = new Set([...expandedCatalogIds.value, created.id])
+    Message.success('接口目录及其中接口已复制')
+  } catch (error) {
+    await loadAssets()
+    Message.error(error instanceof Error ? `${error.message}；已保留成功创建的资产` : '复制接口目录失败')
+  } finally { saving.value = false }
+}
+async function updateDefinitionMetadata(api: ApiDefinition, values: Partial<Pick<ApiDefinition, 'catalogId' | 'name'>>) {
+  return mutate<ApiDefinition>(`/api/v1/projects/${projectId.value}/api-design/definitions/${api.id}`, 'PUT', {
+    catalogId: values.catalogId ?? api.catalogId,
+    method: api.method,
+    path: api.path,
+    name: values.name ?? api.name,
+  })
+}
+async function renameDefinition(api: ApiDefinition) {
+  const name = window.prompt('请输入接口名称', api.name)?.trim()
+  if (!name || name === api.name) return
+  try {
+    await updateDefinitionMetadata(api, { name })
+    await loadAssets()
+    Message.success('接口已重命名')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '重命名接口失败') }
+}
+async function moveDefinition(api: ApiDefinition, catalogId: string) {
+  if (api.catalogId === catalogId) return
+  try {
+    await updateDefinitionMetadata(api, { catalogId })
+    await loadAssets()
+    expandCatalogPath(catalogId)
+    Message.success(`接口已移动到“${catalogMap.value.get(catalogId)?.name ?? '目标目录'}”`)
+  } catch (error) { Message.error(error instanceof Error ? error.message : '移动接口失败') }
+}
+async function curlForDefinition(api: ApiDefinition) {
+  return read<{ command: string }>(`/api/v1/projects/${projectId.value}/api-design/definitions/${api.id}/interchange/curl?baseUrl=${encodeURIComponent('https://api.example.com')}`)
+}
+async function copyDefinitionCurl(api: ApiDefinition) {
+  try {
+    const result = await curlForDefinition(api)
+    await copyText(result.command, '接口 cURL 已复制')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '生成 cURL 失败') }
+}
+async function downloadDefinitionCurl(api: ApiDefinition) {
+  try {
+    const result = await curlForDefinition(api)
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(new Blob([`${result.command}\n`], { type: 'text/plain;charset=utf-8' }))
+    link.download = `${api.name.replace(/[^\p{L}\p{N}_.-]+/gu, '-') || 'api'}.curl.txt`
+    link.click()
+    URL.revokeObjectURL(link.href)
+    Message.success('接口 cURL 文件已导出')
+  } catch (error) { Message.error(error instanceof Error ? error.message : '导出接口失败') }
+}
+async function openApiCase(api: ApiDefinition) {
+  if (!api.currentVersionId) {
+    Message.error('接口没有可用版本，无法添加用例')
+    return
+  }
+  const query = interfaceRouteQuery(route.query, api.id)
+  query.caseRequest = String(++caseOpenNonce)
+  await router.replace({ path: '/api-testing/interfaces', query, hash: route.hash })
+}
+async function clearCaseOpenRequest() {
+  if (!caseOpenRequest.value) return
+  const query = interfaceRouteQuery(route.query, selectedApiId.value)
+  delete query.caseRequest
+  await router.replace({ path: '/api-testing/interfaces', query, hash: route.hash })
+}
+function debugCasesForApi(apiId: string) {
+  return debugCasesByApi.value.get(apiId) ?? []
+}
+function toggleApiCases(apiId: string) {
+  const expanded = new Set(expandedApiCaseIds.value)
+  if (expanded.has(apiId)) expanded.delete(apiId)
+  else expanded.add(apiId)
+  expandedApiCaseIds.value = expanded
+}
+function updateApiCaseList(apiId: string, items: ApiTreeCase[]) {
+  apiCases.value = [...apiCases.value.filter((item) => item.apiId !== apiId), ...items]
+  if (items.some((item) => apiCaseType(item.responseValidation) === 'DEBUG')) {
+    expandedApiCaseIds.value = new Set([...expandedApiCaseIds.value, apiId])
+  }
+}
+async function openDebugCase(api: ApiDefinition, item: ApiTreeCase) {
+  const query = interfaceRouteQuery(route.query, api.id)
+  query.debugCase = item.id
+  await router.replace({ path: '/api-testing/interfaces', query, hash: route.hash })
+}
+async function clearDebugCaseRequest() {
+  if (!debugCaseRequest.value) return
+  const query = interfaceRouteQuery(route.query, selectedApiId.value)
+  delete query.debugCase
+  await router.replace({ path: '/api-testing/interfaces', query, hash: route.hash })
+}
+function openScopedInterchange(catalogId = '') {
+  selectedCatalogId.value = catalogId
+  openInterchange()
+}
+async function exportScope(kind: 'OPENAPI' | 'POSTMAN' | 'HAR', catalogId = '') {
+  selectedCatalogId.value = catalogId
+  if (kind === 'OPENAPI') await downloadOpenApi()
+  else if (kind === 'POSTMAN') await downloadPostman()
+  else await downloadHar()
+}
 function openCatalog(catalog?: Catalog, parentId = '') { clearFormErrors(catalogErrors); editingCatalogId.value = catalog?.id ?? ''; Object.assign(catalogForm, { name: catalog?.name ?? '', parentId: catalog?.parentId ?? (parentId || selectedCatalogId.value), sortOrder: catalog?.sortOrder ?? catalogs.value.length }); catalogDialog.value = true }
 async function saveCatalog() { clearFormErrors(catalogErrors); if (!catalogForm.name.trim()) { catalogErrors.name = '请输入目录名称'; return false }; saving.value = true; try { const url = editingCatalogId.value ? `/api/v1/projects/${projectId.value}/api-design/catalogs/${editingCatalogId.value}` : `/api/v1/projects/${projectId.value}/api-design/catalogs`; const catalog = await mutate<Catalog>(url, editingCatalogId.value ? 'PUT' : 'POST', { ...catalogForm, parentId: catalogForm.parentId || null }); catalogDialog.value = false; selectedCatalogId.value = catalog.id; await loadAssets(); Message.success(editingCatalogId.value ? '接口目录已更新' : '接口目录已创建'); return true } catch (error) { Object.assign(catalogErrors, formErrorsFrom(error)); if (!Object.keys(catalogErrors).length) catalogErrors.name = error instanceof Error ? error.message : '保存目录失败'; return false } finally { saving.value = false } }
 async function deleteCatalog(catalog: Catalog) { try { await mutate<void>(`/api/v1/projects/${projectId.value}/api-design/catalogs/${catalog.id}`, 'DELETE'); if (selectedCatalogId.value === catalog.id) selectedCatalogId.value = ''; await loadAssets(); Message.success('接口目录已删除') } catch (error) { Message.error(error instanceof Error ? error.message : '删除目录失败') } }
+function confirmDeleteCatalog(catalog: Catalog) {
+  Modal.confirm({
+    title: '删除接口目录',
+    content: `仅空目录可删除，确定删除“${catalog.name}”吗？`,
+    okText: '删除',
+    okButtonProps: { status: 'danger' },
+    onOk: () => deleteCatalog(catalog),
+  })
+}
 function nextVersion(value: string) { const match = value.match(/^v?(\d+)\.(\d+)\.(\d+)/); return match ? `${match[1]}.${match[2]}.${Number(match[3]) + 1}` : '1.0.0' }
 function responseStatus(value?: string) { try { const status = Number((JSON.parse(value || '{}') as { statusCode?: unknown }).statusCode); return Number.isInteger(status) && status >= 100 && status <= 599 ? status : 200 } catch { return 200 } }
 function prepareDefinition(api?: ApiDefinition) {
@@ -264,6 +767,15 @@ async function deleteDefinition(api: ApiDefinition) {
     Message.success('接口已删除')
   } catch (error) { Message.error(error instanceof Error ? error.message : '删除接口失败') }
 }
+function confirmDeleteDefinition(api: ApiDefinition) {
+  Modal.confirm({
+    title: '删除接口',
+    content: `删除“${api.name}”会同时删除全部版本和测试用例，确定继续吗？`,
+    okText: '删除',
+    okButtonProps: { status: 'danger' },
+    onOk: () => deleteDefinition(api),
+  })
+}
 async function deleteSelectedDefinitions() {
   const targets = definitions.value.filter((api) => selectedApiIds.value.includes(api.id))
   if (!targets.length) return
@@ -289,10 +801,9 @@ function toggleApiSelection(id: string, checked: boolean) {
     : selectedApiIds.value.filter((candidate) => candidate !== id)
 }
 async function syncRouteToApi() {
-  const query = { ...route.query }
-  if (selectedApiId.value) query.apiId = selectedApiId.value
-  else delete query.apiId
-  await router.replace({ path: route.path, query, hash: route.hash })
+  const query = interfaceRouteQuery(route.query, selectedApiId.value)
+  const path = selectedApiId.value ? '/api-testing/interfaces' : route.path
+  await router.replace({ path, query, hash: route.hash })
 }
 async function selectApi(id: string) {
   if (!openApiIds.value.includes(id)) openApiIds.value = [...openApiIds.value, id]
@@ -385,7 +896,7 @@ watch(() => route.query.apiId, async (value) => {
   if (typeof value !== 'string' || value === selectedApiId.value || !definitions.value.some((api) => api.id === value)) return
   await selectApi(value)
 })
-onMounted(load)
+onMounted(async () => { await load(); loadQuickRequestTreeState(); loadApiTreePreferences() })
 </script>
 
 <template>
@@ -422,7 +933,6 @@ onMounted(load)
             <template #content>
               <a-doption @click="openDefinition()"><icon-plus /> 新建接口</a-doption>
               <a-doption @click="openCatalog()"><icon-folder-add /> 新建目录</a-doption>
-              <a-doption @click="router.push('/api-testing/quick-request')"><icon-thunderbolt /> 快捷请求</a-doption>
               <a-doption @click="openInterchange"><icon-import /> 导入 / 导出</a-doption>
             </template>
           </a-dropdown>
@@ -432,83 +942,300 @@ onMounted(load)
           <div><icon-storage /><span>默认模块</span></div>
           <small>{{ statusFilterLabel }} · {{ visibleApiCount }}</small>
         </div>
-        <div class="tree-root-row">
-          <div><icon-code-square /><strong>接口</strong></div>
-          <span>根目录</span>
+        <div class="tree-root-row interface-root-row">
+          <button type="button" class="tree-root-main" @click="interfaceRootExpanded = !interfaceRootExpanded">
+            <icon-code-square /><strong>接口</strong>
+          </button>
+          <a-button
+            type="text"
+            size="mini"
+            :aria-expanded="interfaceRootExpanded"
+            :aria-label="interfaceRootExpanded ? '收起接口根目录' : '展开接口根目录'"
+            @click="interfaceRootExpanded = !interfaceRootExpanded"
+          >
+            <icon-down v-if="interfaceRootExpanded" /><icon-right v-else />
+          </a-button>
+          <a-dropdown trigger="click">
+            <a-button type="text" size="mini" aria-label="接口根目录更多操作" @click.stop><icon-more /></a-button>
+            <template #content>
+              <a-doption @click="openHttpDefinition()"><icon-plus /> 新建 HTTP 接口</a-doption>
+              <a-dsubmenu trigger="click">
+                <template #default><icon-apps /> 新建其他类型接口</template>
+                <template #content>
+                  <a-doption @click="openProtocolQuickRequest('WEBSOCKET')">WebSocket</a-doption>
+                  <a-doption disabled>Socket.IO（暂未支持）</a-doption>
+                  <a-doption disabled>MCP（暂未支持）</a-doption>
+                  <a-doption @click="openHttpDefinition('', 'POST')">Webhook</a-doption>
+                  <a-doption disabled>TCP (Socket)（暂未支持）</a-doption>
+                  <a-doption @click="openProtocolQuickRequest('GRPC')">gRPC</a-doption>
+                  <a-doption disabled>Dubbo（暂未支持）</a-doption>
+                  <a-doption @click="openProtocolQuickRequest('GRAPHQL')">GraphQL</a-doption>
+                  <a-doption @click="openProtocolQuickRequest('SOAP')">SOAP</a-doption>
+                </template>
+              </a-dsubmenu>
+              <a-doption disabled><icon-file /> 新建 Markdown（暂未支持）</a-doption>
+              <a-doption @click="openCatalog()"><icon-folder-add /> 新建目录</a-doption>
+              <a-doption @click="openScopedInterchange()"><icon-import /> 导入</a-doption>
+              <a-dsubmenu trigger="click">
+                <template #default><icon-export /> 导出</template>
+                <template #content>
+                  <a-doption @click="exportScope('OPENAPI')">OpenAPI 3.1</a-doption>
+                  <a-doption @click="exportScope('POSTMAN')">Postman Collection</a-doption>
+                  <a-doption @click="exportScope('HAR')">HAR 1.2</a-doption>
+                </template>
+              </a-dsubmenu>
+              <a-doption disabled><icon-code /> 生成业务代码（暂未支持）</a-doption>
+              <a-doption @click="setApiTreeDisplayMode('NAME')"><icon-check v-if="apiTreeDisplayMode === 'NAME'" /> 接口显示为名称</a-doption>
+              <a-doption @click="setApiTreeDisplayMode('URL')"><icon-check v-if="apiTreeDisplayMode === 'URL'" /> 接口显示为 URL</a-doption>
+            </template>
+          </a-dropdown>
         </div>
 
         <a-spin class="tree-spin" :loading="loading">
           <div class="asset-tree-scroll">
-            <template v-for="row in treeRows" :key="row.key">
-              <div
-                v-if="row.kind === 'catalog'"
-                class="asset-tree-entry catalog-entry"
-                :class="{ active: selectedCatalogId === row.catalog.id }"
-                :style="{ paddingLeft: `${8 + row.depth * 17}px` }"
-              >
-                <button type="button" class="asset-tree-main" @click="toggleCatalog(row.catalog.id)">
-                  <icon-down v-if="row.expanded" class="tree-chevron" />
-                  <icon-right v-else class="tree-chevron" />
-                  <icon-folder />
-                  <span>{{ row.catalog.name }}</span>
-                  <small>{{ row.count }}</small>
-                </button>
-                <div class="tree-row-actions">
-                  <a-dropdown trigger="click">
-                    <a-button type="text" size="mini" :aria-label="`目录 ${row.catalog.name} 操作`" @click.stop><icon-more /></a-button>
-                    <template #content>
-                      <a-doption @click="openCatalog(undefined, row.catalog.id)">新建子目录</a-doption>
-                      <a-doption @click="openCatalog(row.catalog)">重命名 / 移动</a-doption>
-                      <a-doption class="danger-option">
-                        <a-popconfirm content="仅空目录可删除，确定继续吗？" @ok="deleteCatalog(row.catalog)">
-                          <span>删除目录</span>
-                        </a-popconfirm>
-                      </a-doption>
-                    </template>
-                  </a-dropdown>
+            <template v-if="interfaceRootExpanded">
+              <template v-for="row in treeRows" :key="row.key">
+                <div
+                  v-if="row.kind === 'catalog'"
+                  class="asset-tree-entry catalog-entry"
+                  :class="{ active: selectedCatalogId === row.catalog.id }"
+                  :style="{ paddingLeft: `${8 + row.depth * 17}px` }"
+                >
+                  <button type="button" class="asset-tree-main" @click="toggleCatalog(row.catalog.id)">
+                    <icon-down v-if="row.expanded" class="tree-chevron" />
+                    <icon-right v-else class="tree-chevron" />
+                    <icon-folder />
+                    <span>{{ row.catalog.name }}</span>
+                    <small>{{ row.count }}</small>
+                  </button>
+                  <div class="tree-row-actions">
+                    <a-dropdown trigger="click">
+                      <a-button type="text" size="mini" :aria-label="`目录 ${row.catalog.name} 更多操作`" @click.stop><icon-more /></a-button>
+                      <template #content>
+                        <a-doption @click="openHttpDefinition(row.catalog.id)"><icon-plus /> 添加 HTTP 接口</a-doption>
+                        <a-dsubmenu trigger="click">
+                          <template #default><icon-apps /> 添加其他类型接口</template>
+                          <template #content>
+                            <a-doption @click="openProtocolQuickRequest('WEBSOCKET')">WebSocket</a-doption>
+                            <a-doption disabled>Socket.IO（暂未支持）</a-doption>
+                            <a-doption disabled>MCP（暂未支持）</a-doption>
+                            <a-doption @click="openHttpDefinition(row.catalog.id, 'POST')">Webhook</a-doption>
+                            <a-doption disabled>TCP (Socket)（暂未支持）</a-doption>
+                            <a-doption @click="openProtocolQuickRequest('GRPC')">gRPC</a-doption>
+                            <a-doption disabled>Dubbo（暂未支持）</a-doption>
+                            <a-doption @click="openProtocolQuickRequest('GRAPHQL')">GraphQL</a-doption>
+                            <a-doption @click="openProtocolQuickRequest('SOAP')">SOAP</a-doption>
+                          </template>
+                        </a-dsubmenu>
+                        <a-doption disabled><icon-file /> 添加 Markdown（暂未支持）</a-doption>
+                        <a-doption @click="openCatalog(undefined, row.catalog.id)"><icon-folder-add /> 添加目录</a-doption>
+                        <a-doption @click="renameCatalog(row.catalog)"><icon-edit /> 重命名</a-doption>
+                        <a-doption @click="copyCatalog(row.catalog)"><icon-copy /> 复制</a-doption>
+                        <a-dsubmenu trigger="click">
+                          <template #default><icon-more /> 更多</template>
+                          <template #content>
+                            <a-dsubmenu trigger="click">
+                              <template #default><icon-folder-add /> 移动到</template>
+                              <template #content>
+                                <a-doption :disabled="row.catalog.parentId === null" @click="moveCatalog(row.catalog, null)">接口根目录</a-doption>
+                                <a-doption
+                                  v-for="target in availableCatalogMoveTargets(row.catalog)"
+                                  :key="target.id"
+                                  :disabled="row.catalog.parentId === target.id"
+                                  @click="moveCatalog(row.catalog, target.id)"
+                                >{{ target.name }}</a-doption>
+                              </template>
+                            </a-dsubmenu>
+                            <a-dsubmenu trigger="click">
+                              <template #default><icon-export /> 导出</template>
+                              <template #content>
+                                <a-doption @click="exportScope('OPENAPI', row.catalog.id)">OpenAPI 3.1</a-doption>
+                                <a-doption @click="exportScope('POSTMAN', row.catalog.id)">Postman Collection</a-doption>
+                                <a-doption @click="exportScope('HAR', row.catalog.id)">HAR 1.2</a-doption>
+                              </template>
+                            </a-dsubmenu>
+                            <a-doption disabled><icon-code /> 生成业务代码（暂未支持）</a-doption>
+                          </template>
+                        </a-dsubmenu>
+                        <a-doption class="danger-option" @click="confirmDeleteCatalog(row.catalog)"><icon-delete /> 删除</a-doption>
+                      </template>
+                    </a-dropdown>
+                  </div>
                 </div>
-              </div>
-              <div
-                v-else
-                class="asset-tree-entry api-entry"
-                :class="{ active: selectedApiId === row.api.id }"
-                :style="{ paddingLeft: `${8 + row.depth * 17}px` }"
-              >
-                <button type="button" class="asset-tree-main" @click="selectApi(row.api.id)">
-                  <a-checkbox
-                    v-if="multiSelectMode"
-                    :model-value="selectedApiIds.includes(row.api.id)"
-                    :aria-label="`选择接口 ${row.api.name}`"
-                    @click.stop
-                    @change="toggleApiSelection(row.api.id, Boolean($event))"
-                  />
-                  <span class="method-label" :class="methodClass(row.api.method)">{{ row.api.method }}</span>
-                  <span class="api-tree-name">{{ row.api.name }}</span>
-                  <small v-if="selectedCaseCounts[row.api.id] !== undefined">{{ selectedCaseCounts[row.api.id] }}</small>
-                </button>
-                <div class="tree-row-actions">
-                  <a-dropdown trigger="click">
-                    <a-button type="text" size="mini" :aria-label="`接口 ${row.api.name} 操作`" @click.stop><icon-more /></a-button>
-                    <template #content>
-                      <a-doption @click="selectApi(row.api.id).then(() => openDefinition(row.api))">编辑接口</a-doption>
-                      <a-doption @click="toggleApiSelection(row.api.id, true); multiSelectMode = true">加入批量选择</a-doption>
-                      <a-doption class="danger-option">
-                        <a-popconfirm content="删除接口会同时删除全部版本和测试用例，确定继续吗？" @ok="deleteDefinition(row.api)">
-                          <span>删除接口</span>
-                        </a-popconfirm>
-                      </a-doption>
-                    </template>
-                  </a-dropdown>
+                <div
+                  v-else
+                  class="asset-tree-entry api-entry"
+                  :class="{ active: selectedApiId === row.api.id }"
+                  :style="{ paddingLeft: `${8 + row.depth * 17}px` }"
+                >
+                  <button
+                    type="button"
+                    class="api-case-toggle"
+                    :class="{ hidden: !debugCasesForApi(row.api.id).length }"
+                    :aria-label="expandedApiCaseIds.has(row.api.id) ? `收起接口 ${row.api.name} 的调试用例` : `展开接口 ${row.api.name} 的调试用例`"
+                    :disabled="!debugCasesForApi(row.api.id).length"
+                    @click="toggleApiCases(row.api.id)"
+                  >
+                    <icon-down v-if="expandedApiCaseIds.has(row.api.id)" />
+                    <icon-right v-else />
+                  </button>
+                  <button type="button" class="asset-tree-main" @click="selectApi(row.api.id)">
+                    <a-checkbox
+                      v-if="multiSelectMode"
+                      :model-value="selectedApiIds.includes(row.api.id)"
+                      :aria-label="`选择接口 ${row.api.name}`"
+                      @click.stop
+                      @change="toggleApiSelection(row.api.id, Boolean($event))"
+                    />
+                    <span class="method-label" :class="methodClass(row.api.method)">{{ row.api.method }}</span>
+                    <span class="api-tree-name" :title="apiTreeLabel(row.api)">{{ apiTreeLabel(row.api) }}</span>
+                    <small v-if="debugCasesForApi(row.api.id).length">{{ debugCasesForApi(row.api.id).length }}</small>
+                  </button>
+                  <div class="tree-row-actions">
+                    <a-dropdown trigger="click">
+                      <a-button type="text" size="mini" :aria-label="`接口 ${row.api.name} 更多操作`" @click.stop><icon-more /></a-button>
+                      <template #content>
+                        <a-doption @click="openApiCase(row.api)"><icon-plus /> 添加用例</a-doption>
+                        <a-doption @click="renameDefinition(row.api)"><icon-edit /> 重命名</a-doption>
+                        <a-dsubmenu trigger="click">
+                          <template #default><icon-robot /> AI 编程</template>
+                          <template #content>
+                            <a-doption disabled>生成请求参数（暂未支持）</a-doption>
+                            <a-doption disabled>生成响应示例（暂未支持）</a-doption>
+                          </template>
+                        </a-dsubmenu>
+                        <a-doption @click="copyDefinition(row.api)"><icon-copy /> 复制</a-doption>
+                        <a-doption @click="copyText(currentApiLink(row.api), '协作链接已复制')"><icon-link /> 复制协作链接</a-doption>
+                        <a-doption @click="copyDefinitionCurl(row.api)"><icon-code-square /> 复制 cURL</a-doption>
+                        <a-dsubmenu trigger="click">
+                          <template #default><icon-more /> 更多</template>
+                          <template #content>
+                            <a-doption disabled><icon-branch /> 复制到其他分支（暂未支持）</a-doption>
+                            <a-dsubmenu trigger="click">
+                              <template #default><icon-folder-add /> 移动到</template>
+                              <template #content>
+                                <a-doption
+                                  v-for="target in catalogs"
+                                  :key="target.id"
+                                  :disabled="row.api.catalogId === target.id"
+                                  @click="moveDefinition(row.api, target.id)"
+                                >{{ target.name }}</a-doption>
+                              </template>
+                            </a-dsubmenu>
+                            <a-doption @click="downloadDefinitionCurl(row.api)"><icon-export /> 导出 cURL</a-doption>
+                            <a-doption disabled><icon-code /> 生成业务代码（暂未支持）</a-doption>
+                          </template>
+                        </a-dsubmenu>
+                        <a-doption class="danger-option" @click="confirmDeleteDefinition(row.api)"><icon-delete /> 删除</a-doption>
+                      </template>
+                    </a-dropdown>
+                  </div>
                 </div>
-              </div>
+                <template v-if="row.kind === 'api' && expandedApiCaseIds.has(row.api.id)">
+                  <button
+                    v-for="item in debugCasesForApi(row.api.id)"
+                    :key="item.id"
+                    type="button"
+                    class="api-debug-case-row"
+                    :style="{ paddingLeft: `${38 + row.depth * 17}px` }"
+                    @click="openDebugCase(row.api, item)"
+                  >
+                    <icon-thunderbolt />
+                    <span :title="item.name">{{ item.name }}</span>
+                  </button>
+                </template>
+              </template>
+              <a-empty v-if="!loading && !treeRows.length" :description="keyword || statusFilter !== 'ALL' ? '没有匹配的接口' : '还没有接口目录'">
+                <template #extra><a-button type="outline" @click="openCatalog()">新建目录</a-button></template>
+              </a-empty>
             </template>
-            <a-empty v-if="!loading && !treeRows.length" :description="keyword || statusFilter !== 'ALL' ? '没有匹配的接口' : '还没有接口目录'">
-              <template #extra><a-button type="outline" @click="openCatalog()">新建目录</a-button></template>
-            </a-empty>
+
+            <section class="quick-request-tree-section" :class="{ active: isQuickRequest }">
+              <div class="tree-root-row quick-request-root">
+                <button type="button" class="tree-root-main" :aria-current="isQuickRequest ? 'page' : undefined" @click="openQuickRequest">
+                  <icon-thunderbolt /><strong>快捷请求</strong><small>{{ visibleQuickRequestItems.length }}</small>
+                </button>
+                <a-button
+                  type="text"
+                  size="mini"
+                  :aria-label="quickRequestRootExpanded ? '收起快捷请求' : '展开快捷请求'"
+                  :aria-expanded="quickRequestRootExpanded"
+                  @click="quickRequestRootExpanded = !quickRequestRootExpanded"
+                >
+                  <icon-down v-if="quickRequestRootExpanded" /><icon-right v-else />
+                </a-button>
+                <a-dropdown trigger="click">
+                  <a-button type="text" size="mini" aria-label="快捷请求更多操作" @click.stop><icon-more /></a-button>
+                  <template #content>
+                    <a-doption @click="newQuickRequest()"><icon-thunderbolt /> 新建快捷请求</a-doption>
+                    <a-doption @click="addQuickRequestFolder(null)"><icon-folder-add /> 新建目录</a-doption>
+                  </template>
+                </a-dropdown>
+              </div>
+              <div v-if="quickRequestRootExpanded" class="quick-request-tree-items">
+                <template v-for="row in quickRequestTreeRows" :key="row.key">
+                  <div
+                    v-if="row.kind === 'folder'"
+                    class="quick-request-folder-row"
+                    :style="{ paddingLeft: `${7 + row.depth * 16}px` }"
+                  >
+                    <icon-folder /><span>{{ row.folder.name }}</span>
+                    <a-dropdown trigger="click">
+                      <a-button type="text" size="mini" :aria-label="`目录 ${row.folder.name} 更多操作`" @click.stop><icon-more /></a-button>
+                      <template #content>
+                        <a-doption @click="newQuickRequest(row.folder.id)"><icon-thunderbolt /> 添加快捷请求</a-doption>
+                        <a-doption @click="addQuickRequestFolder(row.folder.id)"><icon-folder-add /> 添加目录</a-doption>
+                        <a-doption @click="renameQuickRequestFolder(row.folder)"><icon-edit /> 编辑</a-doption>
+                        <a-doption @click="copyQuickRequestFolder(row.folder)"><icon-copy /> 复制</a-doption>
+                        <a-doption class="danger-option" @click="confirmDeleteQuickRequestFolder(row.folder)"><icon-delete /> 删除</a-doption>
+                      </template>
+                    </a-dropdown>
+                  </div>
+                  <div
+                    v-else
+                    class="quick-request-history-row"
+                    :style="{ paddingLeft: `${row.depth * 16}px` }"
+                  >
+                    <button
+                      type="button"
+                      class="quick-request-history"
+                      :title="quickRequestLabel(row.item)"
+                      @click="loadQuickRequest(row.item)"
+                    >
+                      <span class="method-label" :class="methodClass(row.item.method)">{{ row.item.method }}</span>
+                      <span>{{ quickRequestLabel(row.item) }}</span>
+                      <small>{{ row.item.result === 'DRAFT' ? '草稿' : row.item.responseStatus ?? '失败' }}</small>
+                    </button>
+                    <a-dropdown trigger="click">
+                      <a-button type="text" size="mini" :aria-label="`快捷请求 ${quickRequestLabel(row.item)} 更多操作`" @click.stop><icon-more /></a-button>
+                      <template #content>
+                        <a-doption @click="copyQuickRequest(row.item)"><icon-copy /> 复制</a-doption>
+                        <a-dsubmenu trigger="click">
+                          <template #default><icon-folder-add /> 移动到</template>
+                          <template #content>
+                            <a-doption :disabled="!quickRequestFolderIds[row.item.id]" @click="moveQuickRequest(row.item, null)"><icon-thunderbolt /> 快捷请求根目录</a-doption>
+                            <a-doption
+                              v-for="folder in quickRequestFolderRows"
+                              :key="folder.id"
+                              :disabled="quickRequestFolderIds[row.item.id] === folder.id"
+                              @click="moveQuickRequest(row.item, folder.id)"
+                            >
+                              <icon-folder /> {{ folder.name }}
+                            </a-doption>
+                          </template>
+                        </a-dsubmenu>
+                        <a-doption class="danger-option" @click="confirmDeleteQuickRequest(row.item)"><icon-delete /> 删除</a-doption>
+                      </template>
+                    </a-dropdown>
+                  </div>
+                </template>
+                <a-empty v-if="!visibleQuickRequestItems.length && !quickRequestFolders.length" description="暂无快捷请求" />
+              </div>
+            </section>
           </div>
         </a-spin>
 
-        <div class="tree-footer">
+        <div v-if="interfaceRootExpanded" class="tree-footer">
           <a-button type="text" size="small" @click="toggleMultiSelectMode">
             <icon-select-all /> {{ multiSelectMode ? '退出批量选择' : '批量管理' }}
           </a-button>
@@ -521,80 +1248,88 @@ onMounted(load)
       </template>
     </aside>
 
-    <main class="api-editor-pane">
-      <header class="workspace-tabbar">
-        <div class="workspace-tabs-track">
-          <router-link to="/api-testing/quick-request" class="workspace-tab quick-tab">
-            <icon-thunderbolt /><span>快捷请求</span>
-          </router-link>
-          <button
-            v-for="api in openApis"
-            :key="api.id"
-            type="button"
-            class="workspace-tab"
-            :class="{ active: selectedApiId === api.id }"
-            @click="selectApi(api.id)"
-          >
-            <span class="method-label" :class="methodClass(api.method)">{{ api.method }}</span>
-            <span>{{ api.name }}</span>
-            <icon-close class="tab-close" :aria-label="`关闭 ${api.name}`" @click.stop="closeApiTab(api.id)" />
-          </button>
-        </div>
-        <div class="workspace-tab-actions">
-          <a-button type="text" aria-label="新建接口" @click="openDefinition()"><icon-plus /></a-button>
-          <a-dropdown trigger="click">
-            <a-button type="text" aria-label="工作区更多操作"><icon-more /></a-button>
-            <template #content>
-              <a-doption @click="openInterchange">导入 / 导出</a-doption>
-              <a-doption @click="toggleMultiSelectMode">批量管理</a-doption>
-              <a-doption :disabled="openApiIds.length <= 1" @click="closeOtherTabs">关闭其他标签</a-doption>
-              <a-doption :disabled="!openApiIds.length" @click="closeAllTabs">关闭全部标签</a-doption>
-            </template>
-          </a-dropdown>
-          <a-select v-model="projectId" size="small" :style="{ width: '180px' }" aria-label="接口管理项目" @change="changeProject">
-            <a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option>
-          </a-select>
-        </div>
-      </header>
+    <main class="api-editor-pane" :class="{ 'api-editor-pane--quick': isQuickRequest }">
+      <template v-if="isQuickRequest">
+        <section class="document-panel quick-request-panel">
+          <ApiDebugPage :key="route.fullPath" embedded @history-change="loadQuickRequestHistory" @project-change="changeProject" />
+        </section>
+      </template>
+      <template v-else>
+        <header class="workspace-tabbar">
+          <div class="workspace-tabs-track">
+            <button
+              v-for="api in openApis"
+              :key="api.id"
+              type="button"
+              class="workspace-tab"
+              :class="{ active: selectedApiId === api.id }"
+              @click="selectApi(api.id)"
+            >
+              <span class="method-label" :class="methodClass(api.method)">{{ api.method }}</span>
+              <span>{{ api.name }}</span>
+              <icon-close class="tab-close" :aria-label="`关闭 ${api.name}`" @click.stop="closeApiTab(api.id)" />
+            </button>
+          </div>
+          <div class="workspace-tab-actions">
+            <a-button type="text" aria-label="新建接口" @click="openDefinition()"><icon-plus /></a-button>
+            <a-dropdown trigger="click">
+              <a-button type="text" aria-label="工作区更多操作"><icon-more /></a-button>
+              <template #content>
+                <a-doption @click="openInterchange">导入 / 导出</a-doption>
+                <a-doption @click="toggleMultiSelectMode">批量管理</a-doption>
+                <a-doption :disabled="openApiIds.length <= 1" @click="closeOtherTabs">关闭其他标签</a-doption>
+                <a-doption :disabled="!openApiIds.length" @click="closeAllTabs">关闭全部标签</a-doption>
+              </template>
+            </a-dropdown>
+            <a-select v-model="projectId" size="small" :style="{ width: '180px' }" aria-label="接口管理项目" @change="changeProject">
+              <a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option>
+            </a-select>
+          </div>
+        </header>
 
-      <section class="document-panel">
-        <ApiInterfaceWorkbench
-          v-if="selectedApi && selectedVersion"
-          :key="selectedApi.id"
-          :project-id="projectId"
-          :api="selectedApi"
-          :version="selectedVersion"
-          :versions="versions"
-          :selected-version-id="selectedVersionId"
-          :catalog-name="selectedCatalog?.name ?? '未分类'"
-          :created-by-name="actorName(selectedApi.createdBy)"
-          :updated-by-name="actorName(selectedApi.updatedBy)"
-          @update:selected-version-id="selectedVersionId = $event"
-          @edit="prepareInlineEditor"
-          @new-version="openVersion"
-          @publish="publishVersion"
-          @delete="deleteDefinition(selectedApi)"
-          @generate-code="previewCurl"
-          @case-count-change="selectedCaseCounts[selectedApi.id] = $event"
-        >
-          <template #editor>
-            <ApiDefinitionEditor
-              :model-value="definitionForm"
-              :catalogs="catalogs"
-              :errors="definitionErrors"
-              :editing="true"
-              :inline="true"
-              :saving="saving"
-              :show-actions="true"
-              @update:model-value="Object.assign(definitionForm, $event)"
-              @save="saveDefinition"
-              @cancel="prepareInlineEditor"
-              @clear-error="clearDefinitionError"
-            />
-          </template>
-        </ApiInterfaceWorkbench>
-        <a-empty v-else description="选择或创建一个接口开始维护和调试"><template #extra><a-button type="primary" @click="openDefinition()">新建接口</a-button></template></a-empty>
-      </section>
+        <section class="document-panel">
+          <ApiInterfaceWorkbench
+            v-if="selectedApi && selectedVersion"
+            :key="selectedApi.id"
+            :project-id="projectId"
+            :api="selectedApi"
+            :version="selectedVersion"
+            :versions="versions"
+            :selected-version-id="selectedVersionId"
+            :catalog-name="selectedCatalog?.name ?? '未分类'"
+            :created-by-name="actorName(selectedApi.createdBy)"
+            :updated-by-name="actorName(selectedApi.updatedBy)"
+            :open-case-request="route.query.apiId === selectedApi.id ? caseOpenRequest : 0"
+            :open-debug-case="route.query.apiId === selectedApi.id ? debugCaseRequest : ''"
+            @update:selected-version-id="selectedVersionId = $event"
+            @edit="prepareInlineEditor"
+            @new-version="openVersion"
+            @publish="publishVersion"
+            @delete="deleteDefinition(selectedApi)"
+            @generate-code="previewCurl"
+            @case-list-change="updateApiCaseList(selectedApi.id, $event)"
+            @case-opened="clearCaseOpenRequest"
+            @debug-case-opened="clearDebugCaseRequest"
+          >
+            <template #editor>
+              <ApiDefinitionEditor
+                :model-value="definitionForm"
+                :catalogs="catalogs"
+                :errors="definitionErrors"
+                :editing="true"
+                :inline="true"
+                :saving="saving"
+                :show-actions="true"
+                @update:model-value="Object.assign(definitionForm, $event)"
+                @save="saveDefinition"
+                @cancel="prepareInlineEditor"
+                @clear-error="clearDefinitionError"
+              />
+            </template>
+          </ApiInterfaceWorkbench>
+          <a-empty v-else description="选择或创建一个接口开始维护和调试"><template #extra><a-button type="primary" @click="openDefinition()">新建接口</a-button></template></a-empty>
+        </section>
+      </template>
     </main>
     <a-modal v-model:visible="catalogDialog" :title="editingCatalogId ? '修改接口目录' : '新建接口目录'" width="520px" :ok-loading="saving" :on-before-ok="saveCatalog">
       <a-form :model="catalogForm" layout="vertical">
@@ -653,5 +1388,6 @@ onMounted(load)
 </template>
 
 <style scoped>
-.api-design-page{display:grid;grid-template-columns:340px minmax(0,1fr);height:calc(100vh - 68px);min-height:640px;overflow:hidden;background:#fff;transition:grid-template-columns .18s ease}.api-design-page.tree-is-collapsed{grid-template-columns:54px minmax(0,1fr)}.api-tree-pane{display:flex;min-width:0;min-height:0;flex-direction:column;border-right:1px solid #e8e9ee;background:#fff}.tree-header{display:flex;min-height:76px;align-items:center;justify-content:space-between;gap:12px;padding:15px 14px 10px 18px}.tree-header>div{display:grid;gap:5px;min-width:0}.tree-header h1{margin:0;color:#2e3748;font-size:22px;letter-spacing:-.5px}.tree-header span{overflow:hidden;color:var(--color-text-3);font-size:11px;text-overflow:ellipsis;white-space:nowrap}.tree-is-collapsed .tree-header{justify-content:center;padding:12px 6px}.branch-row{display:flex;align-items:center;gap:8px;margin:0 14px 12px;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#667189;cursor:default}.branch-row strong{font-size:13px}.branch-row svg:last-child{margin-left:auto}.tree-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 38px 42px;gap:7px;padding:0 14px 13px}.tree-toolbar :deep(.arco-input-wrapper){height:38px;border-radius:8px;background:#f8f9fb}.tree-toolbar :deep(.arco-btn){height:38px;border-radius:8px}.tree-toolbar :deep(.arco-btn-primary){background:#8c62e8}.tree-project-row,.tree-root-row{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;color:#6c778d}.tree-project-row{border-top:1px solid #f0f1f4;font-size:12px}.tree-project-row>div,.tree-root-row>div{display:flex;align-items:center;gap:8px}.tree-project-row small{font-size:10px}.tree-root-row{padding-top:12px;color:#465268}.tree-root-row span{color:#adb3be;font-size:11px}.tree-spin{display:flex;min-height:0;flex:1;overflow:hidden}.tree-spin :deep(.arco-spin-children){display:flex;min-height:0;flex:1;flex-direction:column}.asset-tree-scroll{min-height:0;flex:1;padding:2px 7px 50px;overflow:auto}.asset-tree-entry{position:relative;display:flex;min-width:0;align-items:center;margin:1px 0;border-radius:7px}.asset-tree-entry:hover,.asset-tree-entry.active{background:#f1f2f5}.asset-tree-entry.active .api-tree-name{font-weight:650;color:#263247}.asset-tree-main{display:flex;min-width:0;flex:1;align-items:center;gap:7px;height:38px;padding:0 34px 0 6px;border:0;background:transparent;color:#4c586e;text-align:left;cursor:pointer}.asset-tree-main:focus-visible{outline:2px solid #8c62e8;outline-offset:-2px;border-radius:7px}.asset-tree-main>span:not(.method-label){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-tree-main>small{margin-left:auto;color:#929baa;font-size:10px}.tree-chevron{flex:0 0 auto;color:#8791a4;font-size:12px}.catalog-entry .asset-tree-main>svg:not(.tree-chevron){flex:0 0 auto;font-size:17px}.tree-row-actions{position:absolute;right:3px;display:none;align-items:center;background:linear-gradient(90deg,transparent,#f1f2f5 22%)}.asset-tree-entry:hover .tree-row-actions,.asset-tree-entry:focus-within .tree-row-actions{display:flex}.api-entry .asset-tree-main{gap:8px}.api-entry .arco-checkbox{flex:0 0 auto}.api-tree-name{min-width:0;flex:1;font-size:12px}.method-label{flex:0 0 auto;font-size:10px;font-weight:800;line-height:1;letter-spacing:.1px}.method-get{color:#14a36f}.method-post{color:#eb6b25}.method-put{color:#3974df}.method-patch{color:#875ce2}.method-delete{color:#e14d54}.method-head,.method-options{color:#75839a}.tree-footer{display:flex;min-height:46px;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;border-top:1px solid #eceef2;background:#fff}.tree-footer :deep(.arco-btn-text){color:#6f7890}.api-editor-pane{display:grid;min-width:0;min-height:0;grid-template-rows:54px minmax(0,1fr);overflow:hidden;background:#fff}.workspace-tabbar{display:flex;min-width:0;align-items:stretch;justify-content:space-between;border-bottom:1px solid #e7e9ee;background:#fff}.workspace-tabs-track{display:flex;min-width:0;flex:1;overflow-x:auto;scrollbar-width:none}.workspace-tabs-track::-webkit-scrollbar{display:none}.workspace-tab{position:relative;display:flex;min-width:130px;max-width:235px;align-items:center;justify-content:center;gap:8px;padding:0 16px;border:0;border-right:1px solid #eceef2;background:#fff;color:#687388;text-decoration:none;cursor:pointer}.workspace-tab>span:not(.method-label){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.workspace-tab:hover{background:#fafafa}.workspace-tab.active{color:#2f384a;font-weight:650;background:#fff}.workspace-tab.active::after,.workspace-tab.router-link-active::after{position:absolute;right:10px;bottom:0;left:10px;height:2px;background:#8c62e8;content:""}.quick-tab{min-width:125px;color:#6e56c8}.tab-close{flex:0 0 auto;color:#a5acb8;font-size:12px}.tab-close:hover{color:#e14d54}.workspace-tab-actions{display:flex;flex:0 0 auto;align-items:center;gap:3px;padding:0 10px;border-left:1px solid #eceef2}.workspace-tab-actions :deep(.arco-select-view){border-radius:8px;background:#f8f9fb}.document-panel{min-width:0;min-height:0;overflow:auto;background:#fff}.document-panel>.arco-empty{padding-top:120px}.danger-option{color:rgb(var(--red-6))}.interchange-dialog{display:grid;gap:16px}.interchange-actions,.spec-picker,.curl-preview>div{display:flex;align-items:center;gap:12px}.interchange-actions{justify-content:flex-start}.file-input{display:none}.spec-picker{justify-content:space-between;padding:9px 0}.spec-picker span,.curl-preview span{color:var(--color-text-3);font-size:12px}.spec-picker span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.interchange-result,.curl-preview{padding:14px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.interchange-result :deep(.arco-result){padding:4px 0 10px}.curl-preview{display:grid;gap:10px}@media(max-width:1180px){.api-design-page{grid-template-columns:300px minmax(0,1fr)}.workspace-tab-actions :deep(.arco-select){display:none}}@media(max-width:760px){.api-design-page{grid-template-columns:260px minmax(680px,1fr)}.interchange-actions,.spec-picker,.curl-preview>div{align-items:flex-start;flex-direction:column}}
+.api-design-page{display:grid;grid-template-columns:340px minmax(0,1fr);height:calc(100vh - 68px);min-height:640px;overflow:hidden;background:#fff;transition:grid-template-columns .18s ease}.api-design-page.tree-is-collapsed{grid-template-columns:54px minmax(0,1fr)}.api-tree-pane{display:flex;min-width:0;min-height:0;flex-direction:column;border-right:1px solid #e8e9ee;background:#fff}.tree-header{display:flex;min-height:76px;align-items:center;justify-content:space-between;gap:12px;padding:15px 14px 10px 18px}.tree-header>div{display:grid;gap:5px;min-width:0}.tree-header h1{margin:0;color:#2e3748;font-size:22px;letter-spacing:-.5px}.tree-header span{overflow:hidden;color:var(--color-text-3);font-size:11px;text-overflow:ellipsis;white-space:nowrap}.tree-is-collapsed .tree-header{justify-content:center;padding:12px 6px}.branch-row{display:flex;align-items:center;gap:8px;margin:0 14px 12px;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#667189;cursor:default}.branch-row strong{font-size:13px}.branch-row svg:last-child{margin-left:auto}.tree-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 38px 42px;gap:7px;padding:0 14px 13px}.tree-toolbar :deep(.arco-input-wrapper){height:38px;border-radius:8px;background:#f8f9fb}.tree-toolbar :deep(.arco-btn){height:38px;border-radius:8px}.tree-toolbar :deep(.arco-btn-primary){background:#8c62e8}.tree-project-row,.tree-root-row{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;color:#6c778d}.tree-project-row{border-top:1px solid #f0f1f4;font-size:12px}.tree-project-row>div,.tree-root-row>div{display:flex;align-items:center;gap:8px}.tree-project-row small{font-size:10px}.tree-root-row{padding-top:12px;color:#465268}.tree-root-row span{color:#adb3be;font-size:11px}.interface-root-row{gap:2px;padding:4px 10px 4px 18px}.tree-root-toggle{width:100%;border:0;background:#fff;cursor:pointer}.tree-root-toggle:hover,.tree-root-toggle:focus-visible{background:#f7f8fa}.tree-root-toggle:focus-visible,.tree-root-main:focus-visible,.quick-request-history:focus-visible{outline:2px solid #8c62e8;outline-offset:-2px}.tree-spin{display:flex;min-height:0;flex:1;overflow:hidden}.tree-spin :deep(.arco-spin-children){display:flex;min-height:0;flex:1;flex-direction:column}.asset-tree-scroll{min-height:0;flex:1;padding:2px 7px 50px;overflow:auto}.asset-tree-entry{position:relative;display:flex;min-width:0;align-items:center;margin:1px 0;border-radius:7px}.asset-tree-entry:hover,.asset-tree-entry.active{background:#f1f2f5}.asset-tree-entry.active .api-tree-name{font-weight:650;color:#263247}.asset-tree-main{display:flex;min-width:0;flex:1;align-items:center;gap:7px;height:38px;padding:0 34px 0 6px;border:0;background:transparent;color:#4c586e;text-align:left;cursor:pointer}.asset-tree-main:focus-visible{outline:2px solid #8c62e8;outline-offset:-2px;border-radius:7px}.asset-tree-main>span:not(.method-label){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-tree-main>small{margin-left:auto;color:#929baa;font-size:10px}.tree-chevron{flex:0 0 auto;color:#8791a4;font-size:12px}.catalog-entry .asset-tree-main>svg:not(.tree-chevron){flex:0 0 auto;font-size:17px}.tree-row-actions{position:absolute;right:3px;display:none;align-items:center;background:linear-gradient(90deg,transparent,#f1f2f5 22%)}.asset-tree-entry:hover .tree-row-actions,.asset-tree-entry.active .tree-row-actions,.tree-row-actions:focus-within{display:flex}.asset-tree-entry:hover,.asset-tree-entry.active{background:#f1f2f5}.api-entry .asset-tree-main{gap:8px}.api-entry .arco-checkbox{flex:0 0 auto}.api-tree-name{min-width:0;flex:1;font-size:12px}.method-label{flex:0 0 auto;font-size:10px;font-weight:800;line-height:1;letter-spacing:.1px}.method-get{color:#14a36f}.method-post{color:#eb6b25}.method-put{color:#3974df}.method-patch{color:#875ce2}.method-delete{color:#e14d54}.method-head,.method-options{color:#75839a}.quick-request-tree-section{margin-top:10px;padding-top:8px;border-top:1px solid #edf0f5}.quick-request-tree-section.active{background:#faf9ff}.quick-request-root{padding:0 5px 0 10px}.tree-root-main{display:flex;min-width:0;flex:1;align-items:center;gap:8px;padding:9px 8px;border:0;border-radius:7px;background:transparent;color:#465268;text-align:left;cursor:pointer}.tree-root-main strong{font-size:13px}.tree-root-main small{margin-left:auto;color:#929baa;font-size:10px}.quick-request-tree-section.active .tree-root-main{color:#6f53cc;font-weight:650}.quick-request-tree-items{display:grid;gap:2px;padding:2px 3px 7px 24px}.quick-request-history-row,.quick-request-folder-row{display:flex;min-width:0;align-items:center;gap:2px}.quick-request-folder-row{gap:7px;height:32px;padding:0 7px;color:#576277;font-size:11px}.quick-request-folder-row:hover{background:#f0eff8;border-radius:6px}.quick-request-folder-row span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.quick-request-history{display:flex;min-width:0;flex:1;align-items:center;gap:7px;height:32px;padding:0 7px;border:0;border-radius:6px;background:transparent;color:#576277;text-align:left;cursor:pointer}.quick-request-history:hover{background:#f0eff8}.quick-request-history>span:not(.method-label){min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}.quick-request-history small{color:#929baa;font-size:10px}.quick-request-tree-items :deep(.arco-empty){padding:10px 0}.tree-footer{display:flex;min-height:46px;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;border-top:1px solid #eceef2;background:#fff}.tree-footer :deep(.arco-btn-text){color:#6f7890}.api-editor-pane{display:grid;min-width:0;min-height:0;grid-template-rows:54px minmax(0,1fr);overflow:hidden;background:#fff}.api-editor-pane--quick{grid-template-rows:minmax(0,1fr)}.workspace-tabbar{display:flex;min-width:0;align-items:stretch;justify-content:space-between;border-bottom:1px solid #e7e9ee;background:#fff}.workspace-tabs-track{display:flex;min-width:0;flex:1;overflow-x:auto;scrollbar-width:none}.workspace-tabs-track::-webkit-scrollbar{display:none}.workspace-tab{position:relative;display:flex;min-width:130px;max-width:235px;align-items:center;justify-content:center;gap:8px;padding:0 16px;border:0;border-right:1px solid #eceef2;background:#fff;color:#687388;text-decoration:none;cursor:pointer}.workspace-tab>span:not(.method-label){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.workspace-tab:hover{background:#fafafa}.workspace-tab.active{color:#2f384a;font-weight:650;background:#fff}.workspace-tab.active::after,.workspace-tab.router-link-active::after{position:absolute;right:10px;bottom:0;left:10px;height:2px;background:#8c62e8;content:""}.tab-close{flex:0 0 auto;color:#a5acb8;font-size:12px}.tab-close:hover{color:#e14d54}.workspace-tab-actions{display:flex;flex:0 0 auto;align-items:center;gap:3px;padding:0 10px;border-left:1px solid #eceef2}.workspace-tab-actions :deep(.arco-select-view){border-radius:8px;background:#f8f9fb}.document-panel{min-width:0;min-height:0;overflow:auto;background:#fff}.document-panel>.arco-empty{padding-top:120px}.quick-request-panel{height:100%}.danger-option{color:rgb(var(--red-6))}.interchange-dialog{display:grid;gap:16px}.interchange-actions,.spec-picker,.curl-preview>div{display:flex;align-items:center;gap:12px}.interchange-actions{justify-content:flex-start}.file-input{display:none}.spec-picker{justify-content:space-between;padding:9px 0}.spec-picker span,.curl-preview span{color:var(--color-text-3);font-size:12px}.spec-picker span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.interchange-result,.curl-preview{padding:14px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.interchange-result :deep(.arco-result){padding:4px 0 10px}.curl-preview{display:grid;gap:10px}@media(max-width:1180px){.api-design-page{grid-template-columns:300px minmax(0,1fr)}.workspace-tab-actions :deep(.arco-select){display:none}}@media(max-width:760px){.api-design-page{grid-template-columns:260px minmax(680px,1fr)}.interchange-actions,.spec-picker,.curl-preview>div{align-items:flex-start;flex-direction:column}}
+.api-entry .asset-tree-main{gap:8px;padding-left:2px}.api-case-toggle{display:grid;flex:0 0 20px;width:20px;height:28px;place-items:center;padding:0;border:0;background:transparent;color:#8791a4;cursor:pointer}.api-case-toggle.hidden{visibility:hidden}.api-case-toggle svg{font-size:11px}.api-debug-case-row{display:flex;width:100%;height:31px;align-items:center;gap:8px;padding-right:32px;border:0;border-radius:6px;background:transparent;color:#687388;text-align:left;cursor:pointer}.api-debug-case-row:hover{background:#f3f1fb;color:#6f53cc}.api-debug-case-row svg{flex:0 0 auto;color:#8c62e8}.api-debug-case-row span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
 </style>

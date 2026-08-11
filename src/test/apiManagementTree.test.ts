@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { buildApiManagementTreeRows, nextWorkspaceTabAfterClose } from '@/utils/apiManagementTree'
+import {
+  apiTreeDisplayText,
+  availableCatalogMoveTargets,
+  buildApiManagementTreeRows,
+  catalogDescendantIds,
+  interfaceRouteQuery,
+  nextApiCopyPath,
+  nextWorkspaceTabAfterClose,
+} from '@/utils/apiManagementTree'
 
 const catalogs = [
   { id: 'root', parentId: null, name: '订单服务', sortOrder: 0 },
@@ -49,5 +57,43 @@ describe('workspace tabs', () => {
       openIds: ['one'],
       activeId: 'one',
     })
+  })
+
+  it('removes quick-request state while preserving interface route signals', () => {
+    expect(interfaceRouteQuery({
+      draft: 'draft-1',
+      newRequest: '123',
+      folderId: 'folder-1',
+      source: 'interface-menu',
+      apiId: 'old-api',
+      caseRequest: '7',
+      view: 'document',
+    }, 'api-2')).toEqual({
+      caseRequest: '7',
+      view: 'document',
+      apiId: 'api-2',
+    })
+  })
+})
+
+describe('api tree actions', () => {
+  it('switches interface labels between name and URL', () => {
+    expect(apiTreeDisplayText(definitions[0], 'NAME')).toBe('创建订单')
+    expect(apiTreeDisplayText(definitions[0], 'URL')).toBe('/orders')
+  })
+
+  it('excludes the current catalog and its descendants from move targets', () => {
+    expect([...catalogDescendantIds(catalogs, 'root')]).toEqual(['child'])
+    expect(availableCatalogMoveTargets(catalogs, 'root').map((catalog) => catalog.id)).toEqual(['other'])
+  })
+
+  it('generates a conflict-free path for copied interfaces', () => {
+    const existing = [
+      ...definitions,
+      { ...definitions[0], id: 'copy-1', path: '/orders-copy' },
+      { ...definitions[0], id: 'copy-2', path: '/orders-copy-2' },
+    ]
+    expect(nextApiCopyPath('POST', '/orders', existing)).toBe('/orders-copy-3')
+    expect(nextApiCopyPath('GET', '/orders', definitions)).toBe('/orders-copy')
   })
 })

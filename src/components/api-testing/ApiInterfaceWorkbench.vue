@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRouter } from 'vue-router'
 import CodeEditor from '@/components/CodeEditor.vue'
 import { storeApiDebugRouteDraft } from '@/utils/apiDebugDraft'
 import {
+  apiCaseName,
+  apiCasePersistence,
+  apiCaseType,
   buildApiRunUrl,
   cloneApiRunSnapshot,
   createApiRunSnapshot,
@@ -13,6 +16,7 @@ import {
   parseApiParameters,
   requestHeaders,
   validateApiContract,
+  type ApiCaseType,
   type ApiRunSnapshot,
   type ContractCheck,
 } from '@/utils/apiTesting'
@@ -54,13 +58,14 @@ interface DebugResult {
   truncated: boolean
   errorMessage: string | null
 }
-interface ProjectParameter {
+interface ProjectEnvironment {
   id: string
+  name: string
   environmentCode: string
-  key: string
-  value: string
+  baseUrl: string
+  enabled: boolean
+  defaultEnvironment: boolean
 }
-interface ParameterCollection { environments: string[]; parameters: ProjectParameter[] }
 interface MockServer {
   id: string
   publicKey: string
@@ -80,6 +85,7 @@ interface ApiInterfaceCase {
   createdAt: string
   updatedAt: string
 }
+const CASE_SCENARIOS = ['成功', '失败', '记录不存在', '数据为空', '缺少参数', '参数有误', '已登录', '未登录'] as const
 
 const props = defineProps<{
   projectId: string
@@ -90,6 +96,8 @@ const props = defineProps<{
   catalogName: string
   createdByName: string
   updatedByName: string
+  openCaseRequest?: number
+  openDebugCase?: string
 }>()
 const emit = defineEmits<{
   'update:selectedVersionId': [value: string]
@@ -98,7 +106,9 @@ const emit = defineEmits<{
   publish: []
   delete: []
   generateCode: []
-  caseCountChange: [count: number]
+  caseListChange: [cases: ApiInterfaceCase[]]
+  caseOpened: []
+  debugCaseOpened: []
 }>()
 const router = useRouter()
 
@@ -109,15 +119,21 @@ const sending = ref(false)
 const savingCase = ref(false)
 const caseDialog = ref(false)
 const cases = ref<ApiInterfaceCase[]>([])
-const environments = ref<string[]>([])
-const parameters = ref<ProjectParameter[]>([])
+const environments = ref<ProjectEnvironment[]>([])
 const mockServers = ref<MockServer[]>([])
 const environment = ref('')
 const snapshot = reactive<ApiRunSnapshot>(createApiRunSnapshot(props.version))
 const result = ref<DebugResult | null>(null)
 const responseBody = ref('发送请求后将在此显示真实响应。')
 const checks = ref<ContractCheck[]>([])
-const caseForm = reactive({ name: '', expectedStatus: 200, responseValidation: true })
+const caseForm = reactive<{
+  name: string
+  scenario: string
+  type: ApiCaseType
+  expectedStatus: number
+  saveResponse: boolean
+}>({ name: '', scenario: '成功', type: 'DEBUG', expectedStatus: 200, saveResponse: false })
+const caseErrors = reactive({ name: '' })
 let runContextGeneration = 0
 let runDraftRevision = 0
 
@@ -125,6 +141,7 @@ const methodColor = computed(() => ({ GET: 'green', POST: 'arcoblue', PUT: 'oran
 const responseHeadersText = computed(() => result.value?.responseHeaders.map((item) => `${item.name}: ${item.value}`).join('\n') || '暂无响应头')
 const responseStatusColor = computed(() => !result.value ? 'gray' : result.value.success && (result.value.statusCode ?? 500) < 400 ? 'green' : 'red')
 const responseStatusText = computed(() => !result.value ? '等待发送' : result.value.success ? `${result.value.statusCode} ${result.value.statusText ?? ''}` : '连接失败')
+const testCases = computed(() => cases.value.filter((item) => apiCaseType(item.responseValidation) === 'TEST'))
 const published = computed(() => props.version.status === 'PUBLISHED')
 const activeMockServer = computed(() => mockServers.value.find(
   (server) => server.enabled && server.smartExampleEnabled,
@@ -186,14 +203,23 @@ function assignSnapshot(value: ApiRunSnapshot) {
 }
 
 function resetSnapshot() {
-  const baseUrlParameter = ['API_BASE_URL', 'BASE_URL'].find((key) =>
-    parameters.value.some((item) => item.environmentCode === environment.value && item.key === key))
-  const baseUrl = environments.value.length && baseUrlParameter
-    ? `{{${baseUrlParameter}}}`
+  const selected = environments.value.find((item) => item.environmentCode === environment.value)
+  const baseUrl = selected?.baseUrl
+    ? '{{BASE_URL}}'
     : snapshot.baseUrl || 'https://api.example.com'
   assignSnapshot(createApiRunSnapshot(props.version, baseUrl))
   result.value = null
   responseBody.value = '发送请求后将在此显示真实响应。'
+  checks.value = []
+}
+
+function selectRunEnvironment(value: unknown) {
+  environment.value = String(value ?? '')
+  const selected = environments.value.find((item) => item.environmentCode === environment.value)
+  if (selected?.baseUrl) snapshot.baseUrl = '{{BASE_URL}}'
+  else if (!environment.value && snapshot.baseUrl === '{{BASE_URL}}') snapshot.baseUrl = 'https://api.example.com'
+  result.value = null
+  responseBody.value = '环境已切换，点击发送后使用新环境执行。'
   checks.value = []
 }
 
@@ -213,19 +239,23 @@ async function loadRunContext() {
   const projectId = props.projectId
   const apiId = props.api.id
   try {
-    const [parameterData, caseData, mockServerData] = await Promise.all([
-      read<ParameterCollection>(`/api/v1/projects/${projectId}/parameters`),
+    const [environmentData, caseData, mockServerData] = await Promise.all([
+      read<ProjectEnvironment[]>(`/api/v1/projects/${projectId}/environments`),
       read<ApiInterfaceCase[]>(`/api/v1/projects/${projectId}/api-design/definitions/${apiId}/cases`),
       read<MockServer[]>(`/api/v1/projects/${projectId}/mock/servers`).catch(() => []),
     ])
     if (generation !== runContextGeneration || projectId !== props.projectId || apiId !== props.api.id) return
     const preserveRunDraft = runDraftRevision !== draftRevision || sending.value || result.value !== resultAtStart
-    parameters.value = parameterData.parameters
-    environments.value = parameterData.environments
+    environments.value = environmentData
     cases.value = caseData
+    openRequestedDebugCase()
     mockServers.value = mockServerData
-    if (environment.value && !environments.value.includes(environment.value)) environment.value = ''
-    if (!environment.value && environments.value.length) environment.value = environments.value[0]
+    if (environment.value && !environments.value.some((item) => item.environmentCode === environment.value)) environment.value = ''
+    if (!environment.value) {
+      environment.value = environments.value.find((item) => item.enabled && item.defaultEnvironment)?.environmentCode
+        ?? environments.value.find((item) => item.enabled)?.environmentCode
+        ?? ''
+    }
     if (!preserveRunDraft) resetSnapshot()
   } catch (error) {
     if (generation === runContextGeneration) {
@@ -272,37 +302,56 @@ async function sendRequest(caseExpectation?: Pick<ApiInterfaceCase, 'expectedSta
   }
 }
 
-function openSaveCase() {
+function openSaveCase(type: ApiCaseType = 'DEBUG') {
   runDraftRevision++
-  caseForm.name = `${props.api.name} - ${cases.value.length + 1}`
+  caseErrors.name = ''
+  caseForm.scenario = result.value?.success === false || (result.value?.statusCode ?? 200) >= 400 ? '失败' : '成功'
+  caseForm.name = apiCaseName(props.api.name, caseForm.scenario)
+  caseForm.type = type
   caseForm.expectedStatus = result.value?.statusCode ?? expectedResponseStatus.value
-  caseForm.responseValidation = true
+  caseForm.saveResponse = Boolean(result.value?.body)
   caseDialog.value = true
 }
 
+const caseRequestMounted = ref(false)
+function openRequestedCase(request = props.openCaseRequest) {
+  if (!caseRequestMounted.value || !request) return
+  openSaveCase()
+  emit('caseOpened')
+}
+
+function applyCaseScenario(value: string) {
+  caseForm.scenario = value
+  caseForm.name = apiCaseName(props.api.name, value)
+  caseErrors.name = ''
+}
+
 async function saveCase() {
+  caseErrors.name = ''
   if (!caseForm.name.trim()) {
-    Message.warning('请输入调试用例名称')
+    caseErrors.name = '请输入用例名称'
     return false
   }
   savingCase.value = true
   try {
     const persistable = createPersistableApiRunSnapshot(snapshot)
+    const casePersistence = apiCasePersistence(caseForm.type, caseForm.expectedStatus, caseForm.saveResponse, result.value?.body ?? '')
     await mutate<ApiInterfaceCase>(`/api/v1/projects/${props.projectId}/api-design/definitions/${props.api.id}/cases`, 'POST', {
       name: caseForm.name,
       environmentCode: environment.value || null,
       requestSnapshot: persistable.snapshot,
-      expectedStatus: caseForm.expectedStatus,
-      responseValidation: caseForm.responseValidation ? 'CONTRACT' : '',
-      savedResponseBody: result.value?.body ?? '',
+      ...casePersistence,
     })
     caseDialog.value = false
     cases.value = await read<ApiInterfaceCase[]>(`/api/v1/projects/${props.projectId}/api-design/definitions/${props.api.id}/cases`)
+    if (caseForm.type === 'TEST') tab.value = 'cases'
     if (persistable.secretsRemoved) Message.info('直接填写的认证值未写入用例；如需复用，请改用环境变量引用')
-    Message.success('已保存为接口调试用例')
+    Message.success(`已保存为接口${caseForm.type === 'TEST' ? '测试用例' : '调试用例'}`)
     return true
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '保存调试用例失败')
+    const message = error instanceof Error ? error.message : '保存用例失败'
+    if (message.includes('用例名称')) caseErrors.name = message
+    else Message.error(message)
     return false
   } finally {
     savingCase.value = false
@@ -319,18 +368,28 @@ function applyCase(item: ApiInterfaceCase) {
   Message.success(`已载入用例：${item.name}`)
 }
 
+function openRequestedDebugCase() {
+  if (!props.openDebugCase) return
+  const item = cases.value.find((candidate) => candidate.id === props.openDebugCase
+    && apiCaseType(candidate.responseValidation) === 'DEBUG')
+  if (!item) return
+  applyCase(item)
+  emit('debugCaseOpened')
+}
+
 async function runCase(item: ApiInterfaceCase) {
   applyCase(item)
   await sendRequest(item)
 }
 
 async function deleteCase(item: ApiInterfaceCase) {
+  const type = apiCaseType(item.responseValidation)
   try {
     await mutate<void>(`/api/v1/projects/${props.projectId}/api-design/definitions/${props.api.id}/cases/${item.id}`, 'DELETE')
     cases.value = cases.value.filter((candidate) => candidate.id !== item.id)
-    Message.success('调试用例已删除')
+    Message.success(`${type === 'TEST' ? '测试' : '调试'}用例已删除`)
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '删除调试用例失败')
+    Message.error(error instanceof Error ? error.message : `删除${type === 'TEST' ? '测试' : '调试'}用例失败`)
   }
 }
 
@@ -380,7 +439,15 @@ watch(() => [props.projectId, props.api.id], loadRunContext, { immediate: true }
 watch(() => props.version.id, resetSnapshot)
 watch(snapshot, () => { runDraftRevision++ }, { deep: true, flush: 'sync' })
 watch(environment, () => { runDraftRevision++ }, { flush: 'sync' })
-watch(() => cases.value.length, (count) => emit('caseCountChange', count), { immediate: true })
+watch(cases, (value) => emit('caseListChange', value))
+watch(() => props.openDebugCase, openRequestedDebugCase)
+watch(() => props.openCaseRequest, (request, previous) => {
+  if (request && request !== previous) openRequestedCase(request)
+})
+onMounted(() => {
+  caseRequestMounted.value = true
+  openRequestedCase()
+})
 </script>
 
 <template>
@@ -528,9 +595,14 @@ watch(() => cases.value.length, (count) => emit('caseCountChange', count), { imm
       <a-tab-pane key="debug" title="调试">
         <div class="workbench-pane">
           <div class="run-toolbar">
-            <a-select v-model="environment" allow-clear placeholder="不使用环境" :style="{ width: '160px' }" aria-label="选择运行环境">
-              <a-option v-for="item in environments" :key="item" :value="item">{{ item }}</a-option>
-            </a-select>
+            <div class="run-environment-control">
+              <a-select :model-value="environment" allow-clear placeholder="请选择环境" aria-label="选择运行环境" @change="selectRunEnvironment">
+                <a-option v-for="item in environments" :key="item.id" :value="item.environmentCode" :disabled="!item.enabled">
+                  {{ item.name }} · {{ item.environmentCode }}
+                </a-option>
+              </a-select>
+              <a-tooltip content="管理项目环境、变量与密钥"><router-link class="environment-settings-link" to="/system-settings/environments" aria-label="管理项目环境"><icon-settings /></router-link></a-tooltip>
+            </div>
             <a-input v-model="snapshot.baseUrl" aria-label="请求服务地址" placeholder="https://api.example.com 或 {{BASE_URL}}" />
             <a-space>
               <a-button @click="restoreFromDocument"><icon-refresh /> 复原文档示例</a-button>
@@ -574,7 +646,7 @@ watch(() => cases.value.length, (count) => emit('caseCountChange', count), { imm
           <section class="response-panel">
             <div class="response-heading">
               <div><strong>响应</strong><a-tag :color="responseStatusColor">{{ responseStatusText }}</a-tag><span v-if="result">{{ result.durationMs }} ms</span><span v-if="result">{{ result.body.length }} 字符</span></div>
-              <a-space><a-button :disabled="!result" @click="openSaveCase">保存为用例</a-button></a-space>
+              <a-space><a-button :disabled="!result" @click="openSaveCase()">保存为用例</a-button></a-space>
             </div>
             <div v-if="checks.length" class="contract-checks">
               <article v-for="check in checks" :key="check.key" :class="{ failed: !check.passed }"><component :is="check.passed ? 'IconCheckCircle' : 'IconCloseCircle'" /><div><strong>{{ check.label }}</strong><span>{{ check.detail }}</span></div></article>
@@ -587,16 +659,16 @@ watch(() => cases.value.length, (count) => emit('caseCountChange', count), { imm
         </div>
       </a-tab-pane>
 
-      <a-tab-pane key="cases" :title="`测试用例 (${cases.length})`">
+      <a-tab-pane key="cases" :title="`测试用例 (${testCases.length})`">
         <div class="workbench-pane">
-          <div class="case-heading"><div><strong>接口调试用例</strong><span>请求值与接口定义分离，定义变更不会丢失已有场景。</span></div><a-button @click="openSaveCase"><icon-plus /> 保存当前运行参数</a-button></div>
-          <div v-if="cases.length" class="case-list">
-            <article v-for="item in cases" :key="item.id">
+          <div class="case-heading"><div><strong>接口测试用例</strong><span>用于稳定的接口回归测试，运行时校验期望状态码与接口契约。</span></div><a-button @click="openSaveCase('TEST')"><icon-plus /> 新建测试用例</a-button></div>
+          <div v-if="testCases.length" class="case-list">
+            <article v-for="item in testCases" :key="item.id">
               <div><strong>{{ item.name }}</strong><span>{{ item.environmentCode || '无环境' }} · 期望 {{ item.expectedStatus ?? '-' }} · {{ new Date(item.updatedAt).toLocaleString('zh-CN') }}</span></div>
-              <a-space><a-button size="small" type="outline" @click="applyCase(item)">仅载入</a-button><a-button size="small" type="primary" :loading="sending" @click="runCase(item)">运行</a-button><a-popconfirm content="确定删除该调试用例吗？" @ok="deleteCase(item)"><a-button size="small" status="danger">删除</a-button></a-popconfirm></a-space>
+              <a-space><a-button size="small" type="outline" @click="applyCase(item)">仅载入</a-button><a-button size="small" type="primary" :loading="sending" @click="runCase(item)">运行</a-button><a-popconfirm content="确定删除该测试用例吗？" @ok="deleteCase(item)"><a-button size="small" status="danger">删除</a-button></a-popconfirm></a-space>
             </article>
           </div>
-          <a-empty v-else description="还没有调试用例"><template #extra><a-button type="primary" @click="openSaveCase">保存第一个用例</a-button></template></a-empty>
+          <a-empty v-else description="还没有测试用例"><template #extra><a-button type="primary" @click="openSaveCase('TEST')">新建第一个测试用例</a-button></template></a-empty>
         </div>
       </a-tab-pane>
 
@@ -616,18 +688,40 @@ watch(() => cases.value.length, (count) => emit('caseCountChange', count), { imm
       </a-tab-pane>
     </a-tabs>
 
-    <a-modal v-model:visible="caseDialog" title="保存为接口调试用例" width="540px" :ok-loading="savingCase" :on-before-ok="saveCase">
-      <a-form :model="caseForm" layout="vertical">
-        <a-form-item label="用例名称" required><a-input v-model="caseForm.name" placeholder="例如：正常查询订单" /></a-form-item>
-        <a-form-item label="期望状态码"><a-input-number v-model="caseForm.expectedStatus" :min="100" :max="599" /></a-form-item>
-        <a-form-item><a-checkbox v-model="caseForm.responseValidation">执行后按当前接口文档校验响应</a-checkbox></a-form-item>
+    <a-modal v-model:visible="caseDialog" title="保存为用例" width="700px" :ok-loading="savingCase" :on-before-ok="saveCase" ok-text="保存">
+      <a-form :model="caseForm" layout="vertical" class="save-case-form">
+        <a-form-item label="用例名称" required :validate-status="caseErrors.name ? 'error' : undefined" :help="caseErrors.name">
+          <div class="case-name-row">
+            <a-input v-model="caseForm.name" placeholder="请输入用例名称" @input="caseErrors.name = ''" />
+            <a-select :model-value="caseForm.scenario" aria-label="用例场景" @change="applyCaseScenario(String($event))">
+              <a-option v-for="scenario in CASE_SCENARIOS" :key="scenario" :value="scenario">{{ scenario }}</a-option>
+            </a-select>
+          </div>
+        </a-form-item>
+        <a-form-item label="用例类型">
+          <a-radio-group v-model="caseForm.type" class="case-type-options">
+            <a-radio value="DEBUG">
+              <span class="case-type-title">调试用例</span>
+              <small>用于开发阶段快速调试接口，便于随时修改请求数据。</small>
+            </a-radio>
+            <a-radio value="TEST">
+              <span class="case-type-title">测试用例</span>
+              <small>用于稳定的接口回归测试，执行时校验状态码与接口契约。</small>
+            </a-radio>
+          </a-radio-group>
+        </a-form-item>
+        <a-form-item v-if="caseForm.type === 'TEST'" label="期望状态码"><a-input-number v-model="caseForm.expectedStatus" :min="100" :max="599" /></a-form-item>
+        <a-form-item>
+          <a-checkbox v-model="caseForm.saveResponse" :disabled="!result?.body">同时保存响应</a-checkbox>
+          <span v-if="!result?.body" class="case-response-hint">发送请求并获得响应后可保存响应内容</span>
+        </a-form-item>
       </a-form>
     </a-modal>
   </section>
 </template>
 
 <style scoped>
-.api-interface-workbench{min-width:0}.workbench-header,.section-heading,.run-toolbar,.response-heading,.case-heading,.case-list article{display:flex;align-items:center;justify-content:space-between;gap:12px}.workbench-header{align-items:flex-start;padding-bottom:16px;border-bottom:1px solid var(--color-border-2)}.workbench-title>div{display:flex;gap:7px}.workbench-title h2{margin:8px 0 5px;font-size:21px}.workbench-title code,.resolved-url code{color:rgb(var(--primary-6));font-size:13px}.dropdown-link{display:block;color:inherit;text-decoration:none}.danger-option{color:rgb(var(--red-6))}.workbench-tabs{margin-top:3px}.document-sections{display:grid;gap:19px;padding-top:6px}.section-heading{margin-bottom:9px}.section-heading span,.summary,.case-heading span,.case-list span{color:var(--color-text-3);font-size:12px}.summary{margin:0;line-height:1.7}.code-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.code-grid pre,.mock-panel pre,.response-code{margin:0;padding:13px;border-radius:8px;background:#172033;color:#c5d7f7;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}.run-toolbar{display:grid;grid-template-columns:160px minmax(280px,1fr) auto auto;margin:5px 0 10px}.resolved-url{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--color-border-2);border-radius:7px;background:var(--color-fill-1);overflow:auto}.resolved-url code{white-space:nowrap}.value-table{display:grid;min-height:170px}.value-row{display:grid;grid-template-columns:50px 130px 75px minmax(170px,1fr) minmax(120px,1fr);gap:9px;align-items:center;padding:8px;border-bottom:1px solid var(--color-border-2);font-size:12px}.value-row>span:last-child{color:var(--color-text-3)}.value-head{color:var(--color-text-3);font-weight:600;background:var(--color-fill-1)}.auth-form{max-width:680px}.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.response-panel{margin-top:14px;padding-top:14px;border-top:1px solid var(--color-border-2)}.response-heading>div{display:flex;align-items:center;gap:9px}.response-heading span{color:var(--color-text-3);font-size:12px}.contract-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}.contract-checks article{display:flex;align-items:flex-start;gap:8px;padding:10px;border:1px solid rgb(var(--green-3));border-radius:7px;background:rgb(var(--green-1));color:rgb(var(--green-7))}.contract-checks article.failed{border-color:rgb(var(--red-3));background:rgb(var(--red-1));color:rgb(var(--red-7))}.contract-checks article>div{display:grid;gap:3px}.contract-checks span{font-size:11px}.response-code{min-height:220px}.case-heading{align-items:flex-start;padding:8px 0 14px}.case-heading>div{display:grid;gap:4px}.case-list{display:grid;gap:9px}.case-list article{padding:12px;border:1px solid var(--color-border-2);border-radius:8px}.case-list article>div{display:grid;gap:5px}.mock-panel{display:grid;gap:15px;padding:16px;border:1px solid var(--color-border-2);border-radius:9px;background:var(--color-fill-1)}.mock-panel>div{display:grid;grid-template-columns:auto 1fr;gap:7px;align-items:center}.mock-panel p{grid-column:2;margin:0;color:var(--color-text-3);font-size:12px}.mock-panel a{justify-self:start}@media(max-width:900px){.code-grid,.contract-checks{grid-template-columns:1fr}.run-toolbar{grid-template-columns:1fr 1fr}.value-row{grid-template-columns:42px 1fr 70px}.value-row>*:nth-child(4),.value-row>*:nth-child(5){grid-column:2 / -1}}@media(max-width:640px){.workbench-header,.case-list article{align-items:flex-start;flex-direction:column}.run-toolbar{grid-template-columns:1fr}.auth-grid{grid-template-columns:1fr}}
+.api-interface-workbench{min-width:0}.workbench-header,.section-heading,.run-toolbar,.response-heading,.case-heading,.case-list article{display:flex;align-items:center;justify-content:space-between;gap:12px}.workbench-header{align-items:flex-start;padding-bottom:16px;border-bottom:1px solid var(--color-border-2)}.workbench-title>div{display:flex;gap:7px}.workbench-title h2{margin:8px 0 5px;font-size:21px}.workbench-title code,.resolved-url code{color:rgb(var(--primary-6));font-size:13px}.dropdown-link{display:block;color:inherit;text-decoration:none}.danger-option{color:rgb(var(--red-6))}.workbench-tabs{margin-top:3px}.document-sections{display:grid;gap:19px;padding-top:6px}.section-heading{margin-bottom:9px}.section-heading span,.summary,.case-heading span,.case-list span{color:var(--color-text-3);font-size:12px}.summary{margin:0;line-height:1.7}.code-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.code-grid pre,.mock-panel pre,.response-code{margin:0;padding:13px;border-radius:8px;background:#172033;color:#c5d7f7;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}.run-toolbar{display:grid;grid-template-columns:220px minmax(280px,1fr) auto auto;margin:5px 0 10px}.run-environment-control{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:6px}.environment-settings-link{display:grid;place-items:center;width:32px;height:32px;color:#6550d5;border:1px solid var(--color-border-2);border-radius:5px;background:#fff;text-decoration:none}.environment-settings-link:hover{border-color:#8d79eb;background:#f5f2ff}.resolved-url{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--color-border-2);border-radius:7px;background:var(--color-fill-1);overflow:auto}.resolved-url code{white-space:nowrap}.value-table{display:grid;min-height:170px}.value-row{display:grid;grid-template-columns:50px 130px 75px minmax(170px,1fr) minmax(120px,1fr);gap:9px;align-items:center;padding:8px;border-bottom:1px solid var(--color-border-2);font-size:12px}.value-row>span:last-child{color:var(--color-text-3)}.value-head{color:var(--color-text-3);font-weight:600;background:var(--color-fill-1)}.auth-form{max-width:680px}.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.response-panel{margin-top:14px;padding-top:14px;border-top:1px solid var(--color-border-2)}.response-heading>div{display:flex;align-items:center;gap:9px}.response-heading span{color:var(--color-text-3);font-size:12px}.contract-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}.contract-checks article{display:flex;align-items:flex-start;gap:8px;padding:10px;border:1px solid rgb(var(--green-3));border-radius:7px;background:rgb(var(--green-1));color:rgb(var(--green-7))}.contract-checks article.failed{border-color:rgb(var(--red-3));background:rgb(var(--red-1));color:rgb(var(--red-7))}.contract-checks article>div{display:grid;gap:3px}.contract-checks span{font-size:11px}.response-code{min-height:220px}.case-heading{align-items:flex-start;padding:8px 0 14px}.case-heading>div{display:grid;gap:4px}.case-list{display:grid;gap:9px}.case-list article{padding:12px;border:1px solid var(--color-border-2);border-radius:8px}.case-list article>div{display:grid;gap:5px}.mock-panel{display:grid;gap:15px;padding:16px;border:1px solid var(--color-border-2);border-radius:9px;background:var(--color-fill-1)}.mock-panel>div{display:grid;grid-template-columns:auto 1fr;gap:7px;align-items:center}.mock-panel p{grid-column:2;margin:0;color:var(--color-text-3);font-size:12px}.mock-panel a{justify-self:start}@media(max-width:900px){.code-grid,.contract-checks{grid-template-columns:1fr}.run-toolbar{grid-template-columns:1fr 1fr}.value-row{grid-template-columns:42px 1fr 70px}.value-row>*:nth-child(4),.value-row>*:nth-child(5){grid-column:2 / -1}}@media(max-width:640px){.workbench-header,.case-list article{align-items:flex-start;flex-direction:column}.run-toolbar{grid-template-columns:1fr}.auth-grid{grid-template-columns:1fr}}
 </style>
 
 <style scoped>
@@ -659,6 +753,54 @@ watch(() => cases.value.length, (count) => emit('caseCountChange', count), { imm
   padding: 17px 10px 15px;
   color: #667188;
   font-weight: 500;
+}
+
+.save-case-form .case-name-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  gap: 10px;
+  width: 100%;
+}
+
+.case-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.case-type-options :deep(.arco-radio) {
+  align-items: flex-start;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 8px;
+  background: var(--color-fill-1);
+}
+
+.case-type-options :deep(.arco-radio-checked) {
+  border-color: rgb(var(--primary-5));
+  background: rgb(var(--primary-1));
+}
+
+.case-type-options :deep(.arco-radio-label) {
+  display: grid;
+  gap: 6px;
+}
+
+.case-type-title {
+  font-weight: 600;
+}
+
+.case-type-options small,
+.case-response-hint {
+  color: var(--color-text-3);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.case-response-hint {
+  margin-left: 10px;
 }
 
 .workbench-tabs :deep(.arco-tabs-tab-active) {
@@ -1012,7 +1154,7 @@ watch(() => cases.value.length, (count) => emit('caseCountChange', count), { imm
 
 .run-toolbar {
   display: grid;
-  grid-template-columns: 160px minmax(280px, 1fr) auto auto;
+  grid-template-columns: 220px minmax(280px, 1fr) auto auto;
   gap: 12px;
   margin: 4px 0 12px;
 }

@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import PageHeader from '@/components/PageHeader.vue'
+import AutomationRunPanel from '@/components/api-automation/AutomationRunPanel.vue'
+import AutomationSidebar from '@/components/api-automation/AutomationSidebar.vue'
 import { useSessionStore } from '@/stores/session'
+import { parseCurlCommand } from '@/utils/apiAutomation'
+import { apiCaseType, buildApiRunUrl, type ApiRunSnapshot } from '@/utils/apiTesting'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
 interface Project { id: string; organizationId: string; name: string; code: string }
 interface Context { organizations: Organization[]; projects: Record<string, Project[]> }
+interface ProjectEnvironment { id: string; name: string; environmentCode: string; baseUrl: string; enabled: boolean; defaultEnvironment: boolean }
 type StepType = 'REQUEST' | 'PARALLEL' | 'EXTRACT' | 'ASSERT' | 'CONDITION' | 'LOOP' | 'WAIT' | 'REUSABLE_STEP' | 'SUB_SCENARIO'
 interface AutomationStep { id: string; type: StepType; name: string; config: Record<string, unknown> }
 interface ParallelRequest { method: string; url: string; body?: string; contentType?: string; maxAttempts?: number }
@@ -41,11 +45,16 @@ interface AutomationExecutionProfile { id: string; organizationId: string; proje
 interface AutomationExecutionProfileDetail extends AutomationExecutionProfile { variables: Record<string, string> }
 type ExecutionVariableSource = 'SCENARIO' | 'PROJECT_PARAMETER' | 'EXECUTION_PROFILE' | 'EXECUTION_OVERRIDE' | 'DATA_SET' | 'ENVIRONMENT_SECRET' | 'RUNNER_LOCAL'
 interface AutomationExecutionConfigurationPreview { scenarioId: string; scenarioVersion: number; environmentCode: string; executionProfileId: string | null; executionProfileVersion: number | null; variableReferences: Array<{ name: string; source: ExecutionVariableSource; secret: boolean; locations: Array<{ stepId: string; configKey: string }> }> }
+interface ImportApiDefinition { id: string; method: string; path: string; name: string; currentVersionId: string | null }
+interface ImportApiCase { id: string; apiId: string; name: string; environmentCode: string | null; requestSnapshot: ApiRunSnapshot; expectedStatus: number | null; responseValidation: string }
+type WorkbenchTab = 'steps' | 'data' | 'reports' | 'integrations'
+type ImportMode = 'INTERFACE' | 'TEST_CASE' | 'DEBUG_CASE' | 'CURL'
 
 const context = ref<Context | null>(null)
 const session = useSessionStore()
 const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) })
 const scenarios = ref<Scenario[]>([])
+const environments = ref<ProjectEnvironment[]>([])
 const detail = ref<ScenarioDetail | null>(null)
 const revisions = ref<Revision[]>([])
 const runners = ref<ApiRunnerStatus[]>([])
@@ -66,6 +75,17 @@ const executionProfiles = ref<AutomationExecutionProfile[]>([])
 const webhooks = ref<AutomationWebhook[]>([])
 const schedules = ref<AutomationSchedule[]>([])
 const selectedStepId = ref('')
+const workbenchTab = ref<WorkbenchTab>('steps')
+const scenarioEditorTab = ref<'flow' | 'scripts' | 'variables'>('flow')
+const scenarioSearch = ref('')
+const stepInspectorVisible = ref(false)
+const importVisible = ref(false)
+const importMode = ref<ImportMode>('INTERFACE')
+const importSelectionId = ref('')
+const importDefinitions = ref<ImportApiDefinition[]>([])
+const importCases = ref<ImportApiCase[]>([])
+const selectedRunDataSetId = ref('')
+const notificationEnabled = ref(false)
 const loading = ref(true)
 const saving = ref(false)
 const submittingExecution = ref(false)
@@ -101,26 +121,26 @@ const savingDataSet = ref(false)
 const deletingDataSetId = ref('')
 const submittingDataSetExecution = ref(false)
 const variableRows = ref<VariableRow[]>([])
-const createForm = reactive({ name: '', description: '', environmentCode: 'test', failureStrategy: 'STOP' as 'STOP' | 'CONTINUE' })
+const createForm = reactive({ name: '', description: '', environmentCode: '', failureStrategy: 'STOP' as 'STOP' | 'CONTINUE' })
 const webhookForm = reactive({ name: '', scenarioId: '' })
 const scheduleForm = reactive({ name: '', scenarioId: '', cronExpression: '0 0 9 * * ?', timezone: 'Asia/Shanghai', timeoutSeconds: 300, maxConsecutiveFailures: 3, enabled: true })
 const dataSetForm = reactive({ name: '', sourceFormat: 'JSON' as 'JSON' | 'CSV', sourceMode: 'TEXT' as 'TEXT' | 'FILE', file: null as File | null, content: '[\n  {"orderId":"1001","region":"east"},\n  {"orderId":"1002","region":"west"}\n]' })
 const dataSetExecutionForm = reactive({ dataSetId: '', scenarioId: '', timeoutSeconds: 300 })
 const reusableStepForm = reactive({ name: '', description: '' })
-const executionProfileForm = reactive({ name: '', environmentCode: 'test', variables: '{\n  "baseUrl": "https://api.example.test"\n}' })
+const executionProfileForm = reactive({ name: '', environmentCode: '', variables: '{}' })
 const executionOptionsForm = reactive({ executionProfileId: '', overrides: '{}', timeoutSeconds: 300 })
+const importForm = reactive({ baseUrl: '{{BASE_URL}}', curl: "curl -X GET '{{BASE_URL}}/health'" })
 
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
 const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value))
+const defaultEnvironmentCode = computed(() => environments.value.find((item) => item.enabled && item.defaultEnvironment)?.environmentCode
+  ?? environments.value.find((item) => item.enabled)?.environmentCode
+  ?? '')
 const selectedStep = computed(() => detail.value?.steps.find((step) => step.id === selectedStepId.value) ?? null)
 const onlineRunner = computed(() => runners.value[0] ?? null)
 const runnerTrusted = computed(() => onlineRunner.value?.trusted === true)
 const runnerHttpExecutionEnabled = computed(() => runnerTrusted.value && onlineRunner.value?.executionEnabled === true)
 const runnerTrustLabel = computed(() => ({ VERIFIED: '已验证', UNVERIFIED: '未验证', NOT_CONFIGURED: '未配置校验' }[onlineRunner.value?.trustStatus ?? 'NOT_CONFIGURED']))
-const runnerTrustColor = computed(() => onlineRunner.value?.trustStatus === 'VERIFIED' ? 'green' : 'orange')
-const failureStrategyNotice = computed(() => detail.value?.failureStrategy === 'CONTINUE'
-  ? '当前策略会在状态断言或后置脚本失败后继续后续受限步骤，任务最终仍会标记为失败；前置脚本和无响应失败始终停止。'
-  : '当前策略会在首个状态断言或脚本失败后停止。')
 const cliScenarioId = computed(() => detail.value?.id || '<scenarioId>')
 const cliExecutionCommand = computed(() => `TESTHUB_URL="${window.location.origin}" \\
 TESTHUB_PROJECT_ID="${projectId.value || '<projectId>'}" \\
@@ -145,13 +165,14 @@ node services/testhub-cli/src/index.js execution export \\
 const executionReportExportUrl = computed(() => executionDetail.value && projectId.value
   ? `/api/v1/projects/${projectId.value}/api-automation/executions/${executionDetail.value.id}/report/export` : '')
 const webhookEndpoint = computed(() => `${window.location.origin}/api/v1/integrations/api-automation/webhooks/{webhookId}/trigger`)
-const runnerCapabilityBoundary = computed(() => runnerHttpExecutionEnabled.value
-  ? '可信 Runner 已启用受限 HTTP、固定流程控制、并行请求组和隔离脚本：并行组只运行 2–5 条独立请求且禁用脚本/局部变量；脚本只在 Runner 容器中以短时同步上下文运行，无法使用网络、文件、进程、模块或计时器；环境密钥、Cookie、请求头、重定向和数据库操作仍保持关闭。'
-  : runnerTrusted.value
-  ? '已具备签名能力发现资格；短时租约可校验无敏感变量来源索引及快照校验和/计数，运行时配置和用户内容执行仍保持关闭。'
-  : '未验证 Runner 仅可执行当前安全预检，不能进行签名能力发现、校验单任务租约、读取快照摘要或获取后续敏感运行配置。')
 const canSaveSelectedAsReusable = computed(() => selectedStep.value !== null
   && !['REUSABLE_STEP', 'SUB_SCENARIO'].includes(selectedStep.value.type))
+const importCandidates = computed(() => importCases.value.filter((item) => importMode.value === 'TEST_CASE'
+  ? apiCaseType(item.responseValidation) === 'TEST'
+  : apiCaseType(item.responseValidation) === 'DEBUG'))
+const runnerSummary = computed(() => onlineRunner.value
+  ? `${onlineRunner.value.runnerVersion} · ${runnerTrustLabel.value}`
+  : '等待 Runner 心跳')
 const date = (value: string) => new Intl.DateTimeFormat('zh-CN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
 const referenceLocations = (reference: { locations: Array<{ stepId: string; configKey: string }> }) => reference.locations.map((location) => `${location.stepId}.${location.configKey}`).join('、')
 const executionLabel: Record<string, string> = { QUEUED: '待投递', ACCEPTED: '已接收', RUNNING: '运行中', CANCELLING: '取消中', SUCCEEDED: '成功', FAILED: '失败', CANCELLED: '已取消', TIMED_OUT: '已超时', REJECTED: '未启用' }
@@ -239,6 +260,11 @@ async function loadRunnerStatus() {
   runners.value = await read<ApiRunnerStatus[]>(`/api/v1/projects/${projectId.value}/api-automation/runner-status`)
 }
 
+async function loadEnvironments() {
+  if (!projectId.value) { environments.value = []; return }
+  environments.value = await read<ProjectEnvironment[]>(`/api/v1/projects/${projectId.value}/environments`)
+}
+
 async function loadExecutions() {
   if (!projectId.value) { executions.value = []; return }
   executions.value = await read<AutomationExecution[]>(`/api/v1/projects/${projectId.value}/api-automation/executions`)
@@ -267,6 +293,16 @@ async function loadWebhooks() {
 async function loadSchedules() {
   if (!projectId.value) { schedules.value = []; return }
   schedules.value = await read<AutomationSchedule[]>(`/api/v1/projects/${projectId.value}/api-automation/schedules`)
+}
+
+async function loadImportSources() {
+  if (!projectId.value) { importDefinitions.value = []; importCases.value = []; return }
+  const [definitions, cases] = await Promise.all([
+    read<ImportApiDefinition[]>(`/api/v1/projects/${projectId.value}/api-design/definitions`),
+    read<ImportApiCase[]>(`/api/v1/projects/${projectId.value}/api-design/cases`),
+  ])
+  importDefinitions.value = definitions
+  importCases.value = cases
 }
 
 async function loadExecutionDetail() {
@@ -311,35 +347,40 @@ async function selectScenario(scenarioId: string) {
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载场景失败') }
 }
 
+async function deleteScenario(scenarioId: string) {
+  if (!projectId.value) return
+  try {
+    await mutate<void>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${scenarioId}`, 'DELETE')
+    if (detail.value?.id === scenarioId) {
+      detail.value = null
+      selectedStepId.value = ''
+      stepInspectorVisible.value = false
+      selectedRunDataSetId.value = ''
+    }
+    await loadScenarios()
+    Message.success('场景已删除')
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : '删除场景失败')
+  }
+}
+
 async function load() {
   loading.value = true
   try {
     context.value = await read<Context>('/api/v1/access/context')
     projectId.value = session.resolveProjectId(projects.value)
-    await Promise.all([loadScenarios(), loadRunnerStatus(), loadExecutions(), loadDataSets(), loadReusableSteps(), loadExecutionProfiles(), loadWebhooks(), loadSchedules()])
+    await Promise.all([loadEnvironments(), loadScenarios(), loadRunnerStatus(), loadExecutions(), loadDataSets(), loadReusableSteps(), loadExecutionProfiles(), loadWebhooks(), loadSchedules(), loadImportSources()])
+    createForm.environmentCode = defaultEnvironmentCode.value
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载接口自动化场景失败') } finally { loading.value = false }
-}
-
-async function changeProject() {
-  detail.value = null
-  revisions.value = []
-  variableRows.value = []
-  webhooks.value = []
-  schedules.value = []
-  dataSets.value = []
-  dataSetDetail.value = null
-  reusableSteps.value = []
-  executionProfiles.value = []
-  try { await Promise.all([loadScenarios(), loadRunnerStatus(), loadExecutions(), loadDataSets(), loadReusableSteps(), loadExecutionProfiles(), loadWebhooks(), loadSchedules()]) } catch (error) { Message.error(error instanceof Error ? error.message : '切换项目失败') }
 }
 
 function defaultStep(type: StepType): AutomationStep {
   const id = `${type.toLowerCase()}-${Date.now()}`
   const defaults: Record<StepType, Record<string, unknown>> = {
-    REQUEST: { method: 'GET', url: '{{baseUrl}}/health', maxAttempts: 1 }, EXTRACT: { source: 'LAST_STATUS_CODE', variable: 'lastStatusCode' },
+    REQUEST: { method: 'GET', url: '{{BASE_URL}}/health', maxAttempts: 1 }, EXTRACT: { source: 'LAST_STATUS_CODE', variable: 'lastStatusCode' },
     PARALLEL: { requests: [
-      { method: 'GET', url: '{{baseUrl}}/health', maxAttempts: 1 },
-      { method: 'GET', url: '{{baseUrl}}/version', maxAttempts: 1 },
+      { method: 'GET', url: '{{BASE_URL}}/health', maxAttempts: 1 },
+      { method: 'GET', url: '{{BASE_URL}}/version', maxAttempts: 1 },
     ] },
     ASSERT: { source: 'LAST_STATUS_CODE', expectedStatus: 200 }, CONDITION: { source: 'LAST_STATUS_CODE', operator: 'EQUALS', expectedStatus: 200 },
     LOOP: { totalRuns: 2 }, WAIT: { delayMillis: 300 },
@@ -349,14 +390,14 @@ function defaultStep(type: StepType): AutomationStep {
 }
 
 async function createScenario() {
-  if (!projectId.value || !createForm.name.trim()) { Message.warning('请填写场景名称'); return }
+  if (!projectId.value || !createForm.name.trim() || !createForm.environmentCode) { Message.warning('请填写场景名称并选择运行环境'); return }
   saving.value = true
   try {
     const scenario = await mutate<ScenarioDetail>(`/api/v1/projects/${projectId.value}/api-automation/scenarios`, 'POST', {
-      ...createForm, steps: [defaultStep('REQUEST')], variables: { baseUrl: 'https://api.example.test' },
+      ...createForm, steps: [defaultStep('REQUEST')], variables: {},
     })
     createVisible.value = false
-    createForm.name = ''; createForm.description = ''; createForm.environmentCode = 'test'; createForm.failureStrategy = 'STOP'
+    createForm.name = ''; createForm.description = ''; createForm.environmentCode = defaultEnvironmentCode.value; createForm.failureStrategy = 'STOP'
     await loadScenarios()
     await selectScenario(scenario.id)
     Message.success('接口自动化场景已创建')
@@ -368,6 +409,73 @@ function addStep(type: StepType) {
   const step = defaultStep(type)
   detail.value.steps.push(step)
   selectedStepId.value = step.id
+  stepInspectorVisible.value = true
+}
+
+function selectStep(stepId: string) {
+  selectedStepId.value = stepId
+  stepInspectorVisible.value = true
+}
+
+function openImport(mode: ImportMode) {
+  if (!detail.value) { Message.warning('请先选择或新建一个场景'); return }
+  importMode.value = mode
+  importSelectionId.value = mode === 'INTERFACE' ? (importDefinitions.value[0]?.id ?? '') : (importCandidates.value[0]?.id ?? '')
+  importVisible.value = true
+}
+
+function importedContentType(snapshot: ApiRunSnapshot): string {
+  return snapshot.headerValues.find((header) => header.enabled && header.name.toLowerCase() === 'content-type')?.value ?? ''
+}
+
+async function importRequestStep() {
+  if (!detail.value) return
+  try {
+    let request: AutomationStep
+    let assertion: AutomationStep | null = null
+    if (importMode.value === 'CURL') {
+      const parsed = parseCurlCommand(importForm.curl)
+      request = defaultStep('REQUEST')
+      request.name = `${parsed.method} ${parsed.url.split('?')[0].split('/').filter(Boolean).at(-1) ?? '请求'}`
+      request.config = { method: parsed.method, url: parsed.url, body: parsed.body, contentType: parsed.contentType, maxAttempts: 1 }
+      if (parsed.externalizedSecrets.length) Message.info(`已将 ${parsed.externalizedSecrets.join('、')} 的直接凭据替换或移除，请改用环境密钥变量`)
+    } else if (importMode.value === 'INTERFACE') {
+      const definition = importDefinitions.value.find((item) => item.id === importSelectionId.value)
+      if (!definition) throw new Error('请选择要导入的接口')
+      const versions = await read<Array<{ id: string; requestBody: string }>>(`/api/v1/projects/${projectId.value}/api-design/definitions/${definition.id}/versions`)
+      const requestBody = versions.find((version) => version.id === definition.currentVersionId)?.requestBody ?? versions[0]?.requestBody ?? ''
+      request = defaultStep('REQUEST')
+      request.name = definition.name
+      request.config = { method: definition.method, url: `${importForm.baseUrl.replace(/\/+$/, '')}${definition.path}`, body: requestBody, contentType: requestBody ? 'application/json' : '', maxAttempts: 1 }
+    } else {
+      const source = importCandidates.value.find((item) => item.id === importSelectionId.value)
+      if (!source) throw new Error('请选择要导入的接口用例')
+      const definition = importDefinitions.value.find((item) => item.id === source.apiId)
+      if (!definition) throw new Error('接口用例所属接口不存在或已删除')
+      request = defaultStep('REQUEST')
+      request.name = source.name
+      request.config = {
+        method: definition.method,
+        url: buildApiRunUrl(definition, source.requestSnapshot),
+        body: source.requestSnapshot.body,
+        contentType: importedContentType(source.requestSnapshot),
+        maxAttempts: 1,
+      }
+      if (source.expectedStatus) {
+        assertion = defaultStep('ASSERT')
+        assertion.name = `${source.name} · 状态断言`
+        assertion.config = { source: 'LAST_STATUS_CODE', expectedStatus: source.expectedStatus }
+      }
+    }
+    detail.value.steps.push(request)
+    if (assertion) detail.value.steps.push(assertion)
+    selectedStepId.value = request.id
+    importVisible.value = false
+    stepInspectorVisible.value = true
+    Message.success(assertion ? '已导入请求与状态断言' : '已导入请求步骤')
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : '导入请求步骤失败')
+  }
 }
 
 function removeStep() {
@@ -425,7 +533,7 @@ function addParallelRequest() {
   if (!selectedStep.value) return
   const requests = parallelRequests()
   if (requests.length >= 5) { Message.warning('并行请求组最多包含 5 条请求'); return }
-  selectedStep.value.config = { ...selectedStep.value.config, requests: [...requests, { method: 'GET', url: '{{baseUrl}}/health', maxAttempts: 1 }] }
+  selectedStep.value.config = { ...selectedStep.value.config, requests: [...requests, { method: 'GET', url: '{{BASE_URL}}/health', maxAttempts: 1 }] }
 }
 
 function removeParallelRequest(index: number) {
@@ -515,13 +623,28 @@ async function saveScenario() {
   } catch (error) { Message.error(error instanceof Error ? error.message : '保存场景失败') } finally { saving.value = false }
 }
 
-function openExecutionOptions() {
+function openExecutionOptions(preserveSelections = false) {
   if (!detail.value) { Message.warning('请先选择一个场景'); return }
-  executionOptionsForm.executionProfileId = ''
-  executionOptionsForm.overrides = '{}'
-  executionOptionsForm.timeoutSeconds = 300
+  if (!preserveSelections) {
+    executionOptionsForm.executionProfileId = ''
+    executionOptionsForm.overrides = '{}'
+    executionOptionsForm.timeoutSeconds = 300
+  }
   executionConfigurationPreview.value = null
   executionOptionsVisible.value = true
+}
+
+async function runCurrentScenario() {
+  if (!detail.value) { Message.warning('请先选择一个场景'); return }
+  if (selectedRunDataSetId.value) {
+    dataSetExecutionForm.dataSetId = selectedRunDataSetId.value
+    dataSetExecutionForm.scenarioId = detail.value.id
+    dataSetExecutionForm.timeoutSeconds = executionOptionsForm.timeoutSeconds
+    await submitDataSetExecution()
+  } else {
+    await submitExecution()
+  }
+  if (notificationEnabled.value) Message.info('已开启本页执行提醒，可在“测试报告”中持续查看最新状态')
 }
 
 function executionOverrides(): Record<string, string> {
@@ -572,8 +695,8 @@ function openCreateExecutionProfile() {
   editingExecutionProfileId.value = null
   executionProfileExpectedVersion.value = null
   executionProfileForm.name = ''
-  executionProfileForm.environmentCode = detail.value?.environmentCode || 'test'
-  executionProfileForm.variables = '{\n  "baseUrl": "https://api.example.test"\n}'
+  executionProfileForm.environmentCode = detail.value?.environmentCode || defaultEnvironmentCode.value
+  executionProfileForm.variables = '{}'
   executionProfileVisible.value = true
 }
 
@@ -863,120 +986,520 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
 
 <template>
   <div class="page automation-page">
-    <PageHeader eyebrow="API AUTOMATION" title="接口自动化场景" description="编排可复用请求、受限并行请求组、提取、断言、固定流程控制与隔离脚本；实际执行始终由独立 Runner 完成。" action="新建场景" @action="createVisible = true" />
-    <section class="automation-summary panel"><div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code }}</small></div><a-select v-model="projectId" :style="{ width: '230px' }" @change="changeProject"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select><div><span>场景数量</span><strong>{{ scenarios.length }}</strong><small>持久化资产</small></div><div><span>当前版本</span><strong>v{{ detail?.version ?? '—' }}</strong><small>乐观锁保护</small></div></section>
-    <section class="runner-status-panel panel" :class="{ online: onlineRunner, trusted: runnerTrusted }"><div class="runner-status-icon"><icon-check-circle-fill v-if="runnerTrusted" /><icon-info-circle-fill v-else /></div><div><span class="eyebrow">ISOLATED API RUNNER</span><strong>{{ runnerHttpExecutionEnabled ? '受限 HTTP Runner 已启用' : runnerTrusted ? 'Runner 身份已验证' : onlineRunner ? 'Runner 协议在线，身份未验证' : '等待 Runner 心跳' }}</strong><small v-if="onlineRunner">{{ onlineRunner.runnerId }} · {{ onlineRunner.runnerVersion }} · 最近心跳 {{ date(onlineRunner.heartbeatAt) }}</small><small v-else>启动独立 Runner 后，控制面会从 Redis 私有心跳中发现它。</small></div><a-tag size="small" :color="runnerTrustColor">{{ onlineRunner ? runnerTrustLabel : '未连接' }}</a-tag><span class="runner-status-boundary">{{ onlineRunner ? runnerCapabilityBoundary : 'Runner 上线并完成可信校验后，才可进行签名能力发现与无敏感索引校验；运行时配置交接默认关闭。' }}</span></section>
-    <section class="data-set-panel panel">
-      <div class="data-set-head"><div><span class="eyebrow">CSV / JSON · DATA DRIVEN</span><h3>接口自动化数据集</h3><small>数据集只在项目范围内可见。按行运行时，每一行都会创建独立的隔离执行任务；行内变量值不会出现在任务消息、执行清单、日志或报告中。CSV / JSON 原文件可在校验后归档到 MinIO。</small></div><a-button type="primary" @click="openCreateDataSet"><icon-plus /> 新建数据集</a-button></div>
-      <div class="data-set-list"><article v-for="dataSet in dataSets" :key="dataSet.id" class="data-set-row"><span class="data-set-icon"><icon-storage /></span><div><strong>{{ dataSet.name }}</strong><small>{{ dataSet.sourceFormat }} · {{ dataSet.rowCount }} 行 · {{ dataSet.columns.length }} 字段<template v-if="dataSet.sourceFile"> · 原文件 {{ dataSet.sourceFile.originalName }}</template><template v-else> · 手工录入</template> · 更新于 {{ date(dataSet.updatedAt) }}</small><code>{{ dataSet.columns.join(' · ') }}</code></div><a-tag :color="dataSet.sourceFile ? 'green' : 'arcoblue'">{{ dataSet.sourceFile ? 'MinIO 已归档' : 'SHA-256' }}</a-tag><a-button type="text" size="small" @click="showDataSet(dataSet)">预览</a-button><a-button type="text" size="small" :disabled="!scenarios.length" @click="openDataSetExecution(dataSet)">逐行执行</a-button><a-popconfirm content="删除后不可恢复，但已创建的执行快照不会受影响。确定继续？" @ok="deleteDataSet(dataSet)"><a-button type="text" status="danger" size="small" :loading="deletingDataSetId === dataSet.id">删除</a-button></a-popconfirm></article><a-empty v-if="!dataSets.length" description="尚未创建接口自动化数据集"><template #extra><a-button type="outline" @click="openCreateDataSet">导入首个 CSV / JSON</a-button></template></a-empty></div>
-      <a-alert class="data-set-security" type="warning" :show-icon="true">请不要将 API Token、密码或私钥放入数据集；环境密钥由项目环境密钥功能独立管理。上传原文件最大 512 KiB，仅当前项目成员可下载；其内容不会进入 Runner 任务、日志或报告。若字段名与当前环境密钥重名，平台会拒绝本次数据驱动执行。</a-alert>
-    </section>
-    <section class="integration-panel panel"><div class="integration-head"><div><span class="eyebrow">CLI · SCHEDULE · WEBHOOK · CI</span><h3>自动化集成触发</h3><small>CLI/CI 使用项目访问令牌的 <code>run:execute</code> 范围；Quartz 定时计划和 Webhook 都只会创建安全 Outbox 任务，报告只返回脱敏固定结构。</small></div><a-space><a-button type="outline" :disabled="!scenarios.length" @click="openCreateSchedule"><icon-calendar /> 新建计划</a-button><a-button type="outline" :disabled="!scenarios.length" @click="openCreateWebhook"><icon-plus /> 新建 Webhook</a-button></a-space></div><a-tabs default-active-key="cli" class="integration-tabs"><a-tab-pane key="cli" title="CLI / PAT"><div class="integration-code-grid"><div><strong>触发当前场景</strong><small>将 PAT 存在 CI 受保护密钥中，不要写入仓库。</small><pre><code>{{ cliExecutionCommand }}</code></pre></div><div><strong>读取结构化报告</strong><small>不包含 URL、请求/响应正文、变量取值、密钥或日志文本。</small><pre><code>{{ cliReportCommand }}</code></pre></div></div></a-tab-pane><a-tab-pane key="ci" title="CI 支持"><div class="ci-note"><strong>Jenkins、GitLab CI 和 GitHub Actions</strong><small>直接执行 CLI 命令并将 <code>TESTHUB_TOKEN</code> 配置为平台密钥变量；运行完成后用执行 ID 请求报告接口归档。</small></div></a-tab-pane><a-tab-pane key="webhook" title="签名 Webhook"><div class="webhook-contract"><strong>入站地址</strong><code>{{ webhookEndpoint }}</code><small>签名原文是 <code>timestamp + newline + nonce + newline + 原始 JSON</code>；请求体仅允许 <code>{"timeoutSeconds":300}</code>。完整 curl/CI 样例见阶段文档。</small></div></a-tab-pane></a-tabs><div class="schedule-list-head"><div><strong>Quartz 定时计划</strong><small>使用 Quartz Cron 六或七段格式；连续失败达到阈值会自动停用，防止不可用 Runner 反复排队。</small></div></div><div class="schedule-list"><article v-for="schedule in schedules" :key="schedule.id" class="schedule-row"><span class="schedule-icon"><icon-calendar /></span><div><strong>{{ schedule.name }}</strong><small>{{ scenarios.find((scenario) => scenario.id === schedule.scenarioId)?.name ?? schedule.scenarioId }} · {{ schedule.cronExpression }} · {{ schedule.timezone }}</small></div><div class="schedule-meta"><a-tag :color="schedule.enabled ? 'green' : 'gray'">{{ schedule.enabled ? '已启用' : '已停用' }}</a-tag><small>连续失败 {{ schedule.consecutiveFailures }}/{{ schedule.maxConsecutiveFailures }} · {{ schedule.lastExecutionStatus ?? '尚未执行' }}</small></div><a-button type="text" size="small" :disabled="!schedule.enabled" :loading="runningScheduleId === schedule.id" @click="runSchedule(schedule)">立即执行</a-button><a-button type="text" size="small" @click="openEditSchedule(schedule)">编辑</a-button><a-popconfirm content="删除后将停止 Quartz 触发，确定继续？" @ok="deleteSchedule(schedule)"><a-button type="text" status="danger" size="small" :loading="deletingScheduleId === schedule.id">删除</a-button></a-popconfirm></article><a-empty v-if="!schedules.length" description="尚未创建接口自动化定时计划" /></div><div class="webhook-list-head"><div><strong>项目 Webhook</strong><small>密钥只会在创建响应中出现一次，列表不返回密钥。</small></div></div><div class="webhook-list"><article v-for="webhook in webhooks" :key="webhook.id" class="webhook-row"><span class="webhook-icon"><icon-link /></span><div><strong>{{ webhook.name }}</strong><small>场景：{{ scenarios.find((scenario) => scenario.id === webhook.scenarioId)?.name ?? webhook.scenarioId }} · {{ webhook.id }}</small></div><a-tag :color="webhook.enabled ? 'green' : 'gray'">{{ webhook.enabled ? '已启用' : '已停用' }}</a-tag><a-button type="text" size="small" :loading="updatingWebhookId === webhook.id" @click="setWebhookEnabled(webhook, !webhook.enabled)">{{ webhook.enabled ? '停用' : '启用' }}</a-button><a-popconfirm content="撤销后不能恢复，确定继续？" @ok="revokeWebhook(webhook)"><a-button type="text" status="danger" size="small" :loading="updatingWebhookId === webhook.id">撤销</a-button></a-popconfirm></article><a-empty v-if="!webhooks.length" description="尚未创建项目 Webhook" /></div></section>
-    <section class="execution-profile-panel panel"><div class="execution-profile-head"><div><span class="eyebrow">ENVIRONMENT · FROZEN VARIABLES</span><h3>场景运行配置集</h3><small>配置集在项目范围内复用，用于指定执行环境与非敏感变量。提交时可叠加一次性覆盖值；环境密钥始终优先且任何同名覆盖都会被拒绝。</small></div><a-button type="primary" @click="openCreateExecutionProfile"><icon-plus /> 新建配置集</a-button></div><div class="execution-profile-list"><article v-for="profile in executionProfiles" :key="profile.id" class="execution-profile-row"><span>◈</span><div><strong>{{ profile.name }}</strong><small>{{ profile.environmentCode }} · v{{ profile.version }} · {{ profile.variableCount }} 个非敏感变量 · 更新于 {{ date(profile.updatedAt) }}</small></div><a-tag color="cyan">执行时冻结</a-tag><a-button type="text" size="small" @click="openEditExecutionProfile(profile)">编辑</a-button></article><a-empty v-if="!executionProfiles.length" description="还没有运行配置集；可在提交场景时使用默认场景环境" /></div><a-alert type="warning" :show-icon="true">配置集和本次覆盖变量都不应用于数据集批量任务；不要填入 Token、密码或私钥，请使用项目环境密钥。</a-alert></section>
-    <section class="execution-panel panel"><div class="execution-panel-head"><div><span class="eyebrow">RUNNER EXECUTION</span><h3>场景执行任务</h3><small>任务经 MySQL Outbox 投递到 Runner；只有完成可信校验、显式启用和网络白名单都满足时才会发送受限 HTTP 请求。GET/HEAD/OPTIONS 可在瞬时失败时进行有界重试；详情不展示请求、响应或密钥。</small></div><a-button type="primary" :disabled="!detail" :loading="submittingExecution" @click="openExecutionOptions"><icon-play-arrow /> 提交当前场景</a-button></div><a-table :data="executions" :pagination="false" row-key="id" :scroll="{ x: 1020 }" size="small"><template #columns><a-table-column title="场景 / 数据行" :width="220"><template #cell="{ record }"><strong>{{ record.scenarioName }}</strong><small class="execution-version">v{{ record.scenarioVersion }} · {{ record.id.slice(-6) }}<template v-if="record.executionProfileId"> · 配置集 v{{ record.executionProfileVersion }}</template><template v-if="record.dataSetId"> · 数据集第 {{ record.dataSetRowNumber }} 行</template></small></template></a-table-column><a-table-column title="状态" :width="110"><template #cell="{ record }"><a-tag :color="executionColor[record.status] ?? 'gray'">{{ executionLabel[record.status] ?? record.status }}</a-tag></template></a-table-column><a-table-column title="Runner / 原因" :width="260"><template #cell="{ record }"><span>{{ record.runnerId ?? '等待投递' }}</span><small class="execution-message">{{ record.statusCode ? `${record.statusCode}${record.statusMessage ? ` · ${record.statusMessage}` : ''}` : 'Outbox 持久化后等待投递' }}</small></template></a-table-column><a-table-column title="提交时间" :width="170"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column><a-table-column title="操作" :width="150" fixed="right"><template #cell="{ record }"><a-space size="mini"><a-button type="text" size="small" @click="showExecutionDetail(record)">详情</a-button><a-button v-if="canCancelExecution(record.status)" type="text" status="warning" size="small" :loading="cancellingExecutionId === record.id" @click="cancelExecution(record)">取消</a-button></a-space></template></a-table-column></template></a-table><a-empty v-if="!executions.length" description="尚未提交执行任务" /></section>
-    <section v-if="detail" class="script-panel panel">
-      <div class="script-panel-head"><div><span class="eyebrow">ISOLATED JAVASCRIPT · PM COMPAT V1</span><h3>场景前后置脚本</h3><small>前置脚本会在每个 HTTP 请求前运行；后置脚本会在每个 HTTP 响应后运行。兼容受限 <code>pm.*</code> 变量和状态断言工作流，脚本不会读取响应正文、请求头、Cookie 或环境密钥。</small></div><a-tag color="purple">Runner 容器执行</a-tag></div>
-      <div class="script-compatibility"><strong>受限 pm.* 兼容范围</strong><div><code>pm.variables</code><code>pm.environment</code><code>pm.response.code</code><code>pm.response.to.have.status()</code><code>pm.test()</code><code>pm.expect()</code></div><small>变量修改仅作用于当前 Runner 内存任务；网络请求、响应正文、Cookie、集合/全局变量和 <code>pm.sendRequest()</code> 不支持。</small></div>
-      <a-tabs default-active-key="pre" class="script-tabs"><a-tab-pane key="pre" title="前置脚本"><a-textarea :model-value="detail.preRequestScript" :max-length="8192" :auto-size="{ minRows: 8, maxRows: 14 }" placeholder="// 受限 pm.* 变量示例：&#10;pm.environment.set('orderId', pm.variables.get('orderId') + '-retry');" @update:model-value="updateScenarioScript('preRequestScript', String($event))" /><a-alert class="script-boundary" type="info" :show-icon="true">禁止使用网络、文件、进程、模块、动态函数、定时器及异步 API。执行上限 150ms；脚本输出不会保存到日志或报告。</a-alert></a-tab-pane><a-tab-pane key="post" title="后置脚本"><a-textarea :model-value="detail.postResponseScript" :max-length="8192" :auto-size="{ minRows: 8, maxRows: 14 }" placeholder="// 状态断言示例：&#10;pm.test('创建成功', function () { pm.response.to.have.status(201); });" @update:model-value="updateScenarioScript('postResponseScript', String($event))" /><a-alert class="script-boundary" type="warning" :show-icon="true">任一 <code>pm.test()</code> 断言失败会使当前执行失败。平台只记录固定的脚本完成或失败事件，不记录脚本文本、变量取值或异常详情。</a-alert></a-tab-pane></a-tabs>
-    </section>
-    <section class="reusable-step-panel panel">
-      <div class="reusable-step-head"><div><span class="eyebrow">PROJECT-LOCAL · VERSIONED REUSE</span><h3>公共步骤与子场景引用</h3><small>公共步骤与子场景均固定来源版本、仅限当前项目。保存或执行时会展开成基础步骤；禁止嵌套引用、跨项目引用、递归和子场景脚本。</small></div><a-button type="primary" :disabled="!canSaveSelectedAsReusable" @click="openCreateReusableStep"><icon-plus /> 将选中基础步骤保存为公共步骤</a-button></div>
-      <div class="reusable-step-list"><article v-for="item in reusableSteps" :key="item.id" class="reusable-step-row"><span>♧</span><div><strong>{{ item.name }}</strong><small>v{{ item.version }} · {{ item.stepCount }} 个基础步骤 · {{ item.description || '未填写说明' }}</small></div><a-tag color="purple">项目内可复用</a-tag></article><a-empty v-if="!reusableSteps.length" description="选择一个基础步骤后，可将其保存为项目级公共步骤" /></div>
-      <a-alert type="info" :show-icon="true">引用节点不会执行控制面代码。Runner 只接收冻结来源版本展开出的受限 HTTP、提取、断言、条件、循环和等待基础步骤。</a-alert>
-    </section>
-    <section class="automation-workspace">
-      <aside class="scenario-panel panel"><div class="panel-heading"><div><span class="eyebrow">SCENARIOS</span><h3>场景库</h3></div><a-button type="text" size="small" @click="loadScenarios"><icon-refresh /></a-button></div><a-spin :loading="loading"><button v-for="scenario in scenarios" :key="scenario.id" class="scenario-row" :class="{ selected: scenario.id === detail?.id }" @click="selectScenario(scenario.id)"><span class="scenario-icon"><icon-code /></span><div><strong>{{ scenario.name }}</strong><small>v{{ scenario.version }} · {{ scenario.stepCount }} 步 · {{ scenario.environmentCode }}</small></div><a-tag size="small" :color="scenario.failureStrategy === 'STOP' ? 'orange' : 'green'">{{ scenario.failureStrategy === 'STOP' ? '遇错停止' : '继续' }}</a-tag></button><a-empty v-if="!loading && !scenarios.length" description="还没有接口自动化场景"><template #extra><a-button type="outline" @click="createVisible = true">新建场景</a-button></template></a-empty></a-spin></aside>
-      <section class="builder-panel panel"><template v-if="detail"><div class="builder-head"><div><span class="eyebrow">SCENARIO BUILDER</span><a-input :model-value="detail.name" class="scenario-title" @update:model-value="updateScenarioField('name', String($event))" /><small>v{{ detail.version }} · 最近更新 {{ date(detail.updatedAt) }}</small></div><div class="builder-actions"><a-button @click="revisionVisible = true"><icon-history /> 修订记录</a-button><a-button :loading="saving" type="primary" @click="saveScenario"><icon-save /> 保存</a-button></div></div><div class="builder-settings"><a-input :model-value="detail.environmentCode" placeholder="环境标识" @update:model-value="updateScenarioField('environmentCode', String($event))"><template #prefix>环境</template></a-input><a-select :model-value="detail.failureStrategy" @change="updateScenarioField('failureStrategy', String($event))"><a-option value="STOP">失败时停止（默认）</a-option><a-option value="CONTINUE">失败后继续（最终仍失败）</a-option></a-select><a-input :model-value="detail.description" placeholder="场景说明（可选）" @update:model-value="updateScenarioField('description', String($event))" /></div><div class="runner-notice"><icon-info-circle-fill /><span>{{ runnerHttpExecutionEnabled ? '可信 Runner 可执行受限 HTTP、状态码条件、有界循环与等待；脚本、密钥、Cookie、请求头、重定向和数据库操作仍不可用。' : '场景可保存和协作编排；只有可信 Runner 显式启用受限 HTTP 执行后才会发送网络请求，其他能力继续关闭。' }} {{ failureStrategyNotice }}</span><a-button size="mini" disabled><icon-play-arrow /> {{ runnerHttpExecutionEnabled ? '受限执行已启用' : '等待可信 Runner' }}</a-button></div><section class="flow-canvas"><div class="flow-start">开始</div><template v-for="(step, index) in detail.steps" :key="step.id"><div class="flow-line"></div><button class="flow-node" :class="[{ selected: selectedStepId === step.id }, `node-${typeMeta[step.type].tone}`]" @click="selectedStepId = step.id"><span class="node-index">{{ index + 1 }}</span><span class="node-type">{{ typeMeta[step.type].icon }}</span><div><strong>{{ step.name }}</strong><small>{{ typeMeta[step.type].label }} · {{ typeMeta[step.type].description }}</small></div></button></template><div class="flow-line"></div><div class="flow-end">结束</div></section><div class="palette"><span>添加步骤</span><a-button v-for="type in (Object.keys(typeMeta) as StepType[])" :key="type" size="small" @click="addStep(type)">{{ typeMeta[type].icon }} {{ typeMeta[type].label }}</a-button></div></template><a-empty v-else description="从场景库选择或新建一个接口自动化场景" /></section>
-      <aside class="property-panel panel">
-        <template v-if="detail && selectedStep">
-          <div class="property-title"><div><span>步骤配置</span><a-tag size="small" :color="typeMeta[selectedStep.type].tone === 'gray' ? 'gray' : 'arcoblue'">{{ typeMeta[selectedStep.type].label }}</a-tag></div><a-button type="text" status="danger" size="small" @click="removeStep"><icon-delete /> 删除</a-button></div>
-          <a-form :model="selectedStep" layout="vertical">
-            <a-form-item label="步骤名称"><a-input :model-value="selectedStep.name" @update:model-value="renameStep(String($event))" /></a-form-item>
-            <template v-if="selectedStep.type === 'REQUEST'">
-              <a-form-item label="请求方法"><a-select :model-value="String(configValue('method', 'GET'))" @change="setRequestMethod(String($event))"><a-option v-for="method in ['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item>
-              <a-form-item label="请求地址"><a-input :model-value="String(configValue('url'))" placeholder="{{baseUrl}}/orders" @update:model-value="setConfig('url', String($event))" /></a-form-item>
-              <a-form-item label="内容类型"><a-select :model-value="String(configValue('contentType', ''))" allow-clear placeholder="未设置" @change="setConfig('contentType', String($event ?? ''))"><a-option value="application/json">application/json</a-option><a-option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</a-option><a-option value="text/plain">text/plain</a-option><a-option value="application/xml">application/xml</a-option></a-select></a-form-item>
-              <a-form-item label="请求正文"><a-textarea :model-value="String(configValue('body', ''))" :auto-size="{ minRows: 4, maxRows: 8 }" placeholder="仅支持正文模板变量；不支持密钥、Cookie、请求头或脚本" @update:model-value="setConfig('body', String($event))" /></a-form-item>
-              <a-form-item label="最大尝试次数"><a-select :model-value="Number(configValue('maxAttempts', 1))" @change="setConfig('maxAttempts', Number($event))"><a-option :value="1">1 次（不重试）</a-option><a-option :value="2" :disabled="!['GET','HEAD','OPTIONS'].includes(String(configValue('method', 'GET')))">2 次</a-option><a-option :value="3" :disabled="!['GET','HEAD','OPTIONS'].includes(String(configValue('method', 'GET')))">3 次</a-option></a-select><div class="step-safe-tip">仅 GET、HEAD、OPTIONS 可重试；仅网络失败、408、429 和 5xx 触发，固定间隔 250ms，任务取消或临近截止时间时不会继续重试。</div></a-form-item>
-            </template>
-            <template v-else-if="selectedStep.type === 'PARALLEL'">
-              <div class="parallel-request-list">
-                <article v-for="(request, index) in parallelRequests()" :key="index" class="parallel-request-card">
-                  <div class="parallel-request-head"><strong>并发分支 {{ index + 1 }}</strong><a-button type="text" size="mini" status="danger" :disabled="parallelRequests().length <= 2" @click="removeParallelRequest(index)">移除</a-button></div>
-                  <a-form-item label="请求方法"><a-select :model-value="request.method" @change="updateParallelRequest(index, 'method', String($event))"><a-option v-for="method in ['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item>
-                  <a-form-item label="请求地址"><a-input :model-value="request.url" placeholder="{{baseUrl}}/health" @update:model-value="updateParallelRequest(index, 'url', String($event))" /></a-form-item>
-                  <a-form-item label="最大尝试次数"><a-select :model-value="Number(request.maxAttempts ?? 1)" @change="updateParallelRequest(index, 'maxAttempts', Number($event))"><a-option :value="1">1 次（不重试）</a-option><a-option :value="2" :disabled="!['GET','HEAD','OPTIONS'].includes(request.method)">2 次</a-option><a-option :value="3" :disabled="!['GET','HEAD','OPTIONS'].includes(request.method)">3 次</a-option></a-select></a-form-item>
-                </article>
+    <section class="automation-workbench">
+      <header class="automation-commandbar">
+        <div class="commandbar-context">
+          <span class="product-mark"><icon-code /></span>
+          <div>
+            <small>自动化测试 / {{ selectedProject?.name ?? '未分配项目' }}</small>
+            <strong>{{ detail?.name ?? '接口自动化工作台' }}</strong>
+          </div>
+          <a-tag v-if="detail" size="small" color="purple">v{{ detail.version }}</a-tag>
+        </div>
+        <div class="commandbar-actions">
+          <span class="runner-pill" :class="{ online: onlineRunner, trusted: runnerTrusted }"><i /> {{ runnerHttpExecutionEnabled ? 'Runner 可执行' : runnerTrusted ? 'Runner 已验证' : onlineRunner ? 'Runner 待验证' : 'Runner 离线' }}</span>
+          <a-button size="small" @click="load"><icon-refresh /> 刷新</a-button>
+          <a-button size="small" :disabled="!detail" @click="revisionVisible = true"><icon-history /> 修订记录</a-button>
+        </div>
+      </header>
+
+      <div class="automation-workbench__body">
+        <AutomationSidebar
+          :scenarios="scenarios"
+          :selected-scenario-id="detail?.id"
+          :keyword="scenarioSearch"
+          :loading="loading"
+          :active-asset="workbenchTab"
+          :data-set-count="dataSets.length"
+          :schedule-count="schedules.length"
+          :report-count="executions.length"
+          @create="createVisible = true"
+          @refresh="loadScenarios"
+          @select="selectScenario"
+          @delete="deleteScenario"
+          @update:keyword="scenarioSearch = $event"
+          @update:active-asset="workbenchTab = $event"
+        />
+
+        <main class="automation-studio">
+          <template v-if="detail">
+            <header class="studio-document-header">
+              <div class="scenario-identity">
+                <button class="priority-chip" aria-label="场景优先级">P2 <icon-down /></button>
+                <div>
+                  <a-input :model-value="detail.name" class="studio-title" aria-label="场景名称" @update:model-value="updateScenarioField('name', String($event))" />
+                  <span>{{ detail.steps.length }} 个步骤 · {{ detail.environmentCode }} · 更新于 {{ date(detail.updatedAt) }}</span>
+                </div>
               </div>
-              <a-button type="outline" size="small" :disabled="parallelRequests().length >= 5" @click="addParallelRequest"><icon-plus /> 添加并发分支</a-button>
-              <div class="step-safe-tip">每组固定并发 2–5 条互不依赖的 HTTP 请求。组内禁止脚本、局部变量、提取、断言、条件和循环；后续先添加普通请求，才可继续使用提取或断言。</div>
-            </template>
-            <template v-else-if="selectedStep.type === 'EXTRACT'">
-              <a-form-item label="提取来源"><a-input :model-value="String(configValue('source', 'LAST_STATUS_CODE'))" disabled /></a-form-item>
-              <a-form-item label="保存为变量"><a-input :model-value="String(configValue('variable', 'lastStatusCode'))" placeholder="例如：lastStatusCode" @update:model-value="setConfig('variable', String($event))" /></a-form-item>
-              <div class="step-safe-tip">仅提取最近一次请求的 HTTP 状态码，变量仅在本次 Runner 任务内存中可用，不会持久化取值。</div>
-            </template>
-            <template v-else-if="selectedStep.type === 'ASSERT'">
-              <a-form-item label="断言来源"><a-input :model-value="String(configValue('source', 'LAST_STATUS_CODE'))" disabled /></a-form-item>
-              <a-form-item label="期望状态码"><a-input-number :model-value="Number(configValue('expectedStatus', 200))" :min="100" :max="599" :style="{ width: '100%' }" @change="setConfig('expectedStatus', Number($event))" /></a-form-item>
-              <div class="step-safe-tip">只支持最近一次请求状态码的精确匹配；不解析或保存响应正文、响应头、Cookie 或密钥。</div>
-            </template>
-            <template v-else-if="selectedStep.type === 'WAIT'">
-              <a-form-item label="延迟时间"><a-input-number :model-value="Number(configValue('delayMillis', 0))" :min="0" :max="600000" :style="{ width: '100%' }" @change="setConfig('delayMillis', Number($event))"><template #suffix>ms</template></a-input-number></a-form-item>
-            </template>
-            <template v-else-if="selectedStep.type === 'CONDITION'">
-              <a-form-item label="条件来源"><a-input :model-value="String(configValue('source', 'LAST_STATUS_CODE'))" disabled /></a-form-item>
-              <a-form-item label="操作符"><a-select :model-value="String(configValue('operator', 'EQUALS'))" @change="setConfig('operator', String($event))"><a-option value="EQUALS">等于</a-option><a-option value="NOT_EQUALS">不等于</a-option></a-select></a-form-item>
-              <a-form-item label="期望状态码"><a-input-number :model-value="Number(configValue('expectedStatus', 200))" :min="100" :max="599" :style="{ width: '100%' }" @change="setConfig('expectedStatus', Number($event))" /></a-form-item>
-              <div class="step-safe-tip">条件只读取最近一次 HTTP 状态码；不满足时会跳过紧随的一个请求步骤，不执行表达式或脚本。</div>
-            </template>
-            <template v-else-if="selectedStep.type === 'LOOP'">
-              <a-form-item label="总执行次数"><a-input-number :model-value="Number(configValue('totalRuns', 2))" :min="1" :max="10" :style="{ width: '100%' }" @change="setConfig('totalRuns', Number($event))"><template #suffix>次</template></a-input-number></a-form-item>
-              <div class="step-safe-tip">循环必须紧随一个请求步骤，并只重复该请求；最多 10 次，不支持动态表达式、嵌套循环或并发。</div>
-            </template>
-            <template v-else-if="selectedStep.type === 'REUSABLE_STEP'">
-              <a-form-item label="公共步骤"><a-select :model-value="String(configValue('reusableStepId', ''))" placeholder="选择当前项目公共步骤" @change="selectReusableStep(String($event))"><a-option v-for="item in reusableSteps" :key="item.id" :value="item.id">{{ item.name }} · v{{ item.version }} · {{ item.stepCount }} 步</a-option></a-select></a-form-item>
-              <a-form-item label="固定来源版本"><a-input :model-value="String(configValue('reusableStepVersion', ''))" disabled /></a-form-item>
-              <div class="step-safe-tip">保存场景后会绑定所选公共步骤的当前版本。之后即使公共步骤更新，已有场景与已创建执行仍使用固定版本。</div>
-            </template>
-            <template v-else-if="selectedStep.type === 'SUB_SCENARIO'">
-              <a-form-item label="子场景"><a-select :model-value="String(configValue('scenarioId', ''))" placeholder="选择当前项目子场景" @change="selectSubScenario(String($event))"><a-option v-for="item in scenarios.filter((scenario) => scenario.id !== detail?.id)" :key="item.id" :value="item.id">{{ item.name }} · v{{ item.version }} · {{ item.stepCount }} 步</a-option></a-select></a-form-item>
-              <a-form-item label="固定来源版本"><a-input :model-value="String(configValue('scenarioVersion', ''))" disabled /></a-form-item>
-              <div class="step-safe-tip">子场景只展开基础步骤，并与父场景共用其变量、环境和失败策略。带前后置脚本或引用节点的子场景会被拒绝，防止递归执行。</div>
-            </template>
-          </a-form>
-          <a-divider />
-          <div class="variables-title"><div><strong>场景变量</strong><small>变量值可见；密钥请使用项目环境密钥。</small></div><a-button type="text" size="small" @click="addVariable"><icon-plus /> 添加</a-button></div>
-          <div class="variable-list"><div v-for="(row, index) in variableRows" :key="index" class="variable-row"><a-input v-model="row.key" placeholder="变量名" /><a-input v-model="row.value" placeholder="变量值" /><a-button type="text" status="danger" size="mini" @click="removeVariable(index)"><icon-close /></a-button></div><a-empty v-if="!variableRows.length" description="尚未定义场景变量" /></div>
-        </template>
-        <a-empty v-else description="选择步骤后配置属性" />
-      </aside>
+              <a-space>
+                <a-button size="small" :disabled="!canSaveSelectedAsReusable" @click="openCreateReusableStep"><icon-save /> 存为公共步骤</a-button>
+                <a-button type="primary" size="small" :loading="saving" @click="saveScenario"><icon-save /> 保存</a-button>
+              </a-space>
+            </header>
+
+            <nav class="studio-tabs" aria-label="场景工作区">
+              <button :class="{ active: workbenchTab === 'steps' }" @click="workbenchTab = 'steps'">测试步骤</button>
+              <button :class="{ active: workbenchTab === 'data' }" @click="workbenchTab = 'data'">测试数据 <span>{{ dataSets.length }}</span></button>
+              <button :class="{ active: workbenchTab === 'reports' }" @click="workbenchTab = 'reports'">测试报告 <span>{{ executions.length }}</span></button>
+              <button :class="{ active: workbenchTab === 'integrations' }" @click="workbenchTab = 'integrations'">CI/CD</button>
+            </nav>
+
+            <section v-if="workbenchTab === 'steps'" class="studio-scroll">
+              <div class="scenario-summary-line">
+                <a-input :model-value="detail.description" placeholder="添加场景说明" allow-clear @update:model-value="updateScenarioField('description', String($event))" />
+                <a-tag :color="detail.failureStrategy === 'STOP' ? 'orange' : 'green'">{{ detail.failureStrategy === 'STOP' ? '遇错停止' : '失败后继续' }}</a-tag>
+              </div>
+              <div class="scenario-editor-tabs">
+                <button :class="{ active: scenarioEditorTab === 'flow' }" @click="scenarioEditorTab = 'flow'"><icon-branch /> 步骤编排</button>
+                <button :class="{ active: scenarioEditorTab === 'scripts' }" @click="scenarioEditorTab = 'scripts'"><icon-code-block /> 前后置脚本</button>
+                <button :class="{ active: scenarioEditorTab === 'variables' }" @click="scenarioEditorTab = 'variables'"><icon-tags /> 场景变量</button>
+              </div>
+
+              <template v-if="scenarioEditorTab === 'flow'">
+                <div class="flow-overview"><strong>{{ detail.steps.length }} 个步骤</strong><span>{{ runnerHttpExecutionEnabled ? '可信 Runner 已启用受限执行' : '可编辑并保存，执行受 Runner 安全开关限制' }}</span></div>
+                <section class="scenario-flow-canvas">
+                  <div class="flow-terminal start">开始</div>
+                  <template v-for="(step, index) in detail.steps" :key="step.id">
+                    <div class="scenario-flow-line"><span /></div>
+                    <button class="scenario-flow-node" :class="[{ selected: selectedStepId === step.id }, `node-${typeMeta[step.type].tone}`]" @click="selectStep(step.id)">
+                      <span class="scenario-flow-index">{{ index + 1 }}</span>
+                      <span class="scenario-flow-icon">{{ typeMeta[step.type].icon }}</span>
+                      <span class="scenario-flow-copy"><strong>{{ step.name }}</strong><small>{{ typeMeta[step.type].label }} · {{ typeMeta[step.type].description }}</small></span>
+                      <icon-settings />
+                    </button>
+                  </template>
+                  <div class="scenario-flow-line"><span /></div>
+                  <a-popover trigger="click" position="bottom" :content-style="{ padding: '0' }">
+                    <button class="flow-add-trigger"><icon-plus /> 添加步骤</button>
+                    <template #content>
+                      <div class="step-library">
+                        <section>
+                          <small>请求接口</small>
+                          <button @click="openImport('INTERFACE')"><span class="step-library-icon purple"><icon-import /></span><div><strong>从接口导入</strong><em>{{ importDefinitions.length }} 个可用接口</em></div></button>
+                          <button @click="openImport('TEST_CASE')"><span class="step-library-icon amber">TC</span><div><strong>从单接口用例导入</strong><em>自动附加状态断言</em></div></button>
+                          <button @click="openImport('DEBUG_CASE')"><span class="step-library-icon blue"><icon-thunderbolt /></span><div><strong>从接口调试用例导入</strong><em>复用已保存请求参数</em></div></button>
+                          <button @click="addStep('REQUEST')"><span class="step-library-icon slate"><icon-send /></span><div><strong>添加 HTTP 请求</strong><em>手工配置方法与地址</em></div></button>
+                          <button @click="openImport('CURL')"><span class="step-library-icon slate">&gt;_</span><div><strong>从 cURL 导入</strong><em>自动移除直接凭据</em></div></button>
+                        </section>
+                        <section>
+                          <small>流程控制</small>
+                          <div class="step-library-grid">
+                            <button @click="addStep('PARALLEL')"><span class="step-library-icon cyan">⇆</span><strong>并行分组</strong></button>
+                            <button @click="addStep('CONDITION')"><span class="step-library-icon pink">◇</span><strong>条件分支</strong></button>
+                            <button @click="addStep('LOOP')"><span class="step-library-icon orange">↻</span><strong>For 循环</strong></button>
+                            <button @click="addStep('WAIT')"><span class="step-library-icon cyan">◷</span><strong>等待时间</strong></button>
+                            <button @click="addStep('EXTRACT')"><span class="step-library-icon purple">⇣</span><strong>提取变量</strong></button>
+                            <button @click="addStep('ASSERT')"><span class="step-library-icon green">✓</span><strong>响应断言</strong></button>
+                            <button @click="addStep('REUSABLE_STEP')"><span class="step-library-icon purple">♧</span><strong>公共步骤</strong></button>
+                            <button @click="addStep('SUB_SCENARIO')"><span class="step-library-icon blue">⌘</span><strong>其他场景</strong></button>
+                          </div>
+                        </section>
+                        <footer><icon-safe /> 任意脚本和数据库直连不进入控制面；脚本仅在隔离 Runner 中执行。</footer>
+                      </div>
+                    </template>
+                  </a-popover>
+                  <div class="scenario-flow-line"><span /></div>
+                  <div class="flow-terminal end">结束</div>
+                </section>
+              </template>
+
+              <section v-else-if="scenarioEditorTab === 'scripts'" class="scenario-script-editor">
+                <div class="script-safety"><icon-safe /><div><strong>隔离 JavaScript · pm.* 兼容</strong><small>脚本在 Runner 容器中限时执行，不可访问网络、文件、进程、模块、Cookie 或环境密钥。</small></div></div>
+                <a-tabs default-active-key="pre">
+                  <a-tab-pane key="pre" title="前置脚本"><a-textarea :model-value="detail.preRequestScript" :max-length="8192" :auto-size="{ minRows: 13, maxRows: 20 }" placeholder="// pm.environment.set('orderId', pm.variables.get('orderId'));" @update:model-value="updateScenarioScript('preRequestScript', String($event))" /></a-tab-pane>
+                  <a-tab-pane key="post" title="后置脚本"><a-textarea :model-value="detail.postResponseScript" :max-length="8192" :auto-size="{ minRows: 13, maxRows: 20 }" placeholder="// pm.test('状态正确', () => pm.response.to.have.status(200));" @update:model-value="updateScenarioScript('postResponseScript', String($event))" /></a-tab-pane>
+                </a-tabs>
+              </section>
+
+              <section v-else class="scenario-variable-editor">
+                <header><div><strong>场景变量</strong><small>变量仅作用于当前场景；Token、密码等凭据请使用项目环境密钥。</small></div><a-button type="primary" size="small" @click="addVariable"><icon-plus /> 添加变量</a-button></header>
+                <div class="variable-table-head"><span>变量名</span><span>变量值</span><span /></div>
+                <div v-for="(row, index) in variableRows" :key="index" class="variable-table-row"><a-input v-model="row.key" placeholder="例如：baseUrl" /><a-input v-model="row.value" placeholder="支持 {{变量名}} 引用" /><a-button type="text" status="danger" @click="removeVariable(index)"><icon-delete /></a-button></div>
+                <a-empty v-if="!variableRows.length" description="尚未定义场景变量" />
+              </section>
+            </section>
+
+            <section v-else-if="workbenchTab === 'data'" class="studio-scroll asset-page">
+              <header class="asset-page-header"><div><span>DATA DRIVEN</span><h2>测试数据</h2><p>导入 CSV 或 JSON，每一行创建独立的隔离执行任务。</p></div><a-button type="primary" @click="openCreateDataSet"><icon-plus /> 新建数据集</a-button></header>
+              <div class="asset-card-list">
+                <article v-for="dataSet in dataSets" :key="dataSet.id" class="asset-card"><span class="asset-card-icon cyan"><icon-storage /></span><div><strong>{{ dataSet.name }}</strong><small>{{ dataSet.sourceFormat }} · {{ dataSet.rowCount }} 行 · {{ dataSet.columns.length }} 字段 · {{ date(dataSet.updatedAt) }}</small><code>{{ dataSet.columns.join(' · ') }}</code></div><a-tag :color="dataSet.sourceFile ? 'green' : 'arcoblue'">{{ dataSet.sourceFile ? '已归档' : '手工录入' }}</a-tag><a-button type="text" @click="showDataSet(dataSet)">预览</a-button><a-button type="text" @click="openDataSetExecution(dataSet)">逐行执行</a-button><a-popconfirm content="删除后不可恢复，确定继续？" @ok="deleteDataSet(dataSet)"><a-button type="text" status="danger" :loading="deletingDataSetId === dataSet.id">删除</a-button></a-popconfirm></article>
+                <a-empty v-if="!dataSets.length" description="尚未创建测试数据"><template #extra><a-button type="outline" @click="openCreateDataSet">导入首个 CSV / JSON</a-button></template></a-empty>
+              </div>
+            </section>
+
+            <section v-else-if="workbenchTab === 'reports'" class="studio-scroll asset-page">
+              <header class="asset-page-header"><div><span>RUNNER REPORTS</span><h2>测试报告</h2><p>按任务查看状态、Runner、数据行、耗时和脱敏结构化结果。</p></div><a-button @click="loadExecutions"><icon-refresh /> 刷新</a-button></header>
+              <a-table :data="executions" :pagination="{ pageSize: 12 }" row-key="id" size="small">
+                <template #columns>
+                  <a-table-column title="场景 / 数据行" :width="220"><template #cell="{ record }"><strong>{{ record.scenarioName }}</strong><small class="table-secondary">v{{ record.scenarioVersion }}<template v-if="record.dataSetId"> · 数据行 {{ record.dataSetRowNumber }}</template></small></template></a-table-column>
+                  <a-table-column title="状态" :width="110"><template #cell="{ record }"><a-tag :color="executionColor[record.status] ?? 'gray'">{{ executionLabel[record.status] ?? record.status }}</a-tag></template></a-table-column>
+                  <a-table-column title="Runner / 原因"><template #cell="{ record }"><span>{{ record.runnerId ?? '等待投递' }}</span><small class="table-secondary">{{ record.statusMessage || 'Outbox 持久化任务' }}</small></template></a-table-column>
+                  <a-table-column title="提交时间" :width="170"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column>
+                  <a-table-column title="操作" :width="130"><template #cell="{ record }"><a-button type="text" size="small" @click="showExecutionDetail(record)">查看报告</a-button><a-button v-if="canCancelExecution(record.status)" type="text" status="warning" size="small" @click="cancelExecution(record)">取消</a-button></template></a-table-column>
+                </template>
+              </a-table>
+              <a-empty v-if="!executions.length" description="尚未提交执行任务" />
+            </section>
+
+            <section v-else class="studio-scroll asset-page">
+              <header class="asset-page-header"><div><span>CI · SCHEDULE · WEBHOOK</span><h2>持续集成与触发器</h2><p>使用 CLI、定时计划或签名 Webhook 触发同一冻结场景版本。</p></div><a-space><a-button @click="openCreateSchedule"><icon-calendar /> 新建计划</a-button><a-button type="primary" @click="openCreateWebhook"><icon-plus /> 新建 Webhook</a-button></a-space></header>
+              <div class="integration-grid">
+                <section class="integration-card"><header><span class="asset-card-icon purple"><icon-code /></span><div><strong>CLI / CI</strong><small>适用于 Jenkins、GitLab CI 与 GitHub Actions</small></div></header><a-tabs default-active-key="run" size="mini"><a-tab-pane key="run" title="触发"><pre><code>{{ cliExecutionCommand }}</code></pre></a-tab-pane><a-tab-pane key="report" title="报告"><pre><code>{{ cliReportCommand }}</code></pre></a-tab-pane></a-tabs></section>
+                <section class="integration-card"><header><span class="asset-card-icon blue"><icon-link /></span><div><strong>签名 Webhook</strong><small>密钥仅在创建时显示一次</small></div></header><code class="webhook-address">{{ webhookEndpoint }}</code></section>
+              </div>
+              <div class="asset-section-heading"><div><strong>运行配置集</strong><small>冻结环境与非敏感变量，可在右侧运行设置中选择</small></div><a-button size="small" @click="openCreateExecutionProfile"><icon-plus /> 添加</a-button></div>
+              <div class="asset-card-list compact"><article v-for="profile in executionProfiles" :key="profile.id" class="asset-card"><span class="asset-card-icon cyan">◈</span><div><strong>{{ profile.name }}</strong><small>{{ profile.environmentCode }} · v{{ profile.version }} · {{ profile.variableCount }} 个变量</small></div><a-tag color="cyan">执行时冻结</a-tag><a-button type="text" @click="openEditExecutionProfile(profile)">编辑</a-button></article><a-empty v-if="!executionProfiles.length" description="尚未创建运行配置集" /></div>
+              <div class="asset-section-heading"><div><strong>定时任务</strong><small>连续失败达到阈值后自动停用</small></div><a-button size="small" @click="openCreateSchedule"><icon-plus /> 添加</a-button></div>
+              <div class="asset-card-list compact"><article v-for="schedule in schedules" :key="schedule.id" class="asset-card"><span class="asset-card-icon orange"><icon-calendar /></span><div><strong>{{ schedule.name }}</strong><small>{{ schedule.cronExpression }} · {{ schedule.timezone }} · 连续失败 {{ schedule.consecutiveFailures }}/{{ schedule.maxConsecutiveFailures }}</small></div><a-tag :color="schedule.enabled ? 'green' : 'gray'">{{ schedule.enabled ? '已启用' : '已停用' }}</a-tag><a-button type="text" @click="runSchedule(schedule)">立即执行</a-button><a-button type="text" @click="openEditSchedule(schedule)">编辑</a-button><a-popconfirm content="确定删除该计划？" @ok="deleteSchedule(schedule)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></article><a-empty v-if="!schedules.length" description="尚未创建定时任务" /></div>
+              <div class="asset-section-heading"><div><strong>Webhook</strong><small>HMAC 签名、防重放、项目范围隔离</small></div><a-button size="small" @click="openCreateWebhook"><icon-plus /> 添加</a-button></div>
+              <div class="asset-card-list compact"><article v-for="webhook in webhooks" :key="webhook.id" class="asset-card"><span class="asset-card-icon blue"><icon-link /></span><div><strong>{{ webhook.name }}</strong><small>{{ scenarios.find((item) => item.id === webhook.scenarioId)?.name ?? webhook.scenarioId }} · {{ webhook.id }}</small></div><a-tag :color="webhook.enabled ? 'green' : 'gray'">{{ webhook.enabled ? '已启用' : '已停用' }}</a-tag><a-button type="text" @click="setWebhookEnabled(webhook, !webhook.enabled)">{{ webhook.enabled ? '停用' : '启用' }}</a-button><a-popconfirm content="撤销后不能恢复，确定继续？" @ok="revokeWebhook(webhook)"><a-button type="text" status="danger">撤销</a-button></a-popconfirm></article><a-empty v-if="!webhooks.length" description="尚未创建 Webhook" /></div>
+            </section>
+          </template>
+          <a-empty v-else class="studio-empty" description="选择或新建一个场景用例开始编排"><template #extra><a-button type="primary" @click="createVisible = true"><icon-plus /> 新建场景</a-button></template></a-empty>
+        </main>
+
+        <AutomationRunPanel
+          :has-scenario="Boolean(detail)"
+          :scenario-environment="detail?.environmentCode ?? ''"
+          :environments="environments"
+          :failure-strategy="detail?.failureStrategy ?? 'STOP'"
+          :data-sets="dataSets"
+          :profiles="executionProfiles"
+          :selected-data-set-id="selectedRunDataSetId"
+          :selected-profile-id="executionOptionsForm.executionProfileId"
+          :timeout-seconds="executionOptionsForm.timeoutSeconds"
+          :runner-connected="Boolean(onlineRunner)"
+          :runner-trusted="runnerTrusted"
+          :execution-enabled="runnerHttpExecutionEnabled"
+          :runner-label="runnerSummary"
+          :notification-enabled="notificationEnabled"
+          :saving="saving"
+          :running="submittingExecution || submittingDataSetExecution"
+          @update:selected-data-set-id="selectedRunDataSetId = $event"
+          @update:selected-profile-id="executionOptionsForm.executionProfileId = $event"
+          @update:timeout-seconds="executionOptionsForm.timeoutSeconds = $event"
+          @update:notification-enabled="notificationEnabled = $event"
+          @update:failure-strategy="updateScenarioField('failureStrategy', $event)"
+          @update:scenario-environment="updateScenarioField('environmentCode', $event)"
+          @create-profile="openCreateExecutionProfile"
+          @advanced="openExecutionOptions(true)"
+          @save="saveScenario"
+          @run="runCurrentScenario"
+        />
+      </div>
     </section>
-    <a-modal v-model:visible="createVisible" title="新建接口自动化场景" width="600px" :confirm-loading="saving" @ok="createScenario"><a-form :model="createForm" layout="vertical"><a-form-item label="场景名称" required><a-input v-model="createForm.name" :max-length="160" placeholder="例如：订单核心链路回归" /></a-form-item><a-form-item label="场景说明"><a-textarea v-model="createForm.description" :max-length="1200" placeholder="说明该场景覆盖的业务路径" /></a-form-item><div class="form-grid"><a-form-item label="环境标识"><a-input v-model="createForm.environmentCode" placeholder="test" /></a-form-item><a-form-item label="失败策略"><a-select v-model="createForm.failureStrategy"><a-option value="STOP">失败时停止（默认）</a-option><a-option value="CONTINUE">失败后继续（最终仍失败）</a-option></a-select></a-form-item></div><div class="modal-tip">将自动创建一个 GET 请求步骤和 <code>baseUrl</code> 场景变量。Runner 接入前，保存不会发起任何外部请求。</div></a-form></a-modal>
-    <a-modal v-model:visible="executionProfileVisible" :title="editingExecutionProfileId ? '编辑场景运行配置集' : '新建场景运行配置集'" width="680px" :confirm-loading="savingExecutionProfile" @ok="createExecutionProfile"><a-form :model="executionProfileForm" layout="vertical"><a-form-item label="配置集名称" required><a-input v-model="executionProfileForm.name" :max-length="160" placeholder="例如：预发订单回归" /></a-form-item><a-form-item label="执行环境" required><a-input v-model="executionProfileForm.environmentCode" :max-length="64" placeholder="staging" /></a-form-item><a-form-item label="非敏感变量（JSON 对象）"><a-textarea v-model="executionProfileForm.variables" :auto-size="{ minRows: 7, maxRows: 12 }" :max-length="262144" /></a-form-item><a-alert type="warning" :show-icon="true">只接受字符串值，最多 100 项。配置集变量会在执行时冻结，但不能覆盖当前环境密钥；密钥必须使用项目环境密钥管理。</a-alert></a-form></a-modal>
-    <a-modal v-model:visible="executionOptionsVisible" title="提交场景执行" width="720px" :confirm-loading="submittingExecution" @ok="submitExecution"><a-form :model="executionOptionsForm" layout="vertical"><a-form-item label="运行配置集（可选）"><a-select v-model="executionOptionsForm.executionProfileId" allow-clear placeholder="使用场景默认环境" @change="clearExecutionConfigurationPreview"><a-option v-for="profile in executionProfiles" :key="profile.id" :value="profile.id">{{ profile.name }} · {{ profile.environmentCode }} · v{{ profile.version }}</a-option></a-select></a-form-item><a-form-item label="本次覆盖变量（JSON 对象）"><a-textarea v-model="executionOptionsForm.overrides" :auto-size="{ minRows: 5, maxRows: 10 }" :max-length="262144" placeholder="{&quot;orderId&quot;:&quot;OD-1001&quot;}" @update:model-value="clearExecutionConfigurationPreview" /></a-form-item><a-button type="outline" size="small" :loading="previewingExecutionConfiguration" @click="previewExecutionConfiguration"><icon-eye /> 预览最终来源</a-button><section v-if="executionConfigurationPreview" class="execution-configuration-preview"><a-descriptions :column="2" size="small" bordered><a-descriptions-item label="场景版本">v{{ executionConfigurationPreview.scenarioVersion }}</a-descriptions-item><a-descriptions-item label="执行环境">{{ executionConfigurationPreview.environmentCode }}</a-descriptions-item><a-descriptions-item label="配置集" :span="2">{{ executionConfigurationPreview.executionProfileId ? `v${executionConfigurationPreview.executionProfileVersion}（提交时固定）` : '使用场景默认环境' }}</a-descriptions-item></a-descriptions><div class="execution-configuration-preview-head"><strong>引用变量的最终来源</strong><small>只显示名称、来源与使用位置，不显示变量或密钥取值。</small></div><a-table :data="executionConfigurationPreview.variableReferences" :pagination="false" size="small" row-key="name"><template #columns><a-table-column title="变量" data-index="name" :width="130" /><a-table-column title="最终来源" :width="170"><template #cell="{ record }"><a-tag :color="record.secret ? 'orange' : 'arcoblue'">{{ record.source }}</a-tag></template></a-table-column><a-table-column title="使用位置"><template #cell="{ record }">{{ referenceLocations(record) }}</template></a-table-column></template></a-table><a-empty v-if="!executionConfigurationPreview.variableReferences.length" description="当前场景没有模板变量引用" /></section><a-form-item label="执行超时"><a-input-number v-model="executionOptionsForm.timeoutSeconds" :min="10" :max="3600" :style="{ width: '100%' }"><template #suffix>秒</template></a-input-number></a-form-item><a-alert type="info" :show-icon="true">优先级从低到高：项目参数、场景变量、运行配置集、数据集行、本次覆盖变量、环境密钥、Runner 局部变量。预览和任务创建都只保留脱敏来源，值不在浏览器、日志、清单或报告中展示。</a-alert></a-form></a-modal>
-    <a-modal v-model:visible="reusableStepVisible" title="保存项目级公共步骤" width="620px" :confirm-loading="savingReusableStep" @ok="createReusableStep"><a-form :model="reusableStepForm" layout="vertical"><a-form-item label="公共步骤名称" required><a-input v-model="reusableStepForm.name" :max-length="160" placeholder="例如：获取订单健康状态" /></a-form-item><a-form-item label="说明"><a-textarea v-model="reusableStepForm.description" :max-length="1200" placeholder="说明此基础步骤的前置条件与用途" /></a-form-item><a-alert type="info" :show-icon="true">会复制当前选中的基础步骤并创建 v1。公共步骤不能嵌套公共步骤或子场景；后续更新会产生新版本，现有引用不会漂移。</a-alert></a-form></a-modal>
+
+    <a-drawer v-model:visible="stepInspectorVisible" :width="420" :footer="false" unmount-on-close>
+      <template #title><span class="inspector-drawer-title">步骤配置 <a-tag v-if="selectedStep" size="small" color="purple">{{ typeMeta[selectedStep.type].label }}</a-tag></span></template>
+      <template v-if="detail && selectedStep">
+        <a-form :model="selectedStep" layout="vertical">
+          <a-form-item label="步骤名称"><a-input :model-value="selectedStep.name" @update:model-value="renameStep(String($event))" /></a-form-item>
+          <template v-if="selectedStep.type === 'REQUEST'">
+            <a-form-item label="请求方法"><a-select :model-value="String(configValue('method', 'GET'))" @change="setRequestMethod(String($event))"><a-option v-for="method in ['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item>
+            <a-form-item label="请求地址"><a-input :model-value="String(configValue('url'))" placeholder="{{BASE_URL}}/orders" @update:model-value="setConfig('url', String($event))" /></a-form-item>
+            <a-form-item label="内容类型"><a-select :model-value="String(configValue('contentType', ''))" allow-clear placeholder="未设置" @change="setConfig('contentType', String($event ?? ''))"><a-option value="application/json">application/json</a-option><a-option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</a-option><a-option value="text/plain">text/plain</a-option><a-option value="application/xml">application/xml</a-option></a-select></a-form-item>
+            <a-form-item label="请求正文"><a-textarea :model-value="String(configValue('body', ''))" :auto-size="{ minRows: 7, maxRows: 14 }" placeholder="支持 {{变量名}}；凭据请使用环境密钥" @update:model-value="setConfig('body', String($event))" /></a-form-item>
+            <a-form-item label="最大尝试次数"><a-select :model-value="Number(configValue('maxAttempts', 1))" @change="setConfig('maxAttempts', Number($event))"><a-option :value="1">1 次</a-option><a-option :value="2" :disabled="!['GET','HEAD','OPTIONS'].includes(String(configValue('method', 'GET')))">2 次</a-option><a-option :value="3" :disabled="!['GET','HEAD','OPTIONS'].includes(String(configValue('method', 'GET')))">3 次</a-option></a-select></a-form-item>
+          </template>
+          <template v-else-if="selectedStep.type === 'PARALLEL'">
+            <article v-for="(request, index) in parallelRequests()" :key="index" class="parallel-editor-card"><header><strong>并行请求 {{ index + 1 }}</strong><a-button type="text" status="danger" size="mini" :disabled="parallelRequests().length <= 2" @click="removeParallelRequest(index)">移除</a-button></header><a-input :model-value="request.method" @update:model-value="updateParallelRequest(index, 'method', String($event))" /><a-input :model-value="request.url" placeholder="{{BASE_URL}}/health" @update:model-value="updateParallelRequest(index, 'url', String($event))" /></article>
+            <a-button long type="outline" :disabled="parallelRequests().length >= 5" @click="addParallelRequest"><icon-plus /> 添加并行请求</a-button>
+          </template>
+          <template v-else-if="selectedStep.type === 'EXTRACT'"><a-form-item label="保存为变量"><a-input :model-value="String(configValue('variable', 'lastStatusCode'))" @update:model-value="setConfig('variable', String($event))" /></a-form-item><a-alert type="info">当前仅提取最近一次 HTTP 状态码。</a-alert></template>
+          <template v-else-if="selectedStep.type === 'ASSERT'"><a-form-item label="期望状态码"><a-input-number :model-value="Number(configValue('expectedStatus', 200))" :min="100" :max="599" :style="{ width: '100%' }" @change="setConfig('expectedStatus', Number($event))" /></a-form-item></template>
+          <template v-else-if="selectedStep.type === 'CONDITION'"><a-form-item label="条件"><a-select :model-value="String(configValue('operator', 'EQUALS'))" @change="setConfig('operator', String($event))"><a-option value="EQUALS">状态码等于</a-option><a-option value="NOT_EQUALS">状态码不等于</a-option></a-select></a-form-item><a-form-item label="状态码"><a-input-number :model-value="Number(configValue('expectedStatus', 200))" :min="100" :max="599" :style="{ width: '100%' }" @change="setConfig('expectedStatus', Number($event))" /></a-form-item></template>
+          <template v-else-if="selectedStep.type === 'LOOP'"><a-form-item label="总执行次数"><a-input-number :model-value="Number(configValue('totalRuns', 2))" :min="1" :max="10" :style="{ width: '100%' }" @change="setConfig('totalRuns', Number($event))" /></a-form-item></template>
+          <template v-else-if="selectedStep.type === 'WAIT'"><a-form-item label="等待时间"><a-input-number :model-value="Number(configValue('delayMillis', 300))" :min="0" :max="600000" :style="{ width: '100%' }" @change="setConfig('delayMillis', Number($event))"><template #suffix>ms</template></a-input-number></a-form-item></template>
+          <template v-else-if="selectedStep.type === 'REUSABLE_STEP'"><a-form-item label="公共步骤"><a-select :model-value="String(configValue('reusableStepId', ''))" @change="selectReusableStep(String($event))"><a-option v-for="item in reusableSteps" :key="item.id" :value="item.id">{{ item.name }} · v{{ item.version }}</a-option></a-select></a-form-item></template>
+          <template v-else-if="selectedStep.type === 'SUB_SCENARIO'"><a-form-item label="其他场景"><a-select :model-value="String(configValue('scenarioId', ''))" @change="selectSubScenario(String($event))"><a-option v-for="item in scenarios.filter((scenario) => scenario.id !== detail?.id)" :key="item.id" :value="item.id">{{ item.name }} · v{{ item.version }}</a-option></a-select></a-form-item></template>
+        </a-form>
+        <div class="inspector-actions"><a-popconfirm content="确定删除当前步骤？" @ok="removeStep"><a-button status="danger"><icon-delete /> 删除步骤</a-button></a-popconfirm><a-button type="primary" :loading="saving" @click="saveScenario"><icon-save /> 保存场景</a-button></div>
+      </template>
+    </a-drawer>
+
+    <a-modal v-model:visible="importVisible" title="导入请求步骤" width="680px" :ok-text="'导入到当前场景'" @ok="importRequestStep">
+      <a-tabs v-model:active-key="importMode" type="rounded">
+        <a-tab-pane key="INTERFACE" title="接口" />
+        <a-tab-pane key="TEST_CASE" title="单接口用例" />
+        <a-tab-pane key="DEBUG_CASE" title="调试用例" />
+        <a-tab-pane key="CURL" title="cURL" />
+      </a-tabs>
+      <a-form :model="importForm" layout="vertical" class="import-form">
+        <template v-if="importMode === 'INTERFACE'">
+          <a-form-item label="选择接口" required><a-select v-model="importSelectionId" show-search placeholder="请选择接口"><a-option v-for="definition in importDefinitions" :key="definition.id" :value="definition.id">{{ definition.method }} · {{ definition.name }} · {{ definition.path }}</a-option></a-select></a-form-item>
+          <a-form-item label="基础地址"><a-input v-model="importForm.baseUrl" placeholder="{{BASE_URL}}" /></a-form-item>
+        </template>
+        <template v-else-if="importMode === 'TEST_CASE' || importMode === 'DEBUG_CASE'">
+          <a-form-item label="选择用例" required><a-select v-model="importSelectionId" show-search placeholder="请选择接口用例"><a-option v-for="item in importCandidates" :key="item.id" :value="item.id">{{ item.name }} · {{ importDefinitions.find((definition) => definition.id === item.apiId)?.method }}</a-option></a-select></a-form-item>
+          <a-alert type="info" :show-icon="true">请求参数来自已保存快照；直接凭据在用例保存时已被清除。单接口测试用例若配置期望状态码，会同时导入断言步骤。</a-alert>
+        </template>
+        <template v-else>
+          <a-form-item label="cURL 命令" required><a-textarea v-model="importForm.curl" :auto-size="{ minRows: 10, maxRows: 18 }" placeholder="curl -X POST 'https://api.example.com/orders' --data-raw '{&quot;name&quot;:&quot;demo&quot;}'" /></a-form-item>
+          <a-alert type="warning" :show-icon="true">Authorization、Cookie、URL 凭据以及常见密码字段不会以明文写入场景；请将生成的变量占位符配置为项目环境密钥。</a-alert>
+        </template>
+      </a-form>
+    </a-modal>
+
+    <a-modal v-model:visible="createVisible" title="新建接口自动化场景" width="600px" :confirm-loading="saving" @ok="createScenario">
+      <a-form :model="createForm" layout="vertical">
+        <a-form-item label="场景名称" required>
+          <a-input v-model="createForm.name" :max-length="160" placeholder="例如：订单核心链路回归" />
+        </a-form-item>
+        <a-form-item label="场景说明">
+          <a-textarea v-model="createForm.description" :max-length="1200" placeholder="说明该场景覆盖的业务路径" />
+        </a-form-item>
+        <div class="form-grid">
+          <a-form-item label="运行环境" required>
+            <a-select v-model="createForm.environmentCode" placeholder="请选择项目环境">
+              <a-option v-for="environment in environments" :key="environment.id" :value="environment.environmentCode" :disabled="!environment.enabled">{{ environment.name }} · {{ environment.environmentCode }}</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="失败策略">
+            <a-select v-model="createForm.failureStrategy">
+              <a-option value="STOP">失败时停止（默认）</a-option>
+              <a-option value="CONTINUE">失败后继续（最终仍失败）</a-option>
+            </a-select>
+          </a-form-item>
+        </div>
+        <div class="modal-tip">将自动创建一个引用 <code>BASE_URL</code> 的 GET 请求步骤，执行时由所选项目环境解析。Runner 接入前，保存不会发起任何外部请求。</div>
+      </a-form>
+    </a-modal>
+    <a-modal v-model:visible="executionProfileVisible" :title="editingExecutionProfileId ? '编辑场景运行配置集' : '新建场景运行配置集'" width="680px" :confirm-loading="savingExecutionProfile" @ok="createExecutionProfile">
+      <a-form :model="executionProfileForm" layout="vertical">
+        <a-form-item label="配置集名称" required>
+          <a-input v-model="executionProfileForm.name" :max-length="160" placeholder="例如：预发订单回归" />
+        </a-form-item>
+        <a-form-item label="执行环境" required>
+          <a-select v-model="executionProfileForm.environmentCode" placeholder="请选择项目环境">
+            <a-option v-for="environment in environments" :key="environment.id" :value="environment.environmentCode" :disabled="!environment.enabled">{{ environment.name }} · {{ environment.environmentCode }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="非敏感变量（JSON 对象）">
+          <a-textarea v-model="executionProfileForm.variables" :auto-size="{ minRows: 7, maxRows: 12 }" :max-length="262144" />
+        </a-form-item>
+        <a-alert type="warning" :show-icon="true">只接受字符串值，最多 100 项。配置集变量会在执行时冻结，但不能覆盖当前环境密钥；密钥必须使用项目环境密钥管理。</a-alert>
+      </a-form>
+    </a-modal>
+    <a-modal v-model:visible="executionOptionsVisible" title="提交场景执行" width="720px" :confirm-loading="submittingExecution" @ok="submitExecution">
+      <a-form :model="executionOptionsForm" layout="vertical">
+        <a-form-item label="运行配置集（可选）">
+          <a-select v-model="executionOptionsForm.executionProfileId" allow-clear placeholder="使用场景默认环境" @change="clearExecutionConfigurationPreview">
+            <a-option v-for="profile in executionProfiles" :key="profile.id" :value="profile.id">{{ profile.name }} · {{ profile.environmentCode }} · v{{ profile.version }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="本次覆盖变量（JSON 对象）">
+          <a-textarea v-model="executionOptionsForm.overrides" :auto-size="{ minRows: 5, maxRows: 10 }" :max-length="262144" placeholder="{&quot;orderId&quot;:&quot;OD-1001&quot;}" @update:model-value="clearExecutionConfigurationPreview" />
+        </a-form-item>
+        <a-button type="outline" size="small" :loading="previewingExecutionConfiguration" @click="previewExecutionConfiguration">
+          <icon-eye /> 预览最终来源</a-button>
+        <section v-if="executionConfigurationPreview" class="execution-configuration-preview">
+          <a-descriptions :column="2" size="small" bordered>
+            <a-descriptions-item label="场景版本">v{{ executionConfigurationPreview.scenarioVersion }}</a-descriptions-item>
+            <a-descriptions-item label="执行环境">{{ executionConfigurationPreview.environmentCode }}</a-descriptions-item>
+            <a-descriptions-item label="配置集" :span="2">{{ executionConfigurationPreview.executionProfileId ? `v${executionConfigurationPreview.executionProfileVersion}（提交时固定）` : '使用场景默认环境' }}</a-descriptions-item>
+          </a-descriptions>
+          <div class="execution-configuration-preview-head">
+            <strong>引用变量的最终来源</strong>
+            <small>只显示名称、来源与使用位置，不显示变量或密钥取值。</small>
+          </div>
+          <a-table :data="executionConfigurationPreview.variableReferences" :pagination="false" size="small" row-key="name">
+            <template #columns>
+              <a-table-column title="变量" data-index="name" :width="130" />
+              <a-table-column title="最终来源" :width="170">
+                <template #cell="{ record }">
+                  <a-tag :color="record.secret ? 'orange' : 'arcoblue'">{{ record.source }}</a-tag>
+                </template>
+              </a-table-column>
+              <a-table-column title="使用位置">
+                <template #cell="{ record }">{{ referenceLocations(record) }}</template>
+              </a-table-column>
+            </template>
+          </a-table>
+          <a-empty v-if="!executionConfigurationPreview.variableReferences.length" description="当前场景没有模板变量引用" />
+        </section>
+        <a-form-item label="执行超时">
+          <a-input-number v-model="executionOptionsForm.timeoutSeconds" :min="10" :max="3600" :style="{ width: '100%' }">
+            <template #suffix>秒</template>
+          </a-input-number>
+        </a-form-item>
+        <a-alert type="info" :show-icon="true">优先级从低到高：项目参数、场景变量、运行配置集、数据集行、本次覆盖变量、环境密钥、Runner 局部变量。预览和任务创建都只保留脱敏来源，值不在浏览器、日志、清单或报告中展示。</a-alert>
+      </a-form>
+    </a-modal>
+    <a-modal v-model:visible="reusableStepVisible" title="保存项目级公共步骤" width="620px" :confirm-loading="savingReusableStep" @ok="createReusableStep">
+      <a-form :model="reusableStepForm" layout="vertical">
+        <a-form-item label="公共步骤名称" required>
+          <a-input v-model="reusableStepForm.name" :max-length="160" placeholder="例如：获取订单健康状态" />
+        </a-form-item>
+        <a-form-item label="说明">
+          <a-textarea v-model="reusableStepForm.description" :max-length="1200" placeholder="说明此基础步骤的前置条件与用途" />
+        </a-form-item>
+        <a-alert type="info" :show-icon="true">会复制当前选中的基础步骤并创建 v1。公共步骤不能嵌套公共步骤或子场景；后续更新会产生新版本，现有引用不会漂移。</a-alert>
+      </a-form>
+    </a-modal>
     <a-modal v-model:visible="dataSetVisible" title="新建接口自动化数据集" width="720px" :confirm-loading="savingDataSet" @ok="createDataSet">
       <a-form :model="dataSetForm" layout="vertical">
-        <div class="form-grid"><a-form-item label="数据集名称" required><a-input v-model="dataSetForm.name" :max-length="160" placeholder="例如：订单回归参数" /></a-form-item><a-form-item label="来源格式" required><a-select v-model="dataSetForm.sourceFormat"><a-option value="JSON">JSON 对象数组</a-option><a-option value="CSV">CSV（首行为字段名）</a-option></a-select></a-form-item></div>
-        <a-form-item label="导入方式" required><a-radio-group v-model="dataSetForm.sourceMode" type="button"><a-radio value="TEXT">粘贴内容</a-radio><a-radio value="FILE">上传原始文件</a-radio></a-radio-group></a-form-item>
+        <div class="form-grid">
+          <a-form-item label="数据集名称" required>
+            <a-input v-model="dataSetForm.name" :max-length="160" placeholder="例如：订单回归参数" />
+          </a-form-item>
+          <a-form-item label="来源格式" required>
+            <a-select v-model="dataSetForm.sourceFormat">
+              <a-option value="JSON">JSON 对象数组</a-option>
+              <a-option value="CSV">CSV（首行为字段名）</a-option>
+            </a-select>
+          </a-form-item>
+        </div>
+        <a-form-item label="导入方式" required>
+          <a-radio-group v-model="dataSetForm.sourceMode" type="button">
+            <a-radio value="TEXT">粘贴内容</a-radio>
+            <a-radio value="FILE">上传原始文件</a-radio>
+          </a-radio-group>
+        </a-form-item>
         <a-form-item v-if="dataSetForm.sourceMode === 'TEXT'" label="数据内容" required>
           <a-textarea v-model="dataSetForm.content" :auto-size="{ minRows: 12, maxRows: 18 }" :max-length="524288" placeholder="JSON 或 CSV 数据内容" />
         </a-form-item>
-        <a-form-item v-else label="原始 CSV / JSON 文件" required><input ref="dataSetFileInput" class="data-set-file-input" type="file" accept=".csv,.json,application/json,text/csv" @change="dataSetFileChanged" /><div class="data-set-file-picker"><div><strong>{{ dataSetForm.file?.name ?? '尚未选择文件' }}</strong><small v-if="dataSetForm.file">{{ dataSetForm.file.size }} 字节 · 将按当前来源格式校验并归档至 MinIO</small><small v-else>仅支持 UTF-8 编码的 .csv / .json，最大 512 KiB</small></div><a-button @click="selectDataSetFile">选择文件</a-button></div></a-form-item>
+        <a-form-item v-else label="原始 CSV / JSON 文件" required>
+          <input ref="dataSetFileInput" class="data-set-file-input" type="file" accept=".csv,.json,application/json,text/csv" @change="dataSetFileChanged" />
+          <div class="data-set-file-picker">
+            <div>
+              <strong>{{ dataSetForm.file?.name ?? '尚未选择文件' }}</strong>
+              <small v-if="dataSetForm.file">{{ dataSetForm.file.size }} 字节 · 将按当前来源格式校验并归档至 MinIO</small>
+              <small v-else>仅支持 UTF-8 编码的 .csv / .json，最大 512 KiB</small>
+            </div>
+            <a-button @click="selectDataSetFile">选择文件</a-button>
+          </div>
+        </a-form-item>
         <a-alert type="warning" :show-icon="true">字段名只能使用字母、数字和下划线，且不能以数字开头；最多 50 个字段、200 行。不要把 API Token、密码或私钥写入数据集。文件导入会保存原始附件，但附件不会发送给 Runner。</a-alert>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="dataSetExecutionVisible" title="按数据集逐行执行" width="560px" :confirm-loading="submittingDataSetExecution" @ok="submitDataSetExecution"><a-form :model="dataSetExecutionForm" layout="vertical"><a-form-item label="数据集"><a-select v-model="dataSetExecutionForm.dataSetId"><a-option v-for="dataSet in dataSets" :key="dataSet.id" :value="dataSet.id">{{ dataSet.name }} · {{ dataSet.rowCount }} 行</a-option></a-select></a-form-item><a-form-item label="执行场景"><a-select v-model="dataSetExecutionForm.scenarioId"><a-option v-for="scenario in scenarios" :key="scenario.id" :value="scenario.id">{{ scenario.name }} · v{{ scenario.version }}</a-option></a-select></a-form-item><a-form-item label="单行超时"><a-input-number v-model="dataSetExecutionForm.timeoutSeconds" :min="10" :max="3600" :style="{ width: '100%' }"><template #suffix>秒</template></a-input-number></a-form-item><a-alert type="info" :show-icon="true">确认后将根据数据集行数创建多个独立 Runner 任务。每条任务只冻结其本行所需的非敏感变量，任务消息和报告不携带行内取值。</a-alert></a-form></a-modal>
-    <a-modal v-model:visible="dataSetPreviewVisible" :title="dataSetDetail ? `${dataSetDetail.dataSet.name} · 数据预览` : '数据集预览'" :footer="false" width="780px"><template v-if="dataSetDetail"><a-descriptions :column="3" size="small" bordered><a-descriptions-item label="来源格式">{{ dataSetDetail.dataSet.sourceFormat }}</a-descriptions-item><a-descriptions-item label="总行数">{{ dataSetDetail.dataSet.rowCount }}</a-descriptions-item><a-descriptions-item label="字段数">{{ dataSetDetail.dataSet.columns.length }}</a-descriptions-item><a-descriptions-item label="原始文件" :span="3"><template v-if="dataSetDetail.dataSet.sourceFile"><a-link :href="sourceFileDownloadUrl(dataSetDetail.dataSet)" target="_blank">{{ dataSetDetail.dataSet.sourceFile.originalName }}（{{ dataSetDetail.dataSet.sourceFile.sizeBytes }} 字节）</a-link><small class="data-set-source-file-note">已按项目权限归档到 MinIO；下载需保持当前登录会话。</small></template><span v-else>手工粘贴录入（无原始附件）</span></a-descriptions-item><a-descriptions-item label="校验和" :span="3"><code>{{ dataSetDetail.dataSet.checksum }}</code></a-descriptions-item></a-descriptions><div class="data-set-preview-head"><strong>前 {{ dataSetDetail.previewRows.length }} 行预览</strong><small>预览仅对当前项目有读取权限的成员可见。</small></div><a-table :data="dataSetDetail.previewRows" :pagination="false" size="small" :scroll="{ x: 680 }"><template #columns><a-table-column v-for="column in dataSetDetail.dataSet.columns" :key="column" :title="column" :data-index="column" :width="160" /></template></a-table><a-empty v-if="!dataSetDetail.previewRows.length" description="没有可预览的数据行" /></template></a-modal>
-    <a-modal v-model:visible="webhookVisible" title="新建签名 Webhook" width="580px" :confirm-loading="savingWebhook" @ok="createWebhook"><a-form :model="webhookForm" layout="vertical"><a-form-item label="Webhook 名称" required><a-input v-model="webhookForm.name" :max-length="160" placeholder="例如：发布后订单回归" /></a-form-item><a-form-item label="触发场景" required><a-select v-model="webhookForm.scenarioId"><a-option v-for="scenario in scenarios" :key="scenario.id" :value="scenario.id">{{ scenario.name }} · v{{ scenario.version }}</a-option></a-select></a-form-item><a-alert type="warning" :show-icon="true">系统只保存 AES-GCM 加密后的 HMAC 密钥；创建成功后会仅展示一次原始密钥。</a-alert></a-form></a-modal>
-    <a-modal v-model:visible="webhookSecretVisible" title="立即保存 Webhook 密钥" :footer="false" width="640px" @cancel="createdWebhookSecret = ''"><a-alert type="warning" :show-icon="true">此密钥不会再次显示。请保存到 CI 的受保护密钥变量中，不要提交至源码。</a-alert><pre class="webhook-secret"><code>{{ createdWebhookSecret }}</code></pre><a-button type="primary" long @click="webhookSecretVisible = false; createdWebhookSecret = ''">我已安全保存</a-button></a-modal>
-    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑 Quartz 定时计划' : '新建 Quartz 定时计划'" width="640px" :confirm-loading="savingSchedule" @ok="saveSchedule"><a-form :model="scheduleForm" layout="vertical"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" :max-length="160" placeholder="例如：每日订单接口回归" /></a-form-item><a-form-item label="触发场景" required><a-select v-model="scheduleForm.scenarioId"><a-option v-for="scenario in scenarios" :key="scenario.id" :value="scenario.id">{{ scenario.name }} · v{{ scenario.version }}</a-option></a-select></a-form-item><div class="schedule-form-grid"><a-form-item label="Quartz Cron" required><a-input v-model="scheduleForm.cronExpression" placeholder="0 0 9 * * ?" /><template #extra>六或七段格式，例如每天 09:00：<code>0 0 9 * * ?</code></template></a-form-item><a-form-item label="时区" required><a-input v-model="scheduleForm.timezone" placeholder="Asia/Shanghai" /></a-form-item><a-form-item label="单次超时"><a-input-number v-model="scheduleForm.timeoutSeconds" :min="10" :max="3600" :style="{ width: '100%' }"><template #suffix>秒</template></a-input-number></a-form-item><a-form-item label="连续失败停用阈值"><a-input-number v-model="scheduleForm.maxConsecutiveFailures" :min="1" :max="10" :style="{ width: '100%' }"><template #suffix>次</template></a-input-number></a-form-item></div><a-form-item label="状态"><a-switch v-model="scheduleForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item><a-alert type="warning" :show-icon="true">计划只会调用现有隔离执行链路。Runner 未通过可信校验或未显式启用时，任务会安全结束；达到连续失败阈值后计划自动停用。</a-alert></a-form></a-modal>
-    <a-modal v-model:visible="revisionVisible" title="场景修订记录" :footer="false" width="560px"><a-table :data="revisions" :pagination="false" row-key="id"><template #columns><a-table-column title="版本"><template #cell="{ record }"><a-tag color="arcoblue">v{{ record.version }}</a-tag></template></a-table-column><a-table-column title="保存时间"><template #cell="{ record }">{{ date(record.createdAt) }}</template></a-table-column></template></a-table><a-empty v-if="!revisions.length" description="尚无修订记录" /></a-modal>
+    <a-modal v-model:visible="dataSetExecutionVisible" title="按数据集逐行执行" width="560px" :confirm-loading="submittingDataSetExecution" @ok="submitDataSetExecution">
+      <a-form :model="dataSetExecutionForm" layout="vertical">
+        <a-form-item label="数据集">
+          <a-select v-model="dataSetExecutionForm.dataSetId">
+            <a-option v-for="dataSet in dataSets" :key="dataSet.id" :value="dataSet.id">{{ dataSet.name }} · {{ dataSet.rowCount }} 行</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="执行场景">
+          <a-select v-model="dataSetExecutionForm.scenarioId">
+            <a-option v-for="scenario in scenarios" :key="scenario.id" :value="scenario.id">{{ scenario.name }} · v{{ scenario.version }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="单行超时">
+          <a-input-number v-model="dataSetExecutionForm.timeoutSeconds" :min="10" :max="3600" :style="{ width: '100%' }">
+            <template #suffix>秒</template>
+          </a-input-number>
+        </a-form-item>
+        <a-alert type="info" :show-icon="true">确认后将根据数据集行数创建多个独立 Runner 任务。每条任务只冻结其本行所需的非敏感变量，任务消息和报告不携带行内取值。</a-alert>
+      </a-form>
+    </a-modal>
+    <a-modal v-model:visible="dataSetPreviewVisible" :title="dataSetDetail ? `${dataSetDetail.dataSet.name} · 数据预览` : '数据集预览'" :footer="false" width="780px">
+      <template v-if="dataSetDetail">
+        <a-descriptions :column="3" size="small" bordered>
+          <a-descriptions-item label="来源格式">{{ dataSetDetail.dataSet.sourceFormat }}</a-descriptions-item>
+          <a-descriptions-item label="总行数">{{ dataSetDetail.dataSet.rowCount }}</a-descriptions-item>
+          <a-descriptions-item label="字段数">{{ dataSetDetail.dataSet.columns.length }}</a-descriptions-item>
+          <a-descriptions-item label="原始文件" :span="3">
+            <template v-if="dataSetDetail.dataSet.sourceFile">
+              <a-link :href="sourceFileDownloadUrl(dataSetDetail.dataSet)" target="_blank">{{ dataSetDetail.dataSet.sourceFile.originalName }}（{{ dataSetDetail.dataSet.sourceFile.sizeBytes }} 字节）</a-link>
+              <small class="data-set-source-file-note">已按项目权限归档到 MinIO；下载需保持当前登录会话。</small>
+            </template>
+            <span v-else>手工粘贴录入（无原始附件）</span>
+          </a-descriptions-item>
+          <a-descriptions-item label="校验和" :span="3">
+            <code>{{ dataSetDetail.dataSet.checksum }}</code>
+          </a-descriptions-item>
+        </a-descriptions>
+        <div class="data-set-preview-head">
+          <strong>前 {{ dataSetDetail.previewRows.length }} 行预览</strong>
+          <small>预览仅对当前项目有读取权限的成员可见。</small>
+        </div>
+        <a-table :data="dataSetDetail.previewRows" :pagination="false" size="small" :scroll="{ x: 680 }">
+          <template #columns>
+            <a-table-column v-for="column in dataSetDetail.dataSet.columns" :key="column" :title="column" :data-index="column" :width="160" />
+          </template>
+        </a-table>
+        <a-empty v-if="!dataSetDetail.previewRows.length" description="没有可预览的数据行" />
+      </template>
+    </a-modal>
+    <a-modal v-model:visible="webhookVisible" title="新建签名 Webhook" width="580px" :confirm-loading="savingWebhook" @ok="createWebhook">
+      <a-form :model="webhookForm" layout="vertical">
+        <a-form-item label="Webhook 名称" required>
+          <a-input v-model="webhookForm.name" :max-length="160" placeholder="例如：发布后订单回归" />
+        </a-form-item>
+        <a-form-item label="触发场景" required>
+          <a-select v-model="webhookForm.scenarioId">
+            <a-option v-for="scenario in scenarios" :key="scenario.id" :value="scenario.id">{{ scenario.name }} · v{{ scenario.version }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-alert type="warning" :show-icon="true">系统只保存 AES-GCM 加密后的 HMAC 密钥；创建成功后会仅展示一次原始密钥。</a-alert>
+      </a-form>
+    </a-modal>
+    <a-modal v-model:visible="webhookSecretVisible" title="立即保存 Webhook 密钥" :footer="false" width="640px" @cancel="createdWebhookSecret = ''">
+      <a-alert type="warning" :show-icon="true">此密钥不会再次显示。请保存到 CI 的受保护密钥变量中，不要提交至源码。</a-alert>
+      <pre class="webhook-secret">
+<code>{{ createdWebhookSecret }}</code>
+</pre>
+      <a-button type="primary" long @click="webhookSecretVisible = false; createdWebhookSecret = ''">我已安全保存</a-button>
+    </a-modal>
+    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑 Quartz 定时计划' : '新建 Quartz 定时计划'" width="640px" :confirm-loading="savingSchedule" @ok="saveSchedule">
+      <a-form :model="scheduleForm" layout="vertical">
+        <a-form-item label="计划名称" required>
+          <a-input v-model="scheduleForm.name" :max-length="160" placeholder="例如：每日订单接口回归" />
+        </a-form-item>
+        <a-form-item label="触发场景" required>
+          <a-select v-model="scheduleForm.scenarioId">
+            <a-option v-for="scenario in scenarios" :key="scenario.id" :value="scenario.id">{{ scenario.name }} · v{{ scenario.version }}</a-option>
+          </a-select>
+        </a-form-item>
+        <div class="schedule-form-grid">
+          <a-form-item label="Quartz Cron" required>
+            <a-input v-model="scheduleForm.cronExpression" placeholder="0 0 9 * * ?" />
+            <template #extra>六或七段格式，例如每天 09:00：<code>0 0 9 * * ?</code>
+            </template>
+          </a-form-item>
+          <a-form-item label="时区" required>
+            <a-input v-model="scheduleForm.timezone" placeholder="Asia/Shanghai" />
+          </a-form-item>
+          <a-form-item label="单次超时">
+            <a-input-number v-model="scheduleForm.timeoutSeconds" :min="10" :max="3600" :style="{ width: '100%' }">
+              <template #suffix>秒</template>
+            </a-input-number>
+          </a-form-item>
+          <a-form-item label="连续失败停用阈值">
+            <a-input-number v-model="scheduleForm.maxConsecutiveFailures" :min="1" :max="10" :style="{ width: '100%' }">
+              <template #suffix>次</template>
+            </a-input-number>
+          </a-form-item>
+        </div>
+        <a-form-item label="状态">
+          <a-switch v-model="scheduleForm.enabled" checked-text="启用" unchecked-text="停用" />
+        </a-form-item>
+        <a-alert type="warning" :show-icon="true">计划只会调用现有隔离执行链路。Runner 未通过可信校验或未显式启用时，任务会安全结束；达到连续失败阈值后计划自动停用。</a-alert>
+      </a-form>
+    </a-modal>
+    <a-modal v-model:visible="revisionVisible" title="场景修订记录" :footer="false" width="560px">
+      <a-table :data="revisions" :pagination="false" row-key="id">
+        <template #columns>
+          <a-table-column title="版本">
+            <template #cell="{ record }">
+              <a-tag color="arcoblue">v{{ record.version }}</a-tag>
+            </template>
+          </a-table-column>
+          <a-table-column title="保存时间">
+            <template #cell="{ record }">{{ date(record.createdAt) }}</template>
+          </a-table-column>
+        </template>
+      </a-table>
+      <a-empty v-if="!revisions.length" description="尚无修订记录" />
+    </a-modal>
     <a-drawer v-model:visible="executionDetailVisible" :width="560" title="执行任务详情" :footer="false">
       <template v-if="executionDetail">
         <section class="execution-detail-summary">
-          <div><span>场景</span><strong>{{ executionDetail.scenarioName }}</strong><small>版本 v{{ executionDetail.scenarioVersion }} · {{ executionDetail.id }}</small></div>
+          <div>
+            <span>场景</span>
+            <strong>{{ executionDetail.scenarioName }}</strong>
+            <small>版本 v{{ executionDetail.scenarioVersion }} · {{ executionDetail.id }}</small>
+          </div>
           <a-tag :color="executionColor[executionDetail.status] ?? 'gray'">{{ executionLabel[executionDetail.status] ?? executionDetail.status }}</a-tag>
         </section>
         <a-descriptions :column="1" size="small" bordered class="execution-descriptions">
@@ -984,54 +1507,248 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
           <a-descriptions-item label="Runner">{{ executionDetail.runnerId ?? '尚未接收' }}</a-descriptions-item>
           <a-descriptions-item v-if="executionDetail.executionProfileId" label="运行配置集">v{{ executionDetail.executionProfileVersion }}（环境与非敏感变量已在提交时固定，取值不展示）</a-descriptions-item>
           <a-descriptions-item v-if="executionDetail.dataSetId" label="数据驱动">数据集第 {{ executionDetail.dataSetRowNumber }} 行（行内变量取值不展示）</a-descriptions-item>
-          <a-descriptions-item label="任务 ID"><code>{{ executionDetail.taskId }}</code></a-descriptions-item>
+          <a-descriptions-item label="任务 ID">
+            <code>{{ executionDetail.taskId }}</code>
+          </a-descriptions-item>
           <a-descriptions-item label="截止时间">{{ date(executionDetail.deadlineAt) }}</a-descriptions-item>
         </a-descriptions>
-        <a-link v-if="executionReportExportUrl" class="execution-report-export" :href="executionReportExportUrl" download><icon-download /> 下载脱敏报告 JSON</a-link>
-        <div v-if="executionReportIntegrity" class="execution-report-integrity"><a-tag size="small" color="green">SHA-256</a-tag><code>{{ executionReportIntegrity.sha256 }}</code><small>与下载响应的 ETag 和 <code>X-TestHub-Report-SHA256</code> 一致，可用于 CI 归档校验。</small></div>
-        <section v-if="executionReport" class="execution-report"><div class="execution-manifest-head"><div><span class="eyebrow">REDACTED STRUCTURED REPORT</span><h4>脱敏结构化报告</h4><small>{{ executionReport.contract }} · v{{ executionReport.reportVersion }}；可由 CLI/CI 读取并归档。</small></div><a-tag color="green">安全输出</a-tag></div><a-descriptions :column="2" size="small" bordered><a-descriptions-item v-if="executionReport.failureStrategy" label="失败策略"><a-tag size="small" :color="executionReport.failureStrategy.strategy === 'CONTINUE' ? 'green' : 'orange'">{{ executionReport.failureStrategy.strategy === 'CONTINUE' ? '失败后继续' : '失败即停止' }}</a-tag></a-descriptions-item><a-descriptions-item v-if="executionReport.failureStrategy" label="安全继续">{{ executionReport.failureStrategy.continuedFailureCount ? `已继续 ${executionReport.failureStrategy.continuedFailureCount} 次，最终执行仍会失败` : '未触发继续执行' }}</a-descriptions-item><a-descriptions-item label="HTTP 尝试">{{ executionReport.summary.httpResultCount }}（成功 {{ executionReport.summary.httpSucceededCount }} / 失败 {{ executionReport.summary.httpFailedCount }}）</a-descriptions-item><a-descriptions-item label="累计耗时">{{ executionReport.summary.httpDurationMillis }} ms</a-descriptions-item><a-descriptions-item label="安全步骤">{{ executionReport.summary.stepResultCount }}</a-descriptions-item><a-descriptions-item label="断言">通过 {{ executionReport.summary.assertionPassedCount }} / 失败 {{ executionReport.summary.assertionFailedCount }}</a-descriptions-item><a-descriptions-item label="pm.test 统计">{{ executionReport.summary.scriptResultCount }} 次执行，共 {{ executionReport.summary.scriptTestCount }} 条</a-descriptions-item><a-descriptions-item label="pm.test 结果">通过 {{ executionReport.summary.scriptPassedCount }} / 失败 {{ executionReport.summary.scriptFailedCount }}</a-descriptions-item></a-descriptions><section v-if="executionReport.parallelGroups.length" class="parallel-group-report"><div class="manifest-binding-head"><strong>并行请求组汇总</strong><small>按冻结父步骤聚合：仅统计分支、尝试、序号与耗时，不记录请求或响应内容。</small></div><div class="parallel-group-list"><article v-for="group in executionReport.parallelGroups" :key="group.stepId" class="parallel-group-row"><span class="parallel-group-icon">⇆</span><div><strong>{{ executionStepName(group.stepId) }}</strong><small>{{ group.stepId }} · 请求序号 {{ group.firstRequestSequence ?? '—' }}–{{ group.lastRequestSequence ?? '—' }} · 累计 {{ group.totalDurationMillis }} ms</small></div><a-tag size="small" color="arcoblue">配置 {{ group.configuredBranchCount }}</a-tag><a-tag size="small" color="purple">完成 {{ group.completedBranchCount }}</a-tag><a-tag size="small" color="green">成功 {{ group.succeededBranchCount }}</a-tag><a-tag size="small" :color="group.failedBranchCount ? 'red' : 'green'">失败 {{ group.failedBranchCount }}</a-tag><a-tag size="small" :color="group.retryAttemptCount ? 'orange' : 'gray'">重试 {{ group.retryAttemptCount }}</a-tag></article></div></section></section>
+        <a-link v-if="executionReportExportUrl" class="execution-report-export" :href="executionReportExportUrl" download>
+          <icon-download /> 下载脱敏报告 JSON</a-link>
+        <div v-if="executionReportIntegrity" class="execution-report-integrity">
+          <a-tag size="small" color="green">SHA-256</a-tag>
+          <code>{{ executionReportIntegrity.sha256 }}</code>
+          <small>与下载响应的 ETag 和 <code>X-TestHub-Report-SHA256</code> 一致，可用于 CI 归档校验。</small>
+        </div>
+        <section v-if="executionReport" class="execution-report">
+          <div class="execution-manifest-head">
+            <div>
+              <span class="eyebrow">REDACTED STRUCTURED REPORT</span>
+              <h4>脱敏结构化报告</h4>
+              <small>{{ executionReport.contract }} · v{{ executionReport.reportVersion }}；可由 CLI/CI 读取并归档。</small>
+            </div>
+            <a-tag color="green">安全输出</a-tag>
+          </div>
+          <a-descriptions :column="2" size="small" bordered>
+            <a-descriptions-item v-if="executionReport.failureStrategy" label="失败策略">
+              <a-tag size="small" :color="executionReport.failureStrategy.strategy === 'CONTINUE' ? 'green' : 'orange'">{{ executionReport.failureStrategy.strategy === 'CONTINUE' ? '失败后继续' : '失败即停止' }}</a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item v-if="executionReport.failureStrategy" label="安全继续">{{ executionReport.failureStrategy.continuedFailureCount ? `已继续 ${executionReport.failureStrategy.continuedFailureCount} 次，最终执行仍会失败` : '未触发继续执行' }}</a-descriptions-item>
+            <a-descriptions-item label="HTTP 尝试">{{ executionReport.summary.httpResultCount }}（成功 {{ executionReport.summary.httpSucceededCount }} / 失败 {{ executionReport.summary.httpFailedCount }}）</a-descriptions-item>
+            <a-descriptions-item label="累计耗时">{{ executionReport.summary.httpDurationMillis }} ms</a-descriptions-item>
+            <a-descriptions-item label="安全步骤">{{ executionReport.summary.stepResultCount }}</a-descriptions-item>
+            <a-descriptions-item label="断言">通过 {{ executionReport.summary.assertionPassedCount }} / 失败 {{ executionReport.summary.assertionFailedCount }}</a-descriptions-item>
+            <a-descriptions-item label="pm.test 统计">{{ executionReport.summary.scriptResultCount }} 次执行，共 {{ executionReport.summary.scriptTestCount }} 条</a-descriptions-item>
+            <a-descriptions-item label="pm.test 结果">通过 {{ executionReport.summary.scriptPassedCount }} / 失败 {{ executionReport.summary.scriptFailedCount }}</a-descriptions-item>
+          </a-descriptions>
+          <section v-if="executionReport.parallelGroups.length" class="parallel-group-report">
+            <div class="manifest-binding-head">
+              <strong>并行请求组汇总</strong>
+              <small>按冻结父步骤聚合：仅统计分支、尝试、序号与耗时，不记录请求或响应内容。</small>
+            </div>
+            <div class="parallel-group-list">
+              <article v-for="group in executionReport.parallelGroups" :key="group.stepId" class="parallel-group-row">
+                <span class="parallel-group-icon">⇆</span>
+                <div>
+                  <strong>{{ executionStepName(group.stepId) }}</strong>
+                  <small>{{ group.stepId }} · 请求序号 {{ group.firstRequestSequence ?? '—' }}–{{ group.lastRequestSequence ?? '—' }} · 累计 {{ group.totalDurationMillis }} ms</small>
+                </div>
+                <a-tag size="small" color="arcoblue">配置 {{ group.configuredBranchCount }}</a-tag>
+                <a-tag size="small" color="purple">完成 {{ group.completedBranchCount }}</a-tag>
+                <a-tag size="small" color="green">成功 {{ group.succeededBranchCount }}</a-tag>
+                <a-tag size="small" :color="group.failedBranchCount ? 'red' : 'green'">失败 {{ group.failedBranchCount }}</a-tag>
+                <a-tag size="small" :color="group.retryAttemptCount ? 'orange' : 'gray'">重试 {{ group.retryAttemptCount }}</a-tag>
+              </article>
+            </div>
+          </section>
+        </section>
         <section v-if="executionManifest" class="execution-manifest">
-          <div class="execution-manifest-head"><div><span class="eyebrow">FROZEN SAFE MANIFEST</span><h4>已固化执行清单</h4><small>提交前会校验 <code v-pre>{{变量}}</code> 引用；清单只保存步骤结构、来源和使用位置。</small></div><a-tag color="green">SHA-256</a-tag></div>
+          <div class="execution-manifest-head">
+            <div>
+              <span class="eyebrow">FROZEN SAFE MANIFEST</span>
+              <h4>已固化执行清单</h4>
+              <small>提交前会校验 <code v-pre>{{变量}}</code> 引用；清单只保存步骤结构、来源和使用位置。</small>
+            </div>
+            <a-tag color="green">SHA-256</a-tag>
+          </div>
           <a-descriptions :column="2" size="small" bordered>
             <a-descriptions-item label="场景版本">v{{ executionManifest.scenarioVersion }}</a-descriptions-item>
             <a-descriptions-item label="环境">{{ executionManifest.snapshot.environmentCode }}</a-descriptions-item>
             <a-descriptions-item label="步骤数">{{ executionManifest.stepCount }}</a-descriptions-item>
             <a-descriptions-item label="变量定义">{{ executionManifest.variableCount }}（密钥 {{ executionManifest.secretReferenceCount }}）</a-descriptions-item>
             <a-descriptions-item label="已解析引用" :span="2">{{ executionManifest.snapshot.variableReferences.length }} 个</a-descriptions-item>
-            <a-descriptions-item label="校验和" :span="2"><code>{{ executionManifest.checksum }}</code></a-descriptions-item>
+            <a-descriptions-item label="校验和" :span="2">
+              <code>{{ executionManifest.checksum }}</code>
+            </a-descriptions-item>
           </a-descriptions>
-          <div class="manifest-binding-head"><strong>已解析引用</strong><small>来源按 环境密钥 → 场景变量 → 项目参数 选择；只记录步骤和配置项名称。</small></div>
-          <div class="manifest-reference-list"><div v-for="reference in executionManifest.snapshot.variableReferences" :key="reference.name" class="manifest-reference-row"><code>{{ reference.name }}</code><a-tag size="small" :color="reference.secret ? 'orange' : 'arcoblue'">{{ reference.source }}</a-tag><span>{{ referenceLocations(reference) }}</span></div><a-empty v-if="!executionManifest.snapshot.variableReferences.length" description="当前场景没有模板变量引用" /></div>
-          <div class="manifest-binding-head"><strong>变量引用</strong><small>来源与变量名可审阅，取值不会展示。</small></div>
-          <div class="manifest-binding-list"><div v-for="binding in executionManifest.snapshot.variableBindings" :key="`${binding.source}-${binding.name}`" class="manifest-binding-row"><code>{{ binding.name }}</code><a-tag size="small" :color="binding.secret ? 'orange' : 'arcoblue'">{{ binding.source }}</a-tag><span>{{ binding.secret ? '仅密钥引用' : '仅变量引用' }}</span></div><a-empty v-if="!executionManifest.snapshot.variableBindings.length" description="当前场景没有变量引用" /></div>
+          <div class="manifest-binding-head">
+            <strong>已解析引用</strong>
+            <small>来源按 环境密钥 → 场景变量 → 项目参数 选择；只记录步骤和配置项名称。</small>
+          </div>
+          <div class="manifest-reference-list">
+            <div v-for="reference in executionManifest.snapshot.variableReferences" :key="reference.name" class="manifest-reference-row">
+              <code>{{ reference.name }}</code>
+              <a-tag size="small" :color="reference.secret ? 'orange' : 'arcoblue'">{{ reference.source }}</a-tag>
+              <span>{{ referenceLocations(reference) }}</span>
+            </div>
+            <a-empty v-if="!executionManifest.snapshot.variableReferences.length" description="当前场景没有模板变量引用" />
+          </div>
+          <div class="manifest-binding-head">
+            <strong>变量引用</strong>
+            <small>来源与变量名可审阅，取值不会展示。</small>
+          </div>
+          <div class="manifest-binding-list">
+            <div v-for="binding in executionManifest.snapshot.variableBindings" :key="`${binding.source}-${binding.name}`" class="manifest-binding-row">
+              <code>{{ binding.name }}</code>
+              <a-tag size="small" :color="binding.secret ? 'orange' : 'arcoblue'">{{ binding.source }}</a-tag>
+              <span>{{ binding.secret ? '仅密钥引用' : '仅变量引用' }}</span>
+            </div>
+            <a-empty v-if="!executionManifest.snapshot.variableBindings.length" description="当前场景没有变量引用" />
+          </div>
         </section>
         <a-alert v-else type="info" class="execution-manifest-legacy" :show-icon="true">该任务在安全执行清单发布前创建，因此没有可审阅的变量引用快照。</a-alert>
         <section v-if="executionRuntimeSnapshot" class="execution-runtime-snapshot">
-          <div class="execution-manifest-head"><div><span class="eyebrow">FROZEN NON-SENSITIVE RUNTIME INPUTS</span><h4>冻结非敏感运行时变量</h4><small>仅固化当前场景实际引用的非敏感变量；环境密钥只保留名称，不读取、不解密、不传递取值。</small></div><a-tag color="arcoblue">内部快照</a-tag></div>
+          <div class="execution-manifest-head">
+            <div>
+              <span class="eyebrow">FROZEN NON-SENSITIVE RUNTIME INPUTS</span>
+              <h4>冻结非敏感运行时变量</h4>
+              <small>仅固化当前场景实际引用的非敏感变量；环境密钥只保留名称，不读取、不解密、不传递取值。</small>
+            </div>
+            <a-tag color="arcoblue">内部快照</a-tag>
+          </div>
           <a-descriptions :column="2" size="small" bordered>
             <a-descriptions-item label="环境">{{ executionRuntimeSnapshot.snapshot.environmentCode }}</a-descriptions-item>
             <a-descriptions-item label="快照版本">v{{ executionRuntimeSnapshot.snapshot.snapshotVersion }}</a-descriptions-item>
             <a-descriptions-item label="非敏感变量">{{ executionRuntimeSnapshot.variableCount }}</a-descriptions-item>
             <a-descriptions-item label="已保留密钥名">{{ executionRuntimeSnapshot.withheldSecretCount }}</a-descriptions-item>
-            <a-descriptions-item label="校验和" :span="2"><code>{{ executionRuntimeSnapshot.checksum }}</code></a-descriptions-item>
+            <a-descriptions-item label="校验和" :span="2">
+              <code>{{ executionRuntimeSnapshot.checksum }}</code>
+            </a-descriptions-item>
           </a-descriptions>
-          <div class="manifest-binding-head"><strong>非敏感变量来源</strong><small>非敏感值已在控制面内部固化，本页面不展示；运行时配置交接仍保持关闭。</small></div>
-          <div class="manifest-binding-list"><div v-for="variable in executionRuntimeSnapshot.snapshot.variables" :key="`${variable.source}-${variable.name}`" class="manifest-binding-row"><code>{{ variable.name }}</code><a-tag size="small" color="arcoblue">{{ variable.source }}</a-tag><span>取值不对外展示</span></div><a-empty v-if="!executionRuntimeSnapshot.snapshot.variables.length" description="当前场景没有引用非敏感变量" /></div>
-          <div class="manifest-binding-head"><strong>环境密钥</strong><small>仅保留名称，不含取值。</small></div>
-          <div class="runtime-secret-tags"><a-tag v-for="name in executionRuntimeSnapshot.snapshot.withheldSecretNames" :key="name" color="orange">{{ name }} · 已保留</a-tag><a-empty v-if="!executionRuntimeSnapshot.snapshot.withheldSecretNames.length" description="当前场景没有引用环境密钥" /></div>
+          <div class="manifest-binding-head">
+            <strong>非敏感变量来源</strong>
+            <small>非敏感值已在控制面内部固化，本页面不展示；运行时配置交接仍保持关闭。</small>
+          </div>
+          <div class="manifest-binding-list">
+            <div v-for="variable in executionRuntimeSnapshot.snapshot.variables" :key="`${variable.source}-${variable.name}`" class="manifest-binding-row">
+              <code>{{ variable.name }}</code>
+              <a-tag size="small" color="arcoblue">{{ variable.source }}</a-tag>
+              <span>取值不对外展示</span>
+            </div>
+            <a-empty v-if="!executionRuntimeSnapshot.snapshot.variables.length" description="当前场景没有引用非敏感变量" />
+          </div>
+          <div class="manifest-binding-head">
+            <strong>环境密钥</strong>
+            <small>仅保留名称，不含取值。</small>
+          </div>
+          <div class="runtime-secret-tags">
+            <a-tag v-for="name in executionRuntimeSnapshot.snapshot.withheldSecretNames" :key="name" color="orange">{{ name }} · 已保留</a-tag>
+            <a-empty v-if="!executionRuntimeSnapshot.snapshot.withheldSecretNames.length" description="当前场景没有引用环境密钥" />
+          </div>
         </section>
         <a-alert v-else-if="executionManifest" type="info" class="execution-manifest-legacy" :show-icon="true">该任务在非敏感运行时变量快照发布前创建，因此不提供变量快照。</a-alert>
-        <section class="http-result-panel"><div class="execution-log-head"><div><span class="eyebrow">REDACTED HTTP RESULTS</span><h4>逐请求执行结果</h4><small>重试会保留相同请求序号并标注尝试次数；仅展示冻结步骤名称、方法、状态码和耗时，不记录地址、正文、响应或密钥。</small></div></div><a-spin :loading="executionDetailLoading"><div class="http-result-list"><article v-for="result in executionHttpResults" :key="result.id" class="http-result-row"><span class="http-result-sequence">{{ result.requestSequence }}</span><div><strong>{{ executionStepName(result.stepId) }}</strong><small>{{ result.stepId }} · {{ result.runnerId }} · {{ date(result.occurredAt) }}</small></div><a-tag size="small" color="purple">尝试 {{ result.attemptNumber }}</a-tag><a-tag size="small" color="arcoblue">{{ result.method }}</a-tag><a-tag size="small" :color="httpResultColor[result.outcome]">{{ result.statusCode ?? '无响应' }}</a-tag><span class="http-result-duration">{{ result.durationMillis }} ms</span></article><a-empty v-if="!executionHttpResults.length" description="尚未收到受限 HTTP 请求结果" /></div></a-spin></section>
-        <section class="step-result-panel"><div class="execution-log-head"><div><span class="eyebrow">SAFE STEP RESULTS</span><h4>提取与断言结果</h4><small>只记录步骤类型、通过状态与已观察状态码；不保存变量取值或响应内容。</small></div></div><a-spin :loading="executionDetailLoading"><div class="step-result-list"><article v-for="result in executionStepResults" :key="result.id" class="step-result-row"><span class="http-result-sequence">{{ result.stepSequence }}</span><div><strong>{{ executionStepName(result.stepId) }}</strong><small>{{ result.stepType }} · {{ result.runnerId }} · {{ date(result.occurredAt) }}</small></div><a-tag size="small" :color="result.stepType === 'ASSERT' ? 'green' : 'purple'">{{ result.stepType === 'ASSERT' ? '状态断言' : '状态提取' }}</a-tag><a-tag size="small" :color="result.outcome === 'FAILED' ? 'red' : 'green'">{{ result.outcome }}</a-tag><span class="http-result-duration">HTTP {{ result.observedStatusCode }}</span></article><a-empty v-if="!executionStepResults.length" description="尚未收到提取或断言结果" /></div></a-spin></section>
-        <section class="script-result-panel"><div class="execution-log-head"><div><span class="eyebrow">SAFE PM.TEST RESULTS</span><h4>脚本断言统计</h4><small>仅保存阶段和通过/失败计数；不保存断言名称、变量、响应、请求或密钥。</small></div></div><a-spin :loading="executionDetailLoading"><div class="script-result-list"><article v-for="result in executionScriptResults" :key="result.id" class="script-result-row"><span class="http-result-sequence">✓</span><div><strong>{{ result.phase === 'PRE_REQUEST' ? '前置脚本' : '后置脚本' }}</strong><small>{{ result.runnerId }} · {{ date(result.occurredAt) }} · 仅聚合计数</small></div><a-tag size="small" color="purple">{{ result.testCount }} 条</a-tag><a-tag size="small" color="green">通过 {{ result.passedCount }}</a-tag><a-tag size="small" :color="result.failedCount ? 'red' : 'green'">失败 {{ result.failedCount }}</a-tag></article><a-empty v-if="!executionScriptResults.length" description="尚未收到 pm.test 断言统计" /></div></a-spin></section>
-        <div class="execution-log-head"><div><span class="eyebrow">SAFE RUNNER LOG</span><h4>实时结构化日志</h4><small>每 1.5 秒刷新；仅接受固定代码与固定消息。</small></div><a-button size="small" :loading="executionDetailLoading" @click="loadExecutionDetail"><icon-refresh /> 刷新</a-button></div>
-        <a-spin :loading="executionDetailLoading"><div class="execution-log-list"><article v-for="entry in executionLogs" :key="entry.id" class="execution-log-row"><a-tag size="small" :color="logLevelColor[entry.level] ?? 'gray'">{{ entry.level }}</a-tag><div><strong>{{ entry.code }}</strong><p>{{ entry.message }}</p><small>{{ entry.source === 'RUNNER' ? `${entry.runnerId ?? 'Runner'} · ` : '控制面 · ' }}{{ date(entry.occurredAt) }}</small></div></article><a-empty v-if="!executionLogs.length" description="尚未收到 Runner 日志" /></div></a-spin>
+        <section class="http-result-panel">
+          <div class="execution-log-head">
+            <div>
+              <span class="eyebrow">REDACTED HTTP RESULTS</span>
+              <h4>逐请求执行结果</h4>
+              <small>重试会保留相同请求序号并标注尝试次数；仅展示冻结步骤名称、方法、状态码和耗时，不记录地址、正文、响应或密钥。</small>
+            </div>
+          </div>
+          <a-spin :loading="executionDetailLoading">
+            <div class="http-result-list">
+              <article v-for="result in executionHttpResults" :key="result.id" class="http-result-row">
+                <span class="http-result-sequence">{{ result.requestSequence }}</span>
+                <div>
+                  <strong>{{ executionStepName(result.stepId) }}</strong>
+                  <small>{{ result.stepId }} · {{ result.runnerId }} · {{ date(result.occurredAt) }}</small>
+                </div>
+                <a-tag size="small" color="purple">尝试 {{ result.attemptNumber }}</a-tag>
+                <a-tag size="small" color="arcoblue">{{ result.method }}</a-tag>
+                <a-tag size="small" :color="httpResultColor[result.outcome]">{{ result.statusCode ?? '无响应' }}</a-tag>
+                <span class="http-result-duration">{{ result.durationMillis }} ms</span>
+              </article>
+              <a-empty v-if="!executionHttpResults.length" description="尚未收到受限 HTTP 请求结果" />
+            </div>
+          </a-spin>
+        </section>
+        <section class="step-result-panel">
+          <div class="execution-log-head">
+            <div>
+              <span class="eyebrow">SAFE STEP RESULTS</span>
+              <h4>提取与断言结果</h4>
+              <small>只记录步骤类型、通过状态与已观察状态码；不保存变量取值或响应内容。</small>
+            </div>
+          </div>
+          <a-spin :loading="executionDetailLoading">
+            <div class="step-result-list">
+              <article v-for="result in executionStepResults" :key="result.id" class="step-result-row">
+                <span class="http-result-sequence">{{ result.stepSequence }}</span>
+                <div>
+                  <strong>{{ executionStepName(result.stepId) }}</strong>
+                  <small>{{ result.stepType }} · {{ result.runnerId }} · {{ date(result.occurredAt) }}</small>
+                </div>
+                <a-tag size="small" :color="result.stepType === 'ASSERT' ? 'green' : 'purple'">{{ result.stepType === 'ASSERT' ? '状态断言' : '状态提取' }}</a-tag>
+                <a-tag size="small" :color="result.outcome === 'FAILED' ? 'red' : 'green'">{{ result.outcome }}</a-tag>
+                <span class="http-result-duration">HTTP {{ result.observedStatusCode }}</span>
+              </article>
+              <a-empty v-if="!executionStepResults.length" description="尚未收到提取或断言结果" />
+            </div>
+          </a-spin>
+        </section>
+        <section class="script-result-panel">
+          <div class="execution-log-head">
+            <div>
+              <span class="eyebrow">SAFE PM.TEST RESULTS</span>
+              <h4>脚本断言统计</h4>
+              <small>仅保存阶段和通过/失败计数；不保存断言名称、变量、响应、请求或密钥。</small>
+            </div>
+          </div>
+          <a-spin :loading="executionDetailLoading">
+            <div class="script-result-list">
+              <article v-for="result in executionScriptResults" :key="result.id" class="script-result-row">
+                <span class="http-result-sequence">✓</span>
+                <div>
+                  <strong>{{ result.phase === 'PRE_REQUEST' ? '前置脚本' : '后置脚本' }}</strong>
+                  <small>{{ result.runnerId }} · {{ date(result.occurredAt) }} · 仅聚合计数</small>
+                </div>
+                <a-tag size="small" color="purple">{{ result.testCount }} 条</a-tag>
+                <a-tag size="small" color="green">通过 {{ result.passedCount }}</a-tag>
+                <a-tag size="small" :color="result.failedCount ? 'red' : 'green'">失败 {{ result.failedCount }}</a-tag>
+              </article>
+              <a-empty v-if="!executionScriptResults.length" description="尚未收到 pm.test 断言统计" />
+            </div>
+          </a-spin>
+        </section>
+        <div class="execution-log-head">
+          <div>
+            <span class="eyebrow">SAFE RUNNER LOG</span>
+            <h4>实时结构化日志</h4>
+            <small>每 1.5 秒刷新；仅接受固定代码与固定消息。</small>
+          </div>
+          <a-button size="small" :loading="executionDetailLoading" @click="loadExecutionDetail">
+            <icon-refresh /> 刷新</a-button>
+        </div>
+        <a-spin :loading="executionDetailLoading">
+          <div class="execution-log-list">
+            <article v-for="entry in executionLogs" :key="entry.id" class="execution-log-row">
+              <a-tag size="small" :color="logLevelColor[entry.level] ?? 'gray'">{{ entry.level }}</a-tag>
+              <div>
+                <strong>{{ entry.code }}</strong>
+                <p>{{ entry.message }}</p>
+                <small>{{ entry.source === 'RUNNER' ? `${entry.runnerId ?? 'Runner'} · ` : '控制面 · ' }}{{ date(entry.occurredAt) }}</small>
+              </div>
+            </article>
+            <a-empty v-if="!executionLogs.length" description="尚未收到 Runner 日志" />
+          </div>
+        </a-spin>
       </template>
     </a-drawer>
   </div>
 </template>
 
 <style scoped>
+.automation-page{min-height:calc(100vh - 68px);padding:0;overflow:hidden;background:#f6f7fa}.automation-workbench{display:flex;flex-direction:column;height:calc(100vh - 68px);min-height:680px;color:#273143;background:#fff}.automation-commandbar{display:flex;align-items:center;justify-content:space-between;min-height:55px;padding:0 15px 0 17px;border-bottom:1px solid #e5e8ef;background:linear-gradient(180deg,#fff,#fcfcfe)}.commandbar-context,.commandbar-actions{display:flex;align-items:center;gap:10px}.commandbar-context>div{display:grid;gap:2px}.commandbar-context small{color:#8d96a6;font-size:9px}.commandbar-context strong{font-size:13px}.product-mark{display:grid;place-items:center;width:31px;height:31px;color:#fff;border-radius:9px;background:linear-gradient(145deg,#8b6df1,#5c42d7);box-shadow:0 7px 18px rgba(104,76,219,.2)}.runner-pill{display:flex;align-items:center;gap:6px;padding:5px 9px;color:#7e8796;font-size:9px;border:1px solid #e3e6ec;border-radius:14px;background:#fafbfc}.runner-pill i{width:6px;height:6px;border-radius:50%;background:#aeb5c0}.runner-pill.online i{background:#e49b39}.runner-pill.trusted i{background:#26aa7e;box-shadow:0 0 0 3px #e2f6ef}.automation-workbench__body{display:grid;grid-template-columns:238px minmax(530px,1fr) 292px;min-height:0;flex:1}.automation-studio{display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}.studio-document-header{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:66px;padding:9px 18px;border-bottom:1px solid #e9ebf1}.scenario-identity{display:flex;align-items:center;gap:11px;min-width:0}.scenario-identity>div{display:grid;min-width:0;gap:2px}.scenario-identity>div>span{color:#959ead;font-size:9px}.priority-chip{height:28px;padding:0 10px;color:#5f6b7c;font-size:10px;border:1px solid #dfe3eb;border-radius:7px;background:#fff}.studio-title{width:min(420px,40vw)}.studio-title :deep(.arco-input){height:28px;padding:0;color:#283246;font-size:16px;font-weight:700;border:0;background:transparent;box-shadow:none}.studio-tabs{display:flex;align-items:end;gap:24px;height:48px;padding:0 20px;border-bottom:1px solid #e9ebf1}.studio-tabs button{height:48px;padding:0 2px;color:#7d8798;font-size:11px;border:0;border-bottom:2px solid transparent;background:transparent;cursor:pointer}.studio-tabs button.active{color:#6b4de1;font-weight:700;border-bottom-color:#7658e8}.studio-tabs button span{margin-left:3px;padding:1px 5px;color:#929aaa;font-size:8px;border-radius:8px;background:#eef0f4}.studio-scroll{min-height:0;padding:15px 20px 28px;overflow:auto;background:#fff}.scenario-summary-line{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px}.scenario-summary-line :deep(.arco-input-wrapper){border:0;background:transparent}.scenario-summary-line :deep(.arco-input){padding-left:0;color:#767f8f;font-size:10px}.scenario-editor-tabs{display:flex;gap:5px;margin:12px 0;padding:3px;border-radius:8px;background:#f4f5f8}.scenario-editor-tabs button{display:flex;align-items:center;justify-content:center;gap:6px;min-width:120px;height:30px;padding:0 13px;color:#7d8797;font-size:10px;border:0;border-radius:6px;background:transparent;cursor:pointer}.scenario-editor-tabs button.active{color:#4e3bb3;font-weight:700;background:#fff;box-shadow:0 2px 8px rgba(32,43,69,.07)}.flow-overview{display:flex;align-items:center;justify-content:space-between;padding:9px 8px;color:#8f98a8;font-size:9px}.flow-overview strong{color:#465166;font-size:11px}.scenario-flow-canvas{display:flex;flex-direction:column;align-items:center;min-height:420px;padding:22px 28px 42px;border:1px dashed #e2e5ed;border-radius:10px;background-color:#fbfcfe;background-image:radial-gradient(#dfe3eb .65px,transparent .65px);background-size:17px 17px}.flow-terminal{display:grid;place-items:center;min-width:58px;height:26px;padding:0 14px;color:#fff;font-size:9px;border-radius:13px;background:#3c485d}.flow-terminal.end{color:#687487;background:#e9ecf2}.scenario-flow-line{display:grid;place-items:center;width:30px;height:22px}.scenario-flow-line span{height:22px;border-left:1px dashed #aeb7c7}.scenario-flow-node{display:grid;grid-template-columns:25px 31px minmax(0,1fr) auto;align-items:center;gap:9px;width:min(470px,92%);min-height:56px;padding:9px 12px;color:#3c4759;text-align:left;border:1px solid #e0e4eb;border-left:3px solid #6079e8;border-radius:9px;background:#fff;box-shadow:0 5px 14px rgba(31,46,76,.055);cursor:pointer;transition:.16s ease}.scenario-flow-node:hover,.scenario-flow-node.selected{border-color:#8d75e9;box-shadow:0 0 0 3px #eeeafd,0 7px 18px rgba(67,48,147,.08);transform:translateY(-1px)}.scenario-flow-node.node-green{border-left-color:#25a980}.scenario-flow-node.node-orange{border-left-color:#e28b3c}.scenario-flow-node.node-cyan{border-left-color:#2aa4bf}.scenario-flow-node.node-violet{border-left-color:#7658e8}.scenario-flow-node.node-gray{border-left-color:#8994a6}.scenario-flow-index{display:grid;place-items:center;width:23px;height:23px;color:#708099;font-size:9px;border-radius:6px;background:#f0f2f6}.scenario-flow-icon{display:grid;place-items:center;width:30px;height:30px;color:#6547db;font-size:15px;border-radius:8px;background:#efebff}.scenario-flow-copy{display:grid;min-width:0;gap:3px}.scenario-flow-copy strong,.scenario-flow-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.scenario-flow-copy strong{font-size:11px}.scenario-flow-copy small{color:#929bab;font-size:9px}.scenario-flow-node>svg{color:#a0a8b5}.flow-add-trigger{display:flex;align-items:center;gap:6px;height:30px;padding:0 13px;color:#694add;font-size:10px;font-weight:700;border:1px dashed #9b86ec;border-radius:15px;background:#fff;cursor:pointer}.flow-add-trigger:hover{background:#f4f1ff}.step-library{width:480px;padding:12px;background:#fff}.step-library section{display:grid;gap:5px}.step-library section+section{margin-top:12px}.step-library section>small{padding:0 4px 3px;color:#8f98a7;font-size:9px}.step-library section>button,.step-library-grid button{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:9px;min-height:42px;padding:6px 8px;color:#4c586c;text-align:left;border:1px solid transparent;border-radius:8px;background:#fff;cursor:pointer}.step-library section>button:hover,.step-library-grid button:hover{border-color:#e4dfff;background:#f8f7ff}.step-library section>button>div{display:grid;gap:2px}.step-library button strong{font-size:10px}.step-library button em{color:#9ba3b0;font-size:8px;font-style:normal}.step-library-icon{display:grid;place-items:center;width:28px;height:28px;color:#647187;font-size:11px;font-weight:700;border-radius:7px;background:#eef1f5}.step-library-icon.purple{color:#6a49df;background:#eeeaff}.step-library-icon.amber{color:#b97612;background:#fff2dc}.step-library-icon.blue{color:#2d72de;background:#e8f2ff}.step-library-icon.cyan{color:#168ca8;background:#e5f8fb}.step-library-icon.pink{color:#d94f9f;background:#ffe9f6}.step-library-icon.orange{color:#d26f22;background:#fff0e4}.step-library-icon.green{color:#188965;background:#e5f7f0}.step-library-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}.step-library-grid button{grid-template-columns:30px minmax(0,1fr);border-color:#edf0f4}.step-library footer{display:flex;gap:6px;margin:11px -12px -12px;padding:10px 12px;color:#8b94a4;font-size:8px;border-top:1px solid #eceef3;background:#fafbfc}.scenario-script-editor,.scenario-variable-editor{margin-top:12px;padding:16px;border:1px solid #e8eaf0;border-radius:10px;background:#fbfbfd}.script-safety{display:flex;gap:10px;margin-bottom:12px;padding:11px;color:#624aa9;border:1px solid #e7e0ff;border-radius:8px;background:#f7f4ff}.script-safety>div{display:grid;gap:3px}.script-safety strong{font-size:10px}.script-safety small{color:#8c84a7;font-size:9px}.scenario-variable-editor header,.asset-section-heading{display:flex;align-items:center;justify-content:space-between}.scenario-variable-editor header>div,.asset-section-heading>div{display:grid;gap:3px}.scenario-variable-editor header strong{font-size:13px}.scenario-variable-editor header small,.asset-section-heading small{color:#919aa9;font-size:9px}.variable-table-head,.variable-table-row{display:grid;grid-template-columns:.8fr 1.2fr 34px;gap:8px;align-items:center}.variable-table-head{margin-top:15px;padding:8px;color:#8b94a4;font-size:9px;border-bottom:1px solid #e8eaf0}.variable-table-row{padding:7px 0;border-bottom:1px solid #eef0f4}.asset-page{padding:22px 24px 36px;background:#fafbfc}.asset-page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:18px}.asset-page-header>div{display:grid;gap:4px}.asset-page-header span{color:#7457df;font-size:9px;font-weight:700;letter-spacing:1px}.asset-page-header h2{margin:0;font-size:18px}.asset-page-header p{margin:0;color:#8b94a4;font-size:10px}.asset-card-list{display:grid;gap:8px}.asset-card{display:grid;grid-template-columns:35px minmax(0,1fr) auto auto auto auto;gap:8px;align-items:center;padding:11px 12px;border:1px solid #e4e7ed;border-radius:9px;background:#fff}.asset-card>div{display:grid;min-width:0;gap:3px}.asset-card strong,.asset-card small,.asset-card code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-card strong{font-size:11px}.asset-card small,.asset-card code{color:#929bab;font-size:9px}.asset-card-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:8px}.asset-card-icon.cyan{color:#158da9;background:#e5f8fb}.asset-card-icon.purple{color:#6548da;background:#eeeaff}.asset-card-icon.blue{color:#3576d6;background:#e9f2ff}.asset-card-icon.orange{color:#cc742d;background:#fff0e4}.table-secondary{display:block;margin-top:3px;color:#959ead;font-size:9px}.integration-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.integration-card{min-width:0;padding:13px;border:1px solid #e4e7ed;border-radius:9px;background:#fff}.integration-card header{display:flex;align-items:center;gap:9px;margin-bottom:10px}.integration-card header>div{display:grid;gap:3px}.integration-card header strong{font-size:11px}.integration-card header small{color:#929baa;font-size:9px}.integration-card pre{max-height:170px;margin:0;padding:10px;overflow:auto;color:#dce5f7;font-size:8px;line-height:1.55;border-radius:7px;background:#182033;white-space:pre-wrap}.webhook-address{display:block;padding:10px;overflow:hidden;color:#5d687b;font-size:9px;text-overflow:ellipsis;border-radius:7px;background:#f3f5f8}.asset-section-heading{margin:22px 0 9px}.asset-section-heading strong{font-size:12px}.asset-card-list.compact .asset-card{grid-template-columns:35px minmax(0,1fr) auto auto auto auto}.studio-empty{display:grid;place-items:center;min-height:100%}.inspector-drawer-title{display:flex;align-items:center;gap:8px}.parallel-editor-card{display:grid;gap:8px;margin-bottom:10px;padding:10px;border:1px solid #e5e8ef;border-radius:8px;background:#fafbfc}.parallel-editor-card header{display:flex;align-items:center;justify-content:space-between}.inspector-actions{position:sticky;bottom:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:24px;padding-top:12px;background:#fff}.import-form{margin-top:14px}
+@media (max-width:1380px){.automation-workbench__body{grid-template-columns:220px minmax(480px,1fr) 275px}.step-library{width:440px}.asset-card{grid-template-columns:35px minmax(0,1fr) auto auto}.asset-card>a-button,.asset-card :deep(.arco-popconfirm){grid-column:2;justify-self:start}}
 .automation-summary{display:grid;grid-template-columns:1.45fr 1fr .7fr .7fr;gap:18px;align-items:center;margin-bottom:20px}.automation-summary>div{display:grid;gap:4px}.automation-summary span,.automation-summary small,.scenario-row small,.builder-head small,.runner-notice,.variables-title small,.modal-tip{color:var(--color-text-3);font-size:12px}.automation-summary strong{font-size:20px}.automation-workspace{display:grid;grid-template-columns:280px minmax(420px,1fr) 300px;gap:18px;align-items:start}.scenario-panel,.builder-panel,.property-panel{min-height:620px;padding:16px}.panel-heading,.builder-head,.builder-actions,.property-title,.variables-title,.runner-notice,.palette{display:flex;gap:10px}.panel-heading,.builder-head,.property-title,.variables-title{align-items:flex-start;justify-content:space-between}.panel-heading h3{margin:4px 0 0;font-size:16px}.scenario-row{display:flex;width:100%;gap:10px;align-items:center;margin-top:8px;padding:11px;border:1px solid var(--color-border-2);border-radius:8px;background:#fff;text-align:left;cursor:pointer}.scenario-row:hover,.scenario-row.selected{border-color:rgb(var(--primary-6));background:rgb(var(--primary-1))}.scenario-row>div{display:grid;min-width:0;flex:1;gap:3px}.scenario-row strong,.scenario-row small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.scenario-row strong{font-size:13px}.scenario-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:rgb(var(--primary-1));color:rgb(var(--primary-6))}.builder-panel{padding:20px}.builder-head>div:first-child{display:grid;gap:4px;min-width:0}.scenario-title :deep(input){height:28px;padding:0;border:0;background:transparent;font-size:20px;font-weight:700;box-shadow:none}.builder-actions{align-items:center}.builder-settings{display:grid;grid-template-columns:160px 150px minmax(0,1fr);gap:10px;margin:16px 0}.runner-notice{align-items:center;padding:10px;border:1px solid rgb(var(--orange-2));border-radius:8px;background:rgb(var(--orange-1));line-height:1.5}.runner-notice span{flex:1}.flow-canvas{display:grid;justify-items:center;min-height:355px;padding:20px;border:1px dashed var(--color-border-3);border-radius:10px;background:linear-gradient(90deg,rgba(22,93,255,.025) 1px,transparent 1px),linear-gradient(rgba(22,93,255,.025) 1px,transparent 1px);background-size:20px 20px}.flow-start,.flow-end{padding:6px 16px;border-radius:999px;background:var(--color-fill-2);color:var(--color-text-2);font-size:12px}.flow-line{height:17px;border-left:1px dashed var(--color-border-3)}.flow-node{display:flex;width:min(100%,420px);gap:10px;align-items:center;padding:11px;border:1px solid var(--color-border-2);border-left:4px solid rgb(var(--primary-6));border-radius:8px;background:#fff;text-align:left;cursor:pointer}.flow-node:hover,.flow-node.selected{box-shadow:0 0 0 3px rgb(var(--primary-1));border-color:rgb(var(--primary-6))}.node-index,.node-type{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--color-fill-2);color:var(--color-text-2);font-size:11px}.node-type{background:rgb(var(--primary-1));color:rgb(var(--primary-6));font-size:14px}.flow-node>div{display:grid;min-width:0;gap:3px}.flow-node strong,.flow-node small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.flow-node strong{font-size:13px}.flow-node small{color:var(--color-text-3);font-size:11px}.node-violet{border-left-color:rgb(var(--purple-6))}.node-violet .node-type{background:rgb(var(--purple-1));color:rgb(var(--purple-6))}.node-green{border-left-color:rgb(var(--green-6))}.node-green .node-type{background:rgb(var(--green-1));color:rgb(var(--green-6))}.node-orange{border-left-color:rgb(var(--orange-6))}.node-orange .node-type{background:rgb(var(--orange-1));color:rgb(var(--orange-6))}.node-cyan{border-left-color:rgb(var(--cyan-6))}.node-cyan .node-type{background:rgb(var(--cyan-1));color:rgb(var(--cyan-6))}.node-gray{border-left-color:rgb(var(--gray-6))}.palette{align-items:center;flex-wrap:wrap;margin-top:14px}.palette>span{margin-right:auto;color:var(--color-text-2);font-size:12px;font-weight:600}.property-title>div,.variables-title>div{display:grid;gap:5px}.variables-title{align-items:center;margin-bottom:12px}.variable-list{display:grid;gap:8px}.variable-row{display:grid;grid-template-columns:.9fr 1fr auto;gap:6px;align-items:center}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-tip{padding:10px;border-left:3px solid var(--color-border-3);background:var(--color-fill-1);line-height:1.6}@media (max-width:1200px){.automation-workspace{grid-template-columns:250px minmax(360px,1fr)}.property-panel{grid-column:1 / -1;min-height:auto}.property-panel :deep(.arco-form){max-width:520px}}@media (max-width:820px){.automation-summary{grid-template-columns:1fr 1fr}.automation-workspace{grid-template-columns:1fr}.scenario-panel,.builder-panel{min-height:auto}.property-panel{grid-column:auto}.builder-head,.runner-notice{align-items:stretch;flex-direction:column}.builder-actions{justify-content:space-between}.builder-settings{grid-template-columns:1fr}.flow-node{width:100%}}@media (max-width:560px){.automation-summary,.form-grid{grid-template-columns:1fr}.scenario-row{align-items:flex-start}.palette>span{width:100%}.variable-row{grid-template-columns:1fr 1fr auto}}
 .runner-status-panel{display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(220px,.8fr);gap:12px;align-items:center;margin:-4px 0 20px;padding:12px 16px;border:1px solid rgb(var(--orange-2));background:rgb(var(--orange-1))}.runner-status-panel.online.trusted{border-color:rgb(var(--green-2));background:rgb(var(--green-1))}.runner-status-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:#fff;color:rgb(var(--orange-6));font-size:18px}.runner-status-panel.online.trusted .runner-status-icon{color:rgb(var(--green-6))}.runner-status-panel>div:nth-child(2){display:grid;gap:3px}.runner-status-panel strong{font-size:14px}.runner-status-panel small,.runner-status-boundary{color:var(--color-text-3);font-size:12px;line-height:1.5}.runner-status-boundary{padding-left:12px;border-left:1px solid var(--color-border-2)}@media (max-width:820px){.runner-status-panel{grid-template-columns:auto minmax(0,1fr)}.runner-status-panel>a-tag,.runner-status-boundary{grid-column:2}.runner-status-boundary{padding-left:0;border-left:0}}
 .data-set-panel{margin:-4px 0 20px;padding:16px;border-color:rgb(var(--cyan-2));background:linear-gradient(135deg,rgb(var(--cyan-1)),#fff 55%)}.data-set-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.data-set-head>div{display:grid;gap:4px}.data-set-head h3{margin:0;font-size:16px}.data-set-head small,.data-set-row small,.data-set-preview-head small,.data-set-source-file-note{color:var(--color-text-3);font-size:12px;line-height:1.55}.data-set-list{display:grid;gap:8px;margin-top:14px}.data-set-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto auto;gap:9px;align-items:center;padding:10px 12px;border:1px solid var(--color-border-2);border-radius:8px;background:#fff}.data-set-row>div{display:grid;min-width:0;gap:3px}.data-set-row strong,.data-set-row small,.data-set-row code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.data-set-row code{color:var(--color-text-3);font-size:11px}.data-set-icon{display:grid;place-items:center;width:29px;height:29px;border-radius:7px;background:rgb(var(--cyan-1));color:rgb(var(--cyan-6))}.data-set-security{margin-top:12px}.data-set-preview-head{display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px}.data-set-preview-head strong{font-size:13px}.data-set-file-input{display:none}.data-set-file-picker{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px;border:1px dashed rgb(var(--cyan-4));border-radius:8px;background:rgb(var(--cyan-1))}.data-set-file-picker>div{display:grid;min-width:0;gap:3px}.data-set-file-picker strong,.data-set-file-picker small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.data-set-source-file-note{display:block;margin-top:4px}@media (max-width:720px){.data-set-head{align-items:stretch;flex-direction:column}.data-set-head>a-button{width:100%}.data-set-row{grid-template-columns:auto minmax(0,1fr) auto}.data-set-row>a-tag{grid-column:2}.data-set-row>a-button,.data-set-row :deep(.arco-popconfirm){grid-column:2;justify-self:start}.data-set-preview-head,.data-set-file-picker{align-items:flex-start;flex-direction:column}}

@@ -12,6 +12,7 @@ interface Parameter { id: string; environmentCode: string; key: string; value: s
 interface ParameterCollection { environments: string[]; parameters: Parameter[] }
 interface Secret { id: string; environmentCode: string; key: string; updatedAt: string }
 interface SecretCollection { environments: string[]; secrets: Secret[] }
+interface ProjectEnvironment { id: string; name: string; environmentCode: string; defaultEnvironment: boolean; enabled: boolean }
 interface FileObject { id: string; originalName: string; contentType: string; sizeBytes: number; createdAt: string }
 interface AuditEntry {
   id: string
@@ -47,6 +48,7 @@ const members = ref<Member[]>([])
 const accountOptions = ref<AccountOption[]>([])
 const parameters = ref<Parameter[]>([])
 const secrets = ref<Secret[]>([])
+const projectEnvironments = ref<ProjectEnvironment[]>([])
 const files = ref<FileObject[]>([])
 const auditEntries = ref<AuditEntry[]>([])
 const projectForm = reactive({ name: '', code: '', description: '' })
@@ -62,13 +64,10 @@ const activeTab = computed(() => {
 })
 const currentProject = computed(() => session.currentProject)
 const availableProjects = computed(() => session.projects)
-const environmentNames = computed(() => Array.from(new Set([
-  ...parameters.value.map((item) => item.environmentCode),
-  ...secrets.value.map((item) => item.environmentCode),
-])).sort())
+const environmentNames = computed(() => projectEnvironments.value.map((item) => item.environmentCode))
 const visibleParameters = computed(() => environmentFilter.value
-  ? parameters.value.filter((item) => item.environmentCode === environmentFilter.value)
-  : parameters.value)
+  ? parameters.value.filter((item) => item.environmentCode === environmentFilter.value && item.key !== 'BASE_URL')
+  : parameters.value.filter((item) => item.key !== 'BASE_URL'))
 const visibleSecrets = computed(() => environmentFilter.value
   ? secrets.value.filter((item) => item.environmentCode === environmentFilter.value)
   : secrets.value)
@@ -104,6 +103,7 @@ async function loadProjectResources() {
     members.value = []
     parameters.value = []
     secrets.value = []
+    projectEnvironments.value = []
     files.value = []
     auditEntries.value = []
     return
@@ -111,16 +111,18 @@ async function loadProjectResources() {
   loading.value = true
   try {
     const projectId = session.projectId
-    const [nextMembers, parameterCollection, secretCollection, nextFiles] = await Promise.all([
+    const [nextMembers, parameterCollection, secretCollection, nextFiles, nextEnvironments] = await Promise.all([
       read<Member[]>(`/api/v1/projects/${projectId}/members`),
       read<ParameterCollection>(`/api/v1/projects/${projectId}/parameters`),
       read<SecretCollection>(`/api/v1/projects/${projectId}/secrets`),
       read<FileObject[]>(`/api/v1/projects/${projectId}/files`),
+      read<ProjectEnvironment[]>(`/api/v1/projects/${projectId}/environments`),
     ])
     members.value = nextMembers
     parameters.value = parameterCollection.parameters
     secrets.value = secretCollection.secrets
     files.value = nextFiles
+    projectEnvironments.value = nextEnvironments
     if (activeTab.value === 'logs') await loadProjectLogs()
   } catch (error) {
     Message.error(error instanceof Error ? error.message : '加载项目设置失败')
@@ -253,9 +255,19 @@ async function removeMember(member: Member) {
 }
 
 function openEnvironment(kind: 'parameter' | 'secret', item?: Parameter) {
+  if (!projectEnvironments.value.length) {
+    Message.warning('请先在系统设置中创建项目环境')
+    void router.push('/system-settings/environments')
+    return
+  }
   environmentKind.value = kind
   editingParameterId.value = item?.id ?? null
-  environmentForm.environmentCode = item?.environmentCode ?? (environmentFilter.value || 'test')
+  environmentForm.environmentCode = item?.environmentCode ?? (
+    environmentFilter.value
+    || projectEnvironments.value.find((environment) => environment.defaultEnvironment)?.environmentCode
+    || projectEnvironments.value.find((environment) => environment.enabled)?.environmentCode
+    || ''
+  )
   environmentForm.key = item?.key ?? ''
   environmentForm.value = item?.value ?? ''
   environmentDialog.value = true
@@ -485,11 +497,11 @@ onMounted(load)
         <section v-else-if="activeTab === 'environments'" class="content-panel panel">
           <div class="content-heading">
             <div><span class="eyebrow">PROJECT ENVIRONMENTS</span><h2>项目环境</h2><p>按环境隔离普通参数与敏感密钥，供接口调试、自动化和性能测试统一引用。</p></div>
-            <a-space><a-button @click="openEnvironment('secret')"><icon-lock /> 新建密钥</a-button><a-button type="primary" @click="openEnvironment('parameter')"><icon-plus /> 新建参数</a-button></a-space>
+            <a-space><a-button @click="router.push('/system-settings/environments')"><icon-settings /> 管理环境</a-button><a-button @click="openEnvironment('secret')"><icon-lock /> 新建密钥</a-button><a-button type="primary" @click="openEnvironment('parameter')"><icon-plus /> 新建参数</a-button></a-space>
           </div>
           <div class="environment-toolbar">
             <a-select v-model="environmentFilter" allow-clear placeholder="全部环境" :style="{ width: '200px' }">
-              <a-option v-for="name in environmentNames" :key="name" :value="name">{{ name }}</a-option>
+              <a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode">{{ environment.name }} · {{ environment.environmentCode }}</a-option>
             </a-select>
             <a-radio-group v-model="environmentView" type="button">
               <a-radio value="parameters">环境参数（{{ visibleParameters.length }}）</a-radio>
@@ -596,7 +608,7 @@ onMounted(load)
     <a-modal v-model:visible="environmentDialog" :title="environmentKind === 'secret' ? '新建环境密钥' : (editingParameterId ? '编辑环境参数' : '新建环境参数')" :ok-loading="saving" width="580px" @ok="saveEnvironmentItem">
       <a-alert v-if="environmentKind === 'secret'" type="warning">密钥值仅在传输时可见，保存后会加密且无法再次回显。</a-alert>
       <a-form :model="environmentForm" layout="vertical">
-        <a-form-item label="环境标识" required><a-input v-model="environmentForm.environmentCode" :disabled="!!editingParameterId" placeholder="test、staging 或 prod" /></a-form-item>
+        <a-form-item label="所属环境" required><a-select v-model="environmentForm.environmentCode" :disabled="!!editingParameterId" placeholder="请选择项目环境"><a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode" :disabled="!environment.enabled">{{ environment.name }} · {{ environment.environmentCode }}</a-option></a-select></a-form-item>
         <a-form-item :label="environmentKind === 'secret' ? '密钥名称' : '参数名称'" required><a-input v-model="environmentForm.key" :disabled="!!editingParameterId" placeholder="API_BASE_URL" /></a-form-item>
         <a-form-item :label="environmentKind === 'secret' ? '密钥值' : '参数值'" required>
           <a-input-password v-if="environmentKind === 'secret'" v-model="environmentForm.value" placeholder="输入需要加密保存的值" />

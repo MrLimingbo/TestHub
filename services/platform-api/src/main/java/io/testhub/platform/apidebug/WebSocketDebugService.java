@@ -1,6 +1,8 @@
 package io.testhub.platform.apidebug;
 
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
 import io.testhub.platform.audit.AuditService;
@@ -58,18 +60,22 @@ public class WebSocketDebugService {
         return thread;
     });
     private final WebSocketDebugClient client;
+    private final ApiDebugHistoryRepository history;
     private final AccessService access;
     private final AuditService audit;
     private final ProjectParameterRepository parameters;
     private final SecretCipher cipher;
+    private final ObjectMapper json;
 
-    public WebSocketDebugService(WebSocketDebugClient client, AccessService access, AuditService audit,
-                                 ProjectParameterRepository parameters, SecretCipher cipher) {
+    public WebSocketDebugService(WebSocketDebugClient client, ApiDebugHistoryRepository history, AccessService access, AuditService audit,
+                                 ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json) {
         this.client = client;
+        this.history = history;
         this.access = access;
         this.audit = audit;
         this.parameters = parameters;
         this.cipher = cipher;
+        this.json = json;
     }
 
     public List<SessionSummary> sessions(AuthenticatedPrincipal principal, String projectId) {
@@ -95,6 +101,7 @@ public class WebSocketDebugService {
         if (existing >= MAX_SESSIONS_PER_USER_PROJECT) {
             throw conflict("同一项目最多保留 10 个 WebSocket 调试会话，请先关闭并等待旧会话过期");
         }
+        long started = System.nanoTime();
         SessionState session = new SessionState(UlidCreator.getUlid().toString(), principal.userId(), project.organizationId(), project.id(), resolved);
         sessions.put(session.id(), session);
         try {
@@ -103,10 +110,22 @@ public class WebSocketDebugService {
                     Map.of("environment", resolved.environmentCode() == null ? "none" : resolved.environmentCode(),
                             "autoReconnect", resolved.autoReconnect(), "subprotocols", resolved.subprotocols().size(),
                             "subscriptions", resolved.subscriptions().size()));
-            return session.summary();
+            SessionSummary summary = session.summary();
+            history.insert(new ApiDebugHistory(UlidCreator.getUlid().toString(), project.organizationId(), project.id(), "WEBSOCKET", "WEBSOCKET",
+                    summary.target(), null, (int) ((System.nanoTime() - started) / 1_000_000), 0, "COMPLETED", null,
+                    encryptedReplayDraft(input), principal.userId(), null));
+            return summary;
         } catch (Exception exception) {
             sessions.remove(session.id());
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "连接 WebSocket 目标服务失败");
+        }
+    }
+
+    private String encryptedReplayDraft(ConnectInput input) {
+        try {
+            return cipher.encrypt(json.writeValueAsString(java.util.Map.of("protocol", "WEBSOCKET", "request", input)));
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("无法加密保存 WebSocket 回放草稿", exception);
         }
     }
 
