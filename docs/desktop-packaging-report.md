@@ -31,6 +31,8 @@
 - `npx pnpm@10.13.1 lint`：通过。
 - `npx pnpm@10.13.1 test && npx pnpm@10.13.1 build`：通过，共 12 个前端测试文件、58 项测试。Vitest 的 Monaco 上游 source map 警告和 Vite 大分包提示为既有警告，未影响结果。
 - Platform API 全量测试：126 项通过；内网目标策略与传输层定向单元测试 9 项通过，接口调试流程测试 7 项通过。
+- 使用与 GitHub CI 相同排序规则的全新 MySQL 数据库执行 60 个 Flyway 迁移并运行 Platform API 全量测试：126 项通过；验证首次启动会幂等创建项目默认 `test` 环境。
+- 本地完整安全发布门禁通过：Platform API Debian 运行层、应用 JAR 和 Web Alpine 镜像的 HIGH/CRITICAL 漏洞均为 0，两个 CycloneDX SBOM 已成功生成。
 - 当前在线环境已启用 `api-debug.allow-configured-private-targets=true`；TestHub Platform API 对 `http://172.27.15.153:8888/api/eventserver/authenticate` 的真实 POST 调试返回 HTTP 200，验证任意已配置私网 IP 链路可用。
 - `npx pnpm@10.13.1 --filter @testhub/desktop package:dir`：通过；已检查 ASAR 不包含 `node_modules`。
 - `npx pnpm@10.13.1 desktop:package:mac`：通过；已检查 DMG 包含 `TestHub.app`、`Applications` 链接和 TestHub 图标。
