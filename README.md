@@ -4,7 +4,7 @@
 
 ## 桌面安装包
 
-TestHub 保留现有的浏览器访问、Vite 开发、Docker Compose 和 Kubernetes 部署方式；桌面端是安全的企业客户端，连接同一个已部署的 TestHub Web 服务，不复制控制面、数据库或 Runner。安装包与发布流程见[桌面安装包与发布](docs/desktop-packaging.md)。
+TestHub 保留现有的浏览器访问、Vite 开发、Docker Compose 和 Kubernetes 部署方式；桌面端连接用户或其组织部署的 TestHub Web 服务，不会连接维护者的本机后台。每个系统用户拥有独立的客户端配置、会话和本地网络授权；HTTP/HTTPS 调试请求由桌面主进程从用户电脑直接发出，因此可访问接口地址或项目环境变量中的内网地址，且不受浏览器 CORS / Private Network Access 限制。安装包与发布流程见[桌面安装包与发布](docs/desktop-packaging.md)。
 
 ```bash
 npx pnpm@10.13.1 desktop:test
@@ -14,14 +14,22 @@ npx pnpm@10.13.1 desktop:package:win  # 仅在 Windows 生成 release/desktop/Te
 
 ## 本地运行
 
+推荐使用可重复执行的恢复脚本（需要 JDK 21、Docker/Colima）：
+
+```bash
+./start.sh
+# 需要接口自动化执行能力时：
+./start.sh --with-api-runner
+```
+
+每次执行都会安全重启 TestHub 自己的 Platform API 和 Web UI，并在返回成功前验证后端健康检查、CSRF 安全会话以及 Web 代理链路。MySQL、Redis 和 MinIO 已健康时会直接复用，不会因 Docker 元数据异常中断恢复；基础设施确实不可用时，脚本会对 Colima 自动重启一次并重试，且不会自动删除 Docker 数据。日志和进程文件位于 `.testhub/`。
+
+如需分开调试，也可以手动启动：
+
 ```bash
 npx pnpm@10.13.1 install
 npx pnpm@10.13.1 dev
-```
 
-另开终端启动控制面（需要 JDK 21）：
-
-```bash
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 PATH=/opt/homebrew/opt/openjdk@21/bin:$PATH \
 ./mvnw -pl services/platform-api spring-boot:run

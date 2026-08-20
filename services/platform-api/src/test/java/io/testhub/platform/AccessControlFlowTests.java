@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.hasItem;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -367,8 +368,8 @@ class AccessControlFlowTests {
                 .andExpect(status().isNoContent());
 
         mvc.perform(get("/api/v1/system-config").cookie(administrator.sessionCookie()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].key").value("test.config.value"))
-                .andExpect(jsonPath("$.data[0].value").value("enabled"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.key == 'test.config.value')].value").value(hasItem("enabled")));
         mvc.perform(get("/api/v1/audit-logs").param("action", "SYSTEM_CONFIG_UPSERTED").cookie(administrator.sessionCookie()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].action").value("SYSTEM_CONFIG_UPSERTED"))
                 .andExpect(jsonPath("$.data[0].resourceId").value("test.config.value"));

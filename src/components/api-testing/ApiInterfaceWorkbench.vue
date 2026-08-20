@@ -4,6 +4,7 @@ import { Message } from '@arco-design/web-vue'
 import { useRouter } from 'vue-router'
 import CodeEditor from '@/components/CodeEditor.vue'
 import { storeApiDebugRouteDraft } from '@/utils/apiDebugDraft'
+import { executeDesktopHttpRequest, isDesktopHttpDebugAvailable } from '@/utils/desktopApiDebug'
 import {
   apiCaseName,
   apiCasePersistence,
@@ -57,6 +58,7 @@ interface DebugResult {
   body: string
   truncated: boolean
   errorMessage: string | null
+  historyWarning?: string | null
 }
 interface ProjectEnvironment {
   id: string
@@ -65,6 +67,14 @@ interface ProjectEnvironment {
   baseUrl: string
   enabled: boolean
   defaultEnvironment: boolean
+}
+interface ProjectParameter {
+  environmentCode: string
+  key: string
+  value: string
+}
+interface ParameterCollection {
+  parameters: ProjectParameter[]
 }
 interface MockServer {
   id: string
@@ -120,6 +130,7 @@ const savingCase = ref(false)
 const caseDialog = ref(false)
 const cases = ref<ApiInterfaceCase[]>([])
 const environments = ref<ProjectEnvironment[]>([])
+const parameters = ref<ProjectParameter[]>([])
 const mockServers = ref<MockServer[]>([])
 const environment = ref('')
 const snapshot = reactive<ApiRunSnapshot>(createApiRunSnapshot(props.version))
@@ -239,14 +250,16 @@ async function loadRunContext() {
   const projectId = props.projectId
   const apiId = props.api.id
   try {
-    const [environmentData, caseData, mockServerData] = await Promise.all([
+    const [environmentData, parameterData, caseData, mockServerData] = await Promise.all([
       read<ProjectEnvironment[]>(`/api/v1/projects/${projectId}/environments`),
+      read<ParameterCollection>(`/api/v1/projects/${projectId}/parameters`),
       read<ApiInterfaceCase[]>(`/api/v1/projects/${projectId}/api-design/definitions/${apiId}/cases`),
       read<MockServer[]>(`/api/v1/projects/${projectId}/mock/servers`).catch(() => []),
     ])
     if (generation !== runContextGeneration || projectId !== props.projectId || apiId !== props.api.id) return
     const preserveRunDraft = runDraftRevision !== draftRevision || sending.value || result.value !== resultAtStart
     environments.value = environmentData
+    parameters.value = parameterData.parameters
     cases.value = caseData
     openRequestedDebugCase()
     mockServers.value = mockServerData
@@ -274,7 +287,7 @@ async function sendRequest(caseExpectation?: Pick<ApiInterfaceCase, 'expectedSta
   result.value = null
   checks.value = []
   try {
-    const response = await mutate<DebugResult>(`/api/v1/projects/${props.projectId}/api-debug/execute`, 'POST', {
+    const payload = {
       method: props.api.method,
       url: buildApiRunUrl(props.api, snapshot),
       headers: requestHeaders(snapshot),
@@ -283,7 +296,13 @@ async function sendRequest(caseExpectation?: Pick<ApiInterfaceCase, 'expectedSta
       environmentCode: environment.value || null,
       auth: { ...snapshot.auth },
       protocol: { type: 'HTTP' },
-    })
+    }
+    const variableValues = Object.fromEntries(parameters.value
+      .filter((parameter) => parameter.environmentCode === environment.value)
+      .map((parameter) => [parameter.key, parameter.value]))
+    const response = isDesktopHttpDebugAvailable()
+      ? await executeDesktopHttpRequest(props.projectId, payload, variableValues)
+      : await mutate<DebugResult>(`/api/v1/projects/${props.projectId}/api-debug/execute`, 'POST', payload)
     result.value = response
     responseBody.value = response.success ? (response.body || '(目标服务未返回响应体)') : (response.errorMessage ?? '连接目标服务失败')
     checks.value = validateApiContract(props.version, response.statusCode, response.body, caseExpectation
@@ -292,7 +311,8 @@ async function sendRequest(caseExpectation?: Pick<ApiInterfaceCase, 'expectedSta
           validateBody: caseExpectation.responseValidation === 'CONTRACT',
         }
       : undefined)
-    if (response.success) Message.success(`请求完成 · ${response.statusCode} · ${response.durationMs} ms`)
+    if (response.historyWarning) Message.warning(`请求已完成，但${response.historyWarning}`)
+    else if (response.success) Message.success(`请求完成 · ${response.statusCode} · ${response.durationMs} ms`)
     else Message.warning(response.errorMessage ?? '请求未能连接到目标服务')
   } catch (error) {
     responseBody.value = error instanceof Error ? error.message : '发送请求失败'

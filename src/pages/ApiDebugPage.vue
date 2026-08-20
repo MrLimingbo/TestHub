@@ -6,6 +6,7 @@ import CodeEditor from '@/components/CodeEditor.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
 import { useSessionStore } from '@/stores/session'
+import { executeDesktopHttpRequest, isDesktopHttpDebugAvailable } from '@/utils/desktopApiDebug'
 import {
   apiDebugDraftFromHistory,
   apiDebugDraftFromQuery,
@@ -34,7 +35,7 @@ interface Organization { id: string; name: string }
 interface Project { id: string; organizationId: string; name: string; code: string }
 interface Context { organizations: Organization[]; projects: Record<string, Project[]> }
 interface Header { name: string; value: string }
-interface DebugResult { historyId: string; success: boolean; statusCode: number | null; statusText: string | null; durationMs: number; responseHeaders: Header[]; body: string; truncated: boolean; errorMessage: string | null }
+interface DebugResult { historyId: string; success: boolean; statusCode: number | null; statusText: string | null; durationMs: number; responseHeaders: Header[]; body: string; truncated: boolean; errorMessage: string | null; historyWarning?: string | null }
 interface History { id: string; projectId: string; method: string; protocol: string; requestUrl: string; responseStatus: number | null; durationMs: number; responseSize: number; result: string; errorMessage: string | null; replayDraft: string | null; createdAt: string }
 interface Parameter { id: string; environmentCode: string; key: string; value: string }
 interface Secret { id: string; environmentCode: string; key: string }
@@ -141,7 +142,14 @@ const variableCaption = computed(() => protocolType.value === 'WEBSOCKET'
   ? 'WebSocket 会解析当前环境变量和环境密钥；密钥只在服务端握手、订阅帧或消息生成时使用，不会回显或写入历史。'
   : protocolType.value === 'GRPC'
     ? 'gRPC Unary、服务端流、客户端流与双向流会解析当前环境变量和环境密钥；请求、响应 JSON、Metadata 与认证值只用于本次调用，不会写入历史。'
-  : '使用 {{VARIABLE_NAME}} 引用当前环境变量。动态值支持 {{$timestamp}}、{{$isoTimestamp}} 和 {{$randomUUID}}。')
+    : '使用 {{VARIABLE_NAME}} 引用当前环境变量。动态值支持 {{$timestamp}}、{{$isoTimestamp}} 和 {{$randomUUID}}。')
+const networkPolicyDescription = computed(() => protocolType.value === 'WEBSOCKET'
+  ? 'WebSocket 目标必须为公开可访问的 WS/WSS 地址；内网、回环、链路本地地址和手工握手头均会被拦截。'
+  : protocolType.value === 'GRPC'
+    ? 'gRPC 目标必须为公开可访问的主机:端口；内网、回环、链路本地地址会被拦截。在线反射描述符仅在本次调用内存中存在；导入的离线描述符是项目级、已校验的编译资产，调用时不会请求远端反射。服务端流、客户端流与双向流数据仅保存在当前控制面内存会话；每个方向限制为 100 条消息、总计 512 KB，达到上限会自动取消。双向流完成发送后仍会继续接收响应。JSON、ASCII Metadata、认证值与响应均不写入历史。'
+    : isDesktopHttpDebugAvailable()
+      ? '桌面端 HTTP/HTTPS 请求直接从当前电脑发出，可访问接口地址或环境变量配置的任意内网地址；每个目标 Origin 首次访问需确认，且不会自动跟随重定向。'
+      : '在线 HTTP/HTTPS 默认阻止内网访问；管理员可在系统配置启用 api-debug.allow-configured-private-targets，允许接口地址或环境变量使用任意私网 IP/端口，也可通过 api-debug.allowed-private-origins 精确放行。回环、链路本地、云元数据、组播、保留地址与重定向始终禁止。')
 const variables = computed(() => [
   ...parameters.value.map((parameter) => ({ key: parameter.key, secret: false, preview: parameter.value })),
   ...secrets.value.map((secret) => ({ key: secret.key, secret: true, preview: '已加密，仅执行时解析' })),
@@ -478,11 +486,16 @@ async function send() {
   sending.value = true
   result.value = null
   try {
-    const response = await mutate<DebugResult>(`/api/v1/projects/${projectId.value}/api-debug/execute`, quickRequestPayload())
+    const payload = quickRequestPayload()
+    const response = isDesktopHttpDebugAvailable()
+      ? await executeDesktopHttpRequest(projectId.value, payload,
+          Object.fromEntries(parameters.value.map((parameter) => [parameter.key, parameter.value])))
+      : await mutate<DebugResult>(`/api/v1/projects/${projectId.value}/api-debug/execute`, payload)
     result.value = response
     responseBody.value = response.success ? (response.body || '(目标服务未返回响应体)') : (response.errorMessage ?? '连接目标服务失败')
     await loadHistory()
-    if (postOperationChecks.value.some((check) => !check.passed)) Message.warning('请求已完成，但后置校验存在失败项')
+    if (response.historyWarning) Message.warning(`请求已完成，但${response.historyWarning}`)
+    else if (postOperationChecks.value.some((check) => !check.passed)) Message.warning('请求已完成，但后置校验存在失败项')
     else if (response.success) Message.success(`请求完成 · ${response.statusCode} · ${response.durationMs} ms`)
     else Message.warning(response.errorMessage ?? '请求未能连接到目标服务')
   } catch (error) {
@@ -1190,7 +1203,7 @@ onBeforeUnmount(() => {
     <section v-if="!props.embedded" class="debug-summary panel">
       <div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code }}</small></div>
       <a-select v-model="projectId" :style="{ width: '240px' }" @change="changeProject"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select>
-      <div><span>安全策略</span><strong>受限网络</strong><small>拦截内网、回环与重定向</small></div>
+      <div><span>安全策略</span><strong>受限网络</strong><small>HTTP 内网按 Origin 放行</small></div>
       <div><span>请求历史</span><strong>{{ history.length }}</strong><small>仅保存脱敏摘要</small></div>
     </section>
     <a-spin :loading="loading">
@@ -1340,7 +1353,7 @@ onBeforeUnmount(() => {
             </a-tab-pane>
             <a-tab-pane v-if="protocolType === 'WEBSOCKET'" key="connection" title="连接"><div class="editor-caption">子协议由客户端生成 <code>Sec-WebSocket-Protocol</code> 握手头；自动重连仅在目标异常断开时触发，手动关闭不会重连。</div><a-form :model="webSocket" layout="vertical" class="auth-form"><a-form-item label="子协议（可选，逗号分隔）"><a-input v-model="webSocket.subprotocolsText" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" placeholder="graphql-transport-ws, mqtt" /></a-form-item><a-form-item><a-checkbox v-model="webSocket.autoReconnect" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'">目标异常关闭时自动重连</a-checkbox></a-form-item><div v-if="webSocket.autoReconnect" class="auth-grid"><a-form-item label="最多重连次数"><a-input-number v-model="webSocket.maxReconnectAttempts" :min="1" :max="5" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" /></a-form-item><a-form-item label="重连间隔（毫秒）"><a-input-number v-model="webSocket.reconnectDelayMs" :min="100" :max="10000" :step="100" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" /></a-form-item></div></a-form></a-tab-pane>
             <a-tab-pane key="variables" title="变量"><div class="editor-caption">{{ variableCaption }}</div><a-table :data="variables" :pagination="false" size="small" row-key="key"><template #columns><a-table-column title="变量"><template #cell="{ record }"><code>{{ '{' + '{' + record.key + '}' + '}' }}</code></template></a-table-column><a-table-column title="类型"><template #cell="{ record }"><a-tag :color="record.secret ? 'orange' : 'green'">{{ record.secret ? '环境密钥' : '项目参数' }}</a-tag></template></a-table-column><a-table-column title="说明"><template #cell="{ record }"><span>{{ record.preview }}</span></template></a-table-column></template></a-table><a-empty v-if="!variables.length" description="当前环境没有可用变量"><template #extra><router-link to="/project-settings/parameters">前往项目参数</router-link></template></a-empty></a-tab-pane>
-            <a-tab-pane key="security" title="安全边界"><div class="security-note"><icon-safe /><div><strong>本节点不执行脚本，也不保存请求体、响应体、请求头、认证值或 WebSocket 消息到数据库。</strong><span>{{ protocolType === 'WEBSOCKET' ? 'WebSocket 目标必须为公开可访问的 WS/WSS 地址；内网、回环、链路本地地址和手工握手头均会被拦截。' : protocolType === 'GRPC' ? 'gRPC 目标必须为公开可访问的主机:端口；内网、回环、链路本地地址会被拦截。在线反射描述符仅在本次调用内存中存在；导入的离线描述符是项目级、已校验的编译资产，调用时不会请求远端反射。服务端流、客户端流与双向流数据仅保存在当前控制面内存会话；每个方向限制为 100 条消息、总计 512 KB，达到上限会自动取消。双向流完成发送后仍会继续接收响应。JSON、ASCII Metadata、认证值与响应均不写入历史。' : '请求目标必须是可公开访问的 HTTP/HTTPS 地址；内网、回环、链路本地地址和重定向均会被拦截。' }}</span></div></div></a-tab-pane>
+            <a-tab-pane key="security" title="安全边界"><div class="security-note"><icon-safe /><div><strong>本节点不执行脚本，也不保存请求体、响应体、请求头、认证值或 WebSocket 消息到数据库。</strong><span>{{ networkPolicyDescription }}</span></div></div></a-tab-pane>
           </a-tabs>
           <div v-if="protocolType === 'HTTP'" class="response-splitter"><span></span></div>
           <section v-if="protocolType !== 'WEBSOCKET'" class="response-panel">

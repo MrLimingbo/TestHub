@@ -14,25 +14,40 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JdkApiDebugTransport implements ApiDebugTransport {
     private static final int MAX_RESPONSE_BYTES = 512 * 1024;
-    private final HttpClient client = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(5))
-            .followRedirects(HttpClient.Redirect.NEVER)
-            .build();
+    private final ApiDebugTargetPolicy targetPolicy;
+    private final RequestSender sender;
+
+    @Autowired
+    public JdkApiDebugTransport(ApiDebugTargetPolicy targetPolicy) {
+        HttpClient client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(5))
+                .followRedirects(HttpClient.Redirect.NEVER)
+                .build();
+        this.targetPolicy = targetPolicy;
+        this.sender = request -> client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+    }
+
+    JdkApiDebugTransport(ApiDebugTargetPolicy targetPolicy, RequestSender sender) {
+        this.targetPolicy = targetPolicy;
+        this.sender = sender;
+    }
 
     @Override
     public TransportResponse execute(String method, URI url, List<Header> headers, String body, int timeoutMs)
             throws IOException, InterruptedException {
+        targetPolicy.assertAllowed(url);
         HttpRequest.BodyPublisher publisher = body == null || body.isEmpty()
                 ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8);
         HttpRequest.Builder request = HttpRequest.newBuilder(url).timeout(Duration.ofMillis(timeoutMs)).method(method, publisher);
         for (Header header : headers) request.header(header.name(), header.value());
 
-        HttpResponse<InputStream> response = client.send(request.build(), HttpResponse.BodyHandlers.ofInputStream());
+        HttpResponse<InputStream> response = sender.send(request.build());
         List<Header> responseHeaders = new ArrayList<>();
         response.headers().map().forEach((name, values) -> values.forEach(value -> responseHeaders.add(new Header(name, value))));
         Body bodyResult;
@@ -102,5 +117,10 @@ public class JdkApiDebugTransport implements ApiDebugTransport {
     }
 
     private record Body(String value, boolean truncated) {
+    }
+
+    @FunctionalInterface
+    interface RequestSender {
+        HttpResponse<InputStream> send(HttpRequest request) throws IOException, InterruptedException;
     }
 }

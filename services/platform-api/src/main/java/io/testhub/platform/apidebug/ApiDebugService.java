@@ -11,9 +11,7 @@ import io.testhub.platform.parameter.ProjectParameterRepository;
 import io.testhub.platform.parameter.ProjectEnvironmentRepository;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.security.SecretCipher;
-import java.net.InetAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -45,10 +43,11 @@ public class ApiDebugService {
     private final SecretCipher cipher;
     private final ObjectMapper json;
     private final ProjectEnvironmentRepository environments;
+    private final ApiDebugTargetPolicy targetPolicy;
 
     public ApiDebugService(ApiDebugHistoryRepository history, ApiDebugTransport transport, AccessService access, AuditService audit,
                            ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json,
-                           ProjectEnvironmentRepository environments) {
+                           ProjectEnvironmentRepository environments, ApiDebugTargetPolicy targetPolicy) {
         this.history = history;
         this.transport = transport;
         this.access = access;
@@ -57,6 +56,7 @@ public class ApiDebugService {
         this.cipher = cipher;
         this.json = json;
         this.environments = environments;
+        this.targetPolicy = targetPolicy;
     }
 
     public List<ApiDebugHistory> history(AuthenticatedPrincipal principal, String projectId, int limit) {
@@ -66,7 +66,7 @@ public class ApiDebugService {
 
     public DebugResult execute(AuthenticatedPrincipal principal, String projectId, DebugRequest input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
-        ValidatedRequest request = resolveAndValidate(projectId, input);
+        ValidatedRequest request = resolveAndValidate(projectId, input, true);
         long started = System.nanoTime();
         try {
             ApiDebugTransport.TransportResponse response = transport.execute(request.method(), request.url(), request.headers(), request.body(), request.timeoutMs());
@@ -80,6 +80,8 @@ public class ApiDebugService {
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             return failed(project, principal, request, input, started, "请求已被中断");
+        } catch (ResponseStatusException exception) {
+            throw exception;
         } catch (Exception exception) {
             return failed(project, principal, request, input, started, "连接目标服务失败");
         }
@@ -87,13 +89,36 @@ public class ApiDebugService {
 
     public ApiDebugHistory saveDraft(AuthenticatedPrincipal principal, String projectId, DebugRequest input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
-        ValidatedRequest request = resolveAndValidate(projectId, input);
+        ValidatedRequest request = resolveAndValidate(projectId, input, true);
         ApiDebugHistory item = saved(project, principal, request, input, null, 0, 0, "DRAFT", null);
         history.insert(item);
         audit.record(principal, project.organizationId(), projectId, "API_DEBUG_DRAFT_SAVED", "API_DEBUG_HISTORY", item.id(),
                 Map.of("method", request.method(), "protocol", request.protocol(),
                         "environment", request.environmentCode() == null ? "none" : request.environmentCode()));
         return withReplayDraft(item);
+    }
+
+    public LocalExecutionReceipt recordLocalExecution(AuthenticatedPrincipal principal, String projectId,
+                                                       DebugRequest input, LocalExecutionResult result) {
+        ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        ValidatedRequest request = resolveAndValidate(projectId, input, false);
+        if (result == null) throw rejected("桌面端执行结果不能为空");
+        Integer statusCode = result.statusCode();
+        if (result.success() && (statusCode == null || statusCode < 100 || statusCode > 599)) {
+            throw rejected("桌面端成功执行结果必须包含合法 HTTP 状态码");
+        }
+        if (!result.success()) statusCode = null;
+        int durationMs = Math.min(Math.max(result.durationMs(), 0), 600_000);
+        int responseSize = Math.min(Math.max(result.responseSize(), 0), 10_000_000);
+        String error = result.success() ? null : normalizeLocalError(result.errorMessage());
+        ApiDebugHistory item = saved(project, principal, request, input, statusCode, durationMs, responseSize,
+                result.success() ? "COMPLETED" : "FAILED", error);
+        history.insert(item);
+        audit.record(principal, project.organizationId(), projectId, "API_DEBUG_EXECUTED_LOCALLY",
+                "API_DEBUG_HISTORY", item.id(), Map.of("method", request.method(),
+                        "environment", request.environmentCode() == null ? "none" : request.environmentCode(),
+                        "status", statusCode == null ? "FAILED" : statusCode));
+        return new LocalExecutionReceipt(item.id());
     }
 
     private DebugResult failed(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, DebugRequest input, long started, String message) {
@@ -125,7 +150,7 @@ public class ApiDebugService {
         }
     }
 
-    private ValidatedRequest resolveAndValidate(String projectId, DebugRequest input) {
+    private ValidatedRequest resolveAndValidate(String projectId, DebugRequest input, boolean enforceNetworkPolicy) {
         if (input == null) throw rejected("调试请求不能为空");
         String environmentCode = normalizeEnvironment(input.environmentCode());
         if (environmentCode != null) {
@@ -144,15 +169,24 @@ public class ApiDebugService {
         if (input.headers() != null) input.headers().forEach(header -> rawHeaders.add(new HeaderInput(
                 header == null ? null : variables.resolve(header.name()), header == null ? null : variables.resolve(header.value()))));
         List<ApiDebugTransport.Header> headers = withProtocolHeaders(validateHeaders(rawHeaders), protocol.headers());
-        URI url = safeHttpUrl(variables.resolve(input.url()));
+        URI url = normalizedUrl(variables.resolve(input.url()), enforceNetworkPolicy);
         AuthInput auth = input.auth() == null ? new AuthInput("NONE", "", "", "", "", "", "HEADER") : new AuthInput(
                 input.auth().type(), variables.resolve(input.auth().token()), variables.resolve(input.auth().username()),
                 variables.resolve(input.auth().password()), variables.resolve(input.auth().key()), variables.resolve(input.auth().value()), input.auth().placement());
         AuthApplied applied = applyAuth(url, headers, auth, variables);
-        url = safeHttpUrl(applied.url().toString());
+        url = normalizedUrl(applied.url().toString(), enforceNetworkPolicy);
         int timeoutMs = input.timeoutMs() == null ? 10_000 : input.timeoutMs();
         if (timeoutMs < 500 || timeoutMs > 10_000) throw rejected("超时时间应在 500 到 10000 毫秒之间");
         return new ValidatedRequest(method, protocol.type(), url, applied.headers(), body, timeoutMs, environmentCode, historyUrl(url, variables.secretValues()));
+    }
+
+    private URI normalizedUrl(String value, boolean enforceNetworkPolicy) {
+        return enforceNetworkPolicy ? targetPolicy.normalizeAndAssertAllowed(value) : targetPolicy.normalizeWithoutNetworkPolicy(value);
+    }
+
+    private String normalizeLocalError(String value) {
+        String normalized = value == null || value.isBlank() ? "桌面端连接目标服务失败" : value.trim();
+        return normalized.length() <= 1_000 ? normalized : normalized.substring(0, 1_000);
     }
 
     private ProtocolRequest protocol(ProtocolInput input, ResolutionContext variables, String httpBody) {
@@ -278,42 +312,6 @@ public class ApiDebugService {
         return normalized;
     }
 
-    private URI safeHttpUrl(String value) {
-        if (value == null || value.isBlank() || value.length() > 2_000) throw rejected("请求 URL 不能为空且不能超过 2000 字符");
-        URI url;
-        try {
-            url = URI.create(value.trim());
-        } catch (IllegalArgumentException exception) {
-            throw rejected("请求 URL 格式不合法");
-        }
-        if (url.getScheme() == null || !Set.of("http", "https").contains(url.getScheme().toLowerCase(Locale.ROOT))
-                || url.getHost() == null || url.getUserInfo() != null) {
-            throw rejected("仅支持不含用户信息的 HTTP 或 HTTPS URL");
-        }
-        try {
-            InetAddress[] addresses = InetAddress.getAllByName(url.getHost());
-            if (addresses.length == 0 || java.util.Arrays.stream(addresses).anyMatch(this::blockedAddress)) {
-                throw rejected("不允许访问内网、回环或保留地址");
-            }
-        } catch (UnknownHostException exception) {
-            throw rejected("无法解析请求主机");
-        }
-        return url;
-    }
-
-    private boolean blockedAddress(InetAddress address) {
-        if (address.isAnyLocalAddress() || address.isLoopbackAddress() || address.isLinkLocalAddress()
-                || address.isSiteLocalAddress() || address.isMulticastAddress()) return true;
-        byte[] bytes = address.getAddress();
-        if (bytes.length == 4) {
-            int first = Byte.toUnsignedInt(bytes[0]);
-            int second = Byte.toUnsignedInt(bytes[1]);
-            return first == 0 || first >= 224 || (first == 100 && second >= 64 && second <= 127)
-                    || (first == 198 && (second == 18 || second == 19));
-        }
-        return bytes.length == 16 && (Byte.toUnsignedInt(bytes[0]) & 0xfe) == 0xfc;
-    }
-
     private List<ApiDebugTransport.Header> validateHeaders(List<HeaderInput> values) {
         if (values == null) return List.of();
         if (values.size() > 48) throw rejected("请求头不能超过 48 项");
@@ -372,6 +370,11 @@ public class ApiDebugService {
     }
     public record DebugResult(String historyId, boolean success, Integer statusCode, String statusText, int durationMs,
                               List<ApiDebugTransport.Header> responseHeaders, String body, boolean truncated, String errorMessage) {
+    }
+    public record LocalExecutionResult(boolean success, Integer statusCode, int durationMs, int responseSize,
+                                       String errorMessage) {
+    }
+    public record LocalExecutionReceipt(String historyId) {
     }
     private record ValidatedRequest(String method, String protocol, URI url, List<ApiDebugTransport.Header> headers, String body, int timeoutMs,
                                     String environmentCode, String historyUrl) {

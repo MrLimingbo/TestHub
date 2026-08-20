@@ -97,10 +97,10 @@ public class ApiDesignController {
     }
     public record DefinitionBatchDeleteRequest(
             @NotNull @Size(min = 1, max = 200) List<@NotBlank @Size(max = 26) String> ids) { }
-    public record DefinitionRequest(@NotBlank @Size(max = 26) String catalogId, @NotBlank @Size(max = 12) String method, @NotBlank @Size(max = 700) String path, @NotBlank @Size(max = 200) String name, @NotBlank @Size(max = 40) String versionName, @Size(max = 500) String summary, @Size(max = 20_000) String description, @Size(max = 200) List<@Valid ParameterRequest> headers, @Size(max = 200) List<@Valid ParameterRequest> query, @Size(max = 200) List<@Valid ParameterRequest> pathParameters, @Size(max = 100_000) String requestBody, @Size(max = 100_000) String responseBody, Map<String, Object> exampleResponse) {
+    public record DefinitionRequest(@NotBlank @Size(max = 26) String catalogId, @NotBlank @Size(max = 12) String method, @NotBlank @Size(max = 700) String path, @NotBlank @Size(max = 200) String name, @NotBlank @Size(max = 40) String versionName, @Size(max = 500) String summary, @Size(max = 20_000) String description, @Size(max = 200) List<@Valid ParameterRequest> headers, @Size(max = 200) List<@Valid ParameterRequest> query, @Size(max = 200) List<@Valid ParameterRequest> pathParameters, @Size(max = 2_000_000) String requestBody, @Size(max = 2_000_000) String responseBody, Map<String, Object> exampleResponse) {
         ApiDesignService.DefinitionInput toInput() { return new ApiDesignService.DefinitionInput(catalogId, method, path, name, versionName, summary, description, map(headers), map(query), map(pathParameters), requestBody, responseBody, exampleResponse); }
     }
-    public record VersionRequest(@NotBlank @Size(max = 40) String versionName, @Size(max = 500) String summary, @Size(max = 20_000) String description, @Size(max = 200) List<@Valid ParameterRequest> headers, @Size(max = 200) List<@Valid ParameterRequest> query, @Size(max = 200) List<@Valid ParameterRequest> pathParameters, @Size(max = 100_000) String requestBody, @Size(max = 100_000) String responseBody, Map<String, Object> exampleResponse) {
+    public record VersionRequest(@NotBlank @Size(max = 40) String versionName, @Size(max = 500) String summary, @Size(max = 20_000) String description, @Size(max = 200) List<@Valid ParameterRequest> headers, @Size(max = 200) List<@Valid ParameterRequest> query, @Size(max = 200) List<@Valid ParameterRequest> pathParameters, @Size(max = 2_000_000) String requestBody, @Size(max = 2_000_000) String responseBody, Map<String, Object> exampleResponse) {
         ApiDesignService.VersionInput toInput() { return new ApiDesignService.VersionInput(versionName, summary, description, map(headers), map(query), map(pathParameters), requestBody, responseBody, exampleResponse); }
     }
     public record CaseRequest(@NotBlank @Size(max = 200) String name, @Size(max = 64) String environmentCode,
@@ -112,10 +112,10 @@ public class ApiDesignController {
                     responseValidation, savedResponseBody);
         }
     }
-    public record OpenApiImportRequest(@NotBlank @Size(max = 26) String catalogId, @NotBlank @Size(max = 2_000_000) String document) { }
+    public record OpenApiImportRequest(@NotBlank @Size(max = 26) String catalogId, @NotBlank @Size(max = 10_485_760) String document) { }
     public record CurlImportRequest(@NotBlank @Size(max = 26) String catalogId, @Size(max = 200) String name, @NotBlank @Size(max = 100_000) String command) { }
-    public record PostmanImportRequest(@NotBlank @Size(max = 26) String catalogId, @NotBlank @Size(max = 2_000_000) String document) { }
-    public record HarImportRequest(@NotBlank @Size(max = 26) String catalogId, @NotBlank @Size(max = 2_000_000) String document) { }
+    public record PostmanImportRequest(@NotBlank @Size(max = 26) String catalogId, @NotBlank @Size(max = 10_485_760) String document) { }
+    public record HarImportRequest(@NotBlank @Size(max = 26) String catalogId, @NotBlank @Size(max = 10_485_760) String document) { }
     public record CurlExport(String command) { }
     private static List<ApiDesignService.ParameterInput> map(List<ParameterRequest> values) { return values == null ? List.of() : values.stream().map(ParameterRequest::toInput).toList(); }
 }

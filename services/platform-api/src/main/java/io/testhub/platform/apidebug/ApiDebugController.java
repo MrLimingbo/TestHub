@@ -44,6 +44,16 @@ public class ApiDebugController {
         return ApiResponse.of(debug.execute(principal(authentication), projectId, debugRequest(request)));
     }
 
+    @PostMapping("/local-executions")
+    public ApiResponse<ApiDebugService.LocalExecutionReceipt> recordLocalExecution(Authentication authentication,
+                                                                                     @PathVariable String projectId,
+                                                                                     @Valid @RequestBody LocalExecutionRequest request) {
+        return ApiResponse.of(debug.recordLocalExecution(principal(authentication), projectId,
+                debugRequest(request.request()), new ApiDebugService.LocalExecutionResult(request.result().success(),
+                        request.result().statusCode(), request.result().durationMs(), request.result().responseSize(),
+                        request.result().errorMessage())));
+    }
+
     @PostMapping("/drafts")
     public ApiResponse<ApiDebugHistory> saveDraft(Authentication authentication, @PathVariable String projectId,
                                                    @Valid @RequestBody ExecuteRequest request) {
@@ -322,5 +332,13 @@ public class ApiDebugController {
         public ExecuteRequest {
             headers = headers == null ? List.of() : List.copyOf(headers);
         }
+    }
+    public record LocalExecutionRequest(@NotNull @Valid ExecuteRequest request,
+                                        @NotNull @Valid LocalExecutionResultRequest result) {
+    }
+    public record LocalExecutionResultRequest(boolean success, @Min(100) @Max(599) Integer statusCode,
+                                              @Min(0) @Max(600_000) int durationMs,
+                                              @Min(0) @Max(10_000_000) int responseSize,
+                                              @Size(max = 1_000) String errorMessage) {
     }
 }

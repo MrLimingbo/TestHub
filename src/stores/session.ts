@@ -67,9 +67,19 @@ export const useSessionStore = defineStore('session', {
       }
     },
     async login(account: string, password: string) {
-      const csrfResponse = await fetch('/api/v1/auth/csrf', { credentials: 'include' })
-      if (!csrfResponse.ok) throw new Error('无法初始化安全会话')
-      const csrf = await csrfResponse.json() as ApiEnvelope<{ token: string; headerName: string }>
+      let csrfResponse: Response
+      try {
+        csrfResponse = await fetch('/api/v1/auth/csrf', { credentials: 'include' })
+      } catch {
+        throw new Error('无法连接 Platform API，请重新运行 ./start.sh 后刷新页面')
+      }
+      if (!csrfResponse.ok) {
+        throw new Error(`安全会话初始化失败（HTTP ${csrfResponse.status}），请重新运行 ./start.sh 后刷新页面`)
+      }
+      const csrf = await csrfResponse.json().catch(() => null) as ApiEnvelope<{ token: string; headerName: string }> | null
+      if (!csrf?.data?.token || !csrf.data.headerName) {
+        throw new Error('安全会话响应无效，请重新运行 ./start.sh 后刷新页面')
+      }
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         credentials: 'include',
