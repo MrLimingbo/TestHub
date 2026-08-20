@@ -1,5 +1,6 @@
 package io.testhub.platform;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -108,6 +109,17 @@ class ApiAutomationScenarioFlowTests {
                                 {"id":"loop-1","type":"LOOP","name":"循环","config":{"totalRuns":2}}],"variables":{}}
                                 """))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("条件步骤必须位于已有请求之后")));
+
+        csrf = csrf(administrator);
+        mvc.perform(delete("/api/v1/projects/{projectId}/api-automation/scenarios/{scenarioId}", projectId, scenarioId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()))
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/api/v1/projects/{projectId}/api-automation/scenarios/{scenarioId}", projectId, scenarioId)
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isNotFound());
+        org.assertj.core.api.Assertions.assertThat(jdbc.sql("SELECT COUNT(*) FROM api_automation_scenario_revision WHERE scenario_id = :scenarioId")
+                .param("scenarioId", scenarioId).query(Integer.class).single()).isZero();
     }
 
     @Test

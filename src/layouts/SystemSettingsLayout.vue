@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const menus = [
   { path: '/system-settings/accounts', label: '账号管理', icon: 'IconUserGroup' },
+  { path: '/system-settings/environments', label: '环境管理', icon: 'IconCloud' },
   { path: '/system-settings/parameters', label: '系统参数', icon: 'IconSettings' },
 ]
 </script>
@@ -38,5 +39,5 @@ nav a:hover{background:var(--color-fill-2)}
 nav a.router-link-active{background:rgb(var(--primary-1));color:rgb(var(--primary-6));font-weight:600}
 nav a svg:last-child{font-size:12px;color:var(--color-text-3)}
 .system-settings__content{min-width:0}
-@media(max-width:800px){.system-settings{grid-template-columns:1fr}.system-settings__rail{padding:12px;border-right:0;border-bottom:1px solid var(--color-border-2)}.rail-title{display:none}nav{grid-template-columns:repeat(2,1fr);padding:0}}
+@media(max-width:800px){.system-settings{grid-template-columns:1fr}.system-settings__rail{padding:12px;border-right:0;border-bottom:1px solid var(--color-border-2)}.rail-title{display:none}nav{grid-template-columns:repeat(3,1fr);padding:0}}
 </style>

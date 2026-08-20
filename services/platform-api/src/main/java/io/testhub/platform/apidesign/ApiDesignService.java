@@ -28,6 +28,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ApiDesignService {
+    private static final int MAX_DEFINITION_BODY_LENGTH = 2_000_000;
+    private static final int MAX_CASE_SNAPSHOT_LENGTH = 2_000_000;
     private static final Set<String> WRITERS = Set.of("SYSTEM_ADMIN", "ORG_ADMIN", "PROJECT_ADMIN", "TEST_LEAD", "TESTER");
     private static final Set<String> METHODS = Set.of("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS");
     private static final Pattern SENSITIVE_CASE_FIELD = Pattern.compile(
@@ -264,6 +266,11 @@ public class ApiDesignService {
         return repository.findCases(projectId, apiId);
     }
 
+    public List<ApiDefinitionCase> cases(AuthenticatedPrincipal principal, String projectId) {
+        access.requireProjectRead(principal, projectId);
+        return repository.findCasesByProject(projectId);
+    }
+
     @Transactional
     public ApiDefinitionCase createCase(AuthenticatedPrincipal principal, String projectId, String apiId, CaseInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
@@ -437,8 +444,8 @@ public class ApiDesignService {
         if (!versionName.matches("v?[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][A-Za-z0-9._-]+)?")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "版本名称需符合语义化版本，例如 1.0.0");
         return new ValidatedVersion(versionName, text(input.summary(), 500, "摘要"), text(input.description(), 20_000, "接口说明"),
                 parameters(input.headers(), "请求头"), parameters(input.query(), "查询参数"),
-                parameters(input.pathParameters(), "路径参数"), text(input.requestBody(), 100_000, "请求体"),
-                text(input.responseBody(), 100_000, "响应体"), input.exampleResponse() == null ? Map.of() : input.exampleResponse());
+                parameters(input.pathParameters(), "路径参数"), text(input.requestBody(), MAX_DEFINITION_BODY_LENGTH, "请求体"),
+                text(input.responseBody(), MAX_DEFINITION_BODY_LENGTH, "响应体"), input.exampleResponse() == null ? Map.of() : input.exampleResponse());
     }
     private List<ParameterInput> parameters(List<ParameterInput> values, String label) {
         if (values == null) return List.of();
@@ -477,8 +484,8 @@ public class ApiDesignService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "请求快照必须是 JSON 对象");
         }
         String requestSnapshot = json(sanitizeCaseSnapshot(input.requestSnapshot()));
-        if (requestSnapshot.length() > 500_000) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "请求快照不能超过500000个字符");
+        if (requestSnapshot.length() > MAX_CASE_SNAPSHOT_LENGTH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "请求快照不能超过" + MAX_CASE_SNAPSHOT_LENGTH + "个字符");
         }
         Integer expectedStatus = input.expectedStatus();
         if (expectedStatus != null && (expectedStatus < 100 || expectedStatus > 599)) {
@@ -561,6 +568,8 @@ public class ApiDesignService {
             container.put(field, "");
         }
     }
+    void validateDefinitionInput(DefinitionInput input) { validate(input); }
+    void validateCaseInput(CaseInput input) { validateCase(input); }
     private String required(String value, int max, String label) { if (value == null || value.isBlank() || value.trim().length() > max) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, label + "不能为空且不能超过" + max + "个字符"); return value.trim(); }
     private String text(String value, int max, String label) { if (value != null && value.length() > max) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, label + "不能超过" + max + "个字符"); return value == null ? "" : value.trim(); }
     private String content(String value, int max, String label) { if (value != null && value.length() > max) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, label + "不能超过" + max + "个字符"); return value == null ? "" : value; }

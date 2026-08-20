@@ -7,6 +7,7 @@ const path = require('node:path')
 const test = require('node:test')
 const {
   isTrustedServerUrl,
+  normalizeHttpDebugRequest,
   normalizeServerUrl,
   readPreferences,
   writePreferences,
@@ -45,4 +46,17 @@ test('persists a normalized server preference without retaining other values', a
   } finally {
     await fs.rm(directory, { recursive: true, force: true })
   }
+})
+
+test('accepts arbitrary intranet and loopback HTTP targets for explicit desktop execution', () => {
+  for (const url of ['http://172.27.15.153:8888/health', 'http://127.0.0.1:3000/api', 'https://10.20.30.40/internal']) {
+    assert.equal(normalizeHttpDebugRequest({ method: 'get', url, headers: [], timeoutMs: 1000 }).url, url)
+  }
+})
+
+test('rejects unsafe protocols, embedded credentials, restricted headers, and excessive timeouts', () => {
+  assert.throws(() => normalizeHttpDebugRequest({ method: 'GET', url: 'file:///etc/passwd' }), /HTTP\(S\)/)
+  assert.throws(() => normalizeHttpDebugRequest({ method: 'GET', url: 'http://user:pass@127.0.0.1' }), /HTTP\(S\)/)
+  assert.throws(() => normalizeHttpDebugRequest({ method: 'GET', url: 'http://127.0.0.1', headers: [{ name: 'Host', value: 'admin' }] }), /Host/)
+  assert.throws(() => normalizeHttpDebugRequest({ method: 'GET', url: 'http://127.0.0.1', timeoutMs: 10001 }), /超时时间/)
 })

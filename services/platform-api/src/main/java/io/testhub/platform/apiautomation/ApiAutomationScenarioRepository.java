@@ -81,6 +81,11 @@ public class ApiAutomationScenarioRepository {
                 .param("preRequestScript", preRequestScript).param("postResponseScript", postResponseScript).update();
     }
 
+    public int delete(String projectId, String scenarioId) {
+        return jdbc.sql("DELETE FROM api_automation_scenario WHERE project_id = :projectId AND id = :scenarioId")
+                .param("projectId", projectId).param("scenarioId", scenarioId).update();
+    }
+
     public void insertRevision(String id, String scenarioId, String organizationId, String projectId, int version,
                                String snapshot, String createdBy) {
         jdbc.sql("""

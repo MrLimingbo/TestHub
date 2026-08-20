@@ -1,6 +1,7 @@
 package io.testhub.platform;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -232,6 +233,10 @@ class ApiDesignFlowTests {
                         .cookie(administrator.sessionCookie()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].id").value(caseId));
+        mvc.perform(get("/api/v1/projects/{projectId}/api-design/cases", projectId)
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].id", hasItem(caseId)));
 
         Map<String, Object> updatedCasePayload = Map.of(
                 "name", "正常创建-更新",

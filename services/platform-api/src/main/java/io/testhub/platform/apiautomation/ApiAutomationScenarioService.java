@@ -4,6 +4,7 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
 import io.testhub.platform.audit.AuditService;
+import io.testhub.platform.parameter.ProjectEnvironmentRepository;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -36,14 +37,16 @@ public class ApiAutomationScenarioService {
     private final ApiAutomationScenarioExpansionService expansions;
     private final AccessService access;
     private final AuditService audit;
+    private final ProjectEnvironmentRepository environments;
 
     public ApiAutomationScenarioService(ApiAutomationScenarioRepository scenarios,
                                         ApiAutomationScenarioExpansionService expansions, AccessService access,
-                                        AuditService audit) {
+                                        AuditService audit, ProjectEnvironmentRepository environments) {
         this.scenarios = scenarios;
         this.expansions = expansions;
         this.access = access;
         this.audit = audit;
+        this.environments = environments;
     }
 
     public List<ApiAutomationScenario> list(AuthenticatedPrincipal principal, String projectId) {
@@ -110,6 +113,19 @@ public class ApiAutomationScenarioService {
         return result;
     }
 
+    @Transactional
+    public void delete(AuthenticatedPrincipal principal, String projectId, String scenarioId) {
+        ProjectSummary project = writeAccess(principal, projectId);
+        ApiAutomationScenarioDetail current = requireScenario(projectId, scenarioId);
+        try {
+            if (scenarios.delete(projectId, scenarioId) == 0) throw notFound("接口自动化场景不存在");
+        } catch (DataIntegrityViolationException exception) {
+            throw conflict("场景已有执行任务、定时计划或 Webhook 引用，不能删除");
+        }
+        audit.record(principal, project.organizationId(), projectId, "API_AUTOMATION_SCENARIO_DELETED", "API_AUTOMATION_SCENARIO",
+                scenarioId, Map.of("name", current.name(), "version", current.version()));
+    }
+
     private void saveRevision(ProjectSummary project, ApiAutomationScenarioDetail scenario, AuthenticatedPrincipal principal) {
         Map<String, Object> snapshot = new LinkedHashMap<>();
         snapshot.put("name", scenario.name());
@@ -129,6 +145,9 @@ public class ApiAutomationScenarioService {
         String name = required(input.name(), "场景名称", 160);
         String description = optional(input.description(), "场景说明", 1200);
         String environmentCode = environment(input.environmentCode());
+        if (environments.findByCode(projectId, environmentCode).isEmpty()) {
+            throw rejected("请选择当前项目中已存在的运行环境");
+        }
         String failureStrategy = failureStrategy(input.failureStrategy());
         List<AutomationStep> steps = steps(input.steps());
         List<AutomationStep> expandedSteps = expansions.validateCandidate(projectId, scenarioId, steps);
@@ -345,8 +364,8 @@ public class ApiAutomationScenarioService {
     }
 
     private String environment(String value) {
-        String normalized = value == null || value.isBlank() ? "default" : value.trim();
-        if (!normalized.matches("[A-Za-z][A-Za-z0-9_-]{0,63}")) throw rejected("环境标识不合法");
+        String normalized = value == null || value.isBlank() ? "test" : value.trim().toLowerCase(Locale.ROOT);
+        if (!normalized.matches("[a-z0-9][a-z0-9_-]{0,63}")) throw rejected("环境标识不合法");
         return normalized;
     }
 

@@ -16,10 +16,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,8 +32,15 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ApiInterchangeService {
+    private static final int MAX_IMPORT_DOCUMENT_BYTES = 10 * 1024 * 1024;
     private static final Set<String> WRITERS = Set.of("SYSTEM_ADMIN", "ORG_ADMIN", "PROJECT_ADMIN", "TEST_LEAD", "TESTER");
     private static final Set<String> HTTP_METHODS = Set.of("get", "post", "put", "patch", "delete", "head", "options");
+    private static final Pattern SENSITIVE_FIELD = Pattern.compile(
+            "(authorization|cookie|api[-_]?key|token|secret|password|passwd|session|jwt|access[-_]?token|refresh[-_]?token)",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern VARIABLE_REFERENCE = Pattern.compile(
+            "^(?:(?:Bearer|Basic)\\s+)?\\{\\{[A-Za-z_][A-Za-z0-9_.-]*}}$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern LEADING_VARIABLE = Pattern.compile("^(\\{\\{[^}]+}})");
 
     private final ApiDesignService design;
     private final ApiDesignRepository repository;
@@ -51,6 +62,7 @@ public class ApiInterchangeService {
     public ImportResult importOpenApi(AuthenticatedPrincipal principal, String projectId, OpenApiImportInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (input == null || blank(input.document())) throw rejected("OpenAPI 文档不能为空");
+        validateImportDocumentSize(input.document(), "OpenAPI");
         requireCatalog(projectId, input.catalogId());
 
         JsonNode document = parseDocument(input.document());
@@ -121,19 +133,26 @@ public class ApiInterchangeService {
     public ImportResult importPostman(AuthenticatedPrincipal principal, String projectId, PostmanImportInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (input == null || blank(input.document())) throw rejected("Postman Collection 文档不能为空");
+        validateImportDocumentSize(input.document(), "Postman Collection");
         requireCatalog(projectId, input.catalogId());
 
         JsonNode collection = parsePostmanCollection(input.document());
-        List<ApiDesignService.DefinitionInput> definitions = postmanDefinitions(collection, input.catalogId());
-        if (definitions.isEmpty()) throw rejected("Postman Collection 中没有可导入的 HTTP 接口");
+        PostmanImportPlan plan = postmanImportPlan(collection, input.catalogId());
+        if (plan.groups().isEmpty()) throw rejected("Postman Collection 中没有可导入的 HTTP 接口");
+        preflightPostmanImport(projectId, plan);
 
-        for (ApiDesignService.DefinitionInput definition : definitions) {
-            design.createDefinition(principal, projectId, definition);
+        for (PostmanImportGroup group : plan.groups()) {
+            ApiDefinition definition = design.createDefinition(principal, projectId, group.definition());
+            for (ApiDesignService.CaseInput definitionCase : group.cases()) {
+                design.createCase(principal, projectId, definition.id(), definitionCase);
+            }
         }
         audit.record(principal, project.organizationId(), projectId, "API_POSTMAN_COLLECTION_IMPORTED", "API_DEFINITION", projectId,
-                Map.of("count", definitions.size(), "format", "POSTMAN_COLLECTION_V2"));
-        return new ImportResult("POSTMAN", definitions.size(), definitions.stream()
-                .map(item -> item.method() + " " + item.path()).toList());
+                Map.of("count", plan.groups().size(), "caseCount", plan.caseCount(), "skippedCount", plan.skippedCount(),
+                        "format", "POSTMAN_COLLECTION_V2"));
+        return new ImportResult("POSTMAN", plan.groups().size(), plan.groups().stream()
+                .map(group -> group.route().method() + " " + group.route().path()).toList(),
+                plan.caseCount(), plan.skippedCount(), plan.warnings());
     }
 
     public ObjectNode exportPostman(AuthenticatedPrincipal principal, String projectId, String catalogId) {
@@ -158,6 +177,7 @@ public class ApiInterchangeService {
     public ImportResult importHar(AuthenticatedPrincipal principal, String projectId, HarImportInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (input == null || blank(input.document())) throw rejected("HAR 文档不能为空");
+        validateImportDocumentSize(input.document(), "HAR");
         requireCatalog(projectId, input.catalogId());
 
         List<ApiDesignService.DefinitionInput> definitions = harDefinitions(input.document(), input.catalogId());
@@ -209,11 +229,30 @@ public class ApiInterchangeService {
         return command.toString();
     }
 
-    private List<ApiDesignService.DefinitionInput> postmanDefinitions(JsonNode collection, String catalogId) {
+    private PostmanImportPlan postmanImportPlan(JsonNode collection, String catalogId) {
         String version = normalizedVersion(collection.path("info").path("version").asText("1.0.0"));
-        List<ApiDesignService.DefinitionInput> result = new ArrayList<>();
-        appendPostmanDefinitions(collection.path("item"), catalogId, List.of(), version, result);
-        return result;
+        PostmanPlanAccumulator accumulator = new PostmanPlanAccumulator();
+        appendPostmanRequests(collection.path("item"), catalogId, List.of(), version, accumulator);
+        List<PostmanImportGroup> groups = accumulator.groups.values().stream()
+                .map(PostmanGroupBuilder::build)
+                .toList();
+        int caseCount = groups.stream().mapToInt(group -> group.cases().size()).sum();
+        return new PostmanImportPlan(groups, caseCount, accumulator.skippedCount,
+                List.copyOf(accumulator.warnings));
+    }
+
+    private void preflightPostmanImport(String projectId, PostmanImportPlan plan) {
+        Set<PostmanRoute> existingRoutes = repository.findDefinitions(projectId, null).stream()
+                .map(definition -> new PostmanRoute(definition.method(), definition.path()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        for (PostmanImportGroup group : plan.groups()) {
+            if (existingRoutes.contains(group.route())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "当前项目已存在接口：" + group.route().method() + " " + group.route().path());
+            }
+            design.validateDefinitionInput(group.definition());
+            group.cases().forEach(design::validateCaseInput);
+        }
     }
 
     private List<ApiDesignService.DefinitionInput> harDefinitions(String source, String catalogId) {
@@ -328,8 +367,8 @@ public class ApiInterchangeService {
         return new HarResponse(statusCode, body);
     }
 
-    private void appendPostmanDefinitions(JsonNode items, String catalogId, List<String> folders, String version,
-                                          List<ApiDesignService.DefinitionInput> result) {
+    private void appendPostmanRequests(JsonNode items, String catalogId, List<String> folders, String version,
+                                       PostmanPlanAccumulator accumulator) {
         if (!items.isArray()) return;
         for (JsonNode item : items) {
             String itemName = item.path("name").asText("").trim();
@@ -337,27 +376,86 @@ public class ApiInterchangeService {
             if (children.isArray()) {
                 List<String> nestedFolders = new ArrayList<>(folders);
                 if (!itemName.isBlank()) nestedFolders.add(itemName);
-                appendPostmanDefinitions(children, catalogId, nestedFolders, version, result);
+                appendPostmanRequests(children, catalogId, nestedFolders, version, accumulator);
                 continue;
             }
 
             JsonNode request = item.path("request");
-            if (!request.isObject()) continue;
+            if (!request.isObject()) {
+                skipPostmanItem(accumulator, itemName, "缺少请求定义");
+                continue;
+            }
             String method = request.path("method").asText("GET").trim().toUpperCase(Locale.ROOT);
             if (!HTTP_METHODS.contains(method.toLowerCase(Locale.ROOT))) {
                 throw rejected("Postman Collection 包含不支持的 HTTP 方法：" + method);
             }
             PostmanUrl url = postmanUrl(request.path("url"));
+            if (url == null) {
+                skipPostmanItem(accumulator, itemName, "缺少 URL");
+                continue;
+            }
             List<ApiDesignService.ParameterInput> headers = postmanHeaders(request.path("header"));
             String body = postmanRequestBody(request.path("body"), headers);
             PostmanResponse response = postmanResponse(item.path("response"));
             String name = itemName.isBlank() ? method + " " + url.path() : itemName;
             if (!folders.isEmpty()) name = String.join(" / ", folders) + " / " + name;
+            name = limited(name, 200);
             String description = postmanDescription(request.path("description"));
-            result.add(new ApiDesignService.DefinitionInput(catalogId, method, url.path(), limited(name, 200), version,
-                    itemName, description, headers, url.query(), pathParameters(url.path()), body, response.body(),
-                    Map.of("statusCode", response.statusCode())));
+            if (description.length() > 20_000) {
+                accumulator.warnings.add("“" + limited(name, 120) + "”的接口说明超过 20000 个字符，已截断");
+                description = limited(description, 20_000);
+            }
+            List<ApiDesignService.ParameterInput> pathParameters = pathParameters(url.path());
+            ApiDesignService.DefinitionInput definition = new ApiDesignService.DefinitionInput(catalogId, method,
+                    url.path(), name, version, limited(itemName, 500), description, headers, url.query(), pathParameters,
+                    body, response.body(), Map.of("statusCode", response.statusCode()));
+            ObjectNode snapshot = postmanCaseSnapshot(url, headers, pathParameters, body);
+            ApiDesignService.CaseInput definitionCase = new ApiDesignService.CaseInput(name, null, snapshot,
+                    response.statusCode(), "", response.body());
+            PostmanRoute route = new PostmanRoute(method, url.path());
+            accumulator.groups.computeIfAbsent(route, PostmanGroupBuilder::new)
+                    .add(definition, definitionCase);
         }
+    }
+
+    private void skipPostmanItem(PostmanPlanAccumulator accumulator, String itemName, String reason) {
+        accumulator.skippedCount++;
+        String displayName = itemName.isBlank() ? "未命名请求" : limited(itemName, 120);
+        accumulator.warnings.add("已跳过“" + displayName + "”：" + reason);
+    }
+
+    private ObjectNode postmanCaseSnapshot(PostmanUrl url, List<ApiDesignService.ParameterInput> headers,
+                                            List<ApiDesignService.ParameterInput> pathParameters, String body) {
+        ObjectNode snapshot = json.createObjectNode();
+        snapshot.put("baseUrl", url.baseUrl());
+        snapshot.set("pathValues", postmanCaseValues(pathParameters));
+        snapshot.set("queryValues", postmanCaseValues(url.query()));
+        snapshot.set("headerValues", postmanCaseValues(headers));
+        snapshot.put("body", body);
+        ObjectNode auth = snapshot.putObject("auth");
+        auth.put("type", "NONE");
+        auth.put("token", "");
+        auth.put("username", "");
+        auth.put("password", "");
+        auth.put("key", "X-API-Key");
+        auth.put("value", "");
+        auth.put("placement", "HEADER");
+        return snapshot;
+    }
+
+    private ArrayNode postmanCaseValues(List<ApiDesignService.ParameterInput> parameters) {
+        ArrayNode result = json.createArrayNode();
+        for (ApiDesignService.ParameterInput parameter : parameters) {
+            ObjectNode value = result.addObject();
+            value.put("name", parameter.name());
+            value.put("type", parameter.type());
+            value.put("required", parameter.required());
+            value.put("example", parameter.example());
+            value.put("description", parameter.description());
+            value.put("enabled", parameter.required() || !parameter.example().isBlank());
+            value.put("value", parameter.example());
+        }
+        return result;
     }
 
     private JsonNode parsePostmanCollection(String source) {
@@ -374,8 +472,9 @@ public class ApiInterchangeService {
     }
 
     private PostmanUrl postmanUrl(JsonNode node) {
-        if (node.isTextual()) return postmanRawUrl(node.asText(), List.of());
-        if (!node.isObject()) throw rejected("Postman 请求缺少 URL");
+        if (node == null || node.isMissingNode() || node.isNull()) return null;
+        if (node.isTextual()) return blank(node.asText()) ? null : postmanRawUrl(node.asText(), List.of());
+        if (!node.isObject()) throw rejected("Postman 请求 URL 格式不合法");
         List<ApiDesignService.ParameterInput> query = postmanQuery(node.path("query"));
         String raw = node.path("raw").asText("");
         String path = "";
@@ -387,24 +486,82 @@ public class ApiInterchangeService {
         } else if (pathNode.isTextual() && !pathNode.asText().isBlank()) {
             path = pathNode.asText();
         }
-        if (path.isBlank()) return postmanRawUrl(raw, query);
-        return new PostmanUrl(normalizePostmanPath(path), query.isEmpty() ? rawQuery(raw) : query);
+        if (path.isBlank()) return blank(raw) ? null : postmanRawUrl(raw, query);
+        String normalizedPath = normalizePostmanPath(path);
+        return new PostmanUrl(normalizedPath, query.isEmpty() ? rawQuery(raw) : query,
+                postmanBaseUrl(node, raw));
     }
 
     private PostmanUrl postmanRawUrl(String raw, List<ApiDesignService.ParameterInput> explicitQuery) {
         if (blank(raw)) throw rejected("Postman 请求缺少 URL");
-        String candidate = raw.trim().replaceAll("\\{\\{[^}]+}}", "");
+        String candidate = raw.trim();
         int queryIndex = candidate.indexOf('?');
         String query = queryIndex >= 0 ? candidate.substring(queryIndex + 1) : "";
         String pathCandidate = queryIndex >= 0 ? candidate.substring(0, queryIndex) : candidate;
+        Matcher leadingVariable = LEADING_VARIABLE.matcher(pathCandidate);
+        if (leadingVariable.find()) pathCandidate = pathCandidate.substring(leadingVariable.end());
         try {
             URI uri = URI.create(pathCandidate);
-            if (uri.getScheme() != null) pathCandidate = uri.getRawPath();
+            if (uri.getScheme() != null && Set.of("http", "https").contains(uri.getScheme().toLowerCase(Locale.ROOT))) {
+                pathCandidate = uri.getRawPath();
+            } else if (!pathCandidate.startsWith("/")) {
+                String baseUrl = postmanBaseUrl(null, raw);
+                if (!baseUrl.equals("{{baseUrl}}")) {
+                    int slash = pathCandidate.indexOf('/');
+                    pathCandidate = slash < 0 ? "/" : pathCandidate.substring(slash);
+                }
+            }
         } catch (IllegalArgumentException exception) {
             throw rejected("Postman 请求 URL 格式不合法");
         }
         if (blank(pathCandidate)) pathCandidate = "/";
-        return new PostmanUrl(normalizePostmanPath(pathCandidate), explicitQuery.isEmpty() ? query(query) : explicitQuery);
+        return new PostmanUrl(normalizePostmanPath(pathCandidate), explicitQuery.isEmpty() ? query(query) : explicitQuery,
+                postmanBaseUrl(null, raw));
+    }
+
+    private String postmanBaseUrl(JsonNode node, String raw) {
+        String normalizedRaw = raw == null ? "" : raw.trim();
+        Matcher variable = LEADING_VARIABLE.matcher(normalizedRaw);
+        if (variable.find()) return variable.group(1);
+
+        if (node != null && node.isObject()) {
+            String host = postmanHost(node.path("host"));
+            if (!host.isBlank()) {
+                if (host.startsWith("{{") && host.endsWith("}}")) return host;
+                String protocol = node.path("protocol").asText("").trim().toLowerCase(Locale.ROOT);
+                if (!Set.of("http", "https").contains(protocol)) protocol = "http";
+                String port = node.path("port").asText("").trim();
+                return protocol + "://" + host + (port.isBlank() ? "" : ":" + port);
+            }
+        }
+
+        int queryIndex = normalizedRaw.indexOf('?');
+        String candidate = queryIndex < 0 ? normalizedRaw : normalizedRaw.substring(0, queryIndex);
+        try {
+            URI uri = URI.create(candidate);
+            if (uri.getScheme() != null && Set.of("http", "https").contains(uri.getScheme().toLowerCase(Locale.ROOT))
+                    && uri.getRawAuthority() != null) {
+                return uri.getScheme().toLowerCase(Locale.ROOT) + "://" + uri.getRawAuthority();
+            }
+        } catch (IllegalArgumentException exception) {
+            throw rejected("Postman 请求 URL 格式不合法");
+        }
+        int slash = candidate.indexOf('/');
+        String possibleHost = slash < 0 ? candidate : candidate.substring(0, slash);
+        if (possibleHost.equalsIgnoreCase("localhost") || possibleHost.startsWith("localhost:")
+                || possibleHost.matches("(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?::[0-9]+)?")
+                || possibleHost.matches("[A-Za-z0-9.-]+\\.[A-Za-z]{2,}(?::[0-9]+)?")) {
+            return "http://" + possibleHost;
+        }
+        return "{{baseUrl}}";
+    }
+
+    private String postmanHost(JsonNode node) {
+        if (node.isTextual()) return node.asText("").trim();
+        if (!node.isArray()) return "";
+        List<String> parts = new ArrayList<>();
+        node.forEach(part -> { if (!part.asText("").isBlank()) parts.add(part.asText()); });
+        return String.join(".", parts);
     }
 
     private List<ApiDesignService.ParameterInput> postmanHeaders(JsonNode node) {
@@ -412,8 +569,10 @@ public class ApiInterchangeService {
         List<ApiDesignService.ParameterInput> result = new ArrayList<>();
         node.forEach(header -> {
             if (header.path("disabled").asBoolean(false) || header.path("key").asText().isBlank()) return;
-            result.add(new ApiDesignService.ParameterInput(header.path("key").asText().trim(), "string", false,
-                    header.path("value").asText(""), header.path("description").asText("")));
+            String name = header.path("key").asText().trim();
+            String value = sanitizedParameterValue(name, header.path("value").asText(""));
+            result.add(new ApiDesignService.ParameterInput(name, "string", false, value,
+                    header.path("description").asText("")));
         });
         return result;
     }
@@ -423,10 +582,18 @@ public class ApiInterchangeService {
         List<ApiDesignService.ParameterInput> result = new ArrayList<>();
         node.forEach(query -> {
             if (query.path("disabled").asBoolean(false) || query.path("key").asText().isBlank()) return;
-            result.add(new ApiDesignService.ParameterInput(query.path("key").asText().trim(), "string", false,
-                    query.path("value").asText(""), query.path("description").asText("")));
+            String name = query.path("key").asText().trim();
+            result.add(new ApiDesignService.ParameterInput(name, "string", false,
+                    sanitizedParameterValue(name, query.path("value").asText("")),
+                    query.path("description").asText("")));
         });
         return result;
+    }
+
+    private String sanitizedParameterValue(String name, String value) {
+        if (SENSITIVE_FIELD.matcher(name).find() && !value.isBlank()
+                && !VARIABLE_REFERENCE.matcher(value.trim()).matches()) return "";
+        return value;
     }
 
     private String postmanRequestBody(JsonNode node, List<ApiDesignService.ParameterInput> headers) {
@@ -915,6 +1082,12 @@ public class ApiInterchangeService {
         return !blank(first) ? first : (second == null ? "" : second);
     }
 
+    private void validateImportDocumentSize(String document, String format) {
+        if (document.getBytes(StandardCharsets.UTF_8).length > MAX_IMPORT_DOCUMENT_BYTES) {
+            throw rejected(format + " 文档不能超过 10 MiB");
+        }
+    }
+
     private boolean blank(String value) {
         return value == null || value.isBlank();
     }
@@ -931,9 +1104,83 @@ public class ApiInterchangeService {
     public record CurlImportInput(String catalogId, String name, String command) { }
     public record PostmanImportInput(String catalogId, String document) { }
     public record HarImportInput(String catalogId, String document) { }
-    public record ImportResult(String format, int importedCount, List<String> items) { }
-    private record PostmanUrl(String path, List<ApiDesignService.ParameterInput> query) { }
+    public record ImportResult(String format, int importedCount, List<String> items, int caseCount,
+                               int skippedCount, List<String> warnings) {
+        public ImportResult(String format, int importedCount, List<String> items) {
+            this(format, importedCount, items, 0, 0, List.of());
+        }
+        public ImportResult {
+            items = items == null ? List.of() : List.copyOf(items);
+            warnings = warnings == null ? List.of() : List.copyOf(warnings);
+        }
+    }
+    private record PostmanUrl(String path, List<ApiDesignService.ParameterInput> query, String baseUrl) { }
     private record PostmanResponse(int statusCode, String body) { }
+    private record PostmanRoute(String method, String path) { }
+    private record PostmanImportGroup(PostmanRoute route, ApiDesignService.DefinitionInput definition,
+                                      List<ApiDesignService.CaseInput> cases) { }
+    private record PostmanImportPlan(List<PostmanImportGroup> groups, int caseCount, int skippedCount,
+                                     List<String> warnings) { }
+    private static final class PostmanPlanAccumulator {
+        private final Map<PostmanRoute, PostmanGroupBuilder> groups = new LinkedHashMap<>();
+        private final List<String> warnings = new ArrayList<>();
+        private int skippedCount;
+    }
+    private static final class PostmanGroupBuilder {
+        private final PostmanRoute route;
+        private final List<ApiDesignService.CaseInput> cases = new ArrayList<>();
+        private final Map<String, Integer> caseNameCounts = new LinkedHashMap<>();
+        private final Set<String> usedCaseNames = new LinkedHashSet<>();
+        private final Map<String, ApiDesignService.ParameterInput> headers = new LinkedHashMap<>();
+        private final Map<String, ApiDesignService.ParameterInput> query = new LinkedHashMap<>();
+        private final Map<String, ApiDesignService.ParameterInput> pathParameters = new LinkedHashMap<>();
+        private ApiDesignService.DefinitionInput definition;
+
+        private PostmanGroupBuilder(PostmanRoute route) {
+            this.route = route;
+        }
+
+        private void add(ApiDesignService.DefinitionInput candidate, ApiDesignService.CaseInput definitionCase) {
+            if (definition == null) definition = candidate;
+            mergeParameters(headers, candidate.headers(), true);
+            mergeParameters(query, candidate.query(), false);
+            mergeParameters(pathParameters, candidate.pathParameters(), false);
+            String baseName = definitionCase.name();
+            int count = caseNameCounts.getOrDefault(baseName, 0) + 1;
+            String uniqueName = count == 1 ? baseName : suffixedName(baseName, count);
+            while (!usedCaseNames.add(uniqueName)) {
+                count++;
+                uniqueName = suffixedName(baseName, count);
+            }
+            caseNameCounts.put(baseName, count);
+            cases.add(new ApiDesignService.CaseInput(uniqueName, definitionCase.environmentCode(),
+                    definitionCase.requestSnapshot(), definitionCase.expectedStatus(),
+                    definitionCase.responseValidation(), definitionCase.savedResponseBody()));
+        }
+
+        private void mergeParameters(Map<String, ApiDesignService.ParameterInput> target,
+                                     List<ApiDesignService.ParameterInput> parameters, boolean caseInsensitive) {
+            for (ApiDesignService.ParameterInput parameter : parameters) {
+                String key = caseInsensitive ? parameter.name().toLowerCase(Locale.ROOT) : parameter.name();
+                target.putIfAbsent(key, parameter);
+            }
+        }
+
+        private static String suffixedName(String name, int count) {
+            String suffix = " (" + count + ")";
+            int maxBaseLength = Math.max(1, 200 - suffix.length());
+            return (name.length() <= maxBaseLength ? name : name.substring(0, maxBaseLength)) + suffix;
+        }
+
+        private PostmanImportGroup build() {
+            ApiDesignService.DefinitionInput merged = new ApiDesignService.DefinitionInput(
+                    definition.catalogId(), definition.method(), definition.path(), definition.name(),
+                    definition.versionName(), definition.summary(), definition.description(),
+                    List.copyOf(headers.values()), List.copyOf(query.values()), List.copyOf(pathParameters.values()),
+                    definition.requestBody(), definition.responseBody(), definition.exampleResponse());
+            return new PostmanImportGroup(route, merged, List.copyOf(cases));
+        }
+    }
     private record HarRequest(String method, String path, List<ApiDesignService.ParameterInput> query,
                               List<ApiDesignService.ParameterInput> headers, String body) { }
     private record HarResponse(int statusCode, String body) { }

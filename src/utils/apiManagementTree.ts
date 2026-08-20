@@ -19,6 +19,10 @@ export type ApiManagementTreeRow<C extends ApiTreeCatalog, A extends ApiTreeDefi
   | { kind: 'api'; key: string; depth: number; api: A }
 
 export type ApiTreeStatusFilter = 'ALL' | 'PUBLISHED' | 'DRAFT'
+export type ApiTreeDisplayMode = 'NAME' | 'URL'
+export type ApiRouteQuery = Record<string, string | null | (string | null)[]>
+
+const QUICK_REQUEST_QUERY_KEYS = new Set(['draft', 'newRequest', 'folderId', 'source'])
 
 function matchesStatus(api: ApiTreeDefinition, status: ApiTreeStatusFilter) {
   if (status === 'ALL') return true
@@ -109,4 +113,49 @@ export function nextWorkspaceTabAfterClose(openIds: string[], activeId: string, 
     openIds: remaining,
     activeId: remaining[Math.min(Math.max(closingIndex, 0), remaining.length - 1)] ?? '',
   }
+}
+
+export function interfaceRouteQuery(query: ApiRouteQuery, apiId: string): ApiRouteQuery {
+  const nextQuery = Object.fromEntries(
+    Object.entries(query).filter(([key]) => key !== 'apiId' && !QUICK_REQUEST_QUERY_KEYS.has(key)),
+  ) as ApiRouteQuery
+  if (apiId) nextQuery.apiId = apiId
+  return nextQuery
+}
+
+export function apiTreeDisplayText(api: ApiTreeDefinition, mode: ApiTreeDisplayMode) {
+  return mode === 'URL' ? api.path : api.name
+}
+
+export function catalogDescendantIds(catalogs: ApiTreeCatalog[], catalogId: string) {
+  const descendants = new Set<string>()
+  let found = true
+  while (found) {
+    found = false
+    for (const catalog of catalogs) {
+      if (catalog.parentId && (catalog.parentId === catalogId || descendants.has(catalog.parentId)) && !descendants.has(catalog.id)) {
+        descendants.add(catalog.id)
+        found = true
+      }
+    }
+  }
+  return descendants
+}
+
+export function availableCatalogMoveTargets(catalogs: ApiTreeCatalog[], catalogId: string) {
+  const excluded = catalogDescendantIds(catalogs, catalogId)
+  excluded.add(catalogId)
+  return catalogs.filter((catalog) => !excluded.has(catalog.id))
+}
+
+export function nextApiCopyPath(method: string, path: string, definitions: ApiTreeDefinition[]) {
+  const normalizedMethod = method.toUpperCase()
+  const existing = new Set(definitions
+    .filter((api) => api.method.toUpperCase() === normalizedMethod)
+    .map((api) => api.path))
+  const base = `${path.replace(/\/+$/, '') || '/'}-copy`
+  let candidate = base
+  let suffix = 2
+  while (existing.has(candidate)) candidate = `${base}-${suffix++}`
+  return candidate
 }

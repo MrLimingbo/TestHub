@@ -1,12 +1,14 @@
 export type ApiDebugProtocol = 'HTTP' | 'GRAPHQL' | 'SOAP' | 'WEBSOCKET' | 'GRPC'
 
 export interface ApiDebugRouteDraft {
+  name?: string
   method?: string
   url?: string
   body?: string
   headers?: string
   environment?: string
   protocol?: ApiDebugProtocol
+  replayDraft?: string
 }
 
 export interface ApiDebugRequestHeader {
@@ -101,6 +103,7 @@ export function joinApiDebugUrl(baseUrl: string, path: string): string {
 
 export function apiDebugDraftFromQuery(query: Record<string, unknown>): ApiDebugRouteDraft | null {
   const draft: ApiDebugRouteDraft = {}
+  const name = nonBlankText(query.name)
   const method = nonBlankText(query.method)?.toUpperCase()
   const protocol = nonBlankText(query.protocol)?.toUpperCase() as ApiDebugProtocol | undefined
   const directUrl = nonBlankText(query.url)
@@ -109,7 +112,9 @@ export function apiDebugDraftFromQuery(query: Record<string, unknown>): ApiDebug
   const body = firstText(query.body)
   const headers = normalizeApiDebugHeaders(query.headers)
   const environment = firstText(query.environment)
+  const replayDraft = firstText(query.replayDraft)
 
+  if (name) draft.name = name
   if (method && HTTP_METHODS.has(method)) draft.method = method
   if (protocol && PROTOCOLS.has(protocol)) draft.protocol = protocol
   if (directUrl) draft.url = directUrl
@@ -117,6 +122,7 @@ export function apiDebugDraftFromQuery(query: Record<string, unknown>): ApiDebug
   if (body !== undefined) draft.body = body
   if (headers !== undefined) draft.headers = headers
   if (environment !== undefined) draft.environment = environment.trim()
+  if (replayDraft !== undefined) draft.replayDraft = replayDraft
 
   return Object.keys(draft).length ? draft : null
 }
@@ -307,11 +313,27 @@ export function buildApiDebugCurlCommand(request: ApiDebugCurlRequest): ApiDebug
   return { command: parts.join(' '), secretsRemoved }
 }
 
-export function apiDebugDraftFromHistory(value: { method?: unknown; requestUrl?: unknown }): ApiDebugRouteDraft | null {
+export function apiDebugDraftFromHistory(value: { method?: unknown; requestUrl?: unknown; replayDraft?: unknown }): ApiDebugRouteDraft | null {
+  const replayDraft = nonBlankText(value.replayDraft)
+  if (replayDraft) return { replayDraft }
   const method = nonBlankText(value.method)?.toUpperCase()
   const requestUrl = nonBlankText(value.requestUrl)
   if (!method || !HTTP_METHODS.has(method) || !requestUrl) return null
   return { method, url: requestUrl, protocol: 'HTTP' }
+}
+
+export function apiDebugRequestNameFromReplayDraft(value: unknown): string | undefined {
+  const replayDraft = nonBlankText(value)
+  if (!replayDraft) return undefined
+  try {
+    const saved = JSON.parse(replayDraft)
+    if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return undefined
+    const request = (saved as Record<string, unknown>).request
+    if (!request || typeof request !== 'object' || Array.isArray(request)) return undefined
+    return nonBlankText((request as Record<string, unknown>).name)
+  } catch {
+    return undefined
+  }
 }
 
 export function isRedactedApiDebugUrl(value: string): boolean {

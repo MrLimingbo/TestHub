@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.hasItem;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,6 +70,10 @@ class AccessControlFlowTests {
                    OR account LIKE 'account-management-test-deleted-%'
                    OR email IN ('test@testhub.local', 'account-management-test@testhub.local')
                 """).update();
+        jdbc.sql("""
+                DELETE FROM project_environment
+                WHERE project_id IN (SELECT id FROM project WHERE name LIKE '项目管理测试%')
+                """).update();
         jdbc.sql("DELETE FROM project WHERE name LIKE '项目管理测试%'").update();
     }
 
@@ -89,6 +94,11 @@ class AccessControlFlowTests {
                 .andExpect(jsonPath("$.data.description").value("创建项目"))
                 .andReturn();
         String projectId = json(created).at("/data/id").asText();
+        mvc.perform(get("/api/v1/projects/{projectId}/environments", projectId)
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].environmentCode").value("test"))
+                .andExpect(jsonPath("$.data[0].defaultEnvironment").value(true));
 
         MvcResult updateCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
                 .andExpect(status().isOk()).andReturn();
@@ -358,8 +368,8 @@ class AccessControlFlowTests {
                 .andExpect(status().isNoContent());
 
         mvc.perform(get("/api/v1/system-config").cookie(administrator.sessionCookie()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].key").value("test.config.value"))
-                .andExpect(jsonPath("$.data[0].value").value("enabled"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.key == 'test.config.value')].value").value(hasItem("enabled")));
         mvc.perform(get("/api/v1/audit-logs").param("action", "SYSTEM_CONFIG_UPSERTED").cookie(administrator.sessionCookie()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].action").value("SYSTEM_CONFIG_UPSERTED"))
                 .andExpect(jsonPath("$.data[0].resourceId").value("test.config.value"));

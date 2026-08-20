@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   apiDebugDraftFromHistory,
   apiDebugDraftFromQuery,
+  apiDebugRequestNameFromReplayDraft,
   buildApiDebugCurlCommand,
   consumeApiDebugRouteDraft,
   isRedactedApiDebugUrl,
@@ -27,6 +28,15 @@ describe('API debug route draft', () => {
       headers: 'Content-Type: application/json\nX-Trace: {{$randomUUID}}',
       environment: 'staging',
     })
+  })
+
+  it('normalizes and reloads a custom quick request name', () => {
+    expect(apiDebugDraftFromQuery({ name: '  订单查询调试  ' })).toEqual({ name: '订单查询调试' })
+    expect(apiDebugRequestNameFromReplayDraft(JSON.stringify({
+      protocol: 'HTTP',
+      request: { name: '订单查询调试', method: 'GET', url: 'https://api.example.com/orders' },
+    }))).toBe('订单查询调试')
+    expect(apiDebugRequestNameFromReplayDraft('{invalid')).toBeUndefined()
   })
 
   it('builds a URL from an environment base URL and interface path', () => {

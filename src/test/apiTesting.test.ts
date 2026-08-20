@@ -1,6 +1,9 @@
 import { reactive } from 'vue'
 import { describe, expect, it } from 'vitest'
 import {
+  apiCaseName,
+  apiCasePersistence,
+  apiCaseType,
   buildApiRunUrl,
   cloneApiRunSnapshot,
   createApiRunSnapshot,
@@ -156,6 +159,23 @@ describe('API testing request mapping', () => {
       passed: true,
       detail: '符合用例期望 202',
     }])
+  })
+
+  it('maps Apifox-style debug and test cases to the persisted case contract', () => {
+    expect(apiCaseName('查询订单', '记录不存在')).toBe('查询订单（记录不存在）')
+    expect(apiCaseType('')).toBe('DEBUG')
+    expect(apiCaseType(null)).toBe('DEBUG')
+    expect(apiCaseType('CONTRACT')).toBe('TEST')
+    expect(apiCasePersistence('DEBUG', 200, false, '{"code":0}')).toEqual({
+      expectedStatus: null,
+      responseValidation: '',
+      savedResponseBody: '',
+    })
+    expect(apiCasePersistence('TEST', 404, true, '{"code":404}')).toEqual({
+      expectedStatus: 404,
+      responseValidation: 'CONTRACT',
+      savedResponseBody: '{"code":404}',
+    })
   })
 
   it('ignores malformed parameter payloads safely', () => {

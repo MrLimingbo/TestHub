@@ -4,6 +4,7 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
 import io.testhub.platform.audit.AuditService;
+import io.testhub.platform.parameter.ProjectEnvironmentRepository;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,12 +23,14 @@ public class ApiAutomationExecutionProfileService {
     private final ApiAutomationExecutionProfileRepository profiles;
     private final AccessService access;
     private final AuditService audit;
+    private final ProjectEnvironmentRepository environments;
 
     public ApiAutomationExecutionProfileService(ApiAutomationExecutionProfileRepository profiles, AccessService access,
-                                                AuditService audit) {
+                                                AuditService audit, ProjectEnvironmentRepository environments) {
         this.profiles = profiles;
         this.access = access;
         this.audit = audit;
+        this.environments = environments;
     }
 
     public List<ApiAutomationExecutionProfile> list(AuthenticatedPrincipal principal, String projectId) {
@@ -44,7 +47,7 @@ public class ApiAutomationExecutionProfileService {
     public ApiAutomationExecutionProfileDetail create(AuthenticatedPrincipal principal, String projectId, ProfileInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (profiles.countByProject(projectId) >= 100) throw rejected("每个项目最多创建 100 个执行配置集");
-        Payload payload = payload(input);
+        Payload payload = payload(projectId, input);
         String id = UlidCreator.getUlid().toString();
         try { profiles.insert(id, project.organizationId(), projectId, payload.name(), payload.environmentCode(),
                 profiles.json(payload.variables()), principal.userId()); }
@@ -60,7 +63,7 @@ public class ApiAutomationExecutionProfileService {
                                                        ProfileInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (input == null || input.expectedVersion() == null || input.expectedVersion() < 1) throw rejected("保存执行配置集时必须提供当前版本号");
-        Payload payload = payload(input);
+        Payload payload = payload(projectId, input);
         int updated;
         try { updated = profiles.update(projectId, profileId, input.expectedVersion(), payload.name(), payload.environmentCode(),
                 profiles.json(payload.variables())); }
@@ -74,10 +77,13 @@ public class ApiAutomationExecutionProfileService {
 
     ApiAutomationExecutionProfileDetail requireForExecution(String projectId, String profileId) { return require(projectId, profileId); }
 
-    private Payload payload(ProfileInput input) {
+    private Payload payload(String projectId, ProfileInput input) {
         if (input == null) throw rejected("执行配置集参数不能为空");
         String name = required(input.name(), "执行配置集名称", 160);
         String environmentCode = environment(input.environmentCode());
+        if (environments.findByCode(projectId, environmentCode).isEmpty()) {
+            throw rejected("请选择当前项目中已存在的执行环境");
+        }
         Map<String, String> variables = variables(input.variables());
         if (profiles.json(variables).length() > 256 * 1024) throw rejected("执行配置集变量不能超过 256 KB");
         return new Payload(name, environmentCode, variables);
@@ -99,8 +105,8 @@ public class ApiAutomationExecutionProfileService {
 
     private Map<String, String> variables(Map<String, String> source) { return validateVariables(source, "执行配置集"); }
     private String environment(String value) {
-        String normalized = value == null || value.isBlank() ? "default" : value.trim().toLowerCase(Locale.ROOT);
-        if (!normalized.matches("[A-Za-z][A-Za-z0-9_-]{0,63}")) throw rejected("环境标识不合法");
+        String normalized = value == null || value.isBlank() ? "test" : value.trim().toLowerCase(Locale.ROOT);
+        if (!normalized.matches("[a-z0-9][a-z0-9_-]{0,63}")) throw rejected("环境标识不合法");
         return normalized;
     }
     private ApiAutomationExecutionProfileDetail require(String projectId, String profileId) {

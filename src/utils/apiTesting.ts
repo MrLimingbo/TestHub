@@ -328,3 +328,26 @@ export function validateApiContract(
   }
   return checks
 }
+
+export type ApiCaseType = 'DEBUG' | 'TEST'
+
+export function apiCaseType(responseValidation: string | null | undefined): ApiCaseType {
+  return responseValidation === 'CONTRACT' ? 'TEST' : 'DEBUG'
+}
+
+export function apiCaseName(apiName: string, scenario: string) {
+  return `${apiName}（${scenario}）`
+}
+
+export function apiCasePersistence(
+  type: ApiCaseType,
+  expectedStatus: number,
+  saveResponse: boolean,
+  responseBody: string,
+) {
+  return {
+    expectedStatus: type === 'TEST' ? expectedStatus : null,
+    responseValidation: type === 'TEST' ? 'CONTRACT' : '',
+    savedResponseBody: saveResponse ? responseBody : '',
+  }
+}

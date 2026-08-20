@@ -33,7 +33,7 @@ const router = createRouter({
           children: [
             { path: '', redirect: '/api-testing/interfaces' },
             { path: 'interfaces', component: () => import('@/pages/ApiDesignPage.vue') },
-            { path: 'quick-request', component: () => import('@/pages/ApiDebugPage.vue') },
+            { path: 'quick-request', component: () => import('@/pages/ApiDesignPage.vue') },
           ],
         },
         {
@@ -67,6 +67,7 @@ const router = createRouter({
           children: [
             { path: '', redirect: '/system-settings/accounts' },
             { path: 'accounts', component: () => import('@/pages/AccountManagementPage.vue') },
+            { path: 'environments', component: () => import('@/pages/EnvironmentManagementPage.vue') },
             { path: 'parameters', component: () => import('@/pages/SystemSettingsPage.vue') },
           ],
         },

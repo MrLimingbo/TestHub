@@ -5,14 +5,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.containsString;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.testhub.platform.apidebug.ApiDebugTargetPolicy;
 import io.testhub.platform.apidebug.ApiDebugTransport;
+import io.testhub.platform.config.SystemConfigRepository;
 import jakarta.servlet.http.Cookie;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -36,11 +41,33 @@ class ApiDebugFlowTests {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private JdbcClient jdbc;
     @Autowired private RecordingDebugTransport transport;
+    @Autowired private SystemConfigRepository configs;
+    private Optional<String> previousAllowedPrivateOrigins = Optional.empty();
+    private Optional<String> previousAllowConfiguredPrivateTargets = Optional.empty();
+    private String configurationAdministratorId;
 
     @AfterEach
     void cleanDebugHistory() {
         jdbc.sql("DELETE FROM api_debug_history WHERE request_url LIKE 'https://8.8.8.8/%'").update();
+        jdbc.sql("DELETE FROM api_debug_history WHERE request_url LIKE 'http://172.27.15.153:%'").update();
+        jdbc.sql("DELETE FROM api_debug_history WHERE request_url LIKE 'http://172.20.30.40:%'").update();
+        jdbc.sql("DELETE FROM api_debug_history WHERE request_url LIKE 'http://127.0.0.1:%'").update();
         jdbc.sql("DELETE FROM project_parameter WHERE parameter_key IN ('DEBUG_ACCEPTANCE_BASE_URL', 'DEBUG_ACCEPTANCE_TOKEN')").update();
+        jdbc.sql("DELETE FROM project_parameter WHERE parameter_key = 'DEBUG_PRIVATE_BASE_URL'").update();
+        if (configurationAdministratorId != null) {
+            if (previousAllowedPrivateOrigins.isPresent()) {
+                configs.upsert(ApiDebugTargetPolicy.ALLOWED_PRIVATE_ORIGINS_CONFIG,
+                        previousAllowedPrivateOrigins.get(), configurationAdministratorId);
+            } else {
+                configs.deleteNonSecret(ApiDebugTargetPolicy.ALLOWED_PRIVATE_ORIGINS_CONFIG);
+            }
+            if (previousAllowConfiguredPrivateTargets.isPresent()) {
+                configs.upsert(ApiDebugTargetPolicy.ALLOW_CONFIGURED_PRIVATE_TARGETS_CONFIG,
+                        previousAllowConfiguredPrivateTargets.get(), configurationAdministratorId);
+            } else {
+                configs.deleteNonSecret(ApiDebugTargetPolicy.ALLOW_CONFIGURED_PRIVATE_TARGETS_CONFIG);
+            }
+        }
         transport.clear();
     }
 
@@ -73,6 +100,142 @@ class ApiDebugFlowTests {
                         .header(csrf.headerName(), csrf.token())
                         .content("{\"method\":\"GET\",\"url\":\"http://127.0.0.1:8080/actuator/health\",\"headers\":[]}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void allowsOnlyTheExactPrivateOriginMaintainedByTheSystemAdministrator() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        configurationAdministratorId = jdbc.sql("SELECT id FROM user_account WHERE email = 'admin@testhub.local'")
+                .query(String.class).single();
+        previousAllowedPrivateOrigins = configs.findNonSecretValue(ApiDebugTargetPolicy.ALLOWED_PRIVATE_ORIGINS_CONFIG);
+        previousAllowConfiguredPrivateTargets = configs.findNonSecretValue(ApiDebugTargetPolicy.ALLOW_CONFIGURED_PRIVATE_TARGETS_CONFIG);
+        configs.deleteNonSecret(ApiDebugTargetPolicy.ALLOWED_PRIVATE_ORIGINS_CONFIG);
+        configs.deleteNonSecret(ApiDebugTargetPolicy.ALLOW_CONFIGURED_PRIVATE_TARGETS_CONFIG);
+
+        Csrf csrf = csrf(administrator);
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/execute", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"method\":\"GET\",\"url\":\"http://172.27.15.153:8888/health\",\"headers\":[]}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(containsString(ApiDebugTargetPolicy.ALLOWED_PRIVATE_ORIGINS_CONFIG)));
+
+        configs.upsert(ApiDebugTargetPolicy.ALLOWED_PRIVATE_ORIGINS_CONFIG,
+                "http://172.27.15.153:8888", configurationAdministratorId);
+        csrf = csrf(administrator);
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/execute", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"method\":\"GET\",\"url\":\"http://172.27.15.153:8888/health\",\"headers\":[]}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.success").value(true));
+        assertEquals("http://172.27.15.153:8888/health", transport.latest().url().toString());
+
+        csrf = csrf(administrator);
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/execute", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"method\":\"GET\",\"url\":\"http://172.27.15.153:8889/health\",\"headers\":[]}"))
+                .andExpect(status().isBadRequest());
+
+        csrf = csrf(administrator);
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/execute", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"method\":\"GET\",\"url\":\"http://127.0.0.1:8888/health\",\"headers\":[]}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(containsString("永久禁止")));
+    }
+
+    @Test
+    void onlineDebugAllowsAnyConfiguredPrivateIpFromAnEnvironmentWhenAdministratorEnablesIt() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        configurationAdministratorId = jdbc.sql("SELECT id FROM user_account WHERE email = 'admin@testhub.local'")
+                .query(String.class).single();
+        previousAllowedPrivateOrigins = configs.findNonSecretValue(ApiDebugTargetPolicy.ALLOWED_PRIVATE_ORIGINS_CONFIG);
+        previousAllowConfiguredPrivateTargets = configs.findNonSecretValue(ApiDebugTargetPolicy.ALLOW_CONFIGURED_PRIVATE_TARGETS_CONFIG);
+        configs.deleteNonSecret(ApiDebugTargetPolicy.ALLOWED_PRIVATE_ORIGINS_CONFIG);
+        configs.upsert(ApiDebugTargetPolicy.ALLOW_CONFIGURED_PRIVATE_TARGETS_CONFIG, "true", configurationAdministratorId);
+        upsert(administrator, projectId, "parameters", Map.of("environmentCode", "test", "key", "DEBUG_PRIVATE_BASE_URL",
+                "value", "http://172.20.30.40:9876"));
+
+        Csrf csrf = csrf(administrator);
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/execute", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"method\":\"GET\",\"url\":\"{{DEBUG_PRIVATE_BASE_URL}}/health\",\"environmentCode\":\"test\",\"headers\":[]}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.success").value(true));
+        assertEquals("http://172.20.30.40:9876/health", transport.latest().url().toString());
+
+        csrf = csrf(administrator);
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/execute", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token())
+                        .content("{\"method\":\"GET\",\"url\":\"http://127.0.0.1:9876/health\",\"headers\":[]}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(containsString("永久禁止")));
+    }
+
+    @Test
+    void recordsDesktopLocalExecutionWithoutUsingTheServerTransport() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        Csrf csrf = csrf(administrator);
+        String payload = """
+                {
+                  "request": {
+                    "name": "桌面内网调试",
+                    "method": "GET",
+                    "url": "http://127.0.0.1:9876/health",
+                    "headers": [],
+                    "body": "",
+                    "timeoutMs": 1000,
+                    "protocol": {"type": "HTTP"}
+                  },
+                  "result": {
+                    "success": true,
+                    "statusCode": 200,
+                    "durationMs": 12,
+                    "responseSize": 18
+                  }
+                }
+                """;
+
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/local-executions", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content(payload))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.historyId").isNotEmpty());
+        assertNull(transport.latest());
+
+        mvc.perform(get("/api/v1/projects/{projectId}/api-debug/history", projectId).cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].requestUrl").value("http://127.0.0.1:9876/health"))
+                .andExpect(jsonPath("$.data[0].responseStatus").value(200));
+    }
+
+    @Test
+    void savesEncryptedQuickRequestDraftWithoutExecutingTransport() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        Csrf csrf = csrf(administrator);
+        Map<String, Object> request = Map.of(
+                "name", "订单查询快捷请求",
+                "method", "POST", "url", "https://8.8.8.8/api/v1/draft-acceptance?token=should-not-persist",
+                "headers", List.of(Map.of("name", "Content-Type", "value", "application/json")),
+                "body", "{\"source\":\"saved-draft\"}", "timeoutMs", 1000);
+
+        mvc.perform(post("/api/v1/projects/{projectId}/api-debug/drafts", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.result").value("DRAFT"))
+                .andExpect(jsonPath("$.data.requestUrl").value("https://8.8.8.8/api/v1/draft-acceptance?token=***"))
+                .andExpect(jsonPath("$.data.replayDraft").value(containsString("saved-draft")))
+                .andExpect(jsonPath("$.data.replayDraft").value(containsString("订单查询快捷请求")));
+
+        assertNull(transport.latest());
+        mvc.perform(get("/api/v1/projects/{projectId}/api-debug/history", projectId).cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].result").value("DRAFT"))
+                .andExpect(jsonPath("$.data[0].responseStatus").doesNotExist());
     }
 
     @Test

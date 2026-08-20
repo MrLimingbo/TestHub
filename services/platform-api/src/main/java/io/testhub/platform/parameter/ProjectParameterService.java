@@ -39,6 +39,9 @@ public class ProjectParameterService {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, PARAMETER_WRITERS);
         String normalizedEnvironment = normalizeEnvironment(environmentCode);
         String normalizedKey = normalizeKey(key);
+        if ("BASE_URL".equals(normalizedKey)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BASE_URL 由环境基础地址维护，请前往环境管理修改");
+        }
         if (value == null || value.length() > 20_000) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "参数值不能为空且不能超过 20000 字符");
         }

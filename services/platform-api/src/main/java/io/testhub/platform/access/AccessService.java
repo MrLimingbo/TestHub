@@ -3,6 +3,7 @@ package io.testhub.platform.access;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.account.AccountManagementService;
 import io.testhub.platform.audit.AuditService;
+import io.testhub.platform.parameter.ProjectEnvironmentRepository;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -31,13 +32,16 @@ public class AccessService {
     private final TokenRepository tokens;
     private final AccountManagementService accountManagement;
     private final AuditService audit;
+    private final ProjectEnvironmentRepository environments;
 
     public AccessService(AccessRepository access, TokenRepository tokens,
-                         AccountManagementService accountManagement, AuditService audit) {
+                         AccountManagementService accountManagement, AuditService audit,
+                         ProjectEnvironmentRepository environments) {
         this.access = access;
         this.tokens = tokens;
         this.accountManagement = accountManagement;
         this.audit = audit;
+        this.environments = environments;
     }
 
     public AccessContext context(AuthenticatedPrincipal principal) {
@@ -73,6 +77,8 @@ public class AccessService {
         String id = UlidCreator.getUlid().toString();
         access.insertProject(id, organization.id(), normalizeProjectName(name), normalizedCode,
                 normalizeDescription(description), principal.userId());
+        environments.insert(UlidCreator.getUlid().toString(), organization.id(), id, "默认测试环境", "test", "",
+                "项目创建时生成的默认环境", true, true, principal.userId());
         audit.record(principal, organization.id(), id, "PROJECT_CREATED", "PROJECT", id,
                 java.util.Map.of("name", name.trim(), "code", normalizedCode));
         return access.findProject(id).orElseThrow();

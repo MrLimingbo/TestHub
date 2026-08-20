@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +27,28 @@ class ApiAutomationExecutionProfileFlowTests {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private JdbcClient jdbc;
+    private final List<String> createdEnvironmentIds = new ArrayList<>();
 
     @AfterEach
     void clean() {
         jdbc.sql("DELETE FROM api_automation_execution WHERE scenario_name LIKE '自动化配置集验收 %'").update();
         jdbc.sql("DELETE FROM api_automation_scenario WHERE name LIKE '自动化配置集验收 %'").update();
         jdbc.sql("DELETE FROM api_automation_execution_profile WHERE name LIKE '自动化配置集验收 %'").update();
+        for (String environmentId : createdEnvironmentIds) {
+            jdbc.sql("DELETE FROM project_parameter WHERE environment_code = 'staging' AND project_id = "
+                    + "(SELECT project_id FROM project_environment WHERE id = :environmentId)")
+                    .param("environmentId", environmentId).update();
+            jdbc.sql("DELETE FROM project_environment WHERE id = :environmentId")
+                    .param("environmentId", environmentId).update();
+        }
+        createdEnvironmentIds.clear();
     }
 
     @Test
     void freezesProfileEnvironmentAndExecutionOverridesWithoutReturningValues() throws Exception {
         LoginSession administrator = login();
         String projectId = projectId(administrator);
+        ensureStagingEnvironment(administrator, projectId);
         Csrf csrf = csrf(administrator);
         MvcResult profile = mvc.perform(post("/api/v1/projects/{projectId}/api-automation/execution-profiles", projectId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
@@ -86,6 +98,7 @@ class ApiAutomationExecutionProfileFlowTests {
     void previewsFrozenConfigurationAndEditsProfilesWithoutCreatingAnExecution() throws Exception {
         LoginSession administrator = login();
         String projectId = projectId(administrator);
+        ensureStagingEnvironment(administrator, projectId);
         Csrf csrf = csrf(administrator);
         MvcResult profile = mvc.perform(post("/api/v1/projects/{projectId}/api-automation/execution-profiles", projectId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
@@ -140,6 +153,24 @@ class ApiAutomationExecutionProfileFlowTests {
                         .content("{\"email\":\"admin@testhub.local\",\"password\":\"TestHub2026!\"}"))
                 .andExpect(status().isOk()).andReturn();
         return new LoginSession(login.getResponse().getCookie("TESTHUB_SESSION"));
+    }
+    private void ensureStagingEnvironment(LoginSession session, String projectId) throws Exception {
+        MvcResult listed = mvc.perform(get("/api/v1/projects/{projectId}/environments", projectId)
+                        .cookie(session.sessionCookie()))
+                .andExpect(status().isOk()).andReturn();
+        for (JsonNode environment : json(listed).path("data")) {
+            if ("staging".equals(environment.path("environmentCode").asText())) return;
+        }
+        Csrf csrf = csrf(session);
+        MvcResult created = mvc.perform(post("/api/v1/projects/{projectId}/environments", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(session.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content("""
+                                {"name":"自动化配置集验收环境","environmentCode":"staging",
+                                 "baseUrl":"https://staging.example.test","enabled":true,
+                                 "defaultEnvironment":false}
+                                """))
+                .andExpect(status().isOk()).andReturn();
+        createdEnvironmentIds.add(json(created).at("/data/id").asText());
     }
     private Csrf csrf(LoginSession session) throws Exception { MvcResult result = mvc.perform(get("/api/v1/auth/csrf").cookie(session.sessionCookie())).andExpect(status().isOk()).andReturn(); JsonNode data = json(result).path("data"); return new Csrf(result.getResponse().getCookie("XSRF-TOKEN"), data.path("headerName").asText(), data.path("token").asText()); }
     private String projectId(LoginSession session) throws Exception { MvcResult context = mvc.perform(get("/api/v1/access/context").cookie(session.sessionCookie())).andExpect(status().isOk()).andReturn(); String organizationId = json(context).at("/data/organizations/0/id").asText(); return json(context).at("/data/projects/" + organizationId + "/0/id").asText(); }
