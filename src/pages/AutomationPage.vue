@@ -5,7 +5,7 @@ import AutomationRunPanel from '@/components/api-automation/AutomationRunPanel.v
 import AutomationSidebar from '@/components/api-automation/AutomationSidebar.vue'
 import { useSessionStore } from '@/stores/session'
 import { parseCurlCommand } from '@/utils/apiAutomation'
-import { apiCaseType, buildApiRunUrl, type ApiRunSnapshot } from '@/utils/apiTesting'
+import { apiCaseType, buildApiRunUrl, createApiRunSnapshot, type ApiRunSnapshot, type ApiVersionSource } from '@/utils/apiTesting'
 
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
@@ -56,6 +56,7 @@ const projectId = computed({ get: () => session.projectId, set: (value: string) 
 const scenarios = ref<Scenario[]>([])
 const environments = ref<ProjectEnvironment[]>([])
 const detail = ref<ScenarioDetail | null>(null)
+const savedScenarioContent = ref('')
 const revisions = ref<Revision[]>([])
 const runners = ref<ApiRunnerStatus[]>([])
 const executions = ref<AutomationExecution[]>([])
@@ -341,6 +342,7 @@ async function selectScenario(scenarioId: string) {
       read<Revision[]>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${scenarioId}/revisions`),
     ])
     detail.value = scenario
+    savedScenarioContent.value = JSON.stringify(scenarioContent(scenario, scenario.variables))
     revisions.value = history
     variableRows.value = Object.entries(scenario.variables).map(([key, value]) => ({ key, value }))
     selectedStepId.value = scenario.steps[0]?.id ?? ''
@@ -442,11 +444,13 @@ async function importRequestStep() {
     } else if (importMode.value === 'INTERFACE') {
       const definition = importDefinitions.value.find((item) => item.id === importSelectionId.value)
       if (!definition) throw new Error('请选择要导入的接口')
-      const versions = await read<Array<{ id: string; requestBody: string }>>(`/api/v1/projects/${projectId.value}/api-design/definitions/${definition.id}/versions`)
-      const requestBody = versions.find((version) => version.id === definition.currentVersionId)?.requestBody ?? versions[0]?.requestBody ?? ''
+      const versions = await read<Array<ApiVersionSource & { id: string }>>(`/api/v1/projects/${projectId.value}/api-design/definitions/${definition.id}/versions`)
+      const version = versions.find((version) => version.id === definition.currentVersionId) ?? versions[0]
+      if (!version) throw new Error('接口尚无可导入的版本')
+      const snapshot = createApiRunSnapshot(version, importForm.baseUrl)
       request = defaultStep('REQUEST')
       request.name = definition.name
-      request.config = { method: definition.method, url: `${importForm.baseUrl.replace(/\/+$/, '')}${definition.path}`, body: requestBody, contentType: requestBody ? 'application/json' : '', maxAttempts: 1 }
+      request.config = { method: definition.method, url: buildApiRunUrl(definition, snapshot), body: snapshot.body, contentType: importedContentType(snapshot), maxAttempts: 1 }
     } else {
       const source = importCandidates.value.find((item) => item.id === importSelectionId.value)
       if (!source) throw new Error('请选择要导入的接口用例')
@@ -601,18 +605,40 @@ function variables(): Record<string, string> {
   return result
 }
 
-async function saveScenario() {
-  if (!detail.value || !projectId.value) return
+function scenarioContent(current: ScenarioDetail, currentVariables: Record<string, string>) {
+  return { name: current.name, description: current.description, environmentCode: current.environmentCode,
+    failureStrategy: current.failureStrategy, steps: current.steps, variables: currentVariables,
+    preRequestScript: current.preRequestScript, postResponseScript: current.postResponseScript }
+}
+
+async function saveBeforeExecution(): Promise<boolean> {
+  if (!detail.value) return false
+  try {
+    if (JSON.stringify(scenarioContent(detail.value, variables())) === savedScenarioContent.value) return true
+    return await saveScenario()
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : '保存场景失败')
+    return false
+  }
+}
+
+// Each action closes its own dialog only after successful validation and persistence.
+async function submitDialog(action: () => Promise<void>): Promise<boolean> {
+  await action()
+  return false
+}
+
+async function saveScenario(): Promise<boolean> {
+  if (!detail.value || !projectId.value) return false
   saving.value = true
   try {
     const current = detail.value
     const result = await mutate<ScenarioDetail>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${current.id}`, 'PUT', {
       expectedVersion: current.version,
-      scenario: { name: current.name, description: current.description, environmentCode: current.environmentCode,
-        failureStrategy: current.failureStrategy, steps: current.steps, variables: variables(),
-        preRequestScript: current.preRequestScript, postResponseScript: current.postResponseScript },
+      scenario: scenarioContent(current, variables()),
     })
     detail.value = result
+    savedScenarioContent.value = JSON.stringify(scenarioContent(result, result.variables))
     variableRows.value = Object.entries(result.variables).map(([key, value]) => ({ key, value }))
     scenarios.value = scenarios.value.map((scenario) => scenario.id === result.id
       ? { ...scenario, name: result.name, description: result.description, environmentCode: result.environmentCode,
@@ -620,7 +646,8 @@ async function saveScenario() {
       : scenario)
     revisions.value = await read<Revision[]>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${result.id}/revisions`)
     Message.success(`场景已保存为 v${result.version}`)
-  } catch (error) { Message.error(error instanceof Error ? error.message : '保存场景失败') } finally { saving.value = false }
+    return true
+  } catch (error) { Message.error(error instanceof Error ? error.message : '保存场景失败'); return false } finally { saving.value = false }
 }
 
 function openExecutionOptions(preserveSelections = false) {
@@ -663,8 +690,10 @@ async function submitExecution() {
   if (!detail.value || !projectId.value) { Message.warning('请先选择一个场景'); return }
   submittingExecution.value = true
   try {
+    const overrides = executionOverrides()
+    if (!await saveBeforeExecution()) return
     const execution = await mutate<AutomationExecution>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${detail.value.id}/executions`, 'POST', {
-      timeoutSeconds: executionOptionsForm.timeoutSeconds, executionProfileId: executionOptionsForm.executionProfileId || null, overrides: executionOverrides(),
+      timeoutSeconds: executionOptionsForm.timeoutSeconds, executionProfileId: executionOptionsForm.executionProfileId || null, overrides,
     })
     executionOptionsVisible.value = false
     await loadExecutions()
@@ -838,6 +867,7 @@ async function submitDataSetExecution() {
   }
   submittingDataSetExecution.value = true
   try {
+    if (dataSetExecutionForm.scenarioId === detail.value?.id && !await saveBeforeExecution()) return
     const batch = await mutate<AutomationDataSetExecutionBatch>(`/api/v1/projects/${projectId.value}/api-automation/data-sets/${dataSetExecutionForm.dataSetId}/scenarios/${dataSetExecutionForm.scenarioId}/executions`, 'POST', {
       timeoutSeconds: dataSetExecutionForm.timeoutSeconds,
     })
@@ -1217,7 +1247,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
       </template>
     </a-drawer>
 
-    <a-modal v-model:visible="importVisible" title="导入请求步骤" width="680px" :ok-text="'导入到当前场景'" @ok="importRequestStep">
+    <a-modal v-model:visible="importVisible" title="导入请求步骤" width="680px" :ok-text="'导入到当前场景'" :on-before-ok="() => submitDialog(importRequestStep)">
       <a-tabs v-model:active-key="importMode" type="rounded">
         <a-tab-pane key="INTERFACE" title="接口" />
         <a-tab-pane key="TEST_CASE" title="单接口用例" />
@@ -1240,7 +1270,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
       </a-form>
     </a-modal>
 
-    <a-modal v-model:visible="createVisible" title="新建接口自动化场景" width="600px" :confirm-loading="saving" @ok="createScenario">
+    <a-modal v-model:visible="createVisible" title="新建接口自动化场景" width="600px" :ok-loading="saving" :on-before-ok="() => submitDialog(createScenario)">
       <a-form :model="createForm" layout="vertical">
         <a-form-item label="场景名称" required>
           <a-input v-model="createForm.name" :max-length="160" placeholder="例如：订单核心链路回归" />
@@ -1264,7 +1294,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         <div class="modal-tip">将自动创建一个引用 <code>BASE_URL</code> 的 GET 请求步骤，执行时由所选项目环境解析。Runner 接入前，保存不会发起任何外部请求。</div>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="executionProfileVisible" :title="editingExecutionProfileId ? '编辑场景运行配置集' : '新建场景运行配置集'" width="680px" :confirm-loading="savingExecutionProfile" @ok="createExecutionProfile">
+    <a-modal v-model:visible="executionProfileVisible" :title="editingExecutionProfileId ? '编辑场景运行配置集' : '新建场景运行配置集'" width="680px" :ok-loading="savingExecutionProfile" :on-before-ok="() => submitDialog(createExecutionProfile)">
       <a-form :model="executionProfileForm" layout="vertical">
         <a-form-item label="配置集名称" required>
           <a-input v-model="executionProfileForm.name" :max-length="160" placeholder="例如：预发订单回归" />
@@ -1280,7 +1310,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         <a-alert type="warning" :show-icon="true">只接受字符串值，最多 100 项。配置集变量会在执行时冻结，但不能覆盖当前环境密钥；密钥必须使用项目环境密钥管理。</a-alert>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="executionOptionsVisible" title="提交场景执行" width="720px" :confirm-loading="submittingExecution" @ok="submitExecution">
+    <a-modal v-model:visible="executionOptionsVisible" title="提交场景执行" width="720px" :ok-loading="submittingExecution" :on-before-ok="() => submitDialog(submitExecution)">
       <a-form :model="executionOptionsForm" layout="vertical">
         <a-form-item label="运行配置集（可选）">
           <a-select v-model="executionOptionsForm.executionProfileId" allow-clear placeholder="使用场景默认环境" @change="clearExecutionConfigurationPreview">
@@ -1325,7 +1355,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         <a-alert type="info" :show-icon="true">优先级从低到高：项目参数、场景变量、运行配置集、数据集行、本次覆盖变量、环境密钥、Runner 局部变量。预览和任务创建都只保留脱敏来源，值不在浏览器、日志、清单或报告中展示。</a-alert>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="reusableStepVisible" title="保存项目级公共步骤" width="620px" :confirm-loading="savingReusableStep" @ok="createReusableStep">
+    <a-modal v-model:visible="reusableStepVisible" title="保存项目级公共步骤" width="620px" :ok-loading="savingReusableStep" :on-before-ok="() => submitDialog(createReusableStep)">
       <a-form :model="reusableStepForm" layout="vertical">
         <a-form-item label="公共步骤名称" required>
           <a-input v-model="reusableStepForm.name" :max-length="160" placeholder="例如：获取订单健康状态" />
@@ -1336,7 +1366,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         <a-alert type="info" :show-icon="true">会复制当前选中的基础步骤并创建 v1。公共步骤不能嵌套公共步骤或子场景；后续更新会产生新版本，现有引用不会漂移。</a-alert>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="dataSetVisible" title="新建接口自动化数据集" width="720px" :confirm-loading="savingDataSet" @ok="createDataSet">
+    <a-modal v-model:visible="dataSetVisible" title="新建接口自动化数据集" width="720px" :ok-loading="savingDataSet" :on-before-ok="() => submitDialog(createDataSet)">
       <a-form :model="dataSetForm" layout="vertical">
         <div class="form-grid">
           <a-form-item label="数据集名称" required>
@@ -1372,7 +1402,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         <a-alert type="warning" :show-icon="true">字段名只能使用字母、数字和下划线，且不能以数字开头；最多 50 个字段、200 行。不要把 API Token、密码或私钥写入数据集。文件导入会保存原始附件，但附件不会发送给 Runner。</a-alert>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="dataSetExecutionVisible" title="按数据集逐行执行" width="560px" :confirm-loading="submittingDataSetExecution" @ok="submitDataSetExecution">
+    <a-modal v-model:visible="dataSetExecutionVisible" title="按数据集逐行执行" width="560px" :ok-loading="submittingDataSetExecution" :on-before-ok="() => submitDialog(submitDataSetExecution)">
       <a-form :model="dataSetExecutionForm" layout="vertical">
         <a-form-item label="数据集">
           <a-select v-model="dataSetExecutionForm.dataSetId">
@@ -1421,7 +1451,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         <a-empty v-if="!dataSetDetail.previewRows.length" description="没有可预览的数据行" />
       </template>
     </a-modal>
-    <a-modal v-model:visible="webhookVisible" title="新建签名 Webhook" width="580px" :confirm-loading="savingWebhook" @ok="createWebhook">
+    <a-modal v-model:visible="webhookVisible" title="新建签名 Webhook" width="580px" :ok-loading="savingWebhook" :on-before-ok="() => submitDialog(createWebhook)">
       <a-form :model="webhookForm" layout="vertical">
         <a-form-item label="Webhook 名称" required>
           <a-input v-model="webhookForm.name" :max-length="160" placeholder="例如：发布后订单回归" />
@@ -1441,7 +1471,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
 </pre>
       <a-button type="primary" long @click="webhookSecretVisible = false; createdWebhookSecret = ''">我已安全保存</a-button>
     </a-modal>
-    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑 Quartz 定时计划' : '新建 Quartz 定时计划'" width="640px" :confirm-loading="savingSchedule" @ok="saveSchedule">
+    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑 Quartz 定时计划' : '新建 Quartz 定时计划'" width="640px" :ok-loading="savingSchedule" :on-before-ok="() => submitDialog(saveSchedule)">
       <a-form :model="scheduleForm" layout="vertical">
         <a-form-item label="计划名称" required>
           <a-input v-model="scheduleForm.name" :max-length="160" placeholder="例如：每日订单接口回归" />

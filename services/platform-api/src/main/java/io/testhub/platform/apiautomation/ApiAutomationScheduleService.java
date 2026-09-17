@@ -67,7 +67,7 @@ public class ApiAutomationScheduleService {
         String id = UlidCreator.getUlid().toString();
         try {
             schedules.insert(id, project.organizationId(), projectId, payload.scenarioId(), payload.name(), payload.cronExpression(),
-                    payload.timezone(), payload.timeoutSeconds(), payload.maxConsecutiveFailures(), principal.userId());
+                    payload.timezone(), payload.timeoutSeconds(), payload.maxConsecutiveFailures(), payload.enabled(), principal.userId());
         } catch (DataIntegrityViolationException exception) {
             throw conflict("当前项目已存在同名接口自动化定时计划");
         }

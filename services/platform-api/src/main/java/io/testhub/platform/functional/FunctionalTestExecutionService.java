@@ -24,20 +24,25 @@ public class FunctionalTestExecutionService {
     private static final Set<String> STEP_STATUSES = Set.of("NOT_RUN", "PASSED", "FAILED", "BLOCKED");
     private final FunctionalTestExecutionRepository executions;
     private final FunctionalCaseRepository cases;
+    private final FunctionalCatalogRepository catalogs;
     private final AccessService access;
     private final AuditService audit;
 
     public FunctionalTestExecutionService(FunctionalTestExecutionRepository executions, FunctionalCaseRepository cases,
+                                          FunctionalCatalogRepository catalogs,
                                           AccessService access, AuditService audit) {
         this.executions = executions;
         this.cases = cases;
+        this.catalogs = catalogs;
         this.access = access;
         this.audit = audit;
     }
 
-    public List<FunctionalTestPlan> listPlans(AuthenticatedPrincipal principal, String projectId) {
+    public List<FunctionalTestPlan> listPlans(AuthenticatedPrincipal principal, String projectId, String catalogId) {
         access.requireProjectRead(principal, projectId);
-        return executions.findPlans(projectId);
+        String normalizedCatalogId = blankToNull(catalogId);
+        validatePlanCatalog(projectId, normalizedCatalogId);
+        return executions.findPlans(projectId, normalizedCatalogId);
     }
 
     public FunctionalTestPlan getPlan(AuthenticatedPrincipal principal, String projectId, String planId) {
@@ -52,11 +57,13 @@ public class FunctionalTestExecutionService {
         String code = normalizeCode(input.planCode(), "计划编号");
         String name = required(input.name(), 200, "计划名称");
         String status = normalizePlanStatus(input.status());
+        String catalogId = blankToNull(input.catalogId());
+        validatePlanCatalog(projectId, catalogId);
         List<String> caseIds = input.caseIds() == null ? List.of() : input.caseIds().stream().filter(id -> id != null && !id.isBlank()).distinct().toList();
         validateCases(projectId, caseIds);
         String id = UlidCreator.getUlid().toString();
         try {
-            executions.insertPlan(id, project.organizationId(), projectId, code, name, status, text(input.description()), principal.userId());
+            executions.insertPlan(id, project.organizationId(), projectId, catalogId, code, name, status, text(input.description()), principal.userId());
             replacePlanCases(id, caseIds);
         } catch (DataIntegrityViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "测试计划编号已存在或用例无效", exception);
@@ -73,9 +80,11 @@ public class FunctionalTestExecutionService {
         requirePlan(projectId, planId);
         String name = required(input.name(), 200, "计划名称");
         String status = normalizePlanStatus(input.status());
+        String catalogId = blankToNull(input.catalogId());
+        validatePlanCatalog(projectId, catalogId);
         List<String> caseIds = input.caseIds() == null ? List.of() : input.caseIds().stream().filter(id -> id != null && !id.isBlank()).distinct().toList();
         validateCases(projectId, caseIds);
-        executions.updatePlan(projectId, planId, name, status, text(input.description()), principal.userId());
+        executions.updatePlan(projectId, planId, catalogId, name, status, text(input.description()), principal.userId());
         replacePlanCases(planId, caseIds);
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_PLAN_UPDATED", "FUNCTIONAL_TEST_PLAN", planId, Map.of());
         return requirePlan(projectId, planId);
@@ -149,6 +158,9 @@ public class FunctionalTestExecutionService {
         ProjectSummary project = writeAccess(principal, projectId);
         FunctionalTestRunCase runCase = requireRunCase(projectId, runCaseId);
         String status = normalizeRunCaseStatus(input == null ? null : input.status());
+        if (status.equals("PASSED") && executions.findRunSteps(projectId, runCaseId).stream().anyMatch(step -> !step.status().equals("PASSED"))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "所有步骤均通过后才能将用例标记为通过");
+        }
         executions.updateRunCase(runCaseId, status, text(input == null ? null : input.note()), principal.userId(), Instant.now());
         recalculateRun(runCase.runId());
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_RUN_CASE_UPDATED", "FUNCTIONAL_TEST_RUN_CASE", runCaseId,
@@ -161,12 +173,17 @@ public class FunctionalTestExecutionService {
                                                RunStepInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         String status = normalizeStepStatus(input == null ? null : input.status());
+        String runCaseId = findRunCaseId(projectId, stepId);
+        FunctionalTestRunCase runCase = requireRunCase(projectId, runCaseId);
+        if (runCase.status().equals("PASSED") && !status.equals("PASSED")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "用例已标记通过，请先调整用例结果再修改步骤状态");
+        }
         if (executions.updateRunStep(projectId, stepId, status, text(input == null ? null : input.actualResult()), principal.userId()) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "执行步骤不存在");
         }
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_RUN_STEP_UPDATED", "FUNCTIONAL_TEST_RUN_STEP", stepId,
                 Map.of("status", status));
-        FunctionalTestRunStep step = executions.findRunSteps(projectId, requireRunCase(projectId, findRunCaseId(projectId, stepId)).id()).stream()
+        FunctionalTestRunStep step = executions.findRunSteps(projectId, runCaseId).stream()
                 .filter(candidate -> candidate.id().equals(stepId)).findFirst().orElseThrow();
         return step;
     }
@@ -194,6 +211,13 @@ public class FunctionalTestExecutionService {
 
     private void validateCases(String projectId, List<String> caseIds) {
         for (String caseId : caseIds) cases.findById(projectId, caseId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "计划包含不存在的用例"));
+    }
+
+    private void validatePlanCatalog(String projectId, String catalogId) {
+        if (catalogId == null) return;
+        FunctionalCatalog catalog = catalogs.findById(projectId, catalogId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "计划目录不存在"));
+        if (!catalog.scope().equals("PLANS")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "计划目录类型不匹配");
     }
 
     private FunctionalTestPlan requirePlan(String projectId, String planId) {
@@ -249,7 +273,7 @@ public class FunctionalTestExecutionService {
     private String text(String value) { return value == null ? "" : value.trim(); }
     private String blankToNull(String value) { return value == null || value.isBlank() ? null : value.trim(); }
 
-    public record PlanInput(String planCode, String name, String status, String description, List<String> caseIds) { }
+    public record PlanInput(String catalogId, String planCode, String name, String status, String description, List<String> caseIds) { }
     public record RunCaseInput(String status, String note) { }
     public record RunStepInput(String status, String actualResult) { }
 }

@@ -48,11 +48,17 @@ export interface FunctionalDefectSummary {
   catalogId: string | null
 }
 
+export interface FunctionalPlanSummary {
+  id: string
+  catalogId: string | null
+}
+
 export interface FunctionalWorkspace {
   catalogs: Ref<FunctionalCatalog[]>
   requirements: Ref<FunctionalRequirement[]>
   cases: Ref<FunctionalCase[]>
   defects: Ref<FunctionalDefectSummary[]>
+  plans: Ref<FunctionalPlanSummary[]>
   selectedCatalogId: Ref<string>
   selectedCatalogName: ComputedRef<string>
   loading: Ref<boolean>

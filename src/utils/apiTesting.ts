@@ -1,3 +1,5 @@
+import { encodeApiUrlComponent } from './apiUrlTemplate'
+
 export interface ApiParameterDefinition {
   name: string
   type: string
@@ -239,13 +241,13 @@ export function buildApiRunUrl(definition: ApiDefinitionSource, snapshot: ApiRun
   if (missingPath) throw new Error(`请填写路径参数：${missingPath.name}`)
   let path = definition.path
   snapshot.pathValues.forEach((item) => {
-    path = path.replaceAll(`{${item.name}}`, encodeURIComponent(item.value))
+    path = path.replaceAll(`{${item.name}}`, encodeApiUrlComponent(item.value))
   })
-  const missingTemplate = path.match(/\{([^}]+)\}/)
+  const missingTemplate = path.replace(/\{\{\s*[^{}\s]+\s*}}/g, '').match(/\{([^}]+)\}/)
   if (missingTemplate) throw new Error(`请填写路径参数：${missingTemplate[1]}`)
   const query = snapshot.queryValues
     .filter((item) => item.enabled && item.value !== '')
-    .map((item) => `${encodeURIComponent(item.name)}=${encodeURIComponent(item.value)}`)
+    .map((item) => `${encodeApiUrlComponent(item.name)}=${encodeApiUrlComponent(item.value)}`)
     .join('&')
   return `${snapshot.baseUrl.trim().replace(/\/+$/, '')}${path}${query ? `?${query}` : ''}`
 }

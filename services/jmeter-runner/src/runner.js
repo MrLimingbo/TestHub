@@ -150,7 +150,7 @@ export class JMeterRunner {
       // Keep the isolated process bounded, and disable both inherited and native
       // system proxies: a proxy would bypass the Runner target-origin allow list.
       cwd: workload.root, env: isolatedJmeterEnvironment(),
-      stdio: ['ignore', 'pipe', 'pipe'], shell: false,
+      stdio: ['ignore', 'pipe', 'pipe'], shell: false, detached: process.platform !== 'win32',
     })
     const running = { task, workload, child, cancelled: false, finalized: false,
       metrics: new JmeterMetrics({ resultsPath: workload.resultsPath, startedAt: this.now().getTime() }), metricTimer: undefined, resourceTimer: undefined }
@@ -262,9 +262,19 @@ export class JMeterRunner {
   }
 
   stopProcess(running) {
-    if (running.child.exitCode !== null || running.child.killed) return
-    running.child.kill('SIGTERM')
-    setTimeout(() => { if (running.child.exitCode === null && !running.child.killed) running.child.kill('SIGKILL') }, KILL_GRACE_MILLISECONDS).unref?.()
+    if (running.finalized || running.stopRequested) return
+    running.stopRequested = true
+    const signal = (name) => {
+      try {
+        // The JMeter launcher is a shell script; its Java child must stop too.
+        if (process.platform !== 'win32' && running.child.pid) process.kill(-running.child.pid, name)
+        else if (running.child.exitCode === null) running.child.kill(name)
+      } catch (error) {
+        if (error?.code !== 'ESRCH') throw error
+      }
+    }
+    signal('SIGTERM')
+    setTimeout(() => { if (!running.finalized) signal('SIGKILL') }, KILL_GRACE_MILLISECONDS).unref?.()
   }
 
   isCancelled(task) {

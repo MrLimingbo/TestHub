@@ -22,6 +22,7 @@ import {
   createQuickRequestRow,
   parseQuickRequestHeaders,
   parseQuickRequestQuery,
+  parseMultipartRows,
   serializeMultipartRows,
   serializeQuickRequestCookies,
   serializeQuickRequestHeaders,
@@ -230,7 +231,8 @@ function hydrateQuickHttpEditor() {
   const split = splitQuickRequestCookies(parseQuickRequestHeaders(headersText.value))
   headerRows.value = withBlankRow(split.headerRows)
   cookieRows.value = withBlankRow(split.cookieRows)
-  const contentType = split.headerRows.find((row) => row.name.toLowerCase() === 'content-type')?.value.toLowerCase() ?? ''
+  const rawContentType = split.headerRows.find((row) => row.name.toLowerCase() === 'content-type')?.value ?? ''
+  const contentType = rawContentType.toLowerCase()
   if (!body.value.trim()) quickBodyType.value = 'NONE'
   else if (contentType.includes('x-www-form-urlencoded')) quickBodyType.value = 'URLENCODED'
   else if (contentType.includes('multipart/form-data')) quickBodyType.value = 'FORM_DATA'
@@ -238,6 +240,14 @@ function hydrateQuickHttpEditor() {
   else if (contentType.startsWith('text/')) quickBodyType.value = 'TEXT'
   else quickBodyType.value = 'JSON'
   if (quickBodyType.value === 'URLENCODED') formBodyRows.value = withBlankRow(parseQuickRequestQuery(`?${body.value}`))
+  else if (quickBodyType.value === 'FORM_DATA') {
+    const rows = parseMultipartRows(body.value, rawContentType)
+    if (rows) formBodyRows.value = withBlankRow(rows)
+    else {
+      quickBodyType.value = 'TEXT'
+      formBodyRows.value = [createQuickRequestRow()]
+    }
+  }
   else formBodyRows.value = [createQuickRequestRow()]
 }
 
@@ -291,6 +301,10 @@ function quickRequestHeaders() {
     JSON: 'application/json',
     XML: 'application/xml',
     TEXT: 'text/plain; charset=UTF-8',
+  }
+  if (quickBodyType.value === 'FORM_DATA') {
+    const existing = values.find((header) => header.name.toLowerCase() === 'content-type')
+    if (existing) existing.value = contentTypes.FORM_DATA
   }
   if (quickBodyType.value !== 'NONE' && !values.some((header) => header.name.toLowerCase() === 'content-type')) {
     values.push({ name: 'Content-Type', value: contentTypes[quickBodyType.value] })
@@ -997,6 +1011,8 @@ function applyStoredReplayDraft(serialized: string): boolean {
       url.value = text(request.url)
       headersText.value = loadHeaders(request.headers)
       body.value = text(request.body)
+      const savedTimeout = Number(request.timeoutMs)
+      timeoutMs.value = Number.isInteger(savedTimeout) && savedTimeout >= 500 && savedTimeout <= 10_000 ? savedTimeout : 10_000
       loadAuth(request.auth, auth)
       const protocol = asRecord(request.protocol)
       if (type === 'GRAPHQL') {
@@ -1264,7 +1280,7 @@ onBeforeUnmount(() => {
           <div class="environment-bar">
             <a-select v-model="protocolType" size="small" :style="{ width: '128px' }" @change="changeProtocol"><a-option value="HTTP">HTTP</a-option><a-option value="GRAPHQL">GraphQL</a-option><a-option value="SOAP">SOAP</a-option><a-option value="WEBSOCKET">WebSocket</a-option><a-option value="GRPC">gRPC</a-option></a-select>
             <a-select v-model="environment" size="small" allow-clear placeholder="不使用环境" :style="{ width: '210px' }" @change="changeEnvironment"><a-option v-for="item in environments" :key="item" :value="item" :disabled="projectEnvironments.find((candidate) => candidate.environmentCode === item)?.enabled === false">{{ projectEnvironments.find((candidate) => candidate.environmentCode === item)?.name ?? item }} · {{ item }}</a-option></a-select>
-            <a-tag color="arcoblue">{{ environment || '无环境' }}</a-tag><span>变量 {{ variables.length }}</span><span>密钥 {{ secrets.length }}</span><span>{{ protocolType === 'WEBSOCKET' ? '消息上限 32 KB' : protocolType === 'GRPC' ? grpcSelectedCallType === 'SERVER_STREAMING' ? '服务端流 · 100 条 / 512 KB' : grpcSelectedCallType === 'CLIENT_STREAMING' ? '客户端流 · 100 条 / 512 KB' : grpcSelectedCallType === 'BIDI_STREAMING' ? '双向流 · 双向各 100 条 / 512 KB' : 'Unary · 响应上限 512 KB' : '超时 10 秒' }}</span>
+            <a-tag color="arcoblue">{{ environment || '无环境' }}</a-tag><span>变量 {{ variables.length }}</span><span>密钥 {{ secrets.length }}</span><span>{{ protocolType === 'WEBSOCKET' ? '消息上限 32 KB' : protocolType === 'GRPC' ? grpcSelectedCallType === 'SERVER_STREAMING' ? '服务端流 · 100 条 / 512 KB' : grpcSelectedCallType === 'CLIENT_STREAMING' ? '客户端流 · 100 条 / 512 KB' : grpcSelectedCallType === 'BIDI_STREAMING' ? '双向流 · 双向各 100 条 / 512 KB' : 'Unary · 响应上限 512 KB' : `超时 ${timeoutMs / 1000} 秒` }}</span>
             <a-button type="text" size="small" @click="router.push('/system-settings/environments')"><icon-settings /> 管理环境</a-button>
             <a-button type="text" size="small" @click="Message.info('当前 gRPC 支持在线反射或离线 Proto/DescriptorSet 发现、Unary、服务端流、客户端流与双向流；流式调用仅保留当前内存会话，每个方向均受 100 条消息与 512 KB 上限约束。')">查看边界</a-button>
           </div>

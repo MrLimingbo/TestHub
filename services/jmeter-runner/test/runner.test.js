@@ -135,3 +135,18 @@ test('publishes bounded JMeter error attribution before the terminal event', asy
   assert.ok(terminalIndex > errorIndex)
   assert.equal(commands[errorIndex].includes('503'), true)
 })
+
+test('cancellation kills a launcher and its child, escalating when SIGTERM is ignored', { skip: process.platform === 'win32', timeout: 12000 }, async () => {
+  const { spawn } = await import('node:child_process')
+  const child = spawn('/bin/sh', ['-c', "trap '' TERM; sleep 60 & echo ready; wait"], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] })
+  await new Promise(resolve => child.stdout.once('data', resolve))
+  const runner = new JMeterRunner({ commandClient: {}, readClient: {}, cancelReadClient: {}, config: {} })
+  const running = { child, finalized: false }
+  const closed = new Promise(resolve => child.once('close', (code, signal) => { running.finalized = true; resolve(signal) }))
+  try {
+    runner.stopProcess(running)
+    assert.equal(await closed, 'SIGKILL')
+  } finally {
+    try { process.kill(-child.pid, 'SIGKILL') } catch (error) { assert.equal(error.code, 'ESRCH') }
+  }
+})

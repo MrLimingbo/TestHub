@@ -39,7 +39,7 @@ class FunctionalExecutionFlowTests {
         jdbc.sql("DELETE FROM functional_test_run WHERE name LIKE '执行验收批次%'").update();
         jdbc.sql("DELETE FROM functional_test_plan WHERE plan_code LIKE 'EXEC_%'").update();
         jdbc.sql("DELETE FROM functional_case WHERE case_code LIKE 'EXEC_%'").update();
-        jdbc.sql("DELETE FROM functional_catalog WHERE name = '执行验收目录'").update();
+        jdbc.sql("DELETE FROM functional_catalog WHERE name IN ('执行验收目录', '执行验收计划目录')").update();
     }
 
     @Test
@@ -49,9 +49,12 @@ class FunctionalExecutionFlowTests {
         String organizationId = jdbc.sql("SELECT organization_id FROM project WHERE id = :id").param("id", projectId).query(String.class).single();
         String userId = jdbc.sql("SELECT id FROM user_account WHERE email = 'admin@testhub.local'").query(String.class).single();
         String catalogId = UlidCreator.getUlid().toString();
+        String planCatalogId = UlidCreator.getUlid().toString();
         String caseId = UlidCreator.getUlid().toString();
         jdbc.sql("INSERT INTO functional_catalog (id, organization_id, project_id, name, created_by) VALUES (:id, :org, :project, :name, :user)")
                 .param("id", catalogId).param("org", organizationId).param("project", projectId).param("name", "执行验收目录").param("user", userId).update();
+        jdbc.sql("INSERT INTO functional_catalog (id, organization_id, project_id, scope, name, created_by) VALUES (:id, :org, :project, 'PLANS', :name, :user)")
+                .param("id", planCatalogId).param("org", organizationId).param("project", projectId).param("name", "执行验收计划目录").param("user", userId).update();
         jdbc.sql("""
                 INSERT INTO functional_case
                     (id, organization_id, project_id, catalog_id, case_code, title, priority, status,
@@ -65,9 +68,13 @@ class FunctionalExecutionFlowTests {
         MvcResult plan = mvc.perform(post("/api/v1/projects/{projectId}/functional/plans", projectId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
                         .header(csrf.headerName(), csrf.token())
-                        .content("{\"planCode\":\"EXEC_PLAN_001\",\"name\":\"执行验收计划\",\"status\":\"READY\",\"description\":\"验证执行闭环\",\"caseIds\":[\"" + caseId + "\"]}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.caseCount").value(1)).andReturn();
+                        .content("{\"catalogId\":\"" + planCatalogId + "\",\"planCode\":\"EXEC_PLAN_001\",\"name\":\"执行验收计划\",\"status\":\"READY\",\"description\":\"验证执行闭环\",\"caseIds\":[\"" + caseId + "\"]}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.catalogId").value(planCatalogId))
+                .andExpect(jsonPath("$.data.caseCount").value(1)).andReturn();
         String planId = json(plan).at("/data/id").asText();
+        mvc.perform(get("/api/v1/projects/{projectId}/functional/plans", projectId).param("catalogId", planCatalogId)
+                        .cookie(administrator.sessionCookie())).andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1)).andExpect(jsonPath("$.data[0].id").value(planId));
 
         csrf = csrf(administrator);
         MvcResult run = mvc.perform(post("/api/v1/projects/{projectId}/functional/plans/{planId}/runs", projectId, planId)
@@ -81,11 +88,22 @@ class FunctionalExecutionFlowTests {
         MvcResult steps = mvc.perform(get("/api/v1/projects/{projectId}/functional/run-cases/{runCaseId}/steps", projectId, runCaseId)
                         .cookie(administrator.sessionCookie())).andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(2)).andReturn();
         String stepId = json(steps).at("/data/0/id").asText();
+        String secondStepId = json(steps).at("/data/1/id").asText();
 
         csrf = csrf(administrator);
         mvc.perform(put("/api/v1/projects/{projectId}/functional/run-steps/{stepId}", projectId, stepId)
                         .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
                         .header(csrf.headerName(), csrf.token()).content("{\"status\":\"PASSED\",\"actualResult\":\"页面打开正常\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PASSED"));
+        csrf = csrf(administrator);
+        mvc.perform(put("/api/v1/projects/{projectId}/functional/run-cases/{runCaseId}", projectId, runCaseId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content("{\"status\":\"PASSED\",\"note\":\"不完整结果\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("所有步骤均通过后才能将用例标记为通过"));
+        csrf = csrf(administrator);
+        mvc.perform(put("/api/v1/projects/{projectId}/functional/run-steps/{stepId}", projectId, secondStepId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content("{\"status\":\"PASSED\",\"actualResult\":\"表单提交正常\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PASSED"));
         csrf = csrf(administrator);
         mvc.perform(put("/api/v1/projects/{projectId}/functional/run-cases/{runCaseId}", projectId, runCaseId)
@@ -97,6 +115,12 @@ class FunctionalExecutionFlowTests {
                 .andExpect(jsonPath("$.data.status").value("COMPLETED"))
                 .andExpect(jsonPath("$.data.passedCount").value(1))
                 .andExpect(jsonPath("$.data.notRunCount").value(0));
+
+        csrf = csrf(administrator);
+        mvc.perform(put("/api/v1/projects/{projectId}/functional/run-steps/{stepId}", projectId, stepId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content("{\"status\":\"FAILED\",\"actualResult\":\"回归失败\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("用例已标记通过，请先调整用例结果再修改步骤状态"));
 
         csrf = csrf(administrator);
         mvc.perform(delete("/api/v1/projects/{projectId}/functional/plans/{planId}", projectId, planId)

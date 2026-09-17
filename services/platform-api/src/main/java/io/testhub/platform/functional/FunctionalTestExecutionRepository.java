@@ -17,47 +17,47 @@ public class FunctionalTestExecutionRepository {
         this.jdbc = jdbc;
     }
 
-    public List<FunctionalTestPlan> findPlans(String projectId) {
+    public List<FunctionalTestPlan> findPlans(String projectId, String catalogId) {
         return jdbc.sql("""
-                SELECT p.id, p.organization_id, p.project_id, p.plan_code, p.name, p.status, p.description,
+                SELECT p.id, p.organization_id, p.project_id, p.catalog_id, p.plan_code, p.name, p.status, p.description,
                        p.created_by, p.updated_by, p.created_at, p.updated_at, COUNT(pc.id) AS case_count
                 FROM functional_test_plan p
                 LEFT JOIN functional_test_plan_case pc ON pc.plan_id = p.id
-                WHERE p.project_id = :projectId
-                GROUP BY p.id, p.organization_id, p.project_id, p.plan_code, p.name, p.status, p.description,
+                WHERE p.project_id = :projectId AND (:catalogId IS NULL OR p.catalog_id = :catalogId)
+                GROUP BY p.id, p.organization_id, p.project_id, p.catalog_id, p.plan_code, p.name, p.status, p.description,
                          p.created_by, p.updated_by, p.created_at, p.updated_at
                 ORDER BY p.updated_at DESC
-                """).param("projectId", projectId).query((rs, row) -> plan(rs)).list();
+                """).param("projectId", projectId).param("catalogId", catalogId).query((rs, row) -> plan(rs)).list();
     }
 
     public Optional<FunctionalTestPlan> findPlan(String projectId, String planId) {
         return jdbc.sql("""
-                SELECT p.id, p.organization_id, p.project_id, p.plan_code, p.name, p.status, p.description,
+                SELECT p.id, p.organization_id, p.project_id, p.catalog_id, p.plan_code, p.name, p.status, p.description,
                        p.created_by, p.updated_by, p.created_at, p.updated_at, COUNT(pc.id) AS case_count
                 FROM functional_test_plan p
                 LEFT JOIN functional_test_plan_case pc ON pc.plan_id = p.id
                 WHERE p.project_id = :projectId AND p.id = :planId
-                GROUP BY p.id, p.organization_id, p.project_id, p.plan_code, p.name, p.status, p.description,
+                GROUP BY p.id, p.organization_id, p.project_id, p.catalog_id, p.plan_code, p.name, p.status, p.description,
                          p.created_by, p.updated_by, p.created_at, p.updated_at
                 """).param("projectId", projectId).param("planId", planId).query((rs, row) -> plan(rs)).optional();
     }
 
-    public void insertPlan(String id, String organizationId, String projectId, String planCode, String name,
+    public void insertPlan(String id, String organizationId, String projectId, String catalogId, String planCode, String name,
                             String status, String description, String userId) {
         jdbc.sql("""
                 INSERT INTO functional_test_plan
-                    (id, organization_id, project_id, plan_code, name, status, description, created_by, updated_by)
-                VALUES (:id, :organizationId, :projectId, :planCode, :name, :status, :description, :userId, :userId)
+                    (id, organization_id, project_id, catalog_id, plan_code, name, status, description, created_by, updated_by)
+                VALUES (:id, :organizationId, :projectId, :catalogId, :planCode, :name, :status, :description, :userId, :userId)
                 """).param("id", id).param("organizationId", organizationId).param("projectId", projectId)
-                .param("planCode", planCode).param("name", name).param("status", status).param("description", description)
+                .param("catalogId", catalogId).param("planCode", planCode).param("name", name).param("status", status).param("description", description)
                 .param("userId", userId).update();
     }
 
-    public int updatePlan(String projectId, String planId, String name, String status, String description, String userId) {
+    public int updatePlan(String projectId, String planId, String catalogId, String name, String status, String description, String userId) {
         return jdbc.sql("""
-                UPDATE functional_test_plan SET name = :name, status = :status, description = :description, updated_by = :userId
+                UPDATE functional_test_plan SET catalog_id = :catalogId, name = :name, status = :status, description = :description, updated_by = :userId
                 WHERE project_id = :projectId AND id = :planId
-                """).param("projectId", projectId).param("planId", planId).param("name", name).param("status", status)
+                """).param("projectId", projectId).param("planId", planId).param("catalogId", catalogId).param("name", name).param("status", status)
                 .param("description", description).param("userId", userId).update();
     }
 
@@ -235,7 +235,7 @@ public class FunctionalTestExecutionRepository {
     }
 
     private FunctionalTestPlan plan(ResultSet rs) throws SQLException {
-        return new FunctionalTestPlan(rs.getString("id"), rs.getString("organization_id"), rs.getString("project_id"),
+        return new FunctionalTestPlan(rs.getString("id"), rs.getString("organization_id"), rs.getString("project_id"), rs.getString("catalog_id"),
                 rs.getString("plan_code"), rs.getString("name"), rs.getString("status"), rs.getString("description"),
                 rs.getString("created_by"), rs.getString("updated_by"), instant(rs.getTimestamp("created_at")),
                 instant(rs.getTimestamp("updated_at")), rs.getInt("case_count"));

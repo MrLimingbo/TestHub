@@ -13,6 +13,8 @@ interface Metric {
 const props = defineProps<{ metrics: Metric[] }>()
 const element = ref<HTMLDivElement>()
 let chart: echarts.ECharts | undefined
+let resizeObserver: ResizeObserver | undefined
+const resize = () => chart?.resize()
 
 function render() {
   if (!element.value) return
@@ -22,8 +24,8 @@ function render() {
     animationDuration: 260,
     color: ['#3167f6', '#f7a928', '#f53f3f'],
     tooltip: { trigger: 'axis' },
-    legend: { data: ['TPS', 'P95（ms）', '累计错误'], textStyle: { color: '#4e5969' } },
-    grid: { left: 42, right: 42, top: 36, bottom: 28 },
+    legend: { top: 0, data: ['TPS', 'P95（ms）', '累计错误'], textStyle: { color: '#4e5969' } },
+    grid: { left: 42, right: 42, top: 52, bottom: 28 },
     xAxis: { type: 'category', boundaryGap: false, data: total.map((metric) => new Date(metric.occurredAt).toLocaleTimeString('zh-CN', { hour12: false })), axisLine: { lineStyle: { color: '#dce3f2' } } },
     yAxis: [
       { type: 'value', name: 'TPS', splitLine: { lineStyle: { color: '#edf0f7', type: 'dashed' } } },
@@ -37,9 +39,14 @@ function render() {
   }, { notMerge: true })
 }
 
-onMounted(() => { render(); window.addEventListener('resize', render) })
+onMounted(() => {
+  render()
+  resizeObserver = new ResizeObserver(resize)
+  if (element.value) resizeObserver.observe(element.value)
+  window.addEventListener('resize', resize)
+})
 watch(() => props.metrics, render, { deep: true })
-onBeforeUnmount(() => { window.removeEventListener('resize', render); chart?.dispose() })
+onBeforeUnmount(() => { resizeObserver?.disconnect(); window.removeEventListener('resize', resize); chart?.dispose() })
 </script>
 
 <template><div ref="element" class="execution-chart" role="img" aria-label="压测指标趋势图"></div></template>

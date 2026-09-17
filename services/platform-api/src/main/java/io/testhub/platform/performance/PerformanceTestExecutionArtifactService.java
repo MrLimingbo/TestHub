@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -31,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class PerformanceTestExecutionArtifactService {
     public static final long MAX_ARTIFACT_BYTES = 20L * 1024 * 1024;
     private static final Set<String> ARCHIVABLE_STATUSES = Set.of("ACCEPTED", "RUNNING", "CANCELLING");
+    private static final Duration TIMEOUT_ARCHIVE_GRACE = Duration.ofMinutes(2);
     private final PerformanceTestExecutionArtifactRepository artifacts;
     private final PerformanceTestExecutionRepository executions;
     private final AccessService access;
@@ -77,7 +80,10 @@ public class PerformanceTestExecutionArtifactService {
             throw invalid("JMeter 工件归档元数据不合法");
         }
         PerformanceTestExecution execution = executions.findByTask(upload.taskId(), upload.executionId()).orElseThrow(this::rejected);
-        if (!ARCHIVABLE_STATUSES.contains(execution.status()) || !runnerId.equals(execution.runnerId())) throw rejected();
+        boolean recentTimeout = "TIMED_OUT".equals(execution.status()) && execution.finishedAt() != null
+                && Instant.now().isBefore(execution.finishedAt().plus(TIMEOUT_ARCHIVE_GRACE));
+        if ((!ARCHIVABLE_STATUSES.contains(execution.status()) && !recentTimeout)
+                || !runnerId.equals(execution.runnerId())) throw rejected();
         PerformanceTestExecutionArtifactRepository.StoredArtifact existing = artifacts.findByType(execution.id(), kind.name()).orElse(null);
         if (existing != null) {
             if (existing.artifact().sizeBytes() != upload.sizeBytes() || !existing.artifact().checksum().equals(upload.checksum())) {

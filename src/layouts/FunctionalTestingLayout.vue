@@ -7,6 +7,7 @@ import {
   type FunctionalCase,
   type FunctionalCatalog,
   type FunctionalDefectSummary,
+  type FunctionalPlanSummary,
   type FunctionalRequirement,
 } from '@/composables/useFunctionalWorkspace'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
@@ -22,6 +23,7 @@ const catalogs = ref<FunctionalCatalog[]>([])
 const requirements = ref<FunctionalRequirement[]>([])
 const cases = ref<FunctionalCase[]>([])
 const defects = ref<FunctionalDefectSummary[]>([])
+const plans = ref<FunctionalPlanSummary[]>([])
 const selectedCatalogId = ref('')
 const catalogKeyword = ref('')
 const loading = ref(false)
@@ -74,6 +76,7 @@ const assetTotal = computed(() => {
   if (catalogScope.value === 'REQUIREMENTS') return requirements.value.length
   if (catalogScope.value === 'CASES') return cases.value.length
   if (catalogScope.value === 'DELIVERY') return defects.value.length
+  if (catalogScope.value === 'PLANS') return plans.value.length
   return 0
 })
 
@@ -97,16 +100,18 @@ async function reload() {
   if (!session.projectId || isOverview.value || isVersionManagement.value) return
   loading.value = true
   try {
-    const [catalogData, requirementData, caseData, defectData] = await Promise.all([
+    const [catalogData, requirementData, caseData, defectData, planData] = await Promise.all([
       read<FunctionalCatalog[]>(`/api/v1/projects/${session.projectId}/functional/catalogs?scope=${catalogScope.value}`),
       read<FunctionalRequirement[]>(`/api/v1/projects/${session.projectId}/functional/requirements`),
       read<FunctionalCase[]>(`/api/v1/projects/${session.projectId}/functional/cases`),
       read<FunctionalDefectSummary[]>(`/api/v1/projects/${session.projectId}/functional/defects`),
+      read<FunctionalPlanSummary[]>(`/api/v1/projects/${session.projectId}/functional/plans`),
     ])
     catalogs.value = catalogData
     requirements.value = requirementData
     cases.value = caseData
     defects.value = defectData
+    plans.value = planData
     if (selectedCatalogId.value && !catalogData.some((catalog) => catalog.id === selectedCatalogId.value)) selectedCatalogId.value = ''
   } catch (error) {
     Message.error(error instanceof Error ? error.message : '加载资产目录失败')
@@ -171,6 +176,7 @@ function directAssetCount(catalogId: string) {
   if (catalogScope.value === 'REQUIREMENTS') return requirements.value.filter((item) => item.catalogId === catalogId).length
   if (catalogScope.value === 'CASES') return cases.value.filter((item) => item.catalogId === catalogId).length
   if (catalogScope.value === 'DELIVERY') return defects.value.filter((item) => item.catalogId === catalogId).length
+  if (catalogScope.value === 'PLANS') return plans.value.filter((item) => item.catalogId === catalogId).length
   return 0
 }
 
@@ -179,6 +185,7 @@ provide(functionalWorkspaceKey, {
   requirements,
   cases,
   defects,
+  plans,
   selectedCatalogId,
   selectedCatalogName,
   loading,

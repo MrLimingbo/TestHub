@@ -39,9 +39,10 @@ function requestWithPinnedAddress(request, url, addresses, timeoutMilliseconds) 
       path: `${url.pathname}${url.search}`,
       method: request.method,
       headers,
-      lookup(_hostname, _options, callback) {
+      lookup(_hostname, options, callback) {
         const selected = addresses[0]
-        callback(null, selected.address, selected.family)
+        if (options.all) callback(null, [selected])
+        else callback(null, selected.address, selected.family)
       },
     }, (response) => {
       const status = response.statusCode ?? 0

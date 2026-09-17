@@ -2,7 +2,7 @@ FROM node:22-alpine
 
 ARG JMETER_VERSION=5.6.3
 
-RUN apk add --no-cache curl openjdk17-jre-headless tar \
+RUN apk add --no-cache curl openjdk17-jre-headless procps-ng tar \
   && mkdir -p /opt \
   && curl --fail --location --retry 3 --output /tmp/jmeter.tgz \
     "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz" \

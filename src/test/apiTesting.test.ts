@@ -25,6 +25,14 @@ const version = {
 }
 
 describe('API testing request mapping', () => {
+  it('preserves runtime variables in path and query values', () => {
+    const snapshot = createApiRunSnapshot(version, '{{BASE_URL}}')
+    snapshot.pathValues[0].value = '{{ORDER_ID}}'
+    snapshot.queryValues[0].value = 'prefix {{$timestamp}}'
+    expect(buildApiRunUrl({ method: 'GET', path: '/orders/{orderId}' }, snapshot))
+      .toBe('{{BASE_URL}}/orders/{{ORDER_ID}}?verbose=prefix%20{{$timestamp}}')
+  })
+
   it('maps an API definition into an isolated request snapshot', () => {
     const snapshot = createApiRunSnapshot(version)
     expect(snapshot.pathValues[0].value).toBe('OD 1')

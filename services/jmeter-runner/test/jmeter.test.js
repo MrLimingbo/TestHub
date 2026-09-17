@@ -45,6 +45,7 @@ test('generates a non-GUI JMeter plan with bounded thread group settings', () =>
   assert.match(jmx, /ThreadGroup.duration">15/)
   assert.match(jmx, /HTTPSampler.contentEncoding/)
   assert.match(jmx, /throughput<\/name><value>420/)
+  assert.match(jmx, /<intProp name="calcMode">2<\/intProp>/)
   assert.deepEqual(jmeterArguments({ planPath: '/tmp/plan.jmx', resultsPath: '/tmp/results.jtl', logPath: '/tmp/jmeter.log' }).slice(0, 6),
     ['-n', '-t', '/tmp/plan.jmx', '-l', '/tmp/results.jtl', '-j'])
 })

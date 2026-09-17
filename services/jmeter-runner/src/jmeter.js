@@ -35,7 +35,7 @@ function throughputTimer(targetTps) {
   if (targetTps === null || targetTps === undefined) return ''
   return `<ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="目标 TPS" enabled="true">
   <doubleProp><name>throughput</name><value>${xml(targetTps * 60)}</value><savedValue>0.0</savedValue></doubleProp>
-  <intProp><name>calcMode</name><value>1</value><savedValue>0</savedValue></intProp>
+  <intProp name="calcMode">2</intProp>
 </ConstantThroughputTimer><hashTree/>`
 }
 
@@ -216,7 +216,7 @@ export async function prepareWorkDirectory(config, task, artifact) {
 
 export function jmeterArguments(workload) {
   return ['-n', '-t', workload.planPath, '-l', workload.resultsPath, '-j', workload.logPath,
-    '-Jjmeter.save.saveservice.output_format=csv', '-Jjmeter.save.saveservice.print_field_names=true',
+    '-Jjmeter.save.saveservice.autoflush=true', '-Jjmeter.save.saveservice.output_format=csv', '-Jjmeter.save.saveservice.print_field_names=true',
     '-Jjmeter.save.saveservice.timestamp_format=ms', '-Jjmeter.save.saveservice.time=true',
     '-Jjmeter.save.saveservice.label=true', '-Jjmeter.save.saveservice.code=true',
     '-Jjmeter.save.saveservice.successful=true', '-Jjmeter.save.saveservice.thread_counts=true',

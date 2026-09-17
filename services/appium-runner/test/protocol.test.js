@@ -18,3 +18,28 @@ test('uses only the configured device farm and archives a screenshot through the
   assert.ok(calls.every((call) => call.url.startsWith('https://control.example.test') || call.url.startsWith('https://farm.example.test/wd/hub')))
   assert.ok(calls.some((call) => call.url.endsWith('/artifacts'))); assert.ok(commands.some((command) => command[0] === 'XACK'))
 })
+test('consumes Redis RESP3 task replies', async () => {
+  const commands = [], client = { sendCommand: async value => { commands.push(value) } }
+  const runner = new AppiumRunner({ config: loadConfig({}), commandClient: client, readClient: { sendCommand: async () => { runner.stopping = true; return { stream: [['1-0', Object.entries(task).flat()]] } } } })
+  await runner.loop(); await new Promise(resolve => setTimeout(resolve, 0))
+  assert.ok(commands.some(command => command[0] === 'XACK'))
+})
+test('CONTINUE still fails the execution after recording all steps', async () => {
+  const runner = new AppiumRunner({ config: loadConfig({}) }), outcomes = []
+  runner.step = async (_, step) => { if (step.id === 'bad') throw new Error('assertion failed') }
+  runner.publishStep = async value => outcomes.push(value)
+  await assert.rejects(runner.execute({ task }, { deadlineAt: '2099-01-01', manifest: { scenario: { failureStrategy: 'CONTINUE', steps: [{ id: 'bad', type: 'ASSERT_TEXT', name: 'bad' }, { id: 'next', type: 'LAUNCH', name: 'next' }] } } }))
+  assert.deepEqual(outcomes.map(v => v.outcome), ['FAILED', 'PASSED'])
+})
+test('undefined input variables fail before sending text to a device', async () => {
+  const runner = new AppiumRunner({ config: loadConfig({}) }); runner.element = async () => 'element'
+  runner.webdriver = async () => { throw new Error('device command must not be called') }
+  await assert.rejects(runner.step({ sessionId: 'session' }, { type: 'INPUT', value: '{{missing}}' }, {}), /变量未定义/)
+})
+test('CONTINUE cannot swallow cancellation', async () => {
+  const runner = new AppiumRunner({ config: loadConfig({}) }); let steps = 0
+  runner.step = async () => { steps++; const reason = new Error('cancelled'); reason.code = 'CANCELLED'; throw reason }
+  runner.publishStep = async () => {}
+  await assert.rejects(runner.execute({ task }, { deadlineAt: '2099-01-01', manifest: { scenario: { failureStrategy: 'CONTINUE', steps: [{ id: 'one', type: 'LAUNCH', name: 'one' }, { id: 'two', type: 'LAUNCH', name: 'two' }] } } }), { code: 'CANCELLED' })
+  assert.equal(steps, 1)
+})

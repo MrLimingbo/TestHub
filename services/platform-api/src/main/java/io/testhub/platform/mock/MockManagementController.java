@@ -4,6 +4,7 @@ import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +38,13 @@ public class MockManagementController {
 
     @PostMapping("/servers/{serverId}/enabled")
     public ApiResponse<MockServer> setServerEnabled(Authentication authentication, @PathVariable String projectId,
-                                                     @PathVariable String serverId, @RequestBody EnabledRequest request) {
+                                                     @PathVariable String serverId, @Valid @RequestBody EnabledRequest request) {
         return ApiResponse.of(mocks.setServerEnabled(principal(authentication), projectId, serverId, request.enabled()));
     }
 
     @PostMapping("/servers/{serverId}/smart-example/enabled")
     public ApiResponse<MockServer> setSmartExampleEnabled(Authentication authentication, @PathVariable String projectId,
-                                                           @PathVariable String serverId, @RequestBody EnabledRequest request) {
+                                                           @PathVariable String serverId, @Valid @RequestBody EnabledRequest request) {
         return ApiResponse.of(mocks.setSmartExampleEnabled(principal(authentication), projectId, serverId, request.enabled()));
     }
 
@@ -92,7 +93,7 @@ public class MockManagementController {
 
     public record ServerRequest(@NotBlank @Size(max = 160) String name) {
     }
-    public record EnabledRequest(boolean enabled) {
+    public record EnabledRequest(@NotNull Boolean enabled) {
     }
     public record ShareRequest(@NotBlank @Size(max = 120) String name, Integer expiresInDays) {
     }

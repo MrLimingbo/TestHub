@@ -75,7 +75,14 @@ class UiAutomationFlowTests {
         if (objectId != null) jdbc.sql("DELETE FROM ui_automation_page_object WHERE id = :id").param("id", objectId).update();
         if (profileId != null) jdbc.sql("DELETE FROM ui_automation_browser_profile WHERE id = :id").param("id", profileId).update();
         if (functionalPlanId != null) jdbc.sql("DELETE FROM functional_test_plan WHERE id = :id").param("id", functionalPlanId).update();
-        jdbc.sql("DELETE FROM audit_log WHERE action LIKE 'UI_AUTOMATION_%'").update();
+        List<String> ownedIds = new ArrayList<>(extraExecutionIds);
+        for (String id : new String[] {profileId, objectId, scenarioId, executionId, scheduleId, functionalPlanId}) {
+            if (id != null) ownedIds.add(id);
+        }
+        for (String id : ownedIds) {
+            jdbc.sql("DELETE FROM audit_log WHERE action LIKE 'UI_AUTOMATION_%' AND resource_id = :id")
+                    .param("id", id).update();
+        }
         if (administratorId != null) {
             if (previous.isPresent()) configs.upsert(ALLOWED_ORIGINS, previous.get(), administratorId);
             else configs.deleteNonSecret(ALLOWED_ORIGINS);
@@ -113,6 +120,14 @@ class UiAutomationFlowTests {
                                 """.formatted(profileId, objectId)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.steps.length()").value(2)).andReturn();
         scenarioId = body(scenario).at("/data/id").asText();
+        csrf = csrf(session);
+        mvc.perform(post("/api/v1/projects/{projectId}/ui-automation/scenarios", projectId)
+                        .cookie(session.cookie(), csrf.cookie()).header(csrf.header(), csrf.token()).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"browserProfileId":"%s","name":"Null step","failureStrategy":"STOP","variables":{},"steps":[null]}
+                                """.formatted(profileId)))
+                .andExpect(status().isBadRequest());
+
         csrf = csrf(session);
         mvc.perform(delete("/api/v1/projects/{projectId}/ui-automation/page-objects/{pageObjectId}", projectId, objectId)
                         .cookie(session.cookie(), csrf.cookie()).header(csrf.header(), csrf.token()))
@@ -153,6 +168,17 @@ class UiAutomationFlowTests {
                 .andExpect(jsonPath("$.data.summary.totalSteps").value(2)).andExpect(jsonPath("$.data.summary.passedSteps").value(2))
                 .andExpect(jsonPath("$.data.artifacts.length()").value(2));
         assertEquals(1, jdbc.sql("SELECT COUNT(*) FROM ui_automation_execution_manifest WHERE execution_id = :id").param("id", executionId).query(Integer.class).single());
+        jdbc.sql("UPDATE ui_automation_execution SET status = 'TIMED_OUT', finished_at = CURRENT_TIMESTAMP(6) WHERE id = :id")
+                .param("id", executionId).update();
+        mvc.perform(post(ARTIFACT_PATH).contentType("application/zip").content(trace)
+                        .headers(artifactHeaders(taskId, executionId, "TRACE", trace, "nonce_ui_timeout_recent_987654")))
+                .andExpect(status().isOk());
+        jdbc.sql("UPDATE ui_automation_execution SET finished_at = DATE_SUB(CURRENT_TIMESTAMP(6), INTERVAL 121 SECOND) WHERE id = :id")
+                .param("id", executionId).update();
+        mvc.perform(post(ARTIFACT_PATH).contentType("application/zip").content(trace)
+                        .headers(artifactHeaders(taskId, executionId, "TRACE", trace, "nonce_ui_timeout_expired_987654")))
+                .andExpect(status().isForbidden());
+
     }
 
     @Test

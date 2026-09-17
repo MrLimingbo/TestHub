@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,7 +72,9 @@ public class UiAutomationExecutionArtifactService {
             throw invalid("Web UI 自动化工件归档元数据不合法");
         }
         UiAutomationExecution execution = automation.findExecutionByTask(upload.taskId(), upload.executionId()).orElseThrow(this::rejected);
-        if (!ACCEPTING.contains(execution.status()) || !runnerId.equals(execution.runnerId())) throw rejected();
+        boolean recentTimeout = "TIMED_OUT".equals(execution.status()) && execution.finishedAt() != null
+                && Instant.now().isBefore(execution.finishedAt().plusSeconds(120));
+        if ((!ACCEPTING.contains(execution.status()) && !recentTimeout) || !runnerId.equals(execution.runnerId())) throw rejected();
         UiAutomationRepository.StoredArtifact duplicate = automation.findArtifactByChecksum(execution.id(), kind.name(), upload.checksum()).orElse(null);
         if (duplicate != null) {
             if (duplicate.artifact().sizeBytes() != upload.sizeBytes()) throw new ResponseStatusException(HttpStatus.CONFLICT, "同一工件校验和的尺寸不一致");

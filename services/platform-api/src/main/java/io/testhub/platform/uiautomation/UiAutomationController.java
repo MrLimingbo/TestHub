@@ -138,7 +138,7 @@ public class UiAutomationController {
                                     @Size(max = 1000) String description) { }
     public record ScenarioRequest(@NotBlank @Size(max = 26) String browserProfileId, @NotBlank @Size(max = 160) String name,
                                   @Size(max = 2000) String description, @NotBlank @Size(max = 16) String failureStrategy,
-                                  Map<String, String> variables, @NotEmpty @Size(max = 300) List<@Valid StepRequest> steps) { }
+                                  Map<String, String> variables, @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps) { }
     public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 32) String type,
                               @NotBlank @Size(max = 160) String name, @Size(max = 1024) String selector,
                               @Size(max = 26) String pageObjectId, @Size(max = 4096) String value, @Size(max = 2048) String url,

@@ -52,25 +52,13 @@ function placeholder(name: string): string {
 function sanitizeUrl(rawUrl: string, secrets: Set<string>): string {
   let value = rawUrl.replace(/^(https?:\/\/)[^/@\s]+@/i, '$1')
   if (value !== rawUrl) secrets.add('URL_CREDENTIAL')
-  try {
-    const url = new URL(value.replace(/\{\{[^}]+\}\}/g, 'variable'))
-    for (const [name, current] of url.searchParams.entries()) {
-      if (!SENSITIVE_NAME.test(name) || /^\{\{[^}]+\}\}$/.test(current)) continue
-      url.searchParams.set(name, placeholder(name))
-      secrets.add(name)
-    }
-    value = value.includes('{{')
-      ? value.replace(/([?&])([^=&]+)=([^&]*)/g, (match, prefix: string, name: string, current: string) => {
-          const decodedName = decodeURIComponent(name)
-          const decodedCurrent = decodeURIComponent(current)
-          if (!SENSITIVE_NAME.test(decodedName) || /^\{\{[^}]+\}\}$/.test(decodedCurrent)) return match
-          secrets.add(decodedName)
-          return `${prefix}${name}=${placeholder(decodedName)}`
-        })
-      : url.toString().replace(/%7B%7B([A-Z0-9_]+)%7D%7D/gi, '{{$1}}')
-  } catch {
-    // Template URLs such as {{baseUrl}}/orders are valid TestHub inputs even though URL cannot parse them.
-  }
+  value = value.replace(/([?&])([^=&#]+)=([^&#]*)/g, (match, prefix: string, name: string, current: string) => {
+    const decodedName = new URLSearchParams(`${name}=`).keys().next().value ?? name
+    const decodedCurrent = new URLSearchParams(`value=${current}`).get('value') ?? current
+    if (!SENSITIVE_NAME.test(decodedName) || /^\{\{[^}]+\}\}$/.test(decodedCurrent)) return match
+    secrets.add(decodedName)
+    return `${prefix}${name}=${placeholder(decodedName)}`
+  })
   return value
 }
 
@@ -106,6 +94,9 @@ export function parseCurlCommand(command: string): ParsedCurlRequest {
   let method = ''
   let url = ''
   let body = ''
+  let hasData = false
+  let queryData = false
+  let head = false
   let contentType = ''
   const secrets = new Set<string>()
   const flagsWithIgnoredValue = new Set(['-u', '--user', '-A', '--user-agent', '-o', '--output', '-x', '--proxy', '--connect-timeout', '--max-time'])
@@ -113,11 +104,27 @@ export function parseCurlCommand(command: string): ParsedCurlRequest {
   for (let index = 1; index < tokens.length; index++) {
     const token = tokens[index]
     if (token === '-X' || token === '--request') method = String(tokens[++index] ?? '').toUpperCase()
+    else if (/^-X.+/.test(token)) method = token.slice(2).toUpperCase()
     else if (token.startsWith('--request=')) method = token.slice('--request='.length).toUpperCase()
     else if (token === '--url') url = tokens[++index] ?? ''
     else if (token.startsWith('--url=')) url = token.slice('--url='.length)
-    else if (['-d', '--data', '--data-raw', '--data-binary', '--data-urlencode'].includes(token)) body = tokens[++index] ?? ''
-    else if (/^--data(?:-raw|-binary|-urlencode)?=/.test(token)) body = token.slice(token.indexOf('=') + 1)
+    else if (token === '-I' || token === '--head') head = true
+    else if (token === '-G' || token === '--get') queryData = true
+    else if (['-d', '--data', '--data-raw', '--data-binary', '--data-urlencode'].includes(token)
+      || /^--data(?:-raw|-binary|-urlencode)?=/.test(token) || /^-d.+/.test(token)) {
+      const flag = token.startsWith('-d') ? '-d' : token.split('=')[0]
+      let part = /^-d.+/.test(token) ? token.slice(2) : token.includes('=') ? token.slice(token.indexOf('=') + 1) : tokens[++index]
+      if (part === undefined) throw new Error('cURL 数据参数缺少值')
+      if (flag !== '--data-raw' && (part.startsWith('@') || (flag === '--data-urlencode' && /^[^=]+@/.test(part)))) {
+        throw new Error('暂不支持 cURL 文件数据，请直接填写请求内容')
+      }
+      if (flag === '--data-urlencode') {
+        const separator = part.indexOf('=')
+        part = separator < 0 ? encodeURIComponent(part) : `${part.slice(0, separator + 1)}${encodeURIComponent(part.slice(separator + 1))}`
+      }
+      body += `${hasData ? '&' : ''}${part}`
+      hasData = true
+    }
     else if (token === '-H' || token === '--header') {
       const header = tokens[++index] ?? ''
       const separator = header.indexOf(':')
@@ -139,7 +146,14 @@ export function parseCurlCommand(command: string): ParsedCurlRequest {
   }
 
   if (!url) throw new Error('cURL 命令缺少请求地址')
-  if (!method) method = body ? 'POST' : 'GET'
+  if (queryData && hasData) {
+    const hashIndex = url.indexOf('#')
+    const fragment = hashIndex < 0 ? '' : url.slice(hashIndex)
+    const address = hashIndex < 0 ? url : url.slice(0, hashIndex)
+    url = `${address}${address.includes('?') ? '&' : '?'}${body}${fragment}`
+    body = ''
+  }
+  if (!method) method = head ? 'HEAD' : queryData ? 'GET' : hasData ? 'POST' : 'GET'
   if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].includes(method)) throw new Error(`暂不支持 ${method} 请求方法`)
   const safeBody = sanitizeBody(body, secrets)
   return {

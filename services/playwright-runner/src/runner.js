@@ -2,10 +2,11 @@ import { createHash } from 'node:crypto'
 import { mkdir, readFile, rm, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { chromium, firefox, webkit } from 'playwright'
+import { createTargetProxy } from './target-proxy.js'
 import { CANCEL_CONSUMER_GROUP, CANCEL_STREAM, TASK_CONSUMER_GROUP, TASK_STREAM, EVENT_STREAM, STEP_RESULT_STREAM, HEARTBEAT_MEMBERS_KEY, artifactRequest, createEvent, createHeartbeat, createStepResult, decodeCancellation, decodeTask, heartbeatKey, runtimeRequest, validateRuntime } from './protocol.js'
 
 function toFields(value) { return Object.entries(value).flatMap(([key, item]) => [key, String(item)]) }
-function entries(reply) { return !Array.isArray(reply) ? [] : reply.flatMap(([, values]) => Array.isArray(values) ? values.map(([id, raw]) => ({ id, fields: Object.fromEntries(raw.reduce((all, item, index) => index % 2 === 0 ? [...all, [item, raw[index + 1]]] : all, [])) })) : []) }
+function entries(reply) { const streams = Array.isArray(reply) ? reply : reply && typeof reply === 'object' ? Object.entries(reply) : []; return streams.flatMap(([, values]) => Array.isArray(values) ? values.map(([id, raw]) => ({ id, fields: Object.fromEntries(raw.reduce((all, item, index) => index % 2 === 0 ? [...all, [item, raw[index + 1]]] : all, [])) })) : []) }
 function text(error) { return String(error?.message ?? error).replace(/[\r\n]+/g, ' ').slice(0, 420) }
 function interpolate(value, variables) { return String(value ?? '').replace(/\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}/g, (_, key) => { if (!(key in variables)) throw new Error(`变量未定义：${key}`); return variables[key] }) }
 function target(raw, base, allowed) { const url = new URL(raw, base); if (!allowed.includes(url.origin)) throw new Error('导航目标不在 Runner Origin 白名单内'); return url.toString() }
@@ -64,13 +65,23 @@ export class PlaywrightRunner {
     const runtime = await this.runtime(task)
     this.assertActive(active)
     const root = join(this.config.workDirectory, task.executionId); await rm(root, { recursive: true, force: true }); await mkdir(root, { recursive: true, mode: 0o700 })
-    const browser = { chromium, firefox, webkit }[runtime.browser.browser]
-    const instance = await browser.launch({ headless: true }); active.browser = instance
-    const context = await instance.newContext({ viewport: { width: runtime.browser.viewportWidth, height: runtime.browser.viewportHeight }, recordVideo: { dir: root } }); active.context = context
-    const page = await context.newPage(); await context.tracing.start({ screenshots: true, snapshots: true, sources: true })
-    let failed = false
-    await this.event(createEvent(task, this.config.runnerId, 'RUNNING', 'PLAYWRIGHT_BROWSER_STARTED', 'Isolated browser context started.', this.now()))
+    active.root = root
+    let failed = false, runError
     try {
+      const browser = { chromium, firefox, webkit }[runtime.browser.browser]
+      active.proxy = await createTargetProxy(this.config.allowedTargetOrigins)
+      const instance = await browser.launch({ headless: true, proxy: { server: active.proxy.server } }); active.browser = instance
+      this.assertActive(active)
+      const context = await instance.newContext({ viewport: { width: runtime.browser.viewportWidth, height: runtime.browser.viewportHeight }, recordVideo: { dir: root }, serviceWorkers: 'block', proxy: { server: active.proxy.server } }); active.context = context
+      this.assertActive(active)
+      await context.routeWebSocket('**/*', socket => {
+        const url = new URL(socket.url()); url.protocol = url.protocol === 'wss:' ? 'https:' : 'http:'
+        if (this.config.allowedTargetOrigins.includes(url.origin)) socket.connectToServer()
+        else socket.close()
+      })
+      const page = await context.newPage(); await context.tracing.start({ screenshots: true, snapshots: true, sources: true })
+      this.assertActive(active)
+      await this.event(createEvent(task, this.config.runnerId, 'RUNNING', 'PLAYWRIGHT_BROWSER_STARTED', 'Isolated browser context started.', this.now()))
       for (const [index, step] of runtime.scenario.steps.entries()) {
         this.assertActive(active)
         const started = Date.now(); let error = ''
@@ -81,25 +92,35 @@ export class PlaywrightRunner {
         await this.stepResult(createStepResult(task, this.config.runnerId, step, index + 1, error ? 'FAILED' : 'PASSED', Math.min(Date.now() - started, 120000), error, this.now()))
         if (error) { await page.screenshot({ path: join(root, `failure-${index + 1}.png`), fullPage: true }).catch(() => {}); if (runtime.scenario.failureStrategy !== 'CONTINUE') break }
       }
-    } finally {
-      await context.tracing.stop({ path: join(root, 'trace.zip') }).catch(() => {}); await context.close().catch(() => {}); await instance.close().catch(() => {})
-      active.context = null; active.browser = null
-    }
+    } catch (error) { runError = error }
+    finally { await this.closeActive(active) }
+    // Cancellation must still preserve the trace/video captured before the browser closed.
+    try { for (const artifact of await this.artifacts(root)) await this.archive(task, artifact) }
+    finally { await rm(root, { recursive: true, force: true }) }
+    if (runError) throw runError
     this.assertActive(active)
-    for (const artifact of await this.artifacts(root)) await this.archive(task, artifact)
-    await rm(root, { recursive: true, force: true }).catch(() => {})
     if (failed) throw new Error('PLAYWRIGHT_ASSERTION_FAILED: One or more declarative browser steps failed.')
   }
+
   async runtime(task) { const request = runtimeRequest(this.config, task); const response = await this.fetcher(`${this.config.controlPlaneUrl}${request.path}`, { method: 'POST', headers: request.headers, body: request.body, signal: AbortSignal.timeout(5000) }); if (!response.ok) throw new Error(`运行时配置请求失败：HTTP ${response.status}`); return validateRuntime(task, (await response.json())?.data, this.config.allowedTargetOrigins) }
   async step(page, step, variables, base) {
     const timeout = step.timeoutMillis ?? 30000, selector = interpolate(step.selector, variables)
-    if (step.type === 'NAVIGATE') return page.goto(target(interpolate(step.url, variables), base, this.config.allowedTargetOrigins), { waitUntil: 'domcontentloaded', timeout })
+    if (step.type === 'NAVIGATE') { const response = await page.goto(target(interpolate(step.url, variables), base, this.config.allowedTargetOrigins), { waitUntil: 'domcontentloaded', timeout }); target(page.url(), base, this.config.allowedTargetOrigins); return response }
     if (step.type === 'WAIT') return page.waitForTimeout(timeout)
     const locator = page.locator(selector)
     if (step.type === 'FILL') return locator.fill(interpolate(step.value, variables), { timeout })
     if (step.type === 'CLICK') return locator.click({ timeout })
     if (step.type === 'ASSERT_VISIBLE') return locator.waitFor({ state: 'visible', timeout })
-    if (step.type === 'ASSERT_TEXT') { const actual = await locator.textContent({ timeout }); if (!String(actual ?? '').includes(interpolate(step.expectedText, variables))) throw new Error('文本断言未通过') }
+    if (step.type === 'ASSERT_TEXT') {
+      const expected = interpolate(step.expectedText, variables), deadline = Date.now() + timeout
+      do {
+        const actual = await locator.textContent({ timeout: Math.max(1, deadline - Date.now()) })
+        if (String(actual ?? '').includes(expected)) return
+        if (Date.now() >= deadline) break
+        await page.waitForTimeout(Math.min(100, deadline - Date.now()))
+      } while (Date.now() < deadline)
+      throw new Error('文本断言未通过')
+    }
   }
   async artifacts(root) { const names = await (await import('node:fs/promises')).readdir(root); const list = []
     for (const name of names) { const path = join(root, name); const info = await stat(path); if (!info.isFile() || info.size > this.config.maxArtifactBytes) continue; const type = name === 'trace.zip' ? 'TRACE' : name.endsWith('.webm') ? 'VIDEO' : name.endsWith('.png') ? 'SCREENSHOT' : undefined; if (type) list.push({ type, path, size: info.size, contentType: type === 'TRACE' ? 'application/zip' : type === 'VIDEO' ? 'video/webm' : 'image/png' }) }
@@ -107,7 +128,20 @@ export class PlaywrightRunner {
   }
   async archive(task, artifact) { const bytes = await readFile(artifact.path); const request = artifactRequest(this.config, task, { ...artifact, checksum: createHash('sha256').update(bytes).digest('hex') }); const response = await this.fetcher(`${this.config.controlPlaneUrl}${request.path}`, { method: 'POST', headers: request.headers, body: bytes, signal: AbortSignal.timeout(10000) }); if (!response.ok) this.logger.warn(`Playwright 工件归档失败：${artifact.type} HTTP ${response.status}`) }
   assertActive(active) { if (active.cancelled || this.cancelled.has(active.task.taskId)) { const error = new Error('Playwright task cancelled'); error.code = 'CANCELLED'; throw error } }
-  async closeActive(active) { await Promise.allSettled([active.context?.close(), active.browser?.close()]); active.context = null; active.browser = null }
+  async closeActive(active) {
+    if (active.closing) return active.closing
+    const context = active.context, browser = active.browser
+    if (!context && !browser && !active.proxy) return
+    active.closing = (async () => {
+      if (context && active.root) await context.tracing.stop({ path: join(active.root, 'trace.zip') }).catch(error => this.logger.warn?.('Playwright Trace 保存失败', text(error)))
+      await context?.close().catch(error => this.logger.warn?.('Playwright Context 关闭失败', text(error)))
+      await browser?.close().catch(error => this.logger.warn?.('Playwright Browser 关闭失败', text(error)))
+      if (active.context === context) active.context = null
+      if (active.browser === browser) active.browser = null
+      await active.proxy?.close(); active.proxy = null
+    })()
+    try { await active.closing } finally { active.closing = null }
+  }
   async event(value) { await this.commandClient.sendCommand(['XADD', EVENT_STREAM, 'MAXLEN', '~', '10000', '*', ...toFields(value)]) }
   async stepResult(value) { await this.commandClient.sendCommand(['XADD', STEP_RESULT_STREAM, 'MAXLEN', '~', '50000', '*', ...toFields(value)]) }
   async ack(id) { await this.commandClient.sendCommand(['XACK', TASK_STREAM, TASK_CONSUMER_GROUP, id]) }

@@ -964,6 +964,7 @@ function documentImportIsValid() {
   return true
 }
 async function importDocument(kind: DocumentInterchangeKind) {
+  interchangeResult.value = null
   if (!documentImportIsValid()) return
   saving.value = true
   try {
@@ -982,6 +983,7 @@ async function importDocument(kind: DocumentInterchangeKind) {
   }
 }
 async function importInterchange() {
+  interchangeResult.value = null
   if (interchangeKind.value !== 'CURL') {
     await importDocument(interchangeKind.value)
     return

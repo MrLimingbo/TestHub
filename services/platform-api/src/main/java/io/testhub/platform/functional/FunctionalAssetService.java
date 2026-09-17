@@ -95,7 +95,7 @@ public class FunctionalAssetService {
         try {
             if (catalogs.delete(projectId, catalogId) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "目录不存在");
         } catch (DataIntegrityViolationException exception) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "目录下仍有需求或用例，不能删除", exception);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "目录下仍有关联资产，不能删除", exception);
         }
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_CATALOG_DELETED", "FUNCTIONAL_CATALOG", catalogId,
                 Map.of());

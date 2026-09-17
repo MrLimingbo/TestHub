@@ -1,3 +1,5 @@
+import { encodeApiUrlComponent } from './apiUrlTemplate'
+
 export interface QuickRequestKeyValueRow {
   id: string
   enabled: boolean
@@ -35,8 +37,8 @@ function decodeQueryPart(value: string) {
 
 export function parseQuickRequestQuery(rawUrl: string): QuickRequestKeyValueRow[] {
   const queryStart = rawUrl.indexOf('?')
-  if (queryStart < 0) return []
-  const hashStart = rawUrl.indexOf('#', queryStart)
+  const hashStart = rawUrl.indexOf('#')
+  if (queryStart < 0 || (hashStart >= 0 && hashStart < queryStart)) return []
   const query = rawUrl.slice(queryStart + 1, hashStart < 0 ? undefined : hashStart)
   if (!query) return []
   return query.split('&').filter(Boolean).map((item) => {
@@ -56,7 +58,7 @@ export function applyQuickRequestQuery(rawUrl: string, rows: QuickRequestKeyValu
   const base = queryStart < 0 ? withoutHash : withoutHash.slice(0, queryStart)
   const query = rows
     .filter((row) => row.enabled && row.name.trim())
-    .map((row) => `${encodeURIComponent(row.name.trim())}=${encodeURIComponent(row.value)}`)
+    .map((row) => `${encodeApiUrlComponent(row.name.trim())}=${encodeApiUrlComponent(row.value)}`)
     .join('&')
   return `${base}${query ? `?${query}` : ''}${hash}`
 }
@@ -107,7 +109,7 @@ export function serializeQuickRequestCookies(rows: QuickRequestKeyValueRow[]): s
 export function serializeUrlEncodedRows(rows: QuickRequestKeyValueRow[]): string {
   return rows
     .filter((row) => row.enabled && row.name.trim())
-    .map((row) => `${encodeURIComponent(row.name.trim())}=${encodeURIComponent(row.value)}`)
+    .map((row) => `${encodeApiUrlComponent(row.name.trim())}=${encodeApiUrlComponent(row.value)}`)
     .join('&')
 }
 
@@ -120,4 +122,31 @@ export function serializeMultipartRows(rows: QuickRequestKeyValueRow[], boundary
     '',
     row.value,
   ].join('\r\n')).join('\r\n')}\r\n--${boundary}--\r\n`
+}
+
+export function parseMultipartRows(body: string, contentType: string): QuickRequestKeyValueRow[] | null {
+  const boundary = contentType.match(/(?:^|;)\s*boundary=(?:"([^"]+)"|([^;\s]+))/i)
+  if (!boundary) return null
+  const delimiter = `--${boundary[1] ?? boundary[2]}`
+  if (!body.startsWith(`${delimiter}\r\n`)) return null
+  const parts = body.slice(delimiter.length + 2).split(`\r\n${delimiter}`)
+  const closing = parts.pop()
+  if (closing !== '--\r\n' && closing !== '--') return null
+  const rows: QuickRequestKeyValueRow[] = []
+  for (const [index, part] of parts.entries()) {
+    if (index > 0 && !part.startsWith('\r\n')) return null
+    const content = index > 0 ? part.slice(2) : part
+    const separator = content.indexOf('\r\n\r\n')
+    if (separator < 0) return null
+    // Only hydrate text fields supported by this editor. Other multipart bodies
+    // remain raw so replay never silently discards files or per-part headers.
+    const header = content.slice(0, separator)
+    const name = header.match(/^Content-Disposition: form-data; name="((?:\\.|[^"\\])*)"$/i)
+    if (!name) return null
+    rows.push(createQuickRequestRow({
+      name: name[1].replace(/\\(["\\])/g, '$1'),
+      value: content.slice(separator + 4),
+    }))
+  }
+  return rows
 }

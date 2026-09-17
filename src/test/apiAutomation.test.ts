@@ -34,3 +34,20 @@ describe('API automation imports', () => {
     expect(() => parseCurlCommand('curl -X TRACE https://api.example.com')).toThrow('TRACE')
   })
 })
+
+describe('cURL request fidelity', () => {
+  it('preserves HEAD, GET query data and repeated form fields', () => {
+    expect(parseCurlCommand('curl -I https://example.com').method).toBe('HEAD')
+    expect(parseCurlCommand("curl -G https://example.com -d a=1 --data-urlencode 'q=a b'")).toMatchObject({ method: 'GET', url: 'https://example.com?a=1&q=a%20b', body: '' })
+    expect(parseCurlCommand('curl https://example.com -da=1 -d b=2')).toMatchObject({ method: 'POST', body: 'a=1&b=2' })
+    expect(parseCurlCommand('curl -XPOST https://example.com').method).toBe('POST')
+  })
+  it('redacts literal query secrets in templated base URLs', () => {
+    const result = parseCurlCommand("curl '{{BASE_URL}}/orders?token=literal&access_token={{ACCESS_TOKEN}}'")
+    expect(result.url).toBe('{{BASE_URL}}/orders?token={{TOKEN}}&access_token={{ACCESS_TOKEN}}')
+    expect(result.externalizedSecrets).toEqual(['token'])
+  })
+  it('rejects file-backed data instead of sending a filename as the body', () => {
+    expect(() => parseCurlCommand('curl https://example.com --data @request.json')).toThrow('文件数据')
+  })
+})

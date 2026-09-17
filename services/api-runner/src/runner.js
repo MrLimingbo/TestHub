@@ -178,6 +178,9 @@ export class ApiRunner {
       await this.acknowledgeTask(entry.id)
       return
     }
+    if (this.config.httpExecutionEnabled && this.runtimeConfiguration === 'DISABLED') {
+      await this.discoverCapabilities().catch((error) => this.logger.error('Runner 签名能力发现失败', message(error)))
+    }
     if (this.config.httpExecutionEnabled && this.runtimeConfiguration === 'HTTP_FLOW_CONTROL_SCRIPTS_V2') {
       await this.executeHttpTask(task)
     } else {

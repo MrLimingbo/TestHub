@@ -50,7 +50,9 @@ class MobileAutomationFlowTests {
         if (elementId != null) jdbc.sql("DELETE FROM mobile_automation_element WHERE id=:id").param("id", elementId).update();
         if (applicationId != null) jdbc.sql("DELETE FROM mobile_automation_application WHERE id=:id").param("id", applicationId).update();
         if (deviceId != null) jdbc.sql("DELETE FROM mobile_automation_device WHERE id=:id").param("id", deviceId).update();
-        jdbc.sql("DELETE FROM audit_log WHERE action LIKE 'MOBILE_AUTOMATION_%'").update();
+        for (String id : new String[] {deviceId, applicationId, elementId, scenarioId, executionId, cancelledExecutionId}) {
+            if (id != null) jdbc.sql("DELETE FROM audit_log WHERE action LIKE 'MOBILE_AUTOMATION_%' AND resource_id=:id").param("id", id).update();
+        }
     }
 
     @Test
@@ -65,6 +67,14 @@ class MobileAutomationFlowTests {
                                 """))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.platform").value("ANDROID")).andReturn();
         deviceId = body(device).at("/data/id").asText();
+        csrf = csrf(session);
+        mvc.perform(post("/api/v1/projects/{projectId}/mobile-automation/devices", projectId)
+                        .cookie(session.cookie(), csrf.cookie()).header(csrf.header(), csrf.token()).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Wrong engine","platform":"ANDROID","udid":"wrong-engine","automationName":"XCUITest","capabilities":{},"enabled":true}
+                                """))
+                .andExpect(status().isBadRequest());
+
         csrf = csrf(session);
         MvcResult application = mvc.perform(post("/api/v1/projects/{projectId}/mobile-automation/applications", projectId)
                         .cookie(session.cookie(), csrf.cookie()).header(csrf.header(), csrf.token()).contentType(MediaType.APPLICATION_JSON)
@@ -89,6 +99,14 @@ class MobileAutomationFlowTests {
                                 """.formatted(deviceId, applicationId, elementId)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.steps.length()").value(2)).andReturn();
         scenarioId = body(scenario).at("/data/id").asText();
+        csrf = csrf(session);
+        mvc.perform(post("/api/v1/projects/{projectId}/mobile-automation/scenarios", projectId)
+                        .cookie(session.cookie(), csrf.cookie()).header(csrf.header(), csrf.token()).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"deviceId":"%s","applicationId":"%s","name":"Null step","failureStrategy":"STOP","variables":{},"steps":[null]}
+                                """.formatted(deviceId, applicationId)))
+                .andExpect(status().isBadRequest());
+
         csrf = csrf(session);
         MvcResult queued = mvc.perform(post("/api/v1/projects/{projectId}/mobile-automation/scenarios/{scenarioId}/executions", projectId, scenarioId)
                         .cookie(session.cookie(), csrf.cookie()).header(csrf.header(), csrf.token()).contentType(MediaType.APPLICATION_JSON)

@@ -27,10 +27,18 @@ function parse(output) {
 export function createProcessResourceSampler({ execFile = nodeExecFile } = {}) {
   const execute = promisify(execFile)
   return async (pid) => {
-    const result = await execute('/bin/ps', ['-o', '%cpu=,rss=', '-p', String(processId(pid))], {
-      timeout: 1000, maxBuffer: 1024, windowsHide: true,
+    const groupId = processId(pid)
+    const result = await execute('/bin/ps', ['-axo', 'pgid=,%cpu=,rss='], {
+      timeout: 1000, maxBuffer: 1024 * 1024, windowsHide: true,
     })
-    return parse(result.stdout)
+    const members = String(result.stdout).trim().split(/\n/).map(line => line.trim().split(/\s+/))
+      .filter(fields => Number(fields[0]) === groupId)
+    if (members.length === 0) throw new Error('JMeter 进程组已退出')
+    return members.reduce((total, fields) => {
+      const current = parse(fields.slice(1).join(' '))
+      return { cpuPercent: Math.min(MAX_CPU_PERCENT, total.cpuPercent + current.cpuPercent),
+        residentMemoryBytes: Math.min(MAX_RESIDENT_MEMORY_BYTES, total.residentMemoryBytes + current.residentMemoryBytes) }
+    }, { cpuPercent: 0, residentMemoryBytes: 0 })
   }
 }
 

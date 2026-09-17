@@ -414,3 +414,24 @@ test('a parallel request group rejects scripts and dependent assertion steps bef
   assert.throws(() => runner.validateArtifact(task, artifact([parallelStep, { stepId: 'assert-group', type: 'ASSERT', expectedStatusCode: 200 }])),
     /Runner 运行时工件不安全/)
 })
+
+test('recovers capability discovery on the next task after control-plane startup failure', async () => {
+  let available = false
+  let executed = false
+  const runner = new ApiRunner({
+    commandClient: { sendCommand: async () => {} }, readClient: {},
+    config: { runnerId: 'runner-test', heartbeatSigningKey: 'a'.repeat(32), controlPlaneUrl: 'http://platform.test', httpExecutionEnabled: true },
+    logger: { info() {}, error() {} },
+    fetcher: async () => {
+      if (!available) throw new Error('connection refused')
+      return { ok: true, json: async () => ({ data: { runnerId: 'runner-test', trusted: true, executionEnabled: true, runtimeConfiguration: 'HTTP_FLOW_CONTROL_SCRIPTS_V2' } }) }
+    },
+  })
+  runner.executeHttpTask = async () => { executed = true }
+  await assert.rejects(runner.discoverCapabilities(), /connection refused/)
+  await runner.handleEntry({ id: '1710000000000-20', fields: task })
+  assert.equal(executed, false)
+  available = true
+  await runner.handleEntry({ id: '1710000000000-21', fields: task })
+  assert.equal(executed, true)
+})

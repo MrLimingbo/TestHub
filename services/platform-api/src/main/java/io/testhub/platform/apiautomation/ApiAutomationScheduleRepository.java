@@ -31,17 +31,17 @@ public class ApiAutomationScheduleRepository {
 
     public void insert(String id, String organizationId, String projectId, String scenarioId, String name,
                        String cronExpression, String timezone, int timeoutSeconds, int maxConsecutiveFailures,
-                       String createdBy) {
+                       boolean enabled, String createdBy) {
         jdbc.sql("""
                 INSERT INTO api_automation_schedule
                     (id, organization_id, project_id, scenario_id, name, cron_expression, timezone, timeout_seconds,
-                     max_consecutive_failures, created_by)
+                     max_consecutive_failures, enabled, created_by)
                 VALUES (:id, :organizationId, :projectId, :scenarioId, :name, :cronExpression, :timezone,
-                        :timeoutSeconds, :maxConsecutiveFailures, :createdBy)
+                        :timeoutSeconds, :maxConsecutiveFailures, :enabled, :createdBy)
                 """).param("id", id).param("organizationId", organizationId).param("projectId", projectId)
                 .param("scenarioId", scenarioId).param("name", name).param("cronExpression", cronExpression)
                 .param("timezone", timezone).param("timeoutSeconds", timeoutSeconds)
-                .param("maxConsecutiveFailures", maxConsecutiveFailures).param("createdBy", createdBy).update();
+                .param("maxConsecutiveFailures", maxConsecutiveFailures).param("enabled", enabled).param("createdBy", createdBy).update();
     }
 
     public int update(String projectId, String id, String scenarioId, String name, String cronExpression, String timezone,

@@ -1,9 +1,9 @@
 import { Buffer } from 'node:buffer'
 import { CANCEL_GROUP, CANCEL_STREAM, EVENT_STREAM, GROUP, STEP_STREAM, TASK_STREAM, artifactRequest, decodeCancellation, decodeTask, event, heartbeat, runtime, runtimeRequest, stepResult } from './protocol.js'
 function fields(value) { return Object.entries(value).flatMap(([key, item]) => [key, String(item)]) }
-function entries(reply) { return !Array.isArray(reply) ? [] : reply.flatMap(([, streams]) => Array.isArray(streams) ? streams.map(([id, raw]) => ({ id, fields: Object.fromEntries(raw.reduce((all, item, index) => index % 2 === 0 ? [...all, [item, raw[index + 1]]] : all, [])) })) : []) }
+function entries(reply) { const values = Array.isArray(reply) ? reply : reply && typeof reply === 'object' ? Object.entries(reply) : []; return values.flatMap(([, streams]) => Array.isArray(streams) ? streams.map(([id, raw]) => ({ id, fields: Object.fromEntries(raw.reduce((all, item, index) => index % 2 === 0 ? [...all, [item, raw[index + 1]]] : all, [])) })) : []) }
 function message(error) { return String(error?.message ?? error).slice(0, 512) }
-function interpolate(value, variables) { return String(value ?? '').replace(/{{([A-Za-z_][A-Za-z0-9_]*)}}/g, (_, name) => variables[name] ?? '') }
+function interpolate(value, variables) { return String(value ?? '').replace(/{{([A-Za-z_][A-Za-z0-9_]*)}}/g, (_, name) => { if (!(name in variables)) throw error('VARIABLE_UNDEFINED', `变量未定义：${name}`); return variables[name] }) }
 function error(code, text) { const value = new Error(text); value.code = code; return value }
 const LOCATORS = { ACCESSIBILITY_ID: 'accessibility id', ID: 'id', XPATH: 'xpath', ANDROID_UIAUTOMATOR: '-android uiautomator', IOS_PREDICATE: '-ios predicate string' }
 const SAFE_CAPABILITIES = new Set(['appium:platformVersion', 'appium:deviceName', 'appium:noReset', 'appium:fullReset', 'appium:newCommandTimeout', 'appium:autoGrantPermissions', 'appium:language', 'appium:locale', 'appium:appActivity', 'appium:appWaitActivity'])
@@ -38,12 +38,12 @@ export class AppiumRunner {
     for (const [key, value] of Object.entries(device.capabilities ?? {})) if (SAFE_CAPABILITIES.has(key)) capabilities[key] = value
     if (device.platform === 'ANDROID') capabilities['appium:appPackage'] = application.appIdentifier; else capabilities['appium:bundleId'] = application.appIdentifier
     const value = await this.webdriver('POST', '/session', { capabilities: { alwaysMatch: capabilities, firstMatch: [{}] } }, 30000); const sessionId = value?.sessionId ?? value?.value?.sessionId; if (typeof sessionId !== 'string' || !sessionId) throw error('APPIUM_SESSION_INVALID', '设备农场未返回有效 Appium session'); return sessionId }
-  async execute(active, configuration) { const scenario = configuration.manifest.scenario; for (const [index, step] of scenario.steps.entries()) { const started = Date.now(); let failure = ''
+  async execute(active, configuration) { const scenario = configuration.manifest.scenario; let failed = false; for (const [index, step] of scenario.steps.entries()) { const started = Date.now(); let failure = ''
       try { this.assertActive(active); this.assertDeadline(active, configuration.deadlineAt); await this.step(active, step, scenario.variables ?? {}); this.assertActive(active); this.assertDeadline(active, configuration.deadlineAt) }
-      catch (value) { failure = message(value) }
+      catch (value) { if (['CANCELLED', 'TIMED_OUT'].includes(value?.code)) throw value; failure = message(value); failed = true }
       await this.publishStep(stepResult(active.task, this.config.runnerId, step, index + 1, failure ? 'FAILED' : 'PASSED', Date.now() - started, failure, this.now()))
       if (failure && scenario.failureStrategy !== 'CONTINUE') throw error(failure.includes('deadline') ? 'TIMED_OUT' : 'STEP_FAILED', failure)
-    } }
+    } if (failed) throw error('STEP_FAILED', 'One or more mobile steps failed'); }
   async step(active, step, variables) { const timeout = Math.min(Math.max(Number(step.timeoutMillis) || 30000, 1), 60000); if (step.type === 'LAUNCH') return
     if (step.type === 'WAIT') return new Promise((resolve) => setTimeout(resolve, timeout))
     if (step.type === 'SCREENSHOT') { const shot = await this.webdriver('GET', `/session/${encodeURIComponent(active.sessionId)}/screenshot`, undefined, timeout); const base64 = typeof shot === 'string' ? shot : shot?.value; if (typeof base64 !== 'string') throw error('SCREENSHOT_FAILED', '设备农场未返回 PNG 截图'); await this.archive(active.task, Buffer.from(base64, 'base64')); return }

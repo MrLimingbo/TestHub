@@ -179,6 +179,7 @@ const selectedPlanId = ref('')
 const selectedDetail = ref<PlanDetail | null>(null)
 const executions = ref<PerformanceExecution[]>([])
 const runners = ref<RunnerStatus[]>([])
+const operationalError = ref('')
 const loading = ref(true)
 const saving = ref(false)
 const planDialog = ref(false)
@@ -188,6 +189,10 @@ const reportLoading = ref(false)
 const selectedReport = ref<PerformanceReport | null>(null)
 let operationalTimer: number | undefined
 let reportTimer: number | undefined
+let detailRequest = 0
+let plansRequest = 0
+let operationalRequest = 0
+let reportRequest = 0
 const planForm = reactive<{ name: string; description: string; status: Plan['status']; threadGroups: ThreadGroupInput[] }>({
   name: '', description: '', status: 'DRAFT', threadGroups: [],
 })
@@ -310,22 +315,35 @@ async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: 
   return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) })
 }
 async function loadDetail() {
-  selectedDetail.value = selectedPlanId.value ? await read<PlanDetail>(`/api/v1/projects/${projectId.value}/performance/plans/${selectedPlanId.value}`) : null
+  const request = ++detailRequest
+  const project = projectId.value
+  const plan = selectedPlanId.value
+  selectedDetail.value = null
+  const detail = plan ? await read<PlanDetail>(`/api/v1/projects/${project}/performance/plans/${plan}`) : null
+  if (request === detailRequest && project === projectId.value && plan === selectedPlanId.value) selectedDetail.value = detail
 }
 async function loadPlans() {
-  plans.value = await read<Plan[]>(`/api/v1/projects/${projectId.value}/performance/plans`)
+  const request = ++plansRequest
+  const project = projectId.value
+  const data = await read<Plan[]>(`/api/v1/projects/${project}/performance/plans`)
+  if (request !== plansRequest || project !== projectId.value) return
+  plans.value = data
   if (selectedPlanId.value && !plans.value.some((plan) => plan.id === selectedPlanId.value)) selectedPlanId.value = ''
   if (!selectedPlanId.value && plans.value[0]) selectedPlanId.value = plans.value[0].id
   await loadDetail()
 }
 async function loadOperationalData() {
   if (!projectId.value) return
+  const request = ++operationalRequest
+  const project = projectId.value
   const [executionData, runnerData] = await Promise.all([
     read<PerformanceExecution[]>(`/api/v1/projects/${projectId.value}/performance/executions`),
     read<RunnerStatus[]>(`/api/v1/projects/${projectId.value}/performance/runner-status`),
   ])
+  if (request !== operationalRequest || project !== projectId.value) return
   executions.value = executionData
   runners.value = runnerData
+  operationalError.value = ''
 }
 async function load() {
   loading.value = true
@@ -340,6 +358,11 @@ async function load() {
   }
 }
 async function changeProject() {
+  closeReport()
+  planDialog.value = false
+  plans.value = []
+  executions.value = []
+  runners.value = []
   selectedPlanId.value = ''
   selectedDetail.value = null
   try { await loadPlans(); await loadOperationalData() } catch (error) { Message.error(error instanceof Error ? error.message : '切换项目失败') }
@@ -376,8 +399,10 @@ async function savePlan() {
     selectedPlanId.value = detail.id
     await loadPlans()
     Message.success(editing.value ? '压测计划已更新' : '压测计划已创建')
+    return true
   } catch (error) {
     Message.error(error instanceof Error ? error.message : '保存压测计划失败')
+    return false
   } finally {
     saving.value = false
   }
@@ -418,25 +443,32 @@ function terminal(status: string) {
 }
 async function loadReport() {
   if (!selectedReport.value) return
+  const request = ++reportRequest
+  const project = projectId.value
+  const executionId = selectedReport.value.execution.id
   reportLoading.value = true
   try {
-    const report = await read<PerformanceReport>(`/api/v1/projects/${projectId.value}/performance/executions/${selectedReport.value.execution.id}/report`)
+    const report = await read<PerformanceReport>(`/api/v1/projects/${project}/performance/executions/${executionId}/report`)
+    if (request !== reportRequest || project !== projectId.value || !reportDrawer.value) return
     selectedReport.value = report
     executions.value = executions.value.map((execution) => execution.id === report.execution.id ? report.execution : execution)
     if (terminal(report.execution.status) && reportTimer !== undefined) { window.clearInterval(reportTimer); reportTimer = undefined }
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载压测报告失败')
+    if (request === reportRequest) Message.error(error instanceof Error ? error.message : '加载压测报告失败')
   } finally {
-    reportLoading.value = false
+    if (request === reportRequest) reportLoading.value = false
   }
 }
 async function openReport(execution: PerformanceExecution) {
+  closeReport()
   selectedReport.value = { execution, summary: { sampleCount: 0, successCount: 0, errorCount: 0, errorRatePercent: 0, peakThroughputPerSecond: 0, averageLatencyMillis: 0, p95LatencyMillis: 0, minLatencyMillis: 0, maxLatencyMillis: 0, peakActiveThreads: 0 }, metrics: [], resources: [], errors: [], logs: [], quality: { status: 'NOT_EVALUATED', configuredChecks: 0, passedChecks: 0, failedChecks: 0, inconclusiveChecks: 0, threadGroups: [] }, comparison: null, artifacts: [] }
   reportDrawer.value = true
   await loadReport()
-  if (!terminal(execution.status) && reportTimer === undefined) reportTimer = window.setInterval(() => { void loadReport() }, 2000)
+  if (reportDrawer.value && selectedReport.value?.execution.id === execution.id && !terminal(selectedReport.value.execution.status) && reportTimer === undefined) reportTimer = window.setInterval(() => { void loadReport() }, 2000)
 }
 function closeReport() {
+  reportRequest++
+  reportLoading.value = false
   if (reportTimer !== undefined) { window.clearInterval(reportTimer); reportTimer = undefined }
   reportDrawer.value = false
   selectedReport.value = null
@@ -452,7 +484,7 @@ function reportExportUrl() {
 
 onMounted(() => {
   void load()
-  operationalTimer = window.setInterval(() => { if (projectId.value) void loadOperationalData() }, 2000)
+  operationalTimer = window.setInterval(() => { if (projectId.value) void loadOperationalData().catch(error => { operationalError.value = error instanceof Error ? error.message : '刷新执行状态失败' }) }, 2000)
 })
 onBeforeUnmount(() => {
   if (operationalTimer !== undefined) window.clearInterval(operationalTimer)
@@ -486,6 +518,8 @@ onBeforeUnmount(() => {
         </article>
       </div>
     </section>
+
+    <a-alert v-if="operationalError" type="warning">{{ operationalError }}；正在自动重试。</a-alert>
 
     <section class="performance-layout">
       <aside class="plan-list panel">
@@ -540,12 +574,12 @@ onBeforeUnmount(() => {
       <div v-else class="panel empty-plan"><a-empty description="选择或创建压测计划，开始维护负载配置。"><template #extra><a-button type="primary" @click="openCreate">新建压测计划</a-button></template></a-empty></div>
     </section>
 
-    <a-modal v-model:visible="planDialog" :title="editing ? '编辑压测计划' : '新建压测计划'" width="900px" :ok-loading="saving" :mask-closable="false" @ok="savePlan">
+    <a-modal v-model:visible="planDialog" :title="editing ? '编辑压测计划' : '新建压测计划'" width="900px" :ok-loading="saving" :mask-closable="false" :on-before-ok="savePlan">
       <a-form :model="planForm" layout="vertical">
         <div class="form-grid"><a-form-item label="计划名称" required><a-input v-model="planForm.name" placeholder="例如：订单核心链路基准压测" /></a-form-item><a-form-item label="计划状态"><a-select v-model="planForm.status"><a-option value="DRAFT">草稿</a-option><a-option value="READY">待执行</a-option><a-option value="ARCHIVED">已归档</a-option></a-select></a-form-item></div>
         <a-form-item label="计划说明"><a-textarea v-model="planForm.description" :auto-size="{ minRows: 2, maxRows: 4 }" placeholder="说明容量目标、场景范围或验收依据" /></a-form-item>
         <div class="form-section-heading"><div><strong>线程组配置</strong><span>每个计划 1–10 个线程组；请求头不支持 Authorization、Cookie 等敏感认证字段，后续通过项目密钥注入。</span></div><a-button type="outline" size="small" :disabled="planForm.threadGroups.length >= 10" @click="addThreadGroup"><icon-plus /> 添加线程组</a-button></div>
-        <article v-for="(group, index) in planForm.threadGroups" :key="`${index}-${group.name}`" class="thread-group-form">
+        <article v-for="(group, index) in planForm.threadGroups" :key="index" class="thread-group-form">
           <header><strong>线程组 {{ index + 1 }}</strong><a-button type="text" status="danger" size="small" :disabled="planForm.threadGroups.length === 1" @click="removeThreadGroup(index)"><icon-delete /> 删除</a-button></header>
           <div class="form-grid group-title-grid"><a-form-item label="线程组名称" required><a-input v-model="group.name" placeholder="例如：下单主链路" /></a-form-item><a-form-item label="负载模型"><a-select v-model="group.loadModel" @change="loadModelChanged(group)"><a-option value="RAMP_UP">线性加压</a-option><a-option value="STEADY">恒定负载</a-option><a-option value="STEPPED_RAMP">阶梯加压</a-option></a-select></a-form-item></div>
           <a-form-item label="目标 URL" required><a-input v-model="group.targetUrl" placeholder="https://api.example.test/orders" /></a-form-item>

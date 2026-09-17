@@ -47,6 +47,8 @@ class PerformanceTestExecutionArtifactFlowTests {
         redis.delete("testhub:runner:jmeter:heartbeat:v1:" + RUNNER_ID);
         redis.opsForSet().remove("testhub:runner:jmeter:members:v1", RUNNER_ID);
         redis.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_archive_jtl_987654");
+        redis.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_timeout_log_987654");
+        redis.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_timeout_late_987654");
         jdbc.sql("DELETE FROM performance_test_execution WHERE plan_name LIKE '压测工件验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_thread_group WHERE name LIKE '压测工件验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_plan WHERE name LIKE '压测工件验收 %'").update();
@@ -94,6 +96,19 @@ class PerformanceTestExecutionArtifactFlowTests {
         mvc.perform(get("/api/v1/projects/{projectId}/performance/executions/{executionId}/artifacts/{artifactId}/download",
                         projectId, executionId, artifactId).cookie(administrator.sessionCookie()))
                 .andExpect(status().isOk()).andExpect(content().bytes(jtl));
+
+        // A timeout is finalized by the control plane before the Runner can upload its last output.
+        jdbc.sql("UPDATE performance_test_execution SET status = 'TIMED_OUT', finished_at = CURRENT_TIMESTAMP(6) WHERE id = :id")
+                .param("id", executionId).update();
+        byte[] log = "JMeter stopped at its deadline".getBytes(StandardCharsets.UTF_8);
+        mvc.perform(post(PATH).contentType("text/plain").content(log)
+                        .headers(headers(taskId, executionId, "JMETER_LOG", log.length, sha256(log), "nonce_timeout_log_987654")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.artifactType").value("JMETER_LOG"));
+        jdbc.sql("UPDATE performance_test_execution SET finished_at = DATE_SUB(CURRENT_TIMESTAMP(6), INTERVAL 3 MINUTE) WHERE id = :id")
+                .param("id", executionId).update();
+        mvc.perform(post(PATH).contentType("text/plain").content(log)
+                        .headers(headers(taskId, executionId, "JMETER_LOG", log.length, sha256(log), "nonce_timeout_late_987654")))
+                .andExpect(status().isForbidden());
     }
 
     private void heartbeat() throws Exception {

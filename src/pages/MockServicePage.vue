@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import CodeEditor from '@/components/CodeEditor.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -34,6 +34,8 @@ const serverForm = reactive({ name: '' })
 const ruleForm = reactive({ name: '', httpMethod: 'GET', path: '/orders', priority: 0, requestQuery: '{\n}', requestHeaders: '{\n}', requestBodyMatch: 'ANY', requestBody: '', responseStatus: 200, headers: '{\n  "Content-Type": "application/json; charset=utf-8"\n}', body: '{\n  "code": 0,\n  "message": "mock response"\n}' })
 const shareForm = reactive({ name: '', expiresInDays: 30 })
 const shareNeverExpires = ref(false)
+const now = ref(Date.now())
+let shareClock: number | undefined
 
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
 const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value))
@@ -41,7 +43,7 @@ const selectedServer = computed(() => servers.value.find((server) => server.id =
 const enabledCount = computed(() => servers.value.filter((server) => server.enabled).length)
 const ruleCount = computed(() => servers.value.reduce((total, server) => total + server.ruleCount, 0))
 const smartExampleCount = computed(() => smartExamples.value.length)
-const activeShareCount = computed(() => shares.value.filter((share) => !share.revokedAt).length)
+const activeShareCount = computed(() => shares.value.filter((share) => shareStatus(share) === '有效').length)
 const runtimeUrl = computed(() => selectedServer.value ? `${window.location.origin}/api/v1/mock/${selectedServer.value.publicKey}` : '')
 
 async function read<T>(path: string, init?: RequestInit): Promise<T> {
@@ -56,26 +58,51 @@ async function mutate<T>(path: string, body: unknown): Promise<T> {
   return read<T>(path, { method: 'POST', headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: JSON.stringify(body) })
 }
 
+function currentSelection(project: string, server: string) {
+  return projectId.value === project && selectedServerId.value === server
+}
+
+function clearDetails() {
+  rules.value = []
+  smartExamples.value = []
+  shares.value = []
+}
+
 async function loadRules() {
-  if (!projectId.value || !selectedServerId.value) { rules.value = []; return }
+  const project = projectId.value
+  const server = selectedServerId.value
+  if (!project || !server) { rules.value = []; return }
   rulesLoading.value = true
-  try { rules.value = await read<MockRule[]>(`/api/v1/projects/${projectId.value}/mock/servers/${selectedServerId.value}/rules`) } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载 Mock 规则失败')
-  } finally { rulesLoading.value = false }
+  try {
+    const result = await read<MockRule[]>(`/api/v1/projects/${project}/mock/servers/${server}/rules`)
+    if (currentSelection(project, server)) rules.value = result
+  } catch (error) {
+    if (currentSelection(project, server)) Message.error(error instanceof Error ? error.message : '加载 Mock 规则失败')
+  } finally { if (currentSelection(project, server)) rulesLoading.value = false }
 }
 
 async function loadSmartExamples() {
-  if (!projectId.value || !selectedServerId.value) { smartExamples.value = []; return }
+  const project = projectId.value
+  const server = selectedServerId.value
+  if (!project || !server) { smartExamples.value = []; return }
   smartLoading.value = true
-  try { smartExamples.value = await read<SmartMockExample[]>(`/api/v1/projects/${projectId.value}/mock/servers/${selectedServerId.value}/smart-examples`) } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载智能示例失败')
-  } finally { smartLoading.value = false }
+  try {
+    const result = await read<SmartMockExample[]>(`/api/v1/projects/${project}/mock/servers/${server}/smart-examples`)
+    if (currentSelection(project, server)) smartExamples.value = result
+  } catch (error) {
+    if (currentSelection(project, server)) Message.error(error instanceof Error ? error.message : '加载智能示例失败')
+  } finally { if (currentSelection(project, server)) smartLoading.value = false }
 }
 
 async function loadShares() {
-  if (!projectId.value || !selectedServerId.value) { shares.value = []; return }
-  try { shares.value = await read<MockShare[]>(`/api/v1/projects/${projectId.value}/mock/servers/${selectedServerId.value}/shares`) } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载 Mock 分享链接失败')
+  const project = projectId.value
+  const server = selectedServerId.value
+  if (!project || !server) { shares.value = []; return }
+  try {
+    const result = await read<MockShare[]>(`/api/v1/projects/${project}/mock/servers/${server}/shares`)
+    if (currentSelection(project, server)) { shares.value = result; now.value = Date.now() }
+  } catch (error) {
+    if (currentSelection(project, server)) Message.error(error instanceof Error ? error.message : '加载 Mock 分享链接失败')
   }
 }
 
@@ -88,28 +115,40 @@ async function load() {
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载 Mock 服务失败') } finally { loading.value = false }
 }
 
+let serverLoadSequence = 0
 async function loadServers() {
-  if (!projectId.value) { servers.value = []; return }
-  servers.value = await read<MockServer[]>(`/api/v1/projects/${projectId.value}/mock/servers`)
-  if (!servers.value.some((server) => server.id === selectedServerId.value)) selectedServerId.value = servers.value[0]?.id ?? ''
-  await loadRules()
-  await loadSmartExamples()
-  await loadShares()
+  const sequence = ++serverLoadSequence
+  const project = projectId.value
+  if (!project) { servers.value = []; selectedServerId.value = ''; clearDetails(); return }
+  try {
+    const result = await read<MockServer[]>(`/api/v1/projects/${project}/mock/servers`)
+    if (sequence !== serverLoadSequence || project !== projectId.value) return
+    servers.value = result
+    const server = result.some((item) => item.id === selectedServerId.value) ? selectedServerId.value : result[0]?.id ?? ''
+    await selectServer(server)
+  } catch (error) {
+    if (sequence === serverLoadSequence && project === projectId.value) Message.error(error instanceof Error ? error.message : '加载 Mock 服务失败')
+  }
 }
 
 async function changeProject() {
   selectedServerId.value = ''
-  rules.value = []
-  smartExamples.value = []
-  shares.value = []
-  try { await loadServers() } catch (error) { Message.error(error instanceof Error ? error.message : '切换项目失败') }
+  servers.value = []
+  clearDetails()
+  await loadServers()
 }
 
 async function selectServer(serverId: string) {
   selectedServerId.value = serverId
-  await loadRules()
-  await loadSmartExamples()
-  await loadShares()
+  clearDetails()
+  rulesLoading.value = false
+  smartLoading.value = false
+  await Promise.all([loadRules(), loadSmartExamples(), loadShares()])
+}
+
+async function submitDialog(action: () => Promise<void>): Promise<boolean> {
+  await action()
+  return false
 }
 
 async function createServer() {
@@ -118,10 +157,7 @@ async function createServer() {
   try {
     const server = await mutate<MockServer>(`/api/v1/projects/${projectId.value}/mock/servers`, { name: serverForm.name })
     servers.value = [server, ...servers.value]
-    selectedServerId.value = server.id
-    rules.value = []
-    smartExamples.value = []
-    shares.value = []
+    await selectServer(server.id)
     serverForm.name = ''
     serverVisible.value = false
     Message.success('Mock 服务已创建')
@@ -155,7 +191,7 @@ async function createRule() {
     const rule = await mutate<MockRule>(`/api/v1/projects/${projectId.value}/mock/servers/${selectedServer.value.id}/rules`, {
       name: ruleForm.name, httpMethod: ruleForm.httpMethod, path: ruleForm.path, priority: ruleForm.priority,
       requestQuery: requestQuery(), requestHeaders: requestHeaders(), requestBodyMatch: ruleForm.requestBodyMatch,
-      requestBody: ruleForm.requestBody, responseStatus: ruleForm.responseStatus, responseHeaders: responseHeaders(), responseBody: ruleForm.body,
+      requestBody: ruleForm.requestBodyMatch === 'ANY' ? '' : ruleForm.requestBody, responseStatus: ruleForm.responseStatus, responseHeaders: responseHeaders(), responseBody: ruleForm.body,
     })
     rules.value = [rule, ...rules.value]
     servers.value = servers.value.map((server) => server.id === selectedServer.value?.id ? { ...server, ruleCount: server.ruleCount + 1 } : server)
@@ -181,6 +217,11 @@ async function setSmartExampleEnabled(value: boolean | string | number) {
     servers.value = servers.value.map((item) => item.id === server.id ? server : item)
     Message.success(server.smartExampleEnabled ? '智能示例 Mock 已启用' : '智能示例 Mock 已停用')
   } catch (error) { Message.error(error instanceof Error ? error.message : '更新智能示例 Mock 失败') }
+}
+
+function shareStatus(share: MockShare): '有效' | '已过期' | '已撤销' {
+  if (share.revokedAt) return '已撤销'
+  return share.expiresAt && new Date(share.expiresAt).getTime() <= now.value ? '已过期' : '有效'
 }
 
 function shareUrl(share: MockShare) { return `${window.location.origin}/mock/share/${share.shareKey}` }
@@ -231,7 +272,11 @@ function conditionSummary(rule: MockRule) {
 }
 function date(value: string | null) { return value ? new Intl.DateTimeFormat('zh-CN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : '永不过期' }
 
-onMounted(load)
+onMounted(() => {
+  void load()
+  shareClock = window.setInterval(() => { now.value = Date.now() }, 30_000)
+})
+onUnmounted(() => { if (shareClock) window.clearInterval(shareClock) })
 </script>
 
 <template>
@@ -245,11 +290,11 @@ onMounted(load)
     <section v-if="selectedServer" class="share-box panel">
       <div class="share-head"><div><span class="eyebrow">TEAM COLLABORATION</span><h3>协作与分享</h3><small>项目成员沿用自身 RBAC 管理 Mock；外部链接只读展示调用说明，不包含响应正文、密钥或成员数据。</small></div><a-button type="primary" @click="shareVisible = true"><icon-share-alt /> 创建只读分享</a-button></div>
       <div class="share-status"><a-tag color="arcoblue">{{ activeShareCount }} 条有效链接</a-tag><span>已撤销或已过期的链接不能再读取说明。</span><a-button size="mini" @click="loadShares">刷新链接</a-button></div>
-      <a-table :data="shares" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="分享名称"><template #cell="{ record }"><div class="rule-name"><strong>{{ record.name }}</strong><small>创建于 {{ date(record.createdAt) }}</small></div></template></a-table-column><a-table-column title="有效期"><template #cell="{ record }">{{ date(record.expiresAt) }}</template></a-table-column><a-table-column title="状态" :width="100"><template #cell="{ record }"><a-tag :color="record.revokedAt ? 'red' : 'green'">{{ record.revokedAt ? '已撤销' : '有效' }}</a-tag></template></a-table-column><a-table-column title="操作" :width="190"><template #cell="{ record }"><a-space><a-button v-if="!record.revokedAt" type="text" size="small" @click="copyShareUrl(record)">复制链接</a-button><a-popconfirm v-if="!record.revokedAt" content="撤销后该分享链接将立即失效，是否继续？" @ok="revokeShare(record)"><a-button type="text" size="small" status="danger">撤销</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table><a-empty v-if="!shares.length" description="还没有只读分享链接" />
+      <a-table :data="shares" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="分享名称"><template #cell="{ record }"><div class="rule-name"><strong>{{ record.name }}</strong><small>创建于 {{ date(record.createdAt) }}</small></div></template></a-table-column><a-table-column title="有效期"><template #cell="{ record }">{{ date(record.expiresAt) }}</template></a-table-column><a-table-column title="状态" :width="100"><template #cell="{ record }"><a-tag :color="shareStatus(record) === '有效' ? 'green' : 'red'">{{ shareStatus(record) }}</a-tag></template></a-table-column><a-table-column title="操作" :width="190"><template #cell="{ record }"><a-space><a-button v-if="shareStatus(record) === '有效'" type="text" size="small" @click="copyShareUrl(record)">复制链接</a-button><a-popconfirm v-if="!record.revokedAt" content="撤销后该分享链接将立即失效，是否继续？" @ok="revokeShare(record)"><a-button type="text" size="small" status="danger">撤销</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table><a-empty v-if="!shares.length" description="还没有只读分享链接" />
     </section>
-    <a-modal v-model:visible="serverVisible" title="新建 Mock 服务" :confirm-loading="creating" @ok="createServer"><a-form :model="serverForm" layout="vertical"><a-form-item label="服务名称" required><a-input v-model="serverForm.name" :max-length="160" placeholder="例如：订单服务模拟环境" /></a-form-item><div class="modal-tip">创建后会生成一条公开地址。该地址不需要登录，适用于联调与自动化测试；可随时停用服务。</div></a-form></a-modal>
-    <a-modal v-model:visible="ruleVisible" title="新建 Mock 规则" width="860px" :confirm-loading="creating" @ok="createRule"><a-form :model="ruleForm" layout="vertical"><div class="form-grid"><a-form-item label="规则名称" required><a-input v-model="ruleForm.name" :max-length="160" placeholder="例如：预览订单成功" /></a-form-item><a-form-item label="优先级"><a-input-number v-model="ruleForm.priority" :min="0" :max="1000" /><small class="field-tip">数值越大越先匹配；同优先级按创建顺序。</small></a-form-item></div><a-divider orientation="left">请求匹配</a-divider><div class="form-grid"><a-form-item label="请求方法" required><a-select v-model="ruleForm.httpMethod"><a-option v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item><a-form-item label="精确路径" required><a-input v-model="ruleForm.path" :max-length="700" placeholder="/orders" /></a-form-item></div><div class="form-grid"><a-form-item label="请求参数条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestQuery" :height="110" /></a-form-item><a-form-item label="请求头条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestHeaders" :height="110" /></a-form-item></div><div class="form-grid"><a-form-item label="请求体匹配"><a-select v-model="ruleForm.requestBodyMatch"><a-option value="ANY">任意请求体</a-option><a-option value="EXACT">请求体精确匹配</a-option><a-option value="JSON_SUBSET">JSON 子集匹配</a-option></a-select></a-form-item><div class="match-hint"><strong>{{ ruleForm.requestBodyMatch === 'ANY' ? '不限制请求体' : ruleForm.requestBodyMatch === 'EXACT' ? '字节文本完全一致' : '请求 JSON 必须包含给定字段' }}</strong><small>参数和请求头值均使用精确匹配。</small></div></div><a-form-item v-if="ruleForm.requestBodyMatch !== 'ANY'" :label="ruleForm.requestBodyMatch === 'JSON_SUBSET' ? 'JSON 请求体条件' : '请求体条件'"><CodeEditor v-model="ruleForm.requestBody" :height="140" /></a-form-item><a-divider orientation="left">响应配置</a-divider><div class="form-grid"><a-form-item label="响应状态"><a-input-number v-model="ruleForm.responseStatus" :min="200" :max="599" /></a-form-item><div /></div><a-form-item label="响应头（JSON 对象）"><CodeEditor v-model="ruleForm.headers" :height="110" /></a-form-item><a-form-item label="响应体"><CodeEditor v-model="ruleForm.body" :height="160" /></a-form-item><div class="modal-tip">未命中规则、路径或方法不匹配、服务停用时均返回 404。此节点不执行脚本；JSON 子集仅匹配对象字段，数组需完全一致。</div></a-form></a-modal>
-    <a-modal v-model:visible="shareVisible" title="创建只读 Mock 分享" width="560px" :confirm-loading="sharing" @ok="createShare"><a-form :model="shareForm" layout="vertical"><a-form-item label="分享名称" required><a-input v-model="shareForm.name" :max-length="120" placeholder="例如：合作方订单联调说明" /></a-form-item><a-form-item label="有效期"><a-input-number v-model="shareForm.expiresInDays" :disabled="shareNeverExpires" :min="1" :max="365" /> <span class="form-hint">天（1–365）</span><a-checkbox v-model="shareNeverExpires" class="never-expire">永不过期</a-checkbox></a-form-item><div class="modal-tip">分享页只显示方法、路径、状态码和匹配条件摘要。它不会公开响应正文、响应头、项目成员、环境变量或密钥；可随时撤销。</div></a-form></a-modal>
+    <a-modal v-model:visible="serverVisible" title="新建 Mock 服务" :ok-loading="creating" :on-before-ok="() => submitDialog(createServer)"><a-form :model="serverForm" layout="vertical"><a-form-item label="服务名称" required><a-input v-model="serverForm.name" :max-length="160" placeholder="例如：订单服务模拟环境" /></a-form-item><div class="modal-tip">创建后会生成一条公开地址。该地址不需要登录，适用于联调与自动化测试；可随时停用服务。</div></a-form></a-modal>
+    <a-modal v-model:visible="ruleVisible" title="新建 Mock 规则" width="860px" :ok-loading="creating" :on-before-ok="() => submitDialog(createRule)"><a-form :model="ruleForm" layout="vertical"><div class="form-grid"><a-form-item label="规则名称" required><a-input v-model="ruleForm.name" :max-length="160" placeholder="例如：预览订单成功" /></a-form-item><a-form-item label="优先级"><a-input-number v-model="ruleForm.priority" :min="0" :max="1000" /><small class="field-tip">数值越大越先匹配；同优先级按创建顺序。</small></a-form-item></div><a-divider orientation="left">请求匹配</a-divider><div class="form-grid"><a-form-item label="请求方法" required><a-select v-model="ruleForm.httpMethod"><a-option v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item><a-form-item label="精确路径" required><a-input v-model="ruleForm.path" :max-length="700" placeholder="/orders" /></a-form-item></div><div class="form-grid"><a-form-item label="请求参数条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestQuery" :height="110" /></a-form-item><a-form-item label="请求头条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestHeaders" :height="110" /></a-form-item></div><div class="form-grid"><a-form-item label="请求体匹配"><a-select v-model="ruleForm.requestBodyMatch"><a-option value="ANY">任意请求体</a-option><a-option value="EXACT">请求体精确匹配</a-option><a-option value="JSON_SUBSET">JSON 子集匹配</a-option></a-select></a-form-item><div class="match-hint"><strong>{{ ruleForm.requestBodyMatch === 'ANY' ? '不限制请求体' : ruleForm.requestBodyMatch === 'EXACT' ? '字节文本完全一致' : '请求 JSON 必须包含给定字段' }}</strong><small>参数和请求头值均使用精确匹配。</small></div></div><a-form-item v-if="ruleForm.requestBodyMatch !== 'ANY'" :label="ruleForm.requestBodyMatch === 'JSON_SUBSET' ? 'JSON 请求体条件' : '请求体条件'"><CodeEditor v-model="ruleForm.requestBody" :height="140" /></a-form-item><a-divider orientation="left">响应配置</a-divider><div class="form-grid"><a-form-item label="响应状态"><a-input-number v-model="ruleForm.responseStatus" :min="200" :max="599" /></a-form-item><div /></div><a-form-item label="响应头（JSON 对象）"><CodeEditor v-model="ruleForm.headers" :height="110" /></a-form-item><a-form-item label="响应体"><CodeEditor v-model="ruleForm.body" :height="160" /></a-form-item><div class="modal-tip">未命中规则、路径或方法不匹配、服务停用时均返回 404。此节点不执行脚本；JSON 子集仅匹配对象字段，数组需完全一致。</div></a-form></a-modal>
+    <a-modal v-model:visible="shareVisible" title="创建只读 Mock 分享" width="560px" :ok-loading="sharing" :on-before-ok="() => submitDialog(createShare)"><a-form :model="shareForm" layout="vertical"><a-form-item label="分享名称" required><a-input v-model="shareForm.name" :max-length="120" placeholder="例如：合作方订单联调说明" /></a-form-item><a-form-item label="有效期"><a-input-number v-model="shareForm.expiresInDays" :disabled="shareNeverExpires" :min="1" :max="365" /> <span class="form-hint">天（1–365）</span><a-checkbox v-model="shareNeverExpires" class="never-expire">永不过期</a-checkbox></a-form-item><div class="modal-tip">分享页只显示方法、路径、状态码和匹配条件摘要。它不会公开响应正文、响应头、项目成员、环境变量或密钥；可随时撤销。</div></a-form></a-modal>
   </div>
 </template>
 

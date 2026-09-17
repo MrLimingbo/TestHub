@@ -39,6 +39,24 @@ class ApiAutomationScheduleFlowTests {
     }
 
     @Test
+    void preservesDisabledStateWhenCreatingSchedule() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        String scenarioId = createScenario(administrator, projectId, "定时计划验收 停用创建");
+        Csrf csrf = csrf(administrator);
+        MvcResult created = mvc.perform(post("/api/v1/projects/{projectId}/api-automation/schedules", projectId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON).content(schedulePayload(scenarioId, false, 3)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.enabled").value(false)).andReturn();
+        String id = objectMapper.readTree(created.getResponse().getContentAsString()).path("data").path("id").asText();
+        assertFalse(jdbc.sql("SELECT enabled FROM api_automation_schedule WHERE id = :id")
+                .param("id", id).query(Boolean.class).single());
+        mvc.perform(post("/api/v1/projects/{projectId}/api-automation/schedules/{id}/run", projectId, id)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token()))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void persistsProjectScopedCronScheduleAndAutoDisablesAfterConfiguredFailures() throws Exception {
         LoginSession administrator = login();
         String projectId = projectId(administrator);

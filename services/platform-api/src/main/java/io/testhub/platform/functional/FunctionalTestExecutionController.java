@@ -28,8 +28,9 @@ public class FunctionalTestExecutionController {
     }
 
     @GetMapping("/plans")
-    public ApiResponse<List<FunctionalTestPlan>> plans(Authentication authentication, @PathVariable String projectId) {
-        return ApiResponse.of(executions.listPlans(principal(authentication), projectId));
+    public ApiResponse<List<FunctionalTestPlan>> plans(Authentication authentication, @PathVariable String projectId,
+                                                        @RequestParam(required = false) String catalogId) {
+        return ApiResponse.of(executions.listPlans(principal(authentication), projectId, catalogId));
     }
 
     @PostMapping("/plans")
@@ -108,9 +109,9 @@ public class FunctionalTestExecutionController {
         return (AuthenticatedPrincipal) authentication.getPrincipal();
     }
 
-    public record PlanRequest(@NotBlank @Size(max = 40) String planCode, @NotBlank @Size(max = 200) String name,
+    public record PlanRequest(String catalogId, @NotBlank @Size(max = 40) String planCode, @NotBlank @Size(max = 200) String name,
                               String status, @Size(max = 20_000) String description, List<String> caseIds) {
-        FunctionalTestExecutionService.PlanInput toInput() { return new FunctionalTestExecutionService.PlanInput(planCode, name, status, description, caseIds); }
+        FunctionalTestExecutionService.PlanInput toInput() { return new FunctionalTestExecutionService.PlanInput(catalogId, planCode, name, status, description, caseIds); }
     }
 
     public record RunRequest(@Size(max = 200) String name) { }

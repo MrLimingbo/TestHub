@@ -37,3 +37,23 @@ test('reserves two slots before running tasks concurrently and releases both aft
   assert.deepEqual(events.filter((event) => event.type === 'SUCCEEDED').map((event) => event.taskId).sort(), [task.taskId, second.taskId].sort())
   assert.deepEqual(acknowledgements.sort(), ['1-0', '2-0'])
 })
+
+test('consumes Redis RESP3 task stream replies and acknowledges completed transport', async () => {
+  const commands = []
+  const runner = new PlaywrightRunner({ commandClient: { sendCommand: async command => { commands.push(command) } },
+    readClient: { sendCommand: async () => { runner.stopping = true; return { stream: [['1-0', Object.entries(task).flat()]] } } },
+    cancelClient: {}, config: { runnerId: 'test', maxConcurrentTasks: 1, executionEnabled: false } })
+  await runner.loop(); await new Promise(resolve => setTimeout(resolve, 0))
+  assert.ok(commands.some(command => command.includes('PLAYWRIGHT_EXECUTION_DISABLED')))
+  assert.ok(commands.some(command => command[0] === 'XACK'))
+})
+
+test('consumes Redis RESP3 cancellation stream replies', async () => {
+  const commands = []
+  const command = { contract: CANCEL_CONTRACT, protocolVersion: '1', commandId: '01KX8XJTSHD5QG60TYT3JV48TQ', taskId: task.taskId, executionId: task.executionId, requestedAt: task.requestedAt, reasonCode: 'USER_REQUESTED' }
+  const runner = new PlaywrightRunner({ commandClient: { sendCommand: async command => { commands.push(command) } }, readClient: {},
+    cancelClient: { sendCommand: async () => { runner.stopping = true; return { stream: [['2-0', Object.entries(command).flat()]] } } }, config: {} })
+  await runner.cancellationLoop()
+  assert.ok(runner.cancelled.has(task.taskId))
+  assert.ok(commands.some(command => command[0] === 'XACK'))
+})

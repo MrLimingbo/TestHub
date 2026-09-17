@@ -193,7 +193,7 @@ public class MockService {
         if (server == null) return Optional.empty();
         String path = runtimePath(request.path());
         Optional<MockRuntimeResponse> manual = repository.findRuntimeRules(publicKey, request.method(), path).stream()
-                .filter(rule -> matches(rule, request))
+                .filter(rule -> rule.path().equals(path) && matches(rule, request))
                 .findFirst()
                 .map(rule -> new MockRuntimeResponse(rule.responseStatus(), rule.responseHeaders(), rule.responseBody()));
         if (manual.isPresent() || !server.smartExampleEnabled()) return manual;

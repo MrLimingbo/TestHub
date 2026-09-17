@@ -16,7 +16,9 @@ function shareKey() { return String(route.params.shareKey ?? '') }
 function date(value: string | null) { return value ? new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '永不过期' }
 function statusColor(status: number) { return status >= 500 ? 'red' : status >= 400 ? 'orange' : status >= 300 ? 'arcoblue' : 'green' }
 
+let loadSequence = 0
 async function load() {
+  const sequence = ++loadSequence
   loading.value = true
   error.value = ''
   document.value = null
@@ -24,11 +26,11 @@ async function load() {
     const response = await fetch(`/api/v1/mock-shares/${encodeURIComponent(shareKey())}`)
     const body = await response.json().catch(() => ({})) as ApiEnvelope<ShareDocument> & { message?: string }
     if (!response.ok) throw new Error(body.message ?? '分享链接不可用')
-    document.value = body.data
+    if (sequence === loadSequence) document.value = body.data
   } catch (reason) {
-    error.value = reason instanceof Error ? reason.message : '分享链接不可用'
+    if (sequence === loadSequence) error.value = reason instanceof Error ? reason.message : '分享链接不可用'
   } finally {
-    loading.value = false
+    if (sequence === loadSequence) loading.value = false
   }
 }
 
