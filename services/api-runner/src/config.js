@@ -96,6 +96,10 @@ export function loadConfig(env = process.env) {
   const controlPlaneUrl = optionalControlPlaneUrl(env.TESTHUB_CONTROL_PLANE_URL)
   const httpExecutionEnabled = enabled(env.RUNNER_HTTP_EXECUTION_ENABLED, 'RUNNER_HTTP_EXECUTION_ENABLED')
   const allowedHttpOrigins = allowedOrigins(env.RUNNER_ALLOWED_ORIGINS)
+  const allowPrivateNetwork = enabled(env.RUNNER_DESKTOP_NETWORK_ACCESS, 'RUNNER_DESKTOP_NETWORK_ACCESS')
+  if (allowPrivateNetwork && (!env.TESTHUB_DESKTOP_BROKER_URL || !env.TESTHUB_DESKTOP_BROKER_TOKEN)) {
+    throw new Error('内网执行授权仅支持已配置本地任务队列凭据的桌面运行进程')
+  }
   if (controlPlaneUrl && !heartbeatSigningKey) {
     throw new Error('配置 TESTHUB_CONTROL_PLANE_URL 时必须同时配置 RUNNER_HEARTBEAT_KEY')
   }
@@ -113,6 +117,7 @@ export function loadConfig(env = process.env) {
     controlPlaneUrl,
     httpExecutionEnabled,
     allowedHttpOrigins,
+    allowPrivateNetwork,
   })
 }
 

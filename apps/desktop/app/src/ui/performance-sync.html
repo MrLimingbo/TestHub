@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 性能计划同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" />
+</head>
+<body><main class="card">
+  <h1>性能计划同步</h1><p class="description">离线时在本地编辑性能计划；联网后与绑定账号的网页端同步计划定义。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">按计划名称匹配，内容不同需选择，名称大小写不同需在两端手动统一。同步说明、线程组顺序、负载、请求、断言、质量阈值及内联 CSV。最多 100 个计划，资料不超过 3 MiB。</p>
+    <p class="hint">目标 URL（包括 localhost）、请求内容及 CSV 会发送到所选账号服务，请核对业务信息及负载。同步不会提交压测；新计划为草稿，目标运行器和本地目标授权需单独配置。删除不传播。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">只同步计划定义与内联 CSV；状态保留各端，更新递增本端版本，现有待执行计划后续提交时会使用同步后的定义。已提交任务使用原冻结配置。执行历史和报告工件不复制，不自动提交压测。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端计划）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="performance-sync.js"></script></body>
+</html>

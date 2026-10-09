@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 项目环境与参数迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>项目环境与参数迁移</h1><p id="account" class="description">正在读取账号与项目…</p>
+  <form id="settings-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required></select>
+    <label for="target">账号目标项目</label><select id="target" required></select>
+    <p class="description">复制当前项目的环境定义与普通参数，包括环境名称、标识、基础地址、说明与启用状态。密钥仅统计排除数量，值和名称不会传输，请在目标账号重新填写。</p>
+  <p class="hint">目标保留原默认环境；同名且内容相同的环境与参数复用，不同配置或与密钥同名将报冲突，整批不写入。普通参数可能包含你自行填写的敏感信息，请核对所选项目。</p>
+  <p class="hint">不会复制项目身份、成员权限、访问令牌或旧审计日志；文件请使用已有项目文件迁移。本地原件不动，后续编辑不会自动双向同步。</p>
+  <p class="hint">最多 100 个环境、1000 个普通参数、32 MiB；预览有效期 10 分钟，账号或服务变化须重新预览。</p>
+  <p id="preview" class="description" role="status" aria-live="polite"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传环境与普通参数</button>
+  </form>
+</main><script src="settings-transfer.js"></script></body>
+</html>

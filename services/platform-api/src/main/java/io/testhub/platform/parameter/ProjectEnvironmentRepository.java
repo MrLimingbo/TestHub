@@ -64,7 +64,7 @@ public class ProjectEnvironmentRepository {
     }
 
     public void clearDefault(String projectId) {
-        jdbc.sql("UPDATE project_environment SET is_default = FALSE WHERE project_id = :projectId")
+        jdbc.sql("UPDATE project_environment SET is_default = FALSE, version = version + 1 WHERE project_id = :projectId AND is_default = TRUE")
                 .param("projectId", projectId).update();
     }
 

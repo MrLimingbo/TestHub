@@ -11,7 +11,7 @@ import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RuntimeStreams;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,19 +20,19 @@ import org.springframework.web.server.ResponseStatusException;
 public class PerformanceRunnerErrorConsumer {
     private static final Logger log = LoggerFactory.getLogger(PerformanceRunnerErrorConsumer.class);
     private static final String CONSUMER = "platform-performance-errors";
-    private final StringRedisTemplate redis;
+    private final RuntimeStreams streams;
     private final PerformanceTestExecutionService executions;
     private volatile boolean groupReady;
 
-    public PerformanceRunnerErrorConsumer(StringRedisTemplate redis, PerformanceTestExecutionService executions) {
-        this.redis = redis;
+    public PerformanceRunnerErrorConsumer(RuntimeStreams streams, PerformanceTestExecutionService executions) {
+        this.streams = streams;
         this.executions = executions;
     }
 
     @Scheduled(fixedDelayString = "${testhub.performance-runner.errors.poll-interval-ms:500}")
     public void consume() {
         ensureGroup();
-        List<MapRecord<String, Object, Object>> records = redis.opsForStream().read(
+        List<MapRecord<String, Object, Object>> records = streams.read(
                 Consumer.from(PerformanceRunnerProtocol.ERROR_GROUP, CONSUMER), StreamReadOptions.empty().count(100),
                 StreamOffset.create(PerformanceRunnerProtocol.ERROR_STREAM, ReadOffset.lastConsumed()));
         if (records == null) return;
@@ -60,19 +60,19 @@ public class PerformanceRunnerErrorConsumer {
     }
 
     private void acknowledge(MapRecord<String, Object, Object> record) {
-        redis.opsForStream().acknowledge(PerformanceRunnerProtocol.ERROR_GROUP, record);
+        streams.acknowledge(PerformanceRunnerProtocol.ERROR_GROUP, record);
     }
 
     private synchronized void ensureGroup() {
         if (groupReady) return;
         try {
-            redis.opsForStream().createGroup(PerformanceRunnerProtocol.ERROR_STREAM, ReadOffset.from("0-0"), PerformanceRunnerProtocol.ERROR_GROUP);
+            streams.createGroup(PerformanceRunnerProtocol.ERROR_STREAM, ReadOffset.from("0-0"), PerformanceRunnerProtocol.ERROR_GROUP);
         } catch (Exception firstAttempt) {
             if (!contains(firstAttempt, "BUSYGROUP")) {
-                redis.opsForStream().add(StreamRecords.mapBacked(Map.of("bootstrap", "1"))
+                streams.add(StreamRecords.mapBacked(Map.of("bootstrap", "1"))
                         .withStreamKey(PerformanceRunnerProtocol.ERROR_STREAM));
                 try {
-                    redis.opsForStream().createGroup(PerformanceRunnerProtocol.ERROR_STREAM, ReadOffset.from("0-0"), PerformanceRunnerProtocol.ERROR_GROUP);
+                    streams.createGroup(PerformanceRunnerProtocol.ERROR_STREAM, ReadOffset.from("0-0"), PerformanceRunnerProtocol.ERROR_GROUP);
                 } catch (Exception secondAttempt) {
                     if (!contains(secondAttempt, "BUSYGROUP")) throw secondAttempt;
                 }

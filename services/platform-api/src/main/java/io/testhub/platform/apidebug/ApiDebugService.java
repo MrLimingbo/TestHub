@@ -139,7 +139,7 @@ public class ApiDebugService {
     private ApiDebugHistory withReplayDraft(ApiDebugHistory entry) {
         String draft = entry.replayDraft() == null ? null : cipher.decrypt(entry.replayDraft());
         return new ApiDebugHistory(entry.id(), entry.organizationId(), entry.projectId(), entry.method(), entry.protocol(), entry.requestUrl(),
-                entry.responseStatus(), entry.durationMs(), entry.responseSize(), entry.result(), entry.errorMessage(), draft, entry.createdBy(), entry.createdAt());
+                entry.responseStatus(), entry.durationMs(), entry.responseSize(), entry.result(), entry.errorMessage(), draft, entry.createdBy(), entry.createdAt(), entry.importSourceProjectId(), entry.importSourceId());
     }
 
     private String encryptedReplayDraft(String protocol, DebugRequest input) {

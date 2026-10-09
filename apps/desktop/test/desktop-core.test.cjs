@@ -60,3 +60,22 @@ test('rejects unsafe protocols, embedded credentials, restricted headers, and ex
   assert.throws(() => normalizeHttpDebugRequest({ method: 'GET', url: 'http://127.0.0.1', headers: [{ name: 'Host', value: 'admin' }] }), /Host/)
   assert.throws(() => normalizeHttpDebugRequest({ method: 'GET', url: 'http://127.0.0.1', timeoutMs: 10001 }), /超时时间/)
 })
+
+test('retains GraphQL and SOAP replay fields from bytes actually sent', () => {
+  const request = { method: 'POST', url: 'http://127.0.0.1:9000/fixture', headers: [], body: JSON.stringify({ query: 'query Echo { echo }', variables: { text: 'fixture' }, operationName: 'Echo' }), protocol: { type: 'GRAPHQL', query: 'untrusted metadata' } }
+  const graphql = normalizeHttpDebugRequest(request)
+  assert.equal(graphql.body, request.body)
+  assert.deepEqual(graphql.protocol, { type: 'GRAPHQL', query: 'query Echo { echo }', variables: '{"text":"fixture"}', operationName: 'Echo' })
+  const envelope = '<Envelope><Body><Echo/></Body></Envelope>'
+  const soap = normalizeHttpDebugRequest({ ...request, body: envelope, headers: [{ name: 'SOAPAction', value: 'Echo' }], protocol: { type: 'SOAP' } })
+  assert.deepEqual(soap.protocol, { type: 'SOAP', envelope, soapAction: 'Echo' })
+})
+test('rejects invalid protocol replay bodies before network execution', () => {
+  const request = { method: 'POST', url: 'http://127.0.0.1:9000/fixture', headers: [], protocol: { type: 'GRAPHQL' } }
+  for (const body of ['broken', 'null', '{"variables":{}}', '{"query":"Q","variables":[]}', '{"query":"Q","operationName":42}']) {
+    assert.throws(() => normalizeHttpDebugRequest({ ...request, body }), /GraphQL/)
+  }
+  assert.throws(() => normalizeHttpDebugRequest({ ...request, method: 'GET', body: '{"query":"Q"}' }), /POST/)
+  assert.throws(() => normalizeHttpDebugRequest({ ...request, protocol: { type: 'SOAP' }, body: '{}' }), /Envelope/)
+  assert.throws(() => normalizeHttpDebugRequest({ ...request, protocol: { type: 'GRPC' }, body: '{}' }), /仅支持/)
+})

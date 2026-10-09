@@ -21,7 +21,7 @@ public class FunctionalAssetService {
     private static final Set<String> PRIORITIES = Set.of("P0", "P1", "P2", "P3");
     private static final Set<String> REQUIREMENT_STATUSES = Set.of("DRAFT", "REVIEWING", "APPROVED", "ARCHIVED");
     private static final Set<String> CASE_STATUSES = Set.of("DRAFT", "READY", "BLOCKED", "ARCHIVED");
-    private static final Set<String> CASE_TYPES = Set.of("UNIT", "API", "FUNCTIONAL", "INSTALLATION", "CONFIGURATION", "PERFORMANCE", "SECURITY", "OTHER");
+    static final Set<String> CASE_TYPES = Set.of("UNIT", "API", "FUNCTIONAL", "INSTALLATION", "CONFIGURATION", "PERFORMANCE", "SECURITY", "OTHER");
     private static final Set<String> CATALOG_SCOPES = Set.of("REQUIREMENTS", "CASES", "PLANS", "GOVERNANCE", "DELIVERY");
 
     private final FunctionalCatalogRepository catalogs;

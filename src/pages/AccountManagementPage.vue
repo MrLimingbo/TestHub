@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useSessionStore } from '@/stores/session'
 
@@ -24,6 +24,9 @@ interface AccountPage {
 const session = useSessionStore()
 const accounts = ref<Account[]>([])
 const loading = ref(false)
+const loadError = ref('')
+const removing = reactive(new Set<string>())
+let disposed = false, requestSequence = 0, formSequence = 0, passwordSequence = 0
 const saving = ref(false)
 const dialogVisible = ref(false)
 const passwordDialogVisible = ref(false)
@@ -42,28 +45,32 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+  const encoded = body === undefined ? undefined : JSON.stringify(body)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
   return read<T>(url, {
     method,
     headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: encoded,
   })
 }
 
 async function load() {
+  const sequence = ++requestSequence
+  accounts.value = []; loadError.value = ''
   loading.value = true
   try {
     const params = new URLSearchParams({ page: String(pagination.current), pageSize: String(pagination.pageSize) })
     if (keyword.value.trim()) params.set('keyword', keyword.value.trim())
     const result = await read<AccountPage>(`/api/v1/accounts?${params}`)
+    if (disposed || sequence !== requestSequence) return
     accounts.value = result.items
     pagination.current = result.page
     pagination.pageSize = result.pageSize
     pagination.total = result.total
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载账号失败')
+    if (!disposed && sequence === requestSequence) loadError.value = error instanceof Error ? error.message : '加载账号失败'
   } finally {
-    loading.value = false
+    if (!disposed && sequence === requestSequence) loading.value = false
   }
 }
 
@@ -78,12 +85,14 @@ async function changePage(page: number) {
 }
 
 function openCreate() {
+  formSequence++
   editingId.value = null
   Object.assign(form, { account: '', displayName: '', email: '', phone: '', enabled: true })
   dialogVisible.value = true
 }
 
 function openEdit(account: Account) {
+  formSequence++
   editingId.value = account.id
   Object.assign(form, {
     account: account.account,
@@ -96,21 +105,25 @@ function openEdit(account: Account) {
 }
 
 async function save(): Promise<boolean> {
+  if (saving.value || disposed) return false
   if (!form.account.trim()) {
     Message.warning('请输入账号')
     return false
   }
+  const id = editingId.value, sequence = formSequence, input = { ...form }
   saving.value = true
   try {
-    const url = editingId.value ? `/api/v1/accounts/${editingId.value}` : '/api/v1/accounts'
-    await mutate<Account>(url, editingId.value ? 'PUT' : 'POST', form)
+    const url = id ? `/api/v1/accounts/${id}` : '/api/v1/accounts'
+    await mutate<Account>(url, id ? 'PUT' : 'POST', input)
+    if (disposed || sequence !== formSequence) return false
     dialogVisible.value = false
     pagination.current = 1
     await load()
-    Message.success(editingId.value ? '账号已更新' : '账号已创建，默认密码为 admin')
+    if (disposed || sequence !== formSequence) return false
+    Message.success(id ? '账号已更新' : '账号已创建，默认密码为 admin')
     return true
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '保存账号失败')
+    if (!disposed && sequence === formSequence) Message.error(error instanceof Error ? error.message : '保存账号失败')
     return false
   } finally {
     saving.value = false
@@ -118,17 +131,22 @@ async function save(): Promise<boolean> {
 }
 
 async function remove(account: Account) {
+  if (disposed || removing.has(account.id)) return
+  const sequence = requestSequence
+  removing.add(account.id)
   try {
     await mutate<void>(`/api/v1/accounts/${account.id}`, 'DELETE')
-    if (accounts.value.length === 1 && pagination.current > 1) pagination.current -= 1
+    if (disposed) return
+    if (sequence === requestSequence && accounts.value.length === 1 && pagination.current > 1) pagination.current -= 1
     await load()
-    Message.success('账号已删除')
+    if (!disposed) Message.success('账号已删除')
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '删除账号失败')
-  }
+    if (!disposed) Message.error(error instanceof Error ? error.message : '删除账号失败')
+  } finally { removing.delete(account.id) }
 }
 
 function openPassword(account: Account) {
+  passwordSequence++
   passwordAccount.value = account
   passwordForm.password = ''
   passwordForm.confirmPassword = ''
@@ -136,6 +154,7 @@ function openPassword(account: Account) {
 }
 
 async function savePassword(): Promise<boolean> {
+  if (saving.value || disposed) return false
   if (passwordForm.password.length < 5 || passwordForm.password.length > 72
     || new TextEncoder().encode(passwordForm.password).length > 72) {
     Message.warning('密码长度应为 5 到 72 个字符，且不能超过 72 字节')
@@ -146,16 +165,19 @@ async function savePassword(): Promise<boolean> {
     return false
   }
   if (!passwordAccount.value) return false
+  const account = passwordAccount.value, password = passwordForm.password, sequence = passwordSequence
   saving.value = true
   try {
-    await mutate<void>(`/api/v1/accounts/${passwordAccount.value.id}/password`, 'PUT', {
-      password: passwordForm.password,
+    await mutate<void>(`/api/v1/accounts/${account.id}/password`, 'PUT', {
+      password,
     })
+    if (disposed || sequence !== passwordSequence) return false
     passwordDialogVisible.value = false
-    Message.success(`账号“${passwordAccount.value.account}”的密码已修改`)
+    passwordForm.password = ''; passwordForm.confirmPassword = ''
+    Message.success(`账号“${account.account}”的密码已修改`)
     return true
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '修改密码失败')
+    if (!disposed && sequence === passwordSequence) Message.error(error instanceof Error ? error.message : '修改密码失败')
     return false
   } finally {
     saving.value = false
@@ -167,10 +189,13 @@ function formatDate(value: string) {
 }
 
 onMounted(load)
+function cancelPassword() { passwordSequence++; passwordForm.password = ''; passwordForm.confirmPassword = ''; passwordAccount.value = null }
+onBeforeUnmount(() => { disposed = true; requestSequence++; formSequence++; cancelPassword() })
 </script>
 
 <template>
   <div class="page account-page">
+    <a-alert v-if="loadError" type="error">{{ loadError }} <a-button type="text" @click="load">重试</a-button></a-alert>
     <section class="panel account-panel">
       <div class="account-toolbar">
         <div>
@@ -214,7 +239,7 @@ onMounted(load)
                     :disabled="record.id === session.profile?.id"
                     @ok="remove(record)"
                   >
-                    <a-button type="text" status="danger" :disabled="record.id === session.profile?.id">删除</a-button>
+                    <a-button type="text" status="danger" :loading="removing.has(record.id)" :disabled="record.id === session.profile?.id">删除</a-button>
                   </a-popconfirm>
                 </a-space>
               </template>
@@ -241,6 +266,7 @@ onMounted(load)
       width="540px"
       :ok-loading="saving"
       :on-before-ok="save"
+      @cancel="formSequence++"
     >
       <a-alert v-if="!editingId" type="info" class="password-alert">账号创建后可使用默认密码 <strong>admin</strong> 登录。</a-alert>
       <a-form :model="form" layout="vertical">
@@ -268,6 +294,7 @@ onMounted(load)
       width="500px"
       :ok-loading="saving"
       :on-before-ok="savePassword"
+      @cancel="cancelPassword"
     >
       <a-alert type="warning" class="password-alert">修改后原密码立即失效，请将新密码安全地告知对应账号使用人。</a-alert>
       <a-form :model="passwordForm" layout="vertical">

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { mkdir, readFile, rm, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { chromium, firefox, webkit } from 'playwright'
+import { prepareDesktopBrowser } from './desktop-browser-request.js'
 import { createTargetProxy } from './target-proxy.js'
 import { CANCEL_CONSUMER_GROUP, CANCEL_STREAM, TASK_CONSUMER_GROUP, TASK_STREAM, EVENT_STREAM, STEP_RESULT_STREAM, HEARTBEAT_MEMBERS_KEY, artifactRequest, createEvent, createHeartbeat, createStepResult, decodeCancellation, decodeTask, heartbeatKey, runtimeRequest, validateRuntime } from './protocol.js'
 
@@ -12,17 +13,25 @@ function interpolate(value, variables) { return String(value ?? '').replace(/\{\
 function target(raw, base, allowed) { const url = new URL(raw, base); if (!allowed.includes(url.origin)) throw new Error('导航目标不在 Runner Origin 白名单内'); return url.toString() }
 
 export class PlaywrightRunner {
-  constructor({ commandClient, readClient, cancelClient, config, logger = console, fetcher = globalThis.fetch, now = () => new Date() }) {
+  constructor({ commandClient, readClient, cancelClient, config, logger = console, fetcher = globalThis.fetch, now = () => new Date(), prepareBrowser = prepareDesktopBrowser }) {
     this.commandClient = commandClient; this.readClient = readClient; this.cancelClient = cancelClient; this.config = config; this.logger = logger; this.fetcher = fetcher; this.now = now
-    this.startedAt = now(); this.running = new Map(); this.cancelled = new Map(); this.stopping = false
+    this.prepareBrowser = prepareBrowser; this.tasks = new Set(); this.startedAt = now(); this.running = new Map(); this.cancelled = new Map(); this.stopping = false
   }
   async start() {
     await this.commandClient.connect(); await this.readClient.connect(); await this.cancelClient.connect(); await this.group(); await this.heartbeat()
-    this.timer = setInterval(() => void this.heartbeat(), this.config.heartbeatIntervalSeconds * 1000)
+    this.timer = setInterval(() => this.refreshHeartbeat(), this.config.heartbeatIntervalSeconds * 1000)
     this.logger.info(this.config.executionEnabled ? `Playwright Runner 已启用：${this.config.runnerId}` : `Playwright Runner 已连接，执行保持禁用：${this.config.runnerId}`)
     void this.loop(); void this.cancellationLoop()
   }
-  async stop() { this.stopping = true; clearInterval(this.timer); await Promise.allSettled([...this.running.values()].map((active) => this.closeActive(active))); await this.commandClient.multi().del(heartbeatKey(this.config.runnerId)).sRem(HEARTBEAT_MEMBERS_KEY, this.config.runnerId).exec(); await Promise.allSettled([this.commandClient.quit(), this.readClient.quit(), this.cancelClient.quit()]) }
+  async stop() {
+    this.stopping = true; clearInterval(this.timer)
+    for (const active of this.running.values()) { active.cancelled = true; active.controller?.abort() }
+    await Promise.allSettled([...this.running.values()].map(active => this.closeActive(active)))
+    await Promise.allSettled(this.tasks)
+    await this.commandClient.multi().del(heartbeatKey(this.config.runnerId)).sRem(HEARTBEAT_MEMBERS_KEY, this.config.runnerId).exec()
+    await Promise.allSettled([this.commandClient.quit(), this.readClient.quit(), this.cancelClient.quit()])
+  }
+  refreshHeartbeat() { void this.heartbeat().catch(error => { if (!this.stopping) this.logger.warn?.('Playwright 心跳刷新失败', text(error)) }) }
   async group() { await this.groupFor(TASK_STREAM, TASK_CONSUMER_GROUP); await this.groupFor(CANCEL_STREAM, CANCEL_CONSUMER_GROUP) }
   async groupFor(stream, group) { try { await this.commandClient.sendCommand(['XGROUP', 'CREATE', stream, group, '$', 'MKSTREAM']) } catch (error) { if (!String(error.message).includes('BUSYGROUP')) throw error } }
   async heartbeat() { for (const [taskId, expiresAt] of this.cancelled) if (expiresAt <= Date.now()) this.cancelled.delete(taskId); await this.commandClient.multi().set(heartbeatKey(this.config.runnerId), JSON.stringify(createHeartbeat(this.config, this.startedAt, this.running.size, this.now())), { EX: this.config.heartbeatTtlSeconds }).sAdd(HEARTBEAT_MEMBERS_KEY, this.config.runnerId).exec() }
@@ -39,15 +48,22 @@ export class PlaywrightRunner {
     let command; try { command = decodeCancellation(entry.fields) } catch { await this.cancelAck(entry.id); return }
     const active = this.running.get(command.taskId)
     this.cancelled.set(command.taskId, Date.now() + 5 * 60 * 1000)
-    if (active && active.task.executionId === command.executionId) { active.cancelled = true; await this.closeActive(active) }
+    if (active && active.task.executionId === command.executionId) { active.cancelled = true; active.controller?.abort(); await this.closeActive(active) }
     await this.cancelAck(entry.id)
   }
-  async handle(entry) {
+  handle(entry) {
+    const completion = this.handleTask(entry)
+    this.tasks.add(completion)
+    void completion.then(() => this.tasks.delete(completion), () => this.tasks.delete(completion))
+    return completion
+  }
+  async handleTask(entry) {
+    if (this.stopping) return
     let task; try { task = decodeTask(entry.fields) } catch { await this.ack(entry.id); return }
     if (!this.config.executionEnabled) { await this.event(createEvent(task, this.config.runnerId, 'ACCEPTED', 'TASK_ACCEPTED', 'Playwright task transport accepted the immutable manifest reference.', this.now())); await this.event(createEvent(task, this.config.runnerId, 'REJECTED', 'PLAYWRIGHT_EXECUTION_DISABLED', 'Playwright execution is intentionally disabled until an isolated Runner is configured.', this.now())); await this.ack(entry.id); return }
     if (this.running.size >= this.config.maxConcurrentTasks) { await this.event(createEvent(task, this.config.runnerId, 'ACCEPTED', 'TASK_ACCEPTED', 'Playwright task transport accepted the immutable manifest reference.', this.now())); await this.event(createEvent(task, this.config.runnerId, 'REJECTED', 'RUNNER_CAPACITY_EXHAUSTED', 'Playwright Runner has no free execution slot.', this.now())); await this.ack(entry.id); return }
-    const active = { task, browser: null, context: null, cancelled: this.cancelled.has(task.taskId) }
-    this.running.set(task.taskId, active); void this.heartbeat()
+    const active = { task, controller: new globalThis.AbortController(), browser: null, context: null, cancelled: this.cancelled.has(task.taskId) }
+    this.running.set(task.taskId, active); this.refreshHeartbeat()
     try {
       await this.event(createEvent(task, this.config.runnerId, 'ACCEPTED', 'TASK_ACCEPTED', 'Playwright task transport accepted the immutable manifest reference.', this.now()))
       await this.run(task, active)
@@ -57,12 +73,14 @@ export class PlaywrightRunner {
       if (active.cancelled || this.cancelled.has(task.taskId)) await this.event(createEvent(task, this.config.runnerId, 'CANCELLED', 'PLAYWRIGHT_CANCELLATION_CONFIRMED', 'Playwright browser task was cancelled in the isolated Runner.', this.now()))
       else await this.event(createEvent(task, this.config.runnerId, 'FAILED', 'PLAYWRIGHT_EXECUTION_FAILED', text(error), this.now()))
     } finally {
-      this.running.delete(task.taskId); this.cancelled.delete(task.taskId); void this.heartbeat(); await this.ack(entry.id)
+      this.running.delete(task.taskId); this.cancelled.delete(task.taskId); this.refreshHeartbeat(); await this.ack(entry.id)
     }
   }
   async run(task, active) {
     this.assertActive(active)
     const runtime = await this.runtime(task)
+    this.assertActive(active)
+    await this.prepareBrowser(runtime.browser.browser, active.controller?.signal)
     this.assertActive(active)
     const root = join(this.config.workDirectory, task.executionId); await rm(root, { recursive: true, force: true }); await mkdir(root, { recursive: true, mode: 0o700 })
     active.root = root
@@ -70,6 +88,7 @@ export class PlaywrightRunner {
     try {
       const browser = { chromium, firefox, webkit }[runtime.browser.browser]
       active.proxy = await createTargetProxy(this.config.allowedTargetOrigins)
+      this.assertActive(active)
       const instance = await browser.launch({ headless: true, proxy: { server: active.proxy.server } }); active.browser = instance
       this.assertActive(active)
       const context = await instance.newContext({ viewport: { width: runtime.browser.viewportWidth, height: runtime.browser.viewportHeight }, recordVideo: { dir: root }, serviceWorkers: 'block', proxy: { server: active.proxy.server } }); active.context = context
@@ -127,9 +146,13 @@ export class PlaywrightRunner {
     return list
   }
   async archive(task, artifact) { const bytes = await readFile(artifact.path); const request = artifactRequest(this.config, task, { ...artifact, checksum: createHash('sha256').update(bytes).digest('hex') }); const response = await this.fetcher(`${this.config.controlPlaneUrl}${request.path}`, { method: 'POST', headers: request.headers, body: bytes, signal: AbortSignal.timeout(10000) }); if (!response.ok) this.logger.warn(`Playwright 工件归档失败：${artifact.type} HTTP ${response.status}`) }
-  assertActive(active) { if (active.cancelled || this.cancelled.has(active.task.taskId)) { const error = new Error('Playwright task cancelled'); error.code = 'CANCELLED'; throw error } }
+  assertActive(active) { if (this.stopping || active.cancelled || this.cancelled.has(active.task.taskId)) { const error = new Error('Playwright task cancelled'); error.code = 'CANCELLED'; throw error } }
   async closeActive(active) {
-    if (active.closing) return active.closing
+    if (active.closing) {
+      await active.closing
+      if (active.context || active.browser || active.proxy) return this.closeActive(active)
+      return
+    }
     const context = active.context, browser = active.browser
     if (!context && !browser && !active.proxy) return
     active.closing = (async () => {

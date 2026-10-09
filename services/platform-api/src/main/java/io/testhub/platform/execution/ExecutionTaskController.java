@@ -4,6 +4,7 @@ import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -41,13 +42,13 @@ public class ExecutionTaskController {
     public ApiResponse<ExecutionTask> update(Authentication authentication, @PathVariable String projectId,
                                              @PathVariable String taskId, @Valid @RequestBody TaskUpdateRequest request) {
         return ApiResponse.of(tasks.update(principal(authentication), projectId, taskId,
-                new ExecutionTaskService.TaskUpdate(request.name(), request.status(), request.progress())));
+                new ExecutionTaskService.TaskUpdate(request.name(), request.status(), request.progress(), request.expectedVersion())));
     }
 
     @PostMapping("/{taskId}/cancel")
     public ApiResponse<ExecutionTask> cancel(Authentication authentication, @PathVariable String projectId,
-                                             @PathVariable String taskId) {
-        return ApiResponse.of(tasks.cancel(principal(authentication), projectId, taskId));
+                                             @PathVariable String taskId, @Valid @RequestBody(required = false) TaskCancelRequest request) {
+        return ApiResponse.of(tasks.cancel(principal(authentication), projectId, taskId, request == null ? null : request.expectedVersion()));
     }
 
     private AuthenticatedPrincipal principal(Authentication authentication) {
@@ -55,5 +56,6 @@ public class ExecutionTaskController {
     }
 
     public record TaskRequest(@NotBlank String taskType, @NotBlank @Size(max = 160) String name) {}
-    public record TaskUpdateRequest(@NotBlank @Size(max = 160) String name, @NotBlank String status, int progress) {}
+    public record TaskUpdateRequest(@NotBlank @Size(max = 160) String name, @NotBlank String status, int progress, @Min(1) Long expectedVersion) {}
+    public record TaskCancelRequest(@Min(1) Long expectedVersion) {}
 }

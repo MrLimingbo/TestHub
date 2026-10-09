@@ -37,6 +37,7 @@ public class ProjectParameterService {
     @Transactional
     public void upsert(AuthenticatedPrincipal principal, String projectId, String environmentCode, String key, String value) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, PARAMETER_WRITERS);
+        parameters.lockProject(projectId);
         String normalizedEnvironment = normalizeEnvironment(environmentCode);
         String normalizedKey = normalizeKey(key);
         if ("BASE_URL".equals(normalizedKey)) {
@@ -55,6 +56,7 @@ public class ProjectParameterService {
     @Transactional
     public void delete(AuthenticatedPrincipal principal, String projectId, String parameterId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, PARAMETER_WRITERS);
+        parameters.lockProject(projectId);
         parameters.delete(parameterId, projectId);
         audit.record(principal, project.organizationId(), project.id(), "PROJECT_PARAMETER_DELETED", "PROJECT_PARAMETER",
                 parameterId, java.util.Map.of());

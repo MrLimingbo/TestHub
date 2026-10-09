@@ -13,6 +13,7 @@ import java.util.Set;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -117,6 +118,11 @@ public class FunctionalTestExecutionService {
         return requireRun(projectId, runId);
     }
 
+    public List<FunctionalTestRun> recentRuns(AuthenticatedPrincipal principal, String projectId) {
+        access.requireProjectRead(principal, projectId);
+        return executions.findRecentRuns(projectId);
+    }
+
     public List<FunctionalTestRunCase> listRunCases(AuthenticatedPrincipal principal, String projectId, String runId) {
         access.requireProjectRead(principal, projectId);
         requireRun(projectId, runId);
@@ -152,10 +158,11 @@ public class FunctionalTestExecutionService {
         return requireRun(projectId, runId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalTestRunCase updateRunCase(AuthenticatedPrincipal principal, String projectId, String runCaseId,
                                                 RunCaseInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        lockRunForCase(projectId, runCaseId);
         FunctionalTestRunCase runCase = requireRunCase(projectId, runCaseId);
         String status = normalizeRunCaseStatus(input == null ? null : input.status());
         if (status.equals("PASSED") && executions.findRunSteps(projectId, runCaseId).stream().anyMatch(step -> !step.status().equals("PASSED"))) {
@@ -168,12 +175,13 @@ public class FunctionalTestExecutionService {
         return executions.findRunCase(projectId, runCaseId).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalTestRunStep updateRunStep(AuthenticatedPrincipal principal, String projectId, String stepId,
                                                RunStepInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         String status = normalizeStepStatus(input == null ? null : input.status());
         String runCaseId = findRunCaseId(projectId, stepId);
+        lockRunForCase(projectId, runCaseId);
         FunctionalTestRunCase runCase = requireRunCase(projectId, runCaseId);
         if (runCase.status().equals("PASSED") && !status.equals("PASSED")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "用例已标记通过，请先调整用例结果再修改步骤状态");
@@ -189,13 +197,18 @@ public class FunctionalTestExecutionService {
     }
 
     private void recalculateRun(String runId) {
-        // Fetching through a project is intentionally deferred to the next query; status changes are derived from case rows.
-        // The run query reports counts, while this update only changes lifecycle timestamps/status.
+        // The parent row is locked by every result writer, so the aggregate sees all earlier committed results.
         List<FunctionalTestRunCase> runCases = executions.findRunCasesByRunId(runId);
         boolean anyTerminal = runCases.stream().anyMatch(item -> !item.status().equals("NOT_RUN"));
         boolean allTerminal = !runCases.isEmpty() && runCases.stream().allMatch(item -> !item.status().equals("NOT_RUN"));
         String status = allTerminal ? "COMPLETED" : anyTerminal ? "RUNNING" : "NOT_STARTED";
         executions.updateRunStatus(runId, status, anyTerminal ? Instant.now() : null, allTerminal ? Instant.now() : null);
+    }
+
+    private void lockRunForCase(String projectId, String runCaseId) {
+        // READ_COMMITTED also prevents a pre-lock permission query from pinning an older MySQL snapshot.
+        if (executions.lockRunForCase(projectId, runCaseId).isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "执行用例不存在");
     }
 
     private String findRunCaseId(String projectId, String stepId) {

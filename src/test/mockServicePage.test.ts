@@ -19,7 +19,7 @@ async function setup(override?: Override) {
   const writes: Array<{ url: string; body: Record<string, unknown> }> = []
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
     const method = init?.method ?? 'GET'
-    if (method === 'POST') writes.push({ url, body: JSON.parse(String(init?.body ?? '{}')) })
+    if (method === 'POST' || method === 'PUT') writes.push({ url, body: JSON.parse(String(init?.body ?? '{}')) })
     const custom = await override?.(url, method)
     let data: unknown = custom
     if (data === undefined) {
@@ -43,6 +43,11 @@ function modal(wrapper: ReturnType<typeof shallowMount>, title: string) {
 }
 
 describe('Mock service editor', () => {
+  it('explains the reachability limit of local desktop Mock links', async () => {
+    vi.stubGlobal('testhubDesktop', { workspaceMode: 'local' })
+    const { wrapper } = await setup()
+    expect(wrapper.find('.local-mock-hint').text()).toContain('仅在本机可访问')
+  })
   it('keeps a required-field error visible in the create dialog', async () => {
     const { wrapper, writes } = await setup()
     wrapper.findComponent(PageHeader).vm.$emit('action'); await wrapper.vm.$nextTick()
@@ -104,5 +109,55 @@ describe('Mock service editor', () => {
     expect(wrapper.find('.detail-head h3').text()).toBe('s2')
     expect(wrapper.text()).toContain('可用已发布接口：0 个')
     expect(wrapper.find('.share-status').text()).toContain('0 条有效链接')
+  })
+})
+
+const editableRule = { id: 'r1', serverId: 's1', name: 'Existing', httpMethod: 'POST', path: '/orders', priority: 30,
+  requestQuery: { type: 'full' }, requestHeaders: { 'x-version': 'v1' }, requestBodyMatch: 'EXACT', requestBody: 'source', responseStatus: 202,
+  responseHeaders: { 'Content-Type': 'application/json' }, responseBody: 'original', enabled: false }
+const editor = (w: ReturnType<typeof shallowMount>) => w.vm as unknown as { editRule(rule: typeof editableRule): void }
+describe('Mock sync and rule editing', () => {
+  it('opens native sync in both desktop modes and hides it on ordinary web', async () => {
+    for (const workspaceMode of ['local', 'server']) {
+      const openMockSync=vi.fn().mockResolvedValue(undefined);vi.stubGlobal('testhubDesktop',{ workspaceMode, openMockSync })
+      const { wrapper, writes }=await setup();const button=wrapper.findAllComponents({name:'Button'}).find(b=>b.text()==='Mock 同步')!
+      button.vm.$emit('click');await flushPromises();expect(openMockSync).toHaveBeenCalledOnce();expect(writes).toHaveLength(0)
+    }
+    vi.stubGlobal('testhubDesktop',undefined);const {wrapper}=await setup();expect(wrapper.find('.sync-entry').exists()).toBe(false)
+  })
+  it('loads existing conditions and uses the scoped PUT without incrementing rule count or enablement', async () => {
+    const { wrapper, writes }=await setup((url,method)=>url.endsWith('/rules/r1')&&method==='PUT'?{...editableRule,responseBody:'edited'}:url.endsWith('/s1/rules')?[editableRule]:undefined)
+    editor(wrapper).editRule(editableRule);await flushPromises();const dialog=modal(wrapper,'编辑 Mock 规则')
+    expect(dialog.props('visible')).toBe(true);expect(dialog.findAllComponents(CodeEditor)[2].props('modelValue')).toBe('source')
+    dialog.findAllComponents(CodeEditor).at(-1)!.vm.$emit('update:modelValue','edited');await dialog.props('onBeforeOk')!(vi.fn());await flushPromises()
+    expect(writes).toHaveLength(1);expect(writes[0]).toMatchObject({url:'/api/v1/projects/p1/mock/servers/s1/rules/r1',body:{name:'Existing',responseBody:'edited',requestBodyMatch:'EXACT',requestBody:'source'}})
+    expect(writes[0]!.body).not.toHaveProperty('enabled');expect(wrapper.findAllComponents({name:'Table'})[1].props('data')).toEqual([{...editableRule,responseBody:'edited'}])
+  })
+  it('invalid JSON preserves the edit dialog and original conditions without sending', async () => {
+    const {wrapper,writes}=await setup();editor(wrapper).editRule(editableRule);await flushPromises();const dialog=modal(wrapper,'编辑 Mock 规则')
+    dialog.findAllComponents(CodeEditor)[0].vm.$emit('update:modelValue','{');await dialog.props('onBeforeOk')!(vi.fn());await flushPromises()
+    expect(dialog.props('visible')).toBe(true);expect(writes).toHaveLength(0)
+  })
+  it('a project change while waiting for CSRF closes the old editor and prevents outgoing save', async () => {
+    let release!: (value: unknown)=>void
+    const {wrapper,writes}=await setup((url)=>url.endsWith('/auth/csrf')?new Promise(resolve=>{release=resolve}):undefined)
+    editor(wrapper).editRule(editableRule);await flushPromises();const dialog=modal(wrapper,'编辑 Mock 规则');const pending=dialog.props('onBeforeOk')!(vi.fn());await flushPromises()
+    state.projectId='p2';await flushPromises();release({token:'fixture',headerName:'X-CSRF'});await pending;await flushPromises();expect(writes).toHaveLength(0);expect(modal(wrapper,'新建 Mock 规则').props('visible')).toBe(false)
+  })
+})
+
+describe('Mock editor cancellation',()=>{
+  it('cancel before CSRF returns prevents the old outgoing edit',async()=>{
+    let release!: (value: unknown)=>void
+    const {wrapper,writes}=await setup(url=>url.endsWith('/auth/csrf')?new Promise(resolve=>{release=resolve}):undefined)
+    editor(wrapper).editRule(editableRule);await flushPromises();const dialog=modal(wrapper,'编辑 Mock 规则'),pending=dialog.props('onBeforeOk')!(vi.fn());await flushPromises()
+    dialog.vm.$emit('cancel');await flushPromises();release({token:'test',headerName:'X-CSRF'});await pending;expect(writes).toHaveLength(0)
+  })
+  it('a late save completion cannot close a subsequently opened rule editor',async()=>{
+    let release!: (value: unknown)=>void
+    const {wrapper}=await setup((url,method)=>url.endsWith('/rules/r1')&&method==='PUT'?new Promise(resolve=>{release=resolve}):undefined)
+    editor(wrapper).editRule(editableRule);await flushPromises();const dialog=modal(wrapper,'编辑 Mock 规则'),pending=dialog.props('onBeforeOk')!(vi.fn());await flushPromises()
+    dialog.vm.$emit('cancel');editor(wrapper).editRule({...editableRule,id:'r2',name:'Another'});await flushPromises();release({...editableRule,responseBody:'late'});await pending;await flushPromises()
+    expect(modal(wrapper,'编辑 Mock 规则').props('visible')).toBe(true);expect(modal(wrapper,'编辑 Mock 规则').findAllComponents(Input)[0].props('modelValue')).toBe('Another')
   })
 })

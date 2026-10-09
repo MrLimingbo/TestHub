@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
-import { Message } from '@arco-design/web-vue'
+import { Message, Modal } from '@arco-design/web-vue'
 import { useRoute } from 'vue-router'
 import {
   functionalWorkspaceKey,
@@ -161,6 +161,14 @@ async function saveCatalog(): Promise<boolean> {
   }
 }
 
+function confirmDeleteCatalog(catalog: FunctionalCatalog) {
+  Modal.confirm({
+    title: '删除目录',
+    content: '删除前需确保目录下没有子目录或资产，确认继续吗？',
+    onOk: () => deleteCatalog(catalog),
+  })
+}
+
 async function deleteCatalog(catalog: FunctionalCatalog) {
   try {
     await mutate(`/api/v1/projects/${session.projectId}/functional/catalogs/${catalog.id}`, 'DELETE')
@@ -248,10 +256,8 @@ onMounted(reload)
                 <template #content>
                   <a-doption @click="openCatalog(catalog.id)"><icon-folder-add /> 新建子目录</a-doption>
                   <a-doption @click="openCatalog('', catalog)"><icon-edit /> 编辑目录</a-doption>
-                  <a-doption>
-                    <a-popconfirm content="删除前需确保目录下没有子目录或资产，确认继续吗？" @ok="deleteCatalog(catalog)">
-                      <span class="danger-option"><icon-delete /> 删除目录</span>
-                    </a-popconfirm>
+                  <a-doption @click="confirmDeleteCatalog(catalog)">
+                    <span class="danger-option"><icon-delete /> 删除目录</span>
                   </a-doption>
                 </template>
               </a-dropdown>

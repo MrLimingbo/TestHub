@@ -57,6 +57,7 @@ public class PerformanceTestPlanService {
     @Transactional
     public PerformanceTestPlanDetail create(AuthenticatedPrincipal principal, String projectId, PlanInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        plans.lockProject(projectId);
         if (plans.countByProject(projectId) >= 100) throw rejected("每个项目最多创建 100 个压测计划");
         PlanPayload payload = payload(input);
         String planId = UlidCreator.getUlid().toString();
@@ -77,6 +78,7 @@ public class PerformanceTestPlanService {
     public PerformanceTestPlanDetail update(AuthenticatedPrincipal principal, String projectId, String planId,
                                             PlanInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        plans.lockProject(projectId);
         if (input == null || input.expectedVersion() == null || input.expectedVersion() < 1) {
             throw rejected("保存压测计划时必须提供当前版本号");
         }
@@ -102,6 +104,7 @@ public class PerformanceTestPlanService {
     @Transactional
     public void delete(AuthenticatedPrincipal principal, String projectId, String planId) {
         ProjectSummary project = writeAccess(principal, projectId);
+        plans.lockProject(projectId);
         PerformanceTestPlanDetail existing = require(projectId, planId);
         if (plans.deletePlan(projectId, planId) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "压测计划不存在");
         audit.record(principal, project.organizationId(), projectId, "PERFORMANCE_TEST_PLAN_DELETED", "PERFORMANCE_TEST_PLAN",
@@ -119,6 +122,16 @@ public class PerformanceTestPlanService {
         List<ThreadGroupPayload> groups = groups(input.threadGroups());
         return new PlanPayload(required(input.name(), "压测计划名称", 160), text(input.description(), 2_000),
                 normalized(input.status(), PLAN_STATUSES, "压测计划状态", "DRAFT"), groups);
+    }
+
+    PlanInput normalizeDefinition(String name, String description, List<ThreadGroupInput> groups) {
+        PlanPayload value = payload(new PlanInput(name, description, "DRAFT", groups, null));
+        return new PlanInput(value.name(), value.description(), "DRAFT", value.threadGroups().stream().map(group ->
+                new ThreadGroupInput(group.name(), group.targetUrl(), group.loadModel(), group.threadCount(),
+                        group.rampUpSeconds(), group.stepCount(), group.stepIntervalSeconds(), group.durationSeconds(),
+                        group.targetTps(), group.p95ThresholdMillis(), group.errorThresholdPercent(), group.requestMethod(),
+                        group.requestHeaders(), group.queryParameters(), group.requestBody(), group.expectedStatusCode(),
+                        group.responseContains(), group.dataSetCsv(), group.rendezvousUsers())).toList(), null);
     }
 
     private List<ThreadGroupPayload> groups(List<ThreadGroupInput> source) {

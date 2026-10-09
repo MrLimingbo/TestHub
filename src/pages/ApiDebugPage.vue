@@ -6,6 +6,7 @@ import CodeEditor from '@/components/CodeEditor.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
 import { useSessionStore } from '@/stores/session'
+import { isLocalDesktop } from '@/utils/desktopWorkspace'
 import { executeDesktopHttpRequest, isDesktopHttpDebugAvailable } from '@/utils/desktopApiDebug'
 import {
   apiDebugDraftFromHistory,
@@ -145,9 +146,9 @@ const variableCaption = computed(() => protocolType.value === 'WEBSOCKET'
     ? 'gRPC Unary、服务端流、客户端流与双向流会解析当前环境变量和环境密钥；请求、响应 JSON、Metadata 与认证值只用于本次调用，不会写入历史。'
     : '使用 {{VARIABLE_NAME}} 引用当前环境变量。动态值支持 {{$timestamp}}、{{$isoTimestamp}} 和 {{$randomUUID}}。')
 const networkPolicyDescription = computed(() => protocolType.value === 'WEBSOCKET'
-  ? 'WebSocket 目标必须为公开可访问的 WS/WSS 地址；内网、回环、链路本地地址和手工握手头均会被拦截。'
+  ? isLocalDesktop() ? 'WebSocket 可访问公网；本机或内网地址需在本地执行设置中授权，WS/WSS 分别对应 HTTP/HTTPS，并匹配主机与端口。链路本地、组播和保留地址仍禁止。' : 'WebSocket 目标必须为公开可访问的 WS/WSS 地址；内网、回环、链路本地地址和手工握手头均会被拦截。'
   : protocolType.value === 'GRPC'
-    ? 'gRPC 目标必须为公开可访问的主机:端口；内网、回环、链路本地地址会被拦截。在线反射描述符仅在本次调用内存中存在；导入的离线描述符是项目级、已校验的编译资产，调用时不会请求远端反射。服务端流、客户端流与双向流数据仅保存在当前控制面内存会话；每个方向限制为 100 条消息、总计 512 KB，达到上限会自动取消。双向流完成发送后仍会继续接收响应。JSON、ASCII Metadata、认证值与响应均不写入历史。'
+    ? isLocalDesktop() ? 'gRPC 可访问公网；本机或内网地址需在本地执行设置中授权相同主机与端口，启用 TLS 对应 HTTPS，否则对应 HTTP。链路本地、组播和保留地址仍禁止。流会话仅保存在当前进程内存中。' : 'gRPC 目标必须为公开可访问的主机:端口；内网、回环、链路本地地址会被拦截。在线反射描述符仅在本次调用内存中存在；导入的离线描述符是项目级、已校验的编译资产，调用时不会请求远端反射。服务端流、客户端流与双向流数据仅保存在当前控制面内存会话；每个方向限制为 100 条消息、总计 512 KB，达到上限会自动取消。双向流完成发送后仍会继续接收响应。JSON、ASCII Metadata、认证值与响应均不写入历史。'
     : isDesktopHttpDebugAvailable()
       ? '桌面端 HTTP/HTTPS 请求直接从当前电脑发出，可访问接口地址或环境变量配置的任意内网地址；每个目标 Origin 首次访问需确认，且不会自动跟随重定向。'
       : '在线 HTTP/HTTPS 默认阻止内网访问；管理员可在系统配置启用 api-debug.allow-configured-private-targets，允许接口地址或环境变量使用任意私网 IP/端口，也可通过 api-debug.allowed-private-origins 精确放行。回环、链路本地、云元数据、组播、保留地址与重定向始终禁止。')
@@ -1228,7 +1229,7 @@ onBeforeUnmount(() => {
           <div class="tree-title"><div><strong>最近请求</strong><small>项目级执行历史</small></div><a-button size="mini" aria-label="刷新最近请求" @click="loadHistory"><icon-refresh /></a-button></div>
           <div v-if="history.length" class="history-list">
             <div v-for="item in history" :key="item.id" class="history-item">
-              <div><a-tag size="small" :color="item.method === 'GET' ? 'green' : item.method === 'POST' ? 'arcoblue' : 'orange'">{{ item.method }}</a-tag><a-tag size="small" :color="item.result === 'DRAFT' ? 'orange' : item.result === 'COMPLETED' && (item.responseStatus ?? 500) < 400 ? 'green' : 'red'">{{ item.result === 'DRAFT' ? '草稿' : item.responseStatus ?? '失败' }}</a-tag></div>
+              <div><a-tag size="small" :color="item.method === 'GET' ? 'green' : item.method === 'POST' ? 'arcoblue' : 'orange'">{{ item.method }}</a-tag><a-tag size="small" :color="item.result === 'DRAFT' ? 'orange' : item.result === 'COMPLETED' && ((item.responseStatus ?? 500) < 400 || item.protocol === 'WEBSOCKET') ? 'green' : 'red'">{{ item.result === 'DRAFT' ? '草稿' : item.protocol === 'WEBSOCKET' && item.result === 'COMPLETED' ? '已连接' : item.responseStatus ?? '失败' }}</a-tag></div>
               <code :title="item.requestUrl">{{ item.requestUrl }}</code>
               <small>{{ item.durationMs }} ms · {{ date(item.createdAt) }}</small>
               <div class="history-actions">

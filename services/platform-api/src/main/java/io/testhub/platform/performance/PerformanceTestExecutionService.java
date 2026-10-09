@@ -242,6 +242,7 @@ public class PerformanceTestExecutionService {
     public PerformanceTestExecution create(AuthenticatedPrincipal principal, String projectId, String planId,
                                            Integer timeoutSeconds) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        plans.lockProject(projectId);
         PerformanceTestPlanDetail plan = plans.findDetail(projectId, planId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "压测计划不存在"));
         if (!"READY".equals(plan.status())) throw new ResponseStatusException(HttpStatus.CONFLICT, "只有待执行状态的压测计划可以提交任务");

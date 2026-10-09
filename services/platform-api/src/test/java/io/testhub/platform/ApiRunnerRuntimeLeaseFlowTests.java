@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -43,7 +43,8 @@ class ApiRunnerRuntimeLeaseFlowTests {
     private static final String HEARTBEAT_KEY = "testhub-runner-contract-test-signing-key-2026-000000000000000000000000";
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
+    @Autowired private io.testhub.platform.shared.runtime.ExpiringStateStore state;
     @Autowired private JdbcClient jdbc;
     private Fixture fixture;
 
@@ -54,15 +55,15 @@ class ApiRunnerRuntimeLeaseFlowTests {
 
     @AfterEach
     void clean() {
-        redis.delete(HEARTBEAT);
-        redis.opsForSet().remove(MEMBERS, RUNNER_ID);
-        redis.delete(NONCE_PREFIX + "nonce_lease_0123456789abc");
-        redis.delete(NONCE_PREFIX + "nonce_lease_abcdef0123456");
-        redis.delete(NONCE_PREFIX + "nonce_lease_bad012345678");
-        redis.delete(NONCE_PREFIX + "nonce_inspect_0123456789");
-        redis.delete(NONCE_PREFIX + "nonce_inspect_bad012345");
+        registry.delete(HEARTBEAT);
+        registry.remove(MEMBERS, RUNNER_ID);
+        state.delete(NONCE_PREFIX + "nonce_lease_0123456789abc");
+        state.delete(NONCE_PREFIX + "nonce_lease_abcdef0123456");
+        state.delete(NONCE_PREFIX + "nonce_lease_bad012345678");
+        state.delete(NONCE_PREFIX + "nonce_inspect_0123456789");
+        state.delete(NONCE_PREFIX + "nonce_inspect_bad012345");
         if (fixture != null) {
-            redis.delete(LEASE_PREFIX + fixture.executionId());
+            state.delete(LEASE_PREFIX + fixture.executionId());
             jdbc.sql("DELETE FROM audit_log WHERE action = 'API_AUTOMATION_RUNTIME_LEASE_ISSUED' AND resource_id = :executionId")
                     .param("executionId", fixture.executionId()).update();
             jdbc.sql("DELETE FROM audit_log WHERE action = 'API_AUTOMATION_RUNTIME_LEASE_INSPECTED' AND resource_id = :executionId")
@@ -90,7 +91,7 @@ class ApiRunnerRuntimeLeaseFlowTests {
         org.junit.jupiter.api.Assertions.assertEquals("RUNTIME_CONFIGURATION_DISABLED", lease.path("purpose").asText());
         org.junit.jupiter.api.Assertions.assertTrue(Instant.parse(lease.path("expiresAt").asText()).isBefore(Instant.now().plus(Duration.ofMinutes(6))));
 
-        String stored = redis.opsForValue().get(LEASE_PREFIX + fixture.executionId());
+        String stored = state.get(LEASE_PREFIX + fixture.executionId());
         org.junit.jupiter.api.Assertions.assertNotNull(stored);
         org.junit.jupiter.api.Assertions.assertFalse(stored.contains(leaseValue));
         org.junit.jupiter.api.Assertions.assertTrue(stored.contains("leaseHash"));
@@ -204,8 +205,7 @@ class ApiRunnerRuntimeLeaseFlowTests {
         heartbeat.put("heartbeatAt", Instant.now().toString());
         heartbeat.put("trustVersion", "1");
         heartbeat.put("signature", heartbeatSignature(heartbeat));
-        redis.opsForSet().add(MEMBERS, RUNNER_ID);
-        redis.opsForValue().set(HEARTBEAT, objectMapper.writeValueAsString(heartbeat), Duration.ofSeconds(60));
+        registry.publish(MEMBERS, HEARTBEAT, RUNNER_ID, objectMapper.writeValueAsString(heartbeat), Duration.ofSeconds(60));
     }
 
     private HttpHeaders headers(String taskId, String executionId, String nonce, boolean tamper) throws Exception {

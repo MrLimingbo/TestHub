@@ -23,3 +23,9 @@ test('requires explicit network origins before bounded HTTP execution can be ena
   assert.equal(config.httpExecutionEnabled, true)
   assert.deepEqual(config.allowedHttpOrigins, ['https://api.example.test'])
 })
+
+test('private network access is opt-in and requires desktop transport credentials', () => {
+  assert.equal(loadConfig({}).allowPrivateNetwork, false)
+  assert.throws(() => loadConfig({ RUNNER_DESKTOP_NETWORK_ACCESS: 'true' }), /桌面/)
+  assert.equal(loadConfig({ RUNNER_DESKTOP_NETWORK_ACCESS: 'true', TESTHUB_DESKTOP_BROKER_URL: 'http://127.0.0.1:3000', TESTHUB_DESKTOP_BROKER_TOKEN: 'test-only' }).allowPrivateNetwork, true)
+})

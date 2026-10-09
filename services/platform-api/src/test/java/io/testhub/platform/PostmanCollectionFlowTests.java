@@ -36,9 +36,8 @@ class PostmanCollectionFlowTests {
     @AfterEach
     void cleanApiAssets() {
         jdbc.sql("""
-                DELETE d FROM api_definition d
-                JOIN api_catalog c ON c.id = d.catalog_id
-                WHERE c.name = 'Postman验收目录'
+                DELETE FROM api_definition
+                WHERE catalog_id IN (SELECT id FROM api_catalog WHERE name = 'Postman验收目录')
                 """).update();
         jdbc.sql("DELETE FROM api_catalog WHERE name = 'Postman验收目录'").update();
     }

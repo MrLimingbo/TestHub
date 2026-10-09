@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 本地资料迁入账号</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>本地资料迁入账号</h1>
+  <button id="open-api-transfer" type="button">接口设计资产迁移</button>
+  <button id="open-automation-transfer" type="button" disabled>接口自动化资料迁移</button>
+  <button id="open-mock-transfer" type="button" disabled>Mock 资料迁移</button>
+  <button id="open-performance-transfer" type="button" disabled>性能资料迁移</button>
+  <button id="open-ui-automation-transfer" type="button" disabled>Web UI 资料迁移</button>
+  <button id="open-quality-report-transfer" type="button" disabled>定时质量报告迁移</button>
+  <button id="open-notification-transfer" type="button" disabled>通知模板迁移</button>
+  <button id="open-settings-transfer" type="button" disabled>项目环境与参数迁移</button>
+  <button id="open-task-transfer" type="button" disabled>任务登记资料迁移</button>
+  <button id="open-mobile-automation-transfer" type="button" disabled>移动端 资料迁移</button>
+  <p id="account" class="description" role="status">正在准备本地工作区并读取项目…</p>
+  <form id="transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required></select>
+    <label for="target">账号目标项目</label><select id="target" required></select>
+    <label class="checkbox-row" for="include-plans"><input id="include-plans" type="checkbox" />同时迁移测试计划及用例关联</label>
+    <label class="checkbox-row" for="include-governance"><input id="include-governance" type="checkbox" />同时迁移项目标签与自定义字段定义</label>
+    <label class="checkbox-row" for="include-defects"><input id="include-defects" type="checkbox" />同时迁移缺陷与需求、用例关联</label>
+    <label class="checkbox-row" for="include-files"><input id="include-files" type="checkbox" />同时复制全部项目文件（含未引用文件）</label>
+    <label class="checkbox-row" for="include-history"><input id="include-history" type="checkbox" />同时复制执行历史（需勾选测试计划）</label>
+    <label class="checkbox-row" for="include-project-versions"><input id="include-project-versions" type="checkbox" />同时复制项目版本</label>
+    <label class="checkbox-row" for="include-governance-catalogs"><input id="include-governance-catalogs" type="checkbox" />同时复制资产治理目录</label>
+    <p class="hint">勾选治理目录后保留目录层级、名称、顺序和空目录；与标签及字段独立选择。迁入后在资产治理页查看，放入新建的“本地迁入”目录，不覆盖目标已有目录。</p>
+    <p class="hint">勾选项目版本后保留版本号、构建顺序、发布状态、计划及实际发布日期和描述；新记录归当前账号所有。目标存在同名版本号时整批停止。可独立选择，不要求勾选测试计划或执行历史。</p>
+    <p class="description">迁移目录、需求与用例基础资料，保留目录层级和需求关联；在目标项目新建“本地迁入”目录。本地原件保持不变。</p>
+    <p class="hint">勾选测试计划后，同时保留计划目录、状态和用例顺序；迁入后可创建新的执行批次。未勾选时不迁移计划。</p>
+    <p class="hint">勾选标签与字段后，迁移项目标签字典、所选资产类型的字段定义及本次资产的标签关联。未勾选计划时，不迁移计划字段和计划标签关联；不包含自定义字段填写值。</p>
+    <p class="hint">勾选缺陷后保留内容、状态、解决方案、目录及需求/用例关联；同选执行历史时保留执行记录关联；不迁入原指派人、抄送人、解决/关闭人员及处理时间。未勾选时不迁移缺陷。</p>
+    <p class="hint">勾选项目文件后复制文件内容，校验大小与 SHA-256，并更新已迁入正文中的同项目标准相对下载链接。最多 100 个文件、合计 20 MiB；外部、跨项目或绝对链接保持原文。未勾选时不迁移文件。</p>
+    <p class="hint">勾选执行历史后保留批次、历史用例及步骤结果和时间，迁入后可以继续执行；最多 1000 批次、10000 条执行用例和 50000 条步骤。新记录归当前账号所有，不复制原执行人员身份。本次不包含其他测试模块或密钥设置。仅上述标准相对文件链接会在勾选文件迁移后更新。</p>
+    <p class="hint">预览只读取资料；确认后才上传。目标存在相同资产编号、标签名称或同类型字段标识时整批停止，不覆盖已有记录。此操作是一次性复制，不会自动同步后续编辑。</p>
+    <p id="preview" class="description" role="status"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit">预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认迁入当前账号</button>
+  </form>
+</main><script src="transfer-renderer.js"></script><script src="api-transfer.js"></script><script src="automation-transfer.js"></script><script src="mock-transfer.js"></script><script src="performance-transfer.js"></script><script src="ui-automation-transfer.js"></script>
+    <script src="mobile-automation-transfer.js"></script><script src="quality-report-transfer.js"></script><script src="task-transfer.js"></script><script src="settings-transfer.js"></script><script src="notification-transfer.js"></script></body>
+</html>

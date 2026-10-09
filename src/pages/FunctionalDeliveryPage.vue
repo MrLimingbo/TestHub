@@ -194,7 +194,7 @@ const resolutionLabel = (value: string | null) => value ? ({
   POSTPONED: '延期处理',
   EXTERNAL: '外部原因',
 }[value] ?? value) : '-'
-const assetLabel = (value: string) => ({ REQUIREMENT: '需求', CASE: '测试用例' }[value] ?? value)
+const assetLabel = (value: string) => ({ REQUIREMENT: '需求', CASE: '测试用例', RUN_CASE: '执行用例' }[value] ?? value)
 const date = (value: string | null, dateOnly = false) => value
   ? new Intl.DateTimeFormat('zh-CN', dateOnly ? { dateStyle: 'medium' } : { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
   : '-'
@@ -778,7 +778,7 @@ onMounted(load)
   </a-drawer>
 
   <a-drawer v-model:visible="exchangeVisible" title="资产导入与交换" :width="720" :footer="false">
-    <a-alert type="info">仅接受平台模板的 .xlsx 文件；导入会先完整预检，任意行失败都不会写入数据。单次最多 500 行、5 MB。</a-alert>
+    <a-alert type="info">仅接受平台模板的 .xlsx 文件；导入会先完整预检，任意行失败都不会写入数据。单次最多 500 行、5 MB。新用例模板保留用例类型，旧九列模板按功能用例导入；目录需预先创建且名称唯一，关联需求需先导入。</a-alert>
     <div class="exchange-grid">
       <section>
         <h3>导出与模板</h3>

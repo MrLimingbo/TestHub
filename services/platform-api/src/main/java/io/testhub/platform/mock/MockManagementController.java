@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,6 +86,20 @@ public class MockManagementController {
                 new MockService.RuleInput(request.name(), request.httpMethod(), request.path(), request.priority(), request.requestQuery(),
                         request.requestHeaders(), request.requestBodyMatch(), request.requestBody(), request.responseStatus(),
                         request.responseHeaders(), request.responseBody())));
+    }
+
+    @PostMapping("/servers/{serverId}/rules/{ruleId}/enabled")
+    public ApiResponse<MockRule> setRuleEnabled(Authentication authentication, @PathVariable String projectId, @PathVariable String serverId,
+            @PathVariable String ruleId, @Valid @RequestBody EnabledRequest request) {
+        return ApiResponse.of(mocks.setRuleEnabled(principal(authentication),projectId,serverId,ruleId,request.enabled()));
+    }
+
+    @PutMapping("/servers/{serverId}/rules/{ruleId}")
+    public ApiResponse<MockRule> updateRule(Authentication authentication, @PathVariable String projectId, @PathVariable String serverId,
+            @PathVariable String ruleId, @Valid @RequestBody RuleRequest request) {
+        return ApiResponse.of(mocks.updateRule(principal(authentication),projectId,serverId,ruleId,
+                new MockService.RuleInput(request.name(),request.httpMethod(),request.path(),request.priority(),request.requestQuery(),
+                    request.requestHeaders(),request.requestBodyMatch(),request.requestBody(),request.responseStatus(),request.responseHeaders(),request.responseBody())));
     }
 
     private AuthenticatedPrincipal principal(Authentication authentication) {

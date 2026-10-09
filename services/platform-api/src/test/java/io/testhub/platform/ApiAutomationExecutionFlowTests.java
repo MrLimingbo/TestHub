@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RuntimeStreams;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -41,7 +41,7 @@ class ApiAutomationExecutionFlowTests {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private JdbcClient jdbc;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RuntimeStreams streams;
     @Autowired private ApiRunnerEventConsumer runnerEvents;
     @Autowired private ApiRunnerHttpResultConsumer runnerHttpResults;
     @Autowired private ApiRunnerStepResultConsumer runnerStepResults;
@@ -288,13 +288,13 @@ class ApiAutomationExecutionFlowTests {
         org.junit.jupiter.api.Assertions.assertFalse(payload.toLowerCase().contains("authorization"));
 
         runnerLogs.consume();
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.of(
+        streams.add(StreamRecords.mapBacked(Map.of(
                 "contract", ApiRunnerProtocol.LOG_CONTRACT, "protocolVersion", ApiRunnerProtocol.VERSION,
                 "taskId", taskId, "executionId", executionId, "runnerId", "api-runner-test", "level", "INFO",
                 "code", "TASK_RECEIVED", "message", "Task accepted for safety precheck.",
                 "occurredAt", Instant.now().toString()
         )).withStreamKey(ApiRunnerProtocol.LOG_STREAM));
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.of(
+        streams.add(StreamRecords.mapBacked(Map.of(
                 "contract", ApiRunnerProtocol.LOG_CONTRACT, "protocolVersion", ApiRunnerProtocol.VERSION,
                 "taskId", taskId, "executionId", executionId, "runnerId", "api-runner-test", "level", "INFO",
                 "code", "TASK_RECEIVED", "message", "Bearer never-persist-this-secret", "occurredAt", Instant.now().toString()
@@ -313,7 +313,7 @@ class ApiAutomationExecutionFlowTests {
         org.junit.jupiter.api.Assertions.assertEquals(0, unsafeLogCount);
 
         runnerEvents.consume();
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.of(
+        streams.add(StreamRecords.mapBacked(Map.of(
                 "contract", ApiRunnerProtocol.EVENT_CONTRACT, "protocolVersion", ApiRunnerProtocol.VERSION,
                 "taskId", taskId, "executionId", executionId, "runnerId", "api-runner-test", "type", "REJECTED",
                 "code", "EXECUTION_DISABLED", "message", "The execution engine is disabled for this verification.",
@@ -337,21 +337,21 @@ class ApiAutomationExecutionFlowTests {
         String taskId = executionTaskId(projectId, executionId);
 
         runnerHttpResults.consume();
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.ofEntries(
+        streams.add(StreamRecords.mapBacked(Map.ofEntries(
                 Map.entry("contract", ApiRunnerProtocol.HTTP_RESULT_CONTRACT), Map.entry("protocolVersion", ApiRunnerProtocol.HTTP_RESULT_VERSION),
                 Map.entry("taskId", taskId), Map.entry("executionId", executionId), Map.entry("runnerId", "api-runner-test"),
                 Map.entry("stepId", "request-order"), Map.entry("requestSequence", "1"), Map.entry("method", "GET"),
                 Map.entry("attemptNumber", "1"), Map.entry("outcome", "FAILED"), Map.entry("statusCode", "503"), Map.entry("durationMillis", "36"),
                 Map.entry("occurredAt", Instant.now().toString())
         )).withStreamKey(ApiRunnerProtocol.HTTP_RESULT_STREAM));
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.ofEntries(
+        streams.add(StreamRecords.mapBacked(Map.ofEntries(
                 Map.entry("contract", ApiRunnerProtocol.HTTP_RESULT_CONTRACT), Map.entry("protocolVersion", ApiRunnerProtocol.HTTP_RESULT_VERSION),
                 Map.entry("taskId", taskId), Map.entry("executionId", executionId), Map.entry("runnerId", "api-runner-test"),
                 Map.entry("stepId", "request-order"), Map.entry("requestSequence", "1"), Map.entry("method", "GET"),
                 Map.entry("attemptNumber", "2"), Map.entry("outcome", "SUCCEEDED"), Map.entry("statusCode", "204"), Map.entry("durationMillis", "36"),
                 Map.entry("occurredAt", Instant.now().toString())
         )).withStreamKey(ApiRunnerProtocol.HTTP_RESULT_STREAM));
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.ofEntries(
+        streams.add(StreamRecords.mapBacked(Map.ofEntries(
                 Map.entry("contract", ApiRunnerProtocol.HTTP_RESULT_CONTRACT), Map.entry("protocolVersion", ApiRunnerProtocol.HTTP_RESULT_VERSION),
                 Map.entry("taskId", taskId), Map.entry("executionId", executionId), Map.entry("runnerId", "api-runner-test"),
                 Map.entry("stepId", "request-order"), Map.entry("requestSequence", "2"), Map.entry("method", "GET"),
@@ -480,13 +480,13 @@ class ApiAutomationExecutionFlowTests {
         String taskId = executionTaskId(projectId, executionId);
 
         runnerStepResults.consume();
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.ofEntries(
+        streams.add(StreamRecords.mapBacked(Map.ofEntries(
                 Map.entry("contract", ApiRunnerProtocol.STEP_RESULT_CONTRACT), Map.entry("protocolVersion", ApiRunnerProtocol.VERSION),
                 Map.entry("taskId", taskId), Map.entry("executionId", executionId), Map.entry("runnerId", "api-runner-test"),
                 Map.entry("stepId", "extract-status"), Map.entry("stepSequence", "2"), Map.entry("type", "EXTRACT"),
                 Map.entry("outcome", "COMPLETED"), Map.entry("observedStatusCode", "204"), Map.entry("occurredAt", Instant.now().toString())
         )).withStreamKey(ApiRunnerProtocol.STEP_RESULT_STREAM));
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.ofEntries(
+        streams.add(StreamRecords.mapBacked(Map.ofEntries(
                 Map.entry("contract", ApiRunnerProtocol.STEP_RESULT_CONTRACT), Map.entry("protocolVersion", ApiRunnerProtocol.VERSION),
                 Map.entry("taskId", taskId), Map.entry("executionId", executionId), Map.entry("runnerId", "api-runner-test"),
                 Map.entry("stepId", "assert-status"), Map.entry("stepSequence", "3"), Map.entry("type", "ASSERT"),
@@ -514,13 +514,13 @@ class ApiAutomationExecutionFlowTests {
         String taskId = executionTaskId(projectId, executionId);
 
         runnerScriptResults.consume();
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.ofEntries(
+        streams.add(StreamRecords.mapBacked(Map.ofEntries(
                 Map.entry("contract", ApiRunnerProtocol.SCRIPT_RESULT_CONTRACT), Map.entry("protocolVersion", ApiRunnerProtocol.VERSION),
                 Map.entry("taskId", taskId), Map.entry("executionId", executionId), Map.entry("runnerId", "api-runner-test"),
                 Map.entry("phase", "PRE_REQUEST"), Map.entry("testCount", "3"), Map.entry("passedCount", "2"),
                 Map.entry("failedCount", "1"), Map.entry("occurredAt", Instant.now().toString())
         )).withStreamKey(ApiRunnerProtocol.SCRIPT_RESULT_STREAM));
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.ofEntries(
+        streams.add(StreamRecords.mapBacked(Map.ofEntries(
                 Map.entry("contract", ApiRunnerProtocol.SCRIPT_RESULT_CONTRACT), Map.entry("protocolVersion", ApiRunnerProtocol.VERSION),
                 Map.entry("taskId", taskId), Map.entry("executionId", executionId), Map.entry("runnerId", "api-runner-test"),
                 Map.entry("phase", "PRE_REQUEST"), Map.entry("testCount", "3"), Map.entry("passedCount", "2"),
@@ -560,7 +560,7 @@ class ApiAutomationExecutionFlowTests {
 
         runnerLogs.consume();
         for (int index = 0; index < 2; index++) {
-            redis.opsForStream().add(StreamRecords.mapBacked(Map.of(
+            streams.add(StreamRecords.mapBacked(Map.of(
                     "contract", ApiRunnerProtocol.LOG_CONTRACT, "protocolVersion", ApiRunnerProtocol.VERSION,
                     "taskId", taskId, "executionId", executionId, "runnerId", "api-runner-test", "level", "WARN",
                     "code", "FAILURE_CONTINUED",
@@ -606,7 +606,7 @@ class ApiAutomationExecutionFlowTests {
         org.junit.jupiter.api.Assertions.assertFalse(cancellationPayload.toLowerCase().contains("authorization"));
 
         runnerEvents.consume();
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.of(
+        streams.add(StreamRecords.mapBacked(Map.of(
                 "contract", ApiRunnerProtocol.EVENT_CONTRACT, "protocolVersion", ApiRunnerProtocol.VERSION,
                 "taskId", taskId, "executionId", executionId, "runnerId", "api-runner-test", "type", "CANCELLED",
                 "code", "USER_REQUESTED", "message", "Cancellation accepted without user content execution.",
@@ -718,7 +718,7 @@ class ApiAutomationExecutionFlowTests {
 
     private void addHttpResult(String taskId, String executionId, String stepId, int requestSequence, int attemptNumber,
                                String outcome, int statusCode, long durationMillis) {
-        redis.opsForStream().add(StreamRecords.mapBacked(Map.ofEntries(
+        streams.add(StreamRecords.mapBacked(Map.ofEntries(
                 Map.entry("contract", ApiRunnerProtocol.HTTP_RESULT_CONTRACT),
                 Map.entry("protocolVersion", ApiRunnerProtocol.HTTP_RESULT_VERSION),
                 Map.entry("taskId", taskId), Map.entry("executionId", executionId), Map.entry("runnerId", "api-runner-test"),

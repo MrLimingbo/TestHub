@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
 import { type Project, useSessionStore } from '@/stores/session'
+import { isLocalDesktop, isAccountDesktop, openSettingsSync } from '@/utils/desktopWorkspace'
 
 interface ApiEnvelope<T> { data: T }
 interface Role { code: string; name: string; description: string }
@@ -29,7 +30,26 @@ interface AuditEntry {
 const route = useRoute()
 const router = useRouter()
 const session = useSessionStore()
+const desktop = isLocalDesktop() || isAccountDesktop()
+async function showSettingsSync() {
+  try { await openSettingsSync() } catch (error) { Message.error(error instanceof Error ? error.message : '无法打开项目配置同步。') }
+}
 const loading = ref(false)
+const loadError = ref('')
+const pending = reactive(new Set<string>())
+let ready = false, disposed = false, resourceSequence = 0, logSequence = 0, viewSequence = 0
+let formSequence = 0, formProjectId = ''
+const currentView = (projectId: string, view: number) => !disposed && session.projectId === projectId && viewSequence === view
+function closeForms() {
+  formSequence++
+  projectDialog.value = false; memberDialog.value = false; environmentDialog.value = false
+  environmentForm.value = ''
+}
+function captureForm() { formProjectId = session.projectId; formSequence++ }
+function clearResources() {
+  members.value = []; parameters.value = []; secrets.value = []; projectEnvironments.value = []; files.value = []; auditEntries.value = []
+}
+
 const saving = ref(false)
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -46,6 +66,7 @@ const auditAction = ref('')
 const roles = ref<Role[]>([])
 const members = ref<Member[]>([])
 const accountOptions = ref<AccountOption[]>([])
+const accountLookupError = ref('')
 const parameters = ref<Parameter[]>([])
 const secrets = ref<Secret[]>([])
 const projectEnvironments = ref<ProjectEnvironment[]>([])
@@ -90,27 +111,21 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+  const encoded = body === undefined ? undefined : JSON.stringify(body)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
   return read<T>(url, {
     method,
     headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: encoded,
   })
 }
 
 async function loadProjectResources() {
-  if (!session.projectId) {
-    members.value = []
-    parameters.value = []
-    secrets.value = []
-    projectEnvironments.value = []
-    files.value = []
-    auditEntries.value = []
-    return
-  }
+  const projectId = session.projectId, sequence = ++resourceSequence, view = viewSequence
+  clearResources(); loadError.value = ''
+  if (!projectId) { loading.value = false; return }
   loading.value = true
   try {
-    const projectId = session.projectId
     const [nextMembers, parameterCollection, secretCollection, nextFiles, nextEnvironments] = await Promise.all([
       read<Member[]>(`/api/v1/projects/${projectId}/members`),
       read<ParameterCollection>(`/api/v1/projects/${projectId}/parameters`),
@@ -118,46 +133,55 @@ async function loadProjectResources() {
       read<FileObject[]>(`/api/v1/projects/${projectId}/files`),
       read<ProjectEnvironment[]>(`/api/v1/projects/${projectId}/environments`),
     ])
-    members.value = nextMembers
-    parameters.value = parameterCollection.parameters
-    secrets.value = secretCollection.secrets
-    files.value = nextFiles
-    projectEnvironments.value = nextEnvironments
+    if (sequence !== resourceSequence || !currentView(projectId, view)) return
+    members.value = nextMembers; parameters.value = parameterCollection.parameters; secrets.value = secretCollection.secrets
+    files.value = nextFiles; projectEnvironments.value = nextEnvironments
     if (activeTab.value === 'logs') await loadProjectLogs()
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载项目设置失败')
+    if (sequence === resourceSequence && currentView(projectId, view)) loadError.value = error instanceof Error ? error.message : '加载项目设置失败'
   } finally {
-    loading.value = false
+    if (sequence === resourceSequence && currentView(projectId, view)) loading.value = false
   }
 }
 
 async function loadProjectLogs() {
-  if (!session.projectId) {
-    auditEntries.value = []
-    return
-  }
-  const query = new URLSearchParams({ projectId: session.projectId, limit: '100' })
+  const projectId = session.projectId, sequence = ++logSequence, view = viewSequence
+  auditEntries.value = []; loadError.value = ''
+  if (!projectId) return
+  const query = new URLSearchParams({ limit: '100' })
   if (auditAction.value) query.set('action', auditAction.value)
   try {
-    auditEntries.value = await read<AuditEntry[]>(`/api/v1/audit-logs?${query}`)
+    const entries = await read<AuditEntry[]>(`/api/v1/projects/${projectId}/audit-logs?${query}`)
+    if (sequence === logSequence && currentView(projectId, view)) auditEntries.value = entries
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载项目操作日志失败')
+    if (sequence === logSequence && currentView(projectId, view)) loadError.value = error instanceof Error ? error.message : '加载项目操作日志失败'
   }
 }
 
 async function load() {
+  loading.value = true
   try {
     await session.loadAccessContext()
-    const [nextRoles, nextAccounts] = await Promise.all([
-      read<Role[]>('/api/v1/access/roles'),
-      read<AccountOption[]>('/api/v1/accounts/options'),
-    ])
-    roles.value = nextRoles
-    accountOptions.value = nextAccounts
+    if (disposed) return
+    ready = true
     await loadProjectResources()
+    const nextRoles = await read<Role[]>('/api/v1/access/roles')
+    if (!disposed) roles.value = nextRoles
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载项目设置失败')
+    if (!disposed) { loadError.value = error instanceof Error ? error.message : '加载项目设置失败'; loading.value = false }
   }
+}
+
+async function rowMutation(key: string, url: string, method: 'POST' | 'DELETE', message: string) {
+  const projectId = session.projectId, view = viewSequence
+  if (!projectId || pending.has(key)) return
+  pending.add(key)
+  try {
+    await mutate<void>(url, method)
+    if (currentView(projectId, view)) { await loadProjectResources(); if (currentView(projectId, view)) Message.success(message) }
+  } catch (error) {
+    if (currentView(projectId, view)) Message.error(error instanceof Error ? error.message : '操作失败')
+  } finally { pending.delete(key) }
 }
 
 function selectProject(projectId: string) {
@@ -165,6 +189,7 @@ function selectProject(projectId: string) {
 }
 
 function createProject() {
+  captureForm()
   editingProject.value = false
   editingProjectId.value = null
   projectForm.name = ''
@@ -174,6 +199,7 @@ function createProject() {
 }
 
 function editProject(project: Project) {
+  captureForm()
   editingProject.value = true
   editingProjectId.value = project.id
   projectForm.name = project.name
@@ -182,84 +208,88 @@ function editProject(project: Project) {
   projectDialog.value = true
 }
 
-async function saveProject() {
-  if (!projectForm.name.trim() || !projectForm.code.trim()) {
-    Message.warning('请填写项目名称和项目标识')
-    return
-  }
+async function saveProject(): Promise<boolean> {
+  if (saving.value || disposed) return false
+  if (!projectForm.name.trim() || !projectForm.code.trim()) { Message.warning('请填写项目名称和项目标识'); return false }
+  const projectId = formProjectId, view = viewSequence, form = formSequence
+  const edited = editingProject.value, editingId = editingProjectId.value, input = { ...projectForm }
   saving.value = true
   try {
-    const saved = editingProject.value && editingProjectId.value
-      ? await mutate<Project>(`/api/v1/projects/${editingProjectId.value}`, 'PUT', projectForm)
-      : await mutate<Project>('/api/v1/projects', 'POST', projectForm)
+    const saved = edited && editingId
+      ? await mutate<Project>(`/api/v1/projects/${editingId}`, 'PUT', input)
+      : await mutate<Project>('/api/v1/projects', 'POST', input)
+    if (!currentView(projectId, view) || form !== formSequence) return false
     projectDialog.value = false
     await session.loadAccessContext()
+    if (disposed || view !== viewSequence) return false
     session.selectProject(saved.id)
-    Message.success(editingProject.value ? '项目信息已更新' : '项目已创建')
+    const selectedView = viewSequence, completedForm = formSequence
+    await loadProjectResources()
+    if (!currentView(saved.id, selectedView) || completedForm !== formSequence) return false
+    Message.success(edited ? '项目信息已更新' : '项目已创建'); return true
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '保存项目失败')
-  } finally {
-    saving.value = false
-  }
+    if (currentView(projectId, view) && form === formSequence) Message.error(error instanceof Error ? error.message : '保存项目失败')
+    return false
+  } finally { saving.value = false }
 }
 
 async function deleteProject(project: Project) {
+  const key = 'project:' + project.id, projectId = session.projectId, view = viewSequence
+  if (pending.has(key)) return
+  pending.add(key)
   try {
     await mutate<void>(`/api/v1/projects/${project.id}`, 'DELETE')
+    if (!currentView(projectId, view)) return
     await session.loadAccessContext()
-    Message.success('项目已删除，历史数据已保留')
+    if (!disposed) { await loadProjectResources(); Message.success('项目已删除，历史数据已保留') }
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '删除项目失败')
-  }
+    if (currentView(projectId, view)) Message.error(error instanceof Error ? error.message : '删除项目失败')
+  } finally { pending.delete(key) }
 }
 
 function openMember(member?: Member) {
+  if (!session.projectId) return
+  captureForm()
+  accountLookupError.value = ''; accountOptions.value = []
+  const form = formSequence
+  void read<AccountOption[]>('/api/v1/accounts/options').then(accounts => {
+    if (!disposed && form === formSequence) accountOptions.value = accounts
+  }).catch(error => { if (!disposed && form === formSequence) accountLookupError.value = error instanceof Error ? error.message : '账号选项读取失败，请直接输入账号' })
   memberForm.account = member?.account ?? ''
   memberForm.roleCode = member?.roleCode ?? 'TESTER'
   memberDialog.value = true
 }
 
 async function saveMember(): Promise<boolean> {
-  const account = memberForm.account.trim()
-  if (!session.projectId) return false
-  if (!account) {
-    Message.warning('请输入账号')
-    return false
-  }
+  const account = memberForm.account.trim(), projectId = formProjectId, view = viewSequence, form = formSequence
+  if (!projectId || saving.value || disposed) return false
+  if (!account) { Message.warning('请输入账号'); return false }
+  const input = { account, roleCode: memberForm.roleCode }
   saving.value = true
   try {
-    await mutate<Member>(`/api/v1/projects/${session.projectId}/members`, 'POST', {
-      account,
-      roleCode: memberForm.roleCode,
-    })
-    memberDialog.value = false
-    await loadProjectResources()
-    Message.success('项目成员已保存')
-    return true
+    await mutate<Member>(`/api/v1/projects/${projectId}/members`, 'POST', input)
+    if (!currentView(projectId, view) || form !== formSequence) return false
+    memberDialog.value = false; await loadProjectResources()
+    if (!currentView(projectId, view) || form !== formSequence) return false
+    Message.success('项目成员已保存'); return true
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '保存成员失败')
+    if (currentView(projectId, view) && form === formSequence) Message.error(error instanceof Error ? error.message : '保存成员失败')
     return false
-  } finally {
-    saving.value = false
-  }
+  } finally { saving.value = false }
 }
 
 async function removeMember(member: Member) {
-  try {
-    await mutate<void>(`/api/v1/projects/${session.projectId}/members/${member.membershipId}`, 'DELETE')
-    await loadProjectResources()
-    Message.success('成员已移出项目')
-  } catch (error) {
-    Message.error(error instanceof Error ? error.message : '移除成员失败')
-  }
+  await rowMutation('member:' + member.membershipId, `/api/v1/projects/${session.projectId}/members/${member.membershipId}`, 'DELETE', '成员已移出项目')
 }
 
 function openEnvironment(kind: 'parameter' | 'secret', item?: Parameter) {
+  if (loading.value || !session.projectId) return
   if (!projectEnvironments.value.length) {
     Message.warning('请先在系统设置中创建项目环境')
     void router.push('/system-settings/environments')
     return
   }
+  captureForm()
   environmentKind.value = kind
   editingParameterId.value = item?.id ?? null
   environmentForm.environmentCode = item?.environmentCode ?? (
@@ -273,31 +303,26 @@ function openEnvironment(kind: 'parameter' | 'secret', item?: Parameter) {
   environmentDialog.value = true
 }
 
-async function saveEnvironmentItem() {
-  if (!session.projectId) return
+async function saveEnvironmentItem(): Promise<boolean> {
+  const projectId = formProjectId, view = viewSequence, form = formSequence, kind = environmentKind.value
+  if (!projectId || saving.value || disposed) return false
+  const input = { ...environmentForm }
   saving.value = true
   try {
-    const endpoint = environmentKind.value === 'secret' ? 'secrets' : 'parameters'
-    await mutate<void>(`/api/v1/projects/${session.projectId}/${endpoint}`, 'POST', environmentForm)
-    environmentDialog.value = false
-    environmentForm.value = ''
-    await loadProjectResources()
-    Message.success(environmentKind.value === 'secret' ? '环境密钥已加密保存' : '环境参数已保存')
+    const endpoint = kind === 'secret' ? 'secrets' : 'parameters'
+    await mutate<void>(`/api/v1/projects/${projectId}/${endpoint}`, 'POST', input)
+    if (!currentView(projectId, view) || form !== formSequence) return false
+    environmentDialog.value = false; environmentForm.value = ''; await loadProjectResources()
+    if (!currentView(projectId, view) || form !== formSequence) return false
+    Message.success(kind === 'secret' ? '环境密钥已加密保存' : '环境参数已保存'); return true
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '保存环境配置失败')
-  } finally {
-    saving.value = false
-  }
+    if (currentView(projectId, view) && form === formSequence) Message.error(error instanceof Error ? error.message : '保存环境配置失败')
+    return false
+  } finally { saving.value = false }
 }
 
 async function removeEnvironmentItem(kind: 'parameters' | 'secrets', id: string) {
-  try {
-    await mutate<void>(`/api/v1/projects/${session.projectId}/${kind}/${id}`, 'DELETE')
-    await loadProjectResources()
-    Message.success('环境配置已删除')
-  } catch (error) {
-    Message.error(error instanceof Error ? error.message : '删除环境配置失败')
-  }
+  await rowMutation(kind + ':' + id, `/api/v1/projects/${session.projectId}/${kind}/${id}`, 'DELETE', '环境配置已删除')
 }
 
 function chooseFile() {
@@ -307,13 +332,14 @@ function chooseFile() {
 async function uploadFile(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
-  if (!file || !session.projectId) return
+  const projectId = session.projectId, view = viewSequence
+  if (!file || !projectId || uploading.value) return
   uploading.value = true
   try {
     const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
     const form = new FormData()
     form.append('file', file)
-    const response = await fetch(`/api/v1/projects/${session.projectId}/files`, {
+    const response = await fetch(`/api/v1/projects/${projectId}/files`, {
       method: 'POST',
       credentials: 'include',
       headers: { [csrf.headerName]: csrf.token },
@@ -321,10 +347,9 @@ async function uploadFile(event: Event) {
     })
     const body = await response.json().catch(() => ({})) as { message?: string }
     if (!response.ok) throw new Error(body.message ?? '上传失败')
-    await loadProjectResources()
-    Message.success('文件上传成功')
+    if (currentView(projectId, view)) { await loadProjectResources(); if (currentView(projectId, view)) Message.success('文件上传成功') }
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '上传文件失败')
+    if (currentView(projectId, view)) Message.error(error instanceof Error ? error.message : '上传文件失败')
   } finally {
     uploading.value = false
     input.value = ''
@@ -336,13 +361,7 @@ function downloadFile(file: FileObject) {
 }
 
 async function removeFile(file: FileObject) {
-  try {
-    await mutate<void>(`/api/v1/projects/${session.projectId}/files/${file.id}`, 'DELETE')
-    await loadProjectResources()
-    Message.success('文件已删除')
-  } catch (error) {
-    Message.error(error instanceof Error ? error.message : '删除文件失败')
-  }
+  await rowMutation('file:' + file.id, `/api/v1/projects/${session.projectId}/files/${file.id}`, 'DELETE', '文件已删除')
 }
 
 function roleLabel(roleCode: string) {
@@ -363,6 +382,17 @@ watch(() => route.query.required, (required) => {
   if (required && !session.projectId) Message.warning('请先创建或选择一个项目，再进入测试模块')
 }, { immediate: true })
 
+watch(() => session.projectId, () => {
+  viewSequence++; resourceSequence++; logSequence++; closeForms(); clearResources()
+  environmentFilter.value = ''; auditAction.value = ''; loadError.value = ''; loading.value = false
+  if (ready) void loadProjectResources()
+}, { flush: 'sync' })
+watch(activeTab, () => {
+  viewSequence++; resourceSequence++; logSequence++; closeForms(); clearResources()
+  loadError.value = ''; loading.value = false
+  if (ready) void loadProjectResources()
+}, { flush: 'sync' })
+onBeforeUnmount(() => { disposed = true; resourceSequence++; logSequence++; closeForms() })
 onMounted(load)
 </script>
 
@@ -408,7 +438,7 @@ onMounted(load)
               type="warning"
               @ok="deleteProject(project)"
             >
-              <a-button type="text" size="mini" status="danger" :aria-label="`删除项目 ${project.name}`">
+              <a-button type="text" size="mini" status="danger" :loading="pending.has('project:' + project.id)" :aria-label="`删除项目 ${project.name}`">
                 <icon-delete />
               </a-button>
             </a-popconfirm>
@@ -431,6 +461,7 @@ onMounted(load)
       </header>
 
       <a-spin :loading="loading" class="settings-content">
+        <a-alert v-if="loadError" type="error">{{ loadError }} <a-button type="text" @click="load">重试</a-button></a-alert>
         <a-result v-if="!currentProject" status="info" title="请先创建项目" subtitle="所有测试资产都需要归属于项目。创建项目后即可配置成员、环境与文件。">
           <template #extra><a-button type="primary" @click="createProject">新建项目</a-button></template>
         </a-result>
@@ -487,7 +518,7 @@ onMounted(load)
               <a-table-column title="项目角色"><template #cell="{ record }"><a-tag color="arcoblue">{{ roleLabel(record.roleCode) }}</a-tag></template></a-table-column>
               <a-table-column title="加入时间"><template #cell="{ record }">{{ formatDate(record.createdAt) }}</template></a-table-column>
               <a-table-column title="操作" :width="180">
-                <template #cell="{ record }"><a-space><a-button type="text" @click="openMember(record)">编辑角色</a-button><a-popconfirm content="确定将该成员移出项目吗？" @ok="removeMember(record)"><a-button type="text" status="danger">移除</a-button></a-popconfirm></a-space></template>
+                <template #cell="{ record }"><a-space><a-button type="text" @click="openMember(record)">编辑角色</a-button><a-popconfirm content="确定将该成员移出项目吗？" @ok="removeMember(record)"><a-button type="text" status="danger" :loading="pending.has('member:' + record.membershipId)">移除</a-button></a-popconfirm></a-space></template>
               </a-table-column>
             </template>
           </a-table>
@@ -497,7 +528,7 @@ onMounted(load)
         <section v-else-if="activeTab === 'environments'" class="content-panel panel">
           <div class="content-heading">
             <div><span class="eyebrow">PROJECT ENVIRONMENTS</span><h2>项目环境</h2><p>按环境隔离普通参数与敏感密钥，供接口调试、自动化和性能测试统一引用。</p></div>
-            <a-space><a-button @click="router.push('/system-settings/environments')"><icon-settings /> 管理环境</a-button><a-button @click="openEnvironment('secret')"><icon-lock /> 新建密钥</a-button><a-button type="primary" @click="openEnvironment('parameter')"><icon-plus /> 新建参数</a-button></a-space>
+            <a-space wrap><a-button v-if="desktop" @click="showSettingsSync">项目配置同步</a-button><a-button @click="router.push('/system-settings/environments')"><icon-settings /> 管理环境</a-button><a-button :disabled="loading" @click="openEnvironment('secret')"><icon-lock /> 新建密钥</a-button><a-button type="primary" :disabled="loading" @click="openEnvironment('parameter')"><icon-plus /> 新建参数</a-button></a-space>
           </div>
           <div class="environment-toolbar">
             <a-select v-model="environmentFilter" allow-clear placeholder="全部环境" :style="{ width: '200px' }">
@@ -514,7 +545,7 @@ onMounted(load)
               <a-table-column title="参数名称"><template #cell="{ record }"><strong>{{ record.key }}</strong></template></a-table-column>
               <a-table-column title="参数值"><template #cell="{ record }"><code class="value-code">{{ record.value }}</code></template></a-table-column>
               <a-table-column title="更新时间"><template #cell="{ record }">{{ formatDate(record.updatedAt) }}</template></a-table-column>
-              <a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" @click="openEnvironment('parameter', record)">编辑</a-button><a-popconfirm content="确定删除该参数吗？" @ok="removeEnvironmentItem('parameters', record.id)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></a-space></template></a-table-column>
+              <a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" @click="openEnvironment('parameter', record)">编辑</a-button><a-popconfirm content="确定删除该参数吗？" @ok="removeEnvironmentItem('parameters', record.id)"><a-button type="text" status="danger" :loading="pending.has('parameters:' + record.id)">删除</a-button></a-popconfirm></a-space></template></a-table-column>
             </template>
           </a-table>
           <a-table v-else :data="visibleSecrets" :pagination="false" row-key="id">
@@ -522,7 +553,7 @@ onMounted(load)
               <a-table-column title="环境"><template #cell="{ record }"><a-tag color="purple">{{ record.environmentCode }}</a-tag></template></a-table-column>
               <a-table-column title="密钥名称"><template #cell="{ record }"><strong>{{ record.key }}</strong><small class="masked">•••••••• · 已加密</small></template></a-table-column>
               <a-table-column title="更新时间"><template #cell="{ record }">{{ formatDate(record.updatedAt) }}</template></a-table-column>
-              <a-table-column title="操作"><template #cell="{ record }"><a-popconfirm content="确定删除该密钥吗？" @ok="removeEnvironmentItem('secrets', record.id)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></template></a-table-column>
+              <a-table-column title="操作"><template #cell="{ record }"><a-popconfirm content="确定删除该密钥吗？" @ok="removeEnvironmentItem('secrets', record.id)"><a-button type="text" status="danger" :loading="pending.has('secrets:' + record.id)">删除</a-button></a-popconfirm></template></a-table-column>
             </template>
           </a-table>
         </section>
@@ -536,14 +567,14 @@ onMounted(load)
           <div class="file-summary">
             <div><span>文件数量</span><strong>{{ files.length }}</strong></div>
             <div><span>占用空间</span><strong>{{ formatSize(totalFileSize) }}</strong></div>
-            <div><span>存储方式</span><strong>MinIO 对象存储</strong></div>
+            <div><span>文件归属</span><strong>{{ currentProject?.name || '当前项目' }}</strong></div>
           </div>
           <a-table :data="files" :pagination="false" row-key="id">
             <template #columns>
               <a-table-column title="文件名称"><template #cell="{ record }"><div class="file-cell"><span><icon-file /></span><div><strong>{{ record.originalName }}</strong><small>{{ record.contentType }}</small></div></div></template></a-table-column>
               <a-table-column title="大小"><template #cell="{ record }">{{ formatSize(record.sizeBytes) }}</template></a-table-column>
               <a-table-column title="上传时间"><template #cell="{ record }">{{ formatDate(record.createdAt) }}</template></a-table-column>
-              <a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" @click="downloadFile(record)">下载</a-button><a-popconfirm content="确定删除该文件吗？" @ok="removeFile(record)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></a-space></template></a-table-column>
+              <a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" @click="downloadFile(record)">下载</a-button><a-popconfirm content="确定删除该文件吗？" @ok="removeFile(record)"><a-button type="text" status="danger" :loading="pending.has('file:' + record.id)">删除</a-button></a-popconfirm></a-space></template></a-table-column>
             </template>
           </a-table>
           <a-empty v-if="files.length === 0" description="当前项目还没有文件" />
@@ -560,13 +591,13 @@ onMounted(load)
             </a-select>
             <span>最近 100 条项目操作记录</span>
           </div>
-          <a-table :data="auditEntries" :pagination="{ pageSize: 10 }" row-key="id">
+          <a-table :data="auditEntries" :scroll="{ x: 1050 }" :pagination="{ pageSize: 10 }" row-key="id">
             <template #columns>
               <a-table-column title="时间" :width="185"><template #cell="{ record }">{{ formatDate(record.createdAt) }}</template></a-table-column>
-              <a-table-column title="操作"><template #cell="{ record }"><a-tag color="arcoblue">{{ record.action }}</a-tag></template></a-table-column>
-              <a-table-column title="资源"><template #cell="{ record }"><strong>{{ record.resourceType }}</strong><small class="audit-resource">{{ record.resourceId ?? '—' }}</small></template></a-table-column>
+              <a-table-column title="操作" :width="275"><template #cell="{ record }"><a-tag color="arcoblue">{{ record.action }}</a-tag></template></a-table-column>
+              <a-table-column title="资源" :width="210"><template #cell="{ record }"><strong>{{ record.resourceType }}</strong><small class="audit-resource">{{ record.resourceId ?? '—' }}</small></template></a-table-column>
               <a-table-column title="结果" :width="100"><template #cell="{ record }"><a-tag :color="record.outcome === 'SUCCESS' ? 'green' : 'red'">{{ record.outcome }}</a-tag></template></a-table-column>
-              <a-table-column title="请求 ID"><template #cell="{ record }"><code class="request-id">{{ record.requestId }}</code></template></a-table-column>
+              <a-table-column title="请求 ID" :width="220"><template #cell="{ record }"><code class="request-id">{{ record.requestId }}</code></template></a-table-column>
             </template>
           </a-table>
           <a-empty v-if="auditEntries.length === 0" description="当前项目暂无操作日志" />
@@ -574,7 +605,7 @@ onMounted(load)
       </a-spin>
     </main>
 
-    <a-modal v-model:visible="projectDialog" :title="editingProject ? '编辑项目' : '新增项目'" :ok-loading="saving" width="600px" @ok="saveProject">
+    <a-modal v-model:visible="projectDialog" :title="editingProject ? '编辑项目' : '新增项目'" :ok-loading="saving" width="600px" :on-before-ok="saveProject">
       <a-form :model="projectForm" layout="vertical">
         <a-form-item label="项目名称" required><a-input v-model="projectForm.name" :max-length="160" show-word-limit placeholder="例如：交易中台 V4" /></a-form-item>
         <a-form-item label="项目标识" required extra="2–64 位小写字母、数字、下划线或连字符，创建测试数据后仍建议保持稳定。"><a-input v-model="projectForm.code" placeholder="trade-v4" /></a-form-item>
@@ -599,13 +630,13 @@ onMounted(load)
               </div>
             </a-option>
           </a-select>
-          <template #extra>可下拉选择已有账号；输入新账号后保存，将同步创建系统账号，默认密码为 admin。</template>
+          <template #extra><span v-if="accountLookupError">{{ accountLookupError }}；可直接输入账号。 </span>可下拉选择已有账号；输入新账号后保存，将同步创建系统账号，默认密码为 admin。</template>
         </a-form-item>
         <a-form-item label="项目角色" required><a-select v-model="memberForm.roleCode"><a-option v-for="role in roles" :key="role.code" :value="role.code">{{ role.name }} · {{ role.description }}</a-option></a-select></a-form-item>
       </a-form>
     </a-modal>
 
-    <a-modal v-model:visible="environmentDialog" :title="environmentKind === 'secret' ? '新建环境密钥' : (editingParameterId ? '编辑环境参数' : '新建环境参数')" :ok-loading="saving" width="580px" @ok="saveEnvironmentItem">
+    <a-modal v-model:visible="environmentDialog" :title="environmentKind === 'secret' ? '新建环境密钥' : (editingParameterId ? '编辑环境参数' : '新建环境参数')" :ok-loading="saving" width="580px" :on-before-ok="saveEnvironmentItem">
       <a-alert v-if="environmentKind === 'secret'" type="warning">密钥值仅在传输时可见，保存后会加密且无法再次回显。</a-alert>
       <a-form :model="environmentForm" layout="vertical">
         <a-form-item label="所属环境" required><a-select v-model="environmentForm.environmentCode" :disabled="!!editingParameterId" placeholder="请选择项目环境"><a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode" :disabled="!environment.enabled">{{ environment.name }} · {{ environment.environmentCode }}</a-option></a-select></a-form-item>

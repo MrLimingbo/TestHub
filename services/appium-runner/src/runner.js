@@ -8,6 +8,18 @@ function error(code, text) { const value = new Error(text); value.code = code; r
 const LOCATORS = { ACCESSIBILITY_ID: 'accessibility id', ID: 'id', XPATH: 'xpath', ANDROID_UIAUTOMATOR: '-android uiautomator', IOS_PREDICATE: '-ios predicate string' }
 const SAFE_CAPABILITIES = new Set(['appium:platformVersion', 'appium:deviceName', 'appium:noReset', 'appium:fullReset', 'appium:newCommandTimeout', 'appium:autoGrantPermissions', 'appium:language', 'appium:locale', 'appium:appActivity', 'appium:appWaitActivity'])
 
+function capability(key, value) {
+  if (['appium:noReset', 'appium:fullReset', 'appium:autoGrantPermissions'].includes(key)) {
+    if (value === 'true' || value === true) return true
+    if (value === 'false' || value === false) return false
+    throw error('CAPABILITY_INVALID', `${key} 必须是 true 或 false`)
+  }
+  if (key === 'appium:newCommandTimeout') {
+    if (!/^\d+$/.test(String(value)) || !Number.isSafeInteger(Number(value))) throw error('CAPABILITY_INVALID', `${key} 必须是非负整数秒数`)
+    return Number(value)
+  }
+  return value
+}
 export class AppiumRunner {
   constructor({ commandClient, readClient, cancelClient, config, logger = console, fetcher = globalThis.fetch, now = () => new Date() }) { this.commandClient = commandClient; this.readClient = readClient; this.cancelClient = cancelClient; this.config = config; this.logger = logger; this.fetcher = fetcher; this.now = now; this.startedAt = now(); this.running = new Map(); this.cancelled = new Map(); this.stopping = false }
   async start() { await this.commandClient.connect(); await this.readClient.connect(); await this.cancelClient.connect(); await this.group(TASK_STREAM, GROUP); await this.group(CANCEL_STREAM, CANCEL_GROUP); this.timer = setInterval(() => void this.sendHeartbeat(), this.config.heartbeatIntervalSeconds * 1000); await this.sendHeartbeat(); void this.loop(); void this.cancellationLoop() }
@@ -24,7 +36,7 @@ export class AppiumRunner {
     const active = { task, sessionId: '', cancelled: this.cancelled.has(task.taskId) }; this.running.set(task.taskId, active)
     try {
       await this.publish(event(task, this.config.runnerId, 'ACCEPTED', 'TASK_ACCEPTED', 'Appium task accepted by isolated Runner.', this.now()))
-      this.assertActive(active); const configuration = await this.runtime(task); this.assertDeadline(active, configuration.deadlineAt); active.sessionId = await this.startSession(active, configuration); await this.publish(event(task, this.config.runnerId, 'RUNNING', 'APPIUM_SESSION_STARTED', 'Isolated Appium session started.', this.now()))
+      this.assertActive(active); const configuration = await this.runtime(task); this.assertDeadline(active, configuration.deadlineAt); active.deadlineAt = configuration.deadlineAt; active.sessionId = await this.startSession(active, configuration); this.assertActive(active); await this.publish(event(task, this.config.runnerId, 'RUNNING', 'APPIUM_SESSION_STARTED', 'Isolated Appium session started.', this.now()))
       await this.execute(active, configuration)
       this.assertActive(active); this.assertDeadline(active, configuration.deadlineAt); await this.publish(event(task, this.config.runnerId, 'SUCCEEDED', 'APPIUM_EXECUTION_SUCCEEDED', 'Appium scenario completed.', this.now()))
     } catch (value) {
@@ -33,9 +45,10 @@ export class AppiumRunner {
       else await this.publish(event(task, this.config.runnerId, 'FAILED', 'APPIUM_EXECUTION_FAILED', message(value), this.now()))
     } finally { await this.closeSession(active); this.running.delete(task.taskId); this.cancelled.delete(task.taskId); void this.sendHeartbeat(); await this.ack(entry.id) }
   }
-  async runtime(task) { const request = runtimeRequest(this.config, task); const response = await this.fetcher(`${this.config.controlPlaneUrl}${request.path}`, { method: 'POST', headers: request.headers, body: request.body, signal: AbortSignal.timeout(5000) }); if (!response.ok) throw error('RUNTIME_CONFIGURATION_FAILED', `运行时配置请求失败：HTTP ${response.status}`); return runtime(task, (await response.json())?.data) }
+  async runtime(task) { const request = runtimeRequest(this.config, task); const response = await this.fetcher(`${this.config.controlPlaneUrl}${request.path}`, { method: 'POST', headers: request.headers, body: request.body, redirect: 'error', signal: AbortSignal.timeout(5000) }); if (!response.ok) throw error('RUNTIME_CONFIGURATION_FAILED', `运行时配置请求失败：HTTP ${response.status}`); return runtime(task, (await response.json())?.data) }
   async startSession(active, configuration) { const device = configuration.manifest.device, application = configuration.manifest.application; const capabilities = { platformName: device.platform === 'ANDROID' ? 'Android' : 'iOS', 'appium:automationName': device.automationName, 'appium:udid': device.udid }
-    for (const [key, value] of Object.entries(device.capabilities ?? {})) if (SAFE_CAPABILITIES.has(key)) capabilities[key] = value
+    for (const [key, value] of Object.entries(device.capabilities ?? {})) if (SAFE_CAPABILITIES.has(key)) capabilities[key] = capability(key, value)
+    if (capabilities['appium:noReset'] && capabilities['appium:fullReset']) throw error('CAPABILITY_INVALID', 'noReset 与 fullReset 不能同时启用')
     if (device.platform === 'ANDROID') capabilities['appium:appPackage'] = application.appIdentifier; else capabilities['appium:bundleId'] = application.appIdentifier
     const value = await this.webdriver('POST', '/session', { capabilities: { alwaysMatch: capabilities, firstMatch: [{}] } }, 30000); const sessionId = value?.sessionId ?? value?.value?.sessionId; if (typeof sessionId !== 'string' || !sessionId) throw error('APPIUM_SESSION_INVALID', '设备农场未返回有效 Appium session'); return sessionId }
   async execute(active, configuration) { const scenario = configuration.manifest.scenario; let failed = false; for (const [index, step] of scenario.steps.entries()) { const started = Date.now(); let failure = ''
@@ -45,7 +58,11 @@ export class AppiumRunner {
       if (failure && scenario.failureStrategy !== 'CONTINUE') throw error(failure.includes('deadline') ? 'TIMED_OUT' : 'STEP_FAILED', failure)
     } if (failed) throw error('STEP_FAILED', 'One or more mobile steps failed'); }
   async step(active, step, variables) { const timeout = Math.min(Math.max(Number(step.timeoutMillis) || 30000, 1), 60000); if (step.type === 'LAUNCH') return
-    if (step.type === 'WAIT') return new Promise((resolve) => setTimeout(resolve, timeout))
+    if (step.type === 'WAIT') {
+      const end = Date.now() + timeout
+      while (Date.now() < end) { this.assertActive(active); if (active.deadlineAt) this.assertDeadline(active, active.deadlineAt); await new Promise(resolve => setTimeout(resolve, Math.min(100, end - Date.now()))) }
+      return
+    }
     if (step.type === 'SCREENSHOT') { const shot = await this.webdriver('GET', `/session/${encodeURIComponent(active.sessionId)}/screenshot`, undefined, timeout); const base64 = typeof shot === 'string' ? shot : shot?.value; if (typeof base64 !== 'string') throw error('SCREENSHOT_FAILED', '设备农场未返回 PNG 截图'); await this.archive(active.task, Buffer.from(base64, 'base64')); return }
     const element = await this.element(active, step, timeout); if (step.type === 'TAP') return this.webdriver('POST', `/session/${encodeURIComponent(active.sessionId)}/element/${encodeURIComponent(element)}/click`, {}, timeout)
     if (step.type === 'INPUT') { const value = interpolate(step.value, variables); return this.webdriver('POST', `/session/${encodeURIComponent(active.sessionId)}/element/${encodeURIComponent(element)}/value`, { text: value, value: [...value] }, timeout) }
@@ -53,8 +70,8 @@ export class AppiumRunner {
     if (step.type === 'ASSERT_TEXT') { const actual = await this.webdriver('GET', `/session/${encodeURIComponent(active.sessionId)}/element/${encodeURIComponent(element)}/text`, undefined, timeout); const text = typeof actual === 'string' ? actual : actual?.value; if (!String(text ?? '').includes(interpolate(step.expectedText, variables))) throw error('ASSERT_TEXT_FAILED', '文本断言未通过'); return }
     throw error('STEP_TYPE_UNSUPPORTED', `不支持的移动端步骤：${step.type}`) }
   async element(active, step, timeout) { const using = LOCATORS[step.locatorStrategy]; if (!using || !step.locatorValue) throw error('LOCATOR_INVALID', '移动端元素定位器不完整'); const value = await this.webdriver('POST', `/session/${encodeURIComponent(active.sessionId)}/element`, { using, value: step.locatorValue }, timeout); const element = value?.['element-6066-11e4-a52e-4f735466cecf'] ?? value?.ELEMENT ?? value?.value?.['element-6066-11e4-a52e-4f735466cecf'] ?? value?.value?.ELEMENT; if (typeof element !== 'string') throw error('ELEMENT_NOT_FOUND', '设备农场未返回元素标识'); return element }
-  async webdriver(method, path, body, timeout) { const response = await this.fetcher(`${this.config.appiumServerUrl}${path}`, { method, headers: body === undefined ? undefined : { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(timeout) }); const payload = await response.json().catch(() => ({})); if (!response.ok || payload?.value?.error) throw error('WEBDRIVER_REQUEST_FAILED', payload?.value?.message || `Appium HTTP ${response.status}`); return payload?.value ?? payload }
-  async archive(task, bytes) { if (bytes.length > 25 * 1024 * 1024) throw error('SCREENSHOT_TOO_LARGE', '移动端截图超过 25MB'); const request = artifactRequest(this.config, task, bytes); const response = await this.fetcher(`${this.config.controlPlaneUrl}${request.path}`, { method: 'POST', headers: request.headers, body: request.body, signal: AbortSignal.timeout(10000) }); if (!response.ok) throw error('SCREENSHOT_ARCHIVE_FAILED', `截图归档失败：HTTP ${response.status}`) }
+  async webdriver(method, path, body, timeout) { const response = await this.fetcher(`${this.config.appiumServerUrl}${path}`, { method, headers: body === undefined ? undefined : { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body), redirect: 'error', signal: AbortSignal.timeout(timeout) }); const payload = await response.json().catch(() => ({})); if (!response.ok || payload?.value?.error) throw error('WEBDRIVER_REQUEST_FAILED', payload?.value?.message || `Appium HTTP ${response.status}`); return payload?.value ?? payload }
+  async archive(task, bytes) { if (bytes.length > 25 * 1024 * 1024) throw error('SCREENSHOT_TOO_LARGE', '移动端截图超过 25MB'); const request = artifactRequest(this.config, task, bytes); const response = await this.fetcher(`${this.config.controlPlaneUrl}${request.path}`, { method: 'POST', headers: request.headers, body: request.body, redirect: 'error', signal: AbortSignal.timeout(10000) }); if (!response.ok) throw error('SCREENSHOT_ARCHIVE_FAILED', `截图归档失败：HTTP ${response.status}`) }
   assertActive(active) { if (active.cancelled || this.cancelled.has(active.task.taskId)) throw error('CANCELLED', 'Appium task cancelled') }
   assertDeadline(active, deadlineAt) { if (Date.parse(deadlineAt) <= Date.now()) throw error('TIMED_OUT', 'Appium task deadline exceeded'); this.assertActive(active) }
   async closeSession(active) { if (!active.sessionId) return; const id = active.sessionId; active.sessionId = ''; try { await this.webdriver('DELETE', `/session/${encodeURIComponent(id)}`, undefined, 5000) } catch (value) { this.logger.warn('Appium session 释放失败', message(value)) } }

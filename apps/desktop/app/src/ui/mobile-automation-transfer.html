@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 移动端资料迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>移动端资料迁移</h1><p id="account" class="description">正在读取账号与项目…</p>
+  <form id="mobile-automation-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required></select>
+    <label for="target">账号目标项目</label><select id="target" required></select>
+    <p class="description">复制设备与应用当前版本、元素对象、场景当前版本、变量和有序步骤，重新关联设备、应用及元素。本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">迁入设备和应用全部停用，不提交执行；UDID 与能力参数按原配置保留。设备记录不代表设备已连接，请核对目标端设备、应用和 Appium 服务及其驱动，再手动启用。</p>
+    <p class="hint">本次不复制 APK/IPA、执行历史或截图。本地应用包关联在目标端解除，预览会显示数量；目标端可重新关联其项目文件。当前运行器按应用标识启动预装应用，不自动安装包。设备标识、能力参数、变量和步骤可能包含敏感值，确认后才上传。</p>
+    <p class="hint">同名资料、相同 UDID、无效引用或平台不匹配时整批停止，不覆盖目标资料。每类资料最多 1000 条，总资料上限 32 MiB；预览有效期 10 分钟，切换账号或服务后重新预览。</p>
+    <p id="preview" class="description" role="status" aria-live="polite"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传移动端资料</button>
+  </form>
+</main><script src="mobile-automation-transfer.js"></script></body>
+</html>

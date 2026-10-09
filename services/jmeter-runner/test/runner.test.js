@@ -150,3 +150,38 @@ test('cancellation kills a launcher and its child, escalating when SIGTERM is ig
     try { process.kill(-child.pid, 'SIGKILL') } catch (error) { assert.equal(error.code, 'ESRCH') }
   }
 })
+
+test('shutdown during runtime configuration download cannot spawn a late JVM', async () => {
+  let finishDownload
+  const runner = new JMeterRunner({ commandClient: {}, readClient: {}, cancelReadClient: {}, config: {},
+    spawn: () => { throw new Error('must not spawn after shutdown') } })
+  runner.requestRuntimeConfiguration = () => new Promise(resolve => { finishDownload = resolve })
+  const starting = runner.startJmeterTask(task)
+  runner.stopping = true
+  finishDownload({ threadGroups: [] })
+  await starting
+  assert.equal(runner.runningTasks.size, 0)
+  await runner.handleEntry({ id: 'unread', fields: task })
+})
+
+test('shutdown waits for report archival even after the JVM has exited', async () => {
+  const closed = [], workDirectory = await mkdtemp(join(tmpdir(), 'testhub-jmeter-drain-'))
+  const transaction = { set() { return this }, sAdd() { return this }, del() { return this }, sRem() { return this }, exec: async () => [] }
+  const child = new EventEmitter(); child.stdout = new EventEmitter(); child.stderr = new EventEmitter(); child.exitCode = null
+  const runner = new JMeterRunner({ commandClient: { sendCommand: async () => {}, multi: () => transaction, quit: async () => closed.push('command') },
+    readClient: { quit: async () => closed.push('read') }, cancelReadClient: { quit: async () => closed.push('cancel') },
+    config: { runnerId: 'archive-drain', heartbeatSigningKey: 'a'.repeat(32), heartbeatIntervalSeconds: 10, heartbeatTtlSeconds: 30, workDirectory, jmeterBin: 'jmeter' },
+    spawn: () => child, logger: { info() {}, warn() {}, error() {} }, resourceSampler: async () => ({ cpuPercent: 0, residentMemoryBytes: 0 }) })
+  runner.requestRuntimeConfiguration = async () => ({ threadGroups: [] })
+  let beginArchive, finishArchive
+  const archiving = new Promise(resolve => { beginArchive = resolve })
+  runner.archiveWorkloadArtifacts = () => { beginArchive(); return new Promise(resolve => { finishArchive = resolve }) }
+  await runner.startJmeterTask(task)
+  child.exitCode = 0; child.emit('close', 0)
+  await archiving
+  const stopping = runner.stop()
+  await new Promise(resolve => setTimeout(resolve, 10))
+  assert.deepEqual(closed, [], 'transport must stay open while the result is being saved')
+  finishArchive(); await stopping
+  assert.equal(closed.length, 3)
+})

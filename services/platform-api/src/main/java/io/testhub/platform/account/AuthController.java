@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.Map;
 import org.springframework.http.HttpHeaders;
@@ -26,9 +28,33 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private static final String SECURITY_CONTEXT_KEY = "SPRING_SECURITY_CONTEXT";
     private final AuthenticationManager authenticationManager;
+    private final RegistrationService registration;
+    private final RegistrationRateLimiter registrationRateLimiter;
 
-    public AuthController(AuthenticationManager authenticationManager) {
+    public AuthController(AuthenticationManager authenticationManager, RegistrationService registration,
+                          RegistrationRateLimiter registrationRateLimiter) {
         this.authenticationManager = authenticationManager;
+        this.registration = registration;
+        this.registrationRateLimiter = registrationRateLimiter;
+    }
+
+    @GetMapping("/capabilities")
+    public ApiResponse<Map<String, Boolean>> capabilities() {
+        return ApiResponse.of(Map.of("registrationEnabled", registration.enabled()));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<ProfileResponse>> register(@Valid @RequestBody RegistrationRequest request,
+                                                                HttpServletRequest servletRequest) {
+        if (!registration.enabled()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN, "当前服务未开放注册");
+        }
+        registrationRateLimiter.requireAllowed(servletRequest.getRemoteAddr());
+        UserAccount created = registration.register(request.account(), request.email(), request.displayName(), request.password());
+        PlatformUserPrincipal principal = new PlatformUserPrincipal(created);
+        saveSession(UsernamePasswordAuthenticationToken.authenticated(principal, null, principal.getAuthorities()), servletRequest);
+        return ResponseEntity.status(201).body(ApiResponse.of(ProfileResponse.from(principal)));
     }
 
     @GetMapping("/csrf")
@@ -44,12 +70,18 @@ public class AuthController {
                     org.springframework.http.HttpStatus.BAD_REQUEST, "账号不能为空");
         }
         Authentication authenticated = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(identifier.trim().toLowerCase(), request.password()));
+                UsernamePasswordAuthenticationToken.unauthenticated(identifier.trim().toLowerCase(java.util.Locale.ROOT), request.password()));
+        saveSession(authenticated, servletRequest);
+        return ApiResponse.of(ProfileResponse.from((PlatformUserPrincipal) authenticated.getPrincipal()));
+    }
+
+    private void saveSession(Authentication authenticated, HttpServletRequest servletRequest) {
+        // Controller-based authentication must rotate the pre-authentication session explicitly.
+        if (servletRequest.getSession(false) != null) servletRequest.changeSessionId();
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authenticated);
         SecurityContextHolder.setContext(context);
         servletRequest.getSession(true).setAttribute(SECURITY_CONTEXT_KEY, context);
-        return ApiResponse.of(ProfileResponse.from((PlatformUserPrincipal) authenticated.getPrincipal()));
     }
 
     @GetMapping("/me")
@@ -72,6 +104,12 @@ public class AuthController {
         String identifier() {
             return account == null || account.isBlank() ? email : account;
         }
+    }
+
+    public record RegistrationRequest(@NotBlank @Size(max = 64) String account,
+                                      @NotBlank @Email @Size(max = 190) String email,
+                                      @Size(max = 80) String displayName,
+                                      @NotBlank @Size(min = 8, max = 72) String password) {
     }
 
     public record ProfileResponse(String id, String account, String email, String displayName, Instant authenticatedAt) {

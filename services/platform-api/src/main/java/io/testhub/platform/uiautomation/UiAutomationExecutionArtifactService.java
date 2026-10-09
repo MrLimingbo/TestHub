@@ -1,13 +1,7 @@
 package io.testhub.platform.uiautomation;
 
+import io.testhub.platform.storage.ObjectStorage;
 import com.github.f4b6a3.ulid.UlidCreator;
-import io.minio.BucketExistsArgs;
-import io.minio.GetObjectArgs;
-import io.minio.GetObjectResponse;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.audit.AuditService;
 import io.testhub.platform.security.AuthenticatedPrincipal;
@@ -21,7 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,16 +28,15 @@ public class UiAutomationExecutionArtifactService {
     private final UiAutomationRepository automation;
     private final AccessService access;
     private final AuditService audit;
-    private final MinioClient minio;
+    private final ObjectStorage storage;
     private final String bucket;
-    private final Set<String> ready = ConcurrentHashMap.newKeySet();
 
     public UiAutomationExecutionArtifactService(UiAutomationRepository automation, AccessService access, AuditService audit,
-                                                MinioClient minio, @Value("${testhub.storage.bucket}") String bucket) {
+                                                ObjectStorage storage, @Value("${testhub.storage.bucket}") String bucket) {
         this.automation = automation;
         this.access = access;
         this.audit = audit;
-        this.minio = minio;
+        this.storage = storage;
         this.bucket = bucket;
     }
 
@@ -60,9 +52,9 @@ public class UiAutomationExecutionArtifactService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Web UI 自动化工件不存在"));
         try {
             ensureBucket();
-            return new Download(stored.artifact(), minio.getObject(GetObjectArgs.builder().bucket(bucket).object(stored.objectKey()).build()));
+            return new Download(stored.artifact(), storage.get(bucket, stored.objectKey()));
         } catch (Exception exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Web UI 自动化工件读取失败，请检查 MinIO 服务", exception);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Web UI 自动化工件读取失败，请检查文件存储", exception);
         }
     }
 
@@ -87,8 +79,7 @@ public class UiAutomationExecutionArtifactService {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             CountingInputStream counting = new CountingInputStream(body);
             try (DigestInputStream input = new DigestInputStream(counting, digest)) {
-                minio.putObject(PutObjectArgs.builder().bucket(bucket).object(objectKey).stream(input, upload.sizeBytes(), -1)
-                        .contentType(kind.contentType).build());
+                storage.put(bucket, objectKey, input, upload.sizeBytes(), kind.contentType);
                 if (counting.count != upload.sizeBytes() || !java.util.HexFormat.of().formatHex(digest.digest()).equals(upload.checksum())) {
                     throw invalid("Web UI 自动化工件内容长度或校验和不匹配");
                 }
@@ -99,7 +90,7 @@ public class UiAutomationExecutionArtifactService {
             throw exception;
         } catch (Exception exception) {
             removeQuietly(objectKey);
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Web UI 自动化工件归档失败，请检查 MinIO 服务", exception);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Web UI 自动化工件归档失败，请检查文件存储", exception);
         }
         UiAutomationExecutionArtifact artifact = automation.findArtifact(execution.projectId(), execution.id(), id)
                 .orElseThrow(() -> new IllegalStateException("工件归档后不可读取")).artifact();
@@ -113,17 +104,17 @@ public class UiAutomationExecutionArtifactService {
         return automation.findExecution(projectId, executionId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Web UI 执行记录不存在"));
     }
     private void ensureBucket() {
-        if (ready.contains(bucket)) return;
         try {
-            if (!minio.bucketExists(BucketExistsArgs.builder().bucket(bucket).build())) minio.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-            ready.add(bucket);
-        } catch (Exception exception) { throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "MinIO 存储桶不可用", exception); }
+            storage.ensureBucket(bucket);
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "文件存储不可用", exception);
+        }
     }
-    private void removeQuietly(String objectKey) { try { minio.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(objectKey).build()); } catch (Exception ignored) { } }
+    private void removeQuietly(String objectKey) { try { storage.remove(bucket, objectKey); } catch (Exception ignored) { } }
     private ResponseStatusException rejected() { return new ResponseStatusException(HttpStatus.FORBIDDEN, "Playwright Runner 无权归档该执行工件"); }
     private ResponseStatusException invalid(String text) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, text); }
     public record Upload(String taskId, String executionId, String artifactType, long sizeBytes, String checksum) { }
-    public record Download(UiAutomationExecutionArtifact artifact, GetObjectResponse content) { }
+    public record Download(UiAutomationExecutionArtifact artifact, InputStream content) { }
     private enum ArtifactKind {
         SCREENSHOT("screenshot.png", "image/png"), TRACE("trace.zip", "application/zip"), VIDEO("video.webm", "video/webm");
         private final String originalName;

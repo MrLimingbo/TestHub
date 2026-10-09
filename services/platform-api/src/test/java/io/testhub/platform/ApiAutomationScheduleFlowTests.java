@@ -35,6 +35,7 @@ class ApiAutomationScheduleFlowTests {
         jdbc.sql("DELETE FROM api_automation_schedule WHERE name LIKE '定时计划验收 %'").update();
         jdbc.sql("DELETE FROM api_automation_execution WHERE scenario_name LIKE '定时计划验收 %'").update();
         jdbc.sql("DELETE FROM api_automation_scenario WHERE name LIKE '定时计划验收 %'").update();
+        jdbc.sql("DELETE FROM api_automation_execution_profile WHERE name LIKE '定时计划验收 %'").update();
         jdbc.sql("DELETE FROM audit_log WHERE detail LIKE '%定时计划验收%'").update();
     }
 
@@ -113,6 +114,47 @@ class ApiAutomationScheduleFlowTests {
         Integer count = jdbc.sql("SELECT COUNT(*) FROM api_automation_schedule WHERE name LIKE '定时计划验收 %'")
                 .query(Integer.class).single();
         assertEquals(0, count);
+    }
+
+    @Test
+    void manualAndQuartzTriggersUseTheSelectedExecutionProfile() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        String scenarioId = createScenario(administrator, projectId, "定时计划验收 配置执行");
+        Csrf csrf = csrf(administrator);
+        MvcResult profile = mvc.perform(post("/api/v1/projects/{projectId}/api-automation/execution-profiles", projectId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"定时计划验收 配置集","environmentCode":"test","variables":{"baseUrl":"https://profile.example.test"}}
+                                """))
+                .andExpect(status().isOk()).andReturn();
+        String profileId = json(profile).at("/data/id").asText();
+        MvcResult created = mvc.perform(post("/api/v1/projects/{projectId}/api-automation/schedules", projectId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"定时计划验收 关联配置","scenarioId":"%s","executionProfileId":"%s",
+                                 "cronExpression":"0 0 0 1 1 ? 2099","timezone":"Asia/Shanghai",
+                                 "timeoutSeconds":300,"maxConsecutiveFailures":3,"enabled":true}
+                                """.formatted(scenarioId, profileId)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.executionProfileId").value(profileId)).andReturn();
+        String scheduleId = json(created).at("/data/id").asText();
+        mvc.perform(post("/api/v1/projects/{projectId}/api-automation/schedules/{scheduleId}/run", projectId, scheduleId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.executionProfileId").value(profileId));
+        schedules.executeQuartzJob(scheduleId);
+        String automaticExecution = jdbc.sql("SELECT last_execution_id FROM api_automation_schedule WHERE id = :id")
+                .param("id", scheduleId).query(String.class).single();
+        assertEquals(profileId, jdbc.sql("SELECT execution_profile_id FROM api_automation_execution WHERE id = :id")
+                .param("id", automaticExecution).query(String.class).single());
+
+        mvc.perform(post("/api/v1/projects/{projectId}/api-automation/schedules", projectId)
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"定时计划验收 无效配置","scenarioId":"%s","executionProfileId":"01AAAAAAAAAAAAAAAAAAAAAAAA",
+                                 "cronExpression":"0 0 0 1 1 ? 2099","timezone":"Asia/Shanghai",
+                                 "timeoutSeconds":300,"maxConsecutiveFailures":3,"enabled":false}
+                                """.formatted(scenarioId)))
+                .andExpect(status().isBadRequest());
     }
 
     private String schedulePayload(String scenarioId, boolean enabled, int threshold) {

@@ -34,12 +34,17 @@ class QualityReportScheduleFlowTests {
     @Autowired private JdbcClient jdbc;
     @Autowired private QualityReportScheduleService schedules;
     @Autowired private SystemConfigRepository configs;
+    @Autowired private org.quartz.Scheduler scheduler;
 
     private Optional<String> previousAllowedHosts = Optional.empty();
     private String administratorId;
 
     @AfterEach
-    void clean() {
+    void clean() throws Exception {
+        for (String id : jdbc.sql("SELECT id FROM quality_report_schedule WHERE name LIKE '定时质量报告验收 %'")
+                .query(String.class).list()) {
+            scheduler.deleteJob(new org.quartz.JobKey(id, "testhub-quality-report"));
+        }
         jdbc.sql("DELETE FROM quality_report_schedule WHERE name LIKE '定时质量报告验收 %'").update();
         jdbc.sql("DELETE FROM notification_template WHERE name LIKE '定时质量报告验收 %'").update();
         jdbc.sql("DELETE FROM audit_log WHERE detail LIKE '%定时质量报告验收%'").update();
@@ -47,6 +52,39 @@ class QualityReportScheduleFlowTests {
             if (previousAllowedHosts.isPresent()) configs.upsert(ALLOWED_HOSTS, previousAllowedHosts.get(), administratorId);
             else configs.deleteNonSecret(ALLOWED_HOSTS);
         }
+    }
+
+    @Test
+    void quartzWorkerRecordsSuccessfulReportAndActorWithoutServletRequest() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        Csrf csrf = csrf(administrator);
+        MvcResult created = mvc.perform(post("/api/v1/reports/quality/schedules")
+                        .cookie(administrator.sessionCookie(), csrf.cookie()).header(csrf.headerName(), csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"name":"定时质量报告验收 后台线程","projectIds":["%s"],
+                                "cronExpression":"0 0 0 1 1 ? 2099","timezone":"Asia/Shanghai","periodDays":7,"enabled":true}
+                                """.formatted(projectId)))
+                .andExpect(status().isOk()).andReturn();
+        String scheduleId = json(created).at("/data/id").asText();
+        String actor = json(created).at("/data/createdBy").asText();
+        scheduler.triggerJob(new org.quartz.JobKey(scheduleId, "testhub-quality-report"));
+        JsonNode runs = objectMapper.createArrayNode();
+        long deadline = System.nanoTime() + java.time.Duration.ofSeconds(10).toNanos();
+        while (System.nanoTime() < deadline) {
+            runs = json(mvc.perform(get("/api/v1/reports/quality/schedules/{scheduleId}/runs", scheduleId)
+                    .cookie(administrator.sessionCookie())).andExpect(status().isOk()).andReturn()).path("data");
+            if (!runs.isEmpty() && !runs.get(0).path("status").asText().equals("RUNNING")) break;
+            Thread.sleep(50);
+        }
+        assertEquals("SUCCEEDED", runs.path(0).path("status").asText(), runs.toString());
+        var audit = jdbc.sql("SELECT user_id, request_id, client_ip FROM audit_log WHERE resource_id = :id "
+                        + "AND action = 'QUALITY_REPORT_SCHEDULE_TRIGGERED'")
+                .param("id", runs.path(0).path("id").asText()).query((rs, row) -> new String[] {
+                        rs.getString("user_id"), rs.getString("request_id"), rs.getString("client_ip") }).single();
+        assertEquals(actor, audit[0]);
+        assertEquals("system", audit[1]);
+        assertEquals(null, audit[2]);
     }
 
     @Test

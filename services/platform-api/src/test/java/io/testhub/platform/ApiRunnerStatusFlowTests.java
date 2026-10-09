@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -27,18 +27,17 @@ class ApiRunnerStatusFlowTests {
     private static final String HEARTBEAT = "testhub:runner:api:heartbeat:v1:" + RUNNER_ID;
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
 
     @AfterEach
     void clean() {
-        redis.delete(HEARTBEAT);
-        redis.opsForSet().remove(MEMBERS, RUNNER_ID);
+        registry.delete(HEARTBEAT);
+        registry.remove(MEMBERS, RUNNER_ID);
     }
 
     @Test
     void exposesOnlyValidOnlineApiRunnerHeartbeatsToAuthorizedProjectMembers() throws Exception {
-        redis.opsForSet().add(MEMBERS, RUNNER_ID);
-        redis.opsForValue().set(HEARTBEAT, objectMapper.writeValueAsString(Map.of(
+        registry.publish(MEMBERS, HEARTBEAT, RUNNER_ID, objectMapper.writeValueAsString(Map.of(
                 "runnerId", RUNNER_ID, "runnerType", "api", "protocolVersion", "1", "runnerVersion", "0.1.0-test",
                 "executionEnabled", false, "startedAt", "2026-07-14T08:00:00Z", "heartbeatAt", "2026-07-14T08:00:10Z"
         )), Duration.ofSeconds(60));

@@ -11,7 +11,7 @@ import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RuntimeStreams;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,19 +20,19 @@ import org.springframework.web.server.ResponseStatusException;
 public class PerformanceRunnerEventConsumer {
     private static final Logger log = LoggerFactory.getLogger(PerformanceRunnerEventConsumer.class);
     private static final String CONSUMER = "platform-performance";
-    private final StringRedisTemplate redis;
+    private final RuntimeStreams streams;
     private final PerformanceTestExecutionService executions;
     private volatile boolean groupReady;
 
-    public PerformanceRunnerEventConsumer(StringRedisTemplate redis, PerformanceTestExecutionService executions) {
-        this.redis = redis;
+    public PerformanceRunnerEventConsumer(RuntimeStreams streams, PerformanceTestExecutionService executions) {
+        this.streams = streams;
         this.executions = executions;
     }
 
     @Scheduled(fixedDelayString = "${testhub.performance-runner.events.poll-interval-ms:500}")
     public void consume() {
         ensureGroup();
-        List<MapRecord<String, Object, Object>> records = redis.opsForStream().read(
+        List<MapRecord<String, Object, Object>> records = streams.read(
                 Consumer.from(PerformanceRunnerProtocol.EVENT_GROUP, CONSUMER), StreamReadOptions.empty().count(20),
                 StreamOffset.create(PerformanceRunnerProtocol.EVENT_STREAM, ReadOffset.lastConsumed()));
         if (records == null) return;
@@ -61,19 +61,19 @@ public class PerformanceRunnerEventConsumer {
     }
 
     private void acknowledge(MapRecord<String, Object, Object> record) {
-        redis.opsForStream().acknowledge(PerformanceRunnerProtocol.EVENT_GROUP, record);
+        streams.acknowledge(PerformanceRunnerProtocol.EVENT_GROUP, record);
     }
 
     private synchronized void ensureGroup() {
         if (groupReady) return;
         try {
-            redis.opsForStream().createGroup(PerformanceRunnerProtocol.EVENT_STREAM, ReadOffset.latest(), PerformanceRunnerProtocol.EVENT_GROUP);
+            streams.createGroup(PerformanceRunnerProtocol.EVENT_STREAM, ReadOffset.latest(), PerformanceRunnerProtocol.EVENT_GROUP);
         } catch (Exception firstAttempt) {
             if (!contains(firstAttempt, "BUSYGROUP")) {
-                redis.opsForStream().add(StreamRecords.mapBacked(Map.of("bootstrap", "1"))
+                streams.add(StreamRecords.mapBacked(Map.of("bootstrap", "1"))
                         .withStreamKey(PerformanceRunnerProtocol.EVENT_STREAM));
                 try {
-                    redis.opsForStream().createGroup(PerformanceRunnerProtocol.EVENT_STREAM, ReadOffset.latest(), PerformanceRunnerProtocol.EVENT_GROUP);
+                    streams.createGroup(PerformanceRunnerProtocol.EVENT_STREAM, ReadOffset.latest(), PerformanceRunnerProtocol.EVENT_GROUP);
                 } catch (Exception secondAttempt) {
                     if (!contains(secondAttempt, "BUSYGROUP")) throw secondAttempt;
                 }

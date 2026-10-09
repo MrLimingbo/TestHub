@@ -175,7 +175,7 @@ export function prepareDesktopHttpRequest(
     timeoutMs: input.timeoutMs ?? 10_000,
     environmentCode: input.environmentCode ?? null,
     auth: { type: 'NONE', placement: 'HEADER' },
-    protocol: { type: 'HTTP' },
+    protocol: { type: protocolType },
   }
 }
 

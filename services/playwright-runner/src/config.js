@@ -1,7 +1,9 @@
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 const DEFAULTS = {
   host: 'localhost', port: 6380, password: 'testhub_redis_password', runnerId: 'playwright-runner-local',
   runnerVersion: '0.1.0-dev', heartbeatIntervalSeconds: 10, heartbeatTtlSeconds: 30,
-  heartbeatSigningKey: 'testhub-ui-automation-runner-local-development-key-2026', workDirectory: '/tmp/testhub-playwright-runner',
+  heartbeatSigningKey: 'testhub-ui-automation-runner-local-development-key-2026', workDirectory: process.platform === 'win32' ? join(tmpdir(), 'testhub-playwright-runner') : '/tmp/testhub-playwright-runner',
   maxConcurrentTasks: 1, maxArtifactBytes: 25 * 1024 * 1024,
 }
 
@@ -39,6 +41,11 @@ function redisUrl(env) {
   const port = integer(env.TESTHUB_REDIS_PORT ?? DEFAULTS.port, 'TESTHUB_REDIS_PORT', 1, 65535)
   return `redis://:${encodeURIComponent(env.TESTHUB_REDIS_PASSWORD ?? DEFAULTS.password)}@${env.TESTHUB_REDIS_HOST ?? DEFAULTS.host}:${port}/0`
 }
+function workDirectory(source) {
+  if (typeof source !== 'string' || !source.length || source.length > 2048 || [...source].some(character => character.charCodeAt(0) < 32))
+    throw new Error('RUNNER_WORK_DIRECTORY 格式不合法')
+  return source
+}
 export function loadConfig(env = process.env) {
   const heartbeatIntervalSeconds = integer(env.RUNNER_HEARTBEAT_INTERVAL_SECONDS ?? DEFAULTS.heartbeatIntervalSeconds, 'RUNNER_HEARTBEAT_INTERVAL_SECONDS', 2, 60)
   const heartbeatTtlSeconds = integer(env.RUNNER_HEARTBEAT_TTL_SECONDS ?? DEFAULTS.heartbeatTtlSeconds, 'RUNNER_HEARTBEAT_TTL_SECONDS', 6, 180)
@@ -55,7 +62,7 @@ export function loadConfig(env = process.env) {
     runnerVersion: string(env.RUNNER_VERSION ?? DEFAULTS.runnerVersion, 'RUNNER_VERSION', /^[A-Za-z0-9._+-]{1,64}$/),
     maxConcurrentTasks: integer(env.RUNNER_MAX_CONCURRENT_TASKS ?? DEFAULTS.maxConcurrentTasks, 'RUNNER_MAX_CONCURRENT_TASKS', 1, 2),
     maxArtifactBytes: integer(env.RUNNER_MAX_ARTIFACT_BYTES ?? DEFAULTS.maxArtifactBytes, 'RUNNER_MAX_ARTIFACT_BYTES', 1024, 25 * 1024 * 1024),
-    workDirectory: string(env.RUNNER_WORK_DIRECTORY ?? DEFAULTS.workDirectory, 'RUNNER_WORK_DIRECTORY', /^[/A-Za-z0-9_.-]{1,512}$/),
+    workDirectory: workDirectory(env.RUNNER_WORK_DIRECTORY ?? DEFAULTS.workDirectory),
   })
 }
 export function redactRedisUrl(value) { const parsed = new URL(value); return `${parsed.protocol}//${parsed.hostname}${parsed.port ? `:${parsed.port}` : ''}${parsed.pathname}` }

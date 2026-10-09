@@ -75,9 +75,10 @@ public class GrpcDebugService {
     private final SecretCipher cipher;
     private final ObjectMapper json;
     private final GrpcDescriptorService descriptors;
+    private final DesktopApiDebugTargetPolicy desktopTargets;
 
     public GrpcDebugService(GrpcDebugTransport transport, ApiDebugHistoryRepository history, AccessService access, AuditService audit,
-                            ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json, GrpcDescriptorService descriptors) {
+                            ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json, GrpcDescriptorService descriptors, DesktopApiDebugTargetPolicy desktopTargets) {
         this.transport = transport;
         this.history = history;
         this.access = access;
@@ -86,6 +87,7 @@ public class GrpcDebugService {
         this.cipher = cipher;
         this.json = json;
         this.descriptors = descriptors;
+        this.desktopTargets = desktopTargets;
     }
 
     public GrpcResult unary(AuthenticatedPrincipal principal, String projectId, UnaryRequest input) {
@@ -530,7 +532,7 @@ public class GrpcDebugService {
         if (input == null) throw rejected("gRPC 客户端流请求不能为空");
         String environmentCode = normalizeEnvironment(input.environmentCode());
         ResolutionContext variables = variables(projectId, environmentCode);
-        Target target = publicTarget(variables.resolve(input.endpoint()));
+        Target target = publicTarget(variables.resolve(input.endpoint()), Boolean.TRUE.equals(input.tls()));
         List<GrpcDebugTransport.MetadataEntry> metadata = resolveMetadata(input.metadata(), variables);
         AuthApplied auth = applyAuth(metadata, input.auth(), variables);
         int timeoutMs = input.timeoutMs() == null ? 30_000 : input.timeoutMs();
@@ -547,7 +549,7 @@ public class GrpcDebugService {
         if (input == null) throw rejected("gRPC 双向流请求不能为空");
         String environmentCode = normalizeEnvironment(input.environmentCode());
         ResolutionContext variables = variables(projectId, environmentCode);
-        Target target = publicTarget(variables.resolve(input.endpoint()));
+        Target target = publicTarget(variables.resolve(input.endpoint()), Boolean.TRUE.equals(input.tls()));
         List<GrpcDebugTransport.MetadataEntry> metadata = resolveMetadata(input.metadata(), variables);
         AuthApplied auth = applyAuth(metadata, input.auth(), variables);
         int timeoutMs = input.timeoutMs() == null ? 30_000 : input.timeoutMs();
@@ -564,7 +566,7 @@ public class GrpcDebugService {
         if (input == null) throw rejected("gRPC 发现请求不能为空");
         String environmentCode = normalizeEnvironment(input.environmentCode());
         ResolutionContext variables = variables(projectId, environmentCode);
-        Target target = publicTarget(variables.resolve(input.endpoint()));
+        Target target = publicTarget(variables.resolve(input.endpoint()), Boolean.TRUE.equals(input.tls()));
         List<GrpcDebugTransport.MetadataEntry> metadata = resolveMetadata(input.metadata(), variables);
         AuthApplied auth = applyAuth(metadata, input.auth(), variables);
         int timeoutMs = input.timeoutMs() == null ? 10_000 : input.timeoutMs();
@@ -690,7 +692,7 @@ public class GrpcDebugService {
         }
     }
 
-    private Target publicTarget(String value) {
+    private Target publicTarget(String value, boolean tls) {
         if (value == null || value.isBlank() || value.length() > 512) throw rejected("gRPC 目标不能为空且不能超过 512 字符");
         if (value.contains("://")) throw rejected("gRPC 目标应使用主机:端口格式");
         URI target;
@@ -699,14 +701,15 @@ public class GrpcDebugService {
         } catch (IllegalArgumentException exception) {
             throw rejected("gRPC 目标格式不合法");
         }
-        if (target.getHost() == null || target.getPort() < 1 || target.getUserInfo() != null || target.getRawQuery() != null
+        if (target.getHost() == null || target.getPort() < 1 || target.getPort() > 65535 || target.getUserInfo() != null || target.getRawQuery() != null
                 || target.getRawFragment() != null || (target.getRawPath() != null && !target.getRawPath().isBlank())) {
             throw rejected("gRPC 目标应使用主机:端口格式");
         }
         try {
             InetAddress[] addresses = InetAddress.getAllByName(target.getHost());
-            if (addresses.length == 0 || Arrays.stream(addresses).anyMatch(this::blockedAddress)) {
-                throw rejected("不允许访问内网、回环或保留地址");
+            if (addresses.length == 0 || (Arrays.stream(addresses).anyMatch(this::blockedAddress)
+                    && !desktopTargets.permits(target, tls, addresses))) {
+                throw rejected("目标未获允许：本地工作区请在本地执行设置中授权精确 HTTP(S) 目标（TLS 对应 HTTPS）；在线服务不允许内网或回环目标");
             }
         } catch (UnknownHostException exception) {
             throw rejected("无法解析 gRPC 主机");

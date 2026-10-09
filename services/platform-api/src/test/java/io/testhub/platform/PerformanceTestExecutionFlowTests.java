@@ -29,7 +29,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -43,12 +43,12 @@ class PerformanceTestExecutionFlowTests {
     @Autowired private JdbcClient jdbc;
     @Autowired private PerformanceTestExecutionService executions;
     @Autowired private PerformanceRunnerRuntimeConfigurationService runtime;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
 
     @AfterEach
     void clean() {
-        redis.delete("testhub:runner:jmeter:heartbeat:v1:" + RUNNER_ID);
-        redis.opsForSet().remove("testhub:runner:jmeter:members:v1", RUNNER_ID);
+        registry.delete("testhub:runner:jmeter:heartbeat:v1:" + RUNNER_ID);
+        registry.remove("testhub:runner:jmeter:members:v1", RUNNER_ID);
         jdbc.sql("DELETE FROM performance_test_execution WHERE plan_name LIKE '压测执行验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_thread_group WHERE name LIKE '压测执行验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_plan WHERE name LIKE '压测执行验收 %'").update();
@@ -96,7 +96,8 @@ class PerformanceTestExecutionFlowTests {
 
         mvc.perform(get("/api/v1/projects/{projectId}/performance/executions/{executionId}/logs", projectId, executionId)
                         .cookie(administrator.sessionCookie()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].code").value("MANIFEST_FROZEN"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].code").value("MANIFEST_FROZEN"))
+                .andExpect(jsonPath("$.data[1].code").value("QUEUED"));
 
         executions.applyRunnerEvent(new PerformanceRunnerProtocol.PerformanceRunnerEvent(taskId, executionId,
                 "jmeter-runner-test", "ACCEPTED", "TASK_ACCEPTED", "Task accepted.", Instant.now()));
@@ -220,8 +221,7 @@ class PerformanceTestExecutionFlowTests {
         heartbeat.put("trustVersion", "1");
         heartbeat.put("signature", hmac(String.join("\n", runnerId, "jmeter", "1", "0.1.0-test", "true",
                 startedAt.toString(), heartbeatAt.toString())));
-        redis.opsForSet().add("testhub:runner:jmeter:members:v1", runnerId);
-        redis.opsForValue().set("testhub:runner:jmeter:heartbeat:v1:" + runnerId, objectMapper.writeValueAsString(heartbeat), Duration.ofMinutes(1));
+        registry.publish("testhub:runner:jmeter:members:v1", "testhub:runner:jmeter:heartbeat:v1:" + runnerId, runnerId, objectMapper.writeValueAsString(heartbeat), Duration.ofMinutes(1));
     }
 
     private String hmac(String payload) throws Exception {

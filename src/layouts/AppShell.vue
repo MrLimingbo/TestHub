@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
+import { isLocalDesktop, connectAccountService, openLocalExecutionSettings, openLocalBackup, isAccountDesktop, openAccountTransfer } from '@/utils/desktopWorkspace'
+const localWorkspace = isLocalDesktop()
 
 const route = useRoute()
 const router = useRouter()
@@ -41,7 +43,7 @@ const logout = async () => { await session.signOut(); await router.push('/login'
     <aside class="sidebar">
       <div class="brand" @click="router.push('/dashboard')">
         <div class="brand-mark">T</div>
-        <div v-if="!collapsed" class="brand-copy"><strong>TestHub</strong><span>Quality Cloud</span></div>
+        <div v-if="!collapsed" class="brand-copy"><strong>TestHub</strong><span>{{ localWorkspace ? '本地工作区' : 'Quality Cloud' }}</span></div>
       </div>
       <nav class="side-nav" aria-label="主导航">
         <section v-for="section in sections" :key="section.label">
@@ -66,7 +68,7 @@ const logout = async () => { await session.signOut(); await router.push('/login'
           <a-badge :count="3" dot><a-button shape="circle"><icon-notification /></a-button></a-badge>
           <a-dropdown trigger="click">
             <button class="user-chip"><a-avatar :size="30">{{ session.profile?.displayName.slice(0, 1) ?? '用' }}</a-avatar><span>{{ session.profile?.displayName ?? '当前用户' }}</span><icon-down /></button>
-            <template #content><a-doption>个人中心</a-doption><a-doption @click="logout">退出登录</a-doption></template>
+            <template #content><a-doption>个人中心</a-doption><a-doption v-if="isAccountDesktop()" @click="openAccountTransfer">本地资料迁入账号</a-doption><a-doption v-if="localWorkspace" @click="openLocalBackup">本地备份与恢复</a-doption><a-doption v-if="localWorkspace" @click="openLocalExecutionSettings">本地执行设置</a-doption><a-doption v-if="localWorkspace" @click="connectAccountService">连接账号服务</a-doption><a-doption v-else @click="logout">退出登录</a-doption></template>
           </a-dropdown>
         </div>
       </header>

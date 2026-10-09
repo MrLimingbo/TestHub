@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 任务登记资料迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>任务登记资料迁移</h1><p id="account" class="description">正在读取账号与项目…</p>
+  <form id="task-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required></select>
+    <label for="target">账号目标项目</label><select id="target" required></select>
+    <p class="description">复制当前项目的手工任务登记、类型、名称和进度。成功、失败和取消状态保留；排队中与执行中一律转为取消，来源状态、版本及时间作为只读摘要保存。</p>
+    <p class="hint">目标生成新标识，由当前账号拥有；不会启动测试或创建执行请求。同名登记会新增，保留目标已有登记。本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">本入口只处理任务中心登记。各测试模块的真实执行、报告、工件与定时规则仍按各模块说明处理。确认前核对目标账号、服务和项目。</p>
+    <p class="hint">最多 1000 条任务登记、32 MiB；预览有效期 10 分钟，账号或服务变化须重新预览。</p>
+    <p id="preview" class="description" role="status" aria-live="polite"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传任务登记资料</button>
+  </form>
+</main><script src="task-transfer.js"></script></body>
+</html>

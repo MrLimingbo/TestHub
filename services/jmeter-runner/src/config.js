@@ -1,8 +1,10 @@
+import { isAbsolute, join } from 'node:path'
+import { tmpdir } from 'node:os'
 const DEFAULTS = {
   host: 'localhost', port: 6380, password: 'testhub_redis_password', runnerId: 'jmeter-runner-local',
   runnerVersion: '0.1.0-dev', heartbeatIntervalSeconds: 10, heartbeatTtlSeconds: 30,
   heartbeatSigningKey: 'testhub-performance-runner-local-development-key-2026',
-  jmeterBin: 'jmeter', workDirectory: '/tmp/testhub-jmeter-runner', maxArchiveBytes: 20 * 1024 * 1024,
+  jmeterBin: 'jmeter', workDirectory: process.platform === 'win32' ? join(tmpdir(), 'testhub-jmeter-runner') : '/tmp/testhub-jmeter-runner', maxArchiveBytes: 20 * 1024 * 1024,
   maxConcurrentTasks: 1, taskClaimIdleSeconds: 45,
 }
 
@@ -55,6 +57,12 @@ function allowedOrigins(value) {
   return Object.freeze(origins)
 }
 
+function filePath(source, name) {
+  if (typeof source !== 'string' || !source.length || source.length > 2048 || [...source].some(character => character.charCodeAt(0) < 32))
+    throw new Error(`${name} 格式不合法`)
+  return source
+}
+
 export function loadConfig(env = process.env) {
   const heartbeatIntervalSeconds = integer(env.RUNNER_HEARTBEAT_INTERVAL_SECONDS ?? DEFAULTS.heartbeatIntervalSeconds,
     'RUNNER_HEARTBEAT_INTERVAL_SECONDS', 2, 60)
@@ -75,14 +83,21 @@ export function loadConfig(env = process.env) {
   if (jmeterExecutionEnabled && (!runtimeControlPlaneUrl || allowedTargetOrigins.length === 0)) {
     throw new Error('启用 JMeter 执行时必须配置 TESTHUB_CONTROL_PLANE_URL 与 RUNNER_ALLOWED_TARGET_ORIGINS')
   }
+  const javaBin = env.JMETER_JAVA_BIN ? filePath(env.JMETER_JAVA_BIN, 'JMETER_JAVA_BIN') : undefined
+  const jmeterHome = env.JMETER_HOME ? filePath(env.JMETER_HOME, 'JMETER_HOME') : undefined
+  if (javaBin && (!isAbsolute(javaBin) || !jmeterHome || !isAbsolute(jmeterHome)))
+    throw new Error('JMETER_JAVA_BIN 与 JMETER_HOME 必须是绝对路径')
+  const watchdogJar = env.JMETER_WATCHDOG_JAR ? filePath(env.JMETER_WATCHDOG_JAR, 'JMETER_WATCHDOG_JAR') : undefined
+  if (watchdogJar && (!javaBin || !isAbsolute(watchdogJar))) throw new Error('JMETER_WATCHDOG_JAR 需要绝对路径和内置 Java')
   return Object.freeze({
+    watchdogJar, javaBin, jmeterHome, followRedirects: !env.TESTHUB_DESKTOP_BROKER_URL,
     redisUrl: redisUrl(env), runnerId: value(env.RUNNER_ID ?? DEFAULTS.runnerId, 'RUNNER_ID', /^[A-Za-z0-9._-]{1,64}$/),
     runnerVersion: value(env.RUNNER_VERSION ?? DEFAULTS.runnerVersion, 'RUNNER_VERSION', /^[A-Za-z0-9._+-]{1,64}$/),
     heartbeatIntervalSeconds, heartbeatTtlSeconds, heartbeatSigningKey, jmeterExecutionEnabled,
     controlPlaneUrl: runtimeControlPlaneUrl, allowedTargetOrigins,
     maxArchiveBytes, maxConcurrentTasks, taskClaimIdleSeconds,
-    jmeterBin: value(env.JMETER_BIN ?? DEFAULTS.jmeterBin, 'JMETER_BIN', /^[A-Za-z0-9_./-]{1,512}$/),
-    workDirectory: value(env.RUNNER_WORK_DIRECTORY ?? DEFAULTS.workDirectory, 'RUNNER_WORK_DIRECTORY', /^[/A-Za-z0-9_.-]{1,512}$/),
+    jmeterBin: filePath(env.JMETER_BIN ?? DEFAULTS.jmeterBin, 'JMETER_BIN'),
+    workDirectory: filePath(env.RUNNER_WORK_DIRECTORY ?? DEFAULTS.workDirectory, 'RUNNER_WORK_DIRECTORY'),
   })
 }
 

@@ -41,6 +41,7 @@ public class NotificationTemplateService {
     @Transactional
     public NotificationTemplate create(AuthenticatedPrincipal principal, String projectId, TemplateInput input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        templates.lockProject(projectId);
         validate(input);
         TemplateDelivery delivery = delivery(input, null, true);
         String id = UlidCreator.getUlid().toString();
@@ -55,6 +56,7 @@ public class NotificationTemplateService {
     @Transactional
     public NotificationTemplate update(AuthenticatedPrincipal principal, String projectId, String templateId, TemplateInput input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        templates.lockProject(projectId);
         validate(input);
         NotificationTemplateRepository.StoredNotificationTemplate current = templates.findStored(templateId, projectId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "通知模板不存在"));
@@ -71,6 +73,7 @@ public class NotificationTemplateService {
     @Transactional
     public void delete(AuthenticatedPrincipal principal, String projectId, String templateId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        templates.lockProject(projectId);
         templates.delete(templateId, projectId);
         audit.record(principal, project.organizationId(), projectId, "NOTIFICATION_TEMPLATE_DELETED",
                 "NOTIFICATION_TEMPLATE", templateId, java.util.Map.of());

@@ -27,6 +27,19 @@ class AuthenticationFlowTests {
     private ObjectMapper objectMapper;
 
     @Test
+    void registrationRemainsDisabledByDefault() throws Exception {
+        mvc.perform(get("/api/v1/auth/capabilities")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.registrationEnabled").value(false));
+        MvcResult csrfResult = mvc.perform(get("/api/v1/auth/csrf")).andReturn();
+        JsonNode csrf = objectMapper.readTree(csrfResult.getResponse().getContentAsString()).path("data");
+        mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON)
+                .cookie(csrfResult.getResponse().getCookie("XSRF-TOKEN"))
+                .header(csrf.path("headerName").asText(), csrf.path("token").asText())
+                .content("{\"account\":\"closed-registration\",\"email\":\"closed@example.test\",\"password\":\"Registration2026!\"}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void localAccountCanLoginReadProfileAndLogout() throws Exception {
         MvcResult csrfResult = mvc.perform(get("/api/v1/auth/csrf"))
                 .andExpect(status().isOk())

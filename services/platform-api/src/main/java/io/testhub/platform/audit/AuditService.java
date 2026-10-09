@@ -6,22 +6,23 @@ import io.testhub.platform.shared.api.RequestIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class AuditService {
     private final AuditRepository repository;
-    private final ObjectProvider<HttpServletRequest> requestProvider;
 
-    public AuditService(AuditRepository repository, ObjectProvider<HttpServletRequest> requestProvider) {
+    public AuditService(AuditRepository repository) {
         this.repository = repository;
-        this.requestProvider = requestProvider;
     }
 
     public void record(AuthenticatedPrincipal principal, String organizationId, String projectId, String action,
                        String resourceType, String resourceId, Map<String, Object> detail) {
-        HttpServletRequest request = requestProvider.getIfAvailable();
+        // Quartz threads have an actor but no servlet request scope.
+        HttpServletRequest request = RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes
+                ? attributes.getRequest() : null;
         String requestId = request == null ? "system" : (String) request.getAttribute(RequestIdFilter.REQUEST_ID_ATTRIBUTE);
         String clientIp = request == null ? null : request.getRemoteAddr();
         repository.insert(new AuditLogEntry(UlidCreator.getUlid().toString(), principal.userId(), organizationId, projectId,

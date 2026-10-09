@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.ulid.UlidCreator;
 import java.sql.Timestamp;
+import io.testhub.platform.shared.persistence.PendingExecutionCancellation;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,10 +19,12 @@ public class ApiAutomationExecutionRepository {
     private static final String TERMINAL_STATUSES = "'SUCCEEDED','FAILED','CANCELLED','REJECTED','TIMED_OUT'";
     private static final String ACTIVE_STATUSES = "'QUEUED','ACCEPTED','RUNNING','CANCELLING'";
     private final JdbcClient jdbc;
+    private final PendingExecutionCancellation cancellation;
     private final ObjectMapper json;
 
-    public ApiAutomationExecutionRepository(JdbcClient jdbc, ObjectMapper json) {
+    public ApiAutomationExecutionRepository(JdbcClient jdbc, ObjectMapper json, PendingExecutionCancellation cancellation) {
         this.jdbc = jdbc;
+        this.cancellation = cancellation;
         this.json = json;
     }
 
@@ -178,13 +181,13 @@ public class ApiAutomationExecutionRepository {
     }
 
     public void appendControlPlaneLog(ApiAutomationExecution execution, String code, String message, Instant occurredAt) {
-        insertExecutionLog(UlidCreator.getUlid().toString(), execution, "CONTROL_PLANE", null, "INFO", code, message,
+        insertExecutionLog(UlidCreator.getMonotonicUlid().toString(), execution, "CONTROL_PLANE", null, "INFO", code, message,
                 null, occurredAt);
     }
 
     public void appendRunnerLog(ApiAutomationExecution execution, ApiRunnerProtocol.ApiRunnerLog log,
                                 String streamRecordId) {
-        insertExecutionLog(UlidCreator.getUlid().toString(), execution, "RUNNER", log.runnerId(), log.level(), log.code(),
+        insertExecutionLog(UlidCreator.getMonotonicUlid().toString(), execution, "RUNNER", log.runnerId(), log.level(), log.code(),
                 log.message(), streamRecordId, log.occurredAt());
     }
 
@@ -347,16 +350,7 @@ public class ApiAutomationExecutionRepository {
     }
 
     public int cancelBeforeDispatch(String projectId, String executionId) {
-        return jdbc.sql("""
-                UPDATE api_automation_execution execution
-                JOIN api_runner_outbox outbox ON outbox.execution_id = execution.id
-                    AND outbox.message_type = 'TASK' AND outbox.status = 'PENDING'
-                SET execution.status = 'CANCELLED', execution.status_code = 'CANCELLED_BEFORE_DISPATCH',
-                    execution.status_message = '任务在投递给 Runner 前已取消。', execution.finished_at = CURRENT_TIMESTAMP(3),
-                    execution.updated_at = CURRENT_TIMESTAMP(3), outbox.status = 'CANCELLED', outbox.locked_at = NULL,
-                    outbox.last_error = NULL, outbox.updated_at = CURRENT_TIMESTAMP(3)
-                WHERE execution.project_id = :projectId AND execution.id = :executionId AND execution.status = 'QUEUED'
-                """).param("projectId", projectId).param("executionId", executionId).update();
+        return cancellation.cancel(PendingExecutionCancellation.Engine.API, projectId, executionId);
     }
 
     public int markCancelling(String projectId, String executionId) {

@@ -27,6 +27,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -53,7 +56,7 @@ public class UiAutomationScheduleService {
         return schedules.findByProject(projectId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationSchedule create(AuthenticatedPrincipal principal, String projectId, ScheduleInput input) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationScheduleRepository.ScheduleInput payload = payload(projectId, input);
@@ -66,7 +69,7 @@ public class UiAutomationScheduleService {
         return schedule;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationSchedule update(AuthenticatedPrincipal principal, String projectId, String scheduleId, ScheduleInput input) {
         ProjectSummary project = writable(principal, projectId);
         owned(projectId, scheduleId);
@@ -80,17 +83,17 @@ public class UiAutomationScheduleService {
         return schedule;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(AuthenticatedPrincipal principal, String projectId, String scheduleId) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationSchedule schedule = owned(projectId, scheduleId);
-        removeQuartz(schedule.id());
         schedules.delete(projectId, scheduleId);
+        afterCommit(() -> syncCurrent(scheduleId));
         audit.record(principal, project.organizationId(), projectId, "UI_AUTOMATION_SCHEDULE_DELETED", "UI_AUTOMATION_SCHEDULE", scheduleId,
                 Map.of("scenarioId", schedule.scenarioId()));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationExecution runNow(AuthenticatedPrincipal principal, String projectId, String scheduleId) {
         writable(principal, projectId);
         UiAutomationSchedule schedule = owned(projectId, scheduleId);
@@ -101,9 +104,12 @@ public class UiAutomationScheduleService {
         return execution;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void executeQuartzJob(String scheduleId) {
         UiAutomationSchedule schedule = schedules.findById(scheduleId).orElse(null);
+        if (schedule == null) return;
+        automation.lockProject(schedule.projectId());
+        schedule = schedules.findById(scheduleId).orElse(null);
         if (schedule == null || !schedule.enabled()) return;
         UiAutomationExecution execution = executions.executeFromSchedule(schedule);
         audit.recordSystem(schedule.organizationId(), schedule.projectId(), "UI_AUTOMATION_SCHEDULE_TRIGGERED", "UI_AUTOMATION_EXECUTION",
@@ -123,6 +129,11 @@ public class UiAutomationScheduleService {
         automation.findScenario(projectId, scenarioId).orElseThrow(() -> notFound("Web UI 场景不存在"));
         String functionalPlanId = optionalId(input.functionalPlanId());
         planName(projectId, functionalPlanId);
+        return normalizeSyncFields(new ScheduleInput(scenarioId, functionalPlanId, input.name(), input.cronExpression(), input.timezone(), input.timeoutSeconds(), input.maxRetryAttempts(), input.retryBackoffSeconds(), input.enabled()));
+    }
+
+    UiAutomationScheduleRepository.ScheduleInput normalizeSyncFields(ScheduleInput input) {
+        String scenarioId = input.scenarioId(), functionalPlanId = input.functionalPlanId();
         String cron = required(input.cronExpression(), "Cron 表达式", 160);
         if (!org.quartz.CronExpression.isValidExpression(cron)) throw rejected("Cron 表达式不合法（使用 Quartz 六或七段格式）");
         String timezone = required(input.timezone(), "时区", 64);
@@ -146,7 +157,20 @@ public class UiAutomationScheduleService {
         return schedule;
     }
 
-    private void sync(UiAutomationSchedule schedule) {
+    void refreshSyncedSchedule(String id) { afterCommit(() -> syncCurrent(id)); }
+
+    private void sync(UiAutomationSchedule schedule) { refreshSyncedSchedule(schedule.id()); }
+
+    private void afterCommit(Runnable operation) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) { operation.run(); return; }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override public void afterCommit() { operation.run(); }
+        });
+    }
+
+    private synchronized void syncCurrent(String id) {
+        UiAutomationSchedule schedule = schedules.findById(id).orElse(null);
+        if (schedule == null) { removeQuartz(id); return; }
         if (!schedule.enabled()) { removeQuartz(schedule.id()); return; }
         try {
             JobKey jobKey = jobKey(schedule.id());
@@ -163,7 +187,7 @@ public class UiAutomationScheduleService {
         try { if (scheduler.checkExists(jobKey(scheduleId))) scheduler.deleteJob(jobKey(scheduleId)); }
         catch (SchedulerException exception) { throw new IllegalStateException("无法从 Quartz 移除 Web UI 自动化定时计划", exception); }
     }
-    private ProjectSummary writable(AuthenticatedPrincipal principal, String projectId) { return access.requireProjectParameterWrite(principal, projectId, WRITERS); }
+    private ProjectSummary writable(AuthenticatedPrincipal principal, String projectId) { var project = access.requireProjectParameterWrite(principal, projectId, WRITERS); automation.lockProject(projectId); return project; }
     private String required(String value, String label, int max) { String result = value == null ? "" : value.trim(); if (result.isEmpty() || result.length() > max) throw rejected(label + "长度应在 1 到 " + max + " 字符之间"); return result; }
     private String optionalId(String value) { if (value == null || value.isBlank()) return null; String result = value.trim(); if (!result.matches("[0-9A-HJKMNP-TV-Z]{26}")) throw rejected("功能测试计划标识不合法"); return result; }
     private int bounded(Integer value, int fallback, int min, int max, String label) { int result = value == null ? fallback : value; if (result < min || result > max) throw rejected(label + "应在 " + min + " 到 " + max + " 之间"); return result; }

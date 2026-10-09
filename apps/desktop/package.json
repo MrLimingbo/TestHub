@@ -37,14 +37,33 @@
       "target": [
         "dmg"
       ],
-      "artifactName": "TestHub.${ext}"
+      "artifactName": "TestHub.${ext}",
+      "extraResources": [
+        {
+          "from": "../../.testhub/desktop-runtime",
+          "to": "local-runtime",
+          "filter": [
+            "darwin-arm64/**",
+            "darwin-x64/**"
+          ]
+        }
+      ]
     },
     "win": {
       "icon": "build/icon.ico",
       "target": [
         "nsis"
       ],
-      "artifactName": "TestHub.${ext}"
+      "artifactName": "TestHub.${ext}",
+      "extraResources": [
+        {
+          "from": "../../.testhub/desktop-runtime",
+          "to": "local-runtime",
+          "filter": [
+            "win32-x64/**"
+          ]
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,

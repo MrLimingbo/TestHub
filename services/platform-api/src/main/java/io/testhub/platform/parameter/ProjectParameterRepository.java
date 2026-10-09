@@ -14,6 +14,11 @@ public class ProjectParameterRepository {
         this.jdbc = jdbc;
     }
 
+    public void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id = :id FOR UPDATE").param("id", projectId)
+                .query(String.class).single();
+    }
+
     public List<ProjectParameter> findByProject(String projectId, String environmentCode) {
         return jdbc.sql("""
                 SELECT id, environment_code, parameter_key, parameter_value, secret, updated_by, updated_at

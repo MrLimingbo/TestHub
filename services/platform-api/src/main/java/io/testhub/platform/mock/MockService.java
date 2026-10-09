@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -34,6 +35,7 @@ public class MockService {
     private static final int MAX_SERVERS_PER_PROJECT = 20;
     private static final int MAX_RULES_PER_SERVER = 200;
     private static final int MAX_SHARES_PER_SERVER = 20;
+    private static final int MAX_SHARE_HISTORY_PER_SERVER = 200;
     private static final int MAX_PRIORITY = 1_000;
     private static final int MAX_REQUEST_BODY = 512 * 1024;
     private final MockRepository repository;
@@ -55,8 +57,10 @@ public class MockService {
         return repository.findServers(projectId);
     }
 
+    @Transactional
     public MockServer createServer(AuthenticatedPrincipal principal, String projectId, ServerInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         if (repository.countServers(projectId) >= MAX_SERVERS_PER_PROJECT) {
             throw conflict("每个项目最多创建 20 个 Mock 服务");
         }
@@ -69,8 +73,10 @@ public class MockService {
         return result;
     }
 
+    @Transactional
     public MockServer setServerEnabled(AuthenticatedPrincipal principal, String projectId, String serverId, boolean enabled) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         MockServer server = requireServer(projectId, serverId);
         if (server.enabled() == enabled) return server;
         repository.updateServerEnabled(projectId, serverId, enabled);
@@ -80,8 +86,10 @@ public class MockService {
         return result;
     }
 
+    @Transactional
     public MockServer setSmartExampleEnabled(AuthenticatedPrincipal principal, String projectId, String serverId, boolean enabled) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         MockServer server = requireServer(projectId, serverId);
         if (server.smartExampleEnabled() == enabled) return server;
         repository.updateSmartExampleEnabled(projectId, serverId, enabled);
@@ -103,11 +111,16 @@ public class MockService {
         return repository.findShares(projectId, serverId);
     }
 
+    @Transactional
     public MockShare createShare(AuthenticatedPrincipal principal, String projectId, String serverId, ShareInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         requireServer(projectId, serverId);
-        if (repository.countShares(serverId) >= MAX_SHARES_PER_SERVER) {
-            throw conflict("每个 Mock 服务最多创建 20 条分享链接");
+        if (repository.countActiveShares(serverId) >= MAX_SHARES_PER_SERVER) {
+            throw conflict("每个 Mock 服务最多保留 20 条有效分享链接");
+        }
+        if (repository.countShares(serverId) >= MAX_SHARE_HISTORY_PER_SERVER) {
+            throw conflict("每个 Mock 服务最多保留 200 条分享历史，请创建新服务");
         }
         if (input == null) throw rejected("分享链接参数不能为空");
         String name = required(input.name(), "分享名称", 120);
@@ -128,8 +141,10 @@ public class MockService {
         return result;
     }
 
+    @Transactional
     public MockShare revokeShare(AuthenticatedPrincipal principal, String projectId, String serverId, String shareId) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         MockShare share = requireShare(projectId, serverId, shareId);
         if (share.revokedAt() != null) return share;
         repository.revokeShare(projectId, serverId, shareId);
@@ -155,12 +170,42 @@ public class MockService {
         return repository.findRules(projectId, serverId);
     }
 
+    @Transactional
     public MockRule createRule(AuthenticatedPrincipal principal, String projectId, String serverId, RuleInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         requireServer(projectId, serverId);
         if (repository.countRules(serverId) >= MAX_RULES_PER_SERVER) {
             throw conflict("每个 Mock 服务最多创建 200 条规则");
         }
+        RuleInput normalized = normalizeRule(input);
+        String name = normalized.name(), method = normalized.httpMethod(), path = normalized.path();
+        int priority = normalized.priority(), responseStatus = normalized.responseStatus();
+        var requestQuery = normalized.requestQuery(); var requestHeaders = normalized.requestHeaders();
+        String requestBodyMatch = normalized.requestBodyMatch(), requestBody = normalized.requestBody(), body = normalized.responseBody();
+        var headers = normalized.responseHeaders();
+        String id = UlidCreator.getUlid().toString();
+        repository.insertRule(id, serverId, project.organizationId(), projectId, name, method, path, priority, mapJson(requestQuery),
+                mapJson(requestHeaders), requestBodyMatch, requestBody, responseStatus, mapJson(headers), body, principal.userId());
+        MockRule result = repository.findRules(projectId, serverId).stream().filter(rule -> rule.id().equals(id)).findFirst().orElseThrow();
+        audit.record(principal, project.organizationId(), projectId, "MOCK_RULE_CREATED", "MOCK_RULE", id,
+                Map.of("serverId", serverId, "name", name, "method", method, "path", path, "priority", priority,
+                        "bodyMatch", requestBodyMatch, "status", responseStatus));
+        return result;
+    }
+
+    @Transactional
+    public MockRule setRuleEnabled(AuthenticatedPrincipal principal, String projectId, String serverId, String ruleId, boolean enabled) {
+        var project=writeAccess(principal,projectId);repository.lockProject(projectId);requireServer(projectId,serverId);
+        var old=repository.findRules(projectId,serverId).stream().filter(r->r.id().equals(ruleId)).findFirst()
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Mock 规则不存在"));
+        if(old.enabled()==enabled) return old;
+        repository.updateRuleEnabled(projectId,serverId,ruleId,enabled);
+        audit.record(principal,project.organizationId(),projectId,"MOCK_RULE_ENABLED","MOCK_RULE",ruleId,Map.of("enabled",enabled));
+        return repository.findRules(projectId,serverId).stream().filter(r->r.id().equals(ruleId)).findFirst().orElseThrow();
+    }
+
+    RuleInput normalizeRule(RuleInput input) {
         if (input == null) throw rejected("Mock 规则不能为空");
         String name = required(input.name(), "规则名称", 160);
         String method = method(input.httpMethod());
@@ -176,14 +221,21 @@ public class MockService {
         String body = input.responseBody() == null ? "" : input.responseBody();
         if (body.length() > 512 * 1024) throw rejected("Mock 响应体不能超过 512 KB");
         Map<String, String> headers = responseHeaders(input.responseHeaders());
-        String id = UlidCreator.getUlid().toString();
-        repository.insertRule(id, serverId, project.organizationId(), projectId, name, method, path, priority, mapJson(requestQuery),
-                mapJson(requestHeaders), requestBodyMatch, requestBody, responseStatus, mapJson(headers), body, principal.userId());
-        MockRule result = repository.findRules(projectId, serverId).stream().filter(rule -> rule.id().equals(id)).findFirst().orElseThrow();
-        audit.record(principal, project.organizationId(), projectId, "MOCK_RULE_CREATED", "MOCK_RULE", id,
-                Map.of("serverId", serverId, "name", name, "method", method, "path", path, "priority", priority,
-                        "bodyMatch", requestBodyMatch, "status", responseStatus));
-        return result;
+        return new RuleInput(name, method, path, priority, requestQuery, requestHeaders, requestBodyMatch,
+                requestBody, responseStatus, headers, body);
+    }
+
+    @Transactional
+    public MockRule updateRule(AuthenticatedPrincipal principal, String projectId, String serverId, String ruleId, RuleInput input) {
+        var project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
+        requireServer(projectId, serverId);
+        var old = repository.findRules(projectId, serverId).stream().filter(r -> r.id().equals(ruleId)).findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mock 规则不存在"));
+        var normalized = normalizeRule(input);
+        repository.updateRuleDefinition(projectId, serverId, ruleId, normalized);
+        audit.record(principal, project.organizationId(), projectId, "MOCK_RULE_UPDATED", "MOCK_RULE", old.id(), Map.of("serverId",serverId));
+        return repository.findRules(projectId,serverId).stream().filter(r -> r.id().equals(ruleId)).findFirst().orElseThrow();
     }
 
     public Optional<MockRuntimeResponse> runtime(String publicKey, MockRuntimeRequest request) {

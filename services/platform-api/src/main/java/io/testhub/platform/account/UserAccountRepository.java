@@ -132,6 +132,22 @@ public class UserAccountRepository {
                 .optional();
     }
 
+    public List<AccountOption> findWorkspaceAccountOptions(String userId) {
+        return jdbc.sql("""
+                SELECT u.id, u.account, u.display_name, u.email
+                FROM user_account u
+                WHERE u.deleted_at IS NULL AND u.enabled = TRUE
+                  AND (u.id = :userId OR EXISTS (
+                      SELECT 1 FROM membership own
+                      JOIN membership colleague ON colleague.organization_id = own.organization_id
+                      WHERE own.user_id = :userId AND colleague.user_id = u.id
+                  ))
+                ORDER BY u.account
+                """).param("userId", userId)
+                .query((rs, rowNumber) -> new AccountOption(rs.getString("id"), rs.getString("account"),
+                        rs.getString("display_name"), rs.getString("email"))).list();
+    }
+
     public void update(String id, String account, String displayName, String email, String phone, boolean enabled) {
         jdbc.sql("""
                 UPDATE user_account

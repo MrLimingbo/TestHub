@@ -25,7 +25,7 @@ public class AuditRepository {
                     (id, user_id, organization_id, project_id, action, resource_type, resource_id, outcome,
                      request_id, client_ip, detail)
                 VALUES (:id, :userId, :organizationId, :projectId, :action, :resourceType, :resourceId, :outcome,
-                        :requestId, :clientIp, :detail)
+                        :requestId, :clientIp, CAST(:detail AS JSON))
                 """).param("id", entry.id()).param("userId", entry.userId()).param("organizationId", entry.organizationId())
                 .param("projectId", entry.projectId()).param("action", entry.action()).param("resourceType", entry.resourceType())
                 .param("resourceId", entry.resourceId()).param("outcome", entry.outcome()).param("requestId", entry.requestId())

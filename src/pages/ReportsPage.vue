@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Message } from '@arco-design/web-vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import DashboardTrendChart from '@/components/DashboardTrendChart.vue'
 import MetricGrid from '@/components/MetricGrid.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -64,6 +64,8 @@ const fromDate = ref(daysAgo(29))
 const toDate = ref(daysAgo(0))
 const report = ref<QualityReport | null>(null)
 const loading = ref(true)
+const savingSchedule = ref(false), reportError = ref(''), runsError = ref('')
+let reportRequest = 0, schedulesRequest = 0, runsRequest = 0, formRequest = 0, disposed = false
 const schedules = ref<QualityReportSchedule[]>([])
 const scheduleVisible = ref(false)
 const runsVisible = ref(false)
@@ -109,9 +111,9 @@ const healthColumns = [
 ]
 
 function daysAgo(days: number) {
-  const value = new Date()
-  value.setDate(value.getDate() - days)
-  return value.toISOString().slice(0, 10)
+  const parts = new Intl.DateTimeFormat('en', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date())
+  const part = (type: string) => Number(parts.find(item => item.type === type)!.value)
+  return new Date(Date.UTC(part('year'), part('month') - 1, part('day') - days)).toISOString().slice(0, 10)
 }
 function number(value: number) { return new Intl.NumberFormat('zh-CN').format(value) }
 function passRate(value: number | null) { return value == null ? '暂无结论' : `${value}% 通过` }
@@ -137,52 +139,66 @@ async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: 
   return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) })
 }
 async function loadReport() {
-  if (!context.value) return
-  if (fromDate.value > toDate.value) {
-    Message.warning('开始日期不能晚于结束日期')
+  if (!context.value || disposed) return
+  const request = ++reportRequest, query = queryString()
+  report.value = null; reportError.value = ''
+  if (!fromDate.value || !toDate.value || fromDate.value > toDate.value) {
+    loading.value = false; reportError.value = '请填写有效日期，开始日期不能晚于结束日期'
     return
   }
   loading.value = true
   try {
-    report.value = await read<QualityReport>(`/api/v1/reports/quality?${queryString()}`)
+    const value = await read<QualityReport>(`/api/v1/reports/quality?${query}`)
+    if (!disposed && request === reportRequest) report.value = value
   } catch (error) {
-    report.value = null
-    Message.error(error instanceof Error ? error.message : '无法读取质量报表')
+    if (!disposed && request === reportRequest) reportError.value = error instanceof Error ? error.message : '无法读取质量报表'
   } finally {
-    loading.value = false
+    if (!disposed && request === reportRequest) loading.value = false
   }
 }
 async function initialize() {
   try {
-    context.value = await read<Context>('/api/v1/access/context')
+    const value = await read<Context>('/api/v1/access/context')
+    if (disposed) return
+    context.value = value
     selectedProjectIds.value = projects.value.map((project) => project.id)
     await Promise.all([loadReport(), loadSchedules()])
   } catch (error) {
+    if (disposed) return
     loading.value = false
     Message.error(error instanceof Error ? error.message : '无法读取项目范围')
   }
 }
 async function loadSchedules() {
-  try { schedules.value = await read<QualityReportSchedule[]>('/api/v1/reports/quality/schedules') } catch (error) { Message.error(error instanceof Error ? error.message : '无法读取定时报告') }
+  const request = ++schedulesRequest
+  try { const value = await read<QualityReportSchedule[]>('/api/v1/reports/quality/schedules'); if (!disposed && request === schedulesRequest) schedules.value = value } catch (error) { if (!disposed && request === schedulesRequest) Message.error(error instanceof Error ? error.message : '无法读取定时报告') }
 }
 function createSchedule() {
+  formRequest++
   editingScheduleId.value = null
   scheduleForm.value = { name: '', projectIds: selectedProjectIds.value.length ? [...selectedProjectIds.value] : projects.value.map((project) => project.id), cronExpression: '0 0 9 ? * MON', timezone: 'Asia/Shanghai', periodDays: 7, enabled: true }
   scheduleVisible.value = true
 }
 function editSchedule(schedule: QualityReportSchedule) {
+  formRequest++
   editingScheduleId.value = schedule.id
   scheduleForm.value = { name: schedule.name, projectIds: [...schedule.projectIds], cronExpression: schedule.cronExpression, timezone: schedule.timezone, periodDays: schedule.periodDays, enabled: schedule.enabled }
   scheduleVisible.value = true
 }
+function closeSchedule() { formRequest++; scheduleVisible.value = false }
 async function saveSchedule() {
+  if (savingSchedule.value) return false
+  const request = formRequest, id = editingScheduleId.value
+  const input = { ...scheduleForm.value, projectIds: [...scheduleForm.value.projectIds] }
+  savingSchedule.value = true
   try {
-    const url = editingScheduleId.value ? `/api/v1/reports/quality/schedules/${editingScheduleId.value}` : '/api/v1/reports/quality/schedules'
-    await mutate<QualityReportSchedule>(url, editingScheduleId.value ? 'PUT' : 'POST', scheduleForm.value)
-    scheduleVisible.value = false
-    await loadSchedules()
-    Message.success(editingScheduleId.value ? '定时报告已更新' : '定时报告已创建')
-  } catch (error) { Message.error(error instanceof Error ? error.message : '保存定时报告失败') }
+    const url = id ? `/api/v1/reports/quality/schedules/${id}` : '/api/v1/reports/quality/schedules'
+    await mutate<QualityReportSchedule>(url, id ? 'PUT' : 'POST', input)
+    if (disposed || request !== formRequest) return false
+    scheduleVisible.value = false; await loadSchedules()
+    Message.success(id ? '定时报告已更新' : '定时报告已创建'); return true
+  } catch (error) { if (!disposed && request === formRequest) Message.error(error instanceof Error ? error.message : '保存定时报告失败'); return false }
+  finally { savingSchedule.value = false }
 }
 async function runSchedule(schedule: QualityReportSchedule) {
   try {
@@ -195,26 +211,33 @@ async function runSchedule(schedule: QualityReportSchedule) {
 async function removeSchedule(schedule: QualityReportSchedule) {
   try { await mutate<void>(`/api/v1/reports/quality/schedules/${schedule.id}`, 'DELETE'); await loadSchedules(); Message.success('定时报告已删除') } catch (error) { Message.error(error instanceof Error ? error.message : '删除失败') }
 }
+function closeRuns() { runsRequest++; runsVisible.value = false; selectedSchedule.value = null; scheduleRuns.value = []; runsError.value = '' }
 async function viewRuns(schedule: QualityReportSchedule) {
-  selectedSchedule.value = schedule
-  try { scheduleRuns.value = await read<QualityReportScheduleRun[]>(`/api/v1/reports/quality/schedules/${schedule.id}/runs`); runsVisible.value = true } catch (error) { Message.error(error instanceof Error ? error.message : '无法读取运行记录') }
+  const request = ++runsRequest
+  selectedSchedule.value = schedule; scheduleRuns.value = []; runsError.value = ''; runsVisible.value = true
+  try {
+    const value = await read<QualityReportScheduleRun[]>(`/api/v1/reports/quality/schedules/${schedule.id}/runs`)
+    if (!disposed && request === runsRequest && runsVisible.value) scheduleRuns.value = value
+  } catch (error) { if (!disposed && request === runsRequest && runsVisible.value) runsError.value = error instanceof Error ? error.message : '无法读取运行记录' }
 }
 function date(value: string | null) { return value ? new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '尚未运行' }
 async function downloadCsv() {
-  if (fromDate.value > toDate.value) {
+  if (!fromDate.value || !toDate.value || fromDate.value > toDate.value) {
     Message.warning('开始日期不能晚于结束日期')
     return
   }
+  const query = queryString(), from = fromDate.value, to = toDate.value
   try {
-    const response = await fetch(`/api/v1/reports/quality/export?${queryString()}`, { credentials: 'include' })
+    const response = await fetch(`/api/v1/reports/quality/export?${query}`, { credentials: 'include' })
     if (!response.ok) {
       const body = await response.json().catch(() => ({})) as { message?: string }
       throw new Error(body.message ?? '导出失败')
     }
     const blob = await response.blob()
+    if (disposed) return
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = `testhub-quality-report-${fromDate.value}-to-${toDate.value}.csv`
+    link.download = `testhub-quality-report-${from}-to-${to}.csv`
     link.click()
     URL.revokeObjectURL(link.href)
     Message.success('质量报表 CSV 已生成，内容已进行电子表格公式安全处理')
@@ -225,6 +248,7 @@ async function downloadCsv() {
 
 watch([fromDate, toDate, selectedProjectIds], () => { void loadReport() }, { deep: true })
 onMounted(() => { void initialize() })
+onBeforeUnmount(() => { disposed = true; reportRequest++; schedulesRequest++; runsRequest++; formRequest++ })
 </script>
 
 <template>
@@ -245,6 +269,7 @@ onMounted(() => { void initialize() })
       </div>
     </section>
 
+    <a-alert v-if="reportError" type="error" role="alert">{{ reportError }}</a-alert>
     <a-spin :loading="loading" class="dashboard-spin">
       <MetricGrid v-if="metrics.length" :metrics="metrics" />
       <section v-if="report && summary" class="report-layout">
@@ -274,9 +299,9 @@ onMounted(() => { void initialize() })
       </section>
       <a-empty v-else-if="!loading" description="未能生成质量报表，请调整筛选范围后重试" />
     </a-spin>
-    <section class="panel schedule-panel"><div class="panel-title"><div><h3>定时质量报告</h3><p>按 Quartz Cron 与时区生成跨项目质量报告；通知模板可订阅 ready / risk 事件。</p></div><a-button type="text" @click="createSchedule"><icon-plus /> 新建计划</a-button></div><a-table :data="schedules" :pagination="false" row-key="id"><template #columns><a-table-column title="计划"><template #cell="{ record }"><strong>{{ record.name }}</strong><small class="schedule-meta">{{ record.projectIds.length }} 个项目 · {{ record.periodDays }} 天周期</small></template></a-table-column><a-table-column title="触发规则"><template #cell="{ record }"><code>{{ record.cronExpression }}</code><small class="schedule-meta">{{ record.timezone }}</small></template></a-table-column><a-table-column title="上次运行"><template #cell="{ record }"><a-tag v-if="record.lastRunStatus" :color="record.lastRunStatus === 'SUCCEEDED' ? 'green' : 'red'">{{ record.lastRunStatus }}</a-tag><span v-else class="schedule-meta">尚未运行</span><small class="schedule-meta">{{ date(record.lastRunAt) }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-badge :status="record.enabled ? 'success' : 'normal'" :text="record.enabled ? '已启用' : '已停用'" /></template></a-table-column><a-table-column title="操作" :width="230"><template #cell="{ record }"><a-space><a-button type="text" @click="runSchedule(record)">立即运行</a-button><a-button type="text" @click="viewRuns(record)">记录</a-button><a-button type="text" @click="editSchedule(record)">编辑</a-button><a-popconfirm content="删除后历史运行记录也会移除，确认继续？" @ok="removeSchedule(record)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table><a-empty v-if="schedules.length === 0" description="尚未创建定时质量报告，可先选择项目和周报周期。" /></section>
-    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑定时质量报告' : '新建定时质量报告'" width="640px" @ok="saveSchedule"><a-form :model="scheduleForm" layout="vertical"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" placeholder="例如：每周项目质量报告" /></a-form-item><a-form-item label="项目范围" required extra="选择需要纳入质量汇总且你有管理权限的项目。"><a-select v-model="scheduleForm.projectIds" multiple :max-tag-count="3" placeholder="选择项目"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select></a-form-item><a-form-item label="Quartz Cron" required extra="采用六或七段 Quartz 表达式，例如每周一 09:00：0 0 9 ? * MON。"><a-input v-model="scheduleForm.cronExpression" /></a-form-item><div class="schedule-form-row"><a-form-item label="时区" required><a-select v-model="scheduleForm.timezone"><a-option value="Asia/Shanghai">Asia/Shanghai</a-option><a-option value="UTC">UTC</a-option></a-select></a-form-item><a-form-item label="统计周期（天）" required><a-input-number v-model="scheduleForm.periodDays" :min="1" :max="90" /></a-form-item></div><a-form-item label="启用计划"><a-switch v-model="scheduleForm.enabled"><template #checked>启用</template><template #unchecked>停用</template></a-switch></a-form-item></a-form></a-modal>
-    <a-modal v-model:visible="runsVisible" :title="`${selectedSchedule?.name ?? ''} · 运行记录`" width="760px" :footer="false"><a-table :data="scheduleRuns" :pagination="false" row-key="id"><template #columns><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="record.status === 'SUCCEEDED' ? 'green' : 'red'">{{ record.status }}</a-tag></template></a-table-column><a-table-column title="统计范围"><template #cell="{ record }">{{ record.from }} 至 {{ record.to }}</template></a-table-column><a-table-column title="通知投递" data-index="deliveryCount" /><a-table-column title="开始时间"><template #cell="{ record }">{{ date(record.startedAt) }}</template></a-table-column><a-table-column title="结果"><template #cell="{ record }"><span class="schedule-error">{{ record.errorMessage ?? '质量报告已生成' }}</span></template></a-table-column></template></a-table><a-empty v-if="scheduleRuns.length === 0" description="暂无运行记录" /></a-modal>
+    <section class="panel schedule-panel"><div class="panel-title"><div><h3>定时质量报告</h3><p>按 Quartz Cron 与时区生成跨项目质量报告；通知模板可订阅 ready / risk 事件。</p></div><a-button type="text" @click="createSchedule"><icon-plus /> 新建计划</a-button></div><a-table :data="schedules" :pagination="false" row-key="id"><template #columns><a-table-column title="计划"><template #cell="{ record }"><strong>{{ record.name }}</strong><small class="schedule-meta">{{ record.projectIds.length }} 个项目 · {{ record.periodDays }} 天周期</small></template></a-table-column><a-table-column title="触发规则"><template #cell="{ record }"><code>{{ record.cronExpression }}</code><small class="schedule-meta">{{ record.timezone }}</small></template></a-table-column><a-table-column title="上次运行"><template #cell="{ record }"><a-tag v-if="record.lastRunStatus" :color="record.lastRunStatus === 'SUCCEEDED' ? 'green' : 'red'">{{ record.lastRunStatus }}</a-tag><span v-else class="schedule-meta">尚未运行</span><small class="schedule-meta">{{ date(record.lastRunAt) }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-badge :status="record.enabled ? 'success' : 'normal'" :text="record.enabled ? '已启用' : '已停用'" /></template></a-table-column><a-table-column title="操作" :width="230"><template #cell="{ record }"><a-space><a-button type="text" :disabled="!record.enabled" @click="runSchedule(record)">立即运行</a-button><a-button type="text" @click="viewRuns(record)">记录</a-button><a-button type="text" @click="editSchedule(record)">编辑</a-button><a-popconfirm content="删除后历史运行记录也会移除，确认继续？" @ok="removeSchedule(record)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table><a-empty v-if="schedules.length === 0" description="尚未创建定时质量报告，可先选择项目和周报周期。" /></section>
+    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑定时质量报告' : '新建定时质量报告'" width="640px" :ok-loading="savingSchedule" :on-before-ok="saveSchedule" @cancel="closeSchedule"><a-form :model="scheduleForm" layout="vertical"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" placeholder="例如：每周项目质量报告" /></a-form-item><a-form-item label="项目范围" required extra="选择需要纳入质量汇总且你有管理权限的项目。"><a-select v-model="scheduleForm.projectIds" multiple :max-tag-count="3" placeholder="选择项目"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select></a-form-item><a-form-item label="Quartz Cron" required extra="采用六或七段 Quartz 表达式，例如每周一 09:00：0 0 9 ? * MON。"><a-input v-model="scheduleForm.cronExpression" /></a-form-item><div class="schedule-form-row"><a-form-item label="时区" required><a-select v-model="scheduleForm.timezone"><a-option value="Asia/Shanghai">Asia/Shanghai</a-option><a-option value="UTC">UTC</a-option></a-select></a-form-item><a-form-item label="统计周期（天）" required><a-input-number v-model="scheduleForm.periodDays" :min="1" :max="90" /></a-form-item></div><a-form-item label="启用计划"><a-switch v-model="scheduleForm.enabled"><template #checked>启用</template><template #unchecked>停用</template></a-switch></a-form-item></a-form></a-modal>
+    <a-modal v-model:visible="runsVisible" :title="`${selectedSchedule?.name ?? ''} · 运行记录`" width="760px" :footer="false" @cancel="closeRuns"><a-alert v-if="runsError" type="error">{{ runsError }}</a-alert><a-table :data="scheduleRuns" :pagination="false" row-key="id"><template #columns><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="record.status === 'SUCCEEDED' ? 'green' : 'red'">{{ record.status }}</a-tag></template></a-table-column><a-table-column title="统计范围"><template #cell="{ record }">{{ record.from }} 至 {{ record.to }}</template></a-table-column><a-table-column title="通知投递" data-index="deliveryCount" /><a-table-column title="开始时间"><template #cell="{ record }">{{ date(record.startedAt) }}</template></a-table-column><a-table-column title="结果"><template #cell="{ record }"><span class="schedule-error">{{ record.errorMessage ?? '质量报告已生成' }}</span></template></a-table-column></template></a-table><a-empty v-if="scheduleRuns.length === 0" description="暂无运行记录" /></a-modal>
   </div>
 </template>
 

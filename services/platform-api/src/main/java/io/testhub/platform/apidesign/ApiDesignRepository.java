@@ -159,7 +159,7 @@ public class ApiDesignRepository {
         jdbc.sql("""
                 INSERT INTO api_definition_version
                     (id, api_id, version_name, summary, description, request_headers, request_query, request_path, request_body, response_body, example_response, status, created_by)
-                VALUES (:id, :apiId, :versionName, :summary, :description, :headers, :query, :path, :requestBody, :responseBody, :exampleResponse, 'DRAFT', :userId)
+                VALUES (:id, :apiId, :versionName, :summary, :description, CAST(:headers AS JSON), CAST(:query AS JSON), CAST(:path AS JSON), :requestBody, :responseBody, CAST(:exampleResponse AS JSON), 'DRAFT', :userId)
                 """).param("id", id).param("apiId", apiId).param("versionName", versionName).param("summary", summary)
                 .param("description", description).param("headers", headers).param("query", query).param("path", path)
                 .param("requestBody", requestBody).param("responseBody", responseBody).param("exampleResponse", exampleResponse).param("userId", userId).update();
@@ -167,9 +167,10 @@ public class ApiDesignRepository {
 
     public int publishVersion(String projectId, String apiId, String versionId, String userId) {
         return jdbc.sql("""
-                UPDATE api_definition_version v JOIN api_definition d ON d.id = v.api_id
-                SET v.status = 'PUBLISHED', v.published_by = :userId, v.published_at = CURRENT_TIMESTAMP(3)
-                WHERE d.project_id = :projectId AND v.api_id = :apiId AND v.id = :versionId
+                UPDATE api_definition_version
+                SET status = 'PUBLISHED', published_by = :userId, published_at = CURRENT_TIMESTAMP(3)
+                WHERE api_id = :apiId AND id = :versionId
+                  AND EXISTS (SELECT 1 FROM api_definition d WHERE d.id = :apiId AND d.project_id = :projectId)
                 """).param("projectId", projectId).param("apiId", apiId).param("versionId", versionId).param("userId", userId).update();
     }
 
@@ -203,7 +204,7 @@ public class ApiDesignRepository {
                 INSERT INTO api_definition_case
                     (id, organization_id, project_id, api_id, name, environment_code, request_snapshot,
                      expected_status, response_validation, saved_response_body, created_by, updated_by)
-                VALUES (:id, :organizationId, :projectId, :apiId, :name, :environmentCode, :requestSnapshot,
+                VALUES (:id, :organizationId, :projectId, :apiId, :name, :environmentCode, CAST(:requestSnapshot AS JSON),
                         :expectedStatus, :responseValidation, :savedResponseBody, :userId, :userId)
                 """).param("id", id).param("organizationId", organizationId).param("projectId", projectId)
                 .param("apiId", apiId).param("name", name).param("environmentCode", environmentCode)
@@ -217,7 +218,7 @@ public class ApiDesignRepository {
                           String savedResponseBody, String userId) {
         return jdbc.sql("""
                 UPDATE api_definition_case
-                SET name = :name, environment_code = :environmentCode, request_snapshot = :requestSnapshot,
+                SET name = :name, environment_code = :environmentCode, request_snapshot = CAST(:requestSnapshot AS JSON),
                     expected_status = :expectedStatus, response_validation = :responseValidation,
                     saved_response_body = :savedResponseBody, updated_by = :userId
                 WHERE project_id = :projectId AND api_id = :apiId AND id = :caseId

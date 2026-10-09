@@ -99,6 +99,12 @@ public class FunctionalTestExecutionRepository {
                 .param("projectId", projectId).param("planId", planId).query((rs, row) -> run(rs)).list();
     }
 
+    public List<FunctionalTestRun> findRecentRuns(String projectId) {
+        return jdbc.sql(runQuery("WHERE r.project_id = :projectId").stripTrailing()
+                        + ", r.id DESC LIMIT 100")
+                .param("projectId", projectId).query((rs, row) -> run(rs)).list();
+    }
+
     public Optional<FunctionalTestRun> findRun(String projectId, String runId) {
         return jdbc.sql(runQuery("WHERE r.project_id = :projectId AND r.id = :runId"))
                 .param("projectId", projectId).param("runId", runId)
@@ -116,10 +122,21 @@ public class FunctionalTestExecutionRepository {
 
     public int updateRunStatus(String runId, String status, Instant startedAt, Instant finishedAt) {
         return jdbc.sql("""
-                UPDATE functional_test_run SET status = :status, started_at = :startedAt, finished_at = :finishedAt
+                UPDATE functional_test_run SET status = :status,
+                    started_at = COALESCE(started_at, :startedAt),
+                    finished_at = CASE WHEN :status = 'COMPLETED' THEN COALESCE(finished_at, :finishedAt) ELSE NULL END
                 WHERE id = :runId
                 """).param("runId", runId).param("status", status).param("startedAt", startedAt)
                 .param("finishedAt", finishedAt).update();
+    }
+
+    public Optional<String> lockRunForCase(String projectId, String runCaseId) {
+        return jdbc.sql("""
+                SELECT id FROM functional_test_run
+                WHERE project_id = :projectId
+                  AND id = (SELECT run_id FROM functional_test_run_case WHERE id = :caseId)
+                FOR UPDATE
+                """).param("projectId", projectId).param("caseId", runCaseId).query(String.class).optional();
     }
 
     public void insertRunCase(String id, String runId, String caseId, String status, String note) {
@@ -197,11 +214,12 @@ public class FunctionalTestExecutionRepository {
 
     public int updateRunStep(String projectId, String stepId, String status, String actualResult, String userId) {
         return jdbc.sql("""
-                UPDATE functional_test_run_step s
-                JOIN functional_test_run_case rc ON rc.id = s.run_case_id
-                JOIN functional_test_run r ON r.id = rc.run_id
-                SET s.status = :status, s.actual_result = :actualResult, s.updated_by = :userId, s.updated_at = CURRENT_TIMESTAMP(3)
-                WHERE r.project_id = :projectId AND s.id = :stepId
+                UPDATE functional_test_run_step
+                SET status = :status, actual_result = :actualResult, updated_by = :userId, updated_at = CURRENT_TIMESTAMP(3)
+                WHERE id = :stepId AND run_case_id IN (
+                    SELECT rc.id FROM functional_test_run_case rc
+                    JOIN functional_test_run r ON r.id = rc.run_id WHERE r.project_id = :projectId
+                )
                 """).param("projectId", projectId).param("stepId", stepId).param("status", status)
                 .param("actualResult", actualResult).param("userId", userId).update();
     }

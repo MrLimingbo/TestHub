@@ -46,7 +46,8 @@ public class AccountManagementService {
         if (principal.tokenProjectId() != null) {
             throw new AccessDeniedException("项目令牌不能查询系统账号");
         }
-        return accounts.findEnabledOptions();
+        return access.hasRole(principal.userId(), "SYSTEM_ADMIN")
+                ? accounts.findEnabledOptions() : accounts.findWorkspaceAccountOptions(principal.userId());
     }
 
     @Transactional

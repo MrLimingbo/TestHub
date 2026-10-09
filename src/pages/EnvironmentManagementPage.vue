@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useSessionStore } from '@/stores/session'
 
@@ -27,6 +27,17 @@ interface SecretCollection { environments: string[]; secrets: EnvironmentSecret[
 
 const session = useSessionStore()
 const loading = ref(false)
+const loadError = ref('')
+const pending = reactive(new Set<string>())
+const deleteVisible = ref(false)
+const deletingEnvironment = ref<ProjectEnvironment | null>(null)
+let disposed = false, requestSequence = 0, viewSequence = 0, formSequence = 0, formProjectId = ''
+const current = (projectId: string, view: number) => !disposed && session.projectId === projectId && view === viewSequence
+function captureForm() { formProjectId = session.projectId; formSequence++ }
+function closeForms() {
+  formSequence++; environmentVisible.value = false; variableVisible.value = false; detailVisible.value = false
+  deleteVisible.value = false; selectedEnvironment.value = null; variableForm.value = ''
+}
 const saving = ref(false)
 const environmentVisible = ref(false)
 const variableVisible = ref(false)
@@ -83,43 +94,54 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+  const encoded = body === undefined ? undefined : JSON.stringify(body)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
   return read<T>(url, {
     method,
     headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: encoded,
   })
 }
 
 async function load() {
-  if (!session.projectId) {
-    environments.value = []
-    parameters.value = []
-    secrets.value = []
-    return
-  }
+  const projectId = session.projectId, sequence = ++requestSequence, view = viewSequence
+  environments.value = []; parameters.value = []; secrets.value = []; loadError.value = ''
+  if (!projectId) { loading.value = false; return }
   loading.value = true
   try {
-    const projectId = session.projectId
     const [environmentRows, parameterData, secretData] = await Promise.all([
       read<ProjectEnvironment[]>(`/api/v1/projects/${projectId}/environments`),
       read<ParameterCollection>(`/api/v1/projects/${projectId}/parameters`),
       read<SecretCollection>(`/api/v1/projects/${projectId}/secrets`),
     ])
-    environments.value = environmentRows
-    parameters.value = parameterData.parameters
-    secrets.value = secretData.secrets
+    if (sequence !== requestSequence || !current(projectId, view)) return
+    environments.value = environmentRows; parameters.value = parameterData.parameters; secrets.value = secretData.secrets
     if (selectedEnvironment.value) {
-      selectedEnvironment.value = environmentRows.find((item) => item.id === selectedEnvironment.value?.id) ?? null
-      if (!selectedEnvironment.value) detailVisible.value = false
+      selectedEnvironment.value = environmentRows.find(item => item.id === selectedEnvironment.value?.id) ?? null
+      if (!selectedEnvironment.value) { detailVisible.value = false; variableVisible.value = false; variableForm.value = '' }
     }
-    const maxPage = Math.max(1, Math.ceil(filteredEnvironments.value.length / pageSize.value))
-    if (page.value > maxPage) page.value = maxPage
+    page.value = Math.min(page.value, Math.max(1, Math.ceil(filteredEnvironments.value.length / pageSize.value)))
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载项目环境失败')
+    if (sequence === requestSequence && current(projectId, view)) loadError.value = error instanceof Error ? error.message : '加载项目环境失败'
   } finally {
-    loading.value = false
+    if (sequence === requestSequence && current(projectId, view)) loading.value = false
   }
+}
+
+async function rowMutation(key: string, url: string, method: 'POST' | 'DELETE', message: string): Promise<boolean> {
+  const projectId = session.projectId, view = viewSequence
+  if (!projectId || pending.has(key) || disposed) return false
+  pending.add(key)
+  try {
+    await mutate<void>(url, method)
+    if (!current(projectId, view)) return false
+    await load()
+    if (!current(projectId, view)) return false
+    Message.success(message); return true
+  } catch (error) {
+    if (current(projectId, view)) Message.error(error instanceof Error ? error.message : '操作失败')
+    return false
+  } finally { pending.delete(key) }
 }
 
 function selectProject(value: unknown) {
@@ -127,6 +149,8 @@ function selectProject(value: unknown) {
 }
 
 function openCreate() {
+  if (!session.projectId || loading.value) return
+  captureForm()
   editingEnvironment.value = null
   Object.assign(environmentForm, {
     name: '', environmentCode: '', baseUrl: '', description: '', enabled: true,
@@ -136,6 +160,7 @@ function openCreate() {
 }
 
 function openEdit(environment: ProjectEnvironment) {
+  captureForm()
   editingEnvironment.value = environment
   Object.assign(environmentForm, {
     name: environment.name,
@@ -153,12 +178,14 @@ async function saveEnvironment(): Promise<boolean> {
     Message.warning('请填写环境名称和环境标识')
     return false
   }
+  if (saving.value || disposed) return false
+  const projectId = formProjectId, view = viewSequence, form = formSequence
   saving.value = true
   try {
     const editing = editingEnvironment.value
     const url = editing
-      ? `/api/v1/projects/${session.projectId}/environments/${editing.id}`
-      : `/api/v1/projects/${session.projectId}/environments`
+      ? `/api/v1/projects/${projectId}/environments/${editing.id}`
+      : `/api/v1/projects/${projectId}/environments`
     const body = editing
       ? {
           name: environmentForm.name,
@@ -167,14 +194,16 @@ async function saveEnvironment(): Promise<boolean> {
           enabled: environmentForm.enabled,
           expectedVersion: editing.version,
         }
-      : environmentForm
+      : { ...environmentForm }
     await mutate<ProjectEnvironment>(url, editing ? 'PUT' : 'POST', body)
+    if (!current(projectId, view) || form !== formSequence) return false
     environmentVisible.value = false
     await load()
+    if (!current(projectId, view) || form !== formSequence) return false
     Message.success(editing ? '环境已更新' : '环境已创建')
     return true
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '保存环境失败')
+    if (current(projectId, view) && form === formSequence) Message.error(error instanceof Error ? error.message : '保存环境失败')
     return false
   } finally {
     saving.value = false
@@ -183,24 +212,18 @@ async function saveEnvironment(): Promise<boolean> {
 
 async function makeDefault(environment: ProjectEnvironment) {
   if (!session.projectId || environment.defaultEnvironment) return
-  try {
-    await mutate<ProjectEnvironment>(`/api/v1/projects/${session.projectId}/environments/${environment.id}/default`, 'POST')
-    await load()
-    Message.success(`“${environment.name}”已设为默认环境`)
-  } catch (error) {
-    Message.error(error instanceof Error ? error.message : '设置默认环境失败')
-  }
+  await rowMutation('default:' + environment.id, `/api/v1/projects/${session.projectId}/environments/${environment.id}/default`, 'POST', `“${environment.name}”已设为默认环境`)
 }
 
-async function removeEnvironment(environment: ProjectEnvironment) {
-  if (!session.projectId) return
-  try {
-    await mutate<void>(`/api/v1/projects/${session.projectId}/environments/${environment.id}`, 'DELETE')
-    await load()
-    Message.success('环境已删除')
-  } catch (error) {
-    Message.error(error instanceof Error ? error.message : '删除环境失败')
-  }
+function removeEnvironment(environment: ProjectEnvironment) {
+  captureForm(); deletingEnvironment.value = environment; deleteVisible.value = true
+}
+async function confirmRemoveEnvironment(): Promise<boolean> {
+  const item = deletingEnvironment.value, projectId = formProjectId, view = viewSequence, form = formSequence
+  if (!item || !current(projectId, view)) return false
+  const saved = await rowMutation('delete:' + item.id, `/api/v1/projects/${projectId}/environments/${item.id}`, 'DELETE', '环境已删除')
+  if (saved && current(projectId, view) && form === formSequence) { deleteVisible.value = false; return true }
+  return false
 }
 
 function manageVariables(environment: ProjectEnvironment, kind: 'parameters' | 'secrets' = 'parameters') {
@@ -210,6 +233,8 @@ function manageVariables(environment: ProjectEnvironment, kind: 'parameters' | '
 }
 
 function openVariable(kind: 'parameter' | 'secret', variable?: ProjectParameter) {
+  if (!selectedEnvironment.value || loading.value) return
+  captureForm()
   variableKind.value = kind
   editingVariable.value = variable ?? null
   variableForm.key = variable?.key ?? ''
@@ -222,20 +247,21 @@ async function saveVariable(): Promise<boolean> {
     Message.warning('请填写名称和值')
     return false
   }
+  if (saving.value || disposed) return false
+  const projectId = formProjectId, view = viewSequence, form = formSequence, kind = variableKind.value
+  const input = { environmentCode: selectedEnvironment.value.environmentCode, key: variableForm.key, value: variableForm.value }
   saving.value = true
   try {
-    const resource = variableKind.value === 'secret' ? 'secrets' : 'parameters'
-    await mutate<void>(`/api/v1/projects/${session.projectId}/${resource}`, 'POST', {
-      environmentCode: selectedEnvironment.value.environmentCode,
-      key: variableForm.key,
-      value: variableForm.value,
-    })
-    variableVisible.value = false
+    const resource = kind === 'secret' ? 'secrets' : 'parameters'
+    await mutate<void>(`/api/v1/projects/${projectId}/${resource}`, 'POST', input)
+    if (!current(projectId, view) || form !== formSequence) return false
+    variableVisible.value = false; variableForm.value = ''
     await load()
-    Message.success(variableKind.value === 'secret' ? '环境密钥已加密保存' : '环境变量已保存')
+    if (!current(projectId, view) || form !== formSequence) return false
+    Message.success(kind === 'secret' ? '环境密钥已加密保存' : '环境变量已保存')
     return true
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '保存环境配置失败')
+    if (current(projectId, view) && form === formSequence) Message.error(error instanceof Error ? error.message : '保存环境配置失败')
     return false
   } finally {
     saving.value = false
@@ -243,14 +269,7 @@ async function saveVariable(): Promise<boolean> {
 }
 
 async function removeVariable(resource: 'parameters' | 'secrets', id: string) {
-  if (!session.projectId) return
-  try {
-    await mutate<void>(`/api/v1/projects/${session.projectId}/${resource}/${id}`, 'DELETE')
-    await load()
-    Message.success(resource === 'secrets' ? '环境密钥已删除' : '环境变量已删除')
-  } catch (error) {
-    Message.error(error instanceof Error ? error.message : '删除环境配置失败')
-  }
+  await rowMutation(resource + ':' + id, `/api/v1/projects/${session.projectId}/${resource}/${id}`, 'DELETE', resource === 'secrets' ? '环境密钥已删除' : '环境变量已删除')
 }
 
 function search() {
@@ -261,6 +280,11 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
 
+watch(() => session.projectId, () => {
+  viewSequence++; requestSequence++; closeForms(); keyword.value = ''; page.value = 1
+  void load()
+}, { flush: 'sync' })
+onBeforeUnmount(() => { disposed = true; requestSequence++; closeForms() })
 onMounted(load)
 </script>
 
@@ -272,9 +296,10 @@ onMounted(load)
         <h1>环境管理</h1>
         <p>为每个项目维护独立的服务地址、变量与加密密钥，并用于接口测试和接口自动化执行。</p>
       </div>
-      <a-button type="primary" @click="openCreate"><icon-plus /> 新建环境</a-button>
+      <a-button type="primary" :disabled="!session.projectId || loading" @click="openCreate"><icon-plus /> 新建环境</a-button>
     </header>
 
+    <a-alert v-if="loadError" type="error">{{ loadError }} <a-button type="text" @click="load">重试</a-button></a-alert>
     <section class="environment-console">
       <a-tabs v-model:active-key="activeView" class="environment-tabs">
         <a-tab-pane key="environments" title="环境列表" />
@@ -330,8 +355,8 @@ onMounted(load)
                     <a-dropdown trigger="click">
                       <a-button type="text" size="small"><icon-more /></a-button>
                       <template #content>
-                        <a-doption :disabled="record.defaultEnvironment" @click="makeDefault(record)">设为默认环境</a-doption>
-                        <a-doption class="danger-option" :disabled="record.defaultEnvironment" @click="removeEnvironment(record)">删除环境</a-doption>
+                        <a-doption :disabled="record.defaultEnvironment || pending.has('default:' + record.id)" @click="makeDefault(record)">设为默认环境</a-doption>
+                        <a-doption class="danger-option" :disabled="record.defaultEnvironment || pending.has('delete:' + record.id)" @click="removeEnvironment(record)">删除环境</a-doption>
                       </template>
                     </a-dropdown>
                   </a-space>
@@ -340,7 +365,7 @@ onMounted(load)
             </template>
           </a-table>
           <a-empty v-if="!loading && !pagedEnvironments.length" description="当前项目暂无符合条件的环境">
-            <template #extra><a-button type="primary" @click="openCreate">创建第一个环境</a-button></template>
+            <template #extra><a-button type="primary" :disabled="!session.projectId || loading" @click="openCreate">创建第一个环境</a-button></template>
           </a-empty>
         </template>
         <template v-else>
@@ -369,6 +394,7 @@ onMounted(load)
       width="660px"
       :ok-loading="saving"
       :on-before-ok="saveEnvironment"
+      @cancel="formSequence++"
     >
       <a-alert type="info" class="form-alert">保存后，接口测试与接口自动化可直接选择此环境；基础地址会以 <code>BASE_URL</code> 变量参与服务端解析。</a-alert>
       <a-form :model="environmentForm" layout="vertical">
@@ -398,7 +424,7 @@ onMounted(load)
               <template #columns>
                 <a-table-column title="变量名"><template #cell="{ record }"><code>{{ record.key }}</code></template></a-table-column>
                 <a-table-column title="值"><template #cell="{ record }"><span class="variable-value">{{ record.value }}</span></template></a-table-column>
-                <a-table-column title="操作" :width="130"><template #cell="{ record }"><a-button type="text" size="small" @click="openVariable('parameter', record)">编辑</a-button><a-popconfirm content="确定删除该变量吗？" @ok="removeVariable('parameters', record.id)"><a-button type="text" status="danger" size="small">删除</a-button></a-popconfirm></template></a-table-column>
+                <a-table-column title="操作" :width="130"><template #cell="{ record }"><a-button type="text" size="small" @click="openVariable('parameter', record)">编辑</a-button><a-popconfirm content="确定删除该变量吗？" @ok="removeVariable('parameters', record.id)"><a-button type="text" status="danger" size="small" :loading="pending.has('parameters:' + record.id)">删除</a-button></a-popconfirm></template></a-table-column>
               </template>
             </a-table>
             <a-empty v-if="!activeParameters.length" description="此环境暂无自定义变量" />
@@ -409,7 +435,7 @@ onMounted(load)
               <template #columns>
                 <a-table-column title="密钥名"><template #cell="{ record }"><code>{{ record.key }}</code></template></a-table-column>
                 <a-table-column title="值"><template #cell><span class="masked">•••••••• · 已加密</span></template></a-table-column>
-                <a-table-column title="操作" :width="100"><template #cell="{ record }"><a-popconfirm content="删除后无法恢复，确定继续吗？" @ok="removeVariable('secrets', record.id)"><a-button type="text" status="danger" size="small">删除</a-button></a-popconfirm></template></a-table-column>
+                <a-table-column title="操作" :width="100"><template #cell="{ record }"><a-popconfirm content="删除后无法恢复，确定继续吗？" @ok="removeVariable('secrets', record.id)"><a-button type="text" status="danger" size="small" :loading="pending.has('secrets:' + record.id)">删除</a-button></a-popconfirm></template></a-table-column>
               </template>
             </a-table>
             <a-empty v-if="!activeSecrets.length" description="此环境暂无加密密钥" />
@@ -418,7 +444,7 @@ onMounted(load)
       </div>
     </a-drawer>
 
-    <a-modal v-model:visible="variableVisible" :title="variableKind === 'secret' ? '保存环境密钥' : (editingVariable ? '编辑环境变量' : '新增环境变量')" width="560px" :ok-loading="saving" :on-before-ok="saveVariable">
+    <a-modal v-model:visible="variableVisible" :title="variableKind === 'secret' ? '保存环境密钥' : (editingVariable ? '编辑环境变量' : '新增环境变量')" width="560px" :ok-loading="saving" :on-before-ok="saveVariable" @cancel="formSequence++; variableForm.value = ''">
       <a-form :model="variableForm" layout="vertical">
         <a-form-item label="所属环境"><a-input :model-value="`${selectedEnvironment?.name ?? ''} · ${selectedEnvironment?.environmentCode ?? ''}`" disabled /></a-form-item>
         <a-form-item :label="variableKind === 'secret' ? '密钥名称' : '变量名称'" required extra="支持字母、数字、点、下划线和连字符，且不能以数字开头。"><a-input v-model="variableForm.key" :disabled="Boolean(editingVariable)" :max-length="128" placeholder="例如：API_TOKEN" /></a-form-item>
@@ -427,6 +453,9 @@ onMounted(load)
           <a-textarea v-else v-model="variableForm.value" :auto-size="{ minRows: 3, maxRows: 8 }" :max-length="20000" />
         </a-form-item>
       </a-form>
+    </a-modal>
+    <a-modal v-model:visible="deleteVisible" title="删除项目环境" :ok-loading="pending.has('delete:' + deletingEnvironment?.id)" :on-before-ok="confirmRemoveEnvironment" @cancel="formSequence++">
+      确定删除“{{ deletingEnvironment?.name }}”吗？此环境的参数和密钥会一并删除；被测试资产引用的环境不能删除。
     </a-modal>
   </div>
 </template>

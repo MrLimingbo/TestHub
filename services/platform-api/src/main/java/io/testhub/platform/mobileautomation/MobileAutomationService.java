@@ -24,12 +24,13 @@ import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RuntimeStreams;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 /** Project-scoped mobile assets and immutable execution manifests. Device interaction remains in the Appium Runner. */
@@ -44,12 +45,12 @@ public class MobileAutomationService {
     private final ObjectMapper json;
     private final AccessService access;
     private final AuditService audit;
-    private final StringRedisTemplate redis;
+    private final RuntimeStreams streams;
     private volatile boolean eventGroupReady;
     private volatile boolean stepGroupReady;
 
-    public MobileAutomationService(JdbcClient jdbc, ObjectMapper json, AccessService access, AuditService audit, StringRedisTemplate redis) {
-        this.jdbc = jdbc; this.json = json; this.access = access; this.audit = audit; this.redis = redis;
+    public MobileAutomationService(JdbcClient jdbc, ObjectMapper json, AccessService access, AuditService audit, RuntimeStreams streams) {
+        this.jdbc = jdbc; this.json = json; this.access = access; this.audit = audit; this.streams = streams;
     }
 
     public Snapshot snapshot(AuthenticatedPrincipal principal, String projectId) {
@@ -62,7 +63,7 @@ public class MobileAutomationService {
     public List<Scenario> scenarios(AuthenticatedPrincipal principal, String projectId) { access.requireProjectRead(principal, projectId); return scenarios(projectId); }
     public List<Execution> executions(AuthenticatedPrincipal principal, String projectId) { access.requireProjectRead(principal, projectId); return executions(projectId); }
 
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public Device createDevice(AuthenticatedPrincipal principal, String projectId, DeviceRequest request) {
         ProjectSummary project = writable(principal, projectId); DeviceInput input = deviceInput(request); String id = id();
         try {
@@ -74,16 +75,88 @@ public class MobileAutomationService {
         } catch (DataIntegrityViolationException exception) { throw conflict("当前项目已存在同名设备或相同 UDID"); }
         Device value = device(projectId, id); audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_DEVICE_CREATED", "MOBILE_AUTOMATION_DEVICE", id, Map.of("name", value.name(), "platform", value.platform())); return value;
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
+    public Device updateDevice(AuthenticatedPrincipal principal, String projectId, String deviceId, int expectedVersion, DeviceRequest request) {
+        ProjectSummary project = writable(principal, projectId); Device current = device(projectId, deviceId); DeviceInput input = deviceInput(request);
+        if (!current.platform().equals(input.platform())) throw invalid("编辑设备不能改变平台，请新建设备");
+        try {
+            int changed = jdbc.sql("""
+                    UPDATE mobile_automation_device SET name=:name,udid=:udid,automation_name=:automation,
+                    capabilities=CAST(:capabilities AS JSON),enabled=:enabled,version=version+1,updated_by=:user,updated_at=CURRENT_TIMESTAMP(3)
+                    WHERE project_id=:project AND id=:id AND version=:version
+                    """).param("name",input.name()).param("udid",input.udid()).param("automation",input.automationName())
+                    .param("capabilities",write(input.capabilities())).param("enabled",input.enabled()).param("user",principal.userId())
+                    .param("project",projectId).param("id",deviceId).param("version",expectedVersion).update();
+            if (changed != 1) throw conflict("设备版本已变化，请刷新后重新编辑");
+        } catch (DataIntegrityViolationException error) { throw conflict("当前项目已存在同名设备或相同 UDID"); }
+        audit.record(principal,project.organizationId(),projectId,"MOBILE_AUTOMATION_DEVICE_UPDATED","MOBILE_AUTOMATION_DEVICE",deviceId,Map.of("version",expectedVersion+1));
+        return device(projectId,deviceId);
+    }
+    @Transactional(isolation=Isolation.READ_COMMITTED)
+    public Application updateApplication(AuthenticatedPrincipal principal, String projectId, String applicationId, int expectedVersion, ApplicationRequest request) {
+        ProjectSummary project = writable(principal,projectId); Application current = application(projectId,applicationId); ApplicationInput input = applicationInput(request);
+        if (!current.platform().equals(input.platform())) throw invalid("编辑应用不能改变平台，请新建应用");
+        requireApplicationFile(projectId,input.appFileId());
+        try {
+            int changed = jdbc.sql("""
+                    UPDATE mobile_automation_application SET name=:name,app_identifier=:identifier,version_name=:label,app_file_id=:file,
+                    enabled=:enabled,version=version+1,updated_by=:user,updated_at=CURRENT_TIMESTAMP(3)
+                    WHERE project_id=:project AND id=:id AND version=:version
+                    """).param("name",input.name()).param("identifier",input.appIdentifier()).param("label",input.versionName()).param("file",input.appFileId())
+                    .param("enabled",input.enabled()).param("user",principal.userId()).param("project",projectId).param("id",applicationId).param("version",expectedVersion).update();
+            if (changed != 1) throw conflict("应用版本已变化，请刷新后重新编辑");
+        } catch (DataIntegrityViolationException error) { throw conflict("当前项目已存在同名移动应用"); }
+        audit.record(principal,project.organizationId(),projectId,"MOBILE_AUTOMATION_APPLICATION_UPDATED","MOBILE_AUTOMATION_APPLICATION",applicationId,Map.of("version",expectedVersion+1));
+        return application(projectId,applicationId);
+    }
+    @Transactional(isolation=Isolation.READ_COMMITTED)
+    public Element updateElement(AuthenticatedPrincipal principal, String projectId, String elementId, Instant expectedUpdatedAt, ElementRequest request) {
+        ProjectSummary project = writable(principal,projectId); Element current = element(projectId,elementId); ElementInput input = elementInput(request);
+        if (!current.platform().equals(input.platform())) throw invalid("编辑元素不能改变平台，请新建元素");
+        if (expectedUpdatedAt == null) throw invalid("元素更新时间不能为空");
+        Instant updatedAt = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
+        if (!updatedAt.isAfter(current.updatedAt())) updatedAt = current.updatedAt().plusMillis(1);
+        try {
+            int changed = jdbc.sql("""
+                    UPDATE mobile_automation_element SET name=:name,locator_strategy=:strategy,locator_value=:value,description=:description,
+                    updated_by=:user,updated_at=:updated WHERE project_id=:project AND id=:id AND updated_at=:expected
+                    """).param("name",input.name()).param("strategy",input.locatorStrategy()).param("value",input.locatorValue()).param("description",input.description())
+                    .param("user",principal.userId()).param("updated",Timestamp.from(updatedAt)).param("project",projectId).param("id",elementId).param("expected",Timestamp.from(expectedUpdatedAt)).update();
+            if (changed != 1) throw conflict("元素已变化，请刷新后重新编辑");
+        } catch (DataIntegrityViolationException error) { throw conflict("当前项目已存在同名移动端元素"); }
+        audit.record(principal,project.organizationId(),projectId,"MOBILE_AUTOMATION_ELEMENT_UPDATED","MOBILE_AUTOMATION_ELEMENT",elementId,Map.of("name",input.name()));
+        return element(projectId,elementId);
+    }
+    @Transactional(isolation=Isolation.READ_COMMITTED)
+    public Scenario updateScenario(AuthenticatedPrincipal principal, String projectId, String scenarioId, int expectedVersion, ScenarioRequest request) {
+        ProjectSummary project = writable(principal,projectId); scenario(projectId,scenarioId); ScenarioInput input = scenarioInput(projectId,request);
+        try {
+            int changed = jdbc.sql("""
+                    UPDATE mobile_automation_scenario SET device_id=:device,application_id=:application,name=:name,description=:description,
+                    failure_strategy=:strategy,variables=CAST(:variables AS JSON),steps=CAST(:steps AS JSON),version=version+1,
+                    updated_by=:user,updated_at=CURRENT_TIMESTAMP(3) WHERE project_id=:project AND id=:id AND version=:version
+                    """).param("device",input.deviceId()).param("application",input.applicationId()).param("name",input.name()).param("description",input.description())
+                    .param("strategy",input.failureStrategy()).param("variables",write(input.variables())).param("steps",write(input.steps()))
+                    .param("user",principal.userId()).param("project",projectId).param("id",scenarioId).param("version",expectedVersion).update();
+            if (changed != 1) throw conflict("场景版本已变化，请刷新后重新编辑");
+        } catch (DataIntegrityViolationException error) { throw conflict("当前项目已存在同名移动端场景"); }
+        audit.record(principal,project.organizationId(),projectId,"MOBILE_AUTOMATION_SCENARIO_UPDATED","MOBILE_AUTOMATION_SCENARIO",scenarioId,Map.of("version",expectedVersion+1));
+        return scenario(projectId,scenarioId);
+    }
+    private void requireApplicationFile(String projectId, String fileId) {
+        if (fileId != null && jdbc.sql("SELECT COUNT(*) FROM file_object WHERE project_id=:project AND id=:id")
+                .param("project",projectId).param("id",fileId).query(Integer.class).single() != 1) throw invalid("应用包文件不存在或不属于当前项目");
+    }
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public void deleteDevice(AuthenticatedPrincipal principal, String projectId, String deviceId) {
         ProjectSummary project = writable(principal, projectId); Device value = device(projectId, deviceId);
         try { jdbc.sql("DELETE FROM mobile_automation_device WHERE project_id=:project AND id=:id").param("project", projectId).param("id", deviceId).update(); }
         catch (DataIntegrityViolationException exception) { throw conflict("设备已被移动端场景或执行记录引用，不能删除"); }
         audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_DEVICE_DELETED", "MOBILE_AUTOMATION_DEVICE", deviceId, Map.of("name", value.name()));
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public Application createApplication(AuthenticatedPrincipal principal, String projectId, ApplicationRequest request) {
-        ProjectSummary project = writable(principal, projectId); ApplicationInput input = applicationInput(request); String id = id();
+        ProjectSummary project = writable(principal, projectId); ApplicationInput input = applicationInput(request); requireApplicationFile(projectId,input.appFileId()); String id = id();
         try {
             jdbc.sql("""
                     INSERT INTO mobile_automation_application (id, organization_id, project_id, name, platform, app_identifier, version_name, app_file_id, enabled, created_by, updated_by)
@@ -93,14 +166,14 @@ public class MobileAutomationService {
         } catch (DataIntegrityViolationException exception) { throw conflict("当前项目已存在同名移动应用"); }
         Application value = application(projectId, id); audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_APPLICATION_CREATED", "MOBILE_AUTOMATION_APPLICATION", id, Map.of("name", value.name(), "platform", value.platform())); return value;
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public void deleteApplication(AuthenticatedPrincipal principal, String projectId, String applicationId) {
         ProjectSummary project = writable(principal, projectId); Application value = application(projectId, applicationId);
         try { jdbc.sql("DELETE FROM mobile_automation_application WHERE project_id=:project AND id=:id").param("project", projectId).param("id", applicationId).update(); }
         catch (DataIntegrityViolationException exception) { throw conflict("应用已被移动端场景或执行记录引用，不能删除"); }
         audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_APPLICATION_DELETED", "MOBILE_AUTOMATION_APPLICATION", applicationId, Map.of("name", value.name()));
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public Element createElement(AuthenticatedPrincipal principal, String projectId, ElementRequest request) {
         ProjectSummary project = writable(principal, projectId); ElementInput input = elementInput(request); String id = id();
         try {
@@ -112,7 +185,7 @@ public class MobileAutomationService {
         } catch (DataIntegrityViolationException exception) { throw conflict("当前项目已存在同名移动端元素"); }
         Element value = element(projectId, id); audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_ELEMENT_CREATED", "MOBILE_AUTOMATION_ELEMENT", id, Map.of("name", value.name(), "platform", value.platform())); return value;
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public void deleteElement(AuthenticatedPrincipal principal, String projectId, String elementId) {
         ProjectSummary project = writable(principal, projectId); Element value = element(projectId, elementId);
         Integer used = jdbc.sql("SELECT COUNT(*) FROM mobile_automation_scenario WHERE project_id=:project AND JSON_SEARCH(steps,'one',:id,NULL,'$[*].elementId') IS NOT NULL")
@@ -121,7 +194,7 @@ public class MobileAutomationService {
         jdbc.sql("DELETE FROM mobile_automation_element WHERE project_id=:project AND id=:id").param("project", projectId).param("id", elementId).update();
         audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_ELEMENT_DELETED", "MOBILE_AUTOMATION_ELEMENT", elementId, Map.of("name", value.name()));
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public Scenario createScenario(AuthenticatedPrincipal principal, String projectId, ScenarioRequest request) {
         ProjectSummary project = writable(principal, projectId); ScenarioInput input = scenarioInput(projectId, request); String id = id();
         try {
@@ -133,14 +206,14 @@ public class MobileAutomationService {
         } catch (DataIntegrityViolationException exception) { throw conflict("当前项目已存在同名移动端场景"); }
         Scenario value = scenario(projectId, id); audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_SCENARIO_CREATED", "MOBILE_AUTOMATION_SCENARIO", id, Map.of("name", value.name(), "stepCount", value.steps().size())); return value;
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public void deleteScenario(AuthenticatedPrincipal principal, String projectId, String scenarioId) {
         ProjectSummary project = writable(principal, projectId); Scenario value = scenario(projectId, scenarioId);
         try { jdbc.sql("DELETE FROM mobile_automation_scenario WHERE project_id=:project AND id=:id").param("project", projectId).param("id", scenarioId).update(); }
         catch (DataIntegrityViolationException exception) { throw conflict("场景已有执行记录，不能删除"); }
         audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_SCENARIO_DELETED", "MOBILE_AUTOMATION_SCENARIO", scenarioId, Map.of("name", value.name()));
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public Execution execute(AuthenticatedPrincipal principal, String projectId, String scenarioId, Integer timeoutSeconds) {
         ProjectSummary project = writable(principal, projectId); Scenario scenario = scenario(projectId, scenarioId); Device device = device(projectId, scenario.deviceId()); Application application = application(projectId, scenario.applicationId());
         if (!device.enabled() || !application.enabled()) throw conflict("设备或应用已停用，不能执行场景");
@@ -183,7 +256,7 @@ public class MobileAutomationService {
         Manifest manifest = read(content, new TypeReference<Manifest>() { });
         return new RunnerRuntimeConfiguration("testhub.appium-runner.runtime-configuration", 1, taskId, executionId, execution.deadlineAt(), manifest);
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public Execution cancel(AuthenticatedPrincipal principal, String projectId, String executionId) {
         ProjectSummary project = writable(principal, projectId); Execution current = execution(projectId, executionId);
         if (!Set.of("QUEUED", "ACCEPTED", "RUNNING", "CANCELLING").contains(current.status())) throw conflict("当前执行状态不能取消");
@@ -194,7 +267,7 @@ public class MobileAutomationService {
         audit.record(principal, project.organizationId(), projectId, "MOBILE_AUTOMATION_EXECUTION_CANCEL_REQUESTED", "MOBILE_AUTOMATION_EXECUTION", executionId, Map.of("taskId", current.taskId()));
         return execution(projectId, executionId);
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public void applyRunnerEvent(MobileRunnerProtocol.Event event) {
         String status = Map.of("ACCEPTED", "ACCEPTED", "RUNNING", "RUNNING", "SUCCEEDED", "SUCCEEDED", "FAILED", "FAILED", "CANCELLED", "CANCELLED", "TIMED_OUT", "TIMED_OUT", "REJECTED", "REJECTED").get(event.type()); if (status == null) return;
         Execution current = executionByTask(event.taskId(), event.executionId()); if (current == null || terminal(current.status())) return;
@@ -208,7 +281,7 @@ public class MobileAutomationService {
                 .param("status", status).param("code", event.code()).param("message", event.message()).param("runner", event.runnerId()).param("occurred", Timestamp.from(event.occurredAt())).param("id", current.id()).param("task", event.taskId()).update();
         audit.recordSystem(current.organizationId(), current.projectId(), "MOBILE_AUTOMATION_EXECUTION_EVENT_RECEIVED", "MOBILE_AUTOMATION_EXECUTION", current.id(), Map.of("runnerId", event.runnerId(), "type", event.type(), "code", event.code()));
     }
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public void applyStepResult(MobileRunnerProtocol.StepResult result) {
         Execution current = executionByTask(result.taskId(), result.executionId()); if (current == null || current.runnerId() == null || !current.runnerId().equals(result.runnerId())) return;
         jdbc.sql("""
@@ -220,13 +293,13 @@ public class MobileAutomationService {
     }
 
     @Scheduled(fixedDelayString = "${testhub.mobile-automation-runner.outbox.dispatch-interval-ms:500}")
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public void dispatchOutbox() {
         List<Outbox> messages = jdbc.sql("SELECT id,stream_key,payload,dispatch_attempts FROM mobile_automation_runner_outbox WHERE status='PENDING' AND available_at<=CURRENT_TIMESTAMP(3) ORDER BY created_at LIMIT 20")
                 .query((rs, row) -> new Outbox(rs.getString("id"), rs.getString("stream_key"), read(rs.getString("payload"), new TypeReference<Map<String, String>>() { }), rs.getInt("dispatch_attempts"))).list();
         for (Outbox message : messages) {
             if (jdbc.sql("UPDATE mobile_automation_runner_outbox SET status='SENDING',locked_at=CURRENT_TIMESTAMP(3),dispatch_attempts=dispatch_attempts+1 WHERE id=:id AND status='PENDING'").param("id", message.id()).update() == 0) continue;
-            try { redis.opsForStream().add(StreamRecords.mapBacked(message.payload()).withStreamKey(message.stream())); jdbc.sql("UPDATE mobile_automation_runner_outbox SET status='SENT',sent_at=CURRENT_TIMESTAMP(3) WHERE id=:id").param("id", message.id()).update(); }
+            try { streams.add(StreamRecords.mapBacked(message.payload()).withStreamKey(message.stream())); jdbc.sql("UPDATE mobile_automation_runner_outbox SET status='SENT',sent_at=CURRENT_TIMESTAMP(3) WHERE id=:id").param("id", message.id()).update(); }
             catch (RuntimeException exception) { jdbc.sql("UPDATE mobile_automation_runner_outbox SET status='PENDING',available_at=DATE_ADD(CURRENT_TIMESTAMP(3),INTERVAL 5 SECOND),last_error=:error WHERE id=:id").param("id", message.id()).param("error", "Appium Runner Stream 投递失败").update(); }
         }
     }
@@ -235,7 +308,7 @@ public class MobileAutomationService {
     @Scheduled(fixedDelayString = "${testhub.mobile-automation-runner.steps.poll-interval-ms:500}")
     public void consumeSteps() { consume(MobileRunnerProtocol.STEP_STREAM, MobileRunnerProtocol.STEP_GROUP, true); }
     @Scheduled(fixedDelayString = "${testhub.mobile-automation-runner.deadline-check-interval-ms:1000}")
-    @Transactional
+    @Transactional(isolation=Isolation.READ_COMMITTED)
     public void expireDeadlines() {
         List<Execution> expired = jdbc.sql("SELECT * FROM mobile_automation_execution WHERE status IN ('QUEUED','ACCEPTED','RUNNING','CANCELLING') AND deadline_at<CURRENT_TIMESTAMP(3) ORDER BY deadline_at LIMIT 50")
                 .query((rs, row) -> execution(rs)).list();
@@ -248,10 +321,10 @@ public class MobileAutomationService {
         }
     }
     private void consume(String stream, String group, boolean steps) {
-        ensureGroup(stream, group, steps); List<MapRecord<String, Object, Object>> records = redis.opsForStream().read(Consumer.from(group, "platform-mobile-automation"), StreamReadOptions.empty().count(20), StreamOffset.create(stream, ReadOffset.lastConsumed()));
+        ensureGroup(stream, group, steps); List<MapRecord<String, Object, Object>> records = streams.read(Consumer.from(group, "platform-mobile-automation"), StreamReadOptions.empty().count(20), StreamOffset.create(stream, ReadOffset.lastConsumed()));
         if (records == null) return;
-        for (MapRecord<String, Object, Object> record : records) try { Map<String, String> fields = fields(record); if (steps) applyStepResult(MobileRunnerProtocol.step(fields)); else applyRunnerEvent(MobileRunnerProtocol.event(fields)); redis.opsForStream().acknowledge(group, record); }
-        catch (ResponseStatusException | IllegalArgumentException exception) { redis.opsForStream().acknowledge(group, record); }
+        for (MapRecord<String, Object, Object> record : records) try { Map<String, String> fields = fields(record); if (steps) applyStepResult(MobileRunnerProtocol.step(fields)); else applyRunnerEvent(MobileRunnerProtocol.event(fields)); streams.acknowledge(group, record); }
+        catch (ResponseStatusException | IllegalArgumentException exception) { streams.acknowledge(group, record); }
     }
     private void enqueueCancellation(Execution execution, String reason, Instant requestedAt) {
         Map<String, String> payload = new LinkedHashMap<>();
@@ -261,8 +334,8 @@ public class MobileAutomationService {
     }
     private synchronized void ensureGroup(String stream, String group, boolean steps) {
         if (steps ? stepGroupReady : eventGroupReady) return;
-        try { redis.opsForStream().createGroup(stream, ReadOffset.latest(), group); }
-        catch (Exception first) { if (!busyGroup(first)) { redis.opsForStream().add(StreamRecords.mapBacked(Map.of("bootstrap", "1")).withStreamKey(stream)); try { redis.opsForStream().createGroup(stream, ReadOffset.latest(), group); } catch (Exception second) { if (!busyGroup(second)) throw second; } } }
+        try { streams.createGroup(stream, ReadOffset.latest(), group); }
+        catch (Exception first) { if (!busyGroup(first)) { streams.add(StreamRecords.mapBacked(Map.of("bootstrap", "1")).withStreamKey(stream)); try { streams.createGroup(stream, ReadOffset.latest(), group); } catch (Exception second) { if (!busyGroup(second)) throw second; } } }
         if (steps) stepGroupReady = true; else eventGroupReady = true;
     }
 
@@ -294,7 +367,17 @@ public class MobileAutomationService {
     private Map<String,String> capabilities(Map<String,String> value) { if(value==null) return Map.of(); if(value.size()>50||value.entrySet().stream().anyMatch(entry->entry.getKey()==null||!SAFE_DEVICE_CAPABILITIES.contains(entry.getKey())||entry.getValue()==null||entry.getValue().length()>4096)) throw invalid("设备能力参数不合法或不在白名单内"); return Map.copyOf(value); }
     private int timeout(Integer value) { int valueOrDefault=value==null?300:value; if(valueOrDefault<10||valueOrDefault>3600) throw invalid("执行超时应在 10 到 3600 秒之间"); return valueOrDefault; }
     private Integer timeoutMillis(Integer value) { int valueOrDefault=value==null?30000:value; if(valueOrDefault<1||valueOrDefault>60000) throw invalid("步骤超时应在 1 到 60000 毫秒之间"); return valueOrDefault; }
-    private ProjectSummary writable(AuthenticatedPrincipal principal,String projectId) { return access.requireProjectParameterWrite(principal,projectId,WRITERS); }
+    private ProjectSummary writable(AuthenticatedPrincipal principal,String projectId) {
+        var project=access.requireProjectParameterWrite(principal,projectId,WRITERS); lockProject(projectId); return project;
+    }
+    void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id=:p FOR UPDATE").param("p",projectId).query(String.class).single();
+    }
+    DeviceRequest normalizeSyncDevice(DeviceRequest request) {var d=deviceInput(request);return new DeviceRequest(d.name(),d.platform(),d.udid(),d.automationName(),d.capabilities(),d.enabled());}
+    ApplicationRequest normalizeSyncApplication(ApplicationRequest request) {var d=applicationInput(request);return new ApplicationRequest(d.name(),d.platform(),d.appIdentifier(),d.versionName(),d.appFileId(),d.enabled());}
+    ElementRequest normalizeSyncElement(ElementRequest request) {var d=elementInput(request);return new ElementRequest(d.name(),d.platform(),d.locatorStrategy(),d.locatorValue(),d.description());}
+    Step normalizeSyncStep(Step step) {return stepInput(step);}
+    Map<String,String> normalizeSyncVariables(Map<String,String> values) {return variables(values);}
     private Map<String,String> fields(MapRecord<String,Object,Object> record) { Map<String,String> result=new LinkedHashMap<>(); record.getValue().forEach((key,value)->{if(key!=null&&value!=null)result.put(String.valueOf(key),String.valueOf(value));}); return Map.copyOf(result); }
     private String id() { return UlidCreator.getUlid().toString(); }
     private Instant instant(Timestamp value) { return value==null?null:value.toInstant(); }

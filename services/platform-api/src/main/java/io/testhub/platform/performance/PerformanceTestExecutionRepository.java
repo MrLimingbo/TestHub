@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.ulid.UlidCreator;
 import java.sql.Timestamp;
+import io.testhub.platform.shared.persistence.PendingExecutionCancellation;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,10 +19,12 @@ public class PerformanceTestExecutionRepository {
     private static final String TERMINAL_STATUSES = "'SUCCEEDED','FAILED','CANCELLED','REJECTED','TIMED_OUT'";
     private static final String ACTIVE_STATUSES = "'QUEUED','ACCEPTED','RUNNING','CANCELLING'";
     private final JdbcClient jdbc;
+    private final PendingExecutionCancellation cancellation;
     private final ObjectMapper json;
 
-    public PerformanceTestExecutionRepository(JdbcClient jdbc, ObjectMapper json) {
+    public PerformanceTestExecutionRepository(JdbcClient jdbc, ObjectMapper json, PendingExecutionCancellation cancellation) {
         this.jdbc = jdbc;
+        this.cancellation = cancellation;
         this.json = json;
     }
 
@@ -207,16 +210,7 @@ public class PerformanceTestExecutionRepository {
     }
 
     public int cancelBeforeDispatch(String projectId, String executionId) {
-        return jdbc.sql("""
-                UPDATE performance_test_execution execution
-                JOIN performance_runner_outbox outbox ON outbox.execution_id = execution.id
-                    AND outbox.message_type = 'TASK' AND outbox.status = 'PENDING'
-                SET execution.status = 'CANCELLED', execution.status_code = 'CANCELLED_BEFORE_DISPATCH',
-                    execution.status_message = '任务在投递给 JMeter Runner 前已取消。', execution.finished_at = CURRENT_TIMESTAMP(3),
-                    execution.updated_at = CURRENT_TIMESTAMP(3), outbox.status = 'CANCELLED', outbox.locked_at = NULL,
-                    outbox.last_error = NULL, outbox.updated_at = CURRENT_TIMESTAMP(3)
-                WHERE execution.project_id = :projectId AND execution.id = :executionId AND execution.status = 'QUEUED'
-                """).param("projectId", projectId).param("executionId", executionId).update();
+        return cancellation.cancel(PendingExecutionCancellation.Engine.PERFORMANCE, projectId, executionId);
     }
 
     public int markCancelling(String projectId, String executionId) {
@@ -415,7 +409,7 @@ public class PerformanceTestExecutionRepository {
                 INSERT INTO performance_test_execution_log
                     (id, execution_id, organization_id, project_id, source, runner_id, level, code, message, occurred_at)
                 VALUES (:id, :executionId, :organizationId, :projectId, :source, :runnerId, :level, :code, :message, :occurredAt)
-                """).param("id", UlidCreator.getUlid().toString()).param("executionId", execution.id())
+                """).param("id", UlidCreator.getMonotonicUlid().toString()).param("executionId", execution.id())
                 .param("organizationId", execution.organizationId()).param("projectId", execution.projectId())
                 .param("source", source).param("runnerId", runnerId).param("level", level).param("code", code)
                 .param("message", message).param("occurredAt", Timestamp.from(occurredAt)).update();

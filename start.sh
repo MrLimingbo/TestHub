@@ -12,6 +12,7 @@ api_pid_file="$state_dir/platform-api.pid"
 web_pid_file="$state_dir/web.pid"
 lock_dir="$state_dir/start.lock"
 with_api_runner=false
+with_registration=false
 docker_repaired=false
 runner_warning=false
 
@@ -21,7 +22,7 @@ fail() { printf 'Error: %s\n' "$*" >&2; exit 1; }
 
 usage() {
   cat <<'EOF'
-Usage: ./start.sh [--with-api-runner]
+Usage: ./start.sh [--with-api-runner] [--with-registration]
 
 Recovers the local TestHub development stack. Every run safely restarts the
 Platform API and Web UI, reuses healthy infrastructure, and verifies the CSRF
@@ -29,6 +30,7 @@ login bootstrap path before reporting success.
 
 Options:
   --with-api-runner  Also start the optional API Runner container.
+  --with-registration  Enable personal account registration for local web/desktop integration.
   -h, --help         Show this help message.
 
 The Web UI is available at http://127.0.0.1:5173. Runtime logs and process IDs
@@ -39,6 +41,7 @@ EOF
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --with-api-runner) with_api_runner=true ;;
+    --with-registration) with_registration=true ;;
     -h|--help) usage; exit 0 ;;
     *) fail "unknown option: $1" ;;
   esac
@@ -366,6 +369,10 @@ start_platform_api() {
   : > "$api_log"
   (
     cd "$root_dir"
+    if [[ "$with_registration" == true ]]; then
+      export TESTHUB_REGISTRATION_ENABLED=true
+      export SERVER_ADDRESS=127.0.0.1
+    fi
     nohup env JAVA_HOME="$java_home" PATH="$java_home/bin:$PATH" \
       ./mvnw -pl services/platform-api spring-boot:run </dev/null >"$api_log" 2>&1 &
     printf '%s\n' "$!" > "$api_pid_file"
@@ -373,11 +380,13 @@ start_platform_api() {
 }
 
 start_web_ui() {
+  local web_host=0.0.0.0
+  if [[ "$with_registration" == true ]]; then web_host=127.0.0.1; fi
   note "Starting Web UI..."
   : > "$web_log"
   (
     cd "$root_dir"
-    nohup "$root_dir/node_modules/.bin/vite" --host 0.0.0.0 --strictPort </dev/null >"$web_log" 2>&1 &
+    nohup "$root_dir/node_modules/.bin/vite" --host "$web_host" --strictPort </dev/null >"$web_log" 2>&1 &
     printf '%s\n' "$!" > "$web_pid_file"
   )
 }

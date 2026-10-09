@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,7 +36,8 @@ class ApiRunnerInternalAuthenticationFlowTests {
     private static final String HEARTBEAT_KEY = "testhub-runner-contract-test-signing-key-2026-000000000000000000000000";
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
+    @Autowired private io.testhub.platform.shared.runtime.ExpiringStateStore state;
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
@@ -45,10 +46,10 @@ class ApiRunnerInternalAuthenticationFlowTests {
 
     @AfterEach
     void clean() {
-        redis.delete(HEARTBEAT);
-        redis.opsForSet().remove(MEMBERS, RUNNER_ID);
-        redis.delete(NONCE_PREFIX + "nonce_0123456789abcdef");
-        redis.delete(NONCE_PREFIX + "nonce_abcdef0123456789");
+        registry.delete(HEARTBEAT);
+        registry.remove(MEMBERS, RUNNER_ID);
+        state.delete(NONCE_PREFIX + "nonce_0123456789abcdef");
+        state.delete(NONCE_PREFIX + "nonce_abcdef0123456789");
     }
 
     @Test
@@ -78,8 +79,7 @@ class ApiRunnerInternalAuthenticationFlowTests {
         heartbeat.put("heartbeatAt", Instant.now().toString());
         heartbeat.put("trustVersion", "1");
         heartbeat.put("signature", heartbeatSignature(heartbeat));
-        redis.opsForSet().add(MEMBERS, RUNNER_ID);
-        redis.opsForValue().set(HEARTBEAT, objectMapper.writeValueAsString(heartbeat), Duration.ofSeconds(60));
+        registry.publish(MEMBERS, HEARTBEAT, RUNNER_ID, objectMapper.writeValueAsString(heartbeat), Duration.ofSeconds(60));
     }
 
     private org.springframework.http.HttpHeaders headers(String nonce, boolean tamper) throws Exception {

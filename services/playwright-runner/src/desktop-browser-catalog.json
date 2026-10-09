@@ -1,0 +1,384 @@
+{
+  "version": 1,
+  "playwrightVersion": "1.61.0",
+  "checksumProvenance": "SHA-256 computed from the pinned Playwright release official HTTPS download URLs; not vendor-published checksums.",
+  "platforms": {
+    "mac14": [
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1228",
+        "directory": "chromium_headless_shell-1228",
+        "executable": "chrome-headless-shell-mac-x64/chrome-headless-shell",
+        "urls": [
+          "https://cdn.playwright.dev/builds/cft/149.0.7827.55/mac-x64/chrome-headless-shell-mac-x64.zip"
+        ],
+        "sha256": "a32029e1861329a431b712d5b864e213d9cf8ef51a82ce4c24b27e25f6605434",
+        "bytes": 103452247
+      },
+      {
+        "name": "firefox",
+        "revision": "1532",
+        "directory": "firefox-1532",
+        "executable": "firefox/Nightly.app/Contents/MacOS/firefox",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1532/firefox-mac.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1532/firefox-mac.zip",
+          "https://cdn.playwright.dev/builds/firefox/1532/firefox-mac.zip"
+        ],
+        "sha256": "f7158bd6cc5ca83a13bf1bd6af9e76eb609544b8d9f20996878f77de0468d3ef",
+        "bytes": 111006257
+      },
+      {
+        "name": "webkit",
+        "revision": "2251",
+        "directory": "webkit_mac14_special-2251",
+        "executable": "pw_run.sh",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2251/webkit-mac-14.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2251/webkit-mac-14.zip",
+          "https://cdn.playwright.dev/builds/webkit/2251/webkit-mac-14.zip"
+        ],
+        "sha256": "50ce5d7004274b01b106dda5ceee6703013b7bd0d0384457cd93a524ced34202",
+        "bytes": 86430592
+      },
+      {
+        "name": "ffmpeg",
+        "revision": "1011",
+        "directory": "ffmpeg-1011",
+        "executable": "ffmpeg-mac",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac.zip",
+          "https://cdn.playwright.dev/builds/ffmpeg/1011/ffmpeg-mac.zip"
+        ],
+        "sha256": "17ed15a2fa60d3c74181befcb2bdf7c9bb288d19b2a3b9893b94b63f2ce260e4",
+        "bytes": 1353430
+      }
+    ],
+    "mac14-arm64": [
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1228",
+        "directory": "chromium_headless_shell-1228",
+        "executable": "chrome-headless-shell-mac-arm64/chrome-headless-shell",
+        "urls": [
+          "https://cdn.playwright.dev/builds/cft/149.0.7827.55/mac-arm64/chrome-headless-shell-mac-arm64.zip"
+        ],
+        "sha256": "302f82603be06683947594ecd60f849e362a8fe3dd82a89bd4408477c97e75a6",
+        "bytes": 98043456
+      },
+      {
+        "name": "firefox",
+        "revision": "1532",
+        "directory": "firefox-1532",
+        "executable": "firefox/Nightly.app/Contents/MacOS/firefox",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1532/firefox-mac-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1532/firefox-mac-arm64.zip",
+          "https://cdn.playwright.dev/builds/firefox/1532/firefox-mac-arm64.zip"
+        ],
+        "sha256": "7372a999fe4793e62ca7f6fd65fa4b214b89d1e006e988ef156b8e1ef3bc6745",
+        "bytes": 103615809
+      },
+      {
+        "name": "webkit",
+        "revision": "2251",
+        "directory": "webkit_mac14_arm64_special-2251",
+        "executable": "pw_run.sh",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2251/webkit-mac-14-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2251/webkit-mac-14-arm64.zip",
+          "https://cdn.playwright.dev/builds/webkit/2251/webkit-mac-14-arm64.zip"
+        ],
+        "sha256": "2754eca5bab8773a6b1315528e7d8f342977ace799b3a91314e1be0cb324ee49",
+        "bytes": 82217310
+      },
+      {
+        "name": "ffmpeg",
+        "revision": "1011",
+        "directory": "ffmpeg-1011",
+        "executable": "ffmpeg-mac",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip",
+          "https://cdn.playwright.dev/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip"
+        ],
+        "sha256": "7d77eb0d44b59acc4065faa2476c0df1a242cc904c346f820626818c953c5277",
+        "bytes": 1097141
+      }
+    ],
+    "mac15": [
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1228",
+        "directory": "chromium_headless_shell-1228",
+        "executable": "chrome-headless-shell-mac-x64/chrome-headless-shell",
+        "urls": [
+          "https://cdn.playwright.dev/builds/cft/149.0.7827.55/mac-x64/chrome-headless-shell-mac-x64.zip"
+        ],
+        "sha256": "a32029e1861329a431b712d5b864e213d9cf8ef51a82ce4c24b27e25f6605434",
+        "bytes": 103452247
+      },
+      {
+        "name": "firefox",
+        "revision": "1532",
+        "directory": "firefox-1532",
+        "executable": "firefox/Nightly.app/Contents/MacOS/firefox",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1532/firefox-mac.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1532/firefox-mac.zip",
+          "https://cdn.playwright.dev/builds/firefox/1532/firefox-mac.zip"
+        ],
+        "sha256": "f7158bd6cc5ca83a13bf1bd6af9e76eb609544b8d9f20996878f77de0468d3ef",
+        "bytes": 111006257
+      },
+      {
+        "name": "webkit",
+        "revision": "2311",
+        "directory": "webkit-2311",
+        "executable": "pw_run.sh",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2311/webkit-mac-15.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2311/webkit-mac-15.zip",
+          "https://cdn.playwright.dev/builds/webkit/2311/webkit-mac-15.zip"
+        ],
+        "sha256": "22ab443b724e6fa73c260cd72df54c0147f040dc71654071e4138090dc89862b",
+        "bytes": 85736191
+      },
+      {
+        "name": "ffmpeg",
+        "revision": "1011",
+        "directory": "ffmpeg-1011",
+        "executable": "ffmpeg-mac",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac.zip",
+          "https://cdn.playwright.dev/builds/ffmpeg/1011/ffmpeg-mac.zip"
+        ],
+        "sha256": "17ed15a2fa60d3c74181befcb2bdf7c9bb288d19b2a3b9893b94b63f2ce260e4",
+        "bytes": 1353430
+      }
+    ],
+    "mac15-arm64": [
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1228",
+        "directory": "chromium_headless_shell-1228",
+        "executable": "chrome-headless-shell-mac-arm64/chrome-headless-shell",
+        "urls": [
+          "https://cdn.playwright.dev/builds/cft/149.0.7827.55/mac-arm64/chrome-headless-shell-mac-arm64.zip"
+        ],
+        "sha256": "302f82603be06683947594ecd60f849e362a8fe3dd82a89bd4408477c97e75a6",
+        "bytes": 98043456
+      },
+      {
+        "name": "firefox",
+        "revision": "1532",
+        "directory": "firefox-1532",
+        "executable": "firefox/Nightly.app/Contents/MacOS/firefox",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1532/firefox-mac-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1532/firefox-mac-arm64.zip",
+          "https://cdn.playwright.dev/builds/firefox/1532/firefox-mac-arm64.zip"
+        ],
+        "sha256": "7372a999fe4793e62ca7f6fd65fa4b214b89d1e006e988ef156b8e1ef3bc6745",
+        "bytes": 103615809
+      },
+      {
+        "name": "webkit",
+        "revision": "2311",
+        "directory": "webkit-2311",
+        "executable": "pw_run.sh",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2311/webkit-mac-15-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2311/webkit-mac-15-arm64.zip",
+          "https://cdn.playwright.dev/builds/webkit/2311/webkit-mac-15-arm64.zip"
+        ],
+        "sha256": "a029455b79e20f218992899b87cb59dde6f775c89d79f98ead423698cba08f9b",
+        "bytes": 80910090
+      },
+      {
+        "name": "ffmpeg",
+        "revision": "1011",
+        "directory": "ffmpeg-1011",
+        "executable": "ffmpeg-mac",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip",
+          "https://cdn.playwright.dev/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip"
+        ],
+        "sha256": "7d77eb0d44b59acc4065faa2476c0df1a242cc904c346f820626818c953c5277",
+        "bytes": 1097141
+      }
+    ],
+    "mac26": [
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1228",
+        "directory": "chromium_headless_shell-1228",
+        "executable": "chrome-headless-shell-mac-x64/chrome-headless-shell",
+        "urls": [
+          "https://cdn.playwright.dev/builds/cft/149.0.7827.55/mac-x64/chrome-headless-shell-mac-x64.zip"
+        ],
+        "sha256": "a32029e1861329a431b712d5b864e213d9cf8ef51a82ce4c24b27e25f6605434",
+        "bytes": 103452247
+      },
+      {
+        "name": "firefox",
+        "revision": "1532",
+        "directory": "firefox-1532",
+        "executable": "firefox/Nightly.app/Contents/MacOS/firefox",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1532/firefox-mac.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1532/firefox-mac.zip",
+          "https://cdn.playwright.dev/builds/firefox/1532/firefox-mac.zip"
+        ],
+        "sha256": "f7158bd6cc5ca83a13bf1bd6af9e76eb609544b8d9f20996878f77de0468d3ef",
+        "bytes": 111006257
+      },
+      {
+        "name": "webkit",
+        "revision": "2311",
+        "directory": "webkit-2311",
+        "executable": "pw_run.sh",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2311/webkit-mac-15.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2311/webkit-mac-15.zip",
+          "https://cdn.playwright.dev/builds/webkit/2311/webkit-mac-15.zip"
+        ],
+        "sha256": "22ab443b724e6fa73c260cd72df54c0147f040dc71654071e4138090dc89862b",
+        "bytes": 85736191
+      },
+      {
+        "name": "ffmpeg",
+        "revision": "1011",
+        "directory": "ffmpeg-1011",
+        "executable": "ffmpeg-mac",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac.zip",
+          "https://cdn.playwright.dev/builds/ffmpeg/1011/ffmpeg-mac.zip"
+        ],
+        "sha256": "17ed15a2fa60d3c74181befcb2bdf7c9bb288d19b2a3b9893b94b63f2ce260e4",
+        "bytes": 1353430
+      }
+    ],
+    "mac26-arm64": [
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1228",
+        "directory": "chromium_headless_shell-1228",
+        "executable": "chrome-headless-shell-mac-arm64/chrome-headless-shell",
+        "urls": [
+          "https://cdn.playwright.dev/builds/cft/149.0.7827.55/mac-arm64/chrome-headless-shell-mac-arm64.zip"
+        ],
+        "sha256": "302f82603be06683947594ecd60f849e362a8fe3dd82a89bd4408477c97e75a6",
+        "bytes": 98043456
+      },
+      {
+        "name": "firefox",
+        "revision": "1532",
+        "directory": "firefox-1532",
+        "executable": "firefox/Nightly.app/Contents/MacOS/firefox",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1532/firefox-mac-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1532/firefox-mac-arm64.zip",
+          "https://cdn.playwright.dev/builds/firefox/1532/firefox-mac-arm64.zip"
+        ],
+        "sha256": "7372a999fe4793e62ca7f6fd65fa4b214b89d1e006e988ef156b8e1ef3bc6745",
+        "bytes": 103615809
+      },
+      {
+        "name": "webkit",
+        "revision": "2311",
+        "directory": "webkit-2311",
+        "executable": "pw_run.sh",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2311/webkit-mac-15-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2311/webkit-mac-15-arm64.zip",
+          "https://cdn.playwright.dev/builds/webkit/2311/webkit-mac-15-arm64.zip"
+        ],
+        "sha256": "a029455b79e20f218992899b87cb59dde6f775c89d79f98ead423698cba08f9b",
+        "bytes": 80910090
+      },
+      {
+        "name": "ffmpeg",
+        "revision": "1011",
+        "directory": "ffmpeg-1011",
+        "executable": "ffmpeg-mac",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip",
+          "https://cdn.playwright.dev/builds/ffmpeg/1011/ffmpeg-mac-arm64.zip"
+        ],
+        "sha256": "7d77eb0d44b59acc4065faa2476c0df1a242cc904c346f820626818c953c5277",
+        "bytes": 1097141
+      }
+    ],
+    "win64": [
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1228",
+        "directory": "chromium_headless_shell-1228",
+        "executable": "chrome-headless-shell-win64/chrome-headless-shell.exe",
+        "urls": [
+          "https://cdn.playwright.dev/builds/cft/149.0.7827.55/win64/chrome-headless-shell-win64.zip"
+        ],
+        "sha256": "5cfda0c763aa6a867ce2efad0c467e3220e9c5c01c4cba02fd57afe49ede5457",
+        "bytes": 119099822
+      },
+      {
+        "name": "firefox",
+        "revision": "1532",
+        "directory": "firefox-1532",
+        "executable": "firefox/firefox.exe",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1532/firefox-win64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1532/firefox-win64.zip",
+          "https://cdn.playwright.dev/builds/firefox/1532/firefox-win64.zip"
+        ],
+        "sha256": "c02daa45e8af1164cba27301f076a877d9419f0d40b51b9fab4fe415daf6f77f",
+        "bytes": 122449192
+      },
+      {
+        "name": "webkit",
+        "revision": "2311",
+        "directory": "webkit-2311",
+        "executable": "Playwright.exe",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2311/webkit-win64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2311/webkit-win64.zip",
+          "https://cdn.playwright.dev/builds/webkit/2311/webkit-win64.zip"
+        ],
+        "sha256": "cb9114a112ed8bca0f9d7f24d62054190dfad746c331cd119f5e6a9a054cad64",
+        "bytes": 61623802
+      },
+      {
+        "name": "ffmpeg",
+        "revision": "1011",
+        "directory": "ffmpeg-1011",
+        "executable": "ffmpeg-win64.exe",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-win64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-win64.zip",
+          "https://cdn.playwright.dev/builds/ffmpeg/1011/ffmpeg-win64.zip"
+        ],
+        "sha256": "8d08827c019ad36e7b9d49d3648447d884534cb2acf200e71c715f6dd834cc50",
+        "bytes": 1411741
+      },
+      {
+        "name": "winldd",
+        "revision": "1007",
+        "directory": "winldd-1007",
+        "executable": "PrintDeps.exe",
+        "urls": [
+          "https://cdn.playwright.dev/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip",
+          "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip",
+          "https://cdn.playwright.dev/builds/winldd/1007/winldd-win64.zip"
+        ],
+        "sha256": "0069f0d11d4ad6df068a068c003d22fe7dbec192a47bba64b2e115e9c8ce41d8",
+        "bytes": 128684
+      }
+    ]
+  }
+}

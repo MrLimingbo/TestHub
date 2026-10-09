@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 class OperationsFlowTests {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper json;
+    @Autowired private org.springframework.core.env.Environment environment;
 
     @Test
     void exposesDetailFreeProbesMetricsAndAdministratorOperationsOverview() throws Exception {
@@ -55,14 +56,26 @@ class OperationsFlowTests {
                 .andExpect(jsonPath("$.data.dataProtection.controls[?(@.key == 'restore-guard' && @.status == 'ENABLED')]").exists())
                 .andExpect(jsonPath("$.data.capacity.status").value("ATTENTION"))
                 .andExpect(jsonPath("$.data.capacity.controls[?(@.key == 'capacity-baseline' && @.status == 'ENABLED')]").exists())
-                .andExpect(jsonPath("$.data.capacity.controls[?(@.key == 'resource-alerts' && @.status == 'ENABLED')]").exists())
+                .andExpect(jsonPath("$.data.capacity.controls[?(@.key == 'resource-alerts')]").exists())
                 .andExpect(jsonPath("$.data.capacity.controls[?(@.key == 'recovery-drill' && @.status == 'ATTENTION')]").exists())
                 .andExpect(jsonPath("$.data.controls[?(@.key == 'secret-rekey-window' && @.status == 'ENABLED')]").exists())
-                .andExpect(jsonPath("$.data.controls[?(@.key == 'helm-chart' && @.status == 'ENABLED')]").exists())
-                .andExpect(jsonPath("$.data.controls[?(@.key == 'helm-rollback' && @.status == 'ENABLED')]").exists())
-                .andExpect(jsonPath("$.data.controls[?(@.key == 'release-acceptance' && @.status == 'ENABLED')]").exists())
-                .andExpect(jsonPath("$.data.controls[?(@.key == 'production-drill' && @.status == 'ATTENTION')]").exists())
                 .andExpect(jsonPath("$.data.components[0].detail").value("连接与基础读写检查正常。"));
+
+        boolean desktop = environment.acceptsProfiles(org.springframework.core.env.Profiles.of("desktop"));
+        mvc.perform(get("/api/v1/operations/overview").cookie(session))
+                .andExpect(jsonPath("$.data.runtimeMode").value(desktop ? "DESKTOP" : "SERVER"))
+                .andExpect(jsonPath("$.data.capacity.controls[?(@.key == 'resource-alerts' && @.status == '" + (desktop ? "ATTENTION" : "ENABLED") + "')]").exists());
+        if (desktop) {
+            mvc.perform(get("/api/v1/operations/overview").cookie(session))
+                    .andExpect(jsonPath("$.data.controls[?(@.key == 'helm-chart')]").isEmpty())
+                    .andExpect(jsonPath("$.data.controls[?(@.key == 'desktop-distribution' && @.status == 'ATTENTION')]").exists());
+        } else {
+            mvc.perform(get("/api/v1/operations/overview").cookie(session))
+                    .andExpect(jsonPath("$.data.controls[?(@.key == 'helm-chart' && @.status == 'ENABLED')]").exists())
+                    .andExpect(jsonPath("$.data.controls[?(@.key == 'helm-rollback' && @.status == 'ENABLED')]").exists())
+                    .andExpect(jsonPath("$.data.controls[?(@.key == 'release-acceptance' && @.status == 'ENABLED')]").exists())
+                    .andExpect(jsonPath("$.data.controls[?(@.key == 'production-drill' && @.status == 'ATTENTION')]").exists());
+        }
 
         MvcResult rekeyCsrf = mvc.perform(get("/api/v1/auth/csrf").cookie(session)).andExpect(status().isOk()).andReturn();
         JsonNode rekeyCsrfData = body(rekeyCsrf).path("data");

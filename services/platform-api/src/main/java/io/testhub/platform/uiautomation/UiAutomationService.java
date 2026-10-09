@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -66,10 +67,19 @@ public class UiAutomationService {
         return automation.findExecutions(projectId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationBrowserProfile createProfile(AuthenticatedPrincipal principal, String projectId, ProfileRequest request) {
+        return insertProfile(principal, projectId, profileInput(request));
+    }
+
+    /** Imported targets are stored as disabled drafts; activation retains the ordinary origin policy. */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public UiAutomationBrowserProfile createTransferredProfile(AuthenticatedPrincipal principal, String projectId, ProfileRequest request) {
+        return insertProfile(principal, projectId, profileInput(request, true));
+    }
+
+    private UiAutomationBrowserProfile insertProfile(AuthenticatedPrincipal principal, String projectId, UiAutomationRepository.ProfileInput input) {
         ProjectSummary project = writable(principal, projectId);
-        UiAutomationRepository.ProfileInput input = profileInput(request);
         String id = UlidCreator.getUlid().toString();
         try { automation.insertProfile(id, project.organizationId(), projectId, input, principal.userId()); }
         catch (DataIntegrityViolationException exception) { throw conflict("当前项目已存在同名浏览器配置"); }
@@ -79,7 +89,7 @@ public class UiAutomationService {
         return profile;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationBrowserProfile updateProfile(AuthenticatedPrincipal principal, String projectId, String profileId,
                                                      ProfileRequest request) {
         ProjectSummary project = writable(principal, projectId);
@@ -93,7 +103,7 @@ public class UiAutomationService {
         return profile;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteProfile(AuthenticatedPrincipal principal, String projectId, String profileId) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationBrowserProfile profile = profile(projectId, profileId);
@@ -103,7 +113,7 @@ public class UiAutomationService {
                 "UI_AUTOMATION_BROWSER_PROFILE", profileId, Map.of("name", profile.name()));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationPageObject createPageObject(AuthenticatedPrincipal principal, String projectId, PageObjectRequest request) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationRepository.PageObjectInput input = pageObjectInput(request);
@@ -116,7 +126,7 @@ public class UiAutomationService {
         return value;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationPageObject updatePageObject(AuthenticatedPrincipal principal, String projectId, String pageObjectId,
                                                     PageObjectRequest request) {
         ProjectSummary project = writable(principal, projectId);
@@ -130,7 +140,7 @@ public class UiAutomationService {
         return value;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deletePageObject(AuthenticatedPrincipal principal, String projectId, String pageObjectId) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationPageObject value = pageObject(projectId, pageObjectId);
@@ -142,7 +152,7 @@ public class UiAutomationService {
                 "UI_AUTOMATION_PAGE_OBJECT", pageObjectId, Map.of("name", value.name()));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationScenario createScenario(AuthenticatedPrincipal principal, String projectId, ScenarioRequest request) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationRepository.ScenarioInput input = scenarioInput(projectId, request);
@@ -155,7 +165,7 @@ public class UiAutomationService {
         return scenario;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationScenario updateScenario(AuthenticatedPrincipal principal, String projectId, String scenarioId,
                                                ScenarioRequest request) {
         ProjectSummary project = writable(principal, projectId);
@@ -169,7 +179,7 @@ public class UiAutomationService {
         return scenario;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteScenario(AuthenticatedPrincipal principal, String projectId, String scenarioId) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationScenario scenario = scenario(projectId, scenarioId);
@@ -179,7 +189,7 @@ public class UiAutomationService {
                 Map.of("name", scenario.name()));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationExecution execute(AuthenticatedPrincipal principal, String projectId, String scenarioId, Integer timeoutSeconds,
                                          String functionalPlanId) {
         ProjectSummary project = writable(principal, projectId);
@@ -194,8 +204,10 @@ public class UiAutomationService {
         return execution;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationExecution executeFromSchedule(UiAutomationSchedule schedule) {
+        automation.lockProject(schedule.projectId());
+        schedule = schedules.findById(schedule.id()).orElseThrow(() -> notFound("定时计划不存在"));
         if (!schedule.enabled()) throw conflict("已停用的定时计划不能执行");
         FunctionalTestPlan plan = functionalPlan(schedule.projectId(), schedule.functionalPlanId());
         Instant requestedAt = Instant.now();
@@ -205,7 +217,7 @@ public class UiAutomationService {
         return execution;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationExecution retry(AuthenticatedPrincipal principal, String projectId, String executionId) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationExecution previous = execution(projectId, executionId);
@@ -221,7 +233,7 @@ public class UiAutomationService {
         return retry;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationExecution cancel(AuthenticatedPrincipal principal, String projectId, String executionId) {
         ProjectSummary project = writable(principal, projectId);
         UiAutomationExecution current = execution(projectId, executionId);
@@ -255,19 +267,21 @@ public class UiAutomationService {
                 steps, automation.findArtifacts(projectId, executionId));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void applyRunnerEvent(UiAutomationRunnerProtocol.Event event) {
         String status = Map.of("ACCEPTED", "ACCEPTED", "RUNNING", "RUNNING", "SUCCEEDED", "SUCCEEDED", "FAILED", "FAILED",
                 "CANCELLED", "CANCELLED", "REJECTED", "REJECTED").get(event.type());
         UiAutomationExecution execution = automation.findExecutionByTask(event.taskId(), event.executionId()).orElse(null);
-        if (execution == null || status == null || automation.applyRunnerEvent(event, status) == 0) return;
+        if (execution == null || status == null) return;
+        automation.lockProject(execution.projectId());
+        if (automation.applyRunnerEvent(event, status) == 0) return;
         audit.recordSystem(execution.organizationId(), execution.projectId(), "UI_AUTOMATION_EXECUTION_EVENT_RECEIVED",
                 "UI_AUTOMATION_EXECUTION", execution.id(), Map.of("taskId", execution.taskId(), "runnerId", event.runnerId(),
                         "type", event.type(), "code", event.code()));
         if (terminal(status)) onTerminal(execution(execution.projectId(), execution.id()));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void applyStepResult(UiAutomationRunnerProtocol.StepResult result) {
         UiAutomationExecution execution = automation.findExecutionByTask(result.taskId(), result.executionId()).orElse(null);
         if (execution == null || execution.runnerId() == null || !execution.runnerId().equals(result.runnerId())
@@ -275,7 +289,7 @@ public class UiAutomationService {
         automation.insertStepResult(execution, result);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UiAutomationRunnerRuntimeConfiguration runtimeConfiguration(String runnerId, String taskId, String executionId) {
         UiAutomationExecution execution = automation.findExecutionByTask(taskId, executionId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.FORBIDDEN, "Playwright Runner 运行时工件不可用"));
@@ -295,9 +309,11 @@ public class UiAutomationService {
     }
 
     @Scheduled(fixedDelayString = "${testhub.ui-automation.execution-timeout-sweep-interval-ms:3000}")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void expireDueExecutions() {
-        for (UiAutomationExecution execution : automation.findExpiredActive()) {
+        var expired = automation.findExpiredActive();
+        expired.stream().map(UiAutomationExecution::projectId).distinct().sorted().forEach(automation::lockProject);
+        for (UiAutomationExecution execution : expired) {
             if (automation.markTimedOut(execution.id()) == 0) continue;
             automation.cancelPendingTaskOutbox(execution.id());
             if (automation.hasTaskPossiblyDispatched(execution.id()) && !automation.hasActiveCancellationCommand(execution.id())) {
@@ -350,14 +366,35 @@ public class UiAutomationService {
     }
 
     private UiAutomationRepository.ProfileInput profileInput(ProfileRequest request) {
+        return profileInput(request, false);
+    }
+
+    UiAutomationRepository.ProfileInput normalizeSyncProfile(ProfileRequest request) { return profileInput(request, true); }
+    UiAutomationRepository.PageObjectInput normalizeSyncPageObject(PageObjectRequest request) { return pageObjectInput(request); }
+    Map<String, String> normalizeSyncVariables(Map<String, String> input) { return variables(input); }
+    List<UiAutomationStep> normalizeSyncSteps(List<UiAutomationStep> input) { return steps(null, input); }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public UiAutomationBrowserProfile updateSyncedProfile(AuthenticatedPrincipal actor, String projectId, String id, ProfileRequest request) {
+        var project = writable(actor, projectId);
+        var old = profile(projectId, id);
+        var input = profileInput(new ProfileRequest(request.name(), request.browser(), request.baseUrl(), request.viewportWidth(), request.viewportHeight(), old.enabled()), !old.enabled());
+        if (automation.updateProfile(projectId, id, input, actor.userId()) == 0) throw notFound("浏览器配置不存在");
+        var result = profile(projectId, id);
+        audit.record(actor, project.organizationId(), projectId, "UI_AUTOMATION_BROWSER_PROFILE_UPDATED", "UI_AUTOMATION_BROWSER_PROFILE", id,
+                Map.of("name", result.name(), "version", result.version()));
+        return result;
+    }
+
+    private UiAutomationRepository.ProfileInput profileInput(ProfileRequest request, boolean transferredDraft) {
         if (request == null) throw rejected("浏览器配置不能为空");
         String name = required(request.name(), "配置名称", 120);
         String browser = request.browser() == null ? "" : request.browser().trim().toLowerCase(Locale.ROOT);
         if (!BROWSERS.contains(browser)) throw rejected("浏览器仅支持 chromium、firefox 或 webkit");
-        String baseUrl = targets.normalizeAndAssertAllowed(request.baseUrl());
+        String baseUrl = transferredDraft ? targets.normalizeForTransfer(request.baseUrl()) : targets.normalizeAndAssertAllowed(request.baseUrl());
         int width = integer(request.viewportWidth(), 1440, 320, 3840, "视口宽度");
         int height = integer(request.viewportHeight(), 900, 320, 2160, "视口高度");
-        return new UiAutomationRepository.ProfileInput(name, browser, baseUrl, width, height, request.enabled() == null || request.enabled());
+        return new UiAutomationRepository.ProfileInput(name, browser, baseUrl, width, height, !transferredDraft && (request.enabled() == null || request.enabled()));
     }
 
     private UiAutomationRepository.PageObjectInput pageObjectInput(PageObjectRequest request) {
@@ -466,7 +503,7 @@ public class UiAutomationService {
         return functionalPlans.findPlan(projectId, id).orElseThrow(() -> notFound("功能测试计划不存在"));
     }
     private boolean terminal(String status) { return Set.of("SUCCEEDED", "FAILED", "REJECTED", "CANCELLED", "TIMED_OUT").contains(status); }
-    private ProjectSummary writable(AuthenticatedPrincipal principal, String projectId) { return access.requireProjectParameterWrite(principal, projectId, WRITERS); }
+    private ProjectSummary writable(AuthenticatedPrincipal principal, String projectId) { var project = access.requireProjectParameterWrite(principal, projectId, WRITERS); automation.lockProject(projectId); return project; }
     private int timeout(Integer value) { return integer(value, 300, 10, 3600, "执行超时"); }
     private int integer(Integer value, int fallback, int min, int max, String label) {
         int result = value == null ? fallback : value;

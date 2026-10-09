@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+        name = "testhub.bootstrap.demo-enabled", havingValue = "true", matchIfMissing = true)
 public class BootstrapAccountConfiguration {
     @Bean
     ApplicationRunner bootstrapLocalWorkspace(UserAccountRepository accounts, AccessRepository access,

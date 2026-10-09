@@ -10,7 +10,7 @@ import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.ExpiringStateStore;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,13 +24,13 @@ public class PerformanceRunnerInternalAuthenticationService {
     private static final Duration MAX_CLOCK_SKEW = Duration.ofSeconds(60);
     private static final Duration NONCE_TTL = Duration.ofMinutes(2);
     private final PerformanceRunnerStatusService runners;
-    private final StringRedisTemplate redis;
+    private final ExpiringStateStore state;
     private final byte[] signingKey;
 
-    public PerformanceRunnerInternalAuthenticationService(PerformanceRunnerStatusService runners, StringRedisTemplate redis,
+    public PerformanceRunnerInternalAuthenticationService(PerformanceRunnerStatusService runners, ExpiringStateStore state,
                                                           @Value("${testhub.performance-runner.heartbeat-key:}") String signingKey) {
         this.runners = runners;
-        this.redis = redis;
+        this.state = state;
         this.signingKey = signingKey == null ? new byte[0] : signingKey.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -52,7 +52,7 @@ public class PerformanceRunnerInternalAuthenticationService {
         if (!runnerId.matches("[A-Za-z0-9._-]{1,64}") || !nonce.matches("[A-Za-z0-9_-]{16,128}")
                 || !signature.matches("[0-9a-f]{64}") || !recent(timestamp) || !runners.isTrustedExecutionEnabled(runnerId)
                 || !matches(path, runnerId, timestamp, nonce, signature, bindings)) throw rejected();
-        Boolean firstUse = redis.opsForValue().setIfAbsent(NONCE_KEY_PREFIX + runnerId + ":" + nonce, "1", NONCE_TTL);
+        Boolean firstUse = state.putIfAbsent(NONCE_KEY_PREFIX + runnerId + ":" + nonce, "1", NONCE_TTL);
         if (!Boolean.TRUE.equals(firstUse)) throw rejected();
         return runnerId;
     }

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 性能资料迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>性能资料迁移</h1>
+  <p id="account" class="description" role="status">正在准备本地工作区并读取项目…</p>
+  <form id="performance-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required disabled></select>
+    <label for="target">账号目标项目</label><select id="target" required disabled></select>
+    <p class="description">复制压测计划当前版本、线程组顺序、负载模型、请求配置、内联 CSV、集合点和质量阈值。本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">迁入计划统一为草稿，不提交任何压测任务。目标地址原样保留，localhost 在不同电脑上指向不同服务；检查地址、数据和负载后再设为待执行。目标运行器与执行授权需要单独配置，不迁入本机授权。</p>
+    <p class="hint">本次不复制执行历史、指标、资源监控、JTL 和日志工件；这些仍保留在本地。请求配置和 CSV 可能含敏感值，确认后才上传。</p>
+    <p class="hint">目标项目存在同名计划时整批停止。预览有效期 10 分钟；切换账号或服务后须重新预览。资料上限 32 MiB。</p>
+    <p id="preview" class="description" role="status"></p><p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传性能资料</button>
+  </form>
+</main><script src="performance-transfer.js"></script></body>
+</html>

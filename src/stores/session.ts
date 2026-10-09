@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { isLocalDesktop, resumeLocalWorkspace } from '@/utils/desktopWorkspace'
 
 export interface Profile {
   id: string
@@ -23,6 +24,13 @@ export interface Project {
   createdByName: string | null
   createdAt: string
   updatedAt: string
+}
+
+export interface RegistrationInput {
+  account: string
+  email: string
+  displayName: string
+  password: string
 }
 
 interface AccessContext {
@@ -55,7 +63,11 @@ export const useSessionStore = defineStore('session', {
     async initialize() {
       if (this.initialized) return
       try {
-        const response = await fetch('/api/v1/auth/me', { credentials: 'include' })
+        let response = await fetch('/api/v1/auth/me', { credentials: 'include' })
+        if (response.status === 401 && isLocalDesktop()) {
+          await resumeLocalWorkspace()
+          response = await fetch('/api/v1/auth/me', { credentials: 'include' })
+        }
         if (response.ok) {
           const payload = await response.json() as ApiEnvelope<Profile>
           this.profile = payload.data
@@ -67,6 +79,12 @@ export const useSessionStore = defineStore('session', {
       }
     },
     async login(account: string, password: string) {
+      return this.authenticate('login', { account, password })
+    },
+    async register(input: RegistrationInput) {
+      return this.authenticate('register', input)
+    },
+    async authenticate(action: 'login' | 'register', input: { account: string; password: string }) {
       let csrfResponse: Response
       try {
         csrfResponse = await fetch('/api/v1/auth/csrf', { credentials: 'include' })
@@ -80,20 +98,22 @@ export const useSessionStore = defineStore('session', {
       if (!csrf?.data?.token || !csrf.data.headerName) {
         throw new Error('安全会话响应无效，请重新运行 ./start.sh 后刷新页面')
       }
-      const response = await fetch('/api/v1/auth/login', {
+      const response = await fetch(`/api/v1/auth/${action}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', [csrf.data.headerName]: csrf.data.token },
-        body: JSON.stringify({ account, password }),
+        body: JSON.stringify(input),
       })
       if (!response.ok) {
         const error = await response.json().catch(() => ({})) as ApiFailure
-        throw new Error(error.message ?? '登录失败，请稍后重试')
+        throw new Error(error.message ?? (action === 'register' ? '注册失败，请稍后重试' : '登录失败，请稍后重试'))
       }
       const payload = await response.json() as ApiEnvelope<Profile>
       this.profile = payload.data
       this.signedIn = true
       this.initialized = true
+      this.organizations = []
+      this.projectsByOrganization = {}
       await this.loadAccessContext()
     },
     async signOut() {

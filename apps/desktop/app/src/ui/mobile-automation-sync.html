@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 移动端资料同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="mobile-automation-sync.css" />
+</head>
+<body><main class="card">
+  <h1>移动端资料同步</h1><p class="description">离线时在本地编辑移动端资料；联网后与绑定账号的网页端同步定义。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">按类型与名称匹配，内容不同需选择，名称大小写不同需在两端手动统一。同步设备能力参数、应用标识与版本、元素定位、场景变量与有序步骤。引用在目标重映射，同名平台不同或 UDID 重复需手动核对。每类最多 100 条，资料不超过 3 MiB。</p>
+    <p class="hint">UDID、能力参数、变量及步骤内容会发送到所选账号服务，请核对业务信息。同步不提交执行；新设备与应用停用且无应用包，Appium 与设备运行环境需各端配置。删除不传播。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">只同步移动端定义；启停保留各端，已有应用包关联保留各端，更新递增设备、应用及场景本端版本。已提交任务使用原冻结配置。应用安装文件、执行历史及截图不复制，不自动提交执行。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="mobile-automation-sync.js"></script></body>
+</html>

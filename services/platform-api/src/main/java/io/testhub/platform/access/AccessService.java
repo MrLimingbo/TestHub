@@ -156,9 +156,13 @@ public class AccessService {
     }
 
     public void requireSystemAdmin(AuthenticatedPrincipal principal) {
-        if (principal.tokenProjectId() != null || !access.hasRole(principal.userId(), "SYSTEM_ADMIN")) {
+        if (!canManageSystem(principal)) {
             throw new AccessDeniedException("仅系统管理员可访问");
         }
+    }
+
+    public boolean canManageSystem(AuthenticatedPrincipal principal) {
+        return principal.tokenProjectId() == null && access.hasRole(principal.userId(), "SYSTEM_ADMIN");
     }
 
     @Transactional

@@ -35,6 +35,25 @@ public class NotificationDeliveryRepository {
                 .param("projectId", projectId).param("limit", limit).query((rs, row) -> delivery(rs)).list();
     }
 
+    public Optional<NotificationDelivery> findById(String id, String projectId) {
+        return jdbc.sql(select() + " WHERE id=:id AND project_id=:project")
+                .param("id", id).param("project", projectId).query((rs, row) -> delivery(rs)).optional();
+    }
+
+    public boolean alreadyQueued(String runId, String templateId, String eventCode) {
+        return jdbc.sql("SELECT EXISTS(SELECT 1 FROM notification_delivery WHERE schedule_run_id=:run AND template_id=:template AND event_code=:event)")
+                .param("run", runId).param("template", templateId).param("event", eventCode).query(Boolean.class).single();
+    }
+
+    public int failInterrupted() {
+        return jdbc.sql("""
+                UPDATE notification_delivery SET status='FAILED',
+                    last_error='本机服务在投递中断后重启，结果无法确认。请核对接收端后决定是否重新投递。',
+                    updated_at=CURRENT_TIMESTAMP(3)
+                WHERE status='DELIVERING'
+                """).update();
+    }
+
     public List<StoredNotificationDelivery> findDue(Instant now, int limit) {
         return jdbc.sql(storedSelect() + " WHERE status IN ('PENDING', 'RETRYING') AND next_attempt_at <= :now "
                         + "ORDER BY next_attempt_at, created_at LIMIT :limit")

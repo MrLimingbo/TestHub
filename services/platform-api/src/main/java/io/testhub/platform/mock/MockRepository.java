@@ -21,6 +21,28 @@ public class MockRepository {
         this.json = json;
     }
 
+    public void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id=:project FOR UPDATE").param("project",projectId).query(String.class).single();
+    }
+
+    public void updateRuleDefinition(String projectId, String serverId, String ruleId, MockService.RuleInput input) {
+        jdbc.sql("""
+                UPDATE mock_rule SET name=:name,http_method=:method,path=:path,priority=:priority,
+                    request_query=CAST(:query AS JSON),request_headers=CAST(:headers AS JSON),
+                    request_body_match=:match,request_body=:body,response_status=:status,
+                    response_headers=CAST(:responseHeaders AS JSON),response_body=:responseBody
+                WHERE project_id=:project AND server_id=:server AND id=:id
+                """).param("project",projectId).param("server",serverId).param("id",ruleId)
+                .param("name",input.name()).param("method",input.httpMethod()).param("path",input.path()).param("priority",input.priority())
+                .param("query",encoded(input.requestQuery())).param("headers",encoded(input.requestHeaders()))
+                .param("match",input.requestBodyMatch()).param("body",input.requestBody()).param("status",input.responseStatus())
+                .param("responseHeaders",encoded(input.responseHeaders())).param("responseBody",input.responseBody()).update();
+    }
+    private String encoded(Object value) {
+        try { return json.writeValueAsString(value); }
+        catch (java.io.IOException error) { throw new IllegalStateException("Mock 规则序列化失败",error); }
+    }
+
     public List<MockServer> findServers(String projectId) {
         return jdbc.sql(serverQuery("WHERE s.project_id = :projectId"))
                 .param("projectId", projectId).query((rs, row) -> server(rs)).list();
@@ -60,6 +82,12 @@ public class MockRepository {
                 .param("enabled", enabled).param("projectId", projectId).param("serverId", serverId).update();
     }
 
+    public void updateRuleEnabled(String projectId, String serverId, String ruleId, boolean enabled) {
+        jdbc.sql("UPDATE mock_rule SET enabled = :enabled WHERE project_id = :projectId AND server_id = :serverId AND id = :ruleId")
+                .param("enabled", enabled).param("projectId", projectId).param("serverId", serverId)
+                .param("ruleId", ruleId).update();
+    }
+
     public List<MockShare> findShares(String projectId, String serverId) {
         return jdbc.sql(shareQuery("WHERE s.project_id = :projectId AND s.server_id = :serverId"))
                 .param("projectId", projectId).param("serverId", serverId).query((rs, row) -> share(rs)).list();
@@ -74,6 +102,15 @@ public class MockRepository {
     public int countShares(String serverId) {
         Integer count = jdbc.sql("SELECT COUNT(*) FROM mock_share WHERE server_id = :serverId")
                 .param("serverId", serverId).query(Integer.class).single();
+        return count == null ? 0 : count;
+    }
+
+    public int countActiveShares(String serverId) {
+        Integer count = jdbc.sql("""
+                SELECT COUNT(*) FROM mock_share
+                WHERE server_id = :serverId AND revoked_at IS NULL
+                  AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP(3))
+                """).param("serverId", serverId).query(Integer.class).single();
         return count == null ? 0 : count;
     }
 

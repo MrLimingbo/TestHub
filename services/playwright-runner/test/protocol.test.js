@@ -40,8 +40,8 @@ test('reserves two slots before running tasks concurrently and releases both aft
 
 test('consumes Redis RESP3 task stream replies and acknowledges completed transport', async () => {
   const commands = []
-  const runner = new PlaywrightRunner({ commandClient: { sendCommand: async command => { commands.push(command) } },
-    readClient: { sendCommand: async () => { runner.stopping = true; return { stream: [['1-0', Object.entries(task).flat()]] } } },
+  const runner = new PlaywrightRunner({ commandClient: { sendCommand: async command => { commands.push(command); if (command[0] === 'XACK') runner.stopping = true } },
+    readClient: { sendCommand: async () => { await new Promise(resolve => setTimeout(resolve, 0)); return { stream: [['1-0', Object.entries(task).flat()]] } } },
     cancelClient: {}, config: { runnerId: 'test', maxConcurrentTasks: 1, executionEnabled: false } })
   await runner.loop(); await new Promise(resolve => setTimeout(resolve, 0))
   assert.ok(commands.some(command => command.includes('PLAYWRIGHT_EXECUTION_DISABLED')))
@@ -56,4 +56,30 @@ test('consumes Redis RESP3 cancellation stream replies', async () => {
   await runner.cancellationLoop()
   assert.ok(runner.cancelled.has(task.taskId))
   assert.ok(commands.some(command => command[0] === 'XACK'))
+})
+
+// A task fetched before shutdown must not open a new browser after shutdown has begun.
+test('shutdown refuses a newly delivered task without acknowledging it', async () => {
+  const runner = new PlaywrightRunner({ commandClient: {}, readClient: {}, cancelClient: {}, config: {} })
+  runner.stopping = true
+  runner.run = () => assert.fail('browser must not start')
+  runner.ack = () => assert.fail('unprocessed task must stay recoverable')
+  await runner.handle({ id: '1-0', fields: task })
+})
+test('shutdown cancels browser preparation and drains its terminal event before closing clients', async () => {
+  const calls = [], chain = { del() { return this }, sRem() { return this }, async exec() {} }
+  const client = { multi: () => chain, async quit() { calls.push('quit') } }
+  const runner = new PlaywrightRunner({ commandClient: client, readClient: client, cancelClient: client,
+    config: { executionEnabled: true, runnerId: 'fixture', maxConcurrentTasks: 1 },
+    prepareBrowser: (_browser, signal) => new Promise((_resolve, reject) => signal.addEventListener('abort', () => reject(new Error('cancelled')), { once: true })) })
+  runner.runtime = async () => ({ browser: { browser: 'chromium' } })
+  runner.heartbeat = async () => {}
+  runner.event = async value => { calls.push(value.type) }
+  runner.ack = async () => { calls.push('ack') }
+  const completion = runner.handle({ id: '1-0', fields: task })
+  await new Promise(resolve => setTimeout(resolve, 0))
+  await runner.stop(); await completion
+  assert.ok(calls.indexOf('CANCELLED') < calls.indexOf('quit'))
+  assert.ok(calls.indexOf('ack') < calls.indexOf('quit'))
+  assert.equal(runner.tasks.size, 0)
 })

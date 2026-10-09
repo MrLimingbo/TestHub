@@ -72,12 +72,12 @@ async function loadPlans() {
 async function loadPlanDetails() {
   planCases.value = selectedPlanId.value ? await read<PlanCase[]>(`/api/v1/projects/${projectId.value}/functional/plans/${selectedPlanId.value}/cases`) : []
   runs.value = await read<Run[]>(`/api/v1/projects/${projectId.value}/functional/runs${selectedPlanId.value ? `?planId=${selectedPlanId.value}` : ''}`)
-  selectedRunId.value = runs.value[0]?.id ?? ''
+  if (!runs.value.some((run) => run.id === selectedRunId.value)) selectedRunId.value = runs.value[0]?.id ?? ''
   await loadRunDetails()
 }
 async function loadRunDetails() {
   runCases.value = selectedRunId.value ? await read<RunCase[]>(`/api/v1/projects/${projectId.value}/functional/runs/${selectedRunId.value}/cases`) : []
-  selectedRunCaseId.value = runCases.value[0]?.id ?? ''
+  if (!runCases.value.some((item) => item.id === selectedRunCaseId.value)) selectedRunCaseId.value = runCases.value[0]?.id ?? ''
   await loadRunSteps()
 }
 async function loadRunSteps() { runSteps.value = selectedRunCaseId.value ? await read<RunStep[]>(`/api/v1/projects/${projectId.value}/functional/run-cases/${selectedRunCaseId.value}/steps`) : [] }
@@ -180,4 +180,17 @@ watch(workspace.selectedCatalogId, async () => {
 
 <style scoped>
 .plan-summary{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:18px;align-items:center;margin-bottom:20px}.plan-summary>div{display:grid;gap:4px}.plan-summary span,.plan-summary small,.plan-summary p,.section-title span,.case-name small,.plan-item small,.run-item small{color:var(--color-text-3);font-size:12px}.plan-summary strong{font-size:20px}.plan-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:18px;align-items:start}.plan-list{padding:16px 10px;min-height:640px}.section-heading,.section-title{display:flex;align-items:center;justify-content:space-between}.section-heading{padding:0 6px 12px}.section-heading h3{margin:4px 0 0;font-size:16px}.plan-item,.run-item,.run-case-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:0;background:transparent;border-radius:8px;text-align:left;cursor:pointer}.plan-item{padding:12px 10px}.plan-item:hover,.plan-item.selected,.run-item:hover,.run-item.selected,.run-case-item:hover,.run-case-item.selected{background:rgb(var(--primary-1))}.plan-item>div,.run-item>div,.run-case-item>div{display:grid;gap:4px;min-width:0}.plan-item strong,.run-item strong,.run-case-item strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.create-plan-button{margin-top:18px}.plan-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 24px;margin-bottom:18px}.plan-header h2{margin:5px 0 6px;font-size:22px}.plan-header p{margin:0;color:var(--color-text-3);max-width:640px}.execution-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:18px;margin-bottom:18px}.plan-cases,.run-list,.report-panel{padding:20px}.section-title{margin-bottom:16px}.section-title>div{display:flex;align-items:baseline;gap:10px}.section-title strong{font-size:16px}.case-name{display:flex;align-items:center;gap:10px}.case-name small{display:block;margin-top:4px}.case-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:8px;background:rgb(var(--success-1));color:rgb(var(--success-6))}.run-list{min-height:260px}.run-item{padding:11px 8px}.run-rate{display:flex!important;align-items:flex-end;gap:8px}.run-rate b{font-size:12px;color:var(--color-text-2)}.report-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}.report-metrics>div{display:grid;gap:5px;padding:14px;border-radius:9px;background:var(--color-fill-2)}.report-metrics span{font-size:12px;color:var(--color-text-3)}.report-metrics strong{font-size:22px}.report-metrics .passed strong{color:rgb(var(--success-6))}.report-metrics .failed strong{color:rgb(var(--danger-6))}.report-metrics .blocked strong{color:rgb(var(--warning-6))}.report-metrics .not-run strong{color:var(--color-text-3)}.run-detail{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;position:relative}.detail-heading{font-weight:600;color:var(--color-text-2);margin-bottom:10px}.detail-heading span{margin-left:8px;color:var(--color-text-3);font-size:12px}.run-case-item{padding:10px 8px}.step-list{min-height:160px}.step-item{display:grid;grid-template-columns:28px 1fr 96px;gap:10px;align-items:center;border-bottom:1px solid var(--color-border-2);padding:10px 0}.step-number{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:rgb(var(--primary-1));color:rgb(var(--primary-6));font-size:12px}.step-copy{display:grid;gap:6px;min-width:0}.step-copy strong{font-size:13px;font-weight:500}.run-case-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid var(--color-border-2)}.no-plan{min-height:440px;display:grid;place-items:center}.form-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}.case-picker{display:grid;gap:10px;max-height:190px;overflow:auto;padding:12px;border:1px solid var(--color-border-2);border-radius:6px}@media (max-width:1220px){.plan-summary{grid-template-columns:repeat(3,1fr)}.plan-summary>.arco-btn{grid-column:1/-1}.plan-layout{grid-template-columns:220px minmax(0,1fr)}.execution-grid{grid-template-columns:1fr}}@media (max-width:780px){.plan-summary,.plan-layout,.execution-grid,.run-detail{grid-template-columns:1fr}.plan-header{flex-direction:column}.report-metrics{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}}
+.plan-header > div, .plan-cases, .run-list, .report-panel { min-width: 0; }
+.plan-header { flex-wrap: wrap; }
+.plan-header > div { max-width: 100%; }
+.plan-header :deep(.arco-space) { flex-wrap: wrap; }
+.plan-header p { overflow-wrap: anywhere; }
+.plan-item small, .run-item small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plan-item > div { flex: 1; }
+.plan-item :deep(.arco-tag), .plan-item :deep(.arco-checkbox) { flex-shrink: 0; }
+.run-item > div:first-child { flex: 1; }
+.run-rate { flex-shrink: 0; }
+.step-item { grid-template-columns: 28px minmax(0, 1fr) 96px; }
+.step-copy { grid-template-columns: minmax(0, 1fr); }
+.step-copy strong { overflow-wrap: anywhere; }
 </style>

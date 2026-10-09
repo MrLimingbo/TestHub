@@ -58,6 +58,10 @@ public class PerformanceTestPlanRepository {
         return result == null ? 0 : result;
     }
 
+    public void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id=:project FOR UPDATE").param("project", projectId).query(String.class).single();
+    }
+
     public void insertPlan(String id, String organizationId, String projectId, String name, String description,
                            String status, String createdBy) {
         jdbc.sql("""

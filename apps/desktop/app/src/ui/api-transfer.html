@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 接口设计资产迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>接口设计资产迁移</h1>
+  <p id="account" class="description" role="status">正在准备本地工作区并读取项目…</p>
+  <form id="api-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required disabled></select>
+    <label for="target">账号目标项目</label><select id="target" required disabled></select>
+    <label class="checkbox-row" for="include-files"><input id="include-files" type="checkbox" disabled />同时复制全部项目文件（含未引用文件）</label>
+    <label class="checkbox-row" for="include-grpc"><input id="include-grpc" type="checkbox" disabled />同时复制全部 gRPC 描述符（最多 20 项、合计 4 MiB）</label>
+    <label class="checkbox-row" for="include-history"><input id="include-history" type="checkbox" disabled />同时复制调试历史及回放草稿（可能含认证凭据和请求正文）</label>
+    <p class="hint">历史默认不选；选中后保留原历史时间并标记为迁入历史，目标重新加密草稿，不执行请求。最多 5000 条、源存储估算 8 MiB；超限会阻断，不截断记录。</p>
+    <p class="description">复制所选项目的全部接口目录、接口定义、全部接口版本和接口用例。本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">不包含会话临时快捷请求副本、独立环境参数与凭据库或偏好设置。保留环境代码，目标必须已有对应且启用的环境；环境缺失、禁用或引用未勾选的 gRPC 描述符时将阻断迁移。</p>
+    <p class="hint">文件默认不选；若资产引用源文件但未选择文件，将阻断迁移。选择后复制全部项目文件，最多 100 项、合计 20 MiB；快照限制为 8 MiB，含文件时为 32 MiB。</p>
+    <p class="hint">保留发布状态和历史发布时间，可能影响目标 Mock 示例来源；不保留原发布人。迁入成功不代表所有接口都可直接执行。</p>
+    <p class="hint">接口请求正文和示例可能包含敏感值。确认即同意上传所选项目接口数据及勾选的项目文件。预览只读取资料，不写入目标，有效期 10 分钟；切换账号或服务后须重新预览。</p>
+    <p id="preview" class="description" role="status"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传接口设计资产</button>
+  </form>
+</main><script src="api-transfer.js"></script></body>
+</html>

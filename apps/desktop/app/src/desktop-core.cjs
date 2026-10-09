@@ -70,6 +70,27 @@ function normalizeHttpDebugRequest(value) {
 
   const body = String(value.body ?? '')
   if (body.length > 100000) throw new Error('桌面调试请求体不能超过 100000 字符。')
+  const protocol = { type: String(value.protocol?.type || 'HTTP').trim().toUpperCase() }
+  if (!['HTTP', 'GRAPHQL', 'SOAP'].includes(protocol.type)) throw new Error('桌面本地执行仅支持 HTTP、GraphQL 和 SOAP。')
+  if (protocol.type !== 'HTTP' && method !== 'POST') throw new Error(`${protocol.type} 调试仅支持 POST 请求。`)
+  // Build replay fields from the actual wire body, not unchecked renderer metadata.
+  if (protocol.type === 'GRAPHQL') {
+    let payload
+    try { payload = JSON.parse(body) } catch { throw new Error('GraphQL 请求体必须是有效 JSON。') }
+    if (!payload || typeof payload.query !== 'string' || !payload.query.trim()
+      || (payload.variables != null && (typeof payload.variables !== 'object' || Array.isArray(payload.variables)))
+      || (payload.operationName != null && (typeof payload.operationName !== 'string' || payload.operationName.length > 2000))) {
+      throw new Error('GraphQL 请求体必须包含查询、对象类型 variables 和有效 operationName。')
+    }
+    protocol.query = payload.query
+    protocol.variables = JSON.stringify(payload.variables ?? {})
+    protocol.operationName = payload.operationName ?? ''
+  } else if (protocol.type === 'SOAP') {
+    if (!body.trim().startsWith('<') || !body.includes('Envelope')) throw new Error('SOAP Envelope 格式不合法。')
+    protocol.envelope = body
+    protocol.soapAction = normalizedHeaders.find(header => header.name.toLowerCase() === 'soapaction')?.value ?? ''
+    if (protocol.soapAction.length > 2000) throw new Error('SOAPAction 不能超过 2000 字符。')
+  }
   const timeoutMs = Number(value.timeoutMs ?? 10000)
   if (!Number.isInteger(timeoutMs) || timeoutMs < 500 || timeoutMs > 10000) {
     throw new Error('桌面调试超时时间应在 500 到 10000 毫秒之间。')
@@ -84,7 +105,7 @@ function normalizeHttpDebugRequest(value) {
     timeoutMs,
     environmentCode: typeof value.environmentCode === 'string' ? value.environmentCode : null,
     auth: { type: 'NONE', placement: 'HEADER' },
-    protocol: { type: 'HTTP' },
+    protocol,
   }
 }
 
@@ -96,7 +117,7 @@ async function readPreferences(userDataPath) {
   try {
     const content = await fs.readFile(preferencesPath(userDataPath), 'utf8')
     const parsed = JSON.parse(content)
-    return { serverUrl: normalizeServerUrl(parsed.serverUrl) }
+    return { serverUrl: parsed.serverUrl ? normalizeServerUrl(parsed.serverUrl) : null, ...(parsed.mode === 'local' ? { mode: 'local' } : {}) }
   } catch {
     return { serverUrl: null }
   }
@@ -113,7 +134,16 @@ async function writePreferences(userDataPath, serverUrl) {
   return normalized
 }
 
+async function selectLocalWorkspace(userDataPath) {
+  const preferences = await readPreferences(userDataPath)
+  await fs.mkdir(userDataPath, { recursive: true, mode: 0o700 })
+  const filename = preferencesPath(userDataPath), temporary = `${filename}.${process.pid}.tmp`
+  await fs.writeFile(temporary, `${JSON.stringify({ ...preferences, mode: 'local' }, null, 2)}\n`, { mode: 0o600 })
+  await fs.rename(temporary, filename)
+}
+
 module.exports = {
+  selectLocalWorkspace,
   normalizeServerUrl,
   isTrustedServerUrl,
   normalizeHttpDebugRequest,

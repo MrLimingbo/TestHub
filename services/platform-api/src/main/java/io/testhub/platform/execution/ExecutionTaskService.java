@@ -17,8 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ExecutionTaskService {
     private static final Set<String> WRITERS = Set.of("SYSTEM_ADMIN", "ORG_ADMIN", "PROJECT_ADMIN", "TEST_LEAD", "TESTER");
-    private static final Set<String> TYPES = Set.of("API", "FUNCTIONAL", "PERFORMANCE", "UI", "MOBILE", "OTHER");
-    private static final Set<String> STATUSES = Set.of("QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED");
+    static final Set<String> TYPES = Set.of("API", "FUNCTIONAL", "PERFORMANCE", "UI", "MOBILE", "OTHER");
+    static final Set<String> STATUSES = Set.of("QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED");
     private final ExecutionTaskRepository tasks;
     private final AccessService access;
     private final AuditService audit;
@@ -37,6 +37,7 @@ public class ExecutionTaskService {
     @Transactional
     public ExecutionTask create(AuthenticatedPrincipal principal, String projectId, TaskInput input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "任务参数不能为空");
         validateName(input.name());
         String type = normalizeType(input.taskType());
         String id = UlidCreator.getUlid().toString();
@@ -49,7 +50,10 @@ public class ExecutionTaskService {
     @Transactional
     public ExecutionTask update(AuthenticatedPrincipal principal, String projectId, String taskId, TaskUpdate input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "任务参数不能为空");
         validateName(input.name());
+        ExecutionTask current = locked(projectId, taskId);
+        requireVersion(current, input.expectedVersion());
         String status = normalizeStatus(input.status());
         int progress = input.progress();
         if (progress < 0 || progress > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "进度应在 0 到 100 之间");
@@ -65,14 +69,29 @@ public class ExecutionTaskService {
 
     @Transactional
     public ExecutionTask cancel(AuthenticatedPrincipal principal, String projectId, String taskId) {
+        return cancel(principal, projectId, taskId, null);
+    }
+
+    @Transactional
+    public ExecutionTask cancel(AuthenticatedPrincipal principal, String projectId, String taskId, Long expectedVersion) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
-        ExecutionTask task = tasks.findById(projectId, taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "任务不存在"));
+        ExecutionTask task = locked(projectId, taskId);
+        requireVersion(task, expectedVersion);
         if (Set.of("SUCCEEDED", "FAILED", "CANCELLED").contains(task.status())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "任务已结束，不能取消");
         }
         tasks.update(projectId, taskId, task.name(), "CANCELLED", task.progress());
         audit.record(principal, project.organizationId(), projectId, "EXECUTION_TASK_CANCELLED", "EXECUTION_TASK", taskId, Map.of());
         return tasks.findById(projectId, taskId).orElseThrow();
+    }
+
+    private ExecutionTask locked(String projectId, String taskId) {
+        return tasks.lock(projectId, taskId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "任务不存在"));
+    }
+    private void requireVersion(ExecutionTask task, Long expectedVersion) {
+        if (expectedVersion != null && expectedVersion < 1) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "任务版本不合法");
+        if (expectedVersion != null && expectedVersion != task.version())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "任务已更新，请刷新后核对再操作");
     }
 
     private void validateName(String value) {
@@ -94,5 +113,7 @@ public class ExecutionTaskService {
     }
 
     public record TaskInput(String taskType, String name) {}
-    public record TaskUpdate(String name, String status, int progress) {}
+    public record TaskUpdate(String name, String status, int progress, Long expectedVersion) {
+        public TaskUpdate(String name, String status, int progress) { this(name, status, progress, null); }
+    }
 }

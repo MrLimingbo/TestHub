@@ -66,9 +66,10 @@ public class WebSocketDebugService {
     private final ProjectParameterRepository parameters;
     private final SecretCipher cipher;
     private final ObjectMapper json;
+    private final DesktopApiDebugTargetPolicy desktopTargets;
 
     public WebSocketDebugService(WebSocketDebugClient client, ApiDebugHistoryRepository history, AccessService access, AuditService audit,
-                                 ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json) {
+                                 ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json, DesktopApiDebugTargetPolicy desktopTargets) {
         this.client = client;
         this.history = history;
         this.access = access;
@@ -76,6 +77,7 @@ public class WebSocketDebugService {
         this.parameters = parameters;
         this.cipher = cipher;
         this.json = json;
+        this.desktopTargets = desktopTargets;
     }
 
     public List<SessionSummary> sessions(AuthenticatedPrincipal principal, String projectId) {
@@ -370,13 +372,14 @@ public class WebSocketDebugService {
             throw rejected("WebSocket URL 格式不合法");
         }
         if (url.getScheme() == null || !Set.of("ws", "wss").contains(url.getScheme().toLowerCase(Locale.ROOT))
-                || url.getHost() == null || url.getUserInfo() != null) {
+                || url.getHost() == null || url.getUserInfo() != null || url.getPort() == 0 || url.getPort() > 65535) {
             throw rejected("仅支持不含用户信息的 WS 或 WSS URL");
         }
         try {
             InetAddress[] addresses = InetAddress.getAllByName(url.getHost());
-            if (addresses.length == 0 || java.util.Arrays.stream(addresses).anyMatch(this::blockedAddress)) {
-                throw rejected("不允许访问内网、回环或保留地址");
+            if (addresses.length == 0 || (java.util.Arrays.stream(addresses).anyMatch(this::blockedAddress)
+                    && !desktopTargets.permits(url, "wss".equalsIgnoreCase(url.getScheme()), addresses))) {
+                throw rejected("目标未获允许：本地工作区请在本地执行设置中授权精确 HTTP(S) 目标（WS 对应 HTTP，WSS 对应 HTTPS）；在线服务不允许内网或回环目标");
             }
         } catch (UnknownHostException exception) {
             throw rejected("无法解析 WebSocket 主机");

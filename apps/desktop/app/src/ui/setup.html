@@ -11,14 +11,17 @@
     <main class="card">
       <div class="mark">T</div>
       <p class="eyebrow">TESTHUB DESKTOP</p>
-      <h1>连接 TestHub 服务</h1>
-      <p class="description">连接你或所属组织部署的 TestHub 服务。每个系统用户使用独立会话和配置；HTTP 接口调试会从当前电脑发出，可访问当前电脑所在内网。</p>
+      <h1>选择工作区</h1>
+      <p class="description">本地工作区无需注册，数据保存在这台电脑。连接在线服务后，可以注册或登录该服务的账号；本地数据不会自动上传。</p>
+      <button id="local" type="button">进入本地工作区</button>
+      <p id="local-status" class="hint" role="status"></p>
+      <button id="recover-backup" type="button" hidden>从备份恢复本地工作区…</button>
       <form id="server-form">
         <label for="server-url">服务地址</label>
-        <input id="server-url" name="server-url" type="url" inputmode="url" autocomplete="url" placeholder="https://testhub.example.com" required />
-        <p class="hint">请勿填写他人的本机地址。生产环境必须使用 HTTPS；仅连接当前电脑的开发服务时可使用 http://127.0.0.1:5173。</p>
+        <input id="server-url" name="server-url" type="url" inputmode="url" autocomplete="url" placeholder="https://你的 TestHub 服务地址" required />
+        <p class="hint">填写自己的账号服务或企业服务地址。线上服务使用 HTTPS；本机网页服务可以使用 localhost 地址。</p>
         <p id="error" class="error" role="alert" hidden></p>
-        <button id="connect" type="submit">保存并连接</button>
+        <button id="connect" type="submit">连接账号或企业服务</button>
       </form>
     </main>
     <script src="setup-renderer.js"></script>

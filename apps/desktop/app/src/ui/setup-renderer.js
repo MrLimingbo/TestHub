@@ -32,3 +32,22 @@ form.addEventListener('submit', async (event) => {
 })
 
 void initialize()
+
+const localButton = document.querySelector('#local')
+const recoverButton = document.querySelector('#recover-backup')
+recoverButton.addEventListener('click', async () => {
+  try { await window.testhubDesktop.openBackup() } catch (error) { showError(error.message) }
+})
+localButton.addEventListener('click', async () => {
+  localButton.disabled = true; errorElement.hidden = true
+  try { await window.testhubDesktop.enterLocalWorkspace() }
+  catch (error) { showError(error.message || '本地工作区启动失败。'); localButton.disabled = false }
+})
+setInterval(async () => {
+  try {
+    const { localStatus, canRestore } = await window.testhubDesktop.loadPreferences()
+    document.querySelector('#local-status').textContent = localStatus?.message || ''
+    localButton.disabled = ['starting', 'recovering', 'stopping'].includes(localStatus?.phase)
+    recoverButton.hidden = !(canRestore && localStatus?.phase === 'error')
+  } catch { /* The setup window may close as the main window becomes ready. */ }
+}, 1000)

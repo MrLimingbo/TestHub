@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>TestHub · 本地执行设置</title>
+    <link rel="stylesheet" href="setup.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>本地执行设置</h1>
+      <p class="description">WebSocket/gRPC 调试、接口自动化、性能测试和 Web UI 自动化会从这台电脑发出请求。添加允许访问的目标后，即可测试对应的本机、内网或在线接口。</p>
+      <form id="execution-form">
+        <label for="origins">允许访问的目标地址</label>
+        <textarea id="origins" rows="5" spellcheck="false" placeholder="http://localhost:3000&#10;https://api.example.com" aria-describedby="origins-hint"></textarea>
+        <p id="origins-hint" class="hint">每行一个地址，仅填写协议、主机和端口，最多 50 个。不支持通配符。WebSocket 的 WS/WSS 分别填写 HTTP/HTTPS 地址；gRPC 使用 TLS 时填写 HTTPS，否则填写 HTTP，端口须一致。留空会禁止 WebSocket/gRPC 的本机和内网目标，并关闭本地接口自动化、性能测试和 Web UI 自动化执行。设置只影响这台电脑的本地工作区。</p>
+        <label for="appium-server">移动端 Appium 服务地址（可选）</label>
+        <input id="appium-server" type="url" placeholder="http://127.0.0.1:4723" aria-describedby="appium-hint" />
+        <p id="appium-hint" class="hint">填入已有且安装了对应驱动的 Appium 服务，可使用本机 HTTP 或 HTTPS，支持 /wd/hub 路径。留空关闭本地移动端执行；不影响上述接口目标授权。需要连接 Android/iOS 设备或模拟器并预先安装测试应用。TestHub 自带移动端运行器，不会把设备记录当作已连接设备。</p>
+        <p class="hint">保存后将重启本地工作区，正在执行的任务会被中断。请先保存页面修改并等待任务结束。</p>
+        <p id="error" class="error" role="alert" hidden></p>
+        <button id="save" type="submit">保存并重启本地工作区</button>
+      </form>
+    </main>
+    <script src="execution-renderer.js"></script>
+  </body>
+</html>

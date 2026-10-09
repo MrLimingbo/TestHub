@@ -38,17 +38,19 @@ public class ApiAutomationScheduleService {
     private static final String QUARTZ_GROUP = "testhub-api-automation";
     private final ApiAutomationScheduleRepository schedules;
     private final ApiAutomationScenarioRepository scenarios;
+    private final ApiAutomationExecutionProfileRepository profiles;
     private final ApiAutomationExecutionService executions;
     private final AccessService access;
     private final AuditService audit;
     private final Scheduler scheduler;
 
     public ApiAutomationScheduleService(ApiAutomationScheduleRepository schedules,
-                                        ApiAutomationScenarioRepository scenarios,
+                                        ApiAutomationScenarioRepository scenarios, ApiAutomationExecutionProfileRepository profiles,
                                         ApiAutomationExecutionService executions, AccessService access,
                                         AuditService audit, Scheduler scheduler) {
         this.schedules = schedules;
         this.scenarios = scenarios;
+        this.profiles = profiles;
         this.executions = executions;
         this.access = access;
         this.audit = audit;
@@ -66,7 +68,7 @@ public class ApiAutomationScheduleService {
         SchedulePayload payload = payload(projectId, input);
         String id = UlidCreator.getUlid().toString();
         try {
-            schedules.insert(id, project.organizationId(), projectId, payload.scenarioId(), payload.name(), payload.cronExpression(),
+            schedules.insert(id, project.organizationId(), projectId, payload.scenarioId(), payload.executionProfileId(), payload.name(), payload.cronExpression(),
                     payload.timezone(), payload.timeoutSeconds(), payload.maxConsecutiveFailures(), payload.enabled(), principal.userId());
         } catch (DataIntegrityViolationException exception) {
             throw conflict("当前项目已存在同名接口自动化定时计划");
@@ -84,7 +86,7 @@ public class ApiAutomationScheduleService {
         owned(projectId, scheduleId);
         SchedulePayload payload = payload(projectId, input);
         try {
-            if (schedules.update(projectId, scheduleId, payload.scenarioId(), payload.name(), payload.cronExpression(),
+            if (schedules.update(projectId, scheduleId, payload.scenarioId(), payload.executionProfileId(), payload.name(), payload.cronExpression(),
                     payload.timezone(), payload.timeoutSeconds(), payload.maxConsecutiveFailures(), payload.enabled()) == 0) {
                 throw notFound("接口自动化定时计划不存在");
             }
@@ -114,7 +116,7 @@ public class ApiAutomationScheduleService {
         ApiAutomationSchedule schedule = owned(projectId, scheduleId);
         if (!schedule.enabled()) throw conflict("已停用的定时计划不能立即执行");
         ApiAutomationExecution execution = executions.create(principal, projectId, schedule.scenarioId(), schedule.timeoutSeconds(),
-                null, Map.of());
+                schedule.executionProfileId(), Map.of());
         schedules.markTriggered(scheduleId, execution.id(), Instant.now());
         audit.record(principal, schedule.organizationId(), projectId, "API_AUTOMATION_SCHEDULE_MANUAL_TRIGGERED",
                 "API_AUTOMATION_EXECUTION", execution.id(), Map.of("scheduleId", scheduleId, "scenarioId", schedule.scenarioId()));
@@ -127,7 +129,7 @@ public class ApiAutomationScheduleService {
         if (schedule == null || !schedule.enabled()) return;
         ScheduledAutomationPrincipal principal = new ScheduledAutomationPrincipal(schedule.createdBy(), schedule.projectId(), schedule.id());
         ApiAutomationExecution execution = executions.create(principal, schedule.projectId(), schedule.scenarioId(), schedule.timeoutSeconds(),
-                null, Map.of());
+                schedule.executionProfileId(), Map.of());
         schedules.markTriggered(schedule.id(), execution.id(), Instant.now());
         audit.record(principal, schedule.organizationId(), schedule.projectId(), "API_AUTOMATION_SCHEDULE_TRIGGERED",
                 "API_AUTOMATION_EXECUTION", execution.id(), Map.of("scheduleId", schedule.id(), "scenarioId", schedule.scenarioId()));
@@ -195,6 +197,11 @@ public class ApiAutomationScheduleService {
         String name = required(input.name(), "计划名称", 160);
         String scenarioId = required(input.scenarioId(), "接口自动化场景", 26);
         scenarios.findDetail(projectId, scenarioId).orElseThrow(() -> notFound("接口自动化场景不存在"));
+        String executionProfileId = input.executionProfileId();
+        if (executionProfileId != null && !executionProfileId.isBlank()) {
+            if (executionProfileId.length() != 26 || profiles.findDetail(projectId, executionProfileId).isEmpty())
+                throw rejected("请选择当前项目的运行配置集");
+        } else executionProfileId = null;
         String cron = required(input.cronExpression(), "Cron 表达式", 160);
         if (!org.quartz.CronExpression.isValidExpression(cron)) throw rejected("Cron 表达式不合法（使用 Quartz 六或七段格式）");
         String timezone = required(input.timezone(), "时区", 64);
@@ -203,7 +210,7 @@ public class ApiAutomationScheduleService {
         if (timeout < 10 || timeout > 3600) throw rejected("执行超时时间应在 10 到 3600 秒之间");
         int maximumFailures = input.maxConsecutiveFailures() == null ? 3 : input.maxConsecutiveFailures();
         if (maximumFailures < 1 || maximumFailures > 10) throw rejected("连续失败停用阈值应在 1 到 10 之间");
-        return new SchedulePayload(scenarioId, name, cron, timezone, timeout, maximumFailures,
+        return new SchedulePayload(scenarioId, executionProfileId, name, cron, timezone, timeout, maximumFailures,
                 input.enabled() == null || input.enabled());
     }
 
@@ -214,9 +221,13 @@ public class ApiAutomationScheduleService {
     }
 
     private Map<String, Object> auditDetail(ApiAutomationSchedule schedule) {
-        return Map.of("name", schedule.name(), "scenarioId", schedule.scenarioId(), "cronExpression", schedule.cronExpression(),
-                "timezone", schedule.timezone(), "timeoutSeconds", schedule.timeoutSeconds(), "enabled", schedule.enabled(),
-                "maxConsecutiveFailures", schedule.maxConsecutiveFailures());
+        Map<String, Object> detail = new java.util.LinkedHashMap<>();
+        detail.put("name", schedule.name()); detail.put("scenarioId", schedule.scenarioId());
+        if (schedule.executionProfileId() != null) detail.put("executionProfileId", schedule.executionProfileId());
+        detail.put("cronExpression", schedule.cronExpression()); detail.put("timezone", schedule.timezone());
+        detail.put("timeoutSeconds", schedule.timeoutSeconds()); detail.put("enabled", schedule.enabled());
+        detail.put("maxConsecutiveFailures", schedule.maxConsecutiveFailures());
+        return detail;
     }
 
     private String required(String value, String label, int maxLength) {
@@ -234,10 +245,10 @@ public class ApiAutomationScheduleService {
     private JobKey jobKey(String scheduleId) { return new JobKey(scheduleId, QUARTZ_GROUP); }
     private TriggerKey triggerKey(String scheduleId) { return new TriggerKey(scheduleId, QUARTZ_GROUP); }
 
-    private record SchedulePayload(String scenarioId, String name, String cronExpression, String timezone,
+    private record SchedulePayload(String scenarioId, String executionProfileId, String name, String cronExpression, String timezone,
                                    int timeoutSeconds, int maxConsecutiveFailures, boolean enabled) {
     }
-    public record ScheduleInput(String scenarioId, String name, String cronExpression, String timezone,
+    public record ScheduleInput(String scenarioId, String executionProfileId, String name, String cronExpression, String timezone,
                                 Integer timeoutSeconds, Integer maxConsecutiveFailures, Boolean enabled) {
     }
 }

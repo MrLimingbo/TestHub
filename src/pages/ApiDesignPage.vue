@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
 import ApiDefinitionEditor from '@/components/api-testing/ApiDefinitionEditor.vue'
@@ -25,6 +25,9 @@ import {
   apiInterchangeSizeError,
 } from '@/utils/apiInterchange'
 
+import { isLocalDesktop } from '@/utils/desktopWorkspace'
+import { createApiDesignPreferencesClient, emptyApiDesignPreferences, readLegacyPreferences, PreferencesConflictError, type ApiDesignPreferencesState } from '@/utils/apiDesignPreferences'
+
 interface ApiEnvelope<T> { data: T }
 interface Organization { id: string; name: string }
 interface Project { id: string; organizationId: string; name: string; code: string }
@@ -35,7 +38,7 @@ interface Parameter { name: string; type: string; required: boolean; example: st
 interface ApiVersion { id: string; versionName: string; summary: string; description: string; requestHeaders: string; requestQuery: string; requestPath: string; requestBody: string; responseBody: string; exampleResponse: string; status: string; publishedAt: string | null; createdAt: string }
 interface ApiTreeCase { id: string; apiId: string; name: string; responseValidation: string }
 interface ImportResult { format: string; importedCount: number; items: string[]; caseCount?: number; skippedCount?: number; warnings?: string[] }
-interface QuickRequestHistory { id: string; method: string; protocol?: string; requestUrl: string; responseStatus: number | null; durationMs: number; result: string; createdAt: string; replayDraft?: string; localDraft?: ApiDebugRouteDraft }
+interface QuickRequestHistory { importSourceId?: string | null; id: string; method: string; protocol?: string; requestUrl: string; responseStatus: number | null; durationMs: number; result: string; createdAt: string; replayDraft?: string; localDraft?: ApiDebugRouteDraft }
 interface QuickRequestFolder { id: string; parentId: string | null; name: string }
 interface QuickRequestFolderRow extends QuickRequestFolder { depth: number }
 type DocumentInterchangeKind = 'OPENAPI' | 'POSTMAN' | 'HAR'
@@ -77,6 +80,26 @@ const quickRequestFolders = ref<QuickRequestFolder[]>([])
 const quickRequestCopies = ref<QuickRequestHistory[]>([])
 const quickRequestHiddenIds = ref<string[]>([])
 const quickRequestFolderIds = ref<Record<string, string>>({})
+const preferencesLoading = ref(false)
+const preferencesSaving = ref(false)
+const preferencesReady = ref(false)
+const preferencesError = ref('')
+const preferencesConflict = ref(false)
+const legacyPreferencesAvailable = ref(false)
+const quickFolderDialog = ref(false)
+const quickFolderForm = reactive({ id: '', parentId: null as string | null, name: '' })
+type PendingPreferences = { state: ApiDesignPreferencesState; copies: QuickRequestHistory[]; success: string }
+const pendingPreferences = ref<PendingPreferences | null>(null)
+const preferencesLocked = computed(() => !preferencesReady.value || preferencesLoading.value || preferencesSaving.value || Boolean(pendingPreferences.value))
+let preferencesGeneration = 0
+function preferencesClient() {
+  const userId = session.profile?.id
+  return createApiDesignPreferencesClient({
+    read: (id) => read(`/api/v1/projects/${encodeURIComponent(id)}/api-design/preferences`),
+    write: (id, value) => mutate(`/api/v1/projects/${encodeURIComponent(id)}/api-design/preferences`, 'PUT', value, () => { if (session.profile?.id !== userId) throw new Error('登录身份已变化，请重新加载') }),
+  })
+}
+let preferenceClient = preferencesClient()
 const apiCases = ref<ApiTreeCase[]>([])
 const expandedApiCaseIds = ref<Set<string>>(new Set())
 const interchangeKind = ref<'OPENAPI' | 'CURL' | 'POSTMAN' | 'HAR'>('OPENAPI')
@@ -157,6 +180,17 @@ const quickRequestFolderRows = computed<QuickRequestFolderRow[]>(() => {
     .forEach((folder) => rows.push({ ...folder, depth: 0 }))
   return rows
 })
+const quickFolderParentOptions = computed(() => {
+  const excluded = new Set(quickFolderForm.id ? [quickFolderForm.id] : [])
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const folder of quickRequestFolders.value) {
+      if (folder.parentId && excluded.has(folder.parentId) && !excluded.has(folder.id)) { excluded.add(folder.id); changed = true }
+    }
+  }
+  return quickRequestFolderRows.value.filter(folder => !excluded.has(folder.id))
+})
 const visibleQuickRequestItems = computed(() => [...quickRequestHistory.value, ...quickRequestCopies.value]
   .filter((item) => !quickRequestHiddenIds.value.includes(item.id)))
 const quickRequestTreeRows = computed<QuickRequestTreeRow[]>(() => {
@@ -191,7 +225,7 @@ const interchangeResultSummary = computed(() => interchangeResult.value
   : '')
 
 async function read<T>(url: string, init?: RequestInit): Promise<T> { const response = await fetch(url, { credentials: 'include', ...init }); const body = await response.json().catch(() => ({})) as ApiEnvelope<T> & { code?: string; message?: string; details?: Record<string, unknown> }; if (!response.ok) throw toApiRequestError(response, body); return body.data }
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> { const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf'); return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) }) }
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, beforeSend?: () => void): Promise<T> { const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf'); beforeSend?.(); return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) }) }
 async function loadVersions() {
   const generation = ++versionLoadGeneration
   const apiId = selectedApiId.value
@@ -222,13 +256,18 @@ function syncOpenTabs(definitionData: ApiDefinition[]) {
     openApiIds.value.push(selectedApiId.value)
   }
 }
+let assetsGeneration = 0
 async function loadAssets() {
+  const generation = ++assetsGeneration
+  const activeProjectId = projectId.value
+  if (!activeProjectId) return
   const [catalogData, definitionData, historyData, caseData] = await Promise.all([
-    read<Catalog[]>(`/api/v1/projects/${projectId.value}/api-design/catalogs`),
-    read<ApiDefinition[]>(`/api/v1/projects/${projectId.value}/api-design/definitions`),
-    read<QuickRequestHistory[]>(`/api/v1/projects/${projectId.value}/api-debug/history?limit=20`),
-    read<ApiTreeCase[]>(`/api/v1/projects/${projectId.value}/api-design/cases`),
+    read<Catalog[]>(`/api/v1/projects/${activeProjectId}/api-design/catalogs`),
+    read<ApiDefinition[]>(`/api/v1/projects/${activeProjectId}/api-design/definitions`),
+    read<QuickRequestHistory[]>(`/api/v1/projects/${activeProjectId}/api-debug/history?limit=20`),
+    read<ApiTreeCase[]>(`/api/v1/projects/${activeProjectId}/api-design/cases`),
   ])
+  if (generation !== assetsGeneration || activeProjectId !== projectId.value) return
   catalogs.value = catalogData
   definitions.value = definitionData
   quickRequestHistory.value = historyData
@@ -253,7 +292,7 @@ async function changeProject() {
   openApiIds.value = []
   expandedCatalogIds.value = new Set()
   expandedApiCaseIds.value = new Set()
-  try { await loadAssets(); loadQuickRequestTreeState(); loadApiTreePreferences() } catch (error) { Message.error(error instanceof Error ? error.message : '加载失败') }
+  try { await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '加载失败') }
 }
 function toggleCatalog(catalogId: string) {
   const expanded = new Set(expandedCatalogIds.value)
@@ -262,21 +301,22 @@ function toggleCatalog(catalogId: string) {
   expandedCatalogIds.value = expanded
   selectedCatalogId.value = catalogId
 }
-function apiTreePreferenceKey() { return `testhub:api-tree:${projectId.value}:display-mode` }
-function loadApiTreePreferences() {
-  apiTreeDisplayMode.value = window.localStorage.getItem(apiTreePreferenceKey()) === 'URL' ? 'URL' : 'NAME'
-}
-function setApiTreeDisplayMode(mode: ApiTreeDisplayMode) {
-  apiTreeDisplayMode.value = mode
-  window.localStorage.setItem(apiTreePreferenceKey(), mode)
+async function setApiTreeDisplayMode(mode: ApiTreeDisplayMode) {
+  if (preferencesLocked.value) return
+  const state = currentPreferences()
+  state.displayMode = mode
+  await saveQuickRequestTreeState(state, quickRequestCopies.value, '显示方式已保存')
 }
 function availableCatalogMoveTargets(catalog: Catalog) {
   return catalogMoveTargets(catalogs.value, catalog.id)
 }
 async function loadQuickRequestHistory() {
   if (!projectId.value) return
+  const activeProjectId = projectId.value
+  const generation = preferencesGeneration
   try {
-    quickRequestHistory.value = await read<QuickRequestHistory[]>(`/api/v1/projects/${projectId.value}/api-debug/history?limit=20`)
+    const history = await read<QuickRequestHistory[]>(`/api/v1/projects/${activeProjectId}/api-debug/history?limit=20`)
+    if (activeProjectId === projectId.value && generation === preferencesGeneration) quickRequestHistory.value = history
   } catch (error) {
     Message.error(error instanceof Error ? error.message : '加载快捷请求历史失败')
   }
@@ -289,68 +329,148 @@ async function newQuickRequest(folderId = '') {
   quickRequestRootExpanded.value = true
   await router.push({ path: '/api-testing/quick-request', query: { newRequest: String(Date.now()), ...(folderId ? { folderId } : {}) } })
 }
-function quickRequestStorageKey(name: string) { return `testhub:quick-request:${projectId.value}:${name}` }
+function quickRequestStorageKey(name: string) { return `testhub:quick-request:${session.profile?.id ?? 'anonymous'}:${projectId.value}:${name}` }
 function quickRequestLabel(item: QuickRequestHistory) {
   return item.localDraft?.name?.trim() || apiDebugRequestNameFromReplayDraft(item.replayDraft) || item.requestUrl
 }
-function saveQuickRequestTreeState() {
-  window.localStorage.setItem(quickRequestStorageKey('folders'), JSON.stringify(quickRequestFolders.value))
-  window.localStorage.setItem(quickRequestStorageKey('hidden'), JSON.stringify(quickRequestHiddenIds.value))
-  window.localStorage.setItem(quickRequestStorageKey('folder-ids'), JSON.stringify(quickRequestFolderIds.value))
-  window.sessionStorage.setItem(quickRequestStorageKey('copies'), JSON.stringify(quickRequestCopies.value))
+function currentPreferences(): ApiDesignPreferencesState {
+  return { folders: quickRequestFolders.value.map(f => ({ ...f })), hiddenIds: [...quickRequestHiddenIds.value], folderIds: { ...quickRequestFolderIds.value }, displayMode: apiTreeDisplayMode.value }
 }
-function loadQuickRequestTreeState() {
+function applyPreferences(state: ApiDesignPreferencesState) {
+  quickRequestFolders.value = state.folders
+  quickRequestHiddenIds.value = state.hiddenIds
+  quickRequestFolderIds.value = state.folderIds
+  apiTreeDisplayMode.value = state.displayMode
+}
+async function loadQuickRequestTreeState(importLegacy: 'automatic' | 'confirmed' | 'none' = 'automatic') {
+  const generation = ++preferencesGeneration
+  const id = projectId.value
+  preferencesReady.value = false
+  preferencesLoading.value = Boolean(id)
+  preferencesSaving.value = false
+  preferencesError.value = ''
+  preferencesConflict.value = false
+  legacyPreferencesAvailable.value = false
+  pendingPreferences.value = null
+  applyPreferences(emptyApiDesignPreferences())
+  quickRequestCopies.value = []
+  if (!id) return
   try {
-    const stored = JSON.parse(window.localStorage.getItem(quickRequestStorageKey('folders')) ?? '[]') as unknown
-    quickRequestFolders.value = Array.isArray(stored)
-      ? stored
-        .filter((folder): folder is { id: string; parentId?: string | null; name: string } => Boolean(folder) && typeof folder.id === 'string' && typeof folder.name === 'string')
-        .map((folder) => ({ id: folder.id, parentId: typeof folder.parentId === 'string' ? folder.parentId : null, name: folder.name }))
-      : []
-    const hidden = JSON.parse(window.localStorage.getItem(quickRequestStorageKey('hidden')) ?? '[]') as unknown
-    quickRequestHiddenIds.value = Array.isArray(hidden) ? hidden.filter((id): id is string => typeof id === 'string') : []
-    const folderIds = JSON.parse(window.localStorage.getItem(quickRequestStorageKey('folder-ids')) ?? '{}') as unknown
-    quickRequestFolderIds.value = folderIds && typeof folderIds === 'object' && !Array.isArray(folderIds)
-      ? Object.fromEntries(Object.entries(folderIds).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
-      : {}
-    const copies = JSON.parse(window.sessionStorage.getItem(quickRequestStorageKey('copies')) ?? '[]') as unknown
+    const result = await preferenceClient.load(id, () => {
+      if (generation !== preferencesGeneration || id !== projectId.value) return null
+      if (importLegacy === 'confirmed' || (importLegacy === 'automatic' && isLocalDesktop())) return readLegacyPreferences(window.localStorage, id)
+      legacyPreferencesAvailable.value = ['folders', 'hidden', 'folder-ids'].some(name => window.localStorage.getItem(`testhub:quick-request:${id}:${name}`) !== null)
+        || window.localStorage.getItem(`testhub:api-tree:${id}:display-mode`) !== null
+      return null
+    })
+    if (generation !== preferencesGeneration || id !== projectId.value) return
+    applyPreferences(result.state)
+    preferencesReady.value = true
+    const copies = JSON.parse(window.sessionStorage.getItem(quickRequestStorageKey('copies')) ?? (isLocalDesktop() ? window.sessionStorage.getItem(`testhub:quick-request:${id}:copies`) : null) ?? '[]') as unknown
     quickRequestCopies.value = Array.isArray(copies)
-      ? copies.filter((item): item is QuickRequestHistory => Boolean(item) && typeof item.id === 'string' && typeof item.method === 'string' && typeof item.requestUrl === 'string')
-      : []
-  } catch {
-    quickRequestFolders.value = []
-    quickRequestHiddenIds.value = []
-    quickRequestFolderIds.value = {}
-    quickRequestCopies.value = []
+      ? copies.filter((item): item is QuickRequestHistory => Boolean(item) && typeof item.id === 'string' && typeof item.method === 'string' && typeof item.requestUrl === 'string') : []
+    return true
+  } catch (error) {
+    if (generation !== preferencesGeneration || id !== projectId.value) return false
+    preferencesConflict.value = error instanceof PreferencesConflictError
+    preferencesError.value = error instanceof Error ? error.message : '加载目录/UI 状态失败，请重试'
+    return false
+  } finally {
+    if (generation === preferencesGeneration) preferencesLoading.value = false
   }
 }
+async function saveQuickRequestTreeState(state: ApiDesignPreferencesState, copies = quickRequestCopies.value, success = '目录已保存'): Promise<boolean> {
+  if (!projectId.value || !preferencesReady.value || preferencesSaving.value || preferencesConflict.value) return false
+  const id = projectId.value
+  const generation = preferencesGeneration
+  const copiesKey = quickRequestStorageKey('copies')
+  const candidate = pendingPreferences.value ?? { state, copies: [...copies], success }
+  pendingPreferences.value = candidate
+  preferencesSaving.value = true
+  preferencesError.value = ''
+  try {
+    // Session-only replay data is never passed to the preferences API.
+    const result = await preferenceClient.save(id, () => candidate.state)
+    window.sessionStorage.setItem(copiesKey, JSON.stringify(candidate.copies))
+    if (generation !== preferencesGeneration || id !== projectId.value) return false
+    applyPreferences(result.state)
+    quickRequestCopies.value = candidate.copies
+    pendingPreferences.value = null
+    Message.success(candidate.success)
+    return true
+  } catch (error) {
+    if (generation !== preferencesGeneration || id !== projectId.value) return false
+    preferencesConflict.value = error instanceof PreferencesConflictError
+    preferencesError.value = error instanceof Error ? error.message : '保存目录/UI 状态失败，请重试'
+    Message.error(preferencesError.value)
+    return false
+  } finally {
+    if (generation === preferencesGeneration) preferencesSaving.value = false
+  }
+}
+async function retryPreferences() {
+  const pending = pendingPreferences.value
+  if (!pending) { await loadQuickRequestTreeState(); return }
+  if (await saveQuickRequestTreeState(pending.state, pending.copies, pending.success)) quickFolderDialog.value = false
+}
+async function reloadPreferences() {
+  // Explicit user action only: a conflict must never be resolved by silently overwriting the server.
+  await loadQuickRequestTreeState('none')
+}
+function confirmImportLegacyPreferences() {
+  if (preferencesLocked.value) return
+  const generation = preferencesGeneration
+  Modal.confirm({
+    title: '导入当前 origin 的旧目录/UI 状态',
+    content: '旧数据没有用户身份标记，可能属于同一浏览器中的其他用户。请确认这些目录属于你，再导入到当前账号和项目。只导入非秘密树状态，不导入请求草稿；保留旧 localStorage。无法读取其他 origin（含旧端口）的数据。',
+    okText: '确认属于我并导入',
+    onBeforeOk: () => generation === preferencesGeneration ? loadQuickRequestTreeState('confirmed') : false,
+  })
+}
 function addQuickRequestFolder(parentId: string | null = null) {
-  const name = window.prompt('请输入快捷请求目录名称')?.trim()
-  if (!name) return
-  quickRequestFolders.value.push({ id: globalThis.crypto?.randomUUID?.() ?? String(Date.now()), parentId, name })
-  saveQuickRequestTreeState()
+  if (preferencesLocked.value) return
+  Object.assign(quickFolderForm, { id: '', parentId, name: '' })
+  quickFolderDialog.value = true
 }
 function renameQuickRequestFolder(folder: QuickRequestFolder) {
-  const name = window.prompt('请输入快捷请求目录名称', folder.name)?.trim()
-  if (!name) return
-  quickRequestFolders.value = quickRequestFolders.value.map((item) => item.id === folder.id ? { ...item, name } : item)
-  saveQuickRequestTreeState()
+  if (preferencesLocked.value) return
+  Object.assign(quickFolderForm, folder)
+  quickFolderDialog.value = true
 }
-function copyQuickRequestFolder(folder: QuickRequestFolder) {
+async function saveQuickRequestFolder() {
+  if (!preferencesReady.value || preferencesLoading.value || preferencesSaving.value || preferencesConflict.value) return false
+  const name = quickFolderForm.name.trim()
+  if (!name) { Message.warning('请输入快捷请求目录名称'); return false }
+  const state = currentPreferences()
+  if (quickFolderForm.id) {
+    if (!state.folders.some(folder => folder.id === quickFolderForm.id)) { Message.error('目录已不存在，请重新选择目录'); return false }
+    state.folders = state.folders.map(folder => folder.id === quickFolderForm.id ? { ...folder, name, parentId: quickFolderForm.parentId } : folder)
+  } else {
+    if (quickFolderForm.parentId && !state.folders.some(folder => folder.id === quickFolderForm.parentId)) { Message.error('父目录已不存在，请重新选择目录'); return false }
+    state.folders.push({ id: globalThis.crypto.randomUUID(), parentId: quickFolderForm.parentId, name })
+  }
+  pendingPreferences.value = null
+  return saveQuickRequestTreeState(state)
+}
+async function copyQuickRequestFolder(folder: QuickRequestFolder) {
+  if (preferencesLocked.value) return
+  const state = currentPreferences()
   const copied: QuickRequestFolder[] = []
   const copyBranch = (source: QuickRequestFolder, parentId: string | null, isRoot: boolean) => {
     const id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${copied.length}`
-    copied.push({ id, parentId, name: isRoot ? `${source.name} 副本` : source.name })
+    copied.push({ id, parentId, name: isRoot ? `${source.name.slice(0, 157)} 副本` : source.name })
     quickRequestFolders.value
       .filter((candidate) => candidate.parentId === source.id)
       .forEach((child) => copyBranch(child, id, false))
   }
   copyBranch(folder, folder.parentId, true)
-  quickRequestFolders.value.push(...copied)
-  saveQuickRequestTreeState()
-  Message.success('快捷请求目录已复制')
+  state.folders.push(...copied)
+  await saveQuickRequestTreeState(state, quickRequestCopies.value, '快捷请求目录已复制')
 }
-function deleteQuickRequestFolder(folder: QuickRequestFolder) {
+async function deleteQuickRequestFolder(folder: QuickRequestFolder) {
+  if (pendingPreferences.value) return saveQuickRequestTreeState(pendingPreferences.value.state)
+  if (preferencesLocked.value) return false
+  const state = currentPreferences()
   const deletedIds = new Set([folder.id])
   let foundChild = true
   while (foundChild) {
@@ -362,20 +482,21 @@ function deleteQuickRequestFolder(folder: QuickRequestFolder) {
       }
     })
   }
-  quickRequestFolders.value = quickRequestFolders.value.filter((item) => !deletedIds.has(item.id))
-  quickRequestFolderIds.value = Object.fromEntries(
+  state.folders = state.folders.filter((item) => !deletedIds.has(item.id))
+  state.folderIds = Object.fromEntries(
     Object.entries(quickRequestFolderIds.value).filter(([, folderId]) => !deletedIds.has(folderId)),
   )
-  saveQuickRequestTreeState()
-  Message.success('快捷请求目录已删除')
+  return saveQuickRequestTreeState(state, quickRequestCopies.value, '快捷请求目录已删除')
 }
 function confirmDeleteQuickRequestFolder(folder: QuickRequestFolder) {
+  if (preferencesLocked.value) return
+  const generation = preferencesGeneration
   Modal.confirm({
     title: '删除快捷请求目录',
     content: `删除“${folder.name}”会同时删除其子目录，确定继续吗？`,
     okText: '删除',
     okButtonProps: { status: 'danger' },
-    onOk: () => deleteQuickRequestFolder(folder),
+    onBeforeOk: () => generation === preferencesGeneration ? deleteQuickRequestFolder(folder) : false,
   })
 }
 function draftFromQuickRequest(item: QuickRequestHistory): ApiDebugRouteDraft | null {
@@ -405,44 +526,50 @@ function draftFromQuickRequest(item: QuickRequestHistory): ApiDebugRouteDraft | 
   if (protocol === 'GRAPHQL' || protocol === 'SOAP') return { protocol, method: 'POST', url: item.requestUrl }
   return null
 }
-function copyQuickRequest(item: QuickRequestHistory) {
+async function copyQuickRequest(item: QuickRequestHistory) {
+  if (preferencesLocked.value) return
+  const state = currentPreferences()
   const draft = draftFromQuickRequest(item)
   if (!draft) {
     Message.warning('当前请求没有可复制的回放配置')
     return
   }
   const id = `copy:${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`
-  quickRequestCopies.value.push({ ...item, id, createdAt: new Date().toISOString(), localDraft: draft })
+  const copies = [...quickRequestCopies.value, { ...item, id, createdAt: new Date().toISOString(), localDraft: draft }]
   const folderId = quickRequestFolderIds.value[item.id]
-  if (folderId) quickRequestFolderIds.value = { ...quickRequestFolderIds.value, [id]: folderId }
-  saveQuickRequestTreeState()
-  Message.success('快捷请求已复制')
+  if (folderId) state.folderIds[id] = folderId
+  await saveQuickRequestTreeState(state, copies, '快捷请求已复制')
 }
-function moveQuickRequest(item: QuickRequestHistory, folderId: string | null) {
+async function moveQuickRequest(item: QuickRequestHistory, folderId: string | null) {
+  if (preferencesLocked.value) return
+  const state = currentPreferences()
   const nextFolderIds = { ...quickRequestFolderIds.value }
   if (folderId) nextFolderIds[item.id] = folderId
   else delete nextFolderIds[item.id]
-  quickRequestFolderIds.value = nextFolderIds
-  saveQuickRequestTreeState()
+  state.folderIds = nextFolderIds
   const folder = folderId ? quickRequestFolders.value.find((candidate) => candidate.id === folderId) : null
-  Message.success(folder ? `已移动到“${folder.name}”` : '已移动到快捷请求根目录')
+  await saveQuickRequestTreeState(state, quickRequestCopies.value, folder ? `已移动到“${folder.name}”` : '已移动到快捷请求根目录')
 }
-function deleteQuickRequest(item: QuickRequestHistory) {
-  if (item.localDraft) quickRequestCopies.value = quickRequestCopies.value.filter((candidate) => candidate.id !== item.id)
-  else quickRequestHiddenIds.value = [...new Set([...quickRequestHiddenIds.value, item.id])]
+async function deleteQuickRequest(item: QuickRequestHistory) {
+  if (pendingPreferences.value) return saveQuickRequestTreeState(pendingPreferences.value.state)
+  if (preferencesLocked.value) return false
+  const state = currentPreferences()
+  const copies = item.localDraft ? quickRequestCopies.value.filter(candidate => candidate.id !== item.id) : quickRequestCopies.value
+  if (!item.localDraft) state.hiddenIds = [...new Set([...state.hiddenIds, item.id])]
   const nextFolderIds = { ...quickRequestFolderIds.value }
   delete nextFolderIds[item.id]
-  quickRequestFolderIds.value = nextFolderIds
-  saveQuickRequestTreeState()
-  Message.success('快捷请求已删除')
+  state.folderIds = nextFolderIds
+  return saveQuickRequestTreeState(state, copies, '快捷请求已删除')
 }
 function confirmDeleteQuickRequest(item: QuickRequestHistory) {
+  if (preferencesLocked.value) return
+  const generation = preferencesGeneration
   Modal.confirm({
     title: '删除快捷请求',
     content: `确定删除“${quickRequestLabel(item)}”吗？执行历史不会受到影响。`,
     okText: '删除',
     okButtonProps: { status: 'danger' },
-    onOk: () => deleteQuickRequest(item),
+    onBeforeOk: () => generation === preferencesGeneration ? deleteQuickRequest(item) : false,
   })
 }
 async function loadQuickRequest(item: QuickRequestHistory) {
@@ -479,19 +606,7 @@ function copyText(value: string, success: string) {
 function currentApiLink(api: ApiDefinition) {
   return new URL(router.resolve({ path: '/api-testing/interfaces', query: { apiId: api.id } }).href, window.location.origin).href
 }
-async function renameCatalog(catalog: Catalog) {
-  const name = window.prompt('请输入接口目录名称', catalog.name)?.trim()
-  if (!name || name === catalog.name) return
-  try {
-    await mutate<Catalog>(`/api/v1/projects/${projectId.value}/api-design/catalogs/${catalog.id}`, 'PUT', {
-      name,
-      parentId: catalog.parentId,
-      sortOrder: catalog.sortOrder,
-    })
-    await loadAssets()
-    Message.success('接口目录已重命名')
-  } catch (error) { Message.error(error instanceof Error ? error.message : '重命名目录失败') }
-}
+function renameCatalog(catalog: Catalog) { openCatalog(catalog) }
 async function moveCatalog(catalog: Catalog, parentId: string | null) {
   if (catalog.parentId === parentId) return
   try {
@@ -674,7 +789,7 @@ async function exportScope(kind: 'OPENAPI' | 'POSTMAN' | 'HAR', catalogId = '') 
   else if (kind === 'POSTMAN') await downloadPostman()
   else await downloadHar()
 }
-function openCatalog(catalog?: Catalog, parentId = '') { clearFormErrors(catalogErrors); editingCatalogId.value = catalog?.id ?? ''; Object.assign(catalogForm, { name: catalog?.name ?? '', parentId: catalog?.parentId ?? (parentId || selectedCatalogId.value), sortOrder: catalog?.sortOrder ?? catalogs.value.length }); catalogDialog.value = true }
+function openCatalog(catalog?: Catalog, parentId = '') { clearFormErrors(catalogErrors); editingCatalogId.value = catalog?.id ?? ''; Object.assign(catalogForm, { name: catalog?.name ?? '', parentId: catalog ? (catalog.parentId ?? '') : (parentId || selectedCatalogId.value), sortOrder: catalog?.sortOrder ?? catalogs.value.length }); catalogDialog.value = true }
 async function saveCatalog() { clearFormErrors(catalogErrors); if (!catalogForm.name.trim()) { catalogErrors.name = '请输入目录名称'; return false }; saving.value = true; try { const url = editingCatalogId.value ? `/api/v1/projects/${projectId.value}/api-design/catalogs/${editingCatalogId.value}` : `/api/v1/projects/${projectId.value}/api-design/catalogs`; const catalog = await mutate<Catalog>(url, editingCatalogId.value ? 'PUT' : 'POST', { ...catalogForm, parentId: catalogForm.parentId || null }); catalogDialog.value = false; selectedCatalogId.value = catalog.id; await loadAssets(); Message.success(editingCatalogId.value ? '接口目录已更新' : '接口目录已创建'); return true } catch (error) { Object.assign(catalogErrors, formErrorsFrom(error)); if (!Object.keys(catalogErrors).length) catalogErrors.name = error instanceof Error ? error.message : '保存目录失败'; return false } finally { saving.value = false } }
 async function deleteCatalog(catalog: Catalog) { try { await mutate<void>(`/api/v1/projects/${projectId.value}/api-design/catalogs/${catalog.id}`, 'DELETE'); if (selectedCatalogId.value === catalog.id) selectedCatalogId.value = ''; await loadAssets(); Message.success('接口目录已删除') } catch (error) { Message.error(error instanceof Error ? error.message : '删除目录失败') } }
 function confirmDeleteCatalog(catalog: Catalog) {
@@ -1008,7 +1123,14 @@ watch(() => route.query.apiId, async (value) => {
   if (typeof value !== 'string' || value === selectedApiId.value || !definitions.value.some((api) => api.id === value)) return
   await selectApi(value)
 })
-onMounted(async () => { await load(); loadQuickRequestTreeState(); loadApiTreePreferences() })
+watch([projectId, () => session.profile?.id], ([, userId], previous) => {
+  if (previous && userId !== previous[1]) { preferenceClient.dispose(); preferenceClient = preferencesClient() }
+  quickFolderDialog.value = false
+  quickRequestHistory.value = []
+  void loadQuickRequestTreeState()
+}, { immediate: true, flush: 'sync' })
+onBeforeUnmount(() => { preferencesGeneration++; assetsGeneration++; preferenceClient.dispose() })
+onMounted(load)
 </script>
 
 <template>
@@ -1097,8 +1219,8 @@ onMounted(async () => { await load(); loadQuickRequestTreeState(); loadApiTreePr
                 </template>
               </a-dsubmenu>
               <a-doption disabled><icon-code /> 生成业务代码（暂未支持）</a-doption>
-              <a-doption @click="setApiTreeDisplayMode('NAME')"><icon-check v-if="apiTreeDisplayMode === 'NAME'" /> 接口显示为名称</a-doption>
-              <a-doption @click="setApiTreeDisplayMode('URL')"><icon-check v-if="apiTreeDisplayMode === 'URL'" /> 接口显示为 URL</a-doption>
+              <a-doption :disabled="preferencesLocked" @click="setApiTreeDisplayMode('NAME')"><icon-check v-if="apiTreeDisplayMode === 'NAME'" /> 接口显示为名称</a-doption>
+              <a-doption :disabled="preferencesLocked" @click="setApiTreeDisplayMode('URL')"><icon-check v-if="apiTreeDisplayMode === 'URL'" /> 接口显示为 URL</a-doption>
             </template>
           </a-dropdown>
         </div>
@@ -1262,6 +1384,16 @@ onMounted(async () => { await load(); loadQuickRequestTreeState(); loadApiTreePr
               </a-empty>
             </template>
 
+            <a-alert v-if="legacyPreferencesAvailable" type="info">
+              当前 origin 存在无用户归属标记的旧目录数据，未自动上传。
+              <a-button :disabled="preferencesLocked" @click="confirmImportLegacyPreferences">确认归属并导入旧数据</a-button>
+            </a-alert>
+            <a-alert v-if="preferencesError" type="error" aria-live="polite">
+              {{ preferencesError }}
+              <a-button v-if="!preferencesConflict" :loading="preferencesSaving" @click="retryPreferences">{{ pendingPreferences ? '重试保存' : '重试加载/导入' }}</a-button>
+              <a-button :disabled="preferencesSaving" :loading="preferencesLoading" @click="reloadPreferences">{{ pendingPreferences ? '放弃待保存操作并重新加载' : '仅加载服务端状态' }}</a-button>
+            </a-alert>
+            <span v-if="preferencesLoading || preferencesSaving" role="status">{{ preferencesSaving ? '正在保存目录/UI 状态…' : '正在加载目录/UI 状态…' }}</span>
             <section class="quick-request-tree-section" :class="{ active: isQuickRequest }">
               <div class="tree-root-row quick-request-root">
                 <button type="button" class="tree-root-main" :aria-current="isQuickRequest ? 'page' : undefined" @click="openQuickRequest">
@@ -1280,7 +1412,7 @@ onMounted(async () => { await load(); loadQuickRequestTreeState(); loadApiTreePr
                   <a-button type="text" size="mini" aria-label="快捷请求更多操作" @click.stop><icon-more /></a-button>
                   <template #content>
                     <a-doption @click="newQuickRequest()"><icon-thunderbolt /> 新建快捷请求</a-doption>
-                    <a-doption @click="addQuickRequestFolder(null)"><icon-folder-add /> 新建目录</a-doption>
+                    <a-doption :disabled="preferencesLocked" @click="addQuickRequestFolder(null)"><icon-folder-add /> 新建目录</a-doption>
                   </template>
                 </a-dropdown>
               </div>
@@ -1296,10 +1428,10 @@ onMounted(async () => { await load(); loadQuickRequestTreeState(); loadApiTreePr
                       <a-button type="text" size="mini" :aria-label="`目录 ${row.folder.name} 更多操作`" @click.stop><icon-more /></a-button>
                       <template #content>
                         <a-doption @click="newQuickRequest(row.folder.id)"><icon-thunderbolt /> 添加快捷请求</a-doption>
-                        <a-doption @click="addQuickRequestFolder(row.folder.id)"><icon-folder-add /> 添加目录</a-doption>
-                        <a-doption @click="renameQuickRequestFolder(row.folder)"><icon-edit /> 编辑</a-doption>
-                        <a-doption @click="copyQuickRequestFolder(row.folder)"><icon-copy /> 复制</a-doption>
-                        <a-doption class="danger-option" @click="confirmDeleteQuickRequestFolder(row.folder)"><icon-delete /> 删除</a-doption>
+                        <a-doption :disabled="preferencesLocked" @click="addQuickRequestFolder(row.folder.id)"><icon-folder-add /> 添加目录</a-doption>
+                        <a-doption :disabled="preferencesLocked" @click="renameQuickRequestFolder(row.folder)"><icon-edit /> 编辑</a-doption>
+                        <a-doption :disabled="preferencesLocked" @click="copyQuickRequestFolder(row.folder)"><icon-copy /> 复制</a-doption>
+                        <a-doption class="danger-option" :disabled="preferencesLocked" @click="confirmDeleteQuickRequestFolder(row.folder)"><icon-delete /> 删除</a-doption>
                       </template>
                     </a-dropdown>
                   </div>
@@ -1316,27 +1448,28 @@ onMounted(async () => { await load(); loadQuickRequestTreeState(); loadApiTreePr
                     >
                       <span class="method-label" :class="methodClass(row.item.method)">{{ row.item.method }}</span>
                       <span>{{ quickRequestLabel(row.item) }}</span>
-                      <small>{{ row.item.result === 'DRAFT' ? '草稿' : row.item.responseStatus ?? '失败' }}</small>
+                      <small v-if="row.item.importSourceId">迁入历史</small>
+                      <small>{{ row.item.result === 'DRAFT' ? '草稿' : row.item.protocol === 'WEBSOCKET' && row.item.result === 'COMPLETED' ? '已连接' : row.item.responseStatus ?? '失败' }}</small>
                     </button>
                     <a-dropdown trigger="click">
                       <a-button type="text" size="mini" :aria-label="`快捷请求 ${quickRequestLabel(row.item)} 更多操作`" @click.stop><icon-more /></a-button>
                       <template #content>
-                        <a-doption @click="copyQuickRequest(row.item)"><icon-copy /> 复制</a-doption>
+                        <a-doption :disabled="preferencesLocked" @click="copyQuickRequest(row.item)"><icon-copy /> 复制</a-doption>
                         <a-dsubmenu trigger="click">
                           <template #default><icon-folder-add /> 移动到</template>
                           <template #content>
-                            <a-doption :disabled="!quickRequestFolderIds[row.item.id]" @click="moveQuickRequest(row.item, null)"><icon-thunderbolt /> 快捷请求根目录</a-doption>
+                            <a-doption :disabled="preferencesLocked || !quickRequestFolderIds[row.item.id]" @click="moveQuickRequest(row.item, null)"><icon-thunderbolt /> 快捷请求根目录</a-doption>
                             <a-doption
                               v-for="folder in quickRequestFolderRows"
                               :key="folder.id"
-                              :disabled="quickRequestFolderIds[row.item.id] === folder.id"
+                              :disabled="preferencesLocked || quickRequestFolderIds[row.item.id] === folder.id"
                               @click="moveQuickRequest(row.item, folder.id)"
                             >
                               <icon-folder /> {{ folder.name }}
                             </a-doption>
                           </template>
                         </a-dsubmenu>
-                        <a-doption class="danger-option" @click="confirmDeleteQuickRequest(row.item)"><icon-delete /> 删除</a-doption>
+                        <a-doption class="danger-option" :disabled="preferencesLocked" @click="confirmDeleteQuickRequest(row.item)"><icon-delete /> 删除</a-doption>
                       </template>
                     </a-dropdown>
                   </div>
@@ -1443,6 +1576,19 @@ onMounted(async () => { await load(); loadQuickRequestTreeState(); loadApiTreePr
         </section>
       </template>
     </main>
+    <a-modal v-model:visible="quickFolderDialog" :title="quickFolderForm.id ? '编辑快捷请求目录' : '新建快捷请求目录'" width="520px" :ok-loading="preferencesSaving" :on-before-ok="saveQuickRequestFolder" :mask-closable="false" :esc-to-close="!preferencesSaving" :closable="!preferencesSaving" :cancel-button-props="{ disabled: preferencesSaving }">
+      <a-alert v-if="preferencesError" type="error">{{ preferencesError }}<a-button :disabled="preferencesSaving" :loading="preferencesLoading" @click="reloadPreferences">重新加载服务端状态（保留表单输入）</a-button></a-alert>
+      <a-form :model="quickFolderForm" layout="vertical">
+        <a-form-item label="父目录">
+          <a-select :model-value="quickFolderForm.parentId ?? undefined" :disabled="preferencesSaving" allow-clear placeholder="快捷请求根目录" @update:model-value="quickFolderForm.parentId = typeof $event === 'string' ? $event : null" @clear="quickFolderForm.parentId = null">
+            <a-option v-for="folder in quickFolderParentOptions" :key="folder.id" :value="folder.id">{{ '\u3000'.repeat(folder.depth) }}{{ folder.name }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="目录名称" required>
+          <a-input v-model="quickFolderForm.name" :disabled="preferencesSaving" :max-length="160" placeholder="请输入快捷请求目录名称" @press-enter="async () => { if (await saveQuickRequestFolder()) quickFolderDialog = false }" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
     <a-modal v-model:visible="catalogDialog" :title="editingCatalogId ? '修改接口目录' : '新建接口目录'" width="520px" :ok-loading="saving" :on-before-ok="saveCatalog">
       <a-form :model="catalogForm" layout="vertical">
         <a-form-item label="目录名称" required :validate-status="catalogErrors.name ? 'error' : undefined" :help="catalogErrors.name">

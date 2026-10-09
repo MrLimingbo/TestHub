@@ -59,11 +59,22 @@ public class FunctionalDefectService {
 
     @Transactional
     public FunctionalDefect create(AuthenticatedPrincipal principal, String projectId, DefectInput input) {
+        return create(principal, projectId, input, false);
+    }
+
+    /** Copies the state without attributing historical resolution or closure to the importing user. */
+    @Transactional
+    public FunctionalDefect createTransferred(AuthenticatedPrincipal principal, String projectId, DefectInput input) {
+        return create(principal, projectId, input, true);
+    }
+
+    private FunctionalDefect create(AuthenticatedPrincipal principal, String projectId, DefectInput input, boolean transferred) {
         ProjectSummary project = writeAccess(principal, projectId);
         String id = UlidCreator.getUlid().toString();
         ValidatedDefect defect = validate(principal, projectId, input, null);
         String defectCode = defect.code() == null ? "BUG_" + id.substring(id.length() - 12) : defect.code();
         Lifecycle lifecycle = lifecycle(null, defect.status(), defect.resolution(), principal.userId());
+        if (transferred) lifecycle = new Lifecycle(lifecycle.resolution(), null, null, null, null);
         try {
             defects.insert(id, project.organizationId(), projectId, defect.catalogId(), defectCode, defect.title(),
                     defect.dueDate(), defect.bugType(), defect.keywords(), defect.browsers(),
@@ -204,6 +215,9 @@ public class FunctionalDefectService {
         }
         Instant now = Instant.now();
         String resolution = requestedResolution == null ? "FIXED" : requestedResolution;
+        if (existing != null && existing.status().equals(status) && java.util.Objects.equals(existing.resolution(), resolution)) {
+            return new Lifecycle(resolution, existing.resolvedBy(), existing.resolvedAt(), existing.closedBy(), existing.closedAt());
+        }
         String resolvedBy = existing != null && existing.resolvedBy() != null ? existing.resolvedBy() : actorId;
         Instant resolvedAt = existing != null && existing.resolvedAt() != null ? existing.resolvedAt() : now;
         if (!"CLOSED".equals(status)) {

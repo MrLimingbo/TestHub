@@ -74,3 +74,10 @@ test('aggregates JTL records into total and thread-group metric snapshots', asyn
     p95LatencyMillis: 30, minLatencyMillis: 10, maxLatencyMillis: 30 })
   assert.deepEqual(metrics.errorSummaries(), [{ threadGroupName: '订单主链路', responseCode: '500', errorCount: 1 }])
 })
+
+test('desktop plans do not follow redirects while enterprise plans preserve their behavior', () => {
+  assert.match(createJmx(artifact), /HTTPSampler.follow_redirects">true/)
+  const local = createJmx(artifact, { followRedirects: false })
+  assert.doesNotMatch(local, /HTTPSampler.follow_redirects">true/)
+  assert.match(local, /HTTPSampler.follow_redirects">false/)
+})

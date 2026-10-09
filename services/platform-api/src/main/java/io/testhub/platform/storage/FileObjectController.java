@@ -1,6 +1,6 @@
 package io.testhub.platform.storage;
 
-import io.minio.GetObjectResponse;
+import java.io.InputStream;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import java.util.List;
@@ -49,11 +49,11 @@ public class FileObjectController {
     public ResponseEntity<InputStreamResource> download(Authentication authentication, @PathVariable String projectId,
                                                         @PathVariable String fileId) {
         FileObject file = files.metadata(principal(authentication), projectId, fileId);
-        GetObjectResponse object = files.download(principal(authentication), projectId, fileId);
+        InputStream object = files.download(principal(authentication), projectId, fileId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(file.contentType()));
         headers.setContentLength(file.sizeBytes());
-        headers.setContentDisposition(ContentDisposition.attachment().filename(file.originalName()).build());
+        headers.setContentDisposition(ContentDisposition.attachment().filename(file.originalName(), java.nio.charset.StandardCharsets.UTF_8).build());
         return ResponseEntity.ok().headers(headers).body(new InputStreamResource(object));
     }
 

@@ -14,7 +14,7 @@ import java.util.Set;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,21 +22,21 @@ public class ApiRunnerStatusService {
     static final String MEMBER_KEY = "testhub:runner:api:members:v1";
     static final String HEARTBEAT_KEY_PREFIX = "testhub:runner:api:heartbeat:v1:";
     private final AccessService access;
-    private final StringRedisTemplate redis;
+    private final RunnerRegistry registry;
     private final ObjectMapper objectMapper;
     private final byte[] heartbeatKey;
 
-    public ApiRunnerStatusService(AccessService access, StringRedisTemplate redis, ObjectMapper objectMapper,
+    public ApiRunnerStatusService(AccessService access, RunnerRegistry registry, ObjectMapper objectMapper,
                                   @Value("${testhub.runner.heartbeat-key:}") String heartbeatKey) {
         this.access = access;
-        this.redis = redis;
+        this.registry = registry;
         this.objectMapper = objectMapper;
         this.heartbeatKey = heartbeatKey == null ? new byte[0] : heartbeatKey.getBytes(StandardCharsets.UTF_8);
     }
 
     public List<ApiRunnerStatus> list(AuthenticatedPrincipal principal, String projectId) {
         access.requireProjectRead(principal, projectId);
-        Set<String> runnerIds = redis.opsForSet().members(MEMBER_KEY);
+        Set<String> runnerIds = registry.members(MEMBER_KEY);
         if (runnerIds == null || runnerIds.isEmpty()) return List.of();
         return runnerIds.stream().map(this::read).flatMap(java.util.Optional::stream)
                 .sorted(Comparator.comparing(ApiRunnerStatus::heartbeatAt).reversed()).toList();
@@ -46,15 +46,19 @@ public class ApiRunnerStatusService {
         return read(runnerId).map(ApiRunnerStatus::trusted).orElse(false);
     }
 
+    public boolean isVerifiedSince(String runnerId, Instant startedAfter) {
+        return read(runnerId).map(status -> status.trusted() && !status.startedAt().isBefore(startedAfter)).orElse(false);
+    }
+
     public boolean isTrustedExecutionEnabled(String runnerId) {
         return read(runnerId).map(status -> status.trusted() && status.executionEnabled()).orElse(false);
     }
 
     private java.util.Optional<ApiRunnerStatus> read(String runnerId) {
         if (runnerId == null || !runnerId.matches("[A-Za-z0-9._-]{1,64}")) return java.util.Optional.empty();
-        String body = redis.opsForValue().get(HEARTBEAT_KEY_PREFIX + runnerId);
+        String body = registry.get(HEARTBEAT_KEY_PREFIX + runnerId);
         if (body == null) {
-            redis.opsForSet().remove(MEMBER_KEY, runnerId);
+            registry.remove(MEMBER_KEY, runnerId);
             return java.util.Optional.empty();
         }
         try {

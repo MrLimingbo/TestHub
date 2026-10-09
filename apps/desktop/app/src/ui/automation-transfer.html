@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 接口自动化资料迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>接口自动化资料迁移</h1>
+  <p id="account" class="description" role="status">正在准备本地工作区并读取项目…</p>
+  <form id="automation-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required disabled></select>
+    <label for="target">账号目标项目</label><select id="target" required disabled></select>
+    <p class="description">复制场景及全部修订、公共步骤及全部修订、数据集和来源文件、运行配置、定时计划。本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">目标项目需先创建与本地相同代码且已启用的运行环境。计划迁入后默认停用，检查运行目标与变量后再手动启用。</p>
+    <p class="hint">执行历史及 Webhook 不在本次迁移范围；Webhook 密钥无法读回，请在目标项目重新创建。运行配置、场景脚本和数据行可能含敏感值，确认后才上传。</p>
+    <p class="hint">预览只读取资料，有效期 10 分钟。切换账号或服务后须重新预览。迁移资料上限 32 MiB。</p>
+    <p id="preview" class="description" role="status"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传接口自动化资料</button>
+  </form>
+</main><script src="automation-transfer.js"></script></body>
+</html>

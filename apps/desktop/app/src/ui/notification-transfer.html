@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 通知模板迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>通知模板迁移</h1><p id="account" class="description">正在读取账号与项目…</p>
+  <form id="notification-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required></select>
+    <label for="target">账号目标项目</label><select id="target" required></select>
+    <p class="description">复制通知模板名称、事件、渠道、主题和正文；全部创建为停用状态。接收地址和签名密钥只统计排除数量，不传输值，请在目标账号重新配置。</p>
+    <p class="hint">目标已存在同名模板时整批报冲突，不覆盖。正文可能包含自行填写的敏感信息，请核对所选项目；来源同名模板需先调整名称。</p>
+    <p class="hint">不复制网络授权、已投递或待发记录，也不触发任务或重放旧通知。本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">最多 1000 个模板、32 MiB；预览有效期 10 分钟，账号或服务变化须重新预览。</p>
+  <p id="preview" class="description" role="status" aria-live="polite"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传停用模板</button>
+  </form>
+</main><script src="notification-transfer.js"></script></body>
+</html>

@@ -9,7 +9,7 @@ import java.time.format.DateTimeParseException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.ExpiringStateStore;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,13 +25,13 @@ public class ApiRunnerInternalAuthenticationService {
     private static final Duration MAX_CLOCK_SKEW = Duration.ofSeconds(60);
     private static final Duration NONCE_TTL = Duration.ofMinutes(2);
     private final ApiRunnerStatusService runners;
-    private final StringRedisTemplate redis;
+    private final ExpiringStateStore state;
     private final byte[] signingKey;
 
-    public ApiRunnerInternalAuthenticationService(ApiRunnerStatusService runners, StringRedisTemplate redis,
+    public ApiRunnerInternalAuthenticationService(ApiRunnerStatusService runners, ExpiringStateStore state,
                                                   @Value("${testhub.runner.heartbeat-key:}") String signingKey) {
         this.runners = runners;
-        this.redis = redis;
+        this.state = state;
         this.signingKey = signingKey == null ? new byte[0] : signingKey.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -66,7 +66,7 @@ public class ApiRunnerInternalAuthenticationService {
                 || !matches(expectedMethod, expectedPath, runnerId, timestamp, nonce, signature, bindings)) {
             throw rejected();
         }
-        Boolean firstUse = redis.opsForValue().setIfAbsent(NONCE_KEY_PREFIX + runnerId + ":" + nonce, "1", NONCE_TTL);
+        Boolean firstUse = state.putIfAbsent(NONCE_KEY_PREFIX + runnerId + ":" + nonce, "1", NONCE_TTL);
         if (!Boolean.TRUE.equals(firstUse)) throw rejected();
         return runnerId;
     }

@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.ExpiringStateStore;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,7 +40,7 @@ public class ApiRunnerRuntimeLeaseService {
     private final ApiAutomationScenarioRepository scenarios;
     private final ApiAutomationScenarioExpansionService expansions;
     private final ApiRunnerStatusService runners;
-    private final StringRedisTemplate redis;
+    private final ExpiringStateStore state;
     private final ObjectMapper objectMapper;
     private final AuditService audit;
     private final boolean httpExecutionEnabled;
@@ -48,13 +48,13 @@ public class ApiRunnerRuntimeLeaseService {
 
     public ApiRunnerRuntimeLeaseService(ApiAutomationExecutionRepository executions, ApiAutomationScenarioRepository scenarios,
                                         ApiAutomationScenarioExpansionService expansions, ApiRunnerStatusService runners,
-                                        StringRedisTemplate redis, ObjectMapper objectMapper, AuditService audit,
+                                        ExpiringStateStore state, ObjectMapper objectMapper, AuditService audit,
                                         @Value("${testhub.runner.http-execution-enabled:false}") boolean httpExecutionEnabled) {
         this.executions = executions;
         this.scenarios = scenarios;
         this.expansions = expansions;
         this.runners = runners;
-        this.redis = redis;
+        this.state = state;
         this.objectMapper = objectMapper;
         this.audit = audit;
         this.httpExecutionEnabled = httpExecutionEnabled;
@@ -68,7 +68,7 @@ public class ApiRunnerRuntimeLeaseService {
         String lease = randomLease();
         StoredLease stored = new StoredLease(runnerId, taskId, executionId, leaseFingerprint(lease), expiresAt);
         Duration ttl = Duration.between(now, expiresAt);
-        Boolean created = redis.opsForValue().setIfAbsent(LEASE_KEY_PREFIX + executionId, json(stored), ttl);
+        Boolean created = state.putIfAbsent(LEASE_KEY_PREFIX + executionId, json(stored), ttl);
         if (!Boolean.TRUE.equals(created)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Runner 运行时租约已被领取");
         audit.recordSystem(execution.organizationId(), execution.projectId(), "API_AUTOMATION_RUNTIME_LEASE_ISSUED",
                 "API_AUTOMATION_EXECUTION", execution.id(), Map.of("runnerId", runnerId, "taskId", taskId,
@@ -426,7 +426,7 @@ public class ApiRunnerRuntimeLeaseService {
 
     private StoredLease storedLease(String executionId) {
         try {
-            String value = redis.opsForValue().get(LEASE_KEY_PREFIX + executionId);
+            String value = state.get(LEASE_KEY_PREFIX + executionId);
             if (value == null) throw rejected();
             return objectMapper.readValue(value, StoredLease.class);
         } catch (ResponseStatusException exception) {

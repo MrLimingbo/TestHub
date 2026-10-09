@@ -10,19 +10,24 @@ function privateAddress(address) {
       || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168)
       || (a === 198 && (b === 18 || b === 19)) || a >= 224
   }
-  const normalized = address.toLowerCase()
-  return normalized === '::1' || normalized.startsWith('fc') || normalized.startsWith('fd')
-    || normalized.startsWith('fe80:') || normalized.startsWith('::ffff:127.')
+  const normalized = new URL(`http://[${address}]`).hostname.slice(1, -1).toLowerCase()
+  if (normalized.startsWith('::ffff:')) {
+    const words = normalized.slice(7).split(':').map(word => Number.parseInt(word, 16))
+    if (words.length !== 2) return true
+    return privateAddress(`${words[0] >> 8}.${words[0] & 255}.${words[1] >> 8}.${words[1] & 255}`)
+  }
+  return normalized.startsWith('::') || normalized.startsWith('fc') || normalized.startsWith('fd')
+    || /^fe[89ab]/.test(normalized) || normalized.startsWith('ff')
 }
 
-async function publicAddresses(hostname) {
+async function targetAddresses(hostname, allowPrivateNetwork) {
   const normalizedHostname = hostname.replace(/^\[|\]$/g, '')
   if (net.isIP(normalizedHostname)) {
-    if (privateAddress(normalizedHostname)) throw new Error('HTTP 地址未通过网络边界校验')
+    if (!allowPrivateNetwork && privateAddress(normalizedHostname)) throw new Error('HTTP 地址未通过网络边界校验')
     return [{ address: normalizedHostname, family: net.isIP(normalizedHostname) }]
   }
   const addresses = await lookup(normalizedHostname, { all: true, verbatim: true })
-  if (!addresses.length || addresses.some((entry) => privateAddress(entry.address))) {
+  if (!addresses.length || (!allowPrivateNetwork && addresses.some((entry) => privateAddress(entry.address)))) {
     throw new Error('HTTP 地址未通过网络边界校验')
   }
   return addresses
@@ -34,7 +39,7 @@ function requestWithPinnedAddress(request, url, addresses, timeoutMilliseconds) 
     const headers = request.contentType ? { 'Content-Type': request.contentType } : undefined
     const clientRequest = transport.request({
       protocol: url.protocol,
-      hostname: url.hostname,
+      hostname: url.hostname.replace(/^\[|\]$/g, ''),
       port: url.port || undefined,
       path: `${url.pathname}${url.search}`,
       method: request.method,
@@ -59,8 +64,9 @@ function requestWithPinnedAddress(request, url, addresses, timeoutMilliseconds) 
 
 export async function executeHttpRequest(request, config) {
   const url = new URL(request.url)
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('HTTP 请求地址不合法')
   if (!config.allowedHttpOrigins.includes(url.origin)) throw new Error('HTTP 地址不在 Runner 白名单中')
-  const addresses = await publicAddresses(url.hostname)
+  const addresses = await targetAddresses(url.hostname, config.allowPrivateNetwork === true)
   const remaining = Math.max(1, Math.min(10_000, new Date(config.deadlineAt).getTime() - Date.now()))
   return requestWithPinnedAddress(request, url, addresses, remaining)
 }

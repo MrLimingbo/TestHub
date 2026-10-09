@@ -36,6 +36,9 @@ public class SystemConfigService {
         }
         String normalizedValue = normalizeValue(normalizedKey, value);
         configs.upsert(normalizedKey, normalizedValue, principal.userId());
+        if (configs.findNonSecretValue(normalizedKey).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "该配置不能通过非敏感系统参数编辑");
+        }
         audit.record(principal, null, null, "SYSTEM_CONFIG_UPSERTED", "SYSTEM_CONFIG", normalizedKey,
                 java.util.Map.of("key", normalizedKey));
     }

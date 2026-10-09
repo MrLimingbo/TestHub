@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 质量报告资料迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>质量报告资料迁移</h1><p id="account" class="description">正在读取账号与项目…</p>
+  <form id="quality-report-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required></select>
+    <label for="target">账号目标项目</label><select id="target" required></select>
+    <p class="description">复制包含来源项目的定时质量报告，保留 Cron、时区、统计周期和项目顺序。全部停用，不运行或发送通知；本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">来源项目映射到所选目标项目；其他关联项目按目标组织中唯一的项目编码匹配，缺少或无权限时整批停止。不会按名称猜测，也不会缩小原项目范围。</p>
+    <p class="hint">报表摘要、趋势和 CSV 从目标的业务记录重新计算，不复制历史报告、运行记录、通知模板或投递记录。已有执行历史的迁移范围仍以各模块说明为准。启用前核对目标项目与通知配置。</p>
+    <p class="hint">同名计划不覆盖，最多 1000 个计划、每计划 50 个项目；资料上限 32 MiB，预览有效期 10 分钟，账号或服务变化须重新预览。</p>
+    <p id="preview" class="description" role="status" aria-live="polite"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传质量报告资料</button>
+  </form>
+</main><script src="quality-report-transfer.js"></script></body>
+</html>

@@ -20,7 +20,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,14 +35,14 @@ class PerformanceRunnerCapacityRecoveryFlowTests {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper json;
     @Autowired private JdbcClient jdbc;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
     @Autowired private PerformanceTestExecutionService executions;
 
     @AfterEach
     void clean() {
         for (String runnerId : new String[] { CAPACITY_RUNNER, OFFLINE_RUNNER }) {
-            redis.delete("testhub:runner:jmeter:heartbeat:v1:" + runnerId);
-            redis.opsForSet().remove("testhub:runner:jmeter:members:v1", runnerId);
+            registry.delete("testhub:runner:jmeter:heartbeat:v1:" + runnerId);
+            registry.remove("testhub:runner:jmeter:members:v1", runnerId);
         }
         jdbc.sql("DELETE FROM performance_test_execution WHERE plan_name LIKE '压测调度验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_thread_group WHERE name LIKE '压测调度验收 %'").update();
@@ -115,8 +115,7 @@ class PerformanceRunnerCapacityRecoveryFlowTests {
         heartbeat.put("trustVersion", "1");
         heartbeat.put("signature", hmac(String.join("\n", runnerId, "jmeter", "1", "0.1.0-test", "true",
                 startedAt.toString(), heartbeatAt.toString(), String.valueOf(maxConcurrentTasks), String.valueOf(activeTaskCount))));
-        redis.opsForSet().add("testhub:runner:jmeter:members:v1", runnerId);
-        redis.opsForValue().set("testhub:runner:jmeter:heartbeat:v1:" + runnerId, json.writeValueAsString(heartbeat), Duration.ofMinutes(1));
+        registry.publish("testhub:runner:jmeter:members:v1", "testhub:runner:jmeter:heartbeat:v1:" + runnerId, runnerId, json.writeValueAsString(heartbeat), Duration.ofMinutes(1));
     }
 
     private LoginSession login() throws Exception {

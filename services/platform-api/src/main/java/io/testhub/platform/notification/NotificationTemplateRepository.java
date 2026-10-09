@@ -14,6 +14,9 @@ public class NotificationTemplateRepository {
         this.jdbc = jdbc;
     }
 
+    public void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id=:id FOR UPDATE").param("id", projectId).query(String.class).single();
+    }
     public List<NotificationTemplate> findByProject(String projectId) {
         return jdbc.sql("""
                 SELECT id, organization_id, project_id, name, event_code, channel, subject_template, body_template,
@@ -72,6 +75,14 @@ public class NotificationTemplateRepository {
                 .param("channel", channel).param("subjectTemplate", subjectTemplate).param("bodyTemplate", bodyTemplate)
                 .param("targetUrl", targetUrl).param("signingSecretCiphertext", signingSecretCiphertext)
                 .param("enabled", enabled).param("updatedBy", updatedBy).update();
+    }
+
+    public void updateDefinition(String id, String projectId, String eventCode, String subject, String body, String actorId) {
+        jdbc.sql("""
+                UPDATE notification_template SET event_code=:event, subject_template=:subject, body_template=:body,
+                    updated_by=:actor, updated_at=CURRENT_TIMESTAMP(3) WHERE id=:id AND project_id=:project
+                """).param("event", eventCode).param("subject", subject).param("body", body).param("actor", actorId)
+                .param("id", id).param("project", projectId).update();
     }
 
     public void delete(String id, String projectId) {

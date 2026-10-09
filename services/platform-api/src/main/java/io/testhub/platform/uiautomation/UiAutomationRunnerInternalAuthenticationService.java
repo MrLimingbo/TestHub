@@ -10,7 +10,7 @@ import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.ExpiringStateStore;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,13 +22,13 @@ public class UiAutomationRunnerInternalAuthenticationService {
     private static final String PURPOSE = "testhub.ui-automation-runner.internal-auth.v1";
     private static final Duration MAX_SKEW = Duration.ofSeconds(60);
     private final UiAutomationRunnerStatusService runners;
-    private final StringRedisTemplate redis;
+    private final ExpiringStateStore state;
     private final byte[] key;
 
-    public UiAutomationRunnerInternalAuthenticationService(UiAutomationRunnerStatusService runners, StringRedisTemplate redis,
+    public UiAutomationRunnerInternalAuthenticationService(UiAutomationRunnerStatusService runners, ExpiringStateStore state,
                                                            @Value("${testhub.ui-automation-runner.heartbeat-key:}") String key) {
         this.runners = runners;
-        this.redis = redis;
+        this.state = state;
         this.key = key == null ? new byte[0] : key.getBytes(StandardCharsets.UTF_8);
     }
     public String authenticateRuntime(HttpServletRequest request, String taskId, String executionId) {
@@ -45,7 +45,7 @@ public class UiAutomationRunnerInternalAuthenticationService {
         String signature = header(request, "X-TestHub-Runner-Signature");
         if (!runner.matches("[A-Za-z0-9._-]{1,64}") || !nonce.matches("[A-Za-z0-9_-]{16,128}") || !signature.matches("[0-9a-f]{64}")
                 || !recent(timestamp) || !runners.isTrustedExecutionEnabled(runner) || !matches(path, runner, timestamp, nonce, signature, bindings)) throw rejected();
-        Boolean newNonce = redis.opsForValue().setIfAbsent("testhub:runner:playwright:internal-nonce:v1:" + runner + ":" + nonce, "1", Duration.ofMinutes(2));
+        Boolean newNonce = state.putIfAbsent("testhub:runner:playwright:internal-nonce:v1:" + runner + ":" + nonce, "1", Duration.ofMinutes(2));
         if (!Boolean.TRUE.equals(newNonce)) throw rejected();
         return runner;
     }

@@ -40,6 +40,7 @@ public class EnvironmentSecretService {
     @Transactional
     public void upsert(AuthenticatedPrincipal principal, String projectId, String environmentCode, String key, String value) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, SECRET_WRITERS);
+        parameters.lockProject(projectId);
         String normalizedEnvironment = ProjectParameterService.normalizeEnvironment(environmentCode);
         String normalizedKey = ProjectParameterService.normalizeKey(key);
         if (value == null || value.isEmpty() || value.length() > 20_000) {
@@ -55,6 +56,7 @@ public class EnvironmentSecretService {
     @Transactional
     public void delete(AuthenticatedPrincipal principal, String projectId, String secretId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, SECRET_WRITERS);
+        parameters.lockProject(projectId);
         parameters.deleteSecret(secretId, projectId);
         audit.record(principal, project.organizationId(), project.id(), "ENVIRONMENT_SECRET_DELETED", "ENVIRONMENT_SECRET",
                 secretId, java.util.Map.of());

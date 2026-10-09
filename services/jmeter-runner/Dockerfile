@@ -16,6 +16,7 @@ COPY services/api-runner/package.json services/api-runner/package.json
 COPY services/jmeter-runner/package.json services/jmeter-runner/package.json
 RUN corepack enable && pnpm install --prod --frozen-lockfile --filter @testhub/jmeter-runner...
 
+COPY services/runner-transport services/runner-transport
 COPY services/jmeter-runner/src services/jmeter-runner/src
 WORKDIR /app/services/jmeter-runner
 USER node

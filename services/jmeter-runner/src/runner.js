@@ -1,3 +1,4 @@
+import { join } from 'node:path'
 import { spawn as nodeSpawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { readFile, rm, stat } from 'node:fs/promises'
@@ -21,7 +22,7 @@ function isolatedJmeterEnvironment() {
     ...process.env,
     JVM_ARGS: '-Xms64m -Xmx512m -Djava.awt.headless=true -Djava.net.useSystemProxies=false -Dhttp.proxyHost= -Dhttps.proxyHost= -DsocksProxyHost=',
   }
-  for (const key of PROXY_ENVIRONMENT_KEYS) delete environment[key]
+  for (const key of [...PROXY_ENVIRONMENT_KEYS, 'JAVA_TOOL_OPTIONS', '_JAVA_OPTIONS', 'JDK_JAVA_OPTIONS']) delete environment[key]
   return environment
 }
 
@@ -31,7 +32,7 @@ export class JMeterRunner {
     this.commandClient = commandClient; this.readClient = readClient; this.cancelReadClient = cancelReadClient
     this.config = config; this.logger = logger; this.now = now; this.fetcher = fetcher; this.spawn = spawn; this.resourceSampler = resourceSampler
     this.startedAt = this.now(); this.stopping = false; this.heartbeatTimer = undefined; this.claimRecoveryTimer = undefined; this.cancelledTasks = new Map()
-    this.runningTasks = new Map()
+    this.runningTasks = new Map(); this.taskCompletions = new Set()
   }
 
   async start() {
@@ -52,7 +53,10 @@ export class JMeterRunner {
     this.stopping = true
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer)
     if (this.claimRecoveryTimer) clearInterval(this.claimRecoveryTimer)
-    for (const running of this.runningTasks.values()) this.stopProcess(running)
+    const running = [...this.runningTasks.values()]
+    for (const task of running) this.stopProcess(task)
+    // Keep transport clients alive until each owned JVM exits and archives its final result.
+    await Promise.all(this.taskCompletions)
     await this.commandClient.multi().del(heartbeatKey(this.config.runnerId)).sRem(HEARTBEAT_MEMBERS_KEY, this.config.runnerId).exec()
     await Promise.allSettled([this.cancelReadClient.quit(), this.readClient.quit(), this.commandClient.quit()])
   }
@@ -115,6 +119,7 @@ export class JMeterRunner {
   }
 
   async handleEntry(entry) {
+    if (this.stopping) return
     let task
     try { task = decodeTask(entry.fields) } catch (error) { await this.deadLetter(entry, error); await this.acknowledgeTask(entry.id); return }
     if (this.isCancelled(task)) {
@@ -141,16 +146,22 @@ export class JMeterRunner {
 
   async startJmeterTask(task) {
     const artifact = await this.requestRuntimeConfiguration(task)
+    if (this.stopping) return
     if (this.isCancelled(task)) {
       await this.publishEvent(createEvent(task, this.config.runnerId, 'CANCELLED', 'TASK_CANCELLED', 'JMeter task was cancelled before process creation.', this.now()))
       return
     }
     const workload = await prepareWorkDirectory(this.config, task, artifact)
-    const child = this.spawn(this.config.jmeterBin, jmeterArguments(workload), {
+    if (this.stopping) return
+    const args = jmeterArguments(workload)
+    if (this.config.javaBin) args.unshift('-Xms64m', '-Xmx512m', '-Djava.awt.headless=true', '-Djava.net.useSystemProxies=false',
+      '-Dhttp.proxyHost=', '-Dhttps.proxyHost=', '-DsocksProxyHost=', '-jar', join(this.config.jmeterHome, 'bin/ApacheJMeter.jar'))
+    if (this.config.watchdogJar) args.unshift(`-javaagent:${this.config.watchdogJar}`)
+    const child = this.spawn(this.config.javaBin ?? this.config.jmeterBin, args, {
       // Keep the isolated process bounded, and disable both inherited and native
       // system proxies: a proxy would bypass the Runner target-origin allow list.
       cwd: workload.root, env: isolatedJmeterEnvironment(),
-      stdio: ['ignore', 'pipe', 'pipe'], shell: false, detached: process.platform !== 'win32',
+      stdio: [this.config.watchdogJar ? 'pipe' : 'ignore', 'pipe', 'pipe'], windowsHide: true, shell: false, detached: process.platform !== 'win32',
     })
     const running = { task, workload, child, cancelled: false, finalized: false,
       metrics: new JmeterMetrics({ resultsPath: workload.resultsPath, startedAt: this.now().getTime() }), metricTimer: undefined, resourceTimer: undefined }
@@ -158,8 +169,20 @@ export class JMeterRunner {
     void this.writeHeartbeat().catch((error) => this.logger.warn?.(`JMeter Runner 槽位心跳刷新失败：${message(error)}`))
     child.stdout?.on('data', (data) => this.logger.info(`JMeter ${task.taskId}: ${String(data).trim().slice(0, 500)}`))
     child.stderr?.on('data', (data) => this.logger.warn?.(`JMeter ${task.taskId}: ${String(data).trim().slice(0, 500)}`))
-    child.once('error', (error) => void this.finishTask(running, undefined, error))
-    child.once('close', (code) => void this.finishTask(running, code, undefined))
+    running.done = new Promise(resolve => {
+      let finishing = false
+      const finish = async (code, error) => {
+        if (finishing) return
+        finishing = true
+        try { await this.finishTask(running, code, error) }
+        catch (failure) { this.logger.error('JMeter 任务收尾失败', message(failure)) }
+        finally { resolve() }
+      }
+      child.once('error', error => void finish(undefined, error))
+      child.once('close', code => void finish(code, undefined))
+    })
+    this.taskCompletions.add(running.done)
+    void running.done.then(() => this.taskCompletions.delete(running.done))
     running.metricTimer = setInterval(() => void this.emitMetrics(running), METRIC_INTERVAL_MILLISECONDS)
     running.resourceTimer = setInterval(() => void this.emitResource(running), METRIC_INTERVAL_MILLISECONDS)
     await this.publishEvent(createEvent(task, this.config.runnerId, 'RUNNING', 'JMETER_PROCESS_STARTED', 'JMeter non-GUI process started in the isolated Runner.', this.now()))

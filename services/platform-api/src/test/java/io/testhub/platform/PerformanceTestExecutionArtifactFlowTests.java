@@ -23,7 +23,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -39,16 +39,17 @@ class PerformanceTestExecutionArtifactFlowTests {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper json;
     @Autowired private JdbcClient jdbc;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
+    @Autowired private io.testhub.platform.shared.runtime.ExpiringStateStore state;
     @Autowired private PerformanceTestExecutionService executions;
 
     @AfterEach
     void clean() {
-        redis.delete("testhub:runner:jmeter:heartbeat:v1:" + RUNNER_ID);
-        redis.opsForSet().remove("testhub:runner:jmeter:members:v1", RUNNER_ID);
-        redis.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_archive_jtl_987654");
-        redis.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_timeout_log_987654");
-        redis.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_timeout_late_987654");
+        registry.delete("testhub:runner:jmeter:heartbeat:v1:" + RUNNER_ID);
+        registry.remove("testhub:runner:jmeter:members:v1", RUNNER_ID);
+        state.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_archive_jtl_987654");
+        state.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_timeout_log_987654");
+        state.delete("testhub:runner:jmeter:internal-nonce:v1:" + RUNNER_ID + ":nonce_timeout_late_987654");
         jdbc.sql("DELETE FROM performance_test_execution WHERE plan_name LIKE '压测工件验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_thread_group WHERE name LIKE '压测工件验收 %'").update();
         jdbc.sql("DELETE FROM performance_test_plan WHERE name LIKE '压测工件验收 %'").update();
@@ -118,8 +119,7 @@ class PerformanceTestExecutionArtifactFlowTests {
         heartbeat.put("startedAt", Instant.now().minusSeconds(5).toString()); heartbeat.put("heartbeatAt", Instant.now().toString());
         heartbeat.put("trustVersion", "1"); heartbeat.put("signature", hmac(String.join("\n", RUNNER_ID, "jmeter", "1", "0.1.0-test",
                 "true", String.valueOf(heartbeat.get("startedAt")), String.valueOf(heartbeat.get("heartbeatAt")))));
-        redis.opsForSet().add("testhub:runner:jmeter:members:v1", RUNNER_ID);
-        redis.opsForValue().set("testhub:runner:jmeter:heartbeat:v1:" + RUNNER_ID, json.writeValueAsString(heartbeat), Duration.ofMinutes(1));
+        registry.publish("testhub:runner:jmeter:members:v1", "testhub:runner:jmeter:heartbeat:v1:" + RUNNER_ID, RUNNER_ID, json.writeValueAsString(heartbeat), Duration.ofMinutes(1));
     }
 
     private HttpHeaders headers(String taskId, String executionId, String type, long size, String checksum, String nonce) throws Exception {

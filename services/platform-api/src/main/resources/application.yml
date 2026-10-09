@@ -48,6 +48,10 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
 testhub:
+  registration:
+    # Explicit opt-in keeps existing enterprise installations closed to public sign-ups.
+    enabled: ${TESTHUB_REGISTRATION_ENABLED:false}
+    attempts-per-minute: ${TESTHUB_REGISTRATION_ATTEMPTS_PER_MINUTE:10}
   runner:
     # Disabled by default. HTTP execution additionally requires a verified Runner that advertises executionEnabled=true.
     http-execution-enabled: ${TESTHUB_API_RUNNER_HTTP_EXECUTION_ENABLED:false}
@@ -73,6 +77,8 @@ testhub:
       # Comma-separated browser origins. Production must replace the local defaults with its public HTTPS origin.
       allowed-origins: ${TESTHUB_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   storage:
+    type: ${TESTHUB_STORAGE_TYPE:minio}
+    directory: ${TESTHUB_STORAGE_DIRECTORY:}
     endpoint: ${TESTHUB_MINIO_ENDPOINT:http://localhost:9000}
     access-key: ${TESTHUB_MINIO_ACCESS_KEY:testhub}
     secret-key: ${TESTHUB_MINIO_SECRET_KEY:testhub_minio_password}

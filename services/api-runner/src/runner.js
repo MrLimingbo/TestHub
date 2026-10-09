@@ -307,7 +307,7 @@ export class ApiRunner {
       const startedAt = this.now().getTime()
       let result
       try {
-        result = await this.httpExecutor(request, { allowedHttpOrigins: this.config.allowedHttpOrigins, deadlineAt: task.deadlineAt })
+        result = await this.httpExecutor(request, { allowedHttpOrigins: this.config.allowedHttpOrigins, allowPrivateNetwork: this.config.allowPrivateNetwork === true, deadlineAt: task.deadlineAt })
       } catch {
         result = { status: 0, ok: false }
       }
@@ -340,7 +340,7 @@ export class ApiRunner {
       const startedAt = this.now().getTime()
       let result
       try {
-        result = await this.httpExecutor(request, { allowedHttpOrigins: this.config.allowedHttpOrigins, deadlineAt: task.deadlineAt })
+        result = await this.httpExecutor(request, { allowedHttpOrigins: this.config.allowedHttpOrigins, allowPrivateNetwork: this.config.allowPrivateNetwork === true, deadlineAt: task.deadlineAt })
       } catch {
         result = { status: 0, ok: false }
       }

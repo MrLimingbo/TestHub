@@ -32,7 +32,7 @@ describe('desktop API debug request preparation', () => {
       { name: 'Content-Type', value: 'application/json' },
       { name: 'Authorization', value: 'Bearer desktop-token' },
     ]))
-    expect(request.protocol).toEqual({ type: 'HTTP' })
+    expect(request.protocol).toEqual({ type: 'GRAPHQL' })
     expect(request.auth).toEqual({ type: 'NONE', placement: 'HEADER' })
   })
 

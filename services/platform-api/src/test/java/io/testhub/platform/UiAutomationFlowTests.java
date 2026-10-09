@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -49,7 +49,8 @@ class UiAutomationFlowTests {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper json;
     @Autowired private JdbcClient jdbc;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
+    @Autowired private io.testhub.platform.shared.runtime.ExpiringStateStore state;
     @Autowired private SystemConfigRepository configs;
     @Autowired private UiAutomationService automation;
     private Optional<String> previous = Optional.empty();
@@ -64,10 +65,10 @@ class UiAutomationFlowTests {
 
     @AfterEach
     void clean() {
-        redis.delete("testhub:runner:playwright:heartbeat:v1:" + RUNNER_ID);
-        redis.opsForSet().remove("testhub:runner:playwright:members:v1", RUNNER_ID);
-        redis.delete("testhub:runner:playwright:internal-nonce:v1:" + RUNNER_ID + ":nonce_ui_screenshot_987654");
-        redis.delete("testhub:runner:playwright:internal-nonce:v1:" + RUNNER_ID + ":nonce_ui_trace_987654");
+        registry.delete("testhub:runner:playwright:heartbeat:v1:" + RUNNER_ID);
+        registry.remove("testhub:runner:playwright:members:v1", RUNNER_ID);
+        state.delete("testhub:runner:playwright:internal-nonce:v1:" + RUNNER_ID + ":nonce_ui_screenshot_987654");
+        state.delete("testhub:runner:playwright:internal-nonce:v1:" + RUNNER_ID + ":nonce_ui_trace_987654");
         if (scheduleId != null) jdbc.sql("DELETE FROM ui_automation_schedule WHERE id = :id").param("id", scheduleId).update();
         for (String id : extraExecutionIds) jdbc.sql("DELETE FROM ui_automation_execution WHERE id = :id").param("id", id).update();
         if (executionId != null) jdbc.sql("DELETE FROM ui_automation_execution WHERE id = :id").param("id", executionId).update();
@@ -262,8 +263,7 @@ class UiAutomationFlowTests {
         value.put("runnerVersion", "0.1.0-test"); value.put("executionEnabled", true); value.put("startedAt", started.toString()); value.put("heartbeatAt", beat.toString());
         value.put("maxConcurrentTasks", 2); value.put("activeTaskCount", 1); value.put("trustVersion", "1");
         value.put("signature", hmac(String.join("\n", RUNNER_ID, "playwright", "1", "0.1.0-test", "true", started.toString(), beat.toString(), "2", "1")));
-        redis.opsForSet().add("testhub:runner:playwright:members:v1", RUNNER_ID);
-        redis.opsForValue().set("testhub:runner:playwright:heartbeat:v1:" + RUNNER_ID, json.writeValueAsString(value), java.time.Duration.ofMinutes(1));
+        registry.publish("testhub:runner:playwright:members:v1", "testhub:runner:playwright:heartbeat:v1:" + RUNNER_ID, RUNNER_ID, json.writeValueAsString(value), java.time.Duration.ofMinutes(1));
     }
     private HttpHeaders artifactHeaders(String taskId, String execution, String type, byte[] content, String nonce) throws Exception {
         String timestamp = Instant.now().toString(), checksum = sha256(content);

@@ -43,3 +43,34 @@ test('CONTINUE cannot swallow cancellation', async () => {
   await assert.rejects(runner.execute({ task }, { deadlineAt: '2099-01-01', manifest: { scenario: { failureStrategy: 'CONTINUE', steps: [{ id: 'one', type: 'LAUNCH', name: 'one' }, { id: 'two', type: 'LAUNCH', name: 'two' }] } } }), { code: 'CANCELLED' })
   assert.equal(steps, 1)
 })
+
+test('typed capabilities preserve boolean and numeric values required by Appium', async () => {
+  const runner = new AppiumRunner({ config: loadConfig({}) }); let body
+  runner.webdriver = async (_, __, value) => { body = value; return { sessionId: 'typed' } }
+  const configuration = { manifest: { device: { platform: 'ANDROID', udid: 'qa-only', automationName: 'UiAutomator2', capabilities: {
+    'appium:noReset': 'true', 'appium:fullReset': 'false', 'appium:autoGrantPermissions': 'false', 'appium:newCommandTimeout': '60', 'appium:platformVersion': '15' } }, application: { appIdentifier: 'io.testhub.qa' } } }
+  await runner.startSession({}, configuration)
+  assert.equal(body.capabilities.alwaysMatch['appium:noReset'], true)
+  assert.equal(body.capabilities.alwaysMatch['appium:fullReset'], false)
+  assert.equal(body.capabilities.alwaysMatch['appium:newCommandTimeout'], 60)
+  configuration.manifest.device.capabilities['appium:noReset'] = 'invalid'
+  await assert.rejects(runner.startSession({}, configuration), { code: 'CAPABILITY_INVALID' })
+})
+test('cancellation interrupts a long WAIT rather than waiting for its full duration', async () => {
+  const runner = new AppiumRunner({ config: loadConfig({}) }), active = { task, cancelled: false }
+  const waiting = runner.step(active, { type: 'WAIT', timeoutMillis: 60000 }, {})
+  setTimeout(() => { active.cancelled = true }, 20)
+  await assert.rejects(waiting, { code: 'CANCELLED' })
+})
+test('HTTP redirects never send session commands to an unapproved service', async () => {
+  const { createServer } = await import('node:http'); let forbiddenHits = 0
+  const forbidden = createServer((_, response) => { forbiddenHits++; response.end('{}') })
+  await new Promise(resolve => forbidden.listen(0, '127.0.0.1', resolve))
+  const approved = createServer((_, response) => { response.writeHead(307, { location: `http://127.0.0.1:${forbidden.address().port}/session` }); response.end() })
+  await new Promise(resolve => approved.listen(0, '127.0.0.1', resolve))
+  try {
+    const runner = new AppiumRunner({ config: { appiumServerUrl: `http://127.0.0.1:${approved.address().port}` } })
+    await assert.rejects(runner.webdriver('POST', '/session', { capabilities: {} }, 1000))
+    assert.equal(forbiddenHits, 0)
+  } finally { approved.closeAllConnections(); forbidden.closeAllConnections(); await Promise.all([new Promise(resolve => approved.close(resolve)), new Promise(resolve => forbidden.close(resolve))]) }
+})

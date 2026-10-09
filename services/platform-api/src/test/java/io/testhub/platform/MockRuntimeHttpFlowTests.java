@@ -100,7 +100,7 @@ class MockRuntimeHttpFlowTests {
         initialize("过期分享");
         createRule(Map.of("httpMethod", "GET", "path", "/public"));
         JsonNode share = create(management() + "/shares", Map.of("name", "HTTP Mock 验收 过期链接", "expiresInDays", 1));
-        jdbc.sql("UPDATE mock_share SET expires_at = CURRENT_TIMESTAMP(3) - INTERVAL 1 SECOND WHERE id = :id")
+        jdbc.sql("UPDATE mock_share SET expires_at = CURRENT_TIMESTAMP(3) - INTERVAL '1' SECOND WHERE id = :id")
                 .param("id", share.path("id").asText()).update();
         mvc.perform(get("/api/v1/mock-shares/{key}", share.path("shareKey").asText()))
                 .andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value("REQUEST_REJECTED"));

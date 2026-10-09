@@ -98,7 +98,9 @@ public class ExtensionRegistryService {
     @Transactional
     public InstalledPlugin installPackage(AuthenticatedPrincipal principal, PackageInput input) {
         access.requireSystemAdmin(principal);
-        String manifestJson = required(input.manifestJson(), 50_000, "插件清单");
+        String manifestJson = input.manifestJson();
+        if (manifestJson == null || manifestJson.isBlank() || manifestJson.length() > 50_000) throw rejected("插件清单不合法");
+        // The signature and checksum cover the exact submitted characters, including surrounding whitespace.
         String signatureBase64 = required(input.signatureBase64(), 4096, "插件签名");
         PluginManifest manifest = parseAndValidateManifest(manifestJson);
         ExtensionRegistryRepository.StoredSigningKey signer = registry.findEnabledSigningKey(normalizeKeyId(input.signerKeyId()))
@@ -141,13 +143,20 @@ public class ExtensionRegistryService {
         String type = adapters.requireDefinition(input.adapterType()).type();
         String displayName = required(input.displayName(), 120, "适配器名称");
         String endpoint = adapters.validateAndNormalizeEndpoint(type, input.endpoint());
-        Map<String, String> configuration = adapters.validateConfiguration(type, input.configuration());
-        String ciphertext = cipher.encrypt(write(configuration));
+        var previous = id == null ? null : registry.findAdapterForUpdate(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "企业适配器不存在"));
+        String ciphertext;
+        if (input.configuration() == null && previous != null) {
+            if (!type.equals(previous.adapterType())) throw rejected("切换适配器类型必须填写新的完整配置");
+            ciphertext = previous.configurationCiphertext();
+        } else {
+            Map<String, String> configuration = adapters.validateConfiguration(type, input.configuration());
+            ciphertext = cipher.encrypt(write(configuration));
+        }
         String adapterId = id == null ? UlidCreator.getUlid().toString() : id;
         boolean creating = id == null;
         if (creating) registry.insertAdapter(adapterId, type, displayName, endpoint, ciphertext, input.enabled(), principal.userId());
         else {
-            registry.findAdapter(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "企业适配器不存在"));
             registry.updateAdapter(adapterId, type, displayName, endpoint, ciphertext, input.enabled(), principal.userId());
         }
         audit.record(principal, null, null, creating ? "ENTERPRISE_ADAPTER_CREATED" : "ENTERPRISE_ADAPTER_UPDATED",
@@ -197,17 +206,17 @@ public class ExtensionRegistryService {
     }
 
     private int compareVersions(String next, String current) {
-        List<Integer> left = versionParts(next);
-        List<Integer> right = versionParts(current);
+        List<java.math.BigInteger> left = versionParts(next);
+        List<java.math.BigInteger> right = versionParts(current);
         for (int index = 0; index < left.size(); index++) {
-            int comparison = Integer.compare(left.get(index), right.get(index));
+            int comparison = left.get(index).compareTo(right.get(index));
             if (comparison != 0) return comparison;
         }
         return 0;
     }
 
-    private List<Integer> versionParts(String value) {
-        return java.util.Arrays.stream(value.split("\\.")).map(Integer::parseInt).toList();
+    private List<java.math.BigInteger> versionParts(String value) {
+        return java.util.Arrays.stream(value.split("\\.")).map(java.math.BigInteger::new).toList();
     }
 
     private String normalizeVersion(String value) {

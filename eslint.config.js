@@ -3,7 +3,7 @@ import pluginVue from 'eslint-plugin-vue'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', 'node_modules'] },
+  { ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**', '**/target/**', '.testhub/**', 'release/**', 'artifacts/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
@@ -14,7 +14,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['services/api-runner/**/*.js', 'services/jmeter-runner/**/*.js', 'services/playwright-runner/**/*.js', 'services/appium-runner/**/*.js'],
+    files: ['services/api-runner/**/*.js', 'services/jmeter-runner/**/*.js', 'services/playwright-runner/**/*.{js,mjs}', 'services/appium-runner/**/*.js'],
     languageOptions: {
       globals: {
         AbortSignal: 'readonly',
@@ -26,6 +26,10 @@ export default tseslint.config(
         setTimeout: 'readonly',
       },
     },
+  },
+  {
+    files: ['services/runner-transport/**/*.mjs'],
+    languageOptions: { globals: { AbortController: 'readonly', AbortSignal: 'readonly', URL: 'readonly', fetch: 'readonly', process: 'readonly' } },
   },
   {
     files: ['services/testhub-cli/**/*.js'],
@@ -60,6 +64,7 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         document: 'readonly',
+        setInterval: 'readonly',
         window: 'readonly',
       },
     },

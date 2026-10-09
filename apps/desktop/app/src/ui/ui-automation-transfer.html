@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · Web UI 资料迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>Web UI 资料迁移</h1>
+  <p id="account" class="description" role="status">正在准备本地工作区并读取项目…</p>
+  <form id="ui-automation-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required disabled></select>
+    <label for="target">账号目标项目</label><select id="target" required disabled></select>
+    <p class="description">复制浏览器配置当前版本、页面对象、场景当前版本、变量、有序步骤及定时配置，并重新关联浏览器、页面对象与场景。本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">迁入浏览器配置和定时计划全部停用，不会提交执行。基础地址原样保留，localhost 在不同电脑上指向不同服务。本机授权不复制；需核对目标、配置账号服务的目标授权与运行器后再手动启用。已有服务的 IP 地址限制等规则继续生效。</p>
+    <p class="hint">定时计划保留 Cron、时区、超时和重试策略，不复制最近执行状态。关联的功能测试计划按编号匹配目标项目；缺少对应计划时整批停止，请先迁移相关功能测试计划。</p>
+    <p class="hint">本次不复制执行历史、截图、录屏和 Trace，这些仍保留本地。变量、输入值和断言可能含敏感值，确认后才上传。</p>
+    <p class="hint">目标存在同名配置、对象、场景或计划时整批停止。每类资料最多 1000 条，总资料上限 32 MiB。预览有效期 10 分钟，切换账号或服务后须重新预览。</p>
+    <p id="preview" class="description" role="status"></p><p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传 Web UI 资料</button>
+  </form>
+</main><script src="ui-automation-transfer.js"></script></body>
+</html>

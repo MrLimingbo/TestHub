@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -45,7 +45,8 @@ class ApiRunnerRuntimeConfigurationFlowTests {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper json;
     @Autowired private JdbcClient jdbc;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
+    @Autowired private io.testhub.platform.shared.runtime.ExpiringStateStore state;
     private Fixture fixture;
 
     @DynamicPropertySource
@@ -56,18 +57,18 @@ class ApiRunnerRuntimeConfigurationFlowTests {
 
     @BeforeEach
     void clearNoncesBeforeEachExecution() {
-        redis.delete(NONCE_PREFIX + "nonce_config_lease_012345");
-        redis.delete(NONCE_PREFIX + "nonce_config_artifact_01234");
+        state.delete(NONCE_PREFIX + "nonce_config_lease_012345");
+        state.delete(NONCE_PREFIX + "nonce_config_artifact_01234");
     }
 
     @AfterEach
     void clean() {
-        redis.delete("testhub:runner:api:heartbeat:v1:" + RUNNER_ID);
-        redis.opsForSet().remove("testhub:runner:api:members:v1", RUNNER_ID);
-        redis.delete(NONCE_PREFIX + "nonce_config_lease_012345");
-        redis.delete(NONCE_PREFIX + "nonce_config_artifact_01234");
+        registry.delete("testhub:runner:api:heartbeat:v1:" + RUNNER_ID);
+        registry.remove("testhub:runner:api:members:v1", RUNNER_ID);
+        state.delete(NONCE_PREFIX + "nonce_config_lease_012345");
+        state.delete(NONCE_PREFIX + "nonce_config_artifact_01234");
         if (fixture != null) {
-            redis.delete("testhub:runner:api:runtime-lease:v1:" + fixture.executionId());
+            state.delete("testhub:runner:api:runtime-lease:v1:" + fixture.executionId());
             jdbc.sql("DELETE FROM api_automation_execution WHERE id = :id").param("id", fixture.executionId()).update();
             jdbc.sql("DELETE FROM api_automation_scenario WHERE id = :id").param("id", fixture.scenarioId()).update();
         }
@@ -189,8 +190,7 @@ class ApiRunnerRuntimeConfigurationFlowTests {
         value.put("startedAt", Instant.now().minusSeconds(5).toString()); value.put("heartbeatAt", Instant.now().toString());
         value.put("trustVersion", "1"); value.put("signature", hmac(String.join("\n", RUNNER_ID, "api", "1", "0.1.0-test",
                 "true", String.valueOf(value.get("startedAt")), String.valueOf(value.get("heartbeatAt")))));
-        redis.opsForSet().add("testhub:runner:api:members:v1", RUNNER_ID);
-        redis.opsForValue().set("testhub:runner:api:heartbeat:v1:" + RUNNER_ID, json.writeValueAsString(value), Duration.ofMinutes(1));
+        registry.publish("testhub:runner:api:members:v1", "testhub:runner:api:heartbeat:v1:" + RUNNER_ID, RUNNER_ID, json.writeValueAsString(value), Duration.ofMinutes(1));
     }
 
     private HttpHeaders headers(String path, String taskId, String executionId, String lease, String nonce) throws Exception {

@@ -60,9 +60,9 @@ class FunctionalExecutionFlowTests {
                     (id, organization_id, project_id, catalog_id, case_code, title, priority, status,
                      precondition, steps, expected_result, created_by, updated_by)
                 VALUES (:id, :org, :project, :catalog, 'EXEC_CASE_001', '执行链路验收用例', 'P1', 'READY',
-                        '', '打开页面\\n提交表单', '展示成功结果', :user, :user)
+                        '', :steps, '展示成功结果', :user, :user)
                 """).param("id", caseId).param("org", organizationId).param("project", projectId).param("catalog", catalogId)
-                .param("user", userId).update();
+                .param("user", userId).param("steps", "打开页面\n提交表单").update();
 
         Csrf csrf = csrf(administrator);
         MvcResult plan = mvc.perform(post("/api/v1/projects/{projectId}/functional/plans", projectId)

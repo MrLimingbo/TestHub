@@ -11,7 +11,7 @@ import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RuntimeStreams;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,19 +20,19 @@ import org.springframework.web.server.ResponseStatusException;
 public class PerformanceRunnerResourceConsumer {
     private static final Logger log = LoggerFactory.getLogger(PerformanceRunnerResourceConsumer.class);
     private static final String CONSUMER = "platform-performance-resources";
-    private final StringRedisTemplate redis;
+    private final RuntimeStreams streams;
     private final PerformanceTestExecutionService executions;
     private volatile boolean groupReady;
 
-    public PerformanceRunnerResourceConsumer(StringRedisTemplate redis, PerformanceTestExecutionService executions) {
-        this.redis = redis;
+    public PerformanceRunnerResourceConsumer(RuntimeStreams streams, PerformanceTestExecutionService executions) {
+        this.streams = streams;
         this.executions = executions;
     }
 
     @Scheduled(fixedDelayString = "${testhub.performance-runner.resources.poll-interval-ms:500}")
     public void consume() {
         ensureGroup();
-        List<MapRecord<String, Object, Object>> records = redis.opsForStream().read(
+        List<MapRecord<String, Object, Object>> records = streams.read(
                 Consumer.from(PerformanceRunnerProtocol.RESOURCE_GROUP, CONSUMER), StreamReadOptions.empty().count(100),
                 StreamOffset.create(PerformanceRunnerProtocol.RESOURCE_STREAM, ReadOffset.lastConsumed()));
         if (records == null) return;
@@ -60,19 +60,19 @@ public class PerformanceRunnerResourceConsumer {
     }
 
     private void acknowledge(MapRecord<String, Object, Object> record) {
-        redis.opsForStream().acknowledge(PerformanceRunnerProtocol.RESOURCE_GROUP, record);
+        streams.acknowledge(PerformanceRunnerProtocol.RESOURCE_GROUP, record);
     }
 
     private synchronized void ensureGroup() {
         if (groupReady) return;
         try {
-            redis.opsForStream().createGroup(PerformanceRunnerProtocol.RESOURCE_STREAM, ReadOffset.latest(), PerformanceRunnerProtocol.RESOURCE_GROUP);
+            streams.createGroup(PerformanceRunnerProtocol.RESOURCE_STREAM, ReadOffset.latest(), PerformanceRunnerProtocol.RESOURCE_GROUP);
         } catch (Exception firstAttempt) {
             if (!contains(firstAttempt, "BUSYGROUP")) {
-                redis.opsForStream().add(StreamRecords.mapBacked(Map.of("bootstrap", "1"))
+                streams.add(StreamRecords.mapBacked(Map.of("bootstrap", "1"))
                         .withStreamKey(PerformanceRunnerProtocol.RESOURCE_STREAM));
                 try {
-                    redis.opsForStream().createGroup(PerformanceRunnerProtocol.RESOURCE_STREAM, ReadOffset.latest(), PerformanceRunnerProtocol.RESOURCE_GROUP);
+                    streams.createGroup(PerformanceRunnerProtocol.RESOURCE_STREAM, ReadOffset.latest(), PerformanceRunnerProtocol.RESOURCE_GROUP);
                 } catch (Exception secondAttempt) {
                     if (!contains(secondAttempt, "BUSYGROUP")) throw secondAttempt;
                 }

@@ -35,7 +35,7 @@ public class TokenRepository {
         jdbc.sql("""
                 INSERT INTO personal_access_token
                     (id, user_id, project_id, name, token_prefix, token_hash, scopes, expires_at)
-                VALUES (:id, :userId, :projectId, :name, :prefix, :tokenHash, :scopes, :expiresAt)
+                VALUES (:id, :userId, :projectId, :name, :prefix, :tokenHash, CAST(:scopes AS JSON), :expiresAt)
                 """).param("id", id).param("userId", userId).param("projectId", projectId).param("name", name)
                 .param("prefix", prefix).param("tokenHash", tokenHash).param("scopes", toJson(scopes))
                 .param("expiresAt", expiresAt).update();

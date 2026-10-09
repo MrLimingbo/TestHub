@@ -49,13 +49,22 @@ public class NotificationDeliveryService {
         this.json = json;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = RenderedSubjectTooLong.class)
     public int enqueueQualityReport(String scheduleRunId, QualityReportSchedule schedule, QualityReport report) {
-        int queued = 0;
+        List<NotificationDeliveryRepository.StoredNotificationDelivery> prepared = new java.util.ArrayList<>();
         for (QualityReport.ProjectHealth project : report.projects()) {
-            queued += enqueue(scheduleRunId, schedule, report, project, "quality.report.ready", "READY");
+            prepared.addAll(prepare(scheduleRunId, schedule, report, project, "quality.report.ready", "READY"));
             if (project.failedExecutions() > 0 || project.criticalDefectCount() > 0) {
-                queued += enqueue(scheduleRunId, schedule, report, project, "quality.report.risk", "RISK");
+                prepared.addAll(prepare(scheduleRunId, schedule, report, project, "quality.report.risk", "RISK"));
+            }
+        }
+        // Validate every rendered subject before any queue row is inserted.
+        int queued = 0;
+        for (var stored : prepared) {
+            try { deliveries.insert(stored); queued++; }
+            catch (DataIntegrityViolationException exception) {
+                var row = stored.delivery();
+                if (!deliveries.alreadyQueued(row.scheduleRunId(), row.templateId(), row.eventCode())) throw exception;
             }
         }
         return queued;
@@ -69,11 +78,10 @@ public class NotificationDeliveryService {
     @Transactional
     public NotificationDelivery retry(AuthenticatedPrincipal principal, String projectId, String deliveryId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
-        if (!deliveries.resetForManualRetry(deliveryId, projectId, Instant.now())) {
+        if (!deliveries.resetForManualRetry(deliveryId, projectId, Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "仅失败或已完成的通知可手动重试");
         }
-        NotificationDelivery delivery = deliveries.findByProject(projectId, 100).stream()
-                .filter(item -> item.id().equals(deliveryId)).findFirst()
+        NotificationDelivery delivery = deliveries.findById(deliveryId, projectId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "通知投递记录不存在"));
         audit.record(principal, project.organizationId(), projectId, "NOTIFICATION_DELIVERY_REQUEUED",
                 "NOTIFICATION_DELIVERY", deliveryId, Map.of("eventCode", delivery.eventCode()));
@@ -118,35 +126,38 @@ public class NotificationDeliveryService {
         }
     }
 
-    private int enqueue(String scheduleRunId, QualityReportSchedule schedule, QualityReport report,
+    private List<NotificationDeliveryRepository.StoredNotificationDelivery> prepare(String scheduleRunId, QualityReportSchedule schedule, QualityReport report,
                         QualityReport.ProjectHealth project, String eventCode, String status) {
-        int inserted = 0;
+        List<NotificationDeliveryRepository.StoredNotificationDelivery> prepared = new java.util.ArrayList<>();
         for (NotificationTemplateRepository.StoredNotificationTemplate stored : templates.findEnabledWebhookTemplates(project.projectId(), eventCode)) {
             NotificationTemplate template = stored.template();
             String id = UlidCreator.getUlid().toString();
-            String payload = payload(schedule, report, project, eventCode, status, id);
+            String subject = render(template.subjectTemplate(), eventCode, project, schedule.name(), status);
+            if (subject.length() > 255) throw new RenderedSubjectTooLong();
+            String message = render(template.bodyTemplate(), eventCode, project, schedule.name(), status);
+            String payload = payload(schedule, report, project, eventCode, status, id, subject, message);
             NotificationDelivery delivery = new NotificationDelivery(id, scheduleRunId, template.id(), schedule.organizationId(),
                     project.projectId(), template.name(), eventCode, "WEBHOOK", template.targetUrl(),
-                    render(template.subjectTemplate(), eventCode, project, schedule.name(), status),
-                    render(template.bodyTemplate(), eventCode, project, schedule.name(), status), "PENDING", 0, Instant.now(),
+                    subject, message, "PENDING", 0, Instant.now(),
                     null, null, null, Instant.now(), Instant.now());
-            try {
-                deliveries.insert(new NotificationDeliveryRepository.StoredNotificationDelivery(delivery,
-                        stored.signingSecretCiphertext(), payload));
-                inserted++;
-            } catch (DataIntegrityViolationException ignored) {
-                // `(schedule_run_id, template_id, event_code)` makes rerunning enqueue idempotent.
-            }
+            prepared.add(new NotificationDeliveryRepository.StoredNotificationDelivery(delivery,
+                    stored.signingSecretCiphertext(), payload));
         }
-        return inserted;
+        return prepared;
+    }
+
+    public static class RenderedSubjectTooLong extends ResponseStatusException {
+        public RenderedSubjectTooLong() { super(HttpStatus.BAD_REQUEST, "渲染后的通知主题超过 255 字符，请缩短主题模板后重试。"); }
     }
 
     private String payload(QualityReportSchedule schedule, QualityReport report, QualityReport.ProjectHealth project,
-                           String eventCode, String status, String deliveryId) {
+                           String eventCode, String status, String deliveryId, String subject, String message) {
         Map<String, Object> value = new LinkedHashMap<>();
         value.put("event", eventCode);
         value.put("deliveryId", deliveryId);
         value.put("status", status);
+        value.put("subject", subject);
+        value.put("message", message);
         value.put("schedule", Map.of("id", schedule.id(), "name", schedule.name()));
         value.put("range", Map.of("from", report.from().toString(), "to", report.to().toString()));
         value.put("summary", report.summary());

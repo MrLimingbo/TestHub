@@ -4,6 +4,7 @@ import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import PerformanceExecutionChart from '@/components/PerformanceExecutionChart.vue'
 import PerformanceResourceChart from '@/components/PerformanceResourceChart.vue'
+import { isLocalDesktop, isAccountDesktop, openPerformanceSync, ensureLocalJmeter, localJmeterStatus, cancelJmeterPreparation, openLocalExecutionSettings, type LocalEngineStatus } from '@/utils/desktopWorkspace'
 import { useSessionStore } from '@/stores/session'
 
 interface ApiEnvelope<T> { data: T }
@@ -212,6 +213,17 @@ const availableRunnerSlots = computed(() => Math.max(0, runnerCapacity.value - a
 const runnerLabel = computed(() => !activeRunner.value ? '离线' : readyRunners.value.length ? `${readyRunners.value.length} 个已就绪` : '已接入 · 执行禁用')
 const runnerTone = computed(() => !activeRunner.value ? 'offline' : readyRunners.value.length ? 'ready' : 'pending')
 const runnerPoolLabel = computed(() => runnerCapacity.value ? `${availableRunnerSlots.value} / ${runnerCapacity.value} 空闲槽位` : '等待可执行 Runner')
+const preparingEngine = ref(false)
+const engineStatus = ref<LocalEngineStatus>()
+let preparationCancelled = false
+let engineTimer: number | undefined
+const localDesktop = isLocalDesktop()
+const desktop = localDesktop || isAccountDesktop()
+async function showSync() {
+  try { await openPerformanceSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '打开性能计划同步失败') }
+}
+async function cancelEnginePreparation() { preparationCancelled = true; await cancelJmeterPreparation() }
 const canSubmit = computed(() => selectedDetail.value?.status === 'READY')
 const statusLabel = (status: string) => ({ DRAFT: '草稿', READY: '待执行', ARCHIVED: '已归档', QUEUED: '队列中', ACCEPTED: '已接收', RUNNING: '执行中', CANCELLING: '取消中', CANCELLED: '已取消', SUCCEEDED: '已完成', FAILED: '失败', REJECTED: '已拒绝', TIMED_OUT: '超时' }[status] ?? status)
 const statusColor = (status: string) => ({ DRAFT: 'gray', READY: 'arcoblue', ARCHIVED: 'gray', QUEUED: 'arcoblue', ACCEPTED: 'arcoblue', RUNNING: 'orange', CANCELLING: 'orange', CANCELLED: 'gray', SUCCEEDED: 'green', FAILED: 'red', REJECTED: 'red', TIMED_OUT: 'red' }[status] ?? 'gray')
@@ -419,13 +431,25 @@ async function deletePlan() {
   }
 }
 async function submitExecution() {
-  if (!selectedDetail.value || !canSubmit.value) return
+  if (!selectedDetail.value || !canSubmit.value || preparingEngine.value) return
+  const selectedPlan = selectedDetail.value, selectedProjectId = projectId.value
+  preparingEngine.value = true; preparationCancelled = false
   try {
+    if (localDesktop) {
+      engineTimer = window.setInterval(() => { void localJmeterStatus().then(status => { engineStatus.value = status }).catch(() => {}) }, 300)
+      await ensureLocalJmeter(selectedPlan.threadGroups.map(group => new URL(group.targetUrl).origin))
+      if (preparationCancelled) return
+      if (selectedPlan !== selectedDetail.value || selectedProjectId !== projectId.value) throw new Error('所选压测计划已变化，请重新提交。')
+    }
     const execution = await mutate<PerformanceExecution>(`/api/v1/projects/${projectId.value}/performance/plans/${selectedDetail.value.id}/executions`, 'POST', { timeoutSeconds: 3600 })
     executions.value = [execution, ...executions.value]
     Message.success('压测任务已进入安全队列')
   } catch (error) {
     Message.error(error instanceof Error ? error.message : '提交压测任务失败')
+  } finally {
+    preparingEngine.value = false
+    if (engineTimer !== undefined) window.clearInterval(engineTimer)
+    engineTimer = undefined
   }
 }
 async function cancelExecution(execution: PerformanceExecution) {
@@ -487,6 +511,8 @@ onMounted(() => {
   operationalTimer = window.setInterval(() => { if (projectId.value) void loadOperationalData().catch(error => { operationalError.value = error instanceof Error ? error.message : '刷新执行状态失败' }) }, 2000)
 })
 onBeforeUnmount(() => {
+  if (preparingEngine.value && localDesktop) void cancelEnginePreparation()
+  if (engineTimer !== undefined) window.clearInterval(engineTimer)
   if (operationalTimer !== undefined) window.clearInterval(operationalTimer)
   closeReport()
 })
@@ -495,6 +521,14 @@ onBeforeUnmount(() => {
 <template>
   <div class="page performance-page">
     <PageHeader eyebrow="JMETER RUNNER · CONTROL PLANE" title="性能测试" description="维护压测计划，并通过独立 Runner 执行受限 JMeter 任务、追踪实时指标和查看报告。" action="新建压测计划" @action="openCreate" />
+    <div v-if="desktop" class="sync-entry"><a-button @click="showSync">性能计划同步</a-button><small>离线编辑，联网后同步计划定义；执行历史与报告保留各端。</small></div>
+
+    <a-alert v-if="localDesktop" class="runner-alert" :show-icon="true">
+      <div aria-live="polite">{{ preparingEngine ? engineStatus?.message || '正在准备 JMeter…' : '首次提交压测时会自动下载并校验 JMeter，安装后可离线复用。压测只访问本地执行设置中允许的目标。' }}</div>
+      <div v-if="preparingEngine && engineStatus?.receivedBytes">已下载 {{ (engineStatus.receivedBytes / 1024 / 1024).toFixed(1) }} MB<span v-if="engineStatus.totalBytes"> / {{ (engineStatus.totalBytes / 1024 / 1024).toFixed(1) }} MB</span></div>
+      <a-button v-if="preparingEngine" size="small" @click="cancelEnginePreparation">取消准备</a-button>
+      <a-button v-else size="small" @click="openLocalExecutionSettings">本地执行设置</a-button>
+    </a-alert>
 
     <section class="performance-summary panel">
       <div class="project-summary"><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code ?? '—' }}</small></div>
@@ -506,7 +540,7 @@ onBeforeUnmount(() => {
       <div><span>Runner 池槽位</span><strong>{{ availableRunnerSlots }} / {{ runnerCapacity }}</strong><small>{{ runnerPoolLabel }}</small></div>
     </section>
 
-    <a-alert class="runner-alert" :type="readyRunners.length ? 'success' : 'info'" :show-icon="true">{{ readyRunners.length ? `已接入 ${readyRunners.length} 个可执行 JMeter Runner，当前 ${runnerPoolLabel}。满载 Runner 会延迟并重新投递任务；Runner 失联时，已分配任务会明确失败而不会重复压测。` : 'JMeter Runner 当前处于执行禁用状态。提交任务会被受控拒绝，不会向任何目标地址发送压测流量。' }}</a-alert>
+    <a-alert v-if="!localDesktop || readyRunners.length" class="runner-alert" :type="readyRunners.length ? 'success' : 'info'" :show-icon="true">{{ readyRunners.length ? `已接入 ${readyRunners.length} 个可执行 JMeter Runner，当前 ${runnerPoolLabel}。满载 Runner 会延迟并重新投递任务；Runner 失联时，已分配任务会明确失败而不会重复压测。` : 'JMeter Runner 当前处于执行禁用状态。提交任务会被受控拒绝，不会向任何目标地址发送压测流量。' }}</a-alert>
 
     <section v-if="runners.length" class="runner-pool panel">
       <div class="section-title"><div><strong>Runner 调度池</strong><span>{{ runnerPoolLabel }}</span></div><small>心跳每两秒刷新</small></div>
@@ -536,7 +570,7 @@ onBeforeUnmount(() => {
       <div v-if="selectedDetail" class="plan-content">
         <section class="plan-header panel">
           <div><div class="eyebrow">PLAN · V{{ selectedDetail.version }}</div><h2>{{ selectedDetail.name }}</h2><p>{{ selectedDetail.description || '暂未填写计划说明。' }}</p></div>
-          <a-space><a-button :disabled="!canSubmit" @click="submitExecution"><icon-play-circle /> 提交压测</a-button><a-popconfirm content="删除后线程组配置将不可恢复，确认删除吗？" @ok="deletePlan"><a-button status="danger">删除</a-button></a-popconfirm><a-button type="primary" @click="openEdit"><icon-edit /> 编辑配置</a-button></a-space>
+          <a-space><a-button :disabled="!canSubmit" :loading="preparingEngine" @click="submitExecution"><icon-play-circle /> 提交压测</a-button><a-popconfirm content="删除后线程组配置将不可恢复，确认删除吗？" @ok="deletePlan"><a-button status="danger">删除</a-button></a-popconfirm><a-button type="primary" @click="openEdit"><icon-edit /> 编辑配置</a-button></a-space>
         </section>
 
         <section class="plan-overview panel">
@@ -557,7 +591,7 @@ onBeforeUnmount(() => {
         </section>
 
         <section class="execution-panel panel">
-          <div class="section-title"><div><strong>压测任务</strong><span>{{ selectedExecutions.length }} 条</span></div><a-button size="small" :disabled="!canSubmit" @click="submitExecution"><icon-plus /> 提交压测</a-button></div>
+          <div class="section-title"><div><strong>压测任务</strong><span>{{ selectedExecutions.length }} 条</span></div><a-button size="small" :disabled="!canSubmit" :loading="preparingEngine" @click="submitExecution"><icon-plus /> 提交压测</a-button></div>
           <a-table :data="selectedExecutions" :pagination="false" row-key="id" size="small">
             <template #columns>
               <a-table-column title="任务"><template #cell="{ record }"><div class="execution-name"><strong>{{ record.planName }}</strong><small>{{ record.taskId }}</small></div></template></a-table-column>
@@ -603,7 +637,7 @@ onBeforeUnmount(() => {
           <section v-if="selectedReport.comparison" class="report-panel"><div class="report-panel-title"><h3>与上一成功执行对比</h3><span>基线：{{ date(selectedReport.comparison.baseline.requestedAt) }} · v{{ selectedReport.comparison.baseline.planVersion }}</span></div><div class="comparison-grid"><div><span>样本数</span><strong>{{ signed(selectedReport.comparison.delta.sampleCount) }}</strong></div><div><span>峰值 TPS</span><strong>{{ signed(selectedReport.comparison.delta.peakThroughputPerSecond, 2) }}</strong></div><div><span>P95</span><strong>{{ signed(selectedReport.comparison.delta.p95LatencyMillis) }}ms</strong></div><div><span>错误率</span><strong>{{ signed(selectedReport.comparison.delta.errorRatePercent, 2) }}%</strong></div></div><small class="comparison-note">差异 = 当前执行 − 基线执行；P95 和错误率为负值通常代表质量改善。</small></section>
           <section class="report-panel"><h3>实时趋势</h3><PerformanceExecutionChart :metrics="selectedReport.metrics" /><a-empty v-if="selectedReport.metrics.length === 0" description="等待 JMeter Runner 回传首批指标" /></section>
           <section class="report-panel"><div class="report-panel-title"><h3>运行资源监控</h3><span>仅采集隔离 JMeter 子进程，不包含控制面服务</span></div><template v-if="selectedReport.resources.length"><div class="resource-summary"><div><span>峰值 CPU</span><strong>{{ cpu(peakResourceCpu(selectedReport.resources)) }}</strong></div><div><span>最新 CPU</span><strong>{{ cpu(latestResource(selectedReport.resources)?.cpuPercent ?? 0) }}</strong></div><div><span>峰值常驻内存</span><strong>{{ memory(peakResourceMemory(selectedReport.resources)) }}</strong></div><div><span>最新常驻内存</span><strong>{{ memory(latestResource(selectedReport.resources)?.residentMemoryBytes ?? 0) }}</strong></div></div><PerformanceResourceChart :resources="selectedReport.resources" /><small class="resource-note">Runner：{{ latestResource(selectedReport.resources)?.runnerId }} · 最近采集：{{ date(latestResource(selectedReport.resources)?.occurredAt ?? '') }}</small></template><a-empty v-else description="任务启动后将每秒采集隔离 JMeter 进程的 CPU 与常驻内存" /></section>
-          <section class="report-panel"><div class="report-panel-title"><h3>原始执行工件</h3><span>MinIO · 项目权限下载</span></div><div class="artifact-list"><div v-for="artifact in selectedReport.artifacts" :key="artifact.id" class="artifact-item"><div><strong>{{ artifactLabel(artifact.artifactType) }}</strong><small>{{ artifact.originalName }} · {{ size(artifact.sizeBytes) }} · {{ date(artifact.createdAt) }}</small></div><a-link :href="artifactDownloadUrl(artifact)" target="_blank">下载</a-link></div></div><a-empty v-if="selectedReport.artifacts.length === 0" description="Runner 完成后将归档 results.jtl 与 jmeter.log" /></section>
+          <section class="report-panel"><div class="report-panel-title"><h3>原始执行工件</h3><span>{{ localDesktop ? '本地存储' : 'MinIO' }} · 项目权限下载</span></div><div class="artifact-list"><div v-for="artifact in selectedReport.artifacts" :key="artifact.id" class="artifact-item"><div><strong>{{ artifactLabel(artifact.artifactType) }}</strong><small>{{ artifact.originalName }} · {{ size(artifact.sizeBytes) }} · {{ date(artifact.createdAt) }}</small></div><a-link :href="artifactDownloadUrl(artifact)" target="_blank">下载</a-link></div></div><a-empty v-if="selectedReport.artifacts.length === 0" description="Runner 完成后将归档 results.jtl 与 jmeter.log" /></section>
           <section class="report-panel"><h3>执行日志</h3><a-timeline><a-timeline-item v-for="log in selectedReport.logs" :key="`${log.occurredAt}-${log.code}`" :label="date(log.occurredAt)"><strong>{{ log.code }}</strong><p>{{ log.message }}</p></a-timeline-item></a-timeline><a-empty v-if="selectedReport.logs.length === 0" description="暂无执行日志" /></section>
         </template>
       </a-spin>
@@ -612,6 +646,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.sync-entry{display:flex;align-items:center;gap:12px;margin-bottom:16px}.sync-entry small{color:var(--color-text-3)}
 .performance-summary{display:grid;grid-template-columns:1.25fr 1.1fr repeat(5,.8fr);gap:18px;align-items:center;margin-bottom:16px}.performance-summary>div{display:grid;gap:4px;min-width:0}.performance-summary span,.performance-summary small,.plan-item small,.plan-header p,.group-metrics span,.plan-overview span,.thread-group footer,.form-section-heading span,.execution-name small,.execution-code,.runner-card small,.runner-pool>.section-title>small,.request-summary{color:var(--color-text-3);font-size:12px}.performance-summary strong{font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.project-summary strong{font-size:16px}.runner-state strong{font-size:14px;color:var(--color-text-2);display:flex;align-items:center;gap:6px}.runner-state i{width:7px;height:7px;border-radius:50%;background:rgb(var(--danger-6))}.runner-state.pending i{background:rgb(var(--warning-6))}.runner-state.ready i{background:rgb(var(--success-6))}.plan-overview .pending{font-size:14px;color:rgb(var(--warning-6))}.plan-overview .ready{font-size:14px;color:rgb(var(--success-6))}.runner-alert{margin-bottom:18px}.runner-pool{padding:16px 20px;margin-bottom:18px}.runner-pool .section-title{margin-bottom:12px}.runner-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}.runner-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 12px;padding:12px;border:1px solid var(--color-border-2);border-radius:7px;background:var(--color-fill-1)}.runner-card>div{display:grid;gap:3px;min-width:0}.runner-card strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.runner-card>small{grid-column:1/-1}.performance-layout{display:grid;grid-template-columns:278px minmax(0,1fr);gap:18px;align-items:start}.plan-list{padding:16px 10px;min-height:590px}.section-heading,.section-title{display:flex;align-items:center;justify-content:space-between}.section-heading{padding:0 6px 12px}.section-heading h3{margin:4px 0 0;font-size:16px}.section-title{margin-bottom:16px}.section-title>div{display:flex;align-items:baseline;gap:10px}.section-title strong{font-size:16px}.plan-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:0;background:transparent;border-radius:8px;text-align:left;cursor:pointer;padding:12px 10px}.plan-item:hover,.plan-item.selected{background:rgb(var(--primary-1))}.plan-item>div{display:grid;gap:4px;min-width:0}.plan-item strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.create-plan-button{margin-top:18px}.plan-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 24px;margin-bottom:18px}.plan-header h2{margin:5px 0 6px;font-size:22px}.plan-header p{margin:0;max-width:660px;line-height:1.6}.plan-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;padding:0;margin-bottom:18px;overflow:hidden}.plan-overview>div{display:grid;gap:6px;padding:17px 20px;background:var(--color-fill-1)}.plan-overview strong{font-size:18px}.thread-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.thread-group{padding:20px}.thread-group header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.thread-group h3{margin:4px 0 0;font-size:16px}.target-url{padding:10px 12px;margin:16px 0;background:var(--color-fill-2);border-radius:6px;color:var(--color-text-2);font-family:var(--font-family-mono);font-size:12px;overflow-wrap:anywhere}.target-url strong{margin-right:6px;color:rgb(var(--primary-6))}.group-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.group-metrics>div{display:grid;gap:5px}.group-metrics strong{font-size:16px}.request-summary{display:flex;flex-wrap:wrap;gap:6px 12px;padding:12px 0 0}.request-summary span{padding:3px 7px;border-radius:4px;background:var(--color-fill-2)}.thread-group footer{display:flex;justify-content:space-between;gap:12px;margin-top:18px;padding-top:13px;border-top:1px solid var(--color-border-2)}.execution-panel{padding:20px;margin-top:18px}.execution-name{display:grid;gap:4px;max-width:260px}.execution-name strong,.execution-name small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.execution-code{display:block;margin-top:4px}.empty-plan{min-height:430px;display:grid;place-items:center}.form-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(190px,.5fr);gap:16px}.form-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:8px 0 14px;border-top:1px solid var(--color-border-2)}.form-section-heading>div{display:grid;gap:5px}.thread-group-form{padding:16px;margin-bottom:16px;border:1px solid var(--color-border-2);border-radius:8px;background:var(--color-fill-1)}.thread-group-form>header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.group-title-grid{grid-template-columns:minmax(0,1fr) 190px}.request-grid{display:grid;grid-template-columns:150px 170px minmax(0,1fr);gap:0 16px}.request-content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.number-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 16px}@media (max-width:1250px){.performance-summary{grid-template-columns:1fr 1fr 1fr}.performance-layout{grid-template-columns:240px minmax(0,1fr)}}@media (max-width:920px){.performance-layout,.thread-groups{grid-template-columns:1fr}.plan-list{min-height:auto}.plan-overview{grid-template-columns:repeat(2,1fr)}.request-grid,.request-content-grid{grid-template-columns:1fr}}@media (max-width:680px){.performance-summary,.form-grid,.group-title-grid,.request-grid,.request-content-grid,.number-grid{grid-template-columns:1fr}.plan-header,.form-section-heading{flex-direction:column}.thread-group footer{flex-direction:column;gap:5px}}
 .report-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.report-heading>div{display:grid;gap:4px;min-width:0}.report-heading strong{font-size:17px}.report-heading span{font:12px var(--font-family-mono);color:var(--color-text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.report-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--color-border-2);overflow:hidden;border-radius:8px;margin-bottom:18px}.report-summary>div{display:grid;gap:7px;padding:15px;background:var(--color-bg-2)}.report-summary span{font-size:12px;color:var(--color-text-3)}.report-summary strong{font-size:18px}.report-panel{padding:16px;border:1px solid var(--color-border-2);border-radius:8px;margin-bottom:16px}.report-panel h3{margin:0 0 10px;font-size:15px}.report-panel p{margin:4px 0;color:var(--color-text-2)}.report-panel-title{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:10px}.report-panel-title h3{margin:0}.report-panel-title span,.comparison-note,.resource-note{color:var(--color-text-3);font-size:12px}.threshold-list{display:grid;gap:10px;margin-top:14px}.threshold-item{padding:12px;border:1px solid var(--color-border-2);border-radius:6px;background:var(--color-fill-1)}.threshold-title{display:flex;align-items:center;justify-content:space-between;gap:12px}.threshold-item small{display:block;margin-top:6px;color:var(--color-text-3)}.threshold-item p{font-size:12px}.threshold-breach{color:rgb(var(--danger-6))!important}.error-list{display:grid;gap:8px}.error-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:6px;background:var(--color-fill-1)}.error-item>div{display:grid;gap:4px}.error-item>div:last-child{display:flex;align-items:center;gap:8px}.error-item small{color:var(--color-text-3);font-size:12px}.error-item strong{font-size:14px}.comparison-grid,.resource-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--color-border-2);border-radius:6px;overflow:hidden}.comparison-grid>div,.resource-summary>div{display:grid;gap:6px;padding:12px;background:var(--color-fill-1)}.comparison-grid span,.resource-summary span{font-size:12px;color:var(--color-text-3)}.comparison-grid strong,.resource-summary strong{font-size:16px}.comparison-note,.resource-note{display:block;margin-top:10px}.artifact-list{display:grid;gap:8px}.artifact-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:6px;background:var(--color-fill-1)}.artifact-item>div{display:grid;gap:4px}.artifact-item small{color:var(--color-text-3);font-size:12px}@media (max-width:920px){.report-summary{grid-template-columns:repeat(3,1fr)}.comparison-grid,.resource-summary{grid-template-columns:repeat(2,1fr)}}@media (max-width:680px){.report-summary,.comparison-grid,.resource-summary{grid-template-columns:1fr}.report-panel-title{align-items:flex-start;flex-direction:column;gap:5px}}
 </style>

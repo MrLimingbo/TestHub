@@ -90,7 +90,7 @@ public class FunctionalGovernanceRepository {
         jdbc.sql("""
                 INSERT INTO functional_custom_field
                     (id, organization_id, project_id, asset_type, name, field_key, field_type, required, options_json, created_by, updated_by)
-                VALUES (:id, :organizationId, :projectId, :assetType, :name, :fieldKey, :fieldType, :required, :optionsJson, :userId, :userId)
+                VALUES (:id, :organizationId, :projectId, :assetType, :name, :fieldKey, :fieldType, :required, CAST(:optionsJson AS JSON), :userId, :userId)
                 """).param("id", id).param("organizationId", organizationId).param("projectId", projectId)
                 .param("assetType", assetType).param("name", name).param("fieldKey", fieldKey).param("fieldType", fieldType)
                 .param("required", required).param("optionsJson", optionsJson).param("userId", userId).update();
@@ -100,7 +100,7 @@ public class FunctionalGovernanceRepository {
                            String optionsJson, String userId) {
         return jdbc.sql("""
                 UPDATE functional_custom_field
-                SET name = :name, field_type = :fieldType, required = :required, options_json = :optionsJson,
+                SET name = :name, field_type = :fieldType, required = :required, options_json = CAST(:optionsJson AS JSON),
                     updated_by = :userId
                 WHERE project_id = :projectId AND id = :fieldId
                 """).param("projectId", projectId).param("fieldId", fieldId).param("name", name)

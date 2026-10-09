@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.ulid.UlidCreator;
 import java.sql.Timestamp;
+import io.testhub.platform.shared.persistence.PendingExecutionCancellation;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,13 +15,18 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class UiAutomationRepository {
+    public void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id=:project FOR UPDATE").param("project", projectId).query(String.class).single();
+    }
     private static final TypeReference<Map<String, String>> VARIABLES = new TypeReference<>() { };
     private static final TypeReference<List<UiAutomationStep>> STEPS = new TypeReference<>() { };
     private final JdbcClient jdbc;
+    private final PendingExecutionCancellation cancellation;
     private final ObjectMapper json;
 
-    public UiAutomationRepository(JdbcClient jdbc, ObjectMapper json) {
+    public UiAutomationRepository(JdbcClient jdbc, ObjectMapper json, PendingExecutionCancellation cancellation) {
         this.jdbc = jdbc;
+        this.cancellation = cancellation;
         this.json = json;
     }
 
@@ -378,16 +384,7 @@ public class UiAutomationRepository {
     }
 
     public int cancelBeforeDispatch(String projectId, String executionId) {
-        return jdbc.sql("""
-                UPDATE ui_automation_execution execution
-                JOIN ui_automation_runner_outbox outbox ON outbox.execution_id = execution.id
-                    AND outbox.message_type = 'TASK' AND outbox.status = 'PENDING'
-                SET execution.status = 'CANCELLED', execution.status_code = 'CANCELLED_BEFORE_DISPATCH',
-                    execution.status_message = '任务在投递给 Runner 前已取消。', execution.finished_at = CURRENT_TIMESTAMP(3),
-                    execution.updated_at = CURRENT_TIMESTAMP(3), outbox.status = 'CANCELLED', outbox.locked_at = NULL,
-                    outbox.last_error = NULL, outbox.updated_at = CURRENT_TIMESTAMP(3)
-                WHERE execution.project_id = :projectId AND execution.id = :executionId AND execution.status = 'QUEUED'
-                """).param("projectId", projectId).param("executionId", executionId).update();
+        return cancellation.cancel(PendingExecutionCancellation.Engine.UI, projectId, executionId);
     }
 
     public int markCancelling(String projectId, String executionId) {

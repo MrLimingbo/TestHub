@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>TestHub · 本地备份与恢复</title>
+    <link rel="stylesheet" href="setup.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>本地备份与恢复</h1>
+      <p class="description">将本地工作区的数据库、附件及连接密钥保存为加密备份，可在其他电脑的兼容版本 TestHub 中恢复。</p>
+      <form id="backup-form">
+        <label for="password">备份密码</label>
+        <input id="password" type="password" required minlength="12" maxlength="1024" autocomplete="off" aria-describedby="password-hint" />
+        <p id="password-hint" class="hint">至少 12 个字符。创建备份时设置新密码，恢复时填写原备份密码。请妥善保存，密码遗失后无法恢复备份。</p>
+        <label for="confirmation">再次输入密码（创建备份时必填）</label>
+        <input id="confirmation" type="password" maxlength="1024" autocomplete="off" />
+        <p class="hint">备份和恢复会短暂重启本地工作区、中断执行任务。请先保存页面修改并等待任务结束。执行组件缓存和应用设置不包含在备份中。</p>
+        <p class="hint">恢复前会验证文件并再次确认；当前数据将保留在回滚目录。恢复的定时计划、Webhook 和待发通知不会自动运行，测试目标需重新授权。</p>
+        <p id="status" class="hint" role="status" aria-live="polite"></p>
+        <p id="error" class="error" role="alert" hidden></p>
+        <button id="export" type="submit" value="export">创建加密备份</button>
+        <button id="restore" type="submit" value="restore">从备份恢复…</button>
+      </form>
+    </main>
+    <script src="backup-renderer.js"></script>
+  </body>
+</html>

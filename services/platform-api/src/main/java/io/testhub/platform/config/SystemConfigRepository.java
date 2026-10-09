@@ -26,8 +26,10 @@ public class SystemConfigRepository {
         jdbc.sql("""
                 INSERT INTO system_config (config_key, config_value, secret, updated_by)
                 VALUES (:key, :value, FALSE, :updatedBy)
-                ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), secret = FALSE,
-                    updated_by = VALUES(updated_by), updated_at = CURRENT_TIMESTAMP(3)
+                ON DUPLICATE KEY UPDATE
+                    config_value = CASE WHEN secret = FALSE THEN VALUES(config_value) ELSE config_value END,
+                    updated_by = CASE WHEN secret = FALSE THEN VALUES(updated_by) ELSE updated_by END,
+                    updated_at = CASE WHEN secret = FALSE THEN CURRENT_TIMESTAMP(3) ELSE updated_at END
                 """).param("key", key).param("value", value).param("updatedBy", updatedBy).update();
     }
 

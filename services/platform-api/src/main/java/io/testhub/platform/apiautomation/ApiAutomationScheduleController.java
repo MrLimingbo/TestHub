@@ -60,7 +60,7 @@ public class ApiAutomationScheduleController {
     }
 
     private ApiAutomationScheduleService.ScheduleInput input(ScheduleRequest request) {
-        return new ApiAutomationScheduleService.ScheduleInput(request.scenarioId(), request.name(), request.cronExpression(),
+        return new ApiAutomationScheduleService.ScheduleInput(request.scenarioId(), request.executionProfileId(), request.name(), request.cronExpression(),
                 request.timezone(), request.timeoutSeconds(), request.maxConsecutiveFailures(), request.enabled());
     }
 
@@ -68,7 +68,8 @@ public class ApiAutomationScheduleController {
         return (AuthenticatedPrincipal) authentication.getPrincipal();
     }
 
-    public record ScheduleRequest(@NotBlank @Size(max = 26) String scenarioId, @NotBlank @Size(max = 160) String name,
+    public record ScheduleRequest(@NotBlank @Size(max = 26) String scenarioId, @Size(max = 26) String executionProfileId,
+                                  @NotBlank @Size(max = 160) String name,
                                   @NotBlank @Size(max = 160) String cronExpression, @NotBlank @Size(max = 64) String timezone,
                                   @NotNull @Min(10) @Max(3600) Integer timeoutSeconds,
                                   @NotNull @Min(1) @Max(10) Integer maxConsecutiveFailures,

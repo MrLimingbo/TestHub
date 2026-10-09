@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.ExpiringStateStore;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -41,13 +41,13 @@ public class ApiAutomationWebhookTriggerService {
     private final AccessService access;
     private final AuditService audit;
     private final SecretCipher cipher;
-    private final StringRedisTemplate redis;
+    private final ExpiringStateStore state;
     private final ObjectMapper json;
 
     public ApiAutomationWebhookTriggerService(ApiAutomationWebhookTriggerRepository webhooks,
                                                ApiAutomationScenarioRepository scenarios,
                                                ApiAutomationExecutionService executions, AccessService access,
-                                               AuditService audit, SecretCipher cipher, StringRedisTemplate redis,
+                                               AuditService audit, SecretCipher cipher, ExpiringStateStore state,
                                                ObjectMapper json) {
         this.webhooks = webhooks;
         this.scenarios = scenarios;
@@ -55,7 +55,7 @@ public class ApiAutomationWebhookTriggerService {
         this.access = access;
         this.audit = audit;
         this.cipher = cipher;
-        this.redis = redis;
+        this.state = state;
         this.json = json;
     }
 
@@ -115,7 +115,7 @@ public class ApiAutomationWebhookTriggerService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Webhook 签名校验失败");
         }
         String nonceKey = NONCE_PREFIX + webhookId + ':' + sha256(nonce);
-        Boolean accepted = redis.opsForValue().setIfAbsent(nonceKey, "1", NONCE_TTL);
+        Boolean accepted = state.putIfAbsent(nonceKey, "1", NONCE_TTL);
         if (!Boolean.TRUE.equals(accepted)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Webhook nonce 已使用");
         }

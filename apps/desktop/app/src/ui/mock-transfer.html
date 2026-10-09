@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · Mock 资料迁移</title><link rel="stylesheet" href="setup.css" />
+</head>
+<body><main class="card">
+  <h1>Mock 资料迁移</h1>
+  <p id="account" class="description" role="status">正在准备本地工作区并读取项目…</p>
+  <form id="mock-transfer-form">
+    <label for="source">本地来源项目</label><select id="source" required disabled></select>
+    <label for="target">账号目标项目</label><select id="target" required disabled></select>
+    <p class="description">复制 Mock 服务、手动规则、智能示例开关和分享元数据。本地原件不动，后续编辑不会自动同步。</p>
+    <p class="hint">迁入服务全部停用，目标生成新的公开调用地址。分享只保留名称和过期时间，目标链接均撤销；检查内容后请手动启用服务、重新创建要开放的分享。</p>
+    <p class="hint">智能示例依赖目标项目已发布的接口设计资产。请先迁移接口设计，并核对示例内容；Mock 迁移不会自动复制接口设计。公开地址只在目标服务可达的网络内有效，桌面本地地址不能直接供其他电脑访问。</p>
+    <p class="hint">目标项目存在同名服务时整批停止。规则的请求条件及响应可能含敏感值，确认后才上传。预览有效期 10 分钟，上限 32 MiB。</p>
+    <p id="preview" class="description" role="status"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="prepare" type="submit" disabled>预览迁移数量</button>
+    <button id="commit" type="button" disabled>确认上传 Mock 资料</button>
+  </form>
+</main><script src="mock-transfer.js"></script></body>
+</html>

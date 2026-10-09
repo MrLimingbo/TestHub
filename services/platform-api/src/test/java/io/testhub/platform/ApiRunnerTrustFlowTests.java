@@ -22,7 +22,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -37,7 +37,7 @@ class ApiRunnerTrustFlowTests {
     private static final String HEARTBEAT_KEY = "testhub-runner-contract-test-signing-key-2026-000000000000000000000000";
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private StringRedisTemplate redis;
+    @Autowired private RunnerRegistry registry;
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
@@ -46,9 +46,9 @@ class ApiRunnerTrustFlowTests {
 
     @AfterEach
     void clean() {
-        redis.delete(HEARTBEAT_PREFIX + VALID_RUNNER);
-        redis.delete(HEARTBEAT_PREFIX + TAMPERED_RUNNER);
-        redis.opsForSet().remove(MEMBERS, VALID_RUNNER, TAMPERED_RUNNER);
+        registry.delete(HEARTBEAT_PREFIX + VALID_RUNNER);
+        registry.delete(HEARTBEAT_PREFIX + TAMPERED_RUNNER);
+        registry.remove(MEMBERS, VALID_RUNNER, TAMPERED_RUNNER);
     }
 
     @Test
@@ -81,8 +81,7 @@ class ApiRunnerTrustFlowTests {
         heartbeat.put("trustVersion", "1");
         String signature = sign(heartbeat);
         heartbeat.put("signature", tamper ? (signature.charAt(0) == '0' ? "1" : "0") + signature.substring(1) : signature);
-        redis.opsForSet().add(MEMBERS, runnerId);
-        redis.opsForValue().set(HEARTBEAT_PREFIX + runnerId, objectMapper.writeValueAsString(heartbeat), Duration.ofSeconds(60));
+        registry.publish(MEMBERS, HEARTBEAT_PREFIX + runnerId, runnerId, objectMapper.writeValueAsString(heartbeat), Duration.ofSeconds(60));
     }
 
     private String sign(Map<String, Object> heartbeat) throws Exception {

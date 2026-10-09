@@ -3,11 +3,12 @@ import { flushPromises, shallowMount, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
 import ArcoVue, { Modal, Input, Textarea, Select, Drawer } from '@arco-design/web-vue'
 import PerformancePage from '@/pages/PerformancePage.vue'
+import * as desktop from '@/utils/desktopWorkspace'
 import PageHeader from '@/components/PageHeader.vue'
 const state = reactive({ projectId: 'p1', selectProject(id: string) { this.projectId = id }, resolveProjectId: () => 'p1' })
 vi.mock('@/stores/session', () => ({ useSessionStore: () => state }))
 const wrappers: ReturnType<typeof shallowMount>[] = []
-afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.useRealTimers(); state.projectId = 'p1' })
+afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.useRealTimers(); state.projectId = 'p1' })
 const plan = (id: string) => ({ id, name: id, status: 'READY', version: 1, threadGroupCount: 0, threadGroups: [] })
 async function setup(override?: (url: string, method: string) => unknown, full = false) {
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
@@ -21,6 +22,24 @@ async function setup(override?: (url: string, method: string) => unknown, full =
   wrappers.push(wrapper); await flushPromises(); return wrapper
 }
 describe('Performance page', () => {
+  it('opens native definition sync from local and account desktop without enqueueing an execution', async () => {
+    const open = vi.spyOn(desktop, 'openPerformanceSync').mockResolvedValue()
+    for (const local of [true, false]) {
+      vi.spyOn(desktop, 'isLocalDesktop').mockReturnValue(local)
+      vi.spyOn(desktop, 'isAccountDesktop').mockReturnValue(!local)
+      const wrapper = await setup()
+      wrapper.findAllComponents({ name: 'Button' }).find(button => button.text() === '性能计划同步')!.vm.$emit('click')
+      await flushPromises()
+      expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
+    }
+    expect(open).toHaveBeenCalledTimes(2)
+  })
+  it('does not show the native sync entry in an ordinary browser', async () => {
+    vi.spyOn(desktop, 'isLocalDesktop').mockReturnValue(false)
+    vi.spyOn(desktop, 'isAccountDesktop').mockReturnValue(false)
+    const wrapper = await setup()
+    expect(wrapper.find('.sync-entry').exists()).toBe(false)
+  })
   it('preserves the plan dialog and entered name after a rejected save', async () => {
     const wrapper = await setup()
     wrapper.findComponent(PageHeader).vm.$emit('action'); await flushPromises()
@@ -88,6 +107,45 @@ describe('Performance page', () => {
     release({ execution, summary: {}, quality: {}, metrics: [], resources: [], errors: [], logs: [], artifacts: [] }); await flushPromises()
     expect(drawer.props('visible')).toBe(false)
     expect(wrapper.find('.report-heading').exists()).toBe(false)
+  })
+
+  it('waits for the native engine before posting a local execution', async () => {
+    vi.spyOn(desktop, 'isLocalDesktop').mockReturnValue(true)
+    let ready!: () => void
+    const ensure = vi.spyOn(desktop, 'ensureLocalJmeter').mockImplementation(() => new Promise(resolve => { ready = resolve }))
+    const wrapper = await setup(url => url.endsWith('/plans/a') ? { ...plan('a'), threadGroups: [{ id: 'group', name: 'Probe', targetUrl: 'http://localhost:3000/probe', loadModel: 'STEADY', threadCount: 1, rampUpSeconds: 0, durationSeconds: 10, targetTps: 5, requestMethod: 'GET', requestHeaders: {}, queryParameters: {}, p95ThresholdMillis: null, errorThresholdPercent: null }] } : undefined, true)
+    wrapper.findAllComponents({ name: 'Button' }).find(button => button.text() === '提交压测')!.vm.$emit('click')
+    await flushPromises()
+    expect(ensure).toHaveBeenCalledWith(['http://localhost:3000'])
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
+    ready(); await flushPromises()
+    expect(vi.mocked(fetch).mock.calls.some(([url, init]) => String(url).endsWith('/plans/a/executions') && init?.method === 'POST')).toBe(true)
+  })
+  it('cancelling preparation does not enqueue a task even if native startup finishes', async () => {
+    vi.spyOn(desktop, 'isLocalDesktop').mockReturnValue(true)
+    let ready!: () => void
+    vi.spyOn(desktop, 'ensureLocalJmeter').mockImplementation(() => new Promise(resolve => { ready = resolve }))
+    const cancel = vi.spyOn(desktop, 'cancelJmeterPreparation').mockResolvedValue()
+    const wrapper = await setup(undefined, true)
+    wrapper.findAllComponents({ name: 'Button' }).find(button => button.text() === '提交压测')!.vm.$emit('click'); await flushPromises()
+    wrapper.findAllComponents({ name: 'Button' }).find(button => button.text() === '取消准备')!.vm.$emit('click'); await flushPromises()
+    ready(); await flushPromises()
+    expect(cancel).toHaveBeenCalledOnce()
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
+  })
+  it('failed engine preparation and plan changes cannot queue a stale execution', async () => {
+    vi.spyOn(desktop, 'isLocalDesktop').mockReturnValue(true)
+    const ensure = vi.spyOn(desktop, 'ensureLocalJmeter').mockRejectedValueOnce(new Error('Download failed'))
+    const wrapper = await setup(undefined, true)
+    const submit = () => wrapper.findAllComponents({ name: 'Button' }).find(button => button.text() === '提交压测')!.vm.$emit('click')
+    submit(); await flushPromises()
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
+    let ready!: () => void
+    ensure.mockImplementationOnce(() => new Promise(resolve => { ready = resolve }))
+    submit(); await flushPromises()
+    await wrapper.findAll('.plan-item')[1]!.trigger('click'); await flushPromises()
+    ready(); await flushPromises()
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
   })
 
 })

@@ -34,7 +34,7 @@ interface AutomationExecutionReportIntegrity { contract: string; artifactVersion
 interface AutomationWebhook { id: string; organizationId: string; projectId: string; scenarioId: string; name: string; enabled: boolean; createdBy: string; createdAt: string; updatedAt: string }
 interface CreatedAutomationWebhook { webhook: AutomationWebhook; secret: string }
 interface AutomationExecutionReport { contract: string; reportVersion: number; failureStrategy: { strategy: 'STOP' | 'CONTINUE'; continuedFailureCount: number } | null; summary: { httpResultCount: number; httpSucceededCount: number; httpFailedCount: number; httpDurationMillis: number; stepResultCount: number; assertionPassedCount: number; assertionFailedCount: number; scriptResultCount: number; scriptTestCount: number; scriptPassedCount: number; scriptFailedCount: number }; parallelGroups: Array<{ stepId: string; configuredBranchCount: number; completedBranchCount: number; succeededBranchCount: number; failedBranchCount: number; attemptCount: number; retryAttemptCount: number; firstRequestSequence: number | null; lastRequestSequence: number | null; totalDurationMillis: number }> }
-interface AutomationSchedule { id: string; organizationId: string; projectId: string; scenarioId: string; name: string; cronExpression: string; timezone: string; timeoutSeconds: number; maxConsecutiveFailures: number; consecutiveFailures: number; enabled: boolean; lastExecutionId: string | null; lastExecutionStatus: string | null; lastTriggeredAt: string | null; createdBy: string; createdAt: string; updatedAt: string }
+interface AutomationSchedule { id: string; organizationId: string; projectId: string; scenarioId: string; executionProfileId: string | null; name: string; cronExpression: string; timezone: string; timeoutSeconds: number; maxConsecutiveFailures: number; consecutiveFailures: number; enabled: boolean; lastExecutionId: string | null; lastExecutionStatus: string | null; lastTriggeredAt: string | null; createdBy: string; createdAt: string; updatedAt: string }
 interface AutomationDataSetSourceFile { id: string; originalName: string; contentType: string; sizeBytes: number }
 interface AutomationDataSet { id: string; organizationId: string; projectId: string; name: string; sourceFormat: 'JSON' | 'CSV'; columns: string[]; rowCount: number; checksum: string; sourceFile: AutomationDataSetSourceFile | null; createdBy: string; createdAt: string; updatedAt: string }
 interface AutomationDataSetDetail { dataSet: AutomationDataSet; previewRows: Array<Record<string, string>> }
@@ -124,7 +124,7 @@ const submittingDataSetExecution = ref(false)
 const variableRows = ref<VariableRow[]>([])
 const createForm = reactive({ name: '', description: '', environmentCode: '', failureStrategy: 'STOP' as 'STOP' | 'CONTINUE' })
 const webhookForm = reactive({ name: '', scenarioId: '' })
-const scheduleForm = reactive({ name: '', scenarioId: '', cronExpression: '0 0 9 * * ?', timezone: 'Asia/Shanghai', timeoutSeconds: 300, maxConsecutiveFailures: 3, enabled: true })
+const scheduleForm = reactive({ name: '', scenarioId: '', executionProfileId: '', cronExpression: '0 0 9 * * ?', timezone: 'Asia/Shanghai', timeoutSeconds: 300, maxConsecutiveFailures: 3, enabled: true })
 const dataSetForm = reactive({ name: '', sourceFormat: 'JSON' as 'JSON' | 'CSV', sourceMode: 'TEXT' as 'TEXT' | 'FILE', file: null as File | null, content: '[\n  {"orderId":"1001","region":"east"},\n  {"orderId":"1002","region":"west"}\n]' })
 const dataSetExecutionForm = reactive({ dataSetId: '', scenarioId: '', timeoutSeconds: 300 })
 const reusableStepForm = reactive({ name: '', description: '' })
@@ -933,6 +933,7 @@ function openCreateSchedule() {
   editingScheduleId.value = null
   scheduleForm.name = ''
   scheduleForm.scenarioId = detail.value?.id || scenarios.value[0].id
+  scheduleForm.executionProfileId = ''
   scheduleForm.cronExpression = '0 0 9 * * ?'
   scheduleForm.timezone = 'Asia/Shanghai'
   scheduleForm.timeoutSeconds = 300
@@ -945,6 +946,7 @@ function openEditSchedule(schedule: AutomationSchedule) {
   editingScheduleId.value = schedule.id
   scheduleForm.name = schedule.name
   scheduleForm.scenarioId = schedule.scenarioId
+  scheduleForm.executionProfileId = schedule.executionProfileId ?? ''
   scheduleForm.cronExpression = schedule.cronExpression
   scheduleForm.timezone = schedule.timezone
   scheduleForm.timeoutSeconds = schedule.timeoutSeconds
@@ -954,7 +956,7 @@ function openEditSchedule(schedule: AutomationSchedule) {
 }
 
 function schedulePayload() {
-  return { name: scheduleForm.name.trim(), scenarioId: scheduleForm.scenarioId, cronExpression: scheduleForm.cronExpression.trim(), timezone: scheduleForm.timezone.trim(), timeoutSeconds: scheduleForm.timeoutSeconds, maxConsecutiveFailures: scheduleForm.maxConsecutiveFailures, enabled: scheduleForm.enabled }
+  return { name: scheduleForm.name.trim(), scenarioId: scheduleForm.scenarioId, executionProfileId: scheduleForm.executionProfileId || null, cronExpression: scheduleForm.cronExpression.trim(), timezone: scheduleForm.timezone.trim(), timeoutSeconds: scheduleForm.timeoutSeconds, maxConsecutiveFailures: scheduleForm.maxConsecutiveFailures, enabled: scheduleForm.enabled }
 }
 
 async function saveSchedule() {
@@ -1180,7 +1182,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
               <div class="asset-section-heading"><div><strong>运行配置集</strong><small>冻结环境与非敏感变量，可在右侧运行设置中选择</small></div><a-button size="small" @click="openCreateExecutionProfile"><icon-plus /> 添加</a-button></div>
               <div class="asset-card-list compact"><article v-for="profile in executionProfiles" :key="profile.id" class="asset-card"><span class="asset-card-icon cyan">◈</span><div><strong>{{ profile.name }}</strong><small>{{ profile.environmentCode }} · v{{ profile.version }} · {{ profile.variableCount }} 个变量</small></div><a-tag color="cyan">执行时冻结</a-tag><a-button type="text" @click="openEditExecutionProfile(profile)">编辑</a-button></article><a-empty v-if="!executionProfiles.length" description="尚未创建运行配置集" /></div>
               <div class="asset-section-heading"><div><strong>定时任务</strong><small>连续失败达到阈值后自动停用</small></div><a-button size="small" @click="openCreateSchedule"><icon-plus /> 添加</a-button></div>
-              <div class="asset-card-list compact"><article v-for="schedule in schedules" :key="schedule.id" class="asset-card"><span class="asset-card-icon orange"><icon-calendar /></span><div><strong>{{ schedule.name }}</strong><small>{{ schedule.cronExpression }} · {{ schedule.timezone }} · 连续失败 {{ schedule.consecutiveFailures }}/{{ schedule.maxConsecutiveFailures }}</small></div><a-tag :color="schedule.enabled ? 'green' : 'gray'">{{ schedule.enabled ? '已启用' : '已停用' }}</a-tag><a-button type="text" @click="runSchedule(schedule)">立即执行</a-button><a-button type="text" @click="openEditSchedule(schedule)">编辑</a-button><a-popconfirm content="确定删除该计划？" @ok="deleteSchedule(schedule)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></article><a-empty v-if="!schedules.length" description="尚未创建定时任务" /></div>
+              <div class="asset-card-list compact"><article v-for="schedule in schedules" :key="schedule.id" class="asset-card"><span class="asset-card-icon orange"><icon-calendar /></span><div><strong>{{ schedule.name }}</strong><small>{{ schedule.cronExpression }} · {{ schedule.timezone }} · 连续失败 {{ schedule.consecutiveFailures }}/{{ schedule.maxConsecutiveFailures }}<template v-if="schedule.executionProfileId"> · {{ executionProfiles.find(profile => profile.id === schedule.executionProfileId)?.name ?? '运行配置已移除' }}</template></small></div><a-tag :color="schedule.enabled ? 'green' : 'gray'">{{ schedule.enabled ? '已启用' : '已停用' }}</a-tag><a-button type="text" @click="runSchedule(schedule)">立即执行</a-button><a-button type="text" @click="openEditSchedule(schedule)">编辑</a-button><a-popconfirm content="确定删除该计划？" @ok="deleteSchedule(schedule)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></article><a-empty v-if="!schedules.length" description="尚未创建定时任务" /></div>
               <div class="asset-section-heading"><div><strong>Webhook</strong><small>HMAC 签名、防重放、项目范围隔离</small></div><a-button size="small" @click="openCreateWebhook"><icon-plus /> 添加</a-button></div>
               <div class="asset-card-list compact"><article v-for="webhook in webhooks" :key="webhook.id" class="asset-card"><span class="asset-card-icon blue"><icon-link /></span><div><strong>{{ webhook.name }}</strong><small>{{ scenarios.find((item) => item.id === webhook.scenarioId)?.name ?? webhook.scenarioId }} · {{ webhook.id }}</small></div><a-tag :color="webhook.enabled ? 'green' : 'gray'">{{ webhook.enabled ? '已启用' : '已停用' }}</a-tag><a-button type="text" @click="setWebhookEnabled(webhook, !webhook.enabled)">{{ webhook.enabled ? '停用' : '启用' }}</a-button><a-popconfirm content="撤销后不能恢复，确定继续？" @ok="revokeWebhook(webhook)"><a-button type="text" status="danger">撤销</a-button></a-popconfirm></article><a-empty v-if="!webhooks.length" description="尚未创建 Webhook" /></div>
             </section>
@@ -1480,6 +1482,12 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
           <a-select v-model="scheduleForm.scenarioId">
             <a-option v-for="scenario in scenarios" :key="scenario.id" :value="scenario.id">{{ scenario.name }} · v{{ scenario.version }}</a-option>
           </a-select>
+        </a-form-item>
+        <a-form-item label="运行配置集">
+          <a-select v-model="scheduleForm.executionProfileId" allow-clear placeholder="使用场景默认环境与变量">
+            <a-option v-for="profile in executionProfiles" :key="profile.id" :value="profile.id">{{ profile.name }} · {{ profile.environmentCode }} · v{{ profile.version }}</a-option>
+          </a-select>
+          <template #extra>每次触发时读取配置集的当前版本；缺少变量的场景请在此选择配置集。</template>
         </a-form-item>
         <div class="schedule-form-grid">
           <a-form-item label="Quartz Cron" required>

@@ -12,6 +12,10 @@
 - Install: `npx pnpm@10.13.1 install`
 - Develop: `npx pnpm@10.13.1 dev`
 - Validate: `npx pnpm@10.13.1 lint && npx pnpm@10.13.1 test && npx pnpm@10.13.1 build`
+- Isolated backend acceptance and JAR build: `JAVA_HOME=<JDK 21> node scripts/desktop/test-local-backend.mjs`. This creates a fresh H2 workspace. Do not run the full Maven test suite against the default datasource: acceptance fixtures write and delete demo data. MySQL regression must explicitly target new isolated QA infrastructure.
+- After desktop test/build validation, remove generated `.testhub/desktop-runtime/*-previous-*` runtime copies once no process uses them. Keep the current runtime; do not retain old copies after they are no longer needed.
+
+- Desktop UI acceptance must run in the background without visible windows or focus stealing. Use the offscreen QA bootstrap described in `docs/desktop-standalone-progress-2026-10-09-mobile-sync.md`; adapt older QA launchers before running them.
 
 ## Boundaries
 

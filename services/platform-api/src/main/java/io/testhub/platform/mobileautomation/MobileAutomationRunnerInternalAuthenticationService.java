@@ -10,7 +10,7 @@ import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.ExpiringStateStore;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,11 +21,11 @@ public class MobileAutomationRunnerInternalAuthenticationService {
     static final String ARTIFACT_UPLOAD_PATH = "/internal/mobile-automation-runner/v1/artifacts";
     private static final String PURPOSE = "testhub.mobile-automation-runner.internal-auth.v1";
     private final MobileAutomationRunnerStatusService runners;
-    private final StringRedisTemplate redis;
+    private final ExpiringStateStore state;
     private final byte[] key;
-    public MobileAutomationRunnerInternalAuthenticationService(MobileAutomationRunnerStatusService runners, StringRedisTemplate redis,
+    public MobileAutomationRunnerInternalAuthenticationService(MobileAutomationRunnerStatusService runners, ExpiringStateStore state,
                                                                @Value("${testhub.mobile-automation-runner.heartbeat-key:}") String key) {
-        this.runners = runners; this.redis = redis; this.key = key == null ? new byte[0] : key.getBytes(StandardCharsets.UTF_8);
+        this.runners = runners; this.state = state; this.key = key == null ? new byte[0] : key.getBytes(StandardCharsets.UTF_8);
     }
     public String authenticateRuntime(HttpServletRequest request, String taskId, String executionId) { return authenticate(request, RUNTIME_CONFIGURATION_PATH, List.of(taskId, executionId)); }
     public String authenticateArtifact(HttpServletRequest request, MobileAutomationExecutionArtifactService.Upload upload) { return authenticate(request, ARTIFACT_UPLOAD_PATH, List.of(upload.taskId(), upload.executionId(), upload.artifactType(), String.valueOf(upload.sizeBytes()), upload.checksum())); }
@@ -33,7 +33,7 @@ public class MobileAutomationRunnerInternalAuthenticationService {
         if (key.length == 0 || !"POST".equals(request.getMethod()) || !path.equals(request.getRequestURI())) throw rejected();
         String runner = header(request, "X-TestHub-Runner-Id"), timestamp = header(request, "X-TestHub-Runner-Timestamp"), nonce = header(request, "X-TestHub-Runner-Nonce"), signature = header(request, "X-TestHub-Runner-Signature");
         if (!runner.matches("[A-Za-z0-9._-]{1,64}") || !nonce.matches("[A-Za-z0-9_-]{16,128}") || !signature.matches("[0-9a-f]{64}") || !recent(timestamp) || !runners.isTrustedExecutionEnabled(runner) || !matches(path, runner, timestamp, nonce, signature, bindings)) throw rejected();
-        Boolean newNonce = redis.opsForValue().setIfAbsent("testhub:runner:appium:internal-nonce:v1:" + runner + ":" + nonce, "1", Duration.ofMinutes(2));
+        Boolean newNonce = state.putIfAbsent("testhub:runner:appium:internal-nonce:v1:" + runner + ":" + nonce, "1", Duration.ofMinutes(2));
         if (!Boolean.TRUE.equals(newNonce)) throw rejected();
         return runner;
     }

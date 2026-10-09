@@ -93,7 +93,7 @@ public class FunctionalAssetExchangeService {
                         row.priority(), row.status(), row.description()));
             } else {
                 assets.createCase(principal, projectId, new FunctionalAssetService.CaseInput(row.catalogId(), row.requirementId(), row.code(), row.title(),
-                        row.priority(), row.status(), "FUNCTIONAL", row.precondition(), row.steps(), row.expectedResult()));
+                        row.priority(), row.status(), row.caseType(), row.precondition(), row.steps(), row.expectedResult()));
             }
         }
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_ASSET_IMPORTED", "FUNCTIONAL_" + safeType.name(), projectId,
@@ -118,7 +118,7 @@ public class FunctionalAssetExchangeService {
             for (FunctionalCase testCase : cases.findByProject(projectId, null)) {
                 Row row = sheet.createRow(rowNumber++);
                 values(row, catalogNames.getOrDefault(testCase.catalogId(), ""), requirementCodes.getOrDefault(testCase.requirementId(), ""),
-                        testCase.caseCode(), testCase.title(), testCase.priority(), testCase.status(), testCase.precondition(), testCase.steps(), testCase.expectedResult());
+                        testCase.caseCode(), testCase.title(), testCase.priority(), testCase.status(), testCase.precondition(), testCase.steps(), testCase.expectedResult(), testCase.caseType());
             }
         }
     }
@@ -127,8 +127,12 @@ public class FunctionalAssetExchangeService {
         try (ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes()); Workbook workbook = WorkbookFactory.create(input)) {
             if (workbook.getNumberOfSheets() == 0) throw new IllegalArgumentException("工作簿没有工作表");
             Sheet sheet = workbook.getSheetAt(0);
-            verifyHeader(sheet.getRow(0), headers(type));
             DataFormatter formatter = new DataFormatter(Locale.SIMPLIFIED_CHINESE);
+            String[] expected = headers(type);
+            verifyHeader(sheet.getRow(0), type == AssetKind.CASES ? java.util.Arrays.copyOf(expected, 9) : expected);
+            String typeHeader = type == AssetKind.CASES ? cell(sheet.getRow(0), 9, formatter) : "";
+            if (!typeHeader.isEmpty() && !typeHeader.equals("用例类型")) throw new IllegalArgumentException("用例类型列表头不正确");
+            boolean hasCaseType = typeHeader.equals("用例类型");
             List<ImportRow> rows = new ArrayList<>();
             for (int index = 1; index <= sheet.getLastRowNum(); index++) {
                 Row row = sheet.getRow(index);
@@ -136,8 +140,8 @@ public class FunctionalAssetExchangeService {
                 List<String> values = new ArrayList<>();
                 for (int column = 0; column < headers(type).length; column++) values.add(cell(row, column, formatter));
                 rows.add(type == AssetKind.REQUIREMENTS
-                        ? new ImportRow(index + 1, values.get(0), null, values.get(1), values.get(2), values.get(3), values.get(4), values.get(5), "", "", "")
-                        : new ImportRow(index + 1, values.get(0), values.get(1), values.get(2), values.get(3), values.get(4), values.get(5), "", values.get(6), values.get(7), values.get(8)));
+                        ? new ImportRow(index + 1, values.get(0), null, values.get(1), values.get(2), values.get(3), values.get(4), values.get(5), "", "", "", null)
+                        : new ImportRow(index + 1, values.get(0), values.get(1), values.get(2), values.get(3), values.get(4), values.get(5), "", values.get(6), values.get(7), values.get(8), hasCaseType && !values.get(9).isBlank() ? values.get(9).toUpperCase(Locale.ROOT) : "FUNCTIONAL"));
             }
             return rows;
         }
@@ -168,6 +172,7 @@ public class FunctionalAssetExchangeService {
             if (type == AssetKind.REQUIREMENTS) {
                 if (!Set.of("DRAFT", "REVIEWING", "APPROVED", "ARCHIVED").contains(row.status().toUpperCase(Locale.ROOT))) errors.add(new ImportError(row.rowNumber(), "需求状态不合法"));
             } else {
+                if (!FunctionalAssetService.CASE_TYPES.contains(row.caseType())) errors.add(new ImportError(row.rowNumber(), "用例类型不合法"));
                 if (!Set.of("DRAFT", "READY", "BLOCKED", "ARCHIVED").contains(row.status().toUpperCase(Locale.ROOT))) errors.add(new ImportError(row.rowNumber(), "用例状态不合法"));
                 if (row.steps().isBlank() || row.expectedResult().isBlank()) errors.add(new ImportError(row.rowNumber(), "测试步骤和预期结果不能为空"));
                 if (!row.requirementCode().isBlank()) {
@@ -193,7 +198,7 @@ public class FunctionalAssetExchangeService {
     private String[] headers(AssetKind type) {
         return type == AssetKind.REQUIREMENTS
                 ? new String[] { "目录名称", "需求编号", "需求标题", "优先级", "状态", "需求说明" }
-                : new String[] { "目录名称", "关联需求编号", "用例编号", "用例标题", "优先级", "状态", "前置条件", "测试步骤", "预期结果" };
+                : new String[] { "目录名称", "关联需求编号", "用例编号", "用例标题", "优先级", "状态", "前置条件", "测试步骤", "预期结果", "用例类型" };
     }
 
     private void values(Row row, String... values) { for (int index = 0; index < values.length; index++) row.createCell(index).setCellValue(values[index] == null ? "" : values[index]); }
@@ -208,9 +213,10 @@ public class FunctionalAssetExchangeService {
     private static final class ImportRow {
         private final int rowNumber; private final String catalogName; private final String requirementCode; private String code; private final String title;
         private String priority; private String status; private final String description; private final String precondition; private final String steps; private final String expectedResult;
-        private String catalogId; private String requirementId;
+        private String catalogId; private String requirementId; private final String caseType;
         private ImportRow(int rowNumber, String catalogName, String requirementCode, String code, String title, String priority, String status,
-                          String description, String precondition, String steps, String expectedResult) { this.rowNumber = rowNumber; this.catalogName = catalogName; this.requirementCode = requirementCode; this.code = code; this.title = title; this.priority = priority; this.status = status; this.description = description; this.precondition = precondition; this.steps = steps; this.expectedResult = expectedResult; }
+                          String description, String precondition, String steps, String expectedResult, String caseType) { this.caseType = caseType; this.rowNumber = rowNumber; this.catalogName = catalogName; this.requirementCode = requirementCode; this.code = code; this.title = title; this.priority = priority; this.status = status; this.description = description; this.precondition = precondition; this.steps = steps; this.expectedResult = expectedResult; }
+        String caseType() { return caseType; }
         int rowNumber() { return rowNumber; } String catalogName() { return catalogName; } String requirementCode() { return requirementCode; } String code() { return code; } String title() { return title; } String priority() { return priority; } String status() { return status; } String description() { return description; } String precondition() { return precondition; } String steps() { return steps; } String expectedResult() { return expectedResult; } String catalogId() { return catalogId; } String requirementId() { return requirementId; }
         void code(String value) { code = value; } void priority(String value) { priority = value; } void status(String value) { status = value; } void catalogId(String value) { catalogId = value; } void requirementId(String value) { requirementId = value; }
     }

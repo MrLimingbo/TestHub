@@ -41,6 +41,7 @@ public class ProjectEnvironmentService {
     @Transactional
     public ProjectEnvironment create(AuthenticatedPrincipal principal, String projectId, CreateInput input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, ENVIRONMENT_WRITERS);
+        parameters.lockProject(projectId);
         String name = normalizeName(input.name());
         String code = ProjectParameterService.normalizeEnvironment(input.environmentCode());
         String baseUrl = normalizeBaseUrl(input.baseUrl());
@@ -67,6 +68,7 @@ public class ProjectEnvironmentService {
     public ProjectEnvironment update(AuthenticatedPrincipal principal, String projectId, String environmentId,
                                      UpdateInput input) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, ENVIRONMENT_WRITERS);
+        parameters.lockProject(projectId);
         ProjectEnvironment current = requireEnvironment(projectId, environmentId);
         String name = normalizeName(input.name());
         String baseUrl = normalizeBaseUrl(input.baseUrl());
@@ -92,6 +94,7 @@ public class ProjectEnvironmentService {
     @Transactional
     public ProjectEnvironment makeDefault(AuthenticatedPrincipal principal, String projectId, String environmentId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, ENVIRONMENT_WRITERS);
+        parameters.lockProject(projectId);
         ProjectEnvironment current = requireEnvironment(projectId, environmentId);
         environments.clearDefault(projectId);
         environments.setDefault(projectId, environmentId, principal.userId());
@@ -104,6 +107,7 @@ public class ProjectEnvironmentService {
     @Transactional
     public void delete(AuthenticatedPrincipal principal, String projectId, String environmentId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, ENVIRONMENT_WRITERS);
+        parameters.lockProject(projectId);
         ProjectEnvironment current = requireEnvironment(projectId, environmentId);
         if (environments.count(projectId) <= 1) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "项目至少需要保留一个环境");
@@ -136,7 +140,7 @@ public class ProjectEnvironmentService {
                 "BASE_URL", baseUrl, userId);
     }
 
-    private String normalizeName(String value) {
+    static String normalizeName(String value) {
         String normalized = value == null ? "" : value.trim();
         if (normalized.isEmpty() || normalized.length() > 160) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "环境名称长度应在 1 到 160 字符之间");
@@ -144,7 +148,7 @@ public class ProjectEnvironmentService {
         return normalized;
     }
 
-    private String normalizeBaseUrl(String value) {
+    static String normalizeBaseUrl(String value) {
         String normalized = value == null ? "" : value.trim();
         if (normalized.isEmpty()) return "";
         if (normalized.length() > 2000) {
@@ -167,7 +171,7 @@ public class ProjectEnvironmentService {
         return normalized;
     }
 
-    private String normalizeDescription(String value) {
+    static String normalizeDescription(String value) {
         String normalized = value == null ? "" : value.trim();
         if (normalized.length() > 1200) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "环境说明不能超过 1200 字符");

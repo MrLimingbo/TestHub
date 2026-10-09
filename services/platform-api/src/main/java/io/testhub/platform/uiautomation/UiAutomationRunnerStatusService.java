@@ -15,7 +15,7 @@ import java.util.Set;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,24 +23,28 @@ public class UiAutomationRunnerStatusService {
     static final String MEMBER_KEY = "testhub:runner:playwright:members:v1";
     static final String HEARTBEAT_KEY_PREFIX = "testhub:runner:playwright:heartbeat:v1:";
     private final AccessService access;
-    private final StringRedisTemplate redis;
+    private final RunnerRegistry registry;
     private final ObjectMapper json;
     private final byte[] key;
 
-    public UiAutomationRunnerStatusService(AccessService access, StringRedisTemplate redis, ObjectMapper json,
+    public UiAutomationRunnerStatusService(AccessService access, RunnerRegistry registry, ObjectMapper json,
                                            @Value("${testhub.ui-automation-runner.heartbeat-key:}") String key) {
         this.access = access;
-        this.redis = redis;
+        this.registry = registry;
         this.json = json;
         this.key = key == null ? new byte[0] : key.getBytes(StandardCharsets.UTF_8);
     }
 
     public List<UiAutomationRunnerStatus> list(AuthenticatedPrincipal principal, String projectId) {
         access.requireProjectRead(principal, projectId);
-        Set<String> ids = redis.opsForSet().members(MEMBER_KEY);
+        Set<String> ids = registry.members(MEMBER_KEY);
         if (ids == null || ids.isEmpty()) return List.of();
         return ids.stream().map(this::read).flatMap(Optional::stream)
                 .sorted(Comparator.comparing(UiAutomationRunnerStatus::heartbeatAt).reversed()).toList();
+    }
+
+    public boolean isVerifiedSince(String runnerId, Instant startedAfter) {
+        return read(runnerId).map(status -> status.trusted() && !status.startedAt().isBefore(startedAfter)).orElse(false);
     }
 
     public boolean isTrustedExecutionEnabled(String runnerId) {
@@ -49,8 +53,8 @@ public class UiAutomationRunnerStatusService {
 
     private Optional<UiAutomationRunnerStatus> read(String runnerId) {
         if (runnerId == null || !runnerId.matches("[A-Za-z0-9._-]{1,64}")) return Optional.empty();
-        String body = redis.opsForValue().get(HEARTBEAT_KEY_PREFIX + runnerId);
-        if (body == null) { redis.opsForSet().remove(MEMBER_KEY, runnerId); return Optional.empty(); }
+        String body = registry.get(HEARTBEAT_KEY_PREFIX + runnerId);
+        if (body == null) { registry.remove(MEMBER_KEY, runnerId); return Optional.empty(); }
         try {
             JsonNode value = json.readTree(body);
             if (!runnerId.equals(text(value, "runnerId")) || !UiAutomationRunnerProtocol.RUNNER_TYPE.equals(text(value, "runnerType"))

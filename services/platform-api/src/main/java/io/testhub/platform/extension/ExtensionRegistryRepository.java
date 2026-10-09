@@ -114,11 +114,15 @@ public class ExtensionRegistryRepository {
                 rs.getBoolean("enabled"), instant(rs.getTimestamp("created_at")), instant(rs.getTimestamp("updated_at")))).list();
     }
 
-    public Optional<StoredAdapter> findAdapter(String id) {
+    public Optional<StoredAdapter> findAdapter(String id) { return findAdapter(id, false); }
+
+    public Optional<StoredAdapter> findAdapterForUpdate(String id) { return findAdapter(id, true); }
+
+    private Optional<StoredAdapter> findAdapter(String id, boolean lock) {
         return jdbc.sql("""
                 SELECT id, adapter_type, display_name, endpoint, configuration_ciphertext, enabled, created_at, updated_at
                 FROM enterprise_adapter_configuration WHERE id=:id
-                """).param("id", id).query((rs, row) -> new StoredAdapter(rs.getString("id"), rs.getString("adapter_type"),
+                """ + (lock ? " FOR UPDATE" : "")).param("id", id).query((rs, row) -> new StoredAdapter(rs.getString("id"), rs.getString("adapter_type"),
                 rs.getString("display_name"), rs.getString("endpoint"), rs.getString("configuration_ciphertext"),
                 rs.getBoolean("enabled"), instant(rs.getTimestamp("created_at")), instant(rs.getTimestamp("updated_at")))).optional();
     }

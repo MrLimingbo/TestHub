@@ -15,7 +15,7 @@ import java.util.Set;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RunnerRegistry;
 import org.springframework.stereotype.Service;
 
 /** Reads signed Appium Runner heartbeats. Only a verified, execution-enabled runner may use internal endpoints. */
@@ -24,25 +24,29 @@ public class MobileAutomationRunnerStatusService {
     static final String MEMBER_KEY = "testhub:runner:appium:members:v1";
     static final String HEARTBEAT_KEY_PREFIX = "testhub:runner:appium:heartbeat:v1:";
     private final AccessService access;
-    private final StringRedisTemplate redis;
+    private final RunnerRegistry registry;
     private final ObjectMapper json;
     private final byte[] key;
 
-    public MobileAutomationRunnerStatusService(AccessService access, StringRedisTemplate redis, ObjectMapper json,
+    public MobileAutomationRunnerStatusService(AccessService access, RunnerRegistry registry, ObjectMapper json,
                                                @Value("${testhub.mobile-automation-runner.heartbeat-key:}") String key) {
-        this.access = access; this.redis = redis; this.json = json; this.key = key == null ? new byte[0] : key.getBytes(StandardCharsets.UTF_8);
+        this.access = access; this.registry = registry; this.json = json; this.key = key == null ? new byte[0] : key.getBytes(StandardCharsets.UTF_8);
     }
     public List<MobileAutomationRunnerStatus> list(AuthenticatedPrincipal principal, String projectId) {
         access.requireProjectRead(principal, projectId);
-        Set<String> ids = redis.opsForSet().members(MEMBER_KEY);
+        Set<String> ids = registry.members(MEMBER_KEY);
         if (ids == null || ids.isEmpty()) return List.of();
         return ids.stream().map(this::read).flatMap(Optional::stream).sorted(Comparator.comparing(MobileAutomationRunnerStatus::heartbeatAt).reversed()).toList();
     }
     public boolean isTrustedExecutionEnabled(String runnerId) { return read(runnerId).map(status -> status.trusted() && status.executionEnabled()).orElse(false); }
+    public boolean isVerifiedSince(String runnerId, Instant since) {
+        return read(runnerId).map(status -> status.trusted() && status.executionEnabled()
+                && !status.startedAt().isBefore(since) && !status.heartbeatAt().isBefore(since)).orElse(false);
+    }
     private Optional<MobileAutomationRunnerStatus> read(String runnerId) {
         if (runnerId == null || !runnerId.matches("[A-Za-z0-9._-]{1,64}")) return Optional.empty();
-        String body = redis.opsForValue().get(HEARTBEAT_KEY_PREFIX + runnerId);
-        if (body == null) { redis.opsForSet().remove(MEMBER_KEY, runnerId); return Optional.empty(); }
+        String body = registry.get(HEARTBEAT_KEY_PREFIX + runnerId);
+        if (body == null) { registry.remove(MEMBER_KEY, runnerId); return Optional.empty(); }
         try {
             JsonNode value = json.readTree(body);
             if (!runnerId.equals(text(value, "runnerId")) || !"appium".equals(text(value, "runnerType")) || !MobileRunnerProtocol.VERSION.equals(text(value, "protocolVersion")) || !value.path("executionEnabled").isBoolean()) return Optional.empty();

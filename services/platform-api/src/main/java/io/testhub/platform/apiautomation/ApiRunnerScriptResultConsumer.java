@@ -11,7 +11,7 @@ import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import io.testhub.platform.shared.runtime.RuntimeStreams;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,19 +20,19 @@ import org.springframework.stereotype.Component;
 public class ApiRunnerScriptResultConsumer {
     private static final Logger log = LoggerFactory.getLogger(ApiRunnerScriptResultConsumer.class);
     private static final String CONSUMER = "platform-api";
-    private final StringRedisTemplate redis;
+    private final RuntimeStreams streams;
     private final ApiAutomationExecutionService executions;
     private volatile boolean groupReady;
 
-    public ApiRunnerScriptResultConsumer(StringRedisTemplate redis, ApiAutomationExecutionService executions) {
-        this.redis = redis;
+    public ApiRunnerScriptResultConsumer(RuntimeStreams streams, ApiAutomationExecutionService executions) {
+        this.streams = streams;
         this.executions = executions;
     }
 
     @Scheduled(fixedDelayString = "${testhub.runner.script-results.poll-interval-ms:500}")
     public void consume() {
         ensureGroup();
-        List<MapRecord<String, Object, Object>> records = redis.opsForStream().read(
+        List<MapRecord<String, Object, Object>> records = streams.read(
                 Consumer.from(ApiRunnerProtocol.SCRIPT_RESULT_GROUP, CONSUMER), StreamReadOptions.empty().count(50),
                 StreamOffset.create(ApiRunnerProtocol.SCRIPT_RESULT_STREAM, ReadOffset.lastConsumed()));
         if (records == null) return;
@@ -60,18 +60,18 @@ public class ApiRunnerScriptResultConsumer {
     }
 
     private void acknowledge(MapRecord<String, Object, Object> record) {
-        redis.opsForStream().acknowledge(ApiRunnerProtocol.SCRIPT_RESULT_GROUP, record);
+        streams.acknowledge(ApiRunnerProtocol.SCRIPT_RESULT_GROUP, record);
     }
 
     private synchronized void ensureGroup() {
         if (groupReady) return;
         try {
-            redis.opsForStream().createGroup(ApiRunnerProtocol.SCRIPT_RESULT_STREAM, ReadOffset.latest(), ApiRunnerProtocol.SCRIPT_RESULT_GROUP);
+            streams.createGroup(ApiRunnerProtocol.SCRIPT_RESULT_STREAM, ReadOffset.latest(), ApiRunnerProtocol.SCRIPT_RESULT_GROUP);
         } catch (Exception firstAttempt) {
             if (!contains(firstAttempt, "BUSYGROUP")) {
-                redis.opsForStream().add(StreamRecords.mapBacked(Map.of("bootstrap", "1")).withStreamKey(ApiRunnerProtocol.SCRIPT_RESULT_STREAM));
+                streams.add(StreamRecords.mapBacked(Map.of("bootstrap", "1")).withStreamKey(ApiRunnerProtocol.SCRIPT_RESULT_STREAM));
                 try {
-                    redis.opsForStream().createGroup(ApiRunnerProtocol.SCRIPT_RESULT_STREAM, ReadOffset.latest(), ApiRunnerProtocol.SCRIPT_RESULT_GROUP);
+                    streams.createGroup(ApiRunnerProtocol.SCRIPT_RESULT_STREAM, ReadOffset.latest(), ApiRunnerProtocol.SCRIPT_RESULT_GROUP);
                 } catch (Exception secondAttempt) {
                     if (!contains(secondAttempt, "BUSYGROUP")) throw secondAttempt;
                 }
