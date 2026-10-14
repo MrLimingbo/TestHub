@@ -2,13 +2,11 @@
 
 ## 定位与共存边界
 
-`apps/desktop` 是 TestHub 的桌面客户端，不是另一套控制面。`apps/desktop/app` 是只含运行时文件的封装目录，`apps/desktop` 根目录只存构建工具和测试。它将用户连接到用户本人或所属组织部署的 TestHub Web 服务，因此不会连接维护者的本机后台；浏览器访问、Vite 开发服务器、Docker Compose 私有化部署和 Kubernetes Helm 部署均保持不变。
+`apps/desktop` 封装 Vue 控制台和本地 Platform API，默认进入当前系统用户的本地工作区。安装即用改造已完成多个模块验收，原生多平台发行正在验证；当前预览包仍不是正式签名发行。完整进度及已验收范围见 [迁移计划](desktop-standalone-migration-plan.md)。浏览器、Vite、Docker Compose 和 Kubernetes Helm 的既有使用方式保留。
 
-桌面运行时只使用 Electron 和 Node 内置 API，不含业务 Node 依赖。构建钩子会显式禁止 Electron Builder 将单仓库根目录的 Vue、图表或测试依赖带入安装包。
+`apps/desktop/app` 的 Electron 主进程仅依赖内置 API，构建钩子禁止将根目录的前端和测试依赖错误地装入 app.asar。本地运行组件独立打包，包含 Java 21、Node、Platform API、静态前端、API／JMeter／Playwright／Appium Runner、必要依赖及许可。桌面本地模式使用 H2 和本地文件，不依赖用户预装 MySQL、Redis、MinIO、Java、Node 或 Docker。浏览器引擎、JMeter、Appium 与移动设备驱动等外部执行组件按各模块设置准备，不能据此承诺所有设备环境都已安装或验证。
 
-客户端不打包 MySQL、Redis、MinIO、Platform API 或任何 Runner；这些企业服务仍由用户或组织按既有方式部署。这样桌面端和浏览器端共享同一登录、数据、权限、审计和 API 行为，避免复制业务逻辑或产生本地数据孤岛。这里的“独立运行”是指每个操作系统用户拥有独立的 Electron `userData`、Cookie 会话、服务地址配置和本地网络授权，安装用户之间不会共享本地状态；如果多人登录同一个 TestHub 账号，服务端数据仍按该账号的组织和项目权限共享。
-
-首次打开桌面端时填写自己的 TestHub Web 根地址：生产环境必须使用 HTTPS，例如 `https://testhub.example.com`。本机开发可使用 `http://127.0.0.1:5173`。安装包不预置任何人的本机服务地址；地址只保存到当前系统用户的应用偏好目录，账号、密码和访问令牌都由 TestHub 服务端处理，不会被桌面设置保存。
+本地数据目录、身份及加密设置按系统用户隔离，首启无需注册。用户可选连接自己的网页服务并注册、登录，将支持的资料迁移或建立持续同步绑定；两端项目和账号权限仍需满足要求。账号网页服务是可选在线能力，不是本地使用的前提。生产服务地址使用 HTTPS，本机开发允许 HTTP 回环地址；安装包不预置维护者的服务地址或凭据。
 
 ## 内网接口调试
 
@@ -19,46 +17,45 @@
 
 ## 安全设计
 
-- 远端 TestHub 页面没有 Node.js 集成或原始 Electron IPC 权限，并启用 context isolation、sandbox、web security 与权限请求拒绝策略。预加载脚本只暴露一个结构化 HTTP 调试调用，不暴露文件系统、Shell、任意 URL 导航或通用网络能力；主进程再次校验发送页面 Origin、请求大小与请求头。
-- 设置窗口使用 `testhub-desktop://` 自定义安全协议而非 `file://`；仅暴露“读取设置”和“保存已校验服务地址”两个受限 IPC 操作，并在主进程验证发送方。
+- 远端 TestHub 页面没有 Node.js 集成或原始 Electron IPC 权限，并启用 context isolation、sandbox、web security 与权限请求拒绝策略。预加载脚本仅暴露结构化调试、工作区和模块操作，不暴露文件系统、Shell、任意 URL 导航或通用网络能力；主进程验证页面身份、发送方和各操作参数。
+- 设置窗口使用 `testhub-desktop://` 自定义安全协议而非 `file://`；提供本地设置、备份、迁移及同步管理等受限 IPC 操作，每个原生工具在主进程验证发送方和工作区状态。
 - 非本机 HTTP、带凭据、路径、查询参数或片段的服务地址均被拒绝；远端页面只能在所配置的同一 Origin 内导航或打开窗口。
 - 桌面端不会更改服务端 CORS 或 Cookie 配置，因为加载的是既有的同源 Web 控制台；本地接口请求不经过页面 `fetch`。
 
 ## 本地开发与构建
 
-先照现有流程启动服务：
+安装依赖，构建前端和隔离后端，再准备当前平台架构的运行时：
 
 ```bash
-npx pnpm@10.13.1 dev
-JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
-PATH=/opt/homebrew/opt/openjdk@21/bin:$PATH \
-./mvnw -pl services/platform-api spring-boot:run
-```
-
-然后另开终端启动桌面客户端：
-
-```bash
-TESTHUB_DESKTOP_SERVER_URL=http://127.0.0.1:5173 \
-npx pnpm@10.13.1 desktop:dev
-```
-
-构建命令：
-
-```bash
+npx pnpm@10.13.1 install --frozen-lockfile
+npx pnpm@10.13.1 lint
+npx pnpm@10.13.1 test
+npx pnpm@10.13.1 build
 npx pnpm@10.13.1 desktop:test
-npx pnpm@10.13.1 desktop:package:mac
-npx pnpm@10.13.1 desktop:package:win
+# JAVA_HOME 指向当前系统架构的独立 Java 21 JDK。
+# 不要用正式数据源执行后端全量测试。
+node scripts/desktop/test-local-backend.mjs
+npx pnpm@10.13.1 desktop:prepare:local
+npx pnpm@10.13.1 desktop:verify:runtime
 ```
 
-macOS 构建生成通用（Apple Silicon 和 Intel）`release/desktop/TestHub.dmg`。Windows 构建必须在原生 Windows 环境执行，生成 x64 NSIS 安装器 `release/desktop/TestHub.exe`。构建产物被 `.gitignore` 排除。
+pnpm 10 的依赖安装脚本默认不执行；工作区仅允许 `electron` 的安装脚本下载当前原生平台的二进制及 Chromium 许可，避免干净 CI 缺少 `electron/dist`。[配置说明](https://github.com/pnpm/pnpm.io/blob/main/versioned_docs/version-10.x/settings.md)。
+
+Mac 的 JDK／Node 不得依赖 Homebrew 等包外运行库。准备脚本保持 `distributionReady=false`；仅内部预览打包可通过 `TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE=1` 执行 `package:dir` 或对应安装器命令。前置检查验证平台、架构、组件与全树完整性；`afterPack` 再检查实际复制进包内的资源。正式构建不能靠修改该布尔值代替发行验收。
+
+`desktop:dev` 默认启动本地工作区。连接既有开发网页时仍可设置 `TESTHUB_DESKTOP_SERVER_URL=http://127.0.0.1:5173`；这是可选服务模式。人工开发会打开应用窗口；自动桌面验收必须使用 [离屏 QA 引导](desktop-standalone-progress-2026-10-09-mobile-sync.md)。真正包验收用 `scripts/desktop/smoke-packaged.mjs --app <临时应用路径> --output <脱敏摘要路径>`，独立数据目录、隐藏窗口，退出后删除自有 QA 数据，不替换已安装应用。
+
+默认 `desktop:package:mac` 仍生成 universal `release/desktop/TestHub.dmg`，必须预先准备 arm64 与 x64 两份验证后的运行时。原生 CI 分架构构建和验收，避免用单一架构的测试替代另一架构。Windows 安装器必须在原生 Windows x64 环境执行 `desktop:package:win`。构建产物和运行时不提交 Git。
 
 安装器图标由 `apps/desktop/build/icon.svg` 生成。修改 SVG 后，在 macOS 执行 `scripts/desktop/generate-icons.sh`，并提交生成的 `icon.icns` 和 `icon.ico`，确保 Windows 原生构建不依赖 macOS 工具。
 
 ## GitHub 发布
 
-`.github/workflows/desktop-release.yml` 在 `desktop-v*` 标签上使用 macOS 和 Windows 原生 Runner 分别构建，随后将 `TestHub.dmg` 与 `TestHub.exe` 发布到同名 GitHub Release。手动触发工作流时只上传可下载的构建产物，不创建 Release。
+`.github/workflows/desktop-release.yml` 先在 Ubuntu 执行前端／桌面回归和隔离 H2 后端构建，再传递共享应用文件到三个原生任务：Mac arm64、Intel Mac x64、Windows x64。每个任务准备自己的原生 Java／Node 运行时，检查许可与完整性，打包后实际后台启动程序，验证首启和重启持久化。
 
-正式标签发布必须配置以下 GitHub Actions Secrets；缺失时工作流会在构建前失败，不会发布未签名安装器：
+`workflow_dispatch` 上传 `TestHub-macOS-arm64-preview.dmg`、`TestHub-macOS-x64-preview.dmg`、`TestHub-Windows-x64-preview.exe` 和脱敏验收摘要，不创建 GitHub Release。预览文件不等同已签名／公证的发行包。`desktop-v*` 标签必须先通过正式分发门槛和签名配置检查，全部原生任务成功后才发布 `TestHub-macOS-arm64.dmg`、`TestHub-macOS-x64.dmg`、`TestHub-Windows-x64.exe`。当前运行时准备脚本不会自动解除正式门槛。
+
+正式标签发布必须配置以下 GitHub Actions Secrets；缺失时正式安装器构建会失败，不会发布未签名安装器：
 
 | 平台 | Secrets |
 | --- | --- |
@@ -67,4 +64,4 @@ macOS 构建生成通用（Apple Silicon 和 Intel）`release/desktop/TestHub.dm
 
 macOS 标签构建启用 Electron Builder 公证；Windows 标签构建使用 Authenticode 证书。证书、私钥、Apple 凭据和签名文件只存在于 GitHub Secrets，不能写入仓库、`.env`、安装包日志或发布说明。
 
-发布前请在隔离环境安装 DMG 和 EXE，连接已批准的 HTTPS TestHub 服务，验证登录、项目切换、直接内网 URL、环境 `BASE_URL`、目标授权提示、调试历史、附件下载和退出登录；随后归档安装器 SHA-512、签名/公证状态以及对应服务端版本。
+发布前需在干净隔离系统安装 DMG 和 EXE，验证无需开发工具的本地首启、默认数据目录、重启、退出及升级保留数据；另外连接已批准的网页服务，验证登录、项目切换、内网接口授权、历史、附件和同步。真实安装、签名／公证、Gatekeeper／Authenticode 和移动设备执行均须单独留存结果；后台包 smoke 不能代替这些检查。归档安装器摘要、签名状态、源码提交和运行时清单，并完成发布安全扫描。
