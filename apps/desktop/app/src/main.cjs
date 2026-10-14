@@ -24,6 +24,22 @@ const { installMockSync } = require('./mock-sync-ipc.cjs')
 const { installPerformanceSync } = require('./performance-sync-ipc.cjs')
 const { installUiAutomationSync } = require('./ui-automation-sync-ipc.cjs')
 const { installMobileAutomationSync } = require('./mobile-automation-sync-ipc.cjs')
+const { installFunctionalDefectWorkflowSync } = require('./functional-defect-workflow-sync-ipc.cjs')
+const { installFunctionalDefectPeopleSync } = require('./functional-defect-people-sync-ipc.cjs')
+const { installFunctionalDefectExecutionSync } = require('./functional-defect-execution-sync-ipc.cjs')
+const { installFunctionalHistorySync } = require('./functional-history-sync-ipc.cjs')
+const { installProjectFileSync } = require('./project-file-sync-ipc.cjs')
+const { installFunctionalDefectLinkSync } = require('./functional-defect-link-sync-ipc.cjs')
+const { installProjectVersionSync } = require('./project-version-sync-ipc.cjs')
+const { installFunctionalDefectSync } = require('./functional-defect-sync-ipc.cjs')
+const { installFunctionalAssetTagSync } = require('./functional-asset-tag-sync-ipc.cjs')
+const { installFunctionalGovernanceSync } = require('./functional-governance-sync-ipc.cjs')
+const { installFunctionalSync } = require('./functional-sync-ipc.cjs')
+const { installApiDesignSync } = require('./api-design-sync-ipc.cjs')
+const { installApiAutomationAssetSync } = require('./api-automation-asset-sync-ipc.cjs')
+const { installApiAutomationScenarioSync } = require('./api-automation-scenario-sync-ipc.cjs')
+const { installApiAutomationHistorySync } = require('./api-automation-history-sync-ipc.cjs')
+const { installApiAutomationTriggerSync } = require('./api-automation-trigger-sync-ipc.cjs')
 const { ensureSyncSession } = require('./project-sync-ipc.cjs')
 const { SettingsTransfer, settingsTransferResponseBudget } = require('./settings-transfer.cjs')
 const { NotificationTransfer, notificationTransferResponseBudget } = require('./notification-transfer.cjs')
@@ -58,7 +74,7 @@ let mainWindow
 let setupWindow
 let activeServerUrl
 let workspaceMode = 'server'
-let taskSync, settingsSync, notificationSync, mockSync, performanceSync, uiAutomationSync, mobileAutomationSync, taskSyncTimer
+let taskSync, settingsSync, notificationSync, mockSync, performanceSync, uiAutomationSync, mobileAutomationSync, functionalSync, apiDesignSync, apiAutomationAssetSync, apiAutomationScenarioSync, apiAutomationHistorySync, apiAutomationTriggerSync, functionalGovernanceSync, functionalAssetTagSync, functionalDefectSync, projectVersionSync, functionalDefectLinkSync, functionalDefectWorkflowSync, functionalDefectPeopleSync, functionalDefectExecutionSync, functionalHistorySync, projectFileSync, taskSyncTimer
 let localRuntime
 let localEngines
 let preparingJmeter
@@ -341,8 +357,24 @@ function installApplicationMenu() {
         { label: '本地执行设置', click: () => openSetupWindow('execution.html') },
         { label: '任务登记同步', click: () => { void taskSync?.open().catch(showLocalError) } },
         { label: '项目配置同步', click: () => { void settingsSync?.open().catch(showLocalError) } },
+        { label: '项目文件同步', click: () => { void projectFileSync?.open().catch(showLocalError) } },
         { label: 'Mock 同步', click: () => { void mockSync?.open().catch(showLocalError) } },
         { label: '性能计划同步', click: () => { void performanceSync?.open().catch(showLocalError) } },
+        { label: '缺陷工作流同步', click: () => { void functionalDefectWorkflowSync?.open().catch(showLocalError) } },
+        { label: '缺陷人员同步', click: () => { void functionalDefectPeopleSync?.open().catch(showLocalError) } },
+        { label: '缺陷执行关联同步', click: () => { void functionalDefectExecutionSync?.open().catch(showLocalError) } },
+        { label: '执行历史同步', click: () => { void functionalHistorySync?.open().catch(showLocalError) } },
+        { label: '缺陷关联同步', click: () => { void functionalDefectLinkSync?.open().catch(showLocalError) } },
+        { label: '版本与构建同步', click: () => { void projectVersionSync?.open().catch(showLocalError) } },
+        { label: '缺陷资料同步', click: () => { void functionalDefectSync?.open().catch(showLocalError) } },
+        { label: '标签关联同步', click: () => { void functionalAssetTagSync?.open().catch(showLocalError) } },
+        { label: '治理定义同步', click: () => { void functionalGovernanceSync?.open().catch(showLocalError) } },
+        { label: '功能测试资料同步', click: () => { void functionalSync?.open().catch(showLocalError) } },
+        { label: '接口设计资料同步', click: () => { void apiDesignSync?.open().catch(showLocalError) } },
+        { label: '接口自动化基础资料同步', click: () => { void apiAutomationAssetSync?.open().catch(showLocalError) } },
+        { label: '接口自动化场景同步', click: () => { void apiAutomationScenarioSync?.open().catch(showLocalError) } },
+        { label: '接口自动化执行历史同步', click: () => { void apiAutomationHistorySync?.open().catch(showLocalError) } },
+        { label: '接口自动化触发配置同步', click: () => { void apiAutomationTriggerSync?.open().catch(showLocalError) } },
         { label: '移动端资料同步', click: () => { void mobileAutomationSync?.open().catch(showLocalError) } },
         { label: 'Web UI 资料同步', click: () => { void uiAutomationSync?.open().catch(showLocalError) } },
         { label: '通知模板同步', click: () => { void notificationSync?.open().catch(showLocalError) } },
@@ -1308,6 +1340,22 @@ ipcMain.handle('testhub-desktop:backup:run', async (event, value) => {
       await performanceSync?.suspendForRestore()
       await uiAutomationSync?.suspendForRestore()
       await mobileAutomationSync?.suspendForRestore()
+      await functionalSync?.suspendForRestore()
+      await apiDesignSync?.suspendForRestore()
+      await apiAutomationAssetSync?.suspendForRestore()
+      await apiAutomationScenarioSync?.suspendForRestore()
+      await apiAutomationHistorySync?.suspendForRestore()
+      await apiAutomationTriggerSync?.suspendForRestore()
+      await functionalGovernanceSync?.suspendForRestore()
+      await functionalAssetTagSync?.suspendForRestore()
+      await functionalDefectSync?.suspendForRestore()
+      await projectVersionSync?.suspendForRestore()
+      await functionalDefectLinkSync?.suspendForRestore()
+      await functionalDefectWorkflowSync?.suspendForRestore()
+      await functionalDefectPeopleSync?.suspendForRestore()
+      await functionalDefectExecutionSync?.suspendForRestore()
+      await functionalHistorySync?.suspendForRestore()
+      await projectFileSync?.suspendForRestore()
       const origins = [...localRuntime.allowedOrigins]
       updateBackup('正在切换工作区并保留原数据…')
       await localRuntime.stop()
@@ -1351,6 +1399,7 @@ ipcMain.handle('testhub-desktop:api-debug:execute', executeHttpDebug)
 
 if (ownsWorkspace) app.whenReady().then(async () => {
   const syncOptions = { ipcMain, dialog, session, directory: app.getPath('userData'), origin: SETUP_ORIGIN,
+    fileLinkContext: binding => projectFileSync?.linkContext(binding) ?? null,
     windows: () => ({ main: mainWindow, setup: setupWindow }),
     runtime: async () => {
       await initializeLocalRuntime(); await localRuntime.start()
@@ -1370,7 +1419,23 @@ if (ownsWorkspace) app.whenReady().then(async () => {
   performanceSync = installPerformanceSync(syncOptions)
   uiAutomationSync = installUiAutomationSync(syncOptions)
   mobileAutomationSync = installMobileAutomationSync(syncOptions)
-  taskSyncTimer = globalThis.setInterval(() => { void (async () => { await taskSync.tick(); await settingsSync.tick(); await notificationSync.tick(); await mockSync.tick(); await performanceSync.tick(); await uiAutomationSync.tick(); await mobileAutomationSync.tick() })() }, 30000)
+  functionalSync = installFunctionalSync(syncOptions)
+  apiDesignSync = installApiDesignSync(syncOptions)
+  apiAutomationAssetSync = installApiAutomationAssetSync(syncOptions)
+  apiAutomationScenarioSync = installApiAutomationScenarioSync(syncOptions)
+  apiAutomationHistorySync = installApiAutomationHistorySync(syncOptions)
+  apiAutomationTriggerSync = installApiAutomationTriggerSync(syncOptions)
+  functionalGovernanceSync = installFunctionalGovernanceSync(syncOptions)
+  functionalAssetTagSync = installFunctionalAssetTagSync(syncOptions)
+  functionalDefectSync = installFunctionalDefectSync(syncOptions)
+  projectVersionSync = installProjectVersionSync(syncOptions)
+  functionalDefectLinkSync = installFunctionalDefectLinkSync(syncOptions)
+  functionalDefectWorkflowSync = installFunctionalDefectWorkflowSync(syncOptions)
+  functionalDefectPeopleSync = installFunctionalDefectPeopleSync(syncOptions)
+  functionalDefectExecutionSync = installFunctionalDefectExecutionSync(syncOptions)
+  functionalHistorySync = installFunctionalHistorySync(syncOptions)
+  projectFileSync = installProjectFileSync(syncOptions)
+  taskSyncTimer = globalThis.setInterval(() => { void (async () => { await taskSync.tick(); await settingsSync.tick(); await notificationSync.tick(); await mockSync.tick(); await performanceSync.tick(); await uiAutomationSync.tick(); await mobileAutomationSync.tick(); await functionalSync.tick(); await apiDesignSync.tick(); await apiAutomationAssetSync.tick(); await apiAutomationScenarioSync.tick(); await apiAutomationHistorySync.tick(); await apiAutomationTriggerSync.tick(); await functionalGovernanceSync.tick(); await functionalAssetTagSync.tick(); await functionalDefectSync.tick(); await projectVersionSync.tick(); await functionalDefectLinkSync.tick(); await functionalDefectWorkflowSync.tick(); await functionalDefectPeopleSync.tick(); await functionalDefectExecutionSync.tick(); await functionalHistorySync.tick(); await projectFileSync.tick() })() }, 30000)
   taskSyncTimer.unref()
   protocol.handle('testhub-desktop', (request) => net.fetch(desktopAssetUrl(request.url)))
   installApplicationMenu()
@@ -1389,7 +1454,7 @@ app.on('window-all-closed', () => {
 
 app.on('second-instance', () => { const window = mainWindow || setupWindow; if (window) { if (window.isMinimized()) window.restore(); window.focus() } })
 app.on('before-quit', event => {
-  globalThis.clearInterval(taskSyncTimer); taskSync?.stop(); settingsSync?.stop(); notificationSync?.stop(); mockSync?.stop(); performanceSync?.stop(); uiAutomationSync?.stop(); mobileAutomationSync?.stop()
+  globalThis.clearInterval(taskSyncTimer); taskSync?.stop(); settingsSync?.stop(); notificationSync?.stop(); mockSync?.stop(); performanceSync?.stop(); uiAutomationSync?.stop(); mobileAutomationSync?.stop(); functionalSync?.stop(); apiDesignSync?.stop(); apiAutomationAssetSync?.stop(); apiAutomationScenarioSync?.stop(); apiAutomationHistorySync?.stop(); apiAutomationTriggerSync?.stop(); functionalGovernanceSync?.stop(); functionalAssetTagSync?.stop(); functionalDefectSync?.stop(); projectVersionSync?.stop(); functionalDefectLinkSync?.stop(); functionalDefectWorkflowSync?.stop(); functionalDefectPeopleSync?.stop(); functionalDefectExecutionSync?.stop(); functionalHistorySync?.stop(); projectFileSync?.stop()
   if (quitting || (!localRuntime && !backupOperation && !transferOperation)) return
   event.preventDefault(); quitting = true
   void (async () => { await Promise.all([backupOperation?.catch(() => {}), transferOperation?.catch(() => {})]); await Promise.all([localEngines?.stop(), localBrowsers?.stop()]); await Promise.all([preparingJmeter?.catch(() => {}), preparingBrowser?.catch(() => {})]); await localRuntime?.stop() })().finally(() => app.quit())

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 接口自动化场景同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="api-automation-scenario-sync.css" />
+</head>
+<body><main class="card">
+  <h1>接口自动化场景同步</h1><p class="description">离线编辑当前场景，联网后与绑定账号项目双向同步，保留固定历史引用。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p><p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">按场景和引用来源名称匹配，以历史内容映射本端版本号；当前场景、脚本、变量及实际引用的历史内容会发送到所选账号服务。</p>
+    <p class="hint">已有修订和固定旧版本的引用保留。缺少历史时追加内容，再保留来源资料当前内容；因此本端版本号可能增加，两端版本号不保证相同。缺少公共步骤时先核对基础资料同步，子场景可同批复制。</p>
+    <p class="hint">未配对文件、失效引用和缺失或停用的目标环境暂停相关场景。删除不传播，改名或同名重建需核对。最多 200 个场景、8 MiB，单个引用来源至多核对 1000 个修订；不创建执行、不复制触发器、执行历史或未引用的旧修订。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">双端编辑冲突需选择当前内容；目标已有历史不改写，原有执行快照与固定引用保留。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="api-automation-scenario-sync.js"></script></body>
+</html>

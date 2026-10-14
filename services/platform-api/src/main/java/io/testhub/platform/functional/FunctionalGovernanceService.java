@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -29,10 +30,11 @@ public class FunctionalGovernanceService {
     private final AccessService access;
     private final AuditService audit;
     private final ObjectMapper objectMapper;
+    private final FunctionalCatalogRepository catalogs;
 
     public FunctionalGovernanceService(FunctionalGovernanceRepository governance, FunctionalRequirementRepository requirements,
                                        FunctionalCaseRepository cases, FunctionalTestExecutionRepository executions,
-                                       AccessService access, AuditService audit, ObjectMapper objectMapper) {
+                                       AccessService access, AuditService audit, ObjectMapper objectMapper, FunctionalCatalogRepository catalogs) {
         this.governance = governance;
         this.requirements = requirements;
         this.cases = cases;
@@ -40,6 +42,7 @@ public class FunctionalGovernanceService {
         this.access = access;
         this.audit = audit;
         this.objectMapper = objectMapper;
+        this.catalogs = catalogs;
     }
 
     public List<FunctionalTag> listTags(AuthenticatedPrincipal principal, String projectId) {
@@ -47,7 +50,7 @@ public class FunctionalGovernanceService {
         return governance.findTags(projectId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalTag createTag(AuthenticatedPrincipal principal, String projectId, TagInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "标签参数不能为空");
@@ -64,11 +67,29 @@ public class FunctionalGovernanceService {
         return governance.findTag(projectId, id).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteTag(AuthenticatedPrincipal principal, String projectId, String tagId) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (governance.deleteTag(projectId, tagId) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "标签不存在");
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_TAG_DELETED", "FUNCTIONAL_TAG", tagId, Map.of());
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public FunctionalTag updateTag(AuthenticatedPrincipal principal, String projectId, String tagId, TagInput input) {
+        ProjectSummary project = writeAccess(principal, projectId);
+        governance.findTag(projectId, tagId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "标签不存在"));
+        if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "标签参数不能为空");
+        String name = required(input.name(), 64, "标签名称");
+        String color = color(input.color());
+        try {
+            governance.updateTag(projectId, tagId, name, color);
+        } catch (DataIntegrityViolationException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "同一项目内标签名称已存在", exception);
+        }
+        audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_TAG_UPDATED", "FUNCTIONAL_TAG", tagId,
+                Map.of("name", name));
+        return governance.findTag(projectId, tagId).orElseThrow();
     }
 
     public List<FunctionalTag> listAssetTags(AuthenticatedPrincipal principal, String projectId, String assetType, String assetId) {
@@ -77,7 +98,7 @@ public class FunctionalGovernanceService {
         return governance.findAssetTags(projectId, normalizeAssetType(assetType), assetId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<FunctionalTag> replaceAssetTags(AuthenticatedPrincipal principal, String projectId, String assetType,
                                                  String assetId, List<String> tagIds) {
         ProjectSummary project = writeAccess(principal, projectId);
@@ -102,7 +123,7 @@ public class FunctionalGovernanceService {
         return governance.findFields(projectId, assetType == null || assetType.isBlank() ? null : normalizeAssetType(assetType));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalCustomField createField(AuthenticatedPrincipal principal, String projectId, CustomFieldInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         ValidatedField field = validateField(input);
@@ -118,7 +139,7 @@ public class FunctionalGovernanceService {
         return governance.findField(projectId, id).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalCustomField updateField(AuthenticatedPrincipal principal, String projectId, String fieldId, CustomFieldInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         FunctionalCustomField existing = governance.findField(projectId, fieldId)
@@ -136,7 +157,7 @@ public class FunctionalGovernanceService {
         return governance.findField(projectId, fieldId).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteField(AuthenticatedPrincipal principal, String projectId, String fieldId) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (governance.deleteField(projectId, fieldId) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "自定义字段不存在");
@@ -144,7 +165,9 @@ public class FunctionalGovernanceService {
     }
 
     private ProjectSummary writeAccess(AuthenticatedPrincipal principal, String projectId) {
-        return access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        var project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        catalogs.lockProject(projectId);
+        return project;
     }
 
     private void requireAsset(String projectId, String assetType, String assetId) {

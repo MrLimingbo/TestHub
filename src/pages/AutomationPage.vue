@@ -1,13 +1,33 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import AutomationRunPanel from '@/components/api-automation/AutomationRunPanel.vue'
+import AutomationHistoryPanel from '@/components/api-automation/AutomationHistoryPanel.vue'
 import AutomationSidebar from '@/components/api-automation/AutomationSidebar.vue'
 import { useSessionStore } from '@/stores/session'
 import { parseCurlCommand } from '@/utils/apiAutomation'
+import { isLocalDesktop, isAccountDesktop, openApiAutomationAssetSync, openApiAutomationScenarioSync, openApiAutomationHistorySync, openApiAutomationTriggerSync } from '@/utils/desktopWorkspace'
 import { apiCaseType, buildApiRunUrl, createApiRunSnapshot, type ApiRunSnapshot, type ApiVersionSource } from '@/utils/apiTesting'
 
 interface ApiEnvelope<T> { data: T }
+const nativeDesktop = isLocalDesktop() || isAccountDesktop()
+async function openNativeAssetSync() {
+  try { await openApiAutomationAssetSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开接口自动化基础资料同步') }
+}
+async function openNativeScenarioSync() {
+  try { await openApiAutomationScenarioSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开接口自动化场景同步') }
+}
+async function openNativeHistorySync() {
+  try { await openApiAutomationHistorySync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开接口自动化执行历史同步') }
+}
+async function openNativeTriggerSync() {
+  try { await openApiAutomationTriggerSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开接口自动化触发配置同步') }
+}
 interface Organization { id: string; name: string }
 interface Project { id: string; organizationId: string; name: string; code: string }
 interface Context { organizations: Organization[]; projects: Record<string, Project[]> }
@@ -31,7 +51,7 @@ interface AutomationExecutionHttpResult { id: string; executionId: string; stepI
 interface AutomationExecutionStepResult { id: string; executionId: string; stepId: string; stepSequence: number; stepType: 'EXTRACT' | 'ASSERT'; outcome: 'COMPLETED' | 'PASSED' | 'FAILED'; observedStatusCode: number; runnerId: string; occurredAt: string; createdAt: string }
 interface AutomationExecutionScriptResult { id: string; executionId: string; phase: 'PRE_REQUEST' | 'POST_RESPONSE'; testCount: number; passedCount: number; failedCount: number; runnerId: string; occurredAt: string; createdAt: string }
 interface AutomationExecutionReportIntegrity { contract: string; artifactVersion: number; reportContract: string; reportVersion: number; sha256: string; eTag: string; mediaType: string; filename: string }
-interface AutomationWebhook { id: string; organizationId: string; projectId: string; scenarioId: string; name: string; enabled: boolean; createdBy: string; createdAt: string; updatedAt: string }
+interface AutomationWebhook { id: string; organizationId: string; projectId: string; scenarioId: string; name: string; enabled: boolean; secretReady?: boolean; createdBy: string; createdAt: string; updatedAt: string }
 interface CreatedAutomationWebhook { webhook: AutomationWebhook; secret: string }
 interface AutomationExecutionReport { contract: string; reportVersion: number; failureStrategy: { strategy: 'STOP' | 'CONTINUE'; continuedFailureCount: number } | null; summary: { httpResultCount: number; httpSucceededCount: number; httpFailedCount: number; httpDurationMillis: number; stepResultCount: number; assertionPassedCount: number; assertionFailedCount: number; scriptResultCount: number; scriptTestCount: number; scriptPassedCount: number; scriptFailedCount: number }; parallelGroups: Array<{ stepId: string; configuredBranchCount: number; completedBranchCount: number; succeededBranchCount: number; failedBranchCount: number; attemptCount: number; retryAttemptCount: number; firstRequestSequence: number | null; lastRequestSequence: number | null; totalDurationMillis: number }> }
 interface AutomationSchedule { id: string; organizationId: string; projectId: string; scenarioId: string; executionProfileId: string | null; name: string; cronExpression: string; timezone: string; timeoutSeconds: number; maxConsecutiveFailures: number; consecutiveFailures: number; enabled: boolean; lastExecutionId: string | null; lastExecutionStatus: string | null; lastTriggeredAt: string | null; createdBy: string; createdAt: string; updatedAt: string }
@@ -76,7 +96,10 @@ const executionProfiles = ref<AutomationExecutionProfile[]>([])
 const webhooks = ref<AutomationWebhook[]>([])
 const schedules = ref<AutomationSchedule[]>([])
 const selectedStepId = ref('')
-const workbenchTab = ref<WorkbenchTab>('steps')
+const route = useRoute()
+const workbenchTab = ref<WorkbenchTab>(route?.query?.tab === 'reports' ? 'reports' : 'steps')
+const historyCount = ref(0)
+watch(projectId, () => { historyCount.value = 0 })
 const scenarioEditorTab = ref<'flow' | 'scripts' | 'variables'>('flow')
 const scenarioSearch = ref('')
 const stepInspectorVisible = ref(false)
@@ -100,11 +123,14 @@ const webhookSecretVisible = ref(false)
 const savingWebhook = ref(false)
 const updatingWebhookId = ref('')
 const createdWebhookSecret = ref('')
+const editingWebhook = ref<AutomationWebhook | null>(null)
+let webhookDialogSequence = 0
 const scheduleVisible = ref(false)
 const savingSchedule = ref(false)
 const runningScheduleId = ref('')
 const deletingScheduleId = ref('')
 const editingScheduleId = ref<string | null>(null)
+const editingScheduleUpdatedAt = ref<string | null>(null)
 const dataSetVisible = ref(false)
 const dataSetPreviewVisible = ref(false)
 const dataSetExecutionVisible = ref(false)
@@ -890,29 +916,54 @@ async function deleteDataSet(dataSet: AutomationDataSet) {
 
 function openCreateWebhook() {
   if (!scenarios.value.length) { Message.warning('请先创建接口自动化场景'); return }
+  editingWebhook.value = null
+  webhookDialogSequence++
   webhookForm.name = ''
   webhookForm.scenarioId = detail.value?.id || scenarios.value[0].id
   webhookVisible.value = true
 }
 
+function openEditWebhook(webhook: AutomationWebhook) {
+  editingWebhook.value = webhook; webhookDialogSequence++
+  webhookForm.name = webhook.name; webhookForm.scenarioId = webhook.scenarioId; webhookVisible.value = true
+}
+function closeWebhookDialog() { webhookDialogSequence++; editingWebhook.value = null }
 async function createWebhook() {
+  if (savingWebhook.value) return
   if (!projectId.value || !webhookForm.name.trim() || !webhookForm.scenarioId) { Message.warning('请填写 Webhook 名称并选择场景'); return }
+  const project = projectId.value, editing = editingWebhook.value, token = webhookDialogSequence
+  const body = { name: webhookForm.name.trim(), scenarioId: webhookForm.scenarioId }
   savingWebhook.value = true
   try {
-    const created = await mutate<CreatedAutomationWebhook>(`/api/v1/projects/${projectId.value}/api-automation/webhook-triggers`, 'POST', { name: webhookForm.name.trim(), scenarioId: webhookForm.scenarioId })
-    createdWebhookSecret.value = created.secret
+    let created: CreatedAutomationWebhook | undefined
+    if (editing) await mutate<AutomationWebhook>(`/api/v1/projects/${project}/api-automation/webhook-triggers/${editing.id}/configuration`, 'PUT', body)
+    else created = await mutate<CreatedAutomationWebhook>(`/api/v1/projects/${project}/api-automation/webhook-triggers`, 'POST', body)
+    if (project !== projectId.value || token !== webhookDialogSequence) return
     webhookVisible.value = false
-    webhookSecretVisible.value = true
+    if (created) { createdWebhookSecret.value = created.secret; webhookSecretVisible.value = true }
     await loadWebhooks()
-    Message.success('Webhook 已创建，请立即保存密钥')
-  } catch (error) { Message.error(error instanceof Error ? error.message : '创建 Webhook 失败') } finally { savingWebhook.value = false }
+    Message.success(editing ? 'Webhook 已更新并停用，请核对后再启用' : 'Webhook 已创建，请立即保存密钥')
+  } catch (error) { if (project === projectId.value && token === webhookDialogSequence) Message.error(error instanceof Error ? error.message : '保存 Webhook 失败') }
+  finally { savingWebhook.value = false }
+}
+async function prepareWebhookSecret(webhook: AutomationWebhook) {
+  if (updatingWebhookId.value || !projectId.value || webhook.secretReady !== false) return
+  const project = projectId.value, token = webhookDialogSequence
+  updatingWebhookId.value = webhook.id
+  try {
+    const created = await mutate<CreatedAutomationWebhook>(`/api/v1/projects/${project}/api-automation/webhook-triggers/${webhook.id}/prepare-secret`, 'POST', {})
+    if (project !== projectId.value || token !== webhookDialogSequence) return
+    createdWebhookSecret.value = created.secret; webhookSecretVisible.value = true
+    await loadWebhooks(); Message.success('本端密钥已生成，请先保存，再核对并启用 Webhook')
+  } catch (error) { if (project === projectId.value) Message.error(error instanceof Error ? error.message : '生成本端密钥失败') }
+  finally { updatingWebhookId.value = '' }
 }
 
 async function setWebhookEnabled(webhook: AutomationWebhook, enabled: boolean) {
   if (!projectId.value) return
   updatingWebhookId.value = webhook.id
   try {
-    await mutate<AutomationWebhook>(`/api/v1/projects/${projectId.value}/api-automation/webhook-triggers/${webhook.id}`, 'PUT', { enabled })
+    await mutate<AutomationWebhook>(`/api/v1/projects/${projectId.value}/api-automation/webhook-triggers/${webhook.id}`, 'PUT', { enabled, expectedUpdatedAt: webhook.updatedAt })
     await loadWebhooks()
     Message.success(enabled ? 'Webhook 已启用' : 'Webhook 已停用')
   } catch (error) { Message.error(error instanceof Error ? error.message : '更新 Webhook 失败') } finally { updatingWebhookId.value = '' }
@@ -931,6 +982,7 @@ async function revokeWebhook(webhook: AutomationWebhook) {
 function openCreateSchedule() {
   if (!scenarios.value.length) { Message.warning('请先创建接口自动化场景'); return }
   editingScheduleId.value = null
+  editingScheduleUpdatedAt.value = null
   scheduleForm.name = ''
   scheduleForm.scenarioId = detail.value?.id || scenarios.value[0].id
   scheduleForm.executionProfileId = ''
@@ -944,6 +996,7 @@ function openCreateSchedule() {
 
 function openEditSchedule(schedule: AutomationSchedule) {
   editingScheduleId.value = schedule.id
+  editingScheduleUpdatedAt.value = schedule.updatedAt
   scheduleForm.name = schedule.name
   scheduleForm.scenarioId = schedule.scenarioId
   scheduleForm.executionProfileId = schedule.executionProfileId ?? ''
@@ -956,7 +1009,7 @@ function openEditSchedule(schedule: AutomationSchedule) {
 }
 
 function schedulePayload() {
-  return { name: scheduleForm.name.trim(), scenarioId: scheduleForm.scenarioId, executionProfileId: scheduleForm.executionProfileId || null, cronExpression: scheduleForm.cronExpression.trim(), timezone: scheduleForm.timezone.trim(), timeoutSeconds: scheduleForm.timeoutSeconds, maxConsecutiveFailures: scheduleForm.maxConsecutiveFailures, enabled: scheduleForm.enabled }
+  return { name: scheduleForm.name.trim(), scenarioId: scheduleForm.scenarioId, executionProfileId: scheduleForm.executionProfileId || null, cronExpression: scheduleForm.cronExpression.trim(), timezone: scheduleForm.timezone.trim(), timeoutSeconds: scheduleForm.timeoutSeconds, maxConsecutiveFailures: scheduleForm.maxConsecutiveFailures, enabled: scheduleForm.enabled, expectedUpdatedAt: editingScheduleUpdatedAt.value }
 }
 
 async function saveSchedule() {
@@ -1006,6 +1059,10 @@ async function showExecutionDetail(execution: AutomationExecution) {
 }
 
 let executionPoller: number | undefined
+watch(projectId, () => {
+  webhookDialogSequence++; editingWebhook.value = null; webhookVisible.value = false
+  createdWebhookSecret.value = ''; webhookSecretVisible.value = false
+})
 onMounted(async () => {
   await load()
   executionPoller = window.setInterval(() => {
@@ -1013,7 +1070,7 @@ onMounted(async () => {
     if (executionDetailVisible.value) void loadExecutionDetail()
   }, 1500)
 })
-onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) })
+onUnmounted(() => { webhookDialogSequence++; createdWebhookSecret.value = ''; if (executionPoller) window.clearInterval(executionPoller) })
 </script>
 
 <template>
@@ -1031,6 +1088,10 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         <div class="commandbar-actions">
           <span class="runner-pill" :class="{ online: onlineRunner, trusted: runnerTrusted }"><i /> {{ runnerHttpExecutionEnabled ? 'Runner 可执行' : runnerTrusted ? 'Runner 已验证' : onlineRunner ? 'Runner 待验证' : 'Runner 离线' }}</span>
           <a-button size="small" @click="load"><icon-refresh /> 刷新</a-button>
+          <a-button v-if="nativeDesktop" size="small" @click="openNativeAssetSync">基础资料同步</a-button>
+          <a-button v-if="nativeDesktop" size="small" @click="openNativeScenarioSync">场景同步</a-button>
+          <a-button v-if="nativeDesktop" size="small" @click="openNativeHistorySync">历史同步</a-button>
+          <a-button v-if="nativeDesktop" size="small" @click="openNativeTriggerSync">触发配置同步</a-button>
           <a-button size="small" :disabled="!detail" @click="revisionVisible = true"><icon-history /> 修订记录</a-button>
         </div>
       </header>
@@ -1044,7 +1105,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
           :active-asset="workbenchTab"
           :data-set-count="dataSets.length"
           :schedule-count="schedules.length"
-          :report-count="executions.length"
+          :report-count="executions.length + historyCount"
           @create="createVisible = true"
           @refresh="loadScenarios"
           @select="selectScenario"
@@ -1054,7 +1115,22 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         />
 
         <main class="automation-studio">
-          <template v-if="detail">
+          <section v-if="workbenchTab === 'reports'" class="studio-scroll asset-page">
+            <header class="asset-page-header"><div><span>RUNNER REPORTS</span><h2>测试报告</h2><p>按任务查看状态、Runner、数据行、耗时和脱敏结构化结果。</p></div><a-button @click="loadExecutions"><icon-refresh /> 刷新</a-button></header>
+            <a-table :data="executions" :pagination="{ pageSize: 12 }" row-key="id" size="small">
+              <template #columns>
+                <a-table-column title="场景 / 数据行" :width="220"><template #cell="{ record }"><strong>{{ record.scenarioName }}</strong><small class="table-secondary">v{{ record.scenarioVersion }}<template v-if="record.dataSetId"> · 数据行 {{ record.dataSetRowNumber }}</template></small></template></a-table-column>
+                <a-table-column title="状态" :width="110"><template #cell="{ record }"><a-tag :color="executionColor[record.status] ?? 'gray'">{{ executionLabel[record.status] ?? record.status }}</a-tag></template></a-table-column>
+                <a-table-column title="Runner / 原因"><template #cell="{ record }"><span>{{ record.runnerId ?? '等待投递' }}</span><small class="table-secondary">{{ record.statusMessage || 'Outbox 持久化任务' }}</small></template></a-table-column>
+                <a-table-column title="提交时间" :width="170"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column>
+                <a-table-column title="操作" :width="130"><template #cell="{ record }"><a-button type="text" size="small" @click="showExecutionDetail(record)">查看报告</a-button><a-button v-if="canCancelExecution(record.status)" type="text" status="warning" size="small" @click="cancelExecution(record)">取消</a-button></template></a-table-column>
+              </template>
+            </a-table>
+            <a-empty v-if="!executions.length" description="当前工作区尚未提交执行任务" />
+            <AutomationHistoryPanel :project-id="projectId" @count="historyCount = $event" />
+          </section>
+
+          <template v-else-if="detail">
             <header class="studio-document-header">
               <div class="scenario-identity">
                 <button class="priority-chip" aria-label="场景优先级">P2 <icon-down /></button>
@@ -1072,7 +1148,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
             <nav class="studio-tabs" aria-label="场景工作区">
               <button :class="{ active: workbenchTab === 'steps' }" @click="workbenchTab = 'steps'">测试步骤</button>
               <button :class="{ active: workbenchTab === 'data' }" @click="workbenchTab = 'data'">测试数据 <span>{{ dataSets.length }}</span></button>
-              <button :class="{ active: workbenchTab === 'reports' }" @click="workbenchTab = 'reports'">测试报告 <span>{{ executions.length }}</span></button>
+              <button @click="workbenchTab = 'reports'">测试报告 <span>{{ executions.length }}</span></button>
               <button :class="{ active: workbenchTab === 'integrations' }" @click="workbenchTab = 'integrations'">CI/CD</button>
             </nav>
 
@@ -1159,19 +1235,6 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
               </div>
             </section>
 
-            <section v-else-if="workbenchTab === 'reports'" class="studio-scroll asset-page">
-              <header class="asset-page-header"><div><span>RUNNER REPORTS</span><h2>测试报告</h2><p>按任务查看状态、Runner、数据行、耗时和脱敏结构化结果。</p></div><a-button @click="loadExecutions"><icon-refresh /> 刷新</a-button></header>
-              <a-table :data="executions" :pagination="{ pageSize: 12 }" row-key="id" size="small">
-                <template #columns>
-                  <a-table-column title="场景 / 数据行" :width="220"><template #cell="{ record }"><strong>{{ record.scenarioName }}</strong><small class="table-secondary">v{{ record.scenarioVersion }}<template v-if="record.dataSetId"> · 数据行 {{ record.dataSetRowNumber }}</template></small></template></a-table-column>
-                  <a-table-column title="状态" :width="110"><template #cell="{ record }"><a-tag :color="executionColor[record.status] ?? 'gray'">{{ executionLabel[record.status] ?? record.status }}</a-tag></template></a-table-column>
-                  <a-table-column title="Runner / 原因"><template #cell="{ record }"><span>{{ record.runnerId ?? '等待投递' }}</span><small class="table-secondary">{{ record.statusMessage || 'Outbox 持久化任务' }}</small></template></a-table-column>
-                  <a-table-column title="提交时间" :width="170"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column>
-                  <a-table-column title="操作" :width="130"><template #cell="{ record }"><a-button type="text" size="small" @click="showExecutionDetail(record)">查看报告</a-button><a-button v-if="canCancelExecution(record.status)" type="text" status="warning" size="small" @click="cancelExecution(record)">取消</a-button></template></a-table-column>
-                </template>
-              </a-table>
-              <a-empty v-if="!executions.length" description="尚未提交执行任务" />
-            </section>
 
             <section v-else class="studio-scroll asset-page">
               <header class="asset-page-header"><div><span>CI · SCHEDULE · WEBHOOK</span><h2>持续集成与触发器</h2><p>使用 CLI、定时计划或签名 Webhook 触发同一冻结场景版本。</p></div><a-space><a-button @click="openCreateSchedule"><icon-calendar /> 新建计划</a-button><a-button type="primary" @click="openCreateWebhook"><icon-plus /> 新建 Webhook</a-button></a-space></header>
@@ -1184,7 +1247,7 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
               <div class="asset-section-heading"><div><strong>定时任务</strong><small>连续失败达到阈值后自动停用</small></div><a-button size="small" @click="openCreateSchedule"><icon-plus /> 添加</a-button></div>
               <div class="asset-card-list compact"><article v-for="schedule in schedules" :key="schedule.id" class="asset-card"><span class="asset-card-icon orange"><icon-calendar /></span><div><strong>{{ schedule.name }}</strong><small>{{ schedule.cronExpression }} · {{ schedule.timezone }} · 连续失败 {{ schedule.consecutiveFailures }}/{{ schedule.maxConsecutiveFailures }}<template v-if="schedule.executionProfileId"> · {{ executionProfiles.find(profile => profile.id === schedule.executionProfileId)?.name ?? '运行配置已移除' }}</template></small></div><a-tag :color="schedule.enabled ? 'green' : 'gray'">{{ schedule.enabled ? '已启用' : '已停用' }}</a-tag><a-button type="text" @click="runSchedule(schedule)">立即执行</a-button><a-button type="text" @click="openEditSchedule(schedule)">编辑</a-button><a-popconfirm content="确定删除该计划？" @ok="deleteSchedule(schedule)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></article><a-empty v-if="!schedules.length" description="尚未创建定时任务" /></div>
               <div class="asset-section-heading"><div><strong>Webhook</strong><small>HMAC 签名、防重放、项目范围隔离</small></div><a-button size="small" @click="openCreateWebhook"><icon-plus /> 添加</a-button></div>
-              <div class="asset-card-list compact"><article v-for="webhook in webhooks" :key="webhook.id" class="asset-card"><span class="asset-card-icon blue"><icon-link /></span><div><strong>{{ webhook.name }}</strong><small>{{ scenarios.find((item) => item.id === webhook.scenarioId)?.name ?? webhook.scenarioId }} · {{ webhook.id }}</small></div><a-tag :color="webhook.enabled ? 'green' : 'gray'">{{ webhook.enabled ? '已启用' : '已停用' }}</a-tag><a-button type="text" @click="setWebhookEnabled(webhook, !webhook.enabled)">{{ webhook.enabled ? '停用' : '启用' }}</a-button><a-popconfirm content="撤销后不能恢复，确定继续？" @ok="revokeWebhook(webhook)"><a-button type="text" status="danger">撤销</a-button></a-popconfirm></article><a-empty v-if="!webhooks.length" description="尚未创建 Webhook" /></div>
+              <div class="asset-card-list compact"><article v-for="webhook in webhooks" :key="webhook.id" class="asset-card"><span class="asset-card-icon blue"><icon-link /></span><div><strong>{{ webhook.name }}</strong><small>{{ scenarios.find((item) => item.id === webhook.scenarioId)?.name ?? webhook.scenarioId }} · {{ webhook.id }}</small></div><a-tag v-if="webhook.secretReady === false" color="orange">待生成本端密钥</a-tag><a-tag :color="webhook.enabled ? 'green' : 'gray'">{{ webhook.enabled ? '已启用' : '已停用' }}</a-tag><a-popconfirm v-if="webhook.secretReady === false" content="仅为这个副本生成本端密钥，不会复制来源密钥；生成后仍停用。" @ok="prepareWebhookSecret(webhook)"><a-button type="text" :loading="updatingWebhookId === webhook.id">生成本端密钥</a-button></a-popconfirm><a-button type="text" @click="openEditWebhook(webhook)">编辑配置</a-button><a-button type="text" :disabled="webhook.secretReady === false" @click="setWebhookEnabled(webhook, !webhook.enabled)">{{ webhook.enabled ? '停用' : '启用' }}</a-button><a-popconfirm content="撤销后不能恢复，确定继续？" @ok="revokeWebhook(webhook)"><a-button type="text" status="danger">撤销</a-button></a-popconfirm></article><a-empty v-if="!webhooks.length" description="尚未创建 Webhook" /></div>
             </section>
           </template>
           <a-empty v-else class="studio-empty" description="选择或新建一个场景用例开始编排"><template #extra><a-button type="primary" @click="createVisible = true"><icon-plus /> 新建场景</a-button></template></a-empty>
@@ -1453,8 +1516,9 @@ onUnmounted(() => { if (executionPoller) window.clearInterval(executionPoller) }
         <a-empty v-if="!dataSetDetail.previewRows.length" description="没有可预览的数据行" />
       </template>
     </a-modal>
-    <a-modal v-model:visible="webhookVisible" title="新建签名 Webhook" width="580px" :ok-loading="savingWebhook" :on-before-ok="() => submitDialog(createWebhook)">
+    <a-modal v-model:visible="webhookVisible" :title="editingWebhook ? '编辑签名 Webhook 配置' : '新建签名 Webhook'" width="580px" :ok-loading="savingWebhook" :on-before-ok="() => submitDialog(createWebhook)" @cancel="closeWebhookDialog">
       <a-form :model="webhookForm" layout="vertical">
+        <a-alert v-if="editingWebhook" type="info">修改名称或场景后停用，已有本端密钥保留；核对后再启用。</a-alert>
         <a-form-item label="Webhook 名称" required>
           <a-input v-model="webhookForm.name" :max-length="160" placeholder="例如：发布后订单回归" />
         </a-form-item>

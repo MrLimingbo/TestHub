@@ -12,10 +12,47 @@ import {
 } from '@/composables/useFunctionalWorkspace'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
 import { useSessionStore } from '@/stores/session'
+import { isLocalDesktop, isAccountDesktop, openFunctionalSync, openFunctionalDefectSync, openProjectVersionSync, openFunctionalDefectLinkSync, openFunctionalDefectWorkflowSync, openFunctionalDefectPeopleSync, openFunctionalDefectExecutionSync, openFunctionalHistorySync } from '@/utils/desktopWorkspace'
 
 interface ApiEnvelope<T> { data: T }
 interface FlatCatalog extends FunctionalCatalog { depth: number }
 type CatalogScope = FunctionalCatalog['scope']
+
+const desktop = isLocalDesktop() || isAccountDesktop()
+async function openSync() {
+  try { await openFunctionalSync() } catch (error) { Message.error(error instanceof Error ? error.message : '打开同步失败') }
+}
+async function openDefectWorkflowSync() {
+  try { await openFunctionalDefectWorkflowSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开缺陷工作流同步') }
+}
+async function openDefectPeopleSync() {
+  try { await openFunctionalDefectPeopleSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开缺陷人员同步') }
+}
+async function openHistorySync() {
+  try { await openFunctionalHistorySync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开执行历史同步') }
+}
+async function openDefectExecutionSync() {
+  try { await openFunctionalDefectExecutionSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开缺陷执行关联同步') }
+}
+
+async function openDefectLinkSync() {
+  try { await openFunctionalDefectLinkSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '打开缺陷关联同步失败') }
+}
+
+async function openVersionSync() {
+  try { await openProjectVersionSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '打开版本与构建同步失败') }
+}
+
+async function openDefectSync() {
+  try { await openFunctionalDefectSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '打开缺陷资料同步失败') }
+}
 
 const route = useRoute()
 const session = useSessionStore()
@@ -215,6 +252,14 @@ onMounted(reload)
         <component :is="tab.icon" />
         <span>{{ tab.label }}</span>
       </router-link>
+      <a-button v-if="desktop && route.path.startsWith('/functional/versions')" class="project-version-sync-button" size="small" @click="openVersionSync">版本与构建同步</a-button>
+      <a-button v-if="desktop && route.path.startsWith('/functional/delivery')" class="functional-defect-workflow-sync-button" size="small" @click="openDefectWorkflowSync">缺陷工作流同步</a-button>
+      <a-button v-if="desktop && route.path.startsWith('/functional/delivery')" class="functional-defect-people-sync-button" size="small" @click="openDefectPeopleSync">缺陷人员同步</a-button>
+      <a-button v-if="desktop && route.path.startsWith('/functional/plans')" class="functional-history-sync-button" size="small" @click="openHistorySync">执行历史同步</a-button>
+      <a-button v-if="desktop && route.path.startsWith('/functional/delivery')" class="functional-defect-execution-sync-button" size="small" @click="openDefectExecutionSync">缺陷执行关联同步</a-button>
+      <a-button v-if="desktop && route.path.startsWith('/functional/delivery')" class="functional-defect-link-sync-button" size="small" @click="openDefectLinkSync">缺陷关联同步</a-button>
+      <a-button v-if="desktop && route.path.startsWith('/functional/delivery')" class="functional-defect-sync-button" size="small" @click="openDefectSync">缺陷资料同步</a-button>
+      <a-button v-if="desktop" class="functional-sync-button" size="small" @click="openSync">功能资料同步</a-button>
     </nav>
 
     <div v-if="isOverview" class="functional-overview">
@@ -301,5 +346,5 @@ onMounted(reload)
 </template>
 
 <style scoped>
-.functional-shell{padding-top:0}.functional-tabs{position:sticky;top:0;z-index:10;display:flex;align-items:stretch;gap:4px;min-height:57px;margin:0 -28px 22px;padding:0 28px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);box-shadow:0 3px 14px rgba(23,35,61,.035)}.functional-tab{position:relative;display:flex;align-items:center;gap:7px;padding:0 17px;color:var(--color-text-2);font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap}.functional-tab svg{font-size:16px;color:var(--color-text-3)}.functional-tab:hover{color:var(--primary)}.functional-tab.router-link-exact-active{color:var(--primary);font-weight:650}.functional-tab.router-link-exact-active svg{color:var(--primary)}.functional-tab.router-link-exact-active::after{content:"";position:absolute;right:14px;bottom:0;left:14px;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}.functional-workspace{display:grid;grid-template-columns:254px minmax(0,1fr);gap:18px;align-items:start}.asset-catalog{position:sticky;top:79px;display:flex;flex-direction:column;min-height:650px;padding:16px 12px}.catalog-title{display:flex;align-items:center;justify-content:space-between;margin:0 4px 14px}.catalog-title>div{display:grid;gap:3px}.catalog-title span{color:var(--primary);font-size:9px;font-weight:700;letter-spacing:1.2px}.catalog-title h2{margin:0;font-size:17px}.catalog-spin{display:block;margin-top:13px}.catalog-list{display:grid;gap:2px;margin-top:3px}.catalog-entry{position:relative}.catalog-row{display:grid;grid-template-columns:17px minmax(0,1fr) auto;align-items:center;gap:7px;width:100%;min-height:38px;padding:0 34px 0 12px;color:var(--color-text-2);text-align:left;border:0;border-radius:7px;background:transparent;cursor:pointer}.catalog-row svg{color:var(--color-text-3)}.catalog-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.catalog-row small{color:var(--color-text-3);font-size:11px}.catalog-row:hover,.catalog-row.selected{color:var(--primary);background:rgb(var(--primary-1))}.catalog-row.selected svg{color:var(--primary)}.catalog-all{margin-bottom:4px;padding-right:12px;font-weight:600}.catalog-more{position:absolute;top:5px;right:3px;opacity:0}.catalog-entry:hover .catalog-more,.catalog-entry:focus-within .catalog-more{opacity:1}.catalog-entry:hover .catalog-row small{visibility:hidden}.catalog-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding:14px 4px 0;color:var(--color-text-3);font-size:11px;border-top:1px solid var(--color-border-2)}.catalog-footer button{color:var(--primary);font-size:11px;border:0;background:transparent;cursor:pointer}.functional-content{min-width:0}.functional-content--wide{width:100%}.danger-option{display:flex;align-items:center;gap:6px;color:rgb(var(--danger-6))}@media(max-width:1380px){.functional-tabs{margin-right:-22px;margin-left:-22px;padding:0 22px}.functional-tab{padding:0 12px}.functional-workspace{grid-template-columns:230px minmax(0,1fr)}}@media(max-width:1120px){.functional-tabs{overflow-x:auto}.functional-tab svg{display:none}.functional-tab{padding:0 9px}.functional-workspace{grid-template-columns:210px minmax(0,1fr)}}
+.functional-history-sync-button{flex-shrink:0;align-self:center}.functional-defect-execution-sync-button{flex-shrink:0;align-self:center}.functional-defect-people-sync-button{flex-shrink:0;align-self:center}.functional-defect-workflow-sync-button{flex-shrink:0;align-self:center}.functional-defect-link-sync-button{flex-shrink:0;align-self:center}.project-version-sync-button{flex-shrink:0;align-self:center}.functional-defect-sync-button{flex-shrink:0;align-self:center}.functional-sync-button{flex-shrink:0;align-self:center;margin-left:auto}.functional-shell{padding-top:0}.functional-tabs{overflow-x:auto;position:sticky;top:0;z-index:10;display:flex;align-items:stretch;gap:4px;min-height:57px;margin:0 -28px 22px;padding:0 28px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);box-shadow:0 3px 14px rgba(23,35,61,.035)}.functional-tab{position:relative;display:flex;align-items:center;gap:7px;padding:0 17px;color:var(--color-text-2);font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap}.functional-tab svg{font-size:16px;color:var(--color-text-3)}.functional-tab:hover{color:var(--primary)}.functional-tab.router-link-exact-active{color:var(--primary);font-weight:650}.functional-tab.router-link-exact-active svg{color:var(--primary)}.functional-tab.router-link-exact-active::after{content:"";position:absolute;right:14px;bottom:0;left:14px;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}.functional-workspace{display:grid;grid-template-columns:254px minmax(0,1fr);gap:18px;align-items:start}.asset-catalog{position:sticky;top:79px;display:flex;flex-direction:column;min-height:650px;padding:16px 12px}.catalog-title{display:flex;align-items:center;justify-content:space-between;margin:0 4px 14px}.catalog-title>div{display:grid;gap:3px}.catalog-title span{color:var(--primary);font-size:9px;font-weight:700;letter-spacing:1.2px}.catalog-title h2{margin:0;font-size:17px}.catalog-spin{display:block;margin-top:13px}.catalog-list{display:grid;gap:2px;margin-top:3px}.catalog-entry{position:relative}.catalog-row{display:grid;grid-template-columns:17px minmax(0,1fr) auto;align-items:center;gap:7px;width:100%;min-height:38px;padding:0 34px 0 12px;color:var(--color-text-2);text-align:left;border:0;border-radius:7px;background:transparent;cursor:pointer}.catalog-row svg{color:var(--color-text-3)}.catalog-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.catalog-row small{color:var(--color-text-3);font-size:11px}.catalog-row:hover,.catalog-row.selected{color:var(--primary);background:rgb(var(--primary-1))}.catalog-row.selected svg{color:var(--primary)}.catalog-all{margin-bottom:4px;padding-right:12px;font-weight:600}.catalog-more{position:absolute;top:5px;right:3px;opacity:0}.catalog-entry:hover .catalog-more,.catalog-entry:focus-within .catalog-more{opacity:1}.catalog-entry:hover .catalog-row small{visibility:hidden}.catalog-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding:14px 4px 0;color:var(--color-text-3);font-size:11px;border-top:1px solid var(--color-border-2)}.catalog-footer button{color:var(--primary);font-size:11px;border:0;background:transparent;cursor:pointer}.functional-content{min-width:0}.functional-content--wide{width:100%}.danger-option{display:flex;align-items:center;gap:6px;color:rgb(var(--danger-6))}@media(max-width:1380px){.functional-tabs{margin-right:-22px;margin-left:-22px;padding:0 22px}.functional-tab{padding:0 12px}.functional-workspace{grid-template-columns:230px minmax(0,1fr)}}@media(max-width:1120px){.functional-tabs{overflow-x:auto}.functional-tab svg{display:none}.functional-tab{padding:0 9px}.functional-workspace{grid-template-columns:210px minmax(0,1fr)}}
 </style>

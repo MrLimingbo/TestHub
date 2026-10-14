@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -44,7 +45,7 @@ public class FunctionalAssetService {
         return catalogs.findByProject(projectId, normalizeCatalogScope(scope, "REQUIREMENTS"));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalCatalog createCatalog(AuthenticatedPrincipal principal, String projectId, CatalogInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录参数不能为空");
@@ -63,7 +64,7 @@ public class FunctionalAssetService {
         return catalogs.findById(projectId, id).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalCatalog updateCatalog(AuthenticatedPrincipal principal, String projectId, String catalogId,
                                            CatalogInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
@@ -88,7 +89,7 @@ public class FunctionalAssetService {
         return catalogs.findById(projectId, catalogId).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteCatalog(AuthenticatedPrincipal principal, String projectId, String catalogId) {
         ProjectSummary project = writeAccess(principal, projectId);
         requireCatalog(projectId, catalogId);
@@ -107,7 +108,7 @@ public class FunctionalAssetService {
         return requirements.findByProject(projectId, blankToNull(catalogId));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalRequirement createRequirement(AuthenticatedPrincipal principal, String projectId, RequirementInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validateRequirement(input);
@@ -125,7 +126,7 @@ public class FunctionalAssetService {
         return requirements.findById(projectId, id).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalRequirement updateRequirement(AuthenticatedPrincipal principal, String projectId, String id, RequirementInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validateRequirement(input);
@@ -144,7 +145,7 @@ public class FunctionalAssetService {
         return requirements.findById(projectId, id).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteRequirement(AuthenticatedPrincipal principal, String projectId, String id) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (requirements.delete(projectId, id) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "需求不存在");
@@ -158,7 +159,7 @@ public class FunctionalAssetService {
         return cases.findByProject(projectId, blankToNull(catalogId));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalCase createCase(AuthenticatedPrincipal principal, String projectId, CaseInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validateCase(input);
@@ -177,7 +178,7 @@ public class FunctionalAssetService {
         return cases.findById(projectId, id).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalCase updateCase(AuthenticatedPrincipal principal, String projectId, String id, CaseInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validateCase(input);
@@ -196,15 +197,19 @@ public class FunctionalAssetService {
         return cases.findById(projectId, id).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteCase(AuthenticatedPrincipal principal, String projectId, String id) {
         ProjectSummary project = writeAccess(principal, projectId);
         if (cases.delete(projectId, id) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "用例不存在");
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_CASE_DELETED", "FUNCTIONAL_CASE", id, Map.of());
     }
 
+    void lockProject(String projectId) { catalogs.lockProject(projectId); }
+
     private ProjectSummary writeAccess(AuthenticatedPrincipal principal, String projectId) {
-        return access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        var project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        catalogs.lockProject(projectId);
+        return project;
     }
 
     private FunctionalCatalog requireCatalog(String projectId, String id) {

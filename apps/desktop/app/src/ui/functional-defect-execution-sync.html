@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 缺陷执行关联同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="functional-defect-execution-sync.css" />
+</head>
+<body><main class="card">
+  <h1>缺陷执行关联同步</h1><p class="description">离线时在本地处理缺陷；联网后与绑定账号的网页端同步执行用例关联。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">逐一确认两端已有执行批次，再按相同用例编号匹配。批次名称可能重复，请核对批次标识、计划编号、时间与用例范围。未配对或缺失的执行用例暂停相关缺陷。</p>
+    <button id="load-runs" type="button">读取执行批次</button>
+    <div id="run-pairs" aria-label="执行批次对应关系"></div>
+    <p class="hint">仅同步缺陷的完整执行用例关联，包括明确清空。需求／测试用例关联、缺陷内容、人员、状态和全部执行结果保留各端，不会创建历史。新增关联记录目标实际操作账号，原有关联元数据保留。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p id="paired-summary" class="hint"></p>
+    <p class="hint">仅同步执行用例关联，清空也会同步。其他关联、缺陷字段和执行历史保留各端。调整批次配对请解除绑定并重新预览；同名重建不会继承旧配对。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="functional-defect-execution-sync.js"></script></body>
+</html>

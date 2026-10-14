@@ -13,6 +13,144 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 class TransferPayloadLimitFilterTests {
     private final TransferPayloadLimitFilter filter = new TransferPayloadLimitFilter(new ObjectMapper());
+    @Test void automationScenarioSyncBoundsDeclaredAndChunkedBodiesAtTenMiB() throws Exception {
+        int limit = io.testhub.platform.apiautomation.ApiAutomationScenarioSyncService.MAX_BYTES;
+        String route = "/api/v1/projects/fixture/api-automation/scenarios/sync";
+        var exact = streamed(limit); exact.setServletPath(route);
+        filter.doFilter(exact, new MockHttpServletResponse(), (wrapped, response) ->
+                assertEquals(limit, wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked = streamed(limit + 1L); chunked.setServletPath(route);
+        filter.doFilter(chunked, new MockHttpServletResponse(), (wrapped, response) ->
+                assertThrows(IOException.class, () -> wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("场景同步请求不能超过 10 MiB。", chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared = new MockHttpServletRequest() { @Override public long getContentLengthLong() { return limit + 1L; } };
+        declared.setMethod("POST"); declared.setServletPath(route); var response = new MockHttpServletResponse();
+        filter.doFilter(declared, response, (req, res) -> fail("Must reject before consuming body")); assertEquals(413, response.getStatus());
+    }
+    @Test void automationAssetSyncBoundsDeclaredAndChunkedBodiesAtTenMiB() throws Exception {
+        int limit = io.testhub.platform.apiautomation.ApiAutomationAssetSyncService.MAX_BYTES;
+        String route = "/api/v1/projects/fixture/api-automation/assets/sync";
+        var exact = streamed(limit); exact.setServletPath(route);
+        filter.doFilter(exact, new MockHttpServletResponse(), (wrapped, response) ->
+                assertEquals(limit, wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked = streamed(limit + 1L); chunked.setServletPath(route);
+        filter.doFilter(chunked, new MockHttpServletResponse(), (wrapped, response) ->
+                assertThrows(IOException.class, () -> wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("接口自动化资料同步请求不能超过 10 MiB。", chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared = new MockHttpServletRequest() { @Override public long getContentLengthLong() { return limit + 1L; } };
+        declared.setMethod("POST"); declared.setServletPath(route); var response = new MockHttpServletResponse();
+        filter.doFilter(declared, response, (req, res) -> fail("Must reject before consuming body"));
+        assertEquals(413, response.getStatus());
+    }
+    @Test void projectVersionSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.version.ProjectVersionSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/versions/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/versions/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/versions/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
+    @Test void functionalDefectSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalDefectSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/defects/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/defects/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/defects/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
+    @Test void functionalDefectWorkflowSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalDefectWorkflowSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/defect-workflow/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/defect-workflow/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/defect-workflow/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
+    @Test void functionalDefectPeopleSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalDefectPeopleSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/defect-people/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/defect-people/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/defect-people/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
+    @Test void functionalDefectExecutionSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalDefectExecutionSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/defect-execution/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/defect-execution/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/defect-execution/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }    @Test void functionalHistorySyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalHistorySyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/history/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/history/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/history/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
+    @Test void functionalDefectLinkSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalDefectLinkSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/defect-links/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/defect-links/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/defect-links/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
+    @Test void functionalAssetTagSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalAssetTagSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/asset-tags/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/asset-tags/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/asset-tags/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
+    @Test void functionalGovernanceSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalGovernanceSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/governance/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/governance/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/governance/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
+    @Test void functionalSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
+        int limit=io.testhub.platform.functional.FunctionalSyncService.MAX_BYTES;
+        var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/functional/sync");
+        filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked=streamed(limit+1L);chunked.setServletPath("/api/v1/projects/fixture/functional/sync");
+        filter.doFilter(chunked,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("功能测试同步请求不能超过 4 MiB。",chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};
+        declared.setMethod("POST");declared.setServletPath("/api/v1/projects/fixture/functional/sync");var response=new MockHttpServletResponse();
+        filter.doFilter(declared,response,(req,res)->fail("Must reject before consuming body"));assertEquals(413,response.getStatus());
+    }
     @Test void mobileAutomationSyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
         int limit=io.testhub.platform.mobileautomation.MobileAutomationSyncService.MAX_BYTES;
         var exact=streamed(limit);exact.setServletPath("/api/v1/projects/fixture/mobile-automation/sync");
@@ -171,6 +309,29 @@ class TransferPayloadLimitFilterTests {
         unrelated.setServletPath("/api/v1/projects/fixture/api-design/definitions");
         filter.doFilter(unrelated, new MockHttpServletResponse(), (wrapped, res) ->
                 assertEquals(TransferPayloadLimitFilter.MAX_BODY + 1L, wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+    }
+
+    @Test void apiAutomationHistorySyncUsesDeclaredAndChunkedFourMiBLimit() throws Exception {
+        int limit = io.testhub.platform.apiautomation.ApiAutomationHistorySyncService.MAX_BYTES;
+        var streamed = streamed(limit + 1L); streamed.setServletPath("/api/v1/projects/fixture/api-automation/history/sync");
+        filter.doFilter(streamed, new MockHttpServletResponse(), (wrapped, response) ->
+                assertThrows(IOException.class, () -> wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var declared = new MockHttpServletRequest() { @Override public long getContentLengthLong() { return limit + 1L; } };
+        declared.setMethod("POST"); declared.setServletPath("/api/v1/projects/fixture/api-automation/history/sync");
+        var response = new MockHttpServletResponse();
+        filter.doFilter(declared, response, (req, res) -> fail("Oversized history must not reach controller"));
+        assertEquals(413, response.getStatus());
+    }
+    @Test void apiAutomationTriggerSyncUsesDeclaredAndChunkedFourMiBLimit() throws Exception {
+        int limit = io.testhub.platform.apiautomation.ApiAutomationTriggerSyncService.MAX_BYTES;
+        var streamed = streamed(limit + 1L); streamed.setServletPath("/api/v1/projects/fixture/api-automation/triggers/sync");
+        filter.doFilter(streamed, new MockHttpServletResponse(), (wrapped, response) ->
+                assertThrows(IOException.class, () -> wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var declared = new MockHttpServletRequest() { @Override public long getContentLengthLong() { return limit + 1L; } };
+        declared.setMethod("POST"); declared.setServletPath("/api/v1/projects/fixture/api-automation/triggers/sync");
+        var response = new MockHttpServletResponse();
+        filter.doFilter(declared, response, (req, res) -> fail("Oversized triggers must not reach controller"));
+        assertEquals(413, response.getStatus());
     }
 
 }

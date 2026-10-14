@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  macos:
-    runs-on: macos-latest
+  application:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -20,9 +20,88 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
       - run: pnpm install --frozen-lockfile
-      - run: pnpm desktop:test
-      - if: startsWith(github.ref, 'refs/tags/desktop-v')
+      - run: pnpm lint && pnpm test && pnpm build && pnpm desktop:test
+      - name: Build backend in an isolated H2 workspace
+        run: node scripts/desktop/test-local-backend.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-application
+          path: |
+            dist
+            services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar
+            services/platform-api/target/classes/io/testhub/platform/desktop/DesktopEngineWatchdog.class
+          if-no-files-found: error
+
+  native:
+    needs: application
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            platform: darwin
+            arch: arm64
+            builder: mac
+            app: release/desktop/mac-arm64/TestHub.app
+            artifact: TestHub-macOS-arm64.dmg
+            previewArtifact: TestHub-macOS-arm64-preview.dmg
+          - runner: macos-15-intel
+            platform: darwin
+            arch: x64
+            builder: mac
+            app: release/desktop/mac/TestHub.app
+            artifact: TestHub-macOS-x64.dmg
+            previewArtifact: TestHub-macOS-x64-preview.dmg
+          - runner: windows-latest
+            platform: win32
+            arch: x64
+            builder: win
+            app: release/desktop/win-unpacked/TestHub.exe
+            artifact: TestHub-Windows-x64.exe
+            previewArtifact: TestHub-Windows-x64-preview.exe
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          architecture: ${{ matrix.arch }}
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          architecture: ${{ matrix.arch }}
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: desktop-application
+          path: .
+      - name: Prepare and verify native runtime including every Runner and license
+        run: pnpm desktop:prepare:local && pnpm desktop:verify:runtime
+      - name: Create internal unpacked application for real packaged startup
+        run: pnpm --filter @testhub/desktop package:dir --${{ matrix.builder }} --${{ matrix.arch }}
+        env:
+          TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE: "1"
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Packaged startup and persistence in a hidden isolated workspace
+        run: node scripts/desktop/smoke-packaged.mjs --app "${{ matrix.app }}" --output "artifacts/desktop/${{ matrix.platform }}-${{ matrix.arch }}.json"
+      - name: Enforce formal distribution gate before tagged packaging
+        if: startsWith(github.ref, 'refs/tags/desktop-v')
+        shell: bash
+        run: |
+          node -e 'require("./apps/desktop/build/skip-runtime-dependency-copy.cjs").verifyRuntime(".testhub/desktop-runtime", process.argv[1], process.argv[2]).catch(error => { console.error(error.message); process.exitCode = 1 })' '${{ matrix.platform }}' '${{ matrix.arch }}'
+      - name: Verify macOS signing credentials for a tagged release
+        if: startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'mac'
         run: node scripts/desktop/verify-signing.mjs mac
         env:
           CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
@@ -30,67 +109,68 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      - if: startsWith(github.ref, 'refs/tags/desktop-v')
-        run: pnpm --filter @testhub/desktop package:mac:signed
+      - name: Verify Windows signing credentials for a tagged release
+        if: startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'win'
+        run: node scripts/desktop/verify-signing.mjs win
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+      - name: Create preview DMG
+        if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'mac' }}
+        run: pnpm --filter @testhub/desktop exec electron-builder --mac dmg --${{ matrix.arch }} --publish never --config.mac.artifactName=${{ matrix.previewArtifact }}
+        env:
+          TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE: "1"
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Create preview Windows installer
+        if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'win' }}
+        run: pnpm --filter @testhub/desktop exec electron-builder --win nsis --x64 --publish never --config.win.artifactName=${{ matrix.previewArtifact }}
+        env:
+          TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE: "1"
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Create signed macOS release
+        if: startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'mac'
+        run: pnpm --filter @testhub/desktop exec electron-builder --mac dmg --${{ matrix.arch }} --publish never --config.mac.notarize=true --config.mac.artifactName=${{ matrix.artifact }}
         env:
           CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      - if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
-        run: pnpm desktop:package:mac
-      - uses: actions/upload-artifact@v4
-        with:
-          name: TestHub-macOS
-          path: release/desktop/TestHub.dmg
-          if-no-files-found: error
-
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm desktop:test
-      - if: startsWith(github.ref, 'refs/tags/desktop-v')
-        run: node scripts/desktop/verify-signing.mjs win
+      - name: Create signed Windows release
+        if: startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'win'
+        run: pnpm --filter @testhub/desktop exec electron-builder --win nsis --x64 --publish never --config.win.artifactName=${{ matrix.artifact }}
         env:
           CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
-      - if: startsWith(github.ref, 'refs/tags/desktop-v')
-        run: pnpm desktop:package:win
-        env:
-          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
-      - if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
-        run: pnpm desktop:package:win
       - uses: actions/upload-artifact@v4
         with:
-          name: TestHub-Windows
-          path: release/desktop/TestHub.exe
+          name: TestHub-${{ matrix.platform }}-${{ matrix.arch }}-${{ startsWith(github.ref, 'refs/tags/desktop-v') && 'release' || 'preview' }}
+          path: release/desktop/${{ startsWith(github.ref, 'refs/tags/desktop-v') && matrix.artifact || matrix.previewArtifact }}
           if-no-files-found: error
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-acceptance-${{ matrix.platform }}-${{ matrix.arch }}
+          path: artifacts/desktop/*.json
+          if-no-files-found: ignore
 
   publish:
     if: startsWith(github.ref, 'refs/tags/desktop-v')
-    needs: [macos, windows]
+    needs: native
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
+          pattern: TestHub-*-release
           path: release
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            release/TestHub.dmg
-            release/TestHub.exe
+            release/TestHub-macOS-arm64.dmg
+            release/TestHub-macOS-x64.dmg
+            release/TestHub-Windows-x64.exe
+          fail_on_unmatched_files: true
           generate_release_notes: true

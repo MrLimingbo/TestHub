@@ -79,6 +79,24 @@ public class ProjectVersionRepository {
                 .update();
     }
 
+    public void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id=:projectId FOR UPDATE").param("projectId", projectId)
+                .query(String.class).single();
+    }
+
+    public int updateDefinition(String projectId, String versionId, List<String> buildNumbers,
+                                LocalDate plannedReleaseDate, String description, String userId) {
+        return jdbc.sql("""
+                UPDATE project_version
+                SET build_numbers=:buildNumbers, planned_release_date=:plannedReleaseDate,
+                    description=:description, updated_by=:userId
+                WHERE project_id=:projectId AND id=:versionId
+                """)
+                .param("projectId",projectId).param("versionId",versionId)
+                .param("buildNumbers",encodeBuilds(buildNumbers)).param("plannedReleaseDate",sqlDate(plannedReleaseDate))
+                .param("description",description).param("userId",userId).update();
+    }
+
     public int updateStatus(String projectId, String versionId, String status, LocalDate actualReleaseDate,
                             String userId) {
         return jdbc.sql("""

@@ -21,6 +21,7 @@
     "productName": "TestHub",
     "asar": true,
     "beforeBuild": "./build/skip-runtime-dependency-copy.cjs",
+    "afterPack": "./build/verify-packaged-runtime.cjs",
     "directories": {
       "app": "app",
       "output": "../../release/desktop",

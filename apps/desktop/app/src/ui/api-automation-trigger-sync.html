@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<title>TestHub · 接口自动化触发配置同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="api-automation-trigger-sync.css" /></head>
+<body><main class="card"><h1>接口自动化触发配置同步</h1><p class="description">在本地与账号项目之间双向同步计划和 Webhook 定义；收到修改后在目标核对并重新启用。</p>
+<p id="status" role="status" aria-live="polite">正在读取状态…</p><p id="error" role="alert" class="error" hidden></p>
+<form id="bind-form" hidden><p id="account" class="hint"></p><label for="source">本地项目</label><select id="source" required></select><label for="target">账号项目</label><select id="target" required></select>
+<p class="hint">配置名称、场景／运行配置名称、Cron、时区、超时和失败阈值会发送到所选服务。两端须具有项目管理员权限，引用来源先经基础资料和场景同步准备。</p>
+<p class="hint">新副本默认停用；目标收到配置修改时先停用，核对后再启用。没有配置修改时保留本端启用状态。已有失败计数与执行信息保留，同步不创建或取消任务。</p>
+<p class="hint">密钥、签名地址与启用状态不跨端复制。Webhook 新副本在目标单独生成并保存密钥；原有密钥保留。每类最多 200 条、合计 2 MiB；删除、改名、同名重建、重复名称或引用缺失暂停相关配置。</p>
+<p id="preview" role="status" aria-live="polite"></p><button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button></form>
+<section id="bound" hidden><p id="binding" class="hint"></p><p id="last-sync" class="hint"></p><p class="hint">收到配置修改的目标触发器已停用，请在“持续集成与触发器”核对后再启用；已有本端密钥不替换。</p><button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button><div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端配置）</button></section><button id="refresh" type="button">刷新状态</button>
+</main><script src="api-automation-trigger-sync.js"></script></body></html>

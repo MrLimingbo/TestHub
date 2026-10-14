@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 标签关联同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="functional-asset-tag-sync.css" />
+</head>
+<body><main class="card">
+  <h1>标签关联同步</h1><p class="description">离线时在本地编辑标签关联；联网后与绑定账号的网页端同步定义。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">按资产类型/编号和精确标签名称同步需求、用例和计划的完整标签集合。请先同步基础资料和治理定义；缺失、改名或大小写不同需核对。每类型最多 100 个资产、每资产最多 100 个标签，快照不超过 3 MiB。</p>
+    <p class="hint">资产编号及标签名称会发送到所选账号服务。首次不同集合需选择版本，绑定后清空集合会解除目标资产关联。不会创建资产或标签；删除资产或标签字典不传播。正文、ID、创建信息、字段、执行、文件及历史保持各端。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">只同步完整标签集合（包括清空）；缺失的资产或标签会暂停相关资产。正文、ID 和执行历史保持各端。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="functional-asset-tag-sync.js"></script></body>
+</html>

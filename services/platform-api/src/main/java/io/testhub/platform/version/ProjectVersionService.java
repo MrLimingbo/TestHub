@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -37,9 +38,10 @@ public class ProjectVersionService {
         return versions.findByProject(projectId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ProjectVersion create(AuthenticatedPrincipal principal, String projectId, VersionInput input) {
         ProjectSummary project = writable(principal, projectId);
+        versions.lockProject(projectId);
         ValidatedVersion version = validate(input, null);
         String id = UlidCreator.getUlid().toString();
         try {
@@ -54,10 +56,11 @@ public class ProjectVersionService {
         return requireVersion(projectId, id);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ProjectVersion update(AuthenticatedPrincipal principal, String projectId, String versionId,
                                  VersionInput input) {
         ProjectSummary project = writable(principal, projectId);
+        versions.lockProject(projectId);
         ProjectVersion existing = requireVersion(projectId, versionId);
         ValidatedVersion version = validate(input, existing);
         try {
@@ -74,10 +77,11 @@ public class ProjectVersionService {
         return requireVersion(projectId, versionId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ProjectVersion updateStatus(AuthenticatedPrincipal principal, String projectId, String versionId,
                                        StatusInput input) {
         ProjectSummary project = writable(principal, projectId);
+        versions.lockProject(projectId);
         ProjectVersion existing = requireVersion(projectId, versionId);
         String status = status(input == null ? null : input.status());
         LocalDate actualReleaseDate = actualReleaseDate(status,
@@ -90,9 +94,10 @@ public class ProjectVersionService {
         return requireVersion(projectId, versionId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(AuthenticatedPrincipal principal, String projectId, String versionId) {
         ProjectSummary project = writable(principal, projectId);
+        versions.lockProject(projectId);
         ProjectVersion existing = requireVersion(projectId, versionId);
         if (versions.delete(projectId, versionId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "版本不存在");
@@ -100,6 +105,25 @@ public class ProjectVersionService {
         audit.record(principal, project.organizationId(), projectId, "PROJECT_VERSION_DELETED", "PROJECT_VERSION",
                 versionId, Map.of("versionNumber", existing.versionNumber()));
     }
+
+    /** Changes portable definition columns only, preserving the endpoint's release state and date. */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public ProjectVersion updateDefinition(AuthenticatedPrincipal principal, String projectId, String versionId,
+                                           DefinitionInput input) {
+        ProjectSummary project = writable(principal, projectId);
+        versions.lockProject(projectId);
+        ProjectVersion existing = requireVersion(projectId, versionId);
+        if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "版本定义不能为空");
+        List<String> buildNumbers = builds(input.buildNumbers());
+        String description = text(input.description(), 20_000, "版本描述");
+        if (versions.updateDefinition(projectId, versionId, buildNumbers, input.plannedReleaseDate(), description,
+                principal.userId()) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "版本不存在");
+        audit.record(principal, project.organizationId(), projectId, "PROJECT_VERSION_DEFINITION_UPDATED",
+                "PROJECT_VERSION", versionId, Map.of("versionNumber", existing.versionNumber()));
+        return requireVersion(projectId, versionId);
+    }
+
+    public record DefinitionInput(List<String> buildNumbers, LocalDate plannedReleaseDate, String description) { }
 
     private ValidatedVersion validate(VersionInput input, ProjectVersion existing) {
         if (input == null) {

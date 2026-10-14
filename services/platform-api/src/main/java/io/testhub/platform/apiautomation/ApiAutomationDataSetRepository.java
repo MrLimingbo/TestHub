@@ -82,6 +82,11 @@ public class ApiAutomationDataSetRepository {
                 .param("rowCount", rowCount).param("checksum", checksum).update();
     }
 
+    public int updateSourceFile(String projectId, String dataSetId, String sourceFileId) {
+        return jdbc.sql("UPDATE api_automation_data_set SET source_file_id=:file WHERE project_id=:project AND id=:id")
+                .param("file", sourceFileId).param("project", projectId).param("id", dataSetId).update();
+    }
+
     public int delete(String projectId, String dataSetId) {
         return jdbc.sql("DELETE FROM api_automation_data_set WHERE project_id = :projectId AND id = :dataSetId")
                 .param("projectId", projectId).param("dataSetId", dataSetId).update();

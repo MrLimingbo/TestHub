@@ -18,7 +18,9 @@
     "desktop:test": "pnpm --filter @testhub/desktop test",
     "desktop:package:mac": "pnpm --filter @testhub/desktop package:mac",
     "desktop:package:win": "pnpm --filter @testhub/desktop package:win",
-    "desktop:prepare:local": "node scripts/desktop/prepare-local-runtime.mjs"
+    "desktop:prepare:local": "node scripts/desktop/prepare-local-runtime.mjs",
+    "desktop:verify:runtime": "node scripts/desktop/verify-local-runtime.mjs",
+    "desktop:smoke:packaged": "node scripts/desktop/smoke-packaged.mjs"
   },
   "dependencies": {
     "@arco-design/web-vue": "^2.58.0",

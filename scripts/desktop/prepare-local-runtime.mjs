@@ -8,6 +8,7 @@ import { promisify } from 'node:util'
 import { createHash, randomUUID } from 'node:crypto'
 const execute = promisify(execFile)
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+const { inventory } = createRequire(import.meta.url)(path.join(root, 'apps/desktop/build/runtime-integrity.cjs'))
 const target = `${process.platform}-${process.arch}`
 const directory = path.join(root, '.testhub/desktop-runtime', target)
 const staging = directory + '-' + randomUUID()
@@ -19,6 +20,8 @@ if (!/version "21[."]/.test(javaVersion.stderr)) throw new Error('The desktop ba
 if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('Node 22 or newer is required')
 const sources = { backend: path.join(root, 'services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar'), frontend: path.join(root, 'dist') }
 await fs.access(sources.backend); await fs.access(path.join(sources.frontend, 'index.html'))
+const schemaVersion = Math.max(...(await fs.readdir(path.join(root, 'services/platform-api/src/main/resources/db/desktop')))
+  .map(name => /^V(\d+)__/.exec(name)?.[1]).filter(Boolean).map(Number))
 await fs.mkdir(staging, { recursive: true })
 try {
   await execute(path.join(javaHome, 'bin', executable('jlink')), ['--add-modules', 'ALL-MODULE-PATH', '--strip-debug', '--no-man-pages', '--no-header-files', '--output', path.join(staging, 'jre')], { timeout: 120000 })
@@ -27,6 +30,7 @@ try {
   await fs.chmod(path.join(staging, 'node', executable('node')), 0o755)
   const nodeHome = process.platform === 'win32' ? path.dirname(process.execPath) : path.dirname(path.dirname(process.execPath))
   await fs.copyFile(path.join(nodeHome, 'LICENSE'), path.join(staging, 'node', 'LICENSE'))
+  // jlink retains the module-specific Java notices; include the packaged browser library notices too.
   if (process.platform === 'darwin') {
     const binaries = [path.join(staging, 'jre/bin/java'), path.join(staging, 'node/node')]
     async function collectLibraries(directory) {
@@ -66,11 +70,19 @@ try {
   for (const [name, source] of [['playwright', playwrightPackage], ['playwright-core', corePackage]]) {
     await fs.cp(path.dirname(source), path.join(staging, 'services/playwright-runner/node_modules', name), { recursive: true })
   }
+  const desktopRequire = createRequire(path.join(root, 'apps/desktop/package.json'))
+  const electronPackage = desktopRequire.resolve('electron/package.json')
+  const notices = path.join(staging, 'licenses/electron')
+  await fs.mkdir(notices, { recursive: true })
+  for (const file of ['LICENSE', 'LICENSES.chromium.html'])
+    await fs.copyFile(path.join(path.dirname(electronPackage), 'dist', file), path.join(notices, file))
   const manifest = { version: 1, platform: process.platform, arch: process.arch,
     java: 'jre/bin/' + executable('java'), node: 'node/' + executable('node'), backend: 'platform-api.jar', frontend: 'web',
     apiRunner: 'services/api-runner/src/index.js', jmeterRunner: 'services/jmeter-runner/src/index.js', jmeterWatchdog: 'jmeter-watchdog.jar',
     appiumRunner: 'services/appium-runner/src/index.js', playwrightRunner: 'services/playwright-runner/src/index.js', playwrightTool: 'services/playwright-runner/src/desktop-browser-tool.mjs', backendSha256: createHash('sha256').update(await fs.readFile(sources.backend)).digest('hex'),
-    nodeVersion: process.versions.node, javaVersion: javaVersion.stderr.trim(), preparedAt: new Date().toISOString(), distributionReady: false }
+    nodeVersion: process.versions.node, javaVersion: javaVersion.stderr.trim(), preparedAt: new Date().toISOString(), distributionReady: false,
+    desktopSchemaVersion: schemaVersion, electronVersion: JSON.parse(await fs.readFile(electronPackage, 'utf8')).version,
+    integrity: await inventory(staging) }
   await fs.writeFile(path.join(staging, 'runtime.json'), JSON.stringify(manifest, null, 2) + '\n')
   // Preserve the preceding test bundle; never overwrite a running process's runtime files.
   try { await fs.rename(directory, directory + '-previous-' + Date.now()) } catch (error) { if (error.code !== 'ENOENT') throw error }

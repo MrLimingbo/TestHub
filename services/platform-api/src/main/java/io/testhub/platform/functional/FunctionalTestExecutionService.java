@@ -51,7 +51,7 @@ public class FunctionalTestExecutionService {
         return requirePlan(projectId, planId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalTestPlan createPlan(AuthenticatedPrincipal principal, String projectId, PlanInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validatePlan(input);
@@ -74,7 +74,7 @@ public class FunctionalTestExecutionService {
         return requirePlan(projectId, id);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalTestPlan updatePlan(AuthenticatedPrincipal principal, String projectId, String planId, PlanInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validatePlan(input);
@@ -91,7 +91,7 @@ public class FunctionalTestExecutionService {
         return requirePlan(projectId, planId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deletePlan(AuthenticatedPrincipal principal, String projectId, String planId) {
         ProjectSummary project = writeAccess(principal, projectId);
         requirePlan(projectId, planId);
@@ -135,7 +135,7 @@ public class FunctionalTestExecutionService {
         return executions.findRunSteps(projectId, runCaseId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalTestRun createRun(AuthenticatedPrincipal principal, String projectId, String planId, String name) {
         ProjectSummary project = writeAccess(principal, projectId);
         FunctionalTestPlan plan = requirePlan(projectId, planId);
@@ -246,7 +246,9 @@ public class FunctionalTestExecutionService {
     }
 
     private ProjectSummary writeAccess(AuthenticatedPrincipal principal, String projectId) {
-        return access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        var project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        catalogs.lockProject(projectId);
+        return project;
     }
 
     private void validatePlan(PlanInput input) {

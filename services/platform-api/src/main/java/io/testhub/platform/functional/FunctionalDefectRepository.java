@@ -60,6 +60,27 @@ public class FunctionalDefectRepository {
                 .param("description", description).param("userId", userId).update();
     }
 
+    public int updatePeople(String projectId,String defectId,String assigneeId,String assignedBy,List<String> ccUserIds,String userId) {
+        return jdbc.sql("UPDATE functional_defect SET assignee_id=:assignee,assigned_by=:assignedBy,cc_user_ids=:cc,updated_by=:actor WHERE project_id=:p AND id=:i")
+                .param("p",projectId).param("i",defectId).param("assignee",new SqlParameterValue(Types.CHAR,assigneeId))
+                .param("assignedBy",new SqlParameterValue(Types.CHAR,assignedBy)).param("cc",csv(ccUserIds)).param("actor",userId).update();
+    }
+
+    public int updateWorkflow(String projectId, String defectId, String status, boolean confirmed, String resolution,
+                              String resolvedBy, Instant resolvedAt, String closedBy, Instant closedAt, String userId) {
+        return jdbc.sql("""
+                UPDATE functional_defect SET status=:status, confirmed=:confirmed, resolution=:resolution,
+                    resolved_by=:resolvedBy, resolved_at=:resolvedAt, closed_by=:closedBy, closed_at=:closedAt,
+                    updated_by=:userId WHERE project_id=:projectId AND id=:defectId
+                """).param("projectId", projectId).param("defectId", defectId).param("status", status).param("confirmed", confirmed)
+                .param("resolution", new SqlParameterValue(Types.VARCHAR, resolution))
+                .param("resolvedBy", new SqlParameterValue(Types.CHAR, resolvedBy))
+                .param("resolvedAt", new SqlParameterValue(Types.TIMESTAMP, resolvedAt == null ? null : Timestamp.from(resolvedAt)))
+                .param("closedBy", new SqlParameterValue(Types.CHAR, closedBy))
+                .param("closedAt", new SqlParameterValue(Types.TIMESTAMP, closedAt == null ? null : Timestamp.from(closedAt)))
+                .param("userId", userId).update();
+    }
+
     public int update(String projectId, String defectId, String catalogId, String title, LocalDate dueDate,
                       String bugType, String keywords, List<String> browsers, List<String> operatingSystems,
                       List<String> ccUserIds, String severity, String priority, String status, boolean confirmed,
@@ -93,6 +114,22 @@ public class FunctionalDefectRepository {
                 .param("description", description).param("userId", userId).update();
     }
 
+    public int updateDefinition(String projectId, String defectId, String catalogId, String title, LocalDate dueDate,
+                                String bugType, String keywords, List<String> browsers, List<String> operatingSystems,
+                                String severity, String priority, String source, String externalUrl, String description, String userId) {
+        return jdbc.sql("""
+                UPDATE functional_defect SET catalog_id=:catalog, title=:title, due_date=:due,
+                    bug_type=:type, keywords=:keywords, browsers=:browsers, operating_systems=:os,
+                    severity=:severity, priority=:priority, source=:source, external_url=:url,
+                    description=:description, updated_by=:actor
+                WHERE project_id=:project AND id=:id
+                """).param("project",projectId).param("id",defectId).param("catalog",new SqlParameterValue(Types.CHAR,catalogId))
+                .param("title",title).param("due",new SqlParameterValue(Types.DATE,sqlDate(dueDate))).param("type",bugType)
+                .param("keywords",keywords).param("browsers",csv(browsers)).param("os",csv(operatingSystems))
+                .param("severity",severity).param("priority",priority).param("source",source)
+                .param("url",new SqlParameterValue(Types.VARCHAR,externalUrl)).param("description",description).param("actor",userId).update();
+    }
+
     public int delete(String projectId, String defectId) {
         return jdbc.sql("DELETE FROM functional_defect WHERE project_id = :projectId AND id = :defectId")
                 .param("projectId", projectId).param("defectId", defectId).update();
@@ -100,6 +137,16 @@ public class FunctionalDefectRepository {
 
     public List<FunctionalDefectLink> findLinksByDefect(String projectId, String defectId) {
         return jdbc.sql(linkQuery("WHERE l.project_id = :projectId AND l.defect_id = :defectId"))
+                .param("projectId", projectId).param("defectId", defectId).query((rs, row) -> link(rs)).list();
+    }
+
+    public List<FunctionalDefectLink> findExecutionLinks(String projectId,String defectId) {
+        return jdbc.sql(linkQuery("WHERE l.project_id=:projectId AND l.defect_id=:defectId AND l.asset_type='RUN_CASE'"))
+                .param("projectId",projectId).param("defectId",defectId).query((rs,row)->link(rs)).list();
+    }
+
+    public List<FunctionalDefectLink> findDefinitionLinks(String projectId, String defectId) {
+        return jdbc.sql(linkQuery("WHERE l.project_id = :projectId AND l.defect_id = :defectId AND l.asset_type IN ('REQUIREMENT','CASE')"))
                 .param("projectId", projectId).param("defectId", defectId).query((rs, row) -> link(rs)).list();
     }
 

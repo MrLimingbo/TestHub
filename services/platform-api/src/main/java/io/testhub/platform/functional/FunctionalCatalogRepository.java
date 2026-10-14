@@ -15,6 +15,10 @@ public class FunctionalCatalogRepository {
         this.jdbc = jdbc;
     }
 
+    void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id=:p FOR UPDATE").param("p", projectId).query(String.class).single();
+    }
+
     public List<FunctionalCatalog> findByProject(String projectId, String scope) {
         return jdbc.sql("""
                 SELECT id, organization_id, project_id, scope, parent_id, name, sort_order, created_by, created_at

@@ -13,6 +13,7 @@ let sequence = 0, disposed = false, timer: ReturnType<typeof setInterval> | unde
 const modules: Record<string, { label: string; path: string }> = {
   FUNCTIONAL: { label: '功能测试', path: '/functional/plans' },
   API: { label: '接口自动化', path: '/api-automation' },
+  API_HISTORY: { label: '接口自动化同步历史', path: '/api-automation?tab=reports' },
   PERFORMANCE: { label: '性能测试', path: '/performance' },
   UI: { label: 'Web UI', path: '/ui-automation' },
   MOBILE: { label: '移动端', path: '/mobile-automation' },
@@ -62,7 +63,7 @@ onBeforeUnmount(() => { disposed = true; sequence++; clearInterval(timer) })
 <template>
   <section class="panel execution-panel" aria-label="真实执行记录">
     <div class="execution-heading">
-      <div><h2>真实执行记录</h2><p>汇集当前项目各模块最近 100 条记录，按创建时间排序，每 5 秒刷新。报告与取消操作在对应测试模块中完成。</p></div>
+      <div><h2>真实执行记录</h2><p>汇集当前项目各模块最近 100 条记录，同步历史单独标识，按创建时间排序，每 5 秒刷新。报告与取消操作在对应测试模块中完成。</p></div>
       <a-button :loading="loading" :disabled="!projectId" @click="refresh()">刷新执行</a-button>
     </div>
     <div class="execution-toolbar">

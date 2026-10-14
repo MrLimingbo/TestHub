@@ -16,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -57,19 +58,20 @@ public class FunctionalDefectService {
         return defects.findByProject(projectId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalDefect create(AuthenticatedPrincipal principal, String projectId, DefectInput input) {
         return create(principal, projectId, input, false);
     }
 
     /** Copies the state without attributing historical resolution or closure to the importing user. */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalDefect createTransferred(AuthenticatedPrincipal principal, String projectId, DefectInput input) {
         return create(principal, projectId, input, true);
     }
 
     private FunctionalDefect create(AuthenticatedPrincipal principal, String projectId, DefectInput input, boolean transferred) {
         ProjectSummary project = writeAccess(principal, projectId);
+        catalogs.lockProject(projectId);
         String id = UlidCreator.getUlid().toString();
         ValidatedDefect defect = validate(principal, projectId, input, null);
         String defectCode = defect.code() == null ? "BUG_" + id.substring(id.length() - 12) : defect.code();
@@ -91,9 +93,10 @@ public class FunctionalDefectService {
         return requireDefect(projectId, id);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalDefect update(AuthenticatedPrincipal principal, String projectId, String defectId, DefectInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        catalogs.lockProject(projectId);
         FunctionalDefect existing = requireDefect(projectId, defectId);
         ValidatedDefect defect = validate(principal, projectId, input, existing);
         if (input.defectCode() != null && !input.defectCode().isBlank() && !existing.defectCode().equals(defect.code())) {
@@ -113,9 +116,10 @@ public class FunctionalDefectService {
         return requireDefect(projectId, defectId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(AuthenticatedPrincipal principal, String projectId, String defectId) {
         ProjectSummary project = writeAccess(principal, projectId);
+        catalogs.lockProject(projectId);
         if (defects.delete(projectId, defectId) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "缺陷不存在");
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_DEFECT_DELETED", "FUNCTIONAL_DEFECT", defectId, Map.of());
     }
@@ -126,9 +130,10 @@ public class FunctionalDefectService {
         return defects.findLinksByDefect(projectId, defectId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalDefectLink link(AuthenticatedPrincipal principal, String projectId, String defectId, DefectLinkInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        catalogs.lockProject(projectId);
         requireDefect(projectId, defectId);
         if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "关联参数不能为空");
         String assetType = normalized(input.assetType(), ASSET_TYPES, "关联资产类型");
@@ -145,14 +150,137 @@ public class FunctionalDefectService {
         return defects.findLinksByDefect(projectId, defectId).stream().filter(link -> link.id().equals(id)).findFirst().orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void unlink(AuthenticatedPrincipal principal, String projectId, String defectId, String linkId) {
         ProjectSummary project = writeAccess(principal, projectId);
+        catalogs.lockProject(projectId);
         requireDefect(projectId, defectId);
         if (defects.deleteLink(projectId, defectId, linkId) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "缺陷关联不存在");
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_DEFECT_UNLINKED", "FUNCTIONAL_DEFECT", defectId,
                 Map.of("linkId", linkId));
     }
+
+    /** Reconciles definition links in place; execution links and retained link metadata stay local. */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<FunctionalDefectLink> replaceDefinitionLinks(AuthenticatedPrincipal principal, String projectId,
+                                                             String defectId, List<DefectLinkInput> requested) {
+        var project = writeAccess(principal, projectId);
+        catalogs.lockProject(projectId);
+        requireDefect(projectId, defectId);
+        if (requested == null || requested.size() > 200)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "需求／用例关联不能超过每类 100 条");
+        var keys = new java.util.HashSet<String>();
+        var counts = new java.util.HashMap<String, Integer>();
+        for (var input : requested) {
+            if (input == null || !Set.of("REQUIREMENT", "CASE").contains(input.assetType() == null ? "" : input.assetType())
+                    || input.assetId() == null || !keys.add(input.assetType() + "\n" + input.assetId())
+                    || counts.merge(input.assetType(), 1, Integer::sum) > 100)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "需求／用例关联无效、重复或超过范围");
+            requireAsset(projectId, input.assetType(), input.assetId());
+        }
+        var old = defects.findDefinitionLinks(projectId, defectId);
+        boolean changed = false;
+        for (var link : old) if (!keys.contains(link.assetType() + "\n" + link.assetId())) {
+            defects.deleteLink(projectId, defectId, link.id()); changed = true;
+        }
+        for (var input : requested) if (old.stream().noneMatch(link -> link.assetType().equals(input.assetType()) && link.assetId().equals(input.assetId())))
+        {
+            defects.insertLink(UlidCreator.getUlid().toString(), projectId, defectId, input.assetType(), input.assetId(), principal.userId());
+            changed = true;
+        }
+        if (changed) audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_DEFECT_DEFINITION_LINKS_REPLACED",
+                "FUNCTIONAL_DEFECT", defectId, Map.of("links", requested.size()));
+        return defects.findDefinitionLinks(projectId, defectId);
+    }
+
+    /** Keep retained link IDs, times and actors; leave definition links and execution rows untouched. */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<FunctionalDefectLink> replaceExecutionLinks(AuthenticatedPrincipal principal,String projectId,String defectId,List<String> requested) {
+        var project=writeAccess(principal,projectId);catalogs.lockProject(projectId);requireDefect(projectId,defectId);
+        if(requested==null||requested.size()>100||new java.util.HashSet<>(requested).size()!=requested.size())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"执行关联无效或超过 100 条");
+        for(var id:requested)requireAsset(projectId,"RUN_CASE",id);
+        var old=defects.findExecutionLinks(projectId,defectId);boolean changed=false;
+        for(var link:old)if(!requested.contains(link.assetId())){defects.deleteLink(projectId,defectId,link.id());changed=true;}
+        for(var id:requested)if(old.stream().noneMatch(l->l.assetId().equals(id))){defects.insertLink(UlidCreator.getUlid().toString(),projectId,defectId,"RUN_CASE",id,principal.userId());changed=true;}
+        if(changed)audit.record(principal,project.organizationId(),projectId,"FUNCTIONAL_DEFECT_EXECUTION_LINKS_REPLACED","FUNCTIONAL_DEFECT",defectId,Map.of("links",requested.size()));
+        return defects.findExecutionLinks(projectId,defectId);
+    }
+
+    /** Sync updates only portable fields; it never attributes another endpoint's lifecycle to this actor. */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public FunctionalDefect updateDefinition(AuthenticatedPrincipal principal, String projectId, String defectId, DefinitionInput input) {
+        ProjectSummary project = writeAccess(principal, projectId);
+        catalogs.lockProject(projectId);
+        FunctionalDefect existing = requireDefect(projectId, defectId);
+        var validated = validate(principal, projectId, definitionInput(input), null);
+        if (!existing.defectCode().equals(validated.code())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已创建缺陷不能变更编号");
+        defects.updateDefinition(projectId, defectId, validated.catalogId(), validated.title(), validated.dueDate(),
+                validated.bugType(), validated.keywords(), validated.browsers(), validated.operatingSystems(),
+                validated.severity(), validated.priority(), validated.source(), validated.externalUrl(), validated.description(), principal.userId());
+        audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_DEFECT_DEFINITION_UPDATED", "FUNCTIONAL_DEFECT", defectId, Map.of());
+        return requireDefect(projectId, defectId);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public FunctionalDefect createDefinition(AuthenticatedPrincipal principal, String projectId, DefinitionInput input) {
+        return create(principal, projectId, definitionInput(input), false);
+    }
+
+    private DefectInput definitionInput(DefinitionInput input) {
+        if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "缺陷基本资料不能为空");
+        return new DefectInput(input.catalogId(), input.defectCode(), input.title(), input.dueDate(), input.bugType(), input.keywords(),
+                input.browsers(), input.operatingSystems(), List.of(), input.severity(), input.priority(), "OPEN", false,
+                null, null, input.source(), input.externalUrl(), input.description());
+    }
+
+    public record DefinitionInput(String catalogId, String defectCode, String title, LocalDate dueDate, String bugType,
+                                  String keywords, List<String> browsers, List<String> operatingSystems, String severity,
+                                  String priority, String source, String externalUrl, String description) { }
+
+    /** The target actor performs a new assignment; source assignment attribution is never copied. */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public FunctionalDefect updatePeopleFromSync(AuthenticatedPrincipal principal, String projectId, String defectId,
+                                                String assigneeId, List<String> ccUserIds) {
+        var project=writeAccess(principal,projectId);catalogs.lockProject(projectId);
+        var existing=requireDefect(projectId,defectId);
+        if(java.util.Objects.equals(existing.assigneeId(),assigneeId)
+                && new java.util.HashSet<>(existing.ccUserIds()).equals(new java.util.HashSet<>(ccUserIds))) return existing;
+        var assignedBy=java.util.Objects.equals(existing.assigneeId(),assigneeId)?existing.assignedBy():assigneeId==null?null:principal.userId();
+        defects.updatePeople(projectId,defectId,assigneeId,assignedBy,ccUserIds,principal.userId());
+        audit.record(principal,project.organizationId(),projectId,"FUNCTIONAL_DEFECT_PEOPLE_UPDATED_FROM_SYNC","FUNCTIONAL_DEFECT",defectId,Map.of("ccCount",ccUserIds.size(),"assigned",assigneeId!=null));
+        return requireDefect(projectId,defectId);
+    }
+
+    /** A synchronized state is not evidence that this endpoint's actor resolved or closed the defect. */
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public FunctionalDefect updateWorkflowFromSync(AuthenticatedPrincipal principal, String projectId, String defectId, WorkflowInput input) {
+        var project = writeAccess(principal, projectId);
+        catalogs.lockProject(projectId);
+        validateWorkflow(input);
+        var existing = requireDefect(projectId, defectId);
+        if (existing.status().equals(input.status()) && existing.confirmed() == input.confirmed()
+                && java.util.Objects.equals(existing.resolution(), input.resolution())) return existing;
+        boolean terminal = Set.of("RESOLVED", "CLOSED").contains(input.status());
+        boolean keepResolution = terminal && Set.of("RESOLVED", "CLOSED").contains(existing.status())
+                && java.util.Objects.equals(existing.resolution(), input.resolution());
+        boolean keepClosure = keepResolution && "CLOSED".equals(existing.status()) && "CLOSED".equals(input.status());
+        defects.updateWorkflow(projectId, defectId, input.status(), input.confirmed(), input.resolution(),
+                keepResolution ? existing.resolvedBy() : null, keepResolution ? existing.resolvedAt() : null,
+                keepClosure ? existing.closedBy() : null, keepClosure ? existing.closedAt() : null, principal.userId());
+        audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_DEFECT_WORKFLOW_UPDATED_FROM_SYNC",
+                "FUNCTIONAL_DEFECT", defectId, Map.of("status", input.status(), "confirmed", input.confirmed()));
+        return requireDefect(projectId, defectId);
+    }
+
+    static void validateWorkflow(WorkflowInput input) {
+        if (input == null || !STATUSES.contains(input.status() == null ? "" : input.status()) || input.confirmed() == null
+                || (Set.of("RESOLVED", "CLOSED").contains(input.status())
+                    ? !RESOLUTIONS.contains(input.resolution() == null ? "" : input.resolution()) : input.resolution() != null))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "缺陷工作流无效；已解决／关闭须有解决方案，其他状态须清空解决方案");
+    }
+
+    public record WorkflowInput(String status, Boolean confirmed, String resolution) { }
 
     private ProjectSummary writeAccess(AuthenticatedPrincipal principal, String projectId) {
         return access.requireProjectParameterWrite(principal, projectId, WRITERS);

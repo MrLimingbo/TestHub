@@ -93,6 +93,13 @@ public class ApiAutomationReusableStepService {
         return result;
     }
 
+    void validateSyncInput(ReusableStepInput input) { payload(input); }
+
+    ApiAutomationReusableStepRevisionSnapshot normalizedSyncSnapshot(ApiAutomationReusableStepRevisionSnapshot snapshot) {
+        var value = payload(new ReusableStepInput(snapshot.name(), snapshot.description(), snapshot.steps(), null));
+        return new ApiAutomationReusableStepRevisionSnapshot(value.name(), value.description(), value.steps());
+    }
+
     private Payload payload(ReusableStepInput input) {
         if (input == null) throw rejected("公共步骤参数不能为空");
         String name = required(input.name(), "公共步骤名称", 160);

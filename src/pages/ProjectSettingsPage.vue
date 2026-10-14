@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
 import { type Project, useSessionStore } from '@/stores/session'
-import { isLocalDesktop, isAccountDesktop, openSettingsSync } from '@/utils/desktopWorkspace'
+import { isLocalDesktop, isAccountDesktop, openSettingsSync, openProjectFileSync } from '@/utils/desktopWorkspace'
 
 interface ApiEnvelope<T> { data: T }
 interface Role { code: string; name: string; description: string }
@@ -33,6 +33,9 @@ const session = useSessionStore()
 const desktop = isLocalDesktop() || isAccountDesktop()
 async function showSettingsSync() {
   try { await openSettingsSync() } catch (error) { Message.error(error instanceof Error ? error.message : '无法打开项目配置同步。') }
+}
+async function showProjectFileSync() {
+  try { await openProjectFileSync() } catch (error) { Message.error(error instanceof Error ? error.message : '无法打开项目文件同步。') }
 }
 const loading = ref(false)
 const loadError = ref('')
@@ -562,7 +565,7 @@ onMounted(load)
           <input ref="fileInput" class="file-input" type="file" @change="uploadFile">
           <div class="content-heading">
             <div><span class="eyebrow">PROJECT FILES</span><h2>文件管理</h2><p>统一管理测试数据、接口定义、证书和项目附件，所有文件都与当前项目隔离。</p></div>
-            <a-button type="primary" :loading="uploading" @click="chooseFile"><icon-upload /> 上传文件</a-button>
+            <a-space><a-button v-if="desktop" @click="showProjectFileSync">文件同步</a-button><a-button type="primary" :loading="uploading" @click="chooseFile"><icon-upload /> 上传文件</a-button></a-space>
           </div>
           <div class="file-summary">
             <div><span>文件数量</span><strong>{{ files.length }}</strong></div>

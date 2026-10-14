@@ -86,6 +86,21 @@ public class ApiAutomationScenarioRepository {
                 .param("projectId", projectId).param("scenarioId", scenarioId).update();
     }
 
+
+    /** Completes a newly reserved sync row before its first revision exists in the same transaction. */
+    public int initializeSynced(String projectId, String id, String name, String description, String environmentCode,
+                               String failureStrategy, String steps, String variables, String preScript, String postScript) {
+        return jdbc.sql("""
+                UPDATE api_automation_scenario SET name=:name,description=:description,environment_code=:env,
+                    failure_strategy=:failure,steps=CAST(:steps AS JSON),variables=CAST(:variables AS JSON),
+                    pre_request_script=:pre,post_response_script=:post
+                WHERE project_id=:p AND id=:id AND version=1
+                  AND NOT EXISTS (SELECT 1 FROM api_automation_scenario_revision WHERE scenario_id=:id)
+                """).param("p", projectId).param("id", id).param("name", name).param("description", description)
+                .param("env", environmentCode).param("failure", failureStrategy).param("steps", steps)
+                .param("variables", variables).param("pre", preScript).param("post", postScript).update();
+    }
+
     public void insertRevision(String id, String scenarioId, String organizationId, String projectId, int version,
                                String snapshot, String createdBy) {
         jdbc.sql("""

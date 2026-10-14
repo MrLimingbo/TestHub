@@ -140,6 +140,23 @@ public class ApiAutomationScenarioService {
                 scenario.version(), scenarios.json(snapshot), principal.userId());
     }
 
+    ScenarioInput normalizedSyncInput(String projectId, String scenarioId, ScenarioInput input) {
+        var value = payload(projectId, scenarioId, input);
+        return new ScenarioInput(value.name(), value.description(), value.environmentCode(), value.failureStrategy(),
+                value.steps(), value.variables(), value.preRequestScript(), value.postResponseScript(), input.expectedVersion());
+    }
+
+    ApiAutomationScenarioRevisionSnapshot normalizedSyncPrimitiveSnapshot(ApiAutomationScenarioRevisionSnapshot source) {
+        var steps = validateReusableSteps(source.steps());
+        if (!ApiAutomationScriptPolicy.normalize(source.preRequestScript(), "引用前置脚本").isBlank()
+                || !ApiAutomationScriptPolicy.normalize(source.postResponseScript(), "引用后置脚本").isBlank())
+            throw rejected("固定子场景历史不支持前后置脚本");
+        if (scenarios.json(steps).length() > 512 * 1024) throw rejected("历史子场景步骤超过 512 KB");
+        return new ApiAutomationScenarioRevisionSnapshot(required(source.name(), "历史场景名称", 160),
+                optional(source.description(), "历史场景说明", 1200), environment(source.environmentCode()),
+                failureStrategy(source.failureStrategy()), steps, variables(source.variables()), "", "");
+    }
+
     private ScenarioPayload payload(String projectId, String scenarioId, ScenarioInput input) {
         if (input == null) throw rejected("场景参数不能为空");
         String name = required(input.name(), "场景名称", 160);

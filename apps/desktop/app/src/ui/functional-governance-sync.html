@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 治理定义同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="functional-governance-sync.css" />
+</head>
+<body><main class="card">
+  <h1>治理定义同步</h1><p class="description">离线时在本地编辑治理定义；联网后与绑定账号的网页端同步定义。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">同步治理目录结构与排序、标签名称与颜色、需求/用例/计划的字段名称、类型、必填及有序选项。标签按名称、字段按资产类型和不可变标识、目录按完整路径匹配。目录独立于标签及字段字典。每类最多 100 条，目录最多 16 层，每字段最多 100 个选项，定义不超过 3 MiB。</p>
+    <p class="hint">定义内容会发送到所选账号服务，请核对业务信息。含本端项目链接的定义暂停同步。已有 ID、创建人、创建时间和资产标签关联保留各端。字段填写值、执行、文件、缺陷及历史不复制。删除不传播，标签和目录改名按新名称或路径处理。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">只同步治理定义；资产标签关联和字段填写值保留各端。缺失或冲突的父目录会暂停子目录同步；标签和字段字典独立处理。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="functional-governance-sync.js"></script></body>
+</html>

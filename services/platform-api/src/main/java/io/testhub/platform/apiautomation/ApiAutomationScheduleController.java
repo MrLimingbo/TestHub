@@ -44,7 +44,7 @@ public class ApiAutomationScheduleController {
     @PutMapping("/{scheduleId}")
     public ApiResponse<ApiAutomationSchedule> update(Authentication authentication, @PathVariable String projectId,
                                                      @PathVariable String scheduleId, @Valid @RequestBody ScheduleRequest request) {
-        return ApiResponse.of(schedules.update(principal(authentication), projectId, scheduleId, input(request)));
+        return ApiResponse.of(schedules.updateIfUnchanged(principal(authentication), projectId, scheduleId, input(request), request.expectedUpdatedAt()));
     }
 
     @DeleteMapping("/{scheduleId}")
@@ -73,6 +73,6 @@ public class ApiAutomationScheduleController {
                                   @NotBlank @Size(max = 160) String cronExpression, @NotBlank @Size(max = 64) String timezone,
                                   @NotNull @Min(10) @Max(3600) Integer timeoutSeconds,
                                   @NotNull @Min(1) @Max(10) Integer maxConsecutiveFailures,
-                                  @NotNull Boolean enabled) {
+                                  @NotNull Boolean enabled, java.time.Instant expectedUpdatedAt) {
     }
 }

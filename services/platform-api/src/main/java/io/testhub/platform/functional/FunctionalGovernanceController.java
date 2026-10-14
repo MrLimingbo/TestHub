@@ -38,6 +38,12 @@ public class FunctionalGovernanceController {
         return ApiResponse.of(governance.createTag(principal(authentication), projectId, request.toInput()));
     }
 
+    @PutMapping("/tags/{tagId}")
+    public ApiResponse<FunctionalTag> updateTag(Authentication authentication, @PathVariable String projectId,
+                                                @PathVariable String tagId, @Valid @RequestBody TagRequest request) {
+        return ApiResponse.of(governance.updateTag(principal(authentication), projectId, tagId, request.toInput()));
+    }
+
     @DeleteMapping("/tags/{tagId}")
     public ResponseEntity<Void> deleteTag(Authentication authentication, @PathVariable String projectId, @PathVariable String tagId) {
         governance.deleteTag(principal(authentication), projectId, tagId);

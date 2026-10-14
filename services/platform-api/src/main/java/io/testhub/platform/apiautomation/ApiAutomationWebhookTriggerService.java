@@ -84,13 +84,62 @@ public class ApiAutomationWebhookTriggerService {
     @Transactional
     public ApiAutomationWebhookTrigger setEnabled(AuthenticatedPrincipal principal, String projectId, String webhookId,
                                                    boolean enabled) {
+        return setEnabled(principal, projectId, webhookId, enabled, null);
+    }
+
+    @Transactional
+    public ApiAutomationWebhookTrigger setEnabled(AuthenticatedPrincipal principal, String projectId, String webhookId,
+            boolean enabled, Instant expectedUpdatedAt) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, MANAGERS);
+        webhooks.lock(projectId, webhookId);
         ApiAutomationWebhookTrigger current = owned(projectId, webhookId);
+        if (expectedUpdatedAt != null && !expectedUpdatedAt.equals(current.updatedAt()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Webhook 配置或状态已变化，请刷新并核对后再启用");
+        if (enabled && !current.secretReady()) throw new ResponseStatusException(HttpStatus.CONFLICT, "请先在本端生成并保存 Webhook 密钥，再启用");
         webhooks.setEnabled(webhookId, projectId, enabled);
         ApiAutomationWebhookTrigger result = webhooks.findStoredById(webhookId).orElseThrow().trigger();
         audit.record(principal, project.organizationId(), projectId, "API_AUTOMATION_WEBHOOK_" + (enabled ? "ENABLED" : "DISABLED"),
                 "API_AUTOMATION_WEBHOOK", current.id(), Map.of("scenarioId", current.scenarioId()));
         return result;
+    }
+
+    @Transactional
+    public ApiAutomationWebhookTrigger createSyncedDraft(AuthenticatedPrincipal actor, String projectId, String scenarioId, String name) {
+        var project = access.requireProjectParameterWrite(actor, projectId, MANAGERS);
+        validateConfiguration(projectId, scenarioId, name);
+        String id = UlidCreator.getUlid().toString();
+        webhooks.insertSyncedDraft(id, project.organizationId(), projectId, scenarioId, name, cipher.encrypt(newSecret()), actor.userId());
+        return webhooks.findStoredById(id).orElseThrow().trigger();
+    }
+
+    @Transactional
+    public ApiAutomationWebhookTrigger updateConfiguration(AuthenticatedPrincipal actor, String projectId, String id, String scenarioId, String name) {
+        var project = access.requireProjectParameterWrite(actor, projectId, MANAGERS);
+        webhooks.lock(projectId, id);
+        var before = owned(projectId, id);
+        validateConfiguration(projectId, scenarioId, name);
+        if (before.name().equals(name) && before.scenarioId().equals(scenarioId)) return before;
+        webhooks.updateConfiguration(projectId, id, scenarioId, name);
+        audit.record(actor, project.organizationId(), projectId, "API_AUTOMATION_WEBHOOK_CONFIGURATION_UPDATED", "API_AUTOMATION_WEBHOOK", id, Map.of("scenarioId", scenarioId, "paused", true));
+        return webhooks.findStoredById(id).orElseThrow().trigger();
+    }
+
+    @Transactional
+    public CreatedWebhookTrigger prepareSecret(AuthenticatedPrincipal actor, String projectId, String id) {
+        var project = access.requireProjectParameterWrite(actor, projectId, MANAGERS);
+        webhooks.lock(projectId, id);
+        var before = owned(projectId, id);
+        if (before.secretReady()) throw new ResponseStatusException(HttpStatus.CONFLICT, "本端密钥已生成，不会自动更换；若已丢失请撤销并重新创建 Webhook");
+        String secret = newSecret();
+        webhooks.prepareSecret(projectId, id, cipher.encrypt(secret));
+        audit.record(actor, project.organizationId(), projectId, "API_AUTOMATION_WEBHOOK_SECRET_PREPARED", "API_AUTOMATION_WEBHOOK", id, Map.of("scenarioId", before.scenarioId()));
+        return new CreatedWebhookTrigger(webhooks.findStoredById(id).orElseThrow().trigger(), secret);
+    }
+
+    private void validateConfiguration(String project, String scenario, String name) {
+        if (name == null || name.isBlank() || !name.equals(name.trim()) || name.length() > 160)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Webhook 名称长度应在 1 到 160 字符之间");
+        scenarios.findDetail(project, scenario).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "接口自动化场景不存在"));
     }
 
     @Transactional
@@ -108,7 +157,7 @@ public class ApiAutomationWebhookTriggerService {
         ApiAutomationWebhookTriggerRepository.StoredWebhookTrigger stored = webhooks.findStoredById(webhookId)
                 .orElseThrow(this::unavailable);
         ApiAutomationWebhookTrigger trigger = stored.trigger();
-        if (!trigger.enabled()) throw unavailable();
+        if (!trigger.enabled() || !trigger.secretReady()) throw unavailable();
         Instant signedAt = parseTimestamp(timestamp);
         validateNonce(nonce);
         if (!validSignature(cipher.decrypt(stored.secretCiphertext()), timestamp, nonce, rawBody, signature)) {

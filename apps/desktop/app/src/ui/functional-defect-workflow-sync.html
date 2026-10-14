@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 缺陷工作流同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="functional-defect-workflow-sync.css" />
+</head>
+<body><main class="card">
+  <h1>缺陷工作流同步</h1><p class="description">离线时在本地处理缺陷；联网后与绑定账号的网页端同步状态。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">只同步状态、是否确认和解决方案，须先同步缺陷基本资料。负责人、抄送与操作历史保留各端；新同步的解决／关闭状态不生成历史人员或时间。重新打开会清除失效历史。冲突需要核对，删除不传播。</p>
+    <p class="hint">编号与工作流发送到所选账号服务，请核对业务信息。解决方案变化后旧解决／关闭归因失效；已有本端历史仅在相容状态下保留。缺陷缺失或同编号重建需要重新核对。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">只同步状态、是否确认与解决方案；负责人、抄送、正文和关联保留各端。重新打开清除失效历史；新同步状态不生成历史归因。缺陷缺失或重建需要核对。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="functional-defect-workflow-sync.js"></script></body>
+</html>

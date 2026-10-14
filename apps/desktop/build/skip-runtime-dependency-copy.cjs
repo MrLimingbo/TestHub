@@ -1,6 +1,7 @@
 'use strict'
 const fs = require('node:fs/promises')
 const path = require('node:path')
+const { verifyIntegrity } = require('./runtime-integrity.cjs')
 
 async function verifyRuntime(root, platform, arch, allowExperimental = false) {
   const directory = path.join(root, `${platform}-${arch}`)
@@ -10,6 +11,8 @@ async function verifyRuntime(root, platform, arch, allowExperimental = false) {
   if (manifest.version !== 1 || manifest.platform !== platform || manifest.arch !== arch) throw new Error('本地运行组件架构或版本不匹配。')
   if (manifest.distributionReady !== true && !allowExperimental) throw new Error('本地运行组件尚未完成分发验证。仅内部验收可设置 TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE=1。')
   const realDirectory = await fs.realpath(directory)
+  const realRoot = await fs.realpath(root)
+  if (!realDirectory.startsWith(realRoot + path.sep)) throw new Error('运行组件目录指向安装包之外。')
   for (const key of ['java', 'node', 'backend', 'frontend', 'apiRunner', 'jmeterRunner', 'jmeterWatchdog', 'playwrightRunner', 'playwrightTool']) {
     if (typeof manifest[key] !== 'string' || path.isAbsolute(manifest[key])) throw new Error('本地运行组件清单无效。')
     const file = await fs.realpath(path.join(directory, manifest[key]))
@@ -18,6 +21,15 @@ async function verifyRuntime(root, platform, arch, allowExperimental = false) {
     if (key === 'frontend' ? !stat.isDirectory() : !stat.isFile()) throw new Error('本地运行组件不完整。')
   }
   await fs.access(path.join(directory, manifest.frontend, 'index.html'))
+  if (manifest.appiumRunner !== undefined) {
+    if (typeof manifest.appiumRunner !== 'string' || path.isAbsolute(manifest.appiumRunner)) throw new Error('移动端运行组件清单无效。')
+    const file = await fs.realpath(path.join(directory, manifest.appiumRunner))
+    if (!file.startsWith(realDirectory + path.sep) || !(await fs.stat(file)).isFile()) throw new Error('移动端运行组件不完整或超出安装目录。')
+  }
+  if (manifest.integrity || !allowExperimental) {
+    if (!manifest.appiumRunner) throw new Error('运行组件缺少移动端 Runner。')
+    await verifyIntegrity(directory, manifest)
+  }
 }
 exports.verifyRuntime = verifyRuntime
 exports.default = async context => {

@@ -110,9 +110,10 @@ public class FunctionalTransferService {
         return snapshot;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Receipt transfer(AuthenticatedPrincipal principal, String projectId, ImportRequest request) {
         var project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        assets.lockProject(projectId);
         if (!principal.userId().equals(request.expectedUserId())) throw conflict("登录账号已变化，请重新预览迁移。");
         var snapshot = request.snapshot(); validate(snapshot);
         String digest;

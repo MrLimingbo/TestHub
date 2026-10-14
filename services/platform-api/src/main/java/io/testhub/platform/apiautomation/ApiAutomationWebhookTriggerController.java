@@ -43,7 +43,19 @@ public class ApiAutomationWebhookTriggerController {
     public ApiResponse<ApiAutomationWebhookTrigger> setEnabled(Authentication authentication, @PathVariable String projectId,
                                                                 @PathVariable String webhookId,
                                                                 @Valid @RequestBody UpdateWebhookRequest request) {
-        return ApiResponse.of(webhooks.setEnabled(principal(authentication), projectId, webhookId, request.enabled()));
+        return ApiResponse.of(webhooks.setEnabled(principal(authentication), projectId, webhookId, request.enabled(), request.expectedUpdatedAt()));
+    }
+
+    @PutMapping("/{webhookId}/configuration")
+    public ApiResponse<ApiAutomationWebhookTrigger> configuration(Authentication authentication, @PathVariable String projectId,
+            @PathVariable String webhookId, @Valid @RequestBody CreateWebhookRequest request) {
+        return ApiResponse.of(webhooks.updateConfiguration(principal(authentication), projectId, webhookId, request.scenarioId(), request.name().trim()));
+    }
+
+    @PostMapping("/{webhookId}/prepare-secret")
+    public ApiResponse<ApiAutomationWebhookTriggerService.CreatedWebhookTrigger> prepareSecret(Authentication authentication,
+            @PathVariable String projectId, @PathVariable String webhookId) {
+        return ApiResponse.of(webhooks.prepareSecret(principal(authentication), projectId, webhookId));
     }
 
     @DeleteMapping("/{webhookId}")
@@ -58,6 +70,6 @@ public class ApiAutomationWebhookTriggerController {
 
     public record CreateWebhookRequest(@NotBlank String name, @NotBlank String scenarioId) {
     }
-    public record UpdateWebhookRequest(@NotNull Boolean enabled) {
+    public record UpdateWebhookRequest(@NotNull Boolean enabled, java.time.Instant expectedUpdatedAt) {
     }
 }

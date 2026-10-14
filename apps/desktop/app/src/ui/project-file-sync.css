@@ -1,0 +1,8 @@
+#file-pairs{display:grid;gap:12px;margin:16px 0;max-height:310px;overflow:auto}
+#file-pairs .pair{padding:12px;border:1px solid #dce4ef;border-radius:8px}
+#file-pairs .pair label{display:block;margin:0 0 6px;font-weight:600}
+#file-pairs .pair p{margin:6px 0 0;overflow-wrap:anywhere}
+#file-pairs .pair select{width:100%}
+#conflicts section{margin:12px 0;padding:12px;border:1px solid #e4c7a0;border-radius:8px;background:#fffaf2}
+#conflicts strong{display:block;margin-bottom:5px}
+#conflicts p{margin:4px 0;overflow-wrap:anywhere}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 接口自动化基础资料同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="api-automation-asset-sync.css" />
+</head>
+<body><main class="card">
+  <h1>接口自动化基础资料同步</h1><p class="description">离线时在本地编辑接口自动化基础资料；联网后与绑定账号的网页端同步定义。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">按类型和名称匹配公共步骤当前内容、完整数据集及执行配置集。同名内容冲突需选择保留一端；公共步骤追加修订，已有固定版本引用保持不变。每类最多 100 条，总计最多 300 条、8 MiB。</p>
+    <p class="hint">步骤配置、数据集的全部行和变量会发送到所选账号服务，请核对业务信息。已配对且完好的来源文件和正文链接映射到目标文件；配置集环境须存在并启用。不会创建执行、同步场景、旧修订、定时任务或 Webhook。删除不传播，改名和同名重建暂停核对。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">已有物理 ID、创建信息与公共步骤历史修订保留各端。配置集更新后版本号递增，后续执行采用新变量；已创建的执行快照保留。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="api-automation-asset-sync.js"></script></body>
+</html>

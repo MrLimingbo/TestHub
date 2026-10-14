@@ -101,6 +101,15 @@ public class ApiAutomationScheduleService {
     }
 
     @Transactional
+    public ApiAutomationSchedule updateIfUnchanged(AuthenticatedPrincipal actor, String project, String id, ScheduleInput input, Instant expectedUpdatedAt) {
+        access.requireProjectParameterWrite(actor, project, WRITERS);
+        schedules.lock(project, id);
+        if (expectedUpdatedAt != null && !expectedUpdatedAt.equals(owned(project, id).updatedAt()))
+            throw conflict("计划配置或状态已变化，请刷新并核对后再保存／启用");
+        return update(actor, project, id, input);
+    }
+
+    @Transactional
     public void delete(AuthenticatedPrincipal principal, String projectId, String scheduleId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
         ApiAutomationSchedule schedule = owned(projectId, scheduleId);
@@ -161,6 +170,28 @@ public class ApiAutomationScheduleService {
                 // Individual malformed legacy schedules must not prevent the control plane from starting.
             }
         }
+    }
+
+    @Transactional
+    public ApiAutomationSchedule saveSyncedConfiguration(AuthenticatedPrincipal actor, String projectId, String id, ScheduleInput input) {
+        var project = access.requireProjectParameterWrite(actor, projectId, WRITERS);
+        var p = payload(projectId, input);
+        if (id == null) {
+            id = UlidCreator.getUlid().toString();
+            schedules.insert(id, project.organizationId(), projectId, p.scenarioId(), p.executionProfileId(), p.name(), p.cronExpression(),
+                    p.timezone(), p.timeoutSeconds(), p.maxConsecutiveFailures(), false, actor.userId());
+        } else {
+            owned(projectId, id);
+            schedules.updateSyncedConfiguration(projectId, id, p.scenarioId(), p.executionProfileId(), p.name(), p.cronExpression(),
+                    p.timezone(), p.timeoutSeconds(), p.maxConsecutiveFailures());
+        }
+        var result = schedules.findById(id).orElseThrow();
+        // Runtime changes must never escape a rolled-back multi-trigger sync transaction.
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override public void afterCommit() { sync(result); }
+                });
+        return result;
     }
 
     private void sync(ApiAutomationSchedule schedule) {

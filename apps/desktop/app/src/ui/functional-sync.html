@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 功能测试资料同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="functional-sync.css" />
+</head>
+<body><main class="card">
+  <h1>功能测试资料同步</h1><p class="description">离线时在本地编辑功能测试资料；联网后与绑定账号的网页端同步定义。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">按需求、用例、计划编号及完整目录路径匹配，内容不同需选择。同步目录结构、排序、标题、优先级、资料状态、正文、用例类型及有序计划关联。引用在目标重映射。每类最多 100 条，目录最多 16 层，正文每字段最多 20,000 字符，资料不超过 3 MiB。</p>
+    <p class="hint">资料内容会发送到所选账号服务，请核对业务信息。已通过项目文件同步确认且两端完好的文件下载链接会按本端文件 ID 映射；其他项目链接及失效文件暂停相关资料。人员、治理资料、缺陷、版本、文件和执行记录保留各端。同步不创建执行，删除不传播，改名按新路径或编号处理。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">只同步基础资料和计划定义；已有标识、人员、治理关联及执行记录保留各端。不会创建执行或复制文件。缺失或冲突的父目录、需求、用例会暂停相关依赖资料。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="functional-sync.js"></script></body>
+</html>

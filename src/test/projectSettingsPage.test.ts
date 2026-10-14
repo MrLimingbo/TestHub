@@ -44,6 +44,17 @@ describe('Project settings workspace boundaries', () => {
   it('does not display desktop synchronization on the web', async () => {
     const { wrapper } = await setup(); expect(wrapper.text()).not.toContain('项目配置同步')
   })
+  it('opens native file synchronization from the file tab in both desktop modes', async () => {
+    route.path = '/project-settings/files'
+    for (const workspaceMode of ['local', 'server']) {
+      const openProjectFileSync = vi.fn().mockResolvedValue(undefined)
+      Object.defineProperty(window, 'testhubDesktop', { configurable: true, value: { workspaceMode, openProjectFileSync } })
+      const { wrapper } = await setup(); button(wrapper, '文件同步').vm.$emit('click'); await flushPromises()
+      expect(openProjectFileSync).toHaveBeenCalledOnce()
+      expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
+      wrapper.unmount()
+    }
+  })
   it('project selection reloads resources and closes old forms', async () => {
     const { wrapper, session } = await setup()
     button(wrapper, '新建参数').vm.$emit('click'); await flushPromises(); expect(environmentModal(wrapper).props('visible')).toBe(true)

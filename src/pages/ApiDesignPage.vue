@@ -25,7 +25,7 @@ import {
   apiInterchangeSizeError,
 } from '@/utils/apiInterchange'
 
-import { isLocalDesktop } from '@/utils/desktopWorkspace'
+import { isLocalDesktop, isAccountDesktop, openApiDesignSync } from '@/utils/desktopWorkspace'
 import { createApiDesignPreferencesClient, emptyApiDesignPreferences, readLegacyPreferences, PreferencesConflictError, type ApiDesignPreferencesState } from '@/utils/apiDesignPreferences'
 
 interface ApiEnvelope<T> { data: T }
@@ -47,6 +47,7 @@ type QuickRequestTreeRow =
   | { key: string; kind: 'request'; item: QuickRequestHistory; depth: number }
 
 const context = ref<Context | null>(null)
+const nativeDesktop = computed(() => isLocalDesktop() || isAccountDesktop())
 const session = useSessionStore()
 const route = useRoute()
 const router = useRouter()
@@ -1025,6 +1026,10 @@ async function saveVersion() {
 }
 async function publishVersion() { if (!selectedApiId.value || !selectedVersionId.value) return; try { await mutate(`/api/v1/projects/${projectId.value}/api-design/definitions/${selectedApiId.value}/versions/${selectedVersionId.value}/publish`, 'POST'); await loadAssets(); Message.success('版本已发布，在线文档已更新') } catch (error) { Message.error(error instanceof Error ? error.message : '发布失败') } }
 function openInterchange() { if (!catalogs.value.length) { Message.warning('请先创建接口目录'); return }; Object.assign(interchangeForm, { catalogId: selectedCatalogId.value || catalogs.value[0].id, document: '', name: '', command: "curl -X POST 'https://api.example.com/api/v1/orders?dryRun=true' -H 'Authorization: Bearer <token>' --data-raw '{\"name\":\"示例\"}'" }); interchangeKind.value = 'OPENAPI'; specFileName.value = ''; interchangeResult.value = null; curlPreview.value = ''; interchangeDialog.value = true }
+async function openNativeSync() {
+  try { await openApiDesignSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '无法打开接口设计资料同步') }
+}
 function chooseSpecFile() { specInput.value?.click() }
 async function specChanged(event: Event) {
   const input = event.target as HTMLInputElement
@@ -1168,6 +1173,7 @@ onMounted(load)
               <a-doption @click="openDefinition()"><icon-plus /> 新建接口</a-doption>
               <a-doption @click="openCatalog()"><icon-folder-add /> 新建目录</a-doption>
               <a-doption @click="openInterchange"><icon-import /> 导入 / 导出</a-doption>
+              <a-doption v-if="nativeDesktop" @click="openNativeSync">接口设计资料同步</a-doption>
             </template>
           </a-dropdown>
         </div>

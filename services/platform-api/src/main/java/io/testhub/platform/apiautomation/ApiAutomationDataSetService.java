@@ -93,7 +93,43 @@ public class ApiAutomationDataSetService {
         if (dataSets.countByProject(projectId) >= MAX_DATA_SETS_PER_PROJECT) {
             throw conflict("每个项目最多创建 100 个接口自动化数据集");
         }
-        if (!FORMATS.contains(sourceFormat) || columns == null || columns.isEmpty() || columns.size() > MAX_COLUMNS
+        ParsedDataSet normalized = normalizedRows(name, sourceFormat, columns, rows);
+        String id = UlidCreator.getUlid().toString();
+        try {
+            dataSets.insert(id, project.organizationId(), projectId, normalized.name(), normalized.format(),
+                    dataSets.json(normalized.columns()), dataSets.json(normalized.rows()), normalized.rows().size(),
+                    checksum(normalized), sourceFileId, principal.userId());
+        } catch (DataIntegrityViolationException exception) {
+            throw conflict("当前项目已存在同名接口自动化数据集");
+        }
+        ApiAutomationDataSetDetail result = detail(projectId, id);
+        audit.record(principal, project.organizationId(), projectId, "API_AUTOMATION_DATA_SET_IMPORTED",
+                "API_AUTOMATION_DATA_SET", id, auditDetails(result.dataSet()));
+        return result;
+    }
+
+    void validateSyncRows(String name, String sourceFormat, List<String> columns, List<Map<String, String>> rows) {
+        normalizedRows(name, sourceFormat, columns, rows);
+    }
+
+    @Transactional
+    ApiAutomationDataSetDetail updateTransferred(AuthenticatedPrincipal principal, String projectId, String dataSetId,
+                                                String name, String sourceFormat, List<String> columns,
+                                                List<Map<String, String>> rows, String sourceFileId) {
+        ProjectSummary project = writeAccess(principal, projectId);
+        ParsedDataSet normalized = normalizedRows(name, sourceFormat, columns, rows);
+        if (dataSets.update(projectId, dataSetId, normalized.name(), normalized.format(), dataSets.json(normalized.columns()),
+                dataSets.json(normalized.rows()), normalized.rows().size(), checksum(normalized)) != 1
+                || dataSets.updateSourceFile(projectId, dataSetId, sourceFileId) != 1) throw notFound();
+        ApiAutomationDataSetDetail result = detail(projectId, dataSetId);
+        audit.record(principal, project.organizationId(), projectId, "API_AUTOMATION_DATA_SET_SYNCED",
+                "API_AUTOMATION_DATA_SET", dataSetId, auditDetails(result.dataSet()));
+        return result;
+    }
+
+    private ParsedDataSet normalizedRows(String name, String sourceFormat, List<String> columns,
+                                        List<Map<String, String>> rows) {
+        if (sourceFormat == null || !FORMATS.contains(sourceFormat) || columns == null || columns.isEmpty() || columns.size() > MAX_COLUMNS
                 || columns.stream().anyMatch(java.util.Objects::isNull)
                 || rows == null || rows.isEmpty() || rows.size() > MAX_ROWS) throw rejected("迁移数据集格式或行列数量无效");
         List<Map<String, String>> ordered = new ArrayList<>();
@@ -109,19 +145,7 @@ public class ApiAutomationDataSetService {
         if (!parsed.columns().equals(columns) || !parsed.rows().equals(ordered)) {
             throw rejected("迁移数据集字段顺序或内容不一致");
         }
-        ParsedDataSet normalized = new ParsedDataSet(parsed.name(), sourceFormat, parsed.columns(), parsed.rows());
-        String id = UlidCreator.getUlid().toString();
-        try {
-            dataSets.insert(id, project.organizationId(), projectId, normalized.name(), normalized.format(),
-                    dataSets.json(normalized.columns()), dataSets.json(normalized.rows()), normalized.rows().size(),
-                    checksum(normalized), sourceFileId, principal.userId());
-        } catch (DataIntegrityViolationException exception) {
-            throw conflict("当前项目已存在同名接口自动化数据集");
-        }
-        ApiAutomationDataSetDetail result = detail(projectId, id);
-        audit.record(principal, project.organizationId(), projectId, "API_AUTOMATION_DATA_SET_IMPORTED",
-                "API_AUTOMATION_DATA_SET", id, auditDetails(result.dataSet()));
-        return result;
+        return new ParsedDataSet(parsed.name(), sourceFormat, parsed.columns(), parsed.rows());
     }
 
     /**

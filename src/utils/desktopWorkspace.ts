@@ -1,5 +1,21 @@
 export interface LocalEngineStatus { phase: string; message: string; receivedBytes: number; totalBytes: number }
 interface WorkspaceBridge {
+  openApiAutomationScenarioSync?: () => Promise<void>
+  openApiAutomationHistorySync?: () => Promise<void>
+  openApiAutomationTriggerSync?: () => Promise<void>
+  openApiAutomationAssetSync?: () => Promise<void>
+  openApiDesignSync?: () => Promise<void>
+  openProjectFileSync?: () => Promise<void>
+  openFunctionalHistorySync?: () => Promise<void>
+  openFunctionalDefectExecutionSync?: () => Promise<void>
+  openFunctionalDefectPeopleSync?: () => Promise<void>
+  openFunctionalDefectWorkflowSync?: () => Promise<void>
+  openFunctionalDefectLinkSync?: () => Promise<void>
+  openProjectVersionSync?: () => Promise<void>
+  openFunctionalDefectSync?: () => Promise<void>
+  openFunctionalSync?: () => Promise<void>
+  openFunctionalAssetTagSync?: () => Promise<void>
+  openFunctionalGovernanceSync?: () => Promise<void>
   openMockSync?: () => Promise<void>
   openMobileAutomationSync?: () => Promise<void>
   openUiAutomationSync?: () => Promise<void>
@@ -26,6 +42,32 @@ function bridge(): WorkspaceBridge | undefined {
 }
 export function isLocalDesktop() { return bridge()?.workspaceMode === 'local' }
 export function isAccountDesktop() { return bridge()?.workspaceMode === 'server' }
+export async function openApiAutomationScenarioSync() {
+  if (!bridge()?.openApiAutomationScenarioSync) throw new Error('当前桌面版本不支持接口自动化场景同步，请更新 TestHub。')
+  await bridge()?.openApiAutomationScenarioSync?.()
+}
+
+export async function openApiAutomationHistorySync() {
+  const native = bridge()
+  if (!native?.openApiAutomationHistorySync) throw new Error('当前桌面版本不支持接口自动化执行历史同步')
+  await native.openApiAutomationHistorySync()
+}
+
+export async function openApiAutomationTriggerSync() {
+  const native = bridge()
+  if (!native?.openApiAutomationTriggerSync) throw new Error('当前桌面版本不支持接口自动化触发配置同步')
+  await native.openApiAutomationTriggerSync()
+}
+
+export async function openApiAutomationAssetSync() {
+  if (!bridge()?.openApiAutomationAssetSync) throw new Error('当前桌面版本不支持接口自动化基础资料同步，请更新 TestHub。')
+  await bridge()?.openApiAutomationAssetSync?.()
+}
+
+export async function openApiDesignSync() {
+  if (!bridge()?.openApiDesignSync) throw new Error('当前桌面版本不支持接口设计资料同步，请更新 TestHub。')
+  await bridge()?.openApiDesignSync?.()
+}
 export async function openAccountTransfer() { await bridge()?.openTransfer?.() }
 export async function openTaskSync() {
   if (!bridge()?.openTaskSync) throw new Error('当前桌面版本不支持任务登记同步，请更新 TestHub。')
@@ -34,6 +76,10 @@ export async function openTaskSync() {
 export async function openSettingsSync() {
   if (!bridge()?.openSettingsSync) throw new Error('当前桌面版本不支持项目配置同步，请更新 TestHub。')
   await bridge()?.openSettingsSync?.()
+}
+export async function openProjectFileSync() {
+  if (!bridge()?.openProjectFileSync) throw new Error('当前桌面版本不支持项目文件同步，请更新 TestHub。')
+  await bridge()?.openProjectFileSync?.()
 }
 export async function resumeLocalWorkspace() { await bridge()?.resumeLocalWorkspace?.() }
 export async function connectAccountService() { await bridge()?.connectAccount?.() }
@@ -86,4 +132,54 @@ export async function openUiAutomationSync() {
 export async function openMobileAutomationSync() {
   if (!bridge()?.openMobileAutomationSync) throw new Error('当前桌面版本不支持 移动端 资料同步，请更新 TestHub。')
   await bridge()?.openMobileAutomationSync?.()
+}
+
+export async function openFunctionalSync() {
+  if (!bridge()?.openFunctionalSync) throw new Error('当前桌面版本不支持功能测试资料同步，请更新 TestHub。')
+  await bridge()?.openFunctionalSync?.()
+}
+
+export async function openFunctionalGovernanceSync() {
+  if (!bridge()?.openFunctionalGovernanceSync) throw new Error('当前桌面版本不支持治理定义同步，请更新 TestHub。')
+  await bridge()?.openFunctionalGovernanceSync?.()
+}
+
+export async function openFunctionalAssetTagSync() {
+  if (!bridge()?.openFunctionalAssetTagSync) throw new Error('当前桌面版本不支持标签关联同步，请更新 TestHub。')
+  await bridge()?.openFunctionalAssetTagSync?.()
+}
+
+export async function openFunctionalDefectLinkSync() {
+  if (!bridge()?.openFunctionalDefectLinkSync) throw new Error('当前桌面版本不支持缺陷关联同步，请更新 TestHub。')
+  await bridge()?.openFunctionalDefectLinkSync?.()
+}
+
+export async function openProjectVersionSync() {
+  if (!bridge()?.openProjectVersionSync) throw new Error('当前桌面版本不支持版本与构建同步，请更新 TestHub。')
+  await bridge()?.openProjectVersionSync?.()
+}
+
+export async function openFunctionalDefectSync() {
+  if (!bridge()?.openFunctionalDefectSync) throw new Error('当前桌面版本不支持缺陷资料同步，请更新 TestHub。')
+  await bridge()?.openFunctionalDefectSync?.()
+}
+
+export async function openFunctionalDefectWorkflowSync() {
+  if (!bridge()?.openFunctionalDefectWorkflowSync) throw new Error('当前桌面版本不支持缺陷工作流同步，请更新 TestHub。')
+  await bridge()?.openFunctionalDefectWorkflowSync?.()
+}
+
+export async function openFunctionalDefectPeopleSync() {
+  if (!bridge()?.openFunctionalDefectPeopleSync) throw new Error('当前桌面版本不支持缺陷人员同步，请更新 TestHub。')
+  await bridge()?.openFunctionalDefectPeopleSync?.()
+}
+
+export async function openFunctionalHistorySync() {
+  if (!bridge()?.openFunctionalHistorySync) throw new Error('当前桌面版本不支持执行历史同步，请更新 TestHub。')
+  await bridge()?.openFunctionalHistorySync?.()
+}
+
+export async function openFunctionalDefectExecutionSync() {
+  if (!bridge()?.openFunctionalDefectExecutionSync) throw new Error('当前桌面版本不支持缺陷执行关联同步，请更新 TestHub。')
+  await bridge()?.openFunctionalDefectExecutionSync?.()
 }

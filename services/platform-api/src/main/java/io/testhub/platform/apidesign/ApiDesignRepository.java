@@ -174,6 +174,23 @@ public class ApiDesignRepository {
                 """).param("projectId", projectId).param("apiId", apiId).param("versionId", versionId).param("userId", userId).update();
     }
 
+    public int updateVersionContentForSync(String projectId, String apiId, String versionId, String summary,
+                                           String description, String headers, String query, String path,
+                                           String requestBody, String responseBody, String exampleResponse) {
+        return jdbc.sql("""
+                UPDATE api_definition_version
+                SET summary = :summary, description = :description, request_headers = CAST(:headers AS JSON),
+                    request_query = CAST(:query AS JSON), request_path = CAST(:path AS JSON),
+                    request_body = :requestBody, response_body = :responseBody,
+                    example_response = CAST(:exampleResponse AS JSON)
+                WHERE api_id = :apiId AND id = :versionId
+                  AND EXISTS (SELECT 1 FROM api_definition d WHERE d.id = :apiId AND d.project_id = :projectId)
+                """).param("projectId", projectId).param("apiId", apiId).param("versionId", versionId)
+                .param("summary", summary).param("description", description).param("headers", headers)
+                .param("query", query).param("path", path).param("requestBody", requestBody)
+                .param("responseBody", responseBody).param("exampleResponse", exampleResponse).update();
+    }
+
     public List<ApiDefinitionCase> findCases(String projectId, String apiId) {
         return jdbc.sql(caseQuery("""
                 WHERE c.project_id = :projectId AND c.api_id = :apiId

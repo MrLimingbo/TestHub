@@ -42,6 +42,11 @@ public class FunctionalGovernanceRepository {
                 .param("projectId", projectId).param("tagId", tagId).update();
     }
 
+    public int updateTag(String projectId, String tagId, String name, String color) {
+        return jdbc.sql("UPDATE functional_tag SET name=:name,color=:color WHERE project_id=:projectId AND id=:tagId")
+                .param("name", name).param("color", color).param("projectId", projectId).param("tagId", tagId).update();
+    }
+
     public List<FunctionalTag> findAssetTags(String projectId, String assetType, String assetId) {
         return jdbc.sql("""
                 SELECT t.id, t.organization_id, t.project_id, t.name, t.color, t.created_by, t.created_at

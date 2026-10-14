@@ -16,9 +16,9 @@ async function ensureSyncSession(runtime, fetcher) {
   await runtime.authorizeSession(fetcher)
 }
 
-async function syncRequest(fetcher, url, options = {}, { label = '任务', limit = 1024 * 1024 } = {}) {
+async function syncRequest(fetcher, url, options = {}, { label = '任务', limit = 1024 * 1024, timeoutMs = 30000 } = {}) {
   let response
-  try { response = await fetcher(url, { ...options, credentials: 'include', redirect: 'error', signal: globalThis.AbortSignal.timeout(30000) }) }
+  try { response = await fetcher(url, { ...options, credentials: 'include', redirect: 'error', signal: globalThis.AbortSignal.timeout(timeoutMs) }) }
   catch { throw new Error('同步服务暂时不可达，本地编辑可继续；联网后会自动重试。') }
   if (!response.ok) {
     const message = response.status === 409 ? `账号或${label}版本已变化，请重新同步并核对冲突。`
@@ -36,7 +36,24 @@ async function syncRequest(fetcher, url, options = {}, { label = '任务', limit
   catch { throw new Error('同步服务返回的数据无效，请核对服务版本。') }
 }
 
-function installProjectSync({ ipcMain, dialog, session, directory, origin, windows, runtime, server, exclusive, available, openWindow, trusted }, definition) {
+async function syncBinary(fetcher, url, size, digest, { label = '文件', timeoutMs = 120000 } = {}) {
+  if (!Number.isSafeInteger(size) || size < 1 || size > 20 * 1024 * 1024 || !/^[a-f0-9]{64}$/.test(digest))
+    throw new Error('文件大小或摘要无效。')
+  let response
+  try { response = await fetcher(url, { credentials: 'include', redirect: 'error', signal: globalThis.AbortSignal.timeout(timeoutMs) }) }
+  catch { throw new Error('文件来源暂时不可达，联网后可重试。') }
+  if (!response.ok) { await response.body?.cancel(); throw new Error(`${label}下载失败（HTTP ${response.status}），请核对来源文件。`) }
+  const chunks = []; let length = 0; const hash = crypto.createHash('sha256')
+  for await (const chunk of response.body) {
+    length += chunk.length
+    if (length > size) throw new Error('文件内容超过记录大小，同步已停止。')
+    hash.update(chunk); chunks.push(Buffer.from(chunk))
+  }
+  if (length !== size || hash.digest('hex') !== digest) throw new Error('来源文件大小或 SHA-256 已变化，同步已停止。')
+  return Buffer.concat(chunks)
+}
+
+function installProjectSync({ ipcMain, dialog, session, directory, origin, windows, runtime, server, exclusive, available, openWindow, trusted, fileLinkContext }, definition) {
   const { Client, Store, channel, page, filename, title, transport } = definition
   let client, initializing, lastError = '', disposed = false
   const remoteSession = url => session.fromPartition('persist:testhub-server-' + crypto.createHash('sha256').update(url).digest('hex').slice(0, 24))
@@ -44,12 +61,14 @@ function installProjectSync({ ipcMain, dialog, session, directory, origin, windo
     if (!client) {
       if (!initializing) initializing = (async () => {
         const local = await runtime()
-        client = new Client({ store: new Store(directory, local.codec),
+        client = new Client({ store: new Store(directory, local.codec), fileLinkContext,
           guard: async binding => {
             if (disposed || normalizeServerUrl(await server()) !== binding.server) throw new Error('账号服务已切换，同步已停止；请切回绑定服务。')
           },
           local: async (route, options) => syncRequest((url, init) => session.fromPartition('persist:testhub-local-workspace').fetch(url, init), new URL(route, local.url).href, options, transport),
           remote: async (route, options, binding) => syncRequest((url, init) => remoteSession(binding.server).fetch(url, init), new URL(route, binding.server).href, options, transport),
+          localBinary: async (route, size, digest) => syncBinary((url, init) => session.fromPartition('persist:testhub-local-workspace').fetch(url, init), new URL(route, local.url).href, size, digest, transport),
+          remoteBinary: async (route, size, digest, binding) => syncBinary((url, init) => remoteSession(binding.server).fetch(url, init), new URL(route, binding.server).href, size, digest, transport),
         }); await client.load()
       })().finally(() => { initializing = undefined })
       await initializing
@@ -85,7 +104,7 @@ function installProjectSync({ ipcMain, dialog, session, directory, origin, windo
     const projects = value => value.organizations.flatMap(org => (value.projects[org.id] || []).map(p => ({ id: p.id, name: p.name, organization: org.name })))
     return { ...status, server: url, actor, sourceProjects: projects(local), targetProjects: projects(remote) }
   })
-  invoke('preview', async (c, value) => c.preview(value?.sourceId, value?.targetId, await server()))
+  invoke('preview', async (c, value) => definition.preview ? definition.preview(c, value, await server()) : c.preview(value?.sourceId, value?.targetId, await server()))
   invoke('bind', async (c, token) => {
     const plan = c.plan
     if (!plan || plan.token !== token) throw new Error('绑定预览已失效，请重新预览。')
@@ -113,12 +132,13 @@ function installProjectSync({ ipcMain, dialog, session, directory, origin, windo
     if (!definition.canResolve(conflict) || !['local', 'remote'].includes(value.choice)) throw new Error('请选择当前有效的冲突及版本。')
     const decision = await dialog.showMessageBox(windows().setup, { type: 'question', title: `处理${title}冲突`,
       message: `确认用${value.choice === 'local' ? '本地' : '网页'}版本更新另一端？`,
-      detail: definition.conflictDetail(conflict),
+      detail: definition.conflictDetail(conflict,c.state.binding),
       buttons: ['取消', '确认使用该版本'], defaultId: 0, cancelId: 0 })
     if (decision.response !== 1) return { cancelled: true }
     await c.resolve(identifier, value.choice); return c.status()
   })
   return { open,
+    linkContext: async binding => (await get()).linkContext(binding),
     tick: async () => {
       if (disposed || !available()) return
       try {
@@ -136,4 +156,4 @@ function installProjectSync({ ipcMain, dialog, session, directory, origin, windo
     stop: () => { disposed = true },
   }
 }
-module.exports = { installProjectSync, syncRequest, ensureSyncSession }
+module.exports = { installProjectSync, syncRequest, syncBinary, ensureSyncSession }

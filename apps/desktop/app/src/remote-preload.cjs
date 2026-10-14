@@ -3,6 +3,22 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('testhubDesktop', Object.freeze({
+  openProjectFileSync: () => ipcRenderer.invoke('testhub-desktop:project-file-sync:open'),
+  openFunctionalHistorySync: () => ipcRenderer.invoke('testhub-desktop:functional-history-sync:open'),
+  openFunctionalDefectExecutionSync: () => ipcRenderer.invoke('testhub-desktop:functional-defect-execution-sync:open'),
+  openFunctionalDefectPeopleSync: () => ipcRenderer.invoke('testhub-desktop:functional-defect-people-sync:open'),
+  openFunctionalDefectWorkflowSync: () => ipcRenderer.invoke('testhub-desktop:functional-defect-workflow-sync:open'),
+  openFunctionalDefectLinkSync: () => ipcRenderer.invoke('testhub-desktop:functional-defect-link-sync:open'),
+  openProjectVersionSync: () => ipcRenderer.invoke('testhub-desktop:project-version-sync:open'),
+  openFunctionalDefectSync: () => ipcRenderer.invoke('testhub-desktop:functional-defect-sync:open'),
+  openFunctionalAssetTagSync: () => ipcRenderer.invoke('testhub-desktop:functional-asset-tag-sync:open'),
+  openFunctionalGovernanceSync: () => ipcRenderer.invoke('testhub-desktop:functional-governance-sync:open'),
+  openFunctionalSync: () => ipcRenderer.invoke('testhub-desktop:functional-sync:open'),
+  openApiDesignSync: () => ipcRenderer.invoke('testhub-desktop:api-design-sync:open'),
+  openApiAutomationAssetSync: () => ipcRenderer.invoke('testhub-desktop:api-automation-asset-sync:open'),
+  openApiAutomationScenarioSync: () => ipcRenderer.invoke('testhub-desktop:api-automation-scenario-sync:open'),
+  openApiAutomationHistorySync: () => ipcRenderer.invoke('testhub-desktop:api-automation-history-sync:open'),
+  openApiAutomationTriggerSync: () => ipcRenderer.invoke('testhub-desktop:api-automation-trigger-sync:open'),
   openMockSync: () => ipcRenderer.invoke('testhub-desktop:mock-sync:open'),
   openMobileAutomationSync: () => ipcRenderer.invoke('testhub-desktop:mobile-automation-sync:open'),
   openUiAutomationSync: () => ipcRenderer.invoke('testhub-desktop:ui-automation-sync:open'),

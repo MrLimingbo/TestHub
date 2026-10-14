@@ -58,6 +58,21 @@ public class ApiAutomationScheduleRepository {
                 .param("maxConsecutiveFailures", maxConsecutiveFailures).param("enabled", enabled).update();
     }
 
+    public void lock(String project, String id) {
+        jdbc.sql("SELECT id FROM api_automation_schedule WHERE project_id=:p AND id=:id FOR UPDATE")
+                .param("p", project).param("id", id).query(String.class).optional();
+    }
+
+    public void updateSyncedConfiguration(String project, String id, String scenario, String profile, String name, String cron,
+            String timezone, int timeout, int maximumFailures) {
+        jdbc.sql("""
+                UPDATE api_automation_schedule SET scenario_id=:s,execution_profile_id=:profile,name=:n,cron_expression=:cron,
+                    timezone=:zone,timeout_seconds=:timeout,max_consecutive_failures=:failures,enabled=FALSE,updated_at=CURRENT_TIMESTAMP(3)
+                WHERE project_id=:p AND id=:id
+                """).param("p", project).param("id", id).param("s", scenario).param("profile", profile).param("n", name)
+                .param("cron", cron).param("zone", timezone).param("timeout", timeout).param("failures", maximumFailures).update();
+    }
+
     public void delete(String projectId, String id) {
         jdbc.sql("DELETE FROM api_automation_schedule WHERE id = :id AND project_id = :projectId")
                 .param("id", id).param("projectId", projectId).update();
@@ -89,7 +104,7 @@ public class ApiAutomationScheduleRepository {
     public void applyOutcome(String id, String status, int consecutiveFailures, boolean enabled) {
         jdbc.sql("""
                 UPDATE api_automation_schedule
-                SET last_execution_status = :status, consecutive_failures = :consecutiveFailures, enabled = :enabled,
+                SET last_execution_status = :status, consecutive_failures = :consecutiveFailures, enabled = enabled AND :enabled,
                     updated_at = CURRENT_TIMESTAMP(3)
                 WHERE id = :id
                 """).param("id", id).param("status", status).param("consecutiveFailures", consecutiveFailures)

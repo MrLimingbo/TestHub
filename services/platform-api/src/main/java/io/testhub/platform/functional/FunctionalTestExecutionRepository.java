@@ -121,13 +121,17 @@ public class FunctionalTestExecutionRepository {
     }
 
     public int updateRunStatus(String runId, String status, Instant startedAt, Instant finishedAt) {
-        return jdbc.sql("""
+        int updated = jdbc.sql("""
                 UPDATE functional_test_run SET status = :status,
                     started_at = COALESCE(started_at, :startedAt),
                     finished_at = CASE WHEN :status = 'COMPLETED' THEN COALESCE(finished_at, :finishedAt) ELSE NULL END
                 WHERE id = :runId
                 """).param("runId", runId).param("status", status).param("startedAt", startedAt)
                 .param("finishedAt", finishedAt).update();
+        // Imported history retains its creation clock; clock skew must not break later transfer validation.
+        jdbc.sql("UPDATE functional_test_run SET updated_at = created_at WHERE id = :runId AND updated_at < created_at")
+                .param("runId", runId).update();
+        return updated;
     }
 
     public Optional<String> lockRunForCase(String projectId, String runCaseId) {

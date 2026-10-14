@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 版本与构建定义同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="project-version-sync.css" />
+</head>
+<body><main class="card">
+  <h1>版本与构建定义同步</h1><p class="description">离线时在本地编辑版本与构建定义；联网后与绑定账号的网页端同步定义。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p>
+  <p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p>
+    <label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">按版本号匹配；不同内容需选择。同步完整有序构建列表、计划发布日期和描述，支持清空。每项目最多 100 个版本，每版本 50 个构建，描述最多 20,000 字符，资料不超过 3 MiB。</p>
+    <p class="hint">资料发送到所选账号服务，请核对业务信息。新版本为未开始，实际发布日期为空。已有发布状态、实际发布日期与创建信息保留各端。改名、缺失或同名重建需要核对，删除不传播。已确认且完好的项目文件下载链接会映射到本端；其他项目链接暂停相关版本。</p>
+    <p id="preview" role="status" aria-live="polite"></p>
+    <button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p>
+    <p class="hint">只更新版本号对应的构建列表、计划日期与描述；发布状态、实际日期、创建信息保留各端。改名、缺失或重建需要核对。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button>
+    <div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端资料）</button>
+  </section>
+  <button id="refresh" type="button">刷新状态</button>
+</main><script src="project-version-sync.js"></script></body>
+</html>
