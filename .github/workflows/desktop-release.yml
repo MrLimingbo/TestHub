@@ -86,7 +86,12 @@ jobs:
         with:
           name: desktop-application
           path: .
+      - name: Download locked native Electron executable and license files
+        run: pnpm --filter @testhub/desktop exec install-electron
       - name: Prepare and verify native runtime including every Runner and license
+        # Electron 43 downloads lazily; resolving package.json alone does not install dist or notices.
+        # Run its locked installer explicitly before copying license files into the native runtime.
+        # The installer validates the download against Electron's bundled checksums.
         run: pnpm desktop:prepare:local && pnpm desktop:verify:runtime
       - name: Create internal unpacked application for real packaged startup
         run: pnpm --filter @testhub/desktop package:dir --${{ matrix.builder }} --${{ matrix.arch }}

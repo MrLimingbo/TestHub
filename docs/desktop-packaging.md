@@ -35,11 +35,12 @@ npx pnpm@10.13.1 desktop:test
 # JAVA_HOME 指向当前系统架构的独立 Java 21 JDK。
 # 不要用正式数据源执行后端全量测试。
 node scripts/desktop/test-local-backend.mjs
+npx pnpm@10.13.1 --filter @testhub/desktop exec install-electron
 npx pnpm@10.13.1 desktop:prepare:local
 npx pnpm@10.13.1 desktop:verify:runtime
 ```
 
-pnpm 10 的依赖安装脚本默认不执行；工作区仅允许 `electron` 的安装脚本下载当前原生平台的二进制及 Chromium 许可，避免干净 CI 缺少 `electron/dist`。[配置说明](https://github.com/pnpm/pnpm.io/blob/main/versioned_docs/version-10.x/settings.md)。
+当前锁定 Electron 43 使用延迟下载，安装 npm 包或只读取 `package.json` 不会生成 `electron/dist`。准备运行时前须显式执行其锁定的 `install-electron` 命令，下载当前原生架构的二进制和 Chromium 许可；该安装器使用包内版本与校验摘要，不启动应用。见 [Electron 43 包入口](https://github.com/electron/electron/blob/v43.2.0/npm/index.js) 和 [安装器](https://github.com/electron/electron/blob/v43.2.0/npm/install.js)。
 
 Mac 的 JDK／Node 不得依赖 Homebrew 等包外运行库。准备脚本保持 `distributionReady=false`；仅内部预览打包可通过 `TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE=1` 执行 `package:dir` 或对应安装器命令。前置检查验证平台、架构、组件与全树完整性；`afterPack` 再检查实际复制进包内的资源。正式构建不能靠修改该布尔值代替发行验收。
 

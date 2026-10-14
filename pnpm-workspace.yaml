@@ -2,6 +2,3 @@ packages:
   - apps/*
   - services/*
   - packages/*
-
-onlyBuiltDependencies:
-  - electron
