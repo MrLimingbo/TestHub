@@ -76,16 +76,25 @@ async function smoke(stage, label) {
   assert.equal(result.exactApplicationDefaults, clean)
   assert.match(result.asarSha256, /^[a-f0-9]{64}$/)
   phases.push({ label, backendSha256: result.backendSha256, asarSha256: result.asarSha256, checks: result.checks.length, launches: result.launches })
+  console.log('PASS installed lifecycle phase: ' + label)
 }
 async function uninstall() {
   if (windows) {
     const files = await fs.readdir(installation), uninstaller = files.find(n => /^Uninstall .+\.exe$/.test(n))
     assert.ok(uninstaller, 'Installed NSIS uninstaller is required')
     await run(path.join(installation, uninstaller), ['/S'], { timeout: 180000 })
-    for (let i = 0; i < 600 && !await absent(installation); i++) await delay(100)
+    // NSIS removes the directory before its copied uninstaller clears shortcuts and registry keys.
+    const deadline = Date.now() + 60000
+    let removed
+    do {
+      removed = await windowsState()
+      if (await absent(installation) && removed.registryEntries === 0 && removed.shortcuts.length === 0 && removed.processes === 0) break
+      await delay(100)
+    } while (Date.now() < deadline)
     assert.equal(await absent(installation), true, 'Uninstaller must remove its installed directory')
-    const removed = await windowsState()
-    assert.equal(removed.registryEntries, 0); assert.equal(removed.shortcuts.length, 0); assert.equal(removed.processes, 0)
+    assert.equal(removed.registryEntries, 0, 'Uninstaller must remove its registry entries')
+    assert.equal(removed.shortcuts.length, 0, 'Uninstaller must remove both shortcuts')
+    assert.equal(removed.processes, 0, 'Uninstall must leave no application process')
   } else await fs.rm(installation, { recursive: true })
 }
 try {
