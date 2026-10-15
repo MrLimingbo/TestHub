@@ -2,6 +2,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import crypto from 'node:crypto'
+import installationQA from '../../apps/desktop/build/installation-qa.cjs'
 import assert from 'node:assert/strict'
 import { spawn, execFile } from 'node:child_process'
 import { promisify } from 'node:util'
@@ -18,8 +19,23 @@ const resources = process.platform === 'darwin' ? path.join(appPath, 'Contents/R
 const manifest = JSON.parse(await fs.readFile(path.join(resources, 'local-runtime', `${process.platform}-${process.arch}`, 'runtime.json'), 'utf8'))
 if (!Number.isSafeInteger(manifest.desktopSchemaVersion) || manifest.desktopSchemaVersion < 1) throw new Error('Packaged runtime does not declare its desktop schema version')
 const asar = path.join(resources, 'app.asar'), originalAsarHash = crypto.createHash('sha256').update(await fs.readFile(asar)).digest('hex')
-const directory = await fs.mkdtemp(path.resolve('.testhub/packaged-smoke-'))
-const qaName = 'TestHub-QA-' + crypto.randomUUID(), checks = [], launches = []
+const statePath = args.includes('--lifecycle-state') ? path.resolve(value('--lifecycle-state')) : null
+const lifecycleStage = statePath ? value('--lifecycle-stage') : null
+if (statePath && !['seed', 'verify'].includes(lifecycleStage)) throw new Error('Lifecycle acceptance requires seed or verify stage')
+if (statePath && lifecycleStage === 'seed') await fs.writeFile(statePath, '{}', { flag: 'wx', mode: 0o600 })
+let state = statePath && lifecycleStage === 'verify' ? JSON.parse(await fs.readFile(statePath, 'utf8')) : null
+if (lifecycleStage === 'verify' && !state?.ownership) throw new Error('Missing owned installation lifecycle state')
+let ownership = state?.ownership
+try { ownership ||= statePath ? await installationQA.createSession(args.includes('--clean-runner-defaults')) : null }
+catch (error) { if (lifecycleStage === 'seed') await fs.rm(statePath); throw error }
+const directory = ownership ? await installationQA.verifySession(ownership) : await fs.mkdtemp(path.resolve('.testhub/packaged-smoke-'))
+const qaName = ownership?.qaName || 'TestHub-QA-' + crypto.randomUUID(), checks = [], launches = []
+const sessionName = ownership?.cleanRunnerDefaults ? 'testhub-desktop-app' : qaName
+if (statePath && lifecycleStage === 'seed') {
+  // Persist ownership before starting processes, so an interrupted acceptance can clean up safely.
+  try { await fs.writeFile(statePath, JSON.stringify({ ownership }), { mode: 0o600 }) }
+  catch (error) { await installationQA.removeSession(ownership); await fs.rm(statePath); throw error }
+}
 let child, finished, inspector, browser, transcript = '', summary, cleanupError
 const pass = message => { checks.push(message); console.log('PASS ' + message) }
 class Inspector {
@@ -54,11 +70,15 @@ class Inspector {
   }
   close() { this.socket.close(); for (const call of this.pending.values()) { clearTimeout(call.timeout); call.reject(new Error('Inspector closed')) }; for (const event of this.events.values()) clearTimeout(event.timeout) }
 }
-function bootstrap(directory, qaName) {
+function bootstrap(directory, qaName, nativeDirectory, cleanRunnerDefaults) {
   const electron = require('electron'), Module = require('node:module')
   if (!electron.app.isPackaged) throw new Error('Acceptance must use the packaged executable')
-  electron.app.setName(qaName)
-  electron.app.setPath('userData', directory); electron.app.setPath('sessionData', directory)
+  if (!cleanRunnerDefaults) electron.app.setName(qaName)
+  if (nativeDirectory) {
+    if (electron.app.getPath('userData') !== directory || electron.app.getPath('sessionData') !== directory) throw new Error('Native default application data directory does not match the owned QA directory')
+  } else {
+    electron.app.setPath('userData', directory); electron.app.setPath('sessionData', directory)
+  }
   if (process.platform === 'darwin') electron.app.setActivationPolicy('prohibited')
   globalThis.__testhubPackagedQA = { isPackaged: electron.app.isPackaged, electronVersion: process.versions.electron, resources: process.resourcesPath, executable: process.execPath, data: electron.app.getPath('userData'), created: 0, visibleViolations: 0, unexpectedDialogs: 0 }
   const Original = electron.BrowserWindow
@@ -97,7 +117,7 @@ async function launch() {
   }
   const frame = pause.callFrames.find(entry)
   if (!frame) throw new Error('Did not stop before the unmodified packaged main entry')
-  const installed = await inspector.send('Debugger.evaluateOnCallFrame', { callFrameId: frame.callFrameId, expression: `(${bootstrap.toString()})(${JSON.stringify(directory)},${JSON.stringify(qaName)})`, returnByValue: true })
+  const installed = await inspector.send('Debugger.evaluateOnCallFrame', { callFrameId: frame.callFrameId, expression: `(${bootstrap.toString()})(${JSON.stringify(directory)},${JSON.stringify(qaName)},${Boolean(ownership)},${Boolean(ownership?.cleanRunnerDefaults)})`, returnByValue: true })
   if (installed.exceptionDetails || !installed.result?.value?.isPackaged) throw new Error('Could not isolate packaged launch before entry')
   await inspector.send('Debugger.resume')
   let chrome
@@ -142,8 +162,24 @@ try {
   const identity = await request(page, '/api/v1/auth/me'), context = await request(page, '/api/v1/access/context'), project = context.projects[context.organizations[0].id][0].id
   assert.equal((await request(page, '/api/v1/operations/overview')).dataProtection.migrationVersion, 'V' + manifest.desktopSchemaVersion)
   const base = `/api/v1/projects/${project}/functional`
-  const folder = await request(page, base + '/catalogs', { scope: 'REQUIREMENTS', name: '包首启验收', parentId: null, sortOrder: 0 })
-  const requirement = await request(page, base + '/requirements', { catalogId: folder.id, requirementCode: 'REQ-PACKAGED', title: '真实包持久化', priority: 'P1', status: 'APPROVED', description: '离线本地数据' })
+  let requirement
+  if (lifecycleStage === 'verify') {
+    assert.equal(identity.id, state.identityId)
+    assert.equal(base, state.base)
+    requirement = (await request(page, base + '/requirements')).find(row => row.id === state.requirement.id)
+    assert.deepEqual(requirement, state.requirement)
+    const encrypted = await fs.readFile(path.join(directory, 'local-workspace/workspace-secrets.enc'))
+    assert.equal(crypto.createHash('sha256').update(encrypted).digest('hex'), state.secretSha256)
+    if (state.backendSha256 !== manifest.backendSha256) {
+      const marker = JSON.parse(await fs.readFile(path.join(directory, 'local-workspace/workspace-runtime.json'), 'utf8'))
+      assert.equal(marker.backendHash, manifest.backendSha256)
+      assert.ok((await fs.readdir(directory)).some(name => name.startsWith('workspace-before-upgrade-')))
+      await assert.rejects(fs.access(path.join(directory, 'local-workspace.upgrade.json')), { code: 'ENOENT' })
+    }
+  } else {
+    const folder = await request(page, base + '/catalogs', { scope: 'REQUIREMENTS', name: '包首启验收', parentId: null, sortOrder: 0 })
+    requirement = await request(page, base + '/requirements', { catalogId: folder.id, requirementCode: 'REQ-PACKAGED', title: '真实包持久化', priority: 'P1', status: 'APPROVED', description: '离线本地数据\n升级验收 UTF-8' })
+  }
   assert.ok(identity.id); await hidden(); pass(`unmodified packaged executable uses isPackaged resources and starts native V${manifest.desktopSchemaVersion} workspace with no external development commands`)
   await close(); page = await launch()
   assert.equal((await request(page, '/api/v1/auth/me')).id, identity.id)
@@ -152,17 +188,26 @@ try {
   await close(); pass('both genuine packaged launches stay hidden offscreen unfocused and shut down owned runtime processes')
   const sanitized = launches.map(launch => { const result = { ...launch }; delete result.resources; delete result.executable; delete result.data; return result })
   assert.equal(crypto.createHash('sha256').update(await fs.readFile(asar)).digest('hex'), originalAsarHash)
+  if (statePath) {
+    const secret = await fs.readFile(path.join(directory, 'local-workspace/workspace-secrets.enc'))
+    state = { ownership, identityId: identity.id, base, requirement, secretSha256: crypto.createHash('sha256').update(secret).digest('hex'), backendSha256: manifest.backendSha256 }
+    await fs.writeFile(statePath, JSON.stringify(state), { mode: 0o600 })
+  }
   summary = { passed: true, platform: process.platform, arch: process.arch, isPackaged: true, checks, launches: sanitized, asarUnchanged: true, backendSha256: manifest.backendSha256,
-    externalCommandsExcluded: ['java', 'node', 'mvn', 'pnpm'], defaultUserDataRedirectedForQA: true, installed: false }
+    externalCommandsExcluded: ['java', 'node', 'mvn', 'pnpm'], defaultUserDataRedirectedForQA: !ownership, applicationNameChangedForQA: !ownership?.cleanRunnerDefaults, nativeDefaultUserData: Boolean(ownership), exactApplicationDefaults: Boolean(ownership?.cleanRunnerDefaults), installed: false }
 } finally {
   await close().catch(() => {})
   if (child && child.exitCode === null) { child.kill('SIGTERM'); await finished }
-  await fs.rm(directory, { recursive: true, force: true })
-  if (process.platform === 'darwin') {
-    try { await run('/usr/bin/security', ['delete-generic-password', '-s', qaName + ' Safe Storage', '-a', qaName]) }
+  const retain = statePath && summary?.passed
+  if (!retain) {
+    if (ownership) await installationQA.removeSession(ownership)
+    else await fs.rm(directory, { recursive: true, force: true })
+  }
+  if (process.platform === 'darwin' && !retain) {
+    try { await run('/usr/bin/security', ['delete-generic-password', '-s', sessionName + ' Safe Storage', '-a', sessionName]) }
     catch (error) { if (error.code !== 44) cleanupError = new Error('Could not remove owned QA Keychain entry') }
   }
 }
 if (cleanupError) throw cleanupError
 await fs.mkdir(path.dirname(output), { recursive: true })
-await fs.writeFile(output, JSON.stringify({ ...summary, ownedDataRemoved: true }, null, 2) + '\n')
+await fs.writeFile(output, JSON.stringify({ ...summary, ownedDataRemoved: !statePath, retainedForInstallationLifecycle: Boolean(statePath) }, null, 2) + '\n')

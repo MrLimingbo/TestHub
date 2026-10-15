@@ -66,3 +66,19 @@ Mac 的 JDK／Node 不得依赖 Homebrew 等包外运行库。准备脚本保持
 macOS 标签构建启用 Electron Builder 公证；Windows 标签构建使用 Authenticode 证书。证书、私钥、Apple 凭据和签名文件只存在于 GitHub Secrets，不能写入仓库、`.env`、安装包日志或发布说明。
 
 发布前需在干净隔离系统安装 DMG 和 EXE，验证无需开发工具的本地首启、默认数据目录、重启、退出及升级保留数据；另外连接已批准的网页服务，验证登录、项目切换、内网接口授权、历史、附件和同步。真实安装、签名／公证、Gatekeeper／Authenticode 和移动设备执行均须单独留存结果；后台包 smoke 不能代替这些检查。归档安装器摘要、签名状态、源码提交和运行时清单，并完成发布安全扫描。
+
+## 安装与升级自动验收
+
+预览 CI 增加真实安装生命周期检查。共享任务从固定的上一已验收提交 `3932ef1` 构建隔离后端基线；只有桌面应用源码与该基线完全一致时才复用当前 Electron 壳，避免把新壳误记为旧版完整包。各原生任务保留候选安装器，另建旧后端安装器，在独占安装位置执行首次安装、覆盖升级、卸载保留数据和重装恢复。两份后端摘要必须不同，升级后核对完整业务记录、身份、密文字节、运行版本标记和升级前快照。
+
+本机 Mac 验收使用 `/Applications` 下随机命名的独立子目录与独立 QA 应用名，数据目录由 Electron 的系统默认规则生成，不调用 `setPath('userData')` 或 `setPath('sessionData')`。它能验证系统目录中的安装与数据保留，不能替代正式应用名下的精确默认路径验收。`--clean-runner-defaults` 仅允许全新的 GitHub 托管原生 Runner 使用；它保留实际应用名及默认数据路径，遇到已有应用或数据、快捷方式、卸载注册项时拒绝继续。Windows 使用 assisted NSIS `/S`，核对默认安装目录、快捷方式目标和卸载注册项，拒绝静默安装自行启动未受离屏保护的应用。
+
+准备好当前原生运行时后，可运行本机 Mac 隔离验收：
+
+```bash
+node scripts/desktop/build-install-baseline.mjs --output artifacts/install-baseline
+node scripts/desktop/build-install-fixtures.mjs --baseline-backend artifacts/install-baseline/platform-api.jar --output .testhub/install-fixtures
+node scripts/desktop/accept-installed.mjs --fixtures .testhub/install-fixtures/fixtures.json --output artifacts/installed-mac.json
+```
+
+输出目录必须不存在。验收创建的身份、业务数据、Keychain 项和应用副本在结束后清理；升级中间状态只在带唯一所有权标记的自有数据目录中保留。阶段结束还需移除基线 JAR、源码、测试安装器和原始日志，只保留脱敏摘要。现有用户安装程序和工作区不被接管。这些脚本使用未修改的 ASAR 和调试器离屏引导，仍不代表 Finder／Gatekeeper、正式签名或公证通过。

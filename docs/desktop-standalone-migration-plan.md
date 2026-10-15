@@ -61,6 +61,10 @@
 
 [发行检查修复与开源框架升级](desktop-standalone-progress-2026-10-14-release-security.md)已于 2026-10-15 获用户审核通过，并授权提交 main 与复验远程 CI。按用户选择升级至 Spring Boot 4.0.8／Spring 7.0.9，保留业务 Jackson 2 JSON 契约及 H2 2.3.232；修复 Jackson 2／3、Tomcat、Netty 与网页 Alpine 系统包，MinIO 采用固定提交和归档校验的源码构建。最终 H2 616、隔离 MySQL／Redis／S3 616、桌面 545 项通过，前端 lint／test／build 通过；旧 H2 和 MySQL 工作区真实升级保留完整记录、密钥密文、附件和原会话。新 Mac arm64 包 3 项检查／2 次后台启动、MinIO 存储备份 5 项及网页网关 5 项通过；两份发行镜像可修复 HIGH／CRITICAL 均为 0，未放宽原扫描规则。阶段自有环境和产物按清理约定移除，仅保留当前运行时、复用脚本与脱敏摘要。新版本提交 main 与远程 verify／三架构 CI 在授权范围内继续执行，正式安装发行仍待后续独立验收，分发标记保持 FALSE。
 
+[安全升级后的 main 提交与三架构 CI](desktop-standalone-progress-2026-10-15-security-native-ci.md)已于 2026-10-15 获用户审核通过。main 为 `3332861`，verify 及三架构预览 CI 均成功；Windows 托管 Runner 首轮失联，同一提交重试成功。前端 305、桌面 545、H2／MySQL 各 616 项通过，三平台包检查 9 项、启动／重启 6 次通过；阶段产物已清理。
+
+[默认目录安装与升级验收](desktop-standalone-progress-2026-10-15-install-upgrade.md)已完成本地实现与 Mac arm64 隔离安装闭环：4 项检查、6 次后台启动／重启，覆盖真实旧包安装、Boot 3→Boot 4 覆盖升级、卸载数据保留与重装恢复；另有普通包启动 3 项／2 次及桌面 549 项通过。阶段数据、源码、安装包和工具已清理，已有用户安装保持不变。本地使用独立 QA 应用名与 Applications 子目录；精确默认路径、Intel Mac 与 Windows NSIS 实际验收仍待新代码提交与原生 CI，本模块尚未完成。
+
 ## 用户目标
 
 macOS / Windows 用户安装 TestHub 后即可使用，不需要维护者提供后台地址，不要求用户自行安装数据库、缓存、Java、Node.js 或 Docker。保留现有已完成功能及其数据契约。基线正式桌面版 0.2.0 是连接现有服务的客户端；本轮内部实验包已经包含本地后端，尚未通过正式分发门槛。

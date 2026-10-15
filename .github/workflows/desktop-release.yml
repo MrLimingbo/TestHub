@@ -29,6 +29,9 @@ jobs:
       - run: pnpm lint && pnpm test && pnpm build && pnpm desktop:test
       - name: Build backend in an isolated H2 workspace
         run: node scripts/desktop/test-local-backend.mjs
+      - name: Build previously accepted standalone backend for real installation upgrades
+        if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
+        run: node scripts/desktop/build-install-baseline.mjs --output artifacts/desktop-install-baseline
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-application
@@ -36,6 +39,8 @@ jobs:
             dist
             services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar
             services/platform-api/target/classes/io/testhub/platform/desktop/DesktopEngineWatchdog.class
+            artifacts/desktop-install-baseline/*.jar
+            artifacts/desktop-install-baseline/*.json
           if-no-files-found: error
 
   native:
@@ -147,6 +152,12 @@ jobs:
         env:
           CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+      - name: Build previous installer while preserving the actual candidate installer
+        if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
+        run: node scripts/desktop/build-install-fixtures.mjs --baseline-backend artifacts/desktop-install-baseline/platform-api.jar --candidate-installer "release/desktop/${{ matrix.previewArtifact }}" --output .testhub/installation-fixtures
+      - name: Default installation, upgrade, uninstall retention and reinstall on a fresh native runner
+        if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
+        run: node scripts/desktop/accept-installed.mjs --fixtures .testhub/installation-fixtures/fixtures.json --output "artifacts/desktop/installed-${{ matrix.platform }}-${{ matrix.arch }}.json" --clean-runner-defaults
       - uses: actions/upload-artifact@v4
         with:
           name: TestHub-${{ matrix.platform }}-${{ matrix.arch }}-${{ startsWith(github.ref, 'refs/tags/desktop-v') && 'release' || 'preview' }}
