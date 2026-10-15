@@ -81,6 +81,22 @@ function bootstrap(directory, qaName, nativeDirectory, cleanRunnerDefaults) {
   }
   if (process.platform === 'darwin') electron.app.setActivationPolicy('prohibited')
   globalThis.__testhubPackagedQA = { isPackaged: electron.app.isPackaged, electronVersion: process.versions.electron, resources: process.resourcesPath, executable: process.execPath, data: electron.app.getPath('userData'), created: 0, visibleViolations: 0, unexpectedDialogs: 0 }
+  globalThis.__testhubPackagedQA.failedLocalRequests = []
+  const traceFetch = (original, transport) => async function (...args) {
+    const started = Date.now()
+    try { return await original.apply(this, args) }
+    catch (error) {
+      const address = typeof args[0] === 'string' ? args[0] : args[0]?.url
+      const route = /^http:\/\/127\.0\.0\.1:\d+(\/actuator\/health|\/internal\/desktop\/v1\/(?:status|session))(?:[?#]|$)/.exec(address || '')?.[1]
+      if (route) {
+        const requests = globalThis.__testhubPackagedQA.failedLocalRequests
+        requests.push({ transport, path: route, error: error.name, elapsedMilliseconds: Date.now() - started })
+        if (requests.length > 8) requests.shift()
+      }
+      throw error
+    }
+  }
+  globalThis.fetch = traceFetch(globalThis.fetch, 'main')
   const Original = electron.BrowserWindow
   for (const method of ['show', 'showInactive', 'focus', 'restore']) Original.prototype[method] = function () {}
   const Hidden = new Proxy(Original, { construct(target, args) { const options = args[0] || {}; return Reflect.construct(target, [{ ...options, show: false, focusable: false, webPreferences: { ...options.webPreferences, offscreen: true, backgroundThrottling: false } }], target) } })
@@ -89,7 +105,12 @@ function bootstrap(directory, qaName, nativeDirectory, cleanRunnerDefaults) {
   Module._load = function (request, parent, main) { return request === 'electron' ? quiet : load.call(this, request, parent, main) }
   for (const method of ['showMessageBox', 'showMessageBoxSync', 'showOpenDialog', 'showOpenDialogSync', 'showSaveDialog', 'showSaveDialogSync', 'showErrorBox']) electron.dialog[method] = function () { globalThis.__testhubPackagedQA.unexpectedDialogs++; throw new Error('Unexpected native dialog in packaged acceptance') }
   electron.app.on('browser-window-created', (_event, window) => { globalThis.__testhubPackagedQA.created++; if (window.isVisible()) { globalThis.__testhubPackagedQA.visibleViolations++; throw new Error('Visible packaged QA window') } })
-  electron.app.whenReady().then(() => { if (process.platform === 'darwin') { electron.app.hide(); electron.app.dock?.hide() } })
+  electron.app.whenReady().then(() => {
+    if (process.platform === 'darwin') { electron.app.hide(); electron.app.dock?.hide() }
+    const prototype = Object.getPrototypeOf(electron.session.defaultSession)
+    globalThis.__testhubPackagedQA.sessionFetchTracing = typeof prototype.fetch === 'function'
+    if (typeof prototype.fetch === 'function') prototype.fetch = traceFetch(prototype.fetch, 'session')
+  })
   globalThis.__testhubQaElectron = electron
   return globalThis.__testhubPackagedQA
 }
@@ -99,6 +120,8 @@ function safeDiagnostic(value) {
 }
 async function startupDiagnostics() {
   const result = { pages: browser?.contexts()[0]?.pages().map(p => p.url().split(/[?#]/)[0]) || [], errors: [] }
+  try { Object.assign(result, await inspector.evaluate('({failedLocalRequests:globalThis.__testhubPackagedQA.failedLocalRequests,sessionFetchTracing:globalThis.__testhubPackagedQA.sessionFetchTracing})')) }
+  catch (error) { result.requestTraceError = safeDiagnostic(error.message) }
   const logDirectory = path.join(directory, 'local-workspace/logs')
   try {
     for (const file of (await fs.readdir(logDirectory)).filter(name => name.startsWith('backend-')).slice(-1)) {

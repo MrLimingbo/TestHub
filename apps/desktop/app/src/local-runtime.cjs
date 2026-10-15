@@ -6,6 +6,7 @@ const crypto = require('node:crypto')
 const { spawn } = require('node:child_process')
 const { setTimeout: delay } = require('node:timers/promises')
 const { prepareUpgrade, commitUpgrade, recoverUpgrade } = require('./workspace-upgrade.cjs')
+const { waitForRunnerStatus } = require('./runner-readiness.cjs')
 
 async function privateDirectory(directory) {
   await fs.mkdir(directory, { recursive: true, mode: 0o700 })
@@ -136,18 +137,11 @@ class LocalRuntime {
       TESTHUB_CONTROL_PLANE_URL: origin, RUNNER_HTTP_EXECUTION_ENABLED: String(this.allowedOrigins.length > 0),
       RUNNER_DESKTOP_NETWORK_ACCESS: String(this.allowedOrigins.length > 0),
       RUNNER_ALLOWED_ORIGINS: this.allowedOrigins.join(','), RUNNER_PRECHECK_DELAY_MILLISECONDS: '0' })
-    const runnerDeadline = Date.now() + 15000
-    let runnerReady = false
-    while (Date.now() < runnerDeadline) {
-      if (generation !== this.generation) throw new Error('本地工作区启动已取消。')
-      if (runner.exited || backend.exited) throw new Error('本地执行组件启动失败，请检查工作区日志。')
-      const response = await globalThis.fetch(origin + '/internal/desktop/v1/status?startedAfter=' + encodeURIComponent(runnerStartedAfter), {
-        headers: { 'X-TestHub-Desktop-Session': this.sessionKey }, redirect: 'error', signal: globalThis.AbortSignal.timeout(3000),
-      })
-      if (!response.ok) throw new Error(`本地执行组件状态检查失败（HTTP ${response.status}）。`)
-      if ((await response.json()).data?.apiRunnerReady === true) { runnerReady = true; break }
-      await delay(200)
-    }
+    const runnerReady = await waitForRunnerStatus({ origin, sessionKey: this.sessionKey, since: runnerStartedAfter,
+      statusKey: 'apiRunnerReady', label: '本地执行组件', checkRunning: () => {
+        if (generation !== this.generation) throw new Error('本地工作区启动已取消。')
+        if (runner.exited || backend.exited) throw new Error('本地执行组件启动失败，请检查工作区日志。')
+      } })
     if (!runnerReady) throw new Error('本地执行组件未能在 15 秒内就绪，请检查工作区日志。')
     const jmeterHome = await this.getJmeterHome()
     if (jmeterHome && this.allowedOrigins.length > 0) await this.startJmeter(jmeterHome, true)
@@ -205,15 +199,9 @@ class LocalRuntime {
       RUNNER_ALLOWED_TARGET_ORIGINS: this.allowedOrigins.join(','), ...environment,
       RUNNER_WORK_DIRECTORY: workDirectory, RUNNER_HEARTBEAT_INTERVAL_SECONDS: '2', RUNNER_HEARTBEAT_TTL_SECONDS: '6' })
     try {
-      const deadline = Date.now() + 15000
-      while (Date.now() < deadline) {
-        if (generation !== this.generation || runner.exited) throw new Error(`${label}运行组件已停止，请等待工作区恢复后重试。`)
-        const response = await globalThis.fetch(origin + '/internal/desktop/v1/status?startedAfter=' + encodeURIComponent(since), {
-          headers: { 'X-TestHub-Desktop-Session': this.sessionKey }, redirect: 'error', signal: globalThis.AbortSignal.timeout(3000) })
-        if (!response.ok) throw new Error(`${label}状态检查失败（HTTP ${response.status}）。`)
-        if ((await response.json()).data?.[statusKey] === true) return
-        await delay(200)
-      }
+      const ready = await waitForRunnerStatus({ origin, sessionKey: this.sessionKey, since, statusKey, label,
+        checkRunning: () => { if (generation !== this.generation || runner.exited) throw new Error(`${label}运行组件已停止，请等待工作区恢复后重试。`) } })
+      if (ready) return
       throw new Error(`${label}运行组件未能在 15 秒内就绪。`)
     } catch (error) {
       runner.expectedExit = true

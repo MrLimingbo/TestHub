@@ -75,8 +75,10 @@ async function smoke(stage, label) {
   assert.equal(result.nativeDefaultUserData, true); assert.equal(result.defaultUserDataRedirectedForQA, false)
   assert.equal(result.exactApplicationDefaults, clean)
   assert.match(result.asarSha256, /^[a-f0-9]{64}$/)
-  phases.push({ label, backendSha256: result.backendSha256, asarSha256: result.asarSha256, checks: result.checks.length, launches: result.launches })
+  const phase = { label, backendSha256: result.backendSha256, asarSha256: result.asarSha256, checks: result.checks.length, launches: result.launches }
+  phases.push(phase)
   console.log('PASS installed lifecycle phase: ' + label)
+  return phase
 }
 async function uninstall() {
   if (windows) {
@@ -97,15 +99,34 @@ async function uninstall() {
     assert.equal(removed.processes, 0, 'Uninstall must leave no application process')
   } else await fs.rm(installation, { recursive: true })
 }
+async function removeOwnedWorkspace() {
+  if (await absent(stateFile)) return
+  const record = JSON.parse(await fs.readFile(stateFile, 'utf8'))
+  if (record.ownership) {
+    try { await installationQA.removeSession(record.ownership) } catch (error) { if (error.code !== 'ENOENT') throw error }
+    if (!windows) {
+      const service = record.ownership.cleanRunnerDefaults ? 'testhub-desktop-app' : record.ownership.qaName
+      try { await run('/usr/bin/security', ['delete-generic-password', '-s', service + ' Safe Storage', '-a', service]) }
+      catch (error) { if (error.code !== 44) throw error }
+    }
+  }
+  await fs.rm(stateFile)
+}
 try {
-  await install(baseline); await smoke('seed', 'baseline')
-  if (fixtures) assert.equal(phases[0].backendSha256, fixtures.baselineBackendSha256)
+  await install(candidate); const fresh = await smoke('seed', 'fresh-current'); await uninstall()
+  if (fixtures) assert.equal(fresh.backendSha256, fixtures.candidateBackendSha256)
+  checks.push('current installer creates a fresh native default workspace and preserves its new data on a second genuine launch')
+  // The fresh-current fixture is owned; clear it before creating the immutable legacy upgrade fixture.
+  await removeOwnedWorkspace()
+  await install(baseline); const previous = await smoke('seed', 'baseline')
+  if (fixtures) assert.equal(previous.backendSha256, fixtures.baselineBackendSha256)
   checks.push('real installer copied/extracted to owned Applications or NSIS default installation location; first launch and restart passed')
   const old = JSON.parse(await fs.readFile(stateFile, 'utf8'))
-  await install(candidate); await smoke('verify', 'upgraded')
-  if (fixtures) assert.equal(phases[1].backendSha256, fixtures.candidateBackendSha256)
-  assert.notEqual(phases[0].backendSha256, phases[1].backendSha256, 'Upgrade requires distinct actual backend binaries')
-  if (fixtures?.baselineShellArchiveSha256) assert.notEqual(phases[0].asarSha256, phases[1].asarSha256, 'Current shell repair must be tested against the actual previous shell')
+  await install(candidate); const upgraded = await smoke('verify', 'upgraded')
+  if (fixtures) assert.equal(upgraded.backendSha256, fixtures.candidateBackendSha256)
+  assert.notEqual(previous.backendSha256, upgraded.backendSha256, 'Upgrade requires distinct actual backend binaries')
+  if (fixtures?.baselineShellArchiveSha256) assert.notEqual(previous.asarSha256, upgraded.asarSha256, 'Current shell repair must be tested against the actual previous shell')
+  assert.equal(fresh.backendSha256, upgraded.backendSha256); assert.equal(fresh.asarSha256, upgraded.asarSha256)
   checks.push('replacement installation preserves exact business record, identity and encrypted secret bytes; new runtime marker and pre-upgrade snapshot committed')
   const current = JSON.parse(await fs.readFile(stateFile, 'utf8'))
   const data = await installationQA.verifySession(current.ownership)
@@ -114,13 +135,13 @@ try {
   assert.equal(await hash(path.join(data, 'local-workspace/workspace.mv.db')), dbHash)
   assert.equal(await hash(path.join(data, 'local-workspace/workspace-secrets.enc')), old.secretSha256)
   checks.push('uninstall removes application while retaining exact database and encrypted identity data')
-  await install(candidate); await smoke('verify', 'reinstalled'); await uninstall()
-  assert.equal(phases[2].asarSha256, phases[1].asarSha256)
+  await install(candidate); const reinstalled = await smoke('verify', 'reinstalled'); await uninstall()
+  assert.equal(reinstalled.backendSha256, upgraded.backendSha256); assert.equal(reinstalled.asarSha256, upgraded.asarSha256)
   checks.push('reinstall after uninstall reopens retained identity and exact business record')
   summary = { passed: true, platform: process.platform, arch: process.arch, checks, phases, installerHashes, baselineCommit: fixtures?.baselineCommit, baselineShellArchiveSha256: fixtures?.baselineShellArchiveSha256,
     exactInstallationAndDataDefaults: clean, applicationsRootUsed: !windows, isolatedApplicationNameForLocalQA: !clean,
     workspacePathOverridden: false, finderOrInstallerWizardOpened: false, userInstalledApplicationChanged: false,
-    formalSigningOrGatekeeperValidated: false }
+    formalSigningOrGatekeeperValidated: false, freshCurrentDefaultWorkspacePassed: true }
 } finally {
   // Only an installation created after the exclusive absent check above may be cleaned.
   if (ownsInstallation && !await absent(installation)) {
@@ -128,17 +149,7 @@ try {
     catch (error) { cleanupError = error }
   }
   if (!clean && !windows) await fs.rmdir(path.dirname(installation))
-  if (!await absent(stateFile)) {
-    const record = JSON.parse(await fs.readFile(stateFile, 'utf8'))
-    if (record.ownership) {
-      try { await installationQA.removeSession(record.ownership) } catch (error) { if (error.code !== 'ENOENT') cleanupError ||= error }
-      if (!windows) {
-        const service = record.ownership.cleanRunnerDefaults ? 'testhub-desktop-app' : record.ownership.qaName
-        try { await run('/usr/bin/security', ['delete-generic-password', '-s', service + ' Safe Storage', '-a', service]) }
-        catch (error) { if (error.code !== 44) cleanupError ||= error }
-      }
-    }
-  }
+  try { await removeOwnedWorkspace() } catch (error) { cleanupError ||= error }
   await fs.rm(directory, { recursive: true, force: true })
 }
 if (cleanupError) throw cleanupError
