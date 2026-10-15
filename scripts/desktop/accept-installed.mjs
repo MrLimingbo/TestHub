@@ -25,8 +25,19 @@ const checks = [], phases = [], installerHashes = {}
 let ownsInstallation = false, summary, cleanupError
 const hash = async file => crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex')
 async function absent(file) { try { await fs.lstat(file); return false } catch (error) { if (error.code === 'ENOENT') return true; throw error } }
-async function windowsState() {
-  const command = "$ErrorActionPreference='Stop'; $w=New-Object -ComObject WScript.Shell; $links=@(@([Environment]::GetFolderPath('Desktop'),[Environment]::GetFolderPath('Programs')) | ForEach-Object { $p=Join-Path $_ 'TestHub.lnk'; if(Test-Path -LiteralPath $p){ @{target=$w.CreateShortcut($p).TargetPath} } }); $keys=@(Get-ItemProperty 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' -ErrorAction SilentlyContinue | Where-Object {$_.DisplayName -match '^TestHub( [0-9].*)?$'}); @{shortcuts=@($links);registryEntries=$keys.Count;processes=@(Get-Process TestHub -ErrorAction SilentlyContinue).Count} | ConvertTo-Json -Depth 4 -Compress"
+async function windowsState(resolveTargets = false) {
+  // Never open a shortcut through COM while the copied NSIS uninstaller may be deleting it.
+  const command = [
+    "$ErrorActionPreference='Stop';",
+    resolveTargets ? '$w=New-Object -ComObject WScript.Shell;' : '',
+    "$folders=@(@{location='desktop';path=[Environment]::GetFolderPath('Desktop')},@{location='start-menu';path=[Environment]::GetFolderPath('Programs')});",
+    "$links=@($folders | ForEach-Object { $p=Join-Path $_.path 'TestHub.lnk'; if(Test-Path -LiteralPath $p){ $item=@{location=$_.location};",
+    resolveTargets ? '$shortcut=$w.CreateShortcut($p); try { $item.target=$shortcut.TargetPath } finally { [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($shortcut) };' : '',
+    '$item } });',
+    resolveTargets ? '[void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($w);' : '',
+    "$keys=@(Get-ItemProperty 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' -ErrorAction SilentlyContinue | Where-Object {$_.DisplayName -match '^TestHub( [0-9].*)?$'});",
+    "@{shortcuts=@($links);registryEntries=$keys.Count;processes=@(Get-Process TestHub -ErrorAction SilentlyContinue).Count} | ConvertTo-Json -Depth 4 -Compress",
+  ].join(' ')
   const result = await run(path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-Command', command])
   return JSON.parse(result.stdout)
 }
@@ -45,7 +56,7 @@ async function install(image) {
     // Assisted NSIS /S neither starts the app nor displays the wizard; no force-run flag is supplied.
     await run(image, ['/S'], { timeout: 300000, maxBuffer: 2 * 1024 * 1024 })
     assert.equal(await absent(app), false)
-    const installed = await windowsState()
+    const installed = await windowsState(true)
     assert.equal(installed.registryEntries, 1); assert.equal(installed.shortcuts.length, 2)
     assert.ok(installed.shortcuts.every(link => path.normalize(link.target).toLowerCase() === path.normalize(app).toLowerCase()))
     assert.equal(installed.processes, 0, 'Silent installation must not launch an unguarded visible application')
@@ -95,7 +106,7 @@ async function uninstall() {
     } while (Date.now() < deadline)
     assert.equal(await absent(installation), true, 'Uninstaller must remove its installed directory')
     assert.equal(removed.registryEntries, 0, 'Uninstaller must remove its registry entries')
-    assert.equal(removed.shortcuts.length, 0, 'Uninstaller must remove both shortcuts')
+    assert.equal(removed.shortcuts.length, 0, 'Uninstaller must remove both shortcuts: ' + JSON.stringify(removed.shortcuts))
     assert.equal(removed.processes, 0, 'Uninstall must leave no application process')
   } else await fs.rm(installation, { recursive: true })
 }
