@@ -68,7 +68,8 @@ async function prepareUpgrade(directory, backend) {
       if (!(await fs.lstat(source)).isFile()) throw new Error('升级前数据文件无效。')
       await fs.mkdir(path.dirname(target), { recursive: true, mode: 0o700 })
       await fs.copyFile(source, target, require('node:fs').constants.COPYFILE_EXCL)
-      const handle = await fs.open(target, 'r'); try { await handle.sync() } finally { await handle.close() }
+      // Windows requires write access to flush a copied file; r+ preserves its existing contents.
+      const handle = await fs.open(target, 'r+'); try { await handle.sync() } finally { await handle.close() }
       const expected = checksums.get(name)
       if (expected && await digest(target) !== expected) throw new Error('升级快照校验失败，未启动新版本。')
       for (let parent = path.dirname(target); parent !== snapshot; parent = path.dirname(parent)) await syncDirectory(parent)

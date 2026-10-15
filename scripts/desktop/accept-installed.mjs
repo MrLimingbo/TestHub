@@ -74,7 +74,8 @@ async function smoke(stage, label) {
   assert.equal(result.passed, true); assert.equal(result.asarUnchanged, true)
   assert.equal(result.nativeDefaultUserData, true); assert.equal(result.defaultUserDataRedirectedForQA, false)
   assert.equal(result.exactApplicationDefaults, clean)
-  phases.push({ label, backendSha256: result.backendSha256, checks: result.checks.length, launches: result.launches })
+  assert.match(result.asarSha256, /^[a-f0-9]{64}$/)
+  phases.push({ label, backendSha256: result.backendSha256, asarSha256: result.asarSha256, checks: result.checks.length, launches: result.launches })
 }
 async function uninstall() {
   if (windows) {
@@ -95,6 +96,7 @@ try {
   await install(candidate); await smoke('verify', 'upgraded')
   if (fixtures) assert.equal(phases[1].backendSha256, fixtures.candidateBackendSha256)
   assert.notEqual(phases[0].backendSha256, phases[1].backendSha256, 'Upgrade requires distinct actual backend binaries')
+  if (fixtures?.baselineShellArchiveSha256) assert.notEqual(phases[0].asarSha256, phases[1].asarSha256, 'Current shell repair must be tested against the actual previous shell')
   checks.push('replacement installation preserves exact business record, identity and encrypted secret bytes; new runtime marker and pre-upgrade snapshot committed')
   const current = JSON.parse(await fs.readFile(stateFile, 'utf8'))
   const data = await installationQA.verifySession(current.ownership)
@@ -104,8 +106,9 @@ try {
   assert.equal(await hash(path.join(data, 'local-workspace/workspace-secrets.enc')), old.secretSha256)
   checks.push('uninstall removes application while retaining exact database and encrypted identity data')
   await install(candidate); await smoke('verify', 'reinstalled'); await uninstall()
+  assert.equal(phases[2].asarSha256, phases[1].asarSha256)
   checks.push('reinstall after uninstall reopens retained identity and exact business record')
-  summary = { passed: true, platform: process.platform, arch: process.arch, checks, phases, installerHashes,
+  summary = { passed: true, platform: process.platform, arch: process.arch, checks, phases, installerHashes, baselineCommit: fixtures?.baselineCommit, baselineShellArchiveSha256: fixtures?.baselineShellArchiveSha256,
     exactInstallationAndDataDefaults: clean, applicationsRootUsed: !windows, isolatedApplicationNameForLocalQA: !clean,
     workspacePathOverridden: false, finderOrInstallerWizardOpened: false, userInstalledApplicationChanged: false,
     formalSigningOrGatekeeperValidated: false }

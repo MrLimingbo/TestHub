@@ -1,4 +1,4 @@
-// Build two real installers from the same shell with the previous and current backend binaries.
+// Build real installers with the previous immutable shell/backend and the current candidate.
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { createRequire } from 'node:module'
@@ -12,6 +12,15 @@ const root = process.cwd(), output = path.resolve(value('--output')), baseline =
 const target = `${process.platform}-${process.arch}`, windows = process.platform === 'win32'
 if (!windows && process.platform !== 'darwin') throw new Error('Installer fixtures require a native Mac or Windows')
 await fs.mkdir(output, { recursive: false })
+const metadata = JSON.parse(await fs.readFile(path.join(path.dirname(baseline), 'baseline.json'), 'utf8'))
+const shellArchive = path.join(path.dirname(baseline), 'desktop-app.tar')
+if (metadata.commit !== '3932ef152604244438f007b3e61ed4867a23b443' || metadata.shellSource !== metadata.commit + ':apps/desktop/app'
+  || metadata.backendSha256 !== await digest(baseline) || !/^[a-f0-9]{64}$/.test(metadata.shellArchiveSha256 || '')
+  || metadata.shellArchiveSha256 !== await digest(shellArchive) || metadata.isolatedAcceptancePassed !== true) throw new Error('Previous shell/backend provenance is invalid')
+const baselineApp = path.join(output, 'baseline-app'); await fs.mkdir(baselineApp)
+await run('tar', ['-xf', shellArchive, '-C', baselineApp])
+await fs.access(path.join(baselineApp, 'src/main.cjs'))
+if (JSON.parse(await fs.readFile(path.join(baselineApp, 'package.json'), 'utf8')).name !== 'testhub-desktop-app') throw new Error('Previous shell application identity changed')
 const currentRuntime = path.resolve('.testhub/desktop-runtime', target)
 const manifest = JSON.parse(await fs.readFile(path.join(currentRuntime, 'runtime.json'), 'utf8'))
 await verifyIntegrity(currentRuntime, manifest)
@@ -29,7 +38,7 @@ const externalCandidate = args.includes('--candidate-installer') ? await fs.real
 for (const [label, runtime] of [['baseline', baselineRoot], ...(!externalCandidate ? [['candidate', path.dirname(currentRuntime)]] : [])]) {
   const destination = path.join(output, label)
   const filename = windows ? 'TestHub-install-acceptance.exe' : 'TestHub-install-acceptance.dmg'
-  const configuration = { ...globalThis.structuredClone(baseConfig), directories: { ...baseConfig.directories, app: path.join(root, 'apps/desktop/app'), buildResources: path.join(root, 'apps/desktop/build'), output: destination }, [windows ? 'win' : 'mac']: { ...baseConfig[windows ? 'win' : 'mac'],
+  const configuration = { ...globalThis.structuredClone(baseConfig), directories: { ...baseConfig.directories, app: label === 'baseline' ? baselineApp : path.join(root, 'apps/desktop/app'), buildResources: path.join(root, 'apps/desktop/build'), output: destination }, [windows ? 'win' : 'mac']: { ...baseConfig[windows ? 'win' : 'mac'],
     artifactName: filename, extraResources: [{ from: runtime, to: 'local-runtime', filter: [target + '/**'] }],
   } }
   const file = path.join(output, label + '.json'); await fs.writeFile(file, JSON.stringify(configuration))
@@ -43,5 +52,5 @@ for (const [label, runtime] of [['baseline', baselineRoot], ...(!externalCandida
   await fs.access(fixture[label])
 }
 if (externalCandidate) fixture.candidate = externalCandidate
-await fs.writeFile(path.join(output, 'fixtures.json'), JSON.stringify({ ...fixture, baselineBackendSha256: old.backendSha256, candidateBackendSha256: manifest.backendSha256, distributionReady: false }, null, 2))
+await fs.writeFile(path.join(output, 'fixtures.json'), JSON.stringify({ ...fixture, baselineCommit: metadata.commit, baselineShellArchiveSha256: metadata.shellArchiveSha256, baselineBackendSha256: old.backendSha256, candidateBackendSha256: manifest.backendSha256, distributionReady: false }, null, 2))
 console.log(JSON.stringify(fixture))

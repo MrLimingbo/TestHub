@@ -35,7 +35,8 @@ exports.verifyRuntime = verifyRuntime
 exports.default = async context => {
   const platform = context.platform.nodeName
   const architectures = context.arch === 'universal' ? ['arm64', 'x64'] : [context.arch]
-  const root = path.resolve(context.appDir, '../../../.testhub/desktop-runtime')
+  // A previous shell can be staged outside apps/desktop/app; runtimes still belong to this repository.
+  const root = path.resolve(__dirname, '../../../.testhub/desktop-runtime')
   for (const arch of architectures) await verifyRuntime(root, platform, arch, process.env.TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE === '1')
   // The Electron shell uses only built-ins; do not hoist unrelated monorepo dependencies.
   return false

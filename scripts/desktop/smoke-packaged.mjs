@@ -217,7 +217,7 @@ try {
     state = { ownership, identityId: identity.id, base, requirement, secretSha256: crypto.createHash('sha256').update(secret).digest('hex'), backendSha256: manifest.backendSha256 }
     await fs.writeFile(statePath, JSON.stringify(state), { mode: 0o600 })
   }
-  summary = { passed: true, platform: process.platform, arch: process.arch, isPackaged: true, checks, launches: sanitized, asarUnchanged: true, backendSha256: manifest.backendSha256,
+  summary = { passed: true, platform: process.platform, arch: process.arch, isPackaged: true, checks, launches: sanitized, asarUnchanged: true, asarSha256: originalAsarHash, backendSha256: manifest.backendSha256,
     externalCommandsExcluded: ['java', 'node', 'mvn', 'pnpm'], defaultUserDataRedirectedForQA: !ownership, applicationNameChangedForQA: !ownership?.cleanRunnerDefaults, nativeDefaultUserData: Boolean(ownership), exactApplicationDefaults: Boolean(ownership?.cleanRunnerDefaults), installed: false }
 } finally {
   await close().catch(() => {})

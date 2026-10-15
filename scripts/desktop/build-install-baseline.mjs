@@ -10,9 +10,6 @@ const output = path.resolve(args[args.indexOf('--output') + 1])
 const commit = '3932ef152604244438f007b3e61ed4867a23b443'
 try { await run('git', ['cat-file', '-e', commit + '^{commit}']) }
 catch { await run('git', ['fetch', '--no-tags', '--depth=1', 'origin', commit]) }
-await run('git', ['diff', '--quiet', commit, '--', 'apps/desktop/app'])
-const untrackedShell = await run('git', ['ls-files', '--others', '--exclude-standard', '--', 'apps/desktop/app'])
-if (untrackedShell.stdout.trim()) throw new Error('The baseline shell differs from the working shell')
 await fs.mkdir('.testhub', { recursive: true })
 const temporary = await fs.mkdtemp(path.resolve('.testhub/installation-baseline-'))
 try {
@@ -27,5 +24,8 @@ try {
   await fs.mkdir(path.dirname(output), { recursive: true })
   await fs.mkdir(output, { recursive: false })
   await fs.writeFile(path.join(output, 'platform-api.jar'), jar, { flag: 'wx' })
-  await fs.writeFile(path.join(output, 'baseline.json'), JSON.stringify({ commit, backendSha256: crypto.createHash('sha256').update(jar).digest('hex'), shellUnchangedSinceBaseline: true, isolatedAcceptancePassed: true, distributionReady: false }, null, 2), { flag: 'wx' })
+  // Preserve the actual previous shell when a native acceptance exposes a bug in the current shell.
+  const shell = await run('git', ['archive', '--format=tar', commit + ':apps/desktop/app'], { encoding: 'buffer', maxBuffer: 64 * 1024 * 1024 })
+  await fs.writeFile(path.join(output, 'desktop-app.tar'), shell.stdout, { flag: 'wx' })
+  await fs.writeFile(path.join(output, 'baseline.json'), JSON.stringify({ commit, backendSha256: crypto.createHash('sha256').update(jar).digest('hex'), shellArchiveSha256: crypto.createHash('sha256').update(shell.stdout).digest('hex'), shellSource: commit + ':apps/desktop/app', isolatedAcceptancePassed: true, distributionReady: false }, null, 2), { flag: 'wx' })
 } finally { await fs.rm(temporary, { recursive: true, force: true }) }

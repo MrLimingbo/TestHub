@@ -94,7 +94,8 @@ async function exportWorkspace({ directory, destination, password, secrets, data
     signal?.throwIfAborted()
     // Exclusive copy works on removable filesystems without hard-link support and never overwrites an older backup.
     await fs.copyFile(temporary, destination, require('node:fs').constants.COPYFILE_EXCL)
-    const published = await fs.open(destination, 'r'); try { await published.sync() } finally { await published.close() }
+    // Windows requires write access to flush the published copy without truncating it.
+    const published = await fs.open(destination, 'r+'); try { await published.sync() } finally { await published.close() }
     return { createdAt: manifest.createdAt, fileCount: files.length, bytes: total, databaseVersion }
   } finally { key.fill(0); encoded.fill(0); await output?.close(); await fs.rm(temporary, { force: true }) }
 }
