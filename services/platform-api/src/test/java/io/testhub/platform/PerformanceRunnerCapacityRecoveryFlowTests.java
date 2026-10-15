@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @org.springframework.boot.test.context.SpringBootTest
-@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+@org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 class PerformanceRunnerCapacityRecoveryFlowTests {
     private static final String CAPACITY_RUNNER = "jmeter-runner-capacity-test";
     private static final String OFFLINE_RUNNER = "jmeter-runner-offline-test";

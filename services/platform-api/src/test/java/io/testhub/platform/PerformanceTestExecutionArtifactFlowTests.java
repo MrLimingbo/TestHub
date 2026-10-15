@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @org.springframework.boot.test.context.SpringBootTest
-@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+@org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 class PerformanceTestExecutionArtifactFlowTests {
     private static final String RUNNER_ID = "jmeter-runner-artifact-test";
     private static final String KEY = "testhub-performance-runner-local-development-key-2026";

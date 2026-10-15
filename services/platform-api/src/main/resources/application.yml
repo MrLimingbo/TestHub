@@ -1,6 +1,10 @@
 spring:
   application:
     name: testhub-platform-api
+  http:
+    converters:
+      # Retain the existing API/sync JSON contract while using Spring Framework 7.
+      preferred-json-mapper: jackson2
   datasource:
     url: ${TESTHUB_DB_URL:jdbc:mysql://localhost:13307/testhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
     username: ${TESTHUB_DB_USERNAME:testhub}

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -16,7 +17,12 @@ class DesktopBrokerControllerTests {
     private final DesktopRuntimeBroker broker = mock(DesktopRuntimeBroker.class);
     private final ObjectMapper json = new ObjectMapper();
     private MockMvc mvc;
-    @BeforeEach void initialize() { mvc = MockMvcBuilders.standaloneSetup(new DesktopBrokerController(broker, secret)).build(); }
+    @BeforeEach void initialize() { mvc = mvc(secret); }
+    // Standalone MockMvc does not load the application's preferred-json-mapper setting.
+    private MockMvc mvc(String key) {
+        return MockMvcBuilders.standaloneSetup(new DesktopBrokerController(broker, key))
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(json)).build();
+    }
     @Test void acceptsOnlyLoopbackNativeRequestsWithMatchingEngineAndRunnerCredential() throws Exception {
         mvc.perform(request("ping", Map.of())).andExpect(status().isOk()).andExpect(jsonPath("$.result").value("PONG"));
         mvc.perform(request("ping", Map.of()).header("Origin", "http://localhost")).andExpect(status().isForbidden());
@@ -40,7 +46,7 @@ class DesktopBrokerControllerTests {
         mvc.perform(request("heartbeat", Map.of("body", "{}", "ttlSeconds", 301))).andExpect(status().isBadRequest());
         mvc.perform(request("read", Map.of("stream", "testhub:runner:api:tasks:v1", "group", "testhub-api-runner-v1", "offset", ">", "count", 1001)))
                 .andExpect(status().isBadRequest());
-        mvc = MockMvcBuilders.standaloneSetup(new DesktopBrokerController(broker, "")).build();
+        mvc = mvc("");
         mvc.perform(request("ping", Map.of())).andExpect(status().isForbidden());
         verifyNoInteractions(broker);
     }

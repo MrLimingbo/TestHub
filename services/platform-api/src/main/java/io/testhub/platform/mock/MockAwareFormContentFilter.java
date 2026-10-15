@@ -1,7 +1,7 @@
 package io.testhub.platform.mock;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.boot.web.servlet.filter.OrderedFormContentFilter;
+import org.springframework.boot.servlet.filter.OrderedFormContentFilter;
 import org.springframework.stereotype.Component;
 
 @Component

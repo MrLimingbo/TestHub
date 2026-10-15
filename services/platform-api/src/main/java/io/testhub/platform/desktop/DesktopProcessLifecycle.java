@@ -7,7 +7,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;

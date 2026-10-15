@@ -10,3 +10,7 @@ target
 **/node_modules
 *.log
 .env
+.testhub
+release
+output
+artifacts

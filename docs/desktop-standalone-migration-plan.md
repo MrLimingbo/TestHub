@@ -57,6 +57,10 @@
 
 [桌面发行构建准备与真实 Mac 包首启模块](desktop-standalone-progress-2026-10-14-release-preparation.md)已于 2026-10-14 获用户审核通过。修复发行工作流漏建后端／前端及本地运行时，建立原生 Mac arm64／x64、Windows x64 矩阵；新增全树完整性、内置架构与许可 preflight、复制后校验和真正的 isPackaged 程序验收。当前 Mac arm64 626 个运行时文件、165 个包内原生源文件匹配，545 项桌面回归、lint、actionlint 静态检查通过；真实 `.app` 与 DMG 复制后程序各 3 项通过，身份与业务记录持久，窗口违规及意外弹窗为 0。阶段测试数据与未用旧运行时已清理，业务构建仍 H2 V42／MySQL V99。分发标记保持 FALSE；原生 Intel／Windows CI、正式签名／公证、默认目录与干净系统安装及实际发行仍待独立验收。
 
+[原生桌面 CI 构建验收](desktop-standalone-progress-2026-10-14-native-ci.md)已于 2026-10-14 获用户审核通过。275 个已审核代码／测试／说明文件及 CI 修复已提交 GitHub main，实际验证提交为 `3932ef1`。原生 Mac arm64、Intel Mac x64、Windows x64 全部成功：前端 305、桌面 545、隔离 H2 后端 616 项通过；三平台合计 9 项真实包检查、6 次首启／重启通过。两种 Mac 各 624、Windows 684 个运行时文件及原生 Java／Node 校验通过，H2 V42、Electron 43.2.0、后端摘要一致；窗口隐藏、不可聚焦、离屏，ASAR 未修改，阶段数据清理完成。5 个临时构建／安装器 artifact 已删除，仅保留 3 份脱敏原生摘要，本地日志与工具已清理，用户工作区和安装程序保留。正式门槛仍关闭；常规 verify 的 MinIO 拉取及安全扫描失败、签名／公证、干净系统实际安装、移动端设备和未纳入的同步范围仍待后续模块。
+
+[发行检查修复与开源框架升级](desktop-standalone-progress-2026-10-14-release-security.md)已于 2026-10-15 获用户审核通过，并授权提交 main 与复验远程 CI。按用户选择升级至 Spring Boot 4.0.8／Spring 7.0.9，保留业务 Jackson 2 JSON 契约及 H2 2.3.232；修复 Jackson 2／3、Tomcat、Netty 与网页 Alpine 系统包，MinIO 采用固定提交和归档校验的源码构建。最终 H2 616、隔离 MySQL／Redis／S3 616、桌面 545 项通过，前端 lint／test／build 通过；旧 H2 和 MySQL 工作区真实升级保留完整记录、密钥密文、附件和原会话。新 Mac arm64 包 3 项检查／2 次后台启动、MinIO 存储备份 5 项及网页网关 5 项通过；两份发行镜像可修复 HIGH／CRITICAL 均为 0，未放宽原扫描规则。阶段自有环境和产物按清理约定移除，仅保留当前运行时、复用脚本与脱敏摘要。新版本提交 main 与远程 verify／三架构 CI 在授权范围内继续执行，正式安装发行仍待后续独立验收，分发标记保持 FALSE。
+
 ## 用户目标
 
 macOS / Windows 用户安装 TestHub 后即可使用，不需要维护者提供后台地址，不要求用户自行安装数据库、缓存、Java、Node.js 或 Docker。保留现有已完成功能及其数据契约。基线正式桌面版 0.2.0 是连接现有服务的客户端；本轮内部实验包已经包含本地后端，尚未通过正式分发门槛。
