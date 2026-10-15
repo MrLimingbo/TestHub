@@ -93,6 +93,21 @@ function bootstrap(directory, qaName, nativeDirectory, cleanRunnerDefaults) {
   globalThis.__testhubQaElectron = electron
   return globalThis.__testhubPackagedQA
 }
+function safeDiagnostic(value) {
+  return String(value).replace(/(?:password|secret|authorization|token|credential)\s*[:=]\s*[^\s,;]+/gi, '[redacted]')
+    .replace(/[a-f0-9]{32,}|[A-Za-z0-9+/_=-]{48,}/gi, '[redacted]').slice(0, 2000)
+}
+async function startupDiagnostics() {
+  const result = { pages: browser?.contexts()[0]?.pages().map(p => p.url().split(/[?#]/)[0]) || [], errors: [] }
+  const logDirectory = path.join(directory, 'local-workspace/logs')
+  try {
+    for (const file of (await fs.readdir(logDirectory)).filter(name => name.startsWith('backend-')).slice(-1)) {
+      const log = await fs.readFile(path.join(logDirectory, file), 'utf8')
+      result.errors = log.split('\n').filter(line => /ERROR|Exception|Caused by:|APPLICATION FAILED|Description:|Reason:/.test(line)).slice(-10).map(safeDiagnostic)
+    }
+  } catch (error) { if (error.code !== 'ENOENT') result.logReadError = error.code }
+  return result
+}
 async function launch() {
   transcript = ''
   const env = { ...process.env }
@@ -124,13 +139,22 @@ async function launch() {
   for (let n = 0; n < 900; n++) { chrome = /DevTools listening on (ws:\/\/[^\s]+)/.exec(transcript)?.[1]; if (chrome) break; if (child.exitCode !== null) throw new Error('Packaged executable exited during startup'); await delay(100) }
   if (!chrome) throw new Error('Packaged browser unavailable')
   browser = await chromium.connectOverCDP(chrome)
-  for (let n = 0; n < 900; n++) {
+  const workspaceDeadline = Date.now() + 90000
+  for (let n = 0; Date.now() < workspaceDeadline; n++) {
     const page = browser.contexts()[0]?.pages().find(p => p.url().startsWith('http://127.0.0.1:'))
     if (page) { await page.getByText('本地工作区', { exact: true }).first().waitFor(); return page }
+    if (n % 10 === 0) {
+      const setup = browser.contexts()[0]?.pages().find(p => p.url().startsWith('testhub-desktop://setup/'))
+      if (setup) {
+        // The setup page may disappear as the main window opens. This diagnostic never replaces the startup assertion.
+        const status = await Promise.race([setup.evaluate(async () => (await globalThis.testhubDesktop.loadPreferences()).localStatus).catch(error => ({ probeError: error.name })), delay(1500).then(() => null)])
+        if (status?.phase === 'error') throw new Error('Packaged workspace failed: ' + safeDiagnostic(status.message) + ' ' + JSON.stringify(await startupDiagnostics()))
+      }
+    }
     if (child.exitCode !== null) throw new Error('Packaged executable exited during backend startup')
     await delay(100)
   }
-  throw new Error('Packaged local workspace startup exceeded 90 seconds')
+  throw new Error('Packaged local workspace startup exceeded 90 seconds: ' + JSON.stringify(await startupDiagnostics()))
 }
 async function close() {
   if (!child || child.exitCode !== null) return
