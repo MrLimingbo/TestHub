@@ -9,7 +9,7 @@
     "test": "node --test test/**/*.test.cjs",
     "package:dir": "electron-builder --dir --publish never",
     "package:mac": "electron-builder --mac dmg --universal --publish never",
-    "package:mac:signed": "electron-builder --mac dmg --universal --publish never -c.mac.notarize=true",
+    "package:mac:signed": "electron-builder --mac dmg --universal --publish never -c.forceCodeSigning=true -c.mac.notarize=true",
     "package:win": "electron-builder --win nsis --x64 --publish never"
   },
   "devDependencies": {

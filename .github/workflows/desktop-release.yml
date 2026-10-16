@@ -142,7 +142,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
       - name: Create signed macOS release
         if: startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'mac'
-        run: pnpm --filter @testhub/desktop exec electron-builder --mac dmg --${{ matrix.arch }} --publish never --config.mac.notarize=true --config.mac.artifactName=${{ matrix.artifact }}
+        run: pnpm --filter @testhub/desktop exec electron-builder --mac dmg --${{ matrix.arch }} --publish never --config.forceCodeSigning=true --config.mac.hardenedRuntime=true --config.mac.notarize=true --config.mac.artifactName=${{ matrix.artifact }}
         env:
           CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
@@ -151,10 +151,18 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       - name: Create signed Windows release
         if: startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'win'
-        run: pnpm --filter @testhub/desktop exec electron-builder --win nsis --x64 --publish never --config.win.artifactName=${{ matrix.artifact }}
+        run: pnpm --filter @testhub/desktop exec electron-builder --win nsis --x64 --publish never --config.forceCodeSigning=true --config.win.artifactName=${{ matrix.artifact }}
         env:
           CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+      - name: Verify native signatures and the final macOS image payload before release upload
+        if: startsWith(github.ref, 'refs/tags/desktop-v')
+        run: node scripts/desktop/verify-signed-artifacts.mjs --platform "${{ matrix.platform }}" --arch "${{ matrix.arch }}" --app "${{ matrix.app }}" --installer "release/desktop/${{ matrix.artifact }}" --output "artifacts/desktop/signature-${{ matrix.platform }}-${{ matrix.arch }}.json" --revision "${{ github.sha }}"
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Signed application startup and persistence in a hidden isolated workspace
+        if: startsWith(github.ref, 'refs/tags/desktop-v')
+        run: node scripts/desktop/smoke-packaged.mjs --app "${{ matrix.app }}" --output "artifacts/desktop/signed-startup-${{ matrix.platform }}-${{ matrix.arch }}.json"
       - name: Build previous installer while preserving the actual candidate installer
         if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
         run: node scripts/desktop/build-install-fixtures.mjs --baseline-backend artifacts/desktop-install-baseline/platform-api.jar --candidate-installer "release/desktop/${{ matrix.previewArtifact }}" --output .testhub/installation-fixtures

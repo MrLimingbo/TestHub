@@ -65,13 +65,23 @@ Mac 的 JDK／Node 不得依赖 Homebrew 等包外运行库。准备脚本保持
 
 macOS 标签构建启用 Electron Builder 公证；Windows 标签构建使用 Authenticode 证书。证书、私钥、Apple 凭据和签名文件只存在于 GitHub Secrets，不能写入仓库、`.env`、安装包日志或发布说明。
 
+正式构建显式设置 `forceCodeSigning=true`，Mac 同时启用 Hardened Runtime。按 [electron-builder 26 配置说明](https://www.electron.build/v26/docs/configuration/)，默认不强制签名时，签名配置缺失可能只产生警告；凭据预检不能代替产物检查。
+
+正式标签任务在上传发行安装器前执行 `scripts/desktop/verify-signed-artifacts.mjs`，摘要保留源码提交、安装器 SHA-256 和已执行的原生校验结果：
+
+- Mac：`codesign --verify --deep --strict`、预期应用标识及 Apple Team ID、Developer ID Application、Hardened Runtime、安全时间戳、`stapler validate` 和应用 `spctl --assess` 均须通过；随后仅以只读、隐藏方式挂载最终 DMG，对映像内 TestHub.app 重做这些检查，并核对其主程序和 ASAR 与构建应用一致。命令依据 [Apple 公证故障排查](https://developer.apple.com/documentation/security/resolving-common-notarization-issues)。此检查覆盖 DMG 内的应用，不把 DMG 本身的 Gatekeeper 打开检查记为通过。
+- Windows：通过固定 PowerShell 脚本和 `-LiteralPath` 检查构建的 TestHub.exe 及最终 NSIS EXE；两者都必须是 `Valid` 的嵌入式 Authenticode 签名，具备代码签名用途与时间戳，且签名证书 SHA-256 一致。依据 [Microsoft Get-AuthenticodeSignature](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/get-authenticodesignature)；Catalog 签名不能替代嵌入式签名。此步骤不提取 Windows 安装器内容，签名安装器的真实安装仍需另外验收。
+
+签名检查通过后，还须使用原有隐藏／离屏引导重新启动**签名后的程序**，验证首启和持久性。任一检查失败均阻断该任务的发行安装器上传，发布任务也无法继续；不因设置了凭据、完成内部 smoke 或修改布尔值就自动解除分发门槛。摘要路径须为新文件，旧报告不会被覆盖或复用；仅输出脱敏的证书摘要和检查结论，不记录证书主体、私钥或原始系统工具输出。成功校验和真实签名／公证仍需实际证书及原生 CI 验收，单元测试中的替代系统命令不构成该证据。
+
+
 发布前需在干净隔离系统安装 DMG 和 EXE，验证无需开发工具的本地首启、默认数据目录、重启、退出及升级保留数据；另外连接已批准的网页服务，验证登录、项目切换、内网接口授权、历史、附件和同步。真实安装、签名／公证、Gatekeeper／Authenticode 和移动设备执行均须单独留存结果；后台包 smoke 不能代替这些检查。归档安装器摘要、签名状态、源码提交和运行时清单，并完成发布安全扫描。
 
 ## 安装与升级自动验收
 
 预览 CI 增加真实安装生命周期检查。共享任务从固定的上一已验收提交 `3932ef1` 构建隔离后端基线，同时归档该提交实际桌面壳，分别记录后端与壳归档的 SHA-256。各原生任务核对来源与摘要后构建旧版安装器，候选直接保留实际预览安装器，在独占安装位置执行首次安装、覆盖升级、卸载保留数据和重装恢复。旧版壳不替换为当前壳，因此可覆盖桌面壳自身的升级修复。两份后端摘要必须不同，升级后核对完整业务记录、身份、密文字节、运行版本标记和升级前快照。
 
-各原生任务还运行备份、恢复和升级的 21 项文件系统回归。升级快照和加密备份副本使用 `r+` 句柄执行 `sync()`，保持已有内容且保留刷新持久化；Windows 的 [FlushFileBuffers](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers) 要求文件句柄具备写权限，使用只读句柄会使升级或导出失败。
+各原生任务还运行备份、恢复和升级的 21 项文件系统回归：两种 Mac 各 21 项通过；Windows 按已有平台规则跳过依赖 `/etc/hosts` 的符号链接用例，其余 20 项通过，不能将该跳过项计入通过。升级快照和加密备份副本使用 `r+` 句柄执行 `sync()`，保持已有内容且保留刷新持久化；Windows 的 [FlushFileBuffers](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers) 要求文件句柄具备写权限，使用只读句柄会使升级或导出失败。
 
 安装生命周期先检查当前候选在全新默认工作区的首次安装与两次启动；移除这份自有夹具后，再用固定旧壳创建升级数据，检查升级、卸载保留和重装。每个平台共 5 项检查、8 次成功启动，当前候选不自动重试。旧基线保持原样，失败不会替换成新壳或补记为成功。启动诊断只记录已知 loopback 状态／会话端点、传输类型、耗时和异常名，不记录请求头、密钥、查询参数或业务响应。
 
