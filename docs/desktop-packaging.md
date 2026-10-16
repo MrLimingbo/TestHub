@@ -56,6 +56,8 @@ Mac 的 JDK／Node 不得依赖 Homebrew 等包外运行库。准备脚本保持
 
 `workflow_dispatch` 上传 `TestHub-macOS-arm64-preview.dmg`、`TestHub-macOS-x64-preview.dmg`、`TestHub-Windows-x64-preview.exe` 和脱敏验收摘要，不创建 GitHub Release。预览文件不等同已签名／公证的发行包。`desktop-v*` 标签必须先通过正式分发门槛和签名配置检查，全部原生任务成功后才发布 `TestHub-macOS-arm64.dmg`、`TestHub-macOS-x64.dmg`、`TestHub-Windows-x64.exe`。当前运行时准备脚本不会自动解除正式门槛。
 
+无 Developer ID 的 Mac 预览包仍须具有完整的本地资源封装。Electron Builder 26 未找到身份时会跳过签名；读取到 `Signature=adhoc` 元数据不代表整个应用的资源签名有效。预览构建应显式设置 `mac.identity="-"`、`mac.hardenedRuntime=false`、`mac.notarize=false`，并通过 `mac.signIgnore=["/Contents/Resources/local-runtime/"]` 保留已校验的运行时原始字节；外层应用资源封装仍覆盖这些文件。安装前对最终 DMG 中复制出的应用执行 `codesign --verify --deep --strict`，并重新核对完整运行时、启动与持久化。该 ad-hoc 封装不验证发行者身份，不代替 Developer ID 或公证；正式签名流程保持原有要求。2026-10-16 本机安装发现并修复了此前预览包缺失资源封装的问题；当前本地 r2 安装包已通过上述检查，原生 CI 预览任务恢复时还需同步此配置并复验。
+
 正式标签发布必须配置以下 GitHub Actions Secrets；缺失时正式安装器构建会失败，不会发布未签名安装器：
 
 | 平台 | Secrets |

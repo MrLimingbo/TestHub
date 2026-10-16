@@ -18,6 +18,7 @@
 - After desktop test/build validation, remove generated `.testhub/desktop-runtime/*-previous-*` runtime copies once no process uses them. Keep the current runtime; do not retain old copies after they are no longer needed.
 
 - Desktop UI acceptance must run in the background without visible windows or focus stealing. Use the offscreen QA bootstrap described in `docs/desktop-standalone-progress-2026-10-09-mobile-sync.md`; adapt older QA launchers before running them.
+- Before installing a macOS preview, verify the app extracted from the final DMG with `codesign --verify --deep --strict`; `codesign -d` metadata does not verify the resource seal. Certificate-free previews require explicit ad-hoc sealing while preserving the runtime inventory. See `docs/desktop-packaging.md` for the preview settings.
 - Use isolated data for development acceptance. At the end of each approved module, stop its owned processes and remove its generated test workspaces, databases, backups, screenshots and temporary packages. Keep only sanitized acceptance summaries and reusable QA scripts; never clean user workspaces or shared services.
 
 ## Boundaries
