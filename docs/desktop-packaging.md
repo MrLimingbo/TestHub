@@ -113,3 +113,9 @@ node scripts/desktop/accept-installed.mjs --fixtures .testhub/install-fixtures/f
 ```
 
 输出目录必须不存在。验收创建的身份、业务数据、Keychain 项和应用副本在结束后清理；升级中间状态只在带唯一所有权标记的自有数据目录中保留。阶段结束还需移除基线 JAR、源码、测试安装器和原始日志，只保留脱敏摘要。现有用户安装程序和工作区不被接管。这些脚本使用未修改的 ASAR 和调试器离屏引导，仍不代表 Finder／Gatekeeper、正式签名或公证通过。
+
+## 首次组件下载验收
+
+原生 Mac 可对从最终 DMG 提取的独占应用副本执行 `node scripts/desktop/accept-first-downloads.mjs --app <owned-TestHub.app> --output <new-summary.json>`。脚本在空组件缓存下通过隐藏离屏引导运行，实际下载三种浏览器、FFmpeg 和 JMeter，验证只读目录、模拟离线／断流、界面取消和重试、报告附件、缓存完整性及拦截组件下载后的重启复用。成功下载保留原有 HTTPS、大小及摘要校验，不复制历史缓存，不修改 ASAR。
+
+测试需要官方组件网络并仅使用自有回环执行目标。脚本删除自己创建的工作区、缓存、业务工件和测试 Keychain 项；调用方在结束后删除输入的临时应用副本，不得使用用户已安装应用或工作区。每次摘要路径必须为新文件，初始化即写入 `passed=false`；阶段结束只保留脱敏摘要与脚本。2026-10-19 Mac arm64 结果见 [首次下载验收](desktop-standalone-progress-2026-10-19-first-downloads.md)，不能用已有缓存的 smoke 替代该项验收。
