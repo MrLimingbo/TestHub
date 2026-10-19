@@ -85,6 +85,7 @@ test('macOS orchestration checks final read-only DMG payload and removes its tem
   const result = await inspectArtifacts(options, mock.command)
   assert.equal(result.signature.finalDmgPayloadVerified, true); assert.equal(result.signature.diskImageGatekeeperAssessed, false)
   assert.equal(mock.calls.filter(([file]) => file.endsWith('/spctl')).length, 2)
+  assert.deepEqual(mock.calls.find(([file]) => file.endsWith('/lipo'))[1], [path.join(options.app, 'Contents/MacOS/TestHub'), '-verify_arch', 'arm64'])
   const attach = mock.calls.find(([,args]) => args[0] === 'attach')[1]
   for (const flag of ['-readonly','-noautoopen','-nobrowse']) assert.ok(attach.includes(flag))
   await assert.rejects(fs.lstat(path.dirname(mock.state.mount)), { code: 'ENOENT' })

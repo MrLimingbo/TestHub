@@ -56,7 +56,20 @@ Mac 的 JDK／Node 不得依赖 Homebrew 等包外运行库。准备脚本保持
 
 `workflow_dispatch` 上传 `TestHub-macOS-arm64-preview.dmg`、`TestHub-macOS-x64-preview.dmg`、`TestHub-Windows-x64-preview.exe` 和脱敏验收摘要，不创建 GitHub Release。预览文件不等同已签名／公证的发行包。`desktop-v*` 标签必须先通过正式分发门槛和签名配置检查，全部原生任务成功后才发布 `TestHub-macOS-arm64.dmg`、`TestHub-macOS-x64.dmg`、`TestHub-Windows-x64.exe`。当前运行时准备脚本不会自动解除正式门槛。
 
-无 Developer ID 的 Mac 预览包仍须具有完整的本地资源封装。Electron Builder 26 未找到身份时会跳过签名；读取到 `Signature=adhoc` 元数据不代表整个应用的资源签名有效。预览构建应显式设置 `mac.identity="-"`、`mac.hardenedRuntime=false`、`mac.notarize=false`，并通过 `mac.signIgnore=["/Contents/Resources/local-runtime/"]` 保留已校验的运行时原始字节；外层应用资源封装仍覆盖这些文件。安装前对最终 DMG 中复制出的应用执行 `codesign --verify --deep --strict`，并重新核对完整运行时、启动与持久化。该 ad-hoc 封装不验证发行者身份，不代替 Developer ID 或公证；正式签名流程保持原有要求。2026-10-16 本机安装发现并修复了此前预览包缺失资源封装的问题；当前本地 r2 安装包已通过上述检查，原生 CI 预览任务恢复时还需同步此配置并复验。
+无 Developer ID 的 Mac 预览包仍须具有完整的本地资源封装。Electron Builder 26 未找到身份时会跳过签名；读取到 `Signature=adhoc` 元数据不代表整个应用的资源签名有效。`apps/desktop/build/mac-preview.cjs` 继承完整基础构建配置，显式设置 `mac.identity="-"`、`mac.hardenedRuntime=false`、`mac.notarize=false`，并通过 `mac.signIgnore=["/Contents/Resources/local-runtime/"]` 保留已校验的运行时原始字节；外层应用资源封装仍覆盖这些文件。该 ad-hoc 封装不验证发行者身份，不代替 Developer ID 或公证；正式标签签名流程保持原有要求。
+
+预览统一使用以下入口；`--arm64` 可在原生 Intel Mac 改为 `--x64`，不得将跨架构构建当作原生验收：
+
+```bash
+TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE=1 CSC_IDENTITY_AUTO_DISCOVERY=false \
+  npx pnpm@10.13.1 desktop:package:mac:preview --arm64
+node scripts/desktop/verify-mac-preview.mjs --arch arm64 \
+  --app release/desktop/mac-arm64/TestHub.app \
+  --installer release/desktop/TestHub-macOS-arm64-preview.dmg \
+  --output artifacts/preview-mac-arm64.json --revision <full-commit>
+```
+
+验证器先检查构建应用的 `codesign --verify --deep --strict`、应用标识、ad-hoc 类型、原生架构和全部运行组件字节清单，再以只读、隐藏方式挂载最终 DMG，对映像内应用重复检查，并核对主程序、ASAR 和运行时清单与构建应用一致。成功摘要只表示这些预览检查通过，不记录 Developer ID、公证或 Gatekeeper 通过。摘要文件必须不存在；失败会留下 `passed=false` 的脱敏结果，卸载映像失败时保留挂载点，禁止递归删除其内容。CI 在上传 Mac 预览安装器前执行此门槛；内部 Mac 目录包和旧版安装夹具也复用预览封装配置。最终包的隐藏启动、功能及安装生命周期仍须另外执行。2026-10-16 的本地 r2 修复已固化到此流程，本轮验收范围见 [Mac 标准打包与完整回归](desktop-standalone-progress-2026-10-19-mac-preview.md)。
 
 正式标签发布必须配置以下 GitHub Actions Secrets；缺失时正式安装器构建会失败，不会发布未签名安装器：
 

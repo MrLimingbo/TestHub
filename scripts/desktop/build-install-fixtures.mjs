@@ -32,7 +32,8 @@ const old = { ...manifest, backendSha256: await digest(baseline), distributionRe
 old.integrity = await inventory(copied)
 await fs.writeFile(path.join(copied, 'runtime.json'), JSON.stringify(old, null, 2))
 await verifyIntegrity(copied, old)
-const baseConfig = JSON.parse(await fs.readFile(path.join(root, 'apps/desktop/package.json'), 'utf8')).build
+const baseConfig = windows ? JSON.parse(await fs.readFile(path.join(root, 'apps/desktop/package.json'), 'utf8')).build
+  : require('../../apps/desktop/build/mac-preview.cjs')
 const fixture = {}
 const externalCandidate = args.includes('--candidate-installer') ? await fs.realpath(value('--candidate-installer')) : null
 for (const [label, runtime] of [['baseline', baselineRoot], ...(!externalCandidate ? [['candidate', path.dirname(currentRuntime)]] : [])]) {

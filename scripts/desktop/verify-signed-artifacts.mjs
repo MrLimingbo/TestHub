@@ -27,7 +27,7 @@ async function inspectMac(app, arch, teamId, command) {
   await command('/usr/bin/codesign', ['--verify', '--deep', '--strict', '--verbose=2', app], 'macOS 完整代码签名校验')
   const details = await command('/usr/bin/codesign', ['--display', '--verbose=4', app], 'macOS 签名元数据读取')
   const signature = policy.macSignature(details.stderr, teamId)
-  await command('/usr/bin/lipo', ['-verify_arch', arch, path.join(app, 'Contents/MacOS/TestHub')], 'macOS 应用架构校验')
+  await command('/usr/bin/lipo', [path.join(app, 'Contents/MacOS/TestHub'), '-verify_arch', arch === 'x64' ? 'x86_64' : arch], 'macOS 应用架构校验')
   await command('/usr/bin/xcrun', ['stapler', 'validate', app], 'macOS 应用公证票据校验')
   await command('/usr/sbin/spctl', ['--assess', '--type', 'execute', '--verbose=4', app], 'macOS 应用 Gatekeeper 校验')
   return { ...signature, codesignVerified: true, architectureVerified: true, stapledAppTicketValid: true, appGatekeeperAccepted: true,

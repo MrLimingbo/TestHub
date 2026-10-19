@@ -8,7 +8,9 @@
     "dev": "electron app",
     "test": "node --test test/**/*.test.cjs",
     "package:dir": "electron-builder --dir --publish never",
+    "package:dir:mac:preview": "electron-builder --dir --mac --publish never --config build/mac-preview.cjs",
     "package:mac": "electron-builder --mac dmg --universal --publish never",
+    "package:mac:preview": "electron-builder --mac dmg --publish never --config build/mac-preview.cjs",
     "package:mac:signed": "electron-builder --mac dmg --universal --publish never -c.forceCodeSigning=true -c.mac.notarize=true",
     "package:win": "electron-builder --win nsis --x64 --publish never"
   },

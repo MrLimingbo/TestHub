@@ -17,6 +17,7 @@
     "desktop:dev": "pnpm --filter @testhub/desktop dev",
     "desktop:test": "pnpm --filter @testhub/desktop test",
     "desktop:package:mac": "pnpm --filter @testhub/desktop package:mac",
+    "desktop:package:mac:preview": "pnpm --filter @testhub/desktop package:mac:preview",
     "desktop:package:win": "pnpm --filter @testhub/desktop package:win",
     "desktop:prepare:local": "node scripts/desktop/prepare-local-runtime.mjs",
     "desktop:verify:runtime": "node scripts/desktop/verify-local-runtime.mjs",
