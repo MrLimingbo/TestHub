@@ -9,6 +9,7 @@ import io.testhub.platform.performance.PerformanceTestExecutionService;
 import io.testhub.platform.performance.PerformanceHistorySyncService;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.uiautomation.UiAutomationService;
+import io.testhub.platform.uiautomation.UiAutomationHistorySyncService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,12 +25,13 @@ public class UnifiedExecutionService {
     private final ApiAutomationExecutionService api;
     private final PerformanceTestExecutionService performance;
     private final UiAutomationService ui;
+    private final UiAutomationHistorySyncService uiHistory;
     private final MobileAutomationService mobile;
 
     public UnifiedExecutionService(AccessService access, FunctionalTestExecutionService functional,
             ApiAutomationExecutionService api, PerformanceTestExecutionService performance,
             UiAutomationService ui, MobileAutomationService mobile, ApiAutomationHistorySyncService apiHistory,
-            PerformanceHistorySyncService performanceHistory) {
+            PerformanceHistorySyncService performanceHistory, UiAutomationHistorySyncService uiHistory) {
         this.access = access;
         this.apiHistory = apiHistory;
         this.performanceHistory = performanceHistory;
@@ -37,6 +39,7 @@ public class UnifiedExecutionService {
         this.api = api;
         this.performance = performance;
         this.ui = ui;
+        this.uiHistory=uiHistory;
         this.mobile = mobile;
     }
 
@@ -62,6 +65,9 @@ public class UnifiedExecutionService {
         ui.executions(principal, projectId).forEach(r -> result.add(new UnifiedExecution(
                 r.id(), r.projectId(), "UI", r.scenarioName(), r.status(), r.createdAt(), r.startedAt(),
                 r.finishedAt(), r.updatedAt(), null, null, null, null)));
+        uiHistory.recentArchives(principal, projectId).forEach(r -> result.add(new UnifiedExecution(
+                r.key(),projectId,"UI_HISTORY",r.scenarioName(),r.status(),r.requestedAt(),r.startedAt(),
+                r.finishedAt(),r.updatedAt(),null,null,null,null)));
         mobile.executions(principal, projectId).forEach(r -> result.add(new UnifiedExecution(
                 r.id(), r.projectId(), "MOBILE", r.scenarioName(), r.status(), r.createdAt(), r.startedAt(),
                 r.finishedAt(), r.updatedAt(), null, null, null, null)));

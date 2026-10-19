@@ -362,4 +362,15 @@ class TransferPayloadLimitFilterTests {
         assertEquals(413, response.getStatus());
     }
 
+    @Test void webUiHistoryAndArtifactRoutesUseTheirDeclaredAndStreamedLimits() throws Exception {
+        for(var row:java.util.Map.of("history",4*1024*1024,"artifacts",35*1024*1024).entrySet()){
+            int limit=row.getValue();String route="/api/v1/projects/fixture/ui-automation/"+row.getKey()+"/sync";
+            var stream=streamed(limit+1L);stream.setServletPath(route);
+            filter.doFilter(stream,new MockHttpServletResponse(),(wrapped,response)->assertThrows(IOException.class,()->wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+            var exact=streamed(limit);exact.setServletPath(route);filter.doFilter(exact,new MockHttpServletResponse(),(wrapped,response)->assertEquals(limit,wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+            var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};declared.setMethod("POST");declared.setServletPath(route);
+            var response=new MockHttpServletResponse();filter.doFilter(declared,response,(wrapped,res)->fail("Oversized UI sync must not reach controller"));assertEquals(413,response.getStatus());
+        }
+    }
+
 }

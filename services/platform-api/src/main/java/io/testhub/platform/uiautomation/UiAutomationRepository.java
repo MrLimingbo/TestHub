@@ -232,7 +232,7 @@ public class UiAutomationRepository {
                         :outcome, :durationMillis, :errorMessage, :occurredAt)
                 ON DUPLICATE KEY UPDATE runner_id = VALUES(runner_id), step_type = VALUES(step_type), step_name = VALUES(step_name),
                     outcome = VALUES(outcome), duration_millis = VALUES(duration_millis), error_message = VALUES(error_message),
-                    occurred_at = VALUES(occurred_at)
+                    occurred_at = VALUES(occurred_at), sync_revision = sync_revision + 1
                 """).param("id", UlidCreator.getUlid().toString()).param("executionId", execution.id())
                 .param("organizationId", execution.organizationId()).param("projectId", execution.projectId())
                 .param("runnerId", result.runnerId()).param("stepId", result.stepId()).param("stepSequence", result.stepSequence())

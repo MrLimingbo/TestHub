@@ -36,8 +36,8 @@ async function syncRequest(fetcher, url, options = {}, { label = '任务', limit
   catch { throw new Error('同步服务返回的数据无效，请核对服务版本。') }
 }
 
-async function syncBinary(fetcher, url, size, digest, { label = '文件', timeoutMs = 120000, allowEmpty = false } = {}) {
-  if (!Number.isSafeInteger(size) || size < (allowEmpty ? 0 : 1) || size > 20 * 1024 * 1024 || !/^[a-f0-9]{64}$/.test(digest))
+async function syncBinary(fetcher, url, size, digest, { label = '文件', timeoutMs = 120000, allowEmpty = false, maxBytes = 20 * 1024 * 1024 } = {}) {
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 25 * 1024 * 1024 || !Number.isSafeInteger(size) || size < (allowEmpty ? 0 : 1) || size > maxBytes || !/^[a-f0-9]{64}$/.test(digest))
     throw new Error('文件大小或摘要无效。')
   let response
   try { response = await fetcher(url, { credentials: 'include', redirect: 'error', signal: globalThis.AbortSignal.timeout(timeoutMs) }) }

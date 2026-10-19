@@ -17,6 +17,7 @@ const modules: Record<string, { label: string; path: string }> = {
   PERFORMANCE: { label: '性能测试', path: '/performance' },
   PERFORMANCE_HISTORY: { label: '性能同步历史', path: '/performance#performance-history' },
   UI: { label: 'Web UI', path: '/ui-automation' },
+  UI_HISTORY: { label: 'Web UI 同步历史', path: '/ui-automation#ui-history' },
   MOBILE: { label: '移动端', path: '/mobile-automation' },
 }
 const statuses: Record<string, string> = {

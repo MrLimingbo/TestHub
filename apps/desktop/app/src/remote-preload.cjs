@@ -20,6 +20,8 @@ contextBridge.exposeInMainWorld('testhubDesktop', Object.freeze({
   openApiAutomationHistorySync: () => ipcRenderer.invoke('testhub-desktop:api-automation-history-sync:open'),
   openPerformanceHistorySync: () => ipcRenderer.invoke('testhub-desktop:performance-history-sync:open'),
   openPerformanceArtifactSync: () => ipcRenderer.invoke('testhub-desktop:performance-artifact-sync:open'),
+  openUiAutomationHistorySync: () => ipcRenderer.invoke('testhub-desktop:ui-automation-history-sync:open'),
+  openUiAutomationArtifactSync: () => ipcRenderer.invoke('testhub-desktop:ui-automation-artifact-sync:open'),
   openApiAutomationTriggerSync: () => ipcRenderer.invoke('testhub-desktop:api-automation-trigger-sync:open'),
   openMockSync: () => ipcRenderer.invoke('testhub-desktop:mock-sync:open'),
   openMobileAutomationSync: () => ipcRenderer.invoke('testhub-desktop:mobile-automation-sync:open'),
