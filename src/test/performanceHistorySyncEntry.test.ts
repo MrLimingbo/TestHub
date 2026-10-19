@@ -3,7 +3,7 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 import ArcoVue, { Message } from '@arco-design/web-vue'
 import PerformancePage from '@/pages/PerformancePage.vue'
 const native = vi.hoisted(() => ({ local: false, account: false, open: vi.fn() }))
-vi.mock('@/utils/desktopWorkspace', () => ({ isLocalDesktop: () => native.local, isAccountDesktop: () => native.account, openPerformanceHistorySync: native.open, openPerformanceSync: vi.fn(), openLocalExecutionSettings: vi.fn() }))
+vi.mock('@/utils/desktopWorkspace', () => ({ isLocalDesktop: () => native.local, isAccountDesktop: () => native.account, openPerformanceHistorySync: native.open, openPerformanceSync: vi.fn(), openPerformanceArtifactSync: vi.fn(), openLocalExecutionSettings: vi.fn() }))
 vi.mock('@/stores/session', () => ({ useSessionStore: () => ({ projectId: 'p1', selectProject: vi.fn(), resolveProjectId: () => 'p1' }) }))
 const wrappers: ReturnType<typeof shallowMount>[] = []
 afterEach(() => {

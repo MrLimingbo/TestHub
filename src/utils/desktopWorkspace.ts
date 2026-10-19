@@ -3,6 +3,7 @@ interface WorkspaceBridge {
   openApiAutomationScenarioSync?: () => Promise<void>
   openApiAutomationHistorySync?: () => Promise<void>
   openPerformanceHistorySync?: () => Promise<void>
+  openPerformanceArtifactSync?: () => Promise<void>
   openApiAutomationTriggerSync?: () => Promise<void>
   openApiAutomationAssetSync?: () => Promise<void>
   openApiDesignSync?: () => Promise<void>
@@ -58,6 +59,12 @@ export async function openPerformanceHistorySync() {
   const native = bridge()
   if (!native?.openPerformanceHistorySync) throw new Error('当前桌面版本不支持性能执行历史同步')
   await native.openPerformanceHistorySync()
+}
+
+export async function openPerformanceArtifactSync() {
+  const native = bridge()
+  if (!native?.openPerformanceArtifactSync) throw new Error('当前桌面版本不支持原始 JTL／日志同步')
+  await native.openPerformanceArtifactSync()
 }
 
 export async function openApiAutomationTriggerSync() {

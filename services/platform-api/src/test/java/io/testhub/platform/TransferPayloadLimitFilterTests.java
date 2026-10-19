@@ -13,6 +13,20 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 class TransferPayloadLimitFilterTests {
     private final TransferPayloadLimitFilter filter = new TransferPayloadLimitFilter(new ObjectMapper());
+    @Test void performanceArtifactsBoundDeclaredAndChunkedBodiesAtTwentyNineMiB() throws Exception {
+        int limit = io.testhub.platform.performance.PerformanceArtifactSyncService.MAX_BODY;
+        String route = "/api/v1/projects/fixture/performance/artifacts/sync";
+        var exact = streamed(limit); exact.setServletPath(route);
+        filter.doFilter(exact, new MockHttpServletResponse(), (wrapped, response) ->
+                assertEquals(limit, wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        var chunked = streamed(limit + 1L); chunked.setServletPath(route);
+        filter.doFilter(chunked, new MockHttpServletResponse(), (wrapped, response) ->
+                assertThrows(IOException.class, () -> wrapped.getInputStream().transferTo(OutputStream.nullOutputStream())));
+        assertEquals("原始工件同步请求不能超过 29 MiB。", chunked.getAttribute(io.testhub.platform.shared.api.ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE));
+        var declared = new MockHttpServletRequest() { @Override public long getContentLengthLong() { return limit + 1L; } };
+        declared.setMethod("POST"); declared.setServletPath(route); var response = new MockHttpServletResponse();
+        filter.doFilter(declared, response, (req, res) -> fail("Must reject before consuming body")); assertEquals(413, response.getStatus());
+    }
     @Test void performanceHistorySyncBoundsDeclaredAndChunkedBodiesAtFourMiB() throws Exception {
         int limit = io.testhub.platform.performance.PerformanceHistorySyncService.MAX_BYTES;
         String route = "/api/v1/projects/fixture/performance/history/sync";

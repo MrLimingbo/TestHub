@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import PerformanceExecutionChart from '@/components/PerformanceExecutionChart.vue'
 import PerformanceResourceChart from '@/components/PerformanceResourceChart.vue'
+import PerformanceHistoryArtifacts from '@/components/PerformanceHistoryArtifacts.vue'
 interface HistoryEntry { key: string; revision: string; nativeRecord: boolean; planName: string; status: string; requestedAt: string; finishedAt: string | null }
 interface HistoryReport {
   planName: string; planVersion: number; status: string; statusCode: string | null
@@ -89,6 +90,7 @@ onBeforeUnmount(() => { sequence++; detailSequence++ })
           <p>峰值 TPS {{ selected.report.summary.peakThroughputPerSecond }}；P95 {{ selected.report.summary.p95LatencyMillis }} ms；质量结论 {{ selected.report.quality.status }}。</p>
           <p class="history-note">保留执行时的计划版本、结果、时间和数值指标。指标及资源采样沿用原报告各最多 2000 条范围；不包含请求地址、请求头或正文、数据集、密钥、日志或 JTL。历史不加入原有质量统计。</p>
           <a :href="url" download>下载脱敏历史报告</a>
+          <PerformanceHistoryArtifacts :project-id="projectId" :history-key="selected.key" />
           <PerformanceExecutionChart :metrics="selected.report.metrics" />
           <PerformanceResourceChart :resources="selected.report.resources" />
           <h4>来源质量阈值</h4><a-table :data="selected.report.quality.threadGroups" :pagination="{ pageSize: 10 }" size="small">

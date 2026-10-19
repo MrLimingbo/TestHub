@@ -12,6 +12,7 @@ const run = promisify(execFile)
 class Inspector {
   constructor(socket) {
     this.socket = socket; this.id = 0; this.pending = new Map(); this.events = new Map(); this.scripts = new Map()
+    socket.addEventListener('close', () => { for (const call of this.pending.values()) { clearTimeout(call.timeout); call.reject(new Error('Inspector disconnected')) }; this.pending.clear() })
     socket.addEventListener('message', event => {
       const message = JSON.parse(String(event.data))
       if (message.id) { const call = this.pending.get(message.id); if (!call) return; this.pending.delete(message.id); clearTimeout(call.timeout); if (message.error) call.reject(new Error('Inspector command failed: ' + message.error.message)); else call.resolve(message.result) }
@@ -71,7 +72,7 @@ export async function offscreenMac(appPath, directory, options = {}) {
   }
   const pages = () => browser.contexts()[0].pages()
   async function pageFor(prefix) {
-    for (let n = 0; n < 900; n++) { const page = pages().find(p => p.url().startsWith(prefix)); if (page) return page; if (child.exitCode !== null) throw new Error('Packaged executable exited'); await delay(100) }
+    for (let n = 0; n < 900; n++) { const page = pages().find(p => p.url().startsWith(prefix)); if (page) return page; if ((child.exitCode !== null || child.signalCode !== null)) throw new Error('Packaged executable exited'); await delay(100) }
     throw new Error('Offscreen page unavailable: ' + prefix)
   }
   async function snapshot() {
@@ -82,7 +83,7 @@ export async function offscreenMac(appPath, directory, options = {}) {
   async function close() {
     let failure
     try {
-      if (child && child.exitCode === null) {
+      if (child && child.exitCode === null && child.signalCode === null) {
         await inspector?.evaluate('globalThis.__testhubQaElectron.app.quit(); true').catch(() => {})
         inspector?.close(); inspector = undefined
         const completed = await Promise.race([done.then(code => ({ code })), delay(30000).then(() => null)])
@@ -91,7 +92,7 @@ export async function offscreenMac(appPath, directory, options = {}) {
       }
     } catch (error) { failure = error }
     finally {
-      if (child && child.exitCode === null) { child.kill('SIGTERM'); await done }
+      if (child && child.exitCode === null && child.signalCode === null) { child.kill('SIGTERM'); await done }
       try { if (options.cleanKeychain !== false) await run('/usr/bin/security', ['delete-generic-password', '-s', name + ' Safe Storage', '-a', name + ' Key']) } catch (error) { if (error.code !== 44) failure ||= error }
     }
     if (failure) throw failure
@@ -102,9 +103,9 @@ export async function offscreenMac(appPath, directory, options = {}) {
     env.PATH = '/usr/bin:/bin:/usr/sbin:/sbin'
     child = spawn(executable, ['--inspect-brk=0', '--remote-debugging-port=0'], { env, cwd: directory, stdio: ['ignore','pipe','pipe'] })
     done = new Promise((resolve, reject) => { child.once('error', reject); child.once('close', resolve) })
-    for (const stream of [child.stdout, child.stderr]) stream.on('data', bytes => { transcript = (transcript + bytes.toString()).slice(-100000) })
+    for (const stream of [child.stdout, child.stderr]) stream.on('data', bytes => { transcript = (transcript + bytes.toString()).slice(-100000); if (options.diagnosticLog) void fs.appendFile(options.diagnosticLog, bytes, {mode:0o600}).catch(() => {}) })
     let endpoint
-    for (let n = 0; n < 300; n++) { endpoint = /Debugger listening on (ws:\/\/[^\s]+)/.exec(transcript)?.[1]; if (endpoint) break; if (child.exitCode !== null) throw new Error('Inspector startup failed'); await delay(100) }
+    for (let n = 0; n < 300; n++) { endpoint = /Debugger listening on (ws:\/\/[^\s]+)/.exec(transcript)?.[1]; if (endpoint) break; if ((child.exitCode !== null || child.signalCode !== null)) throw new Error('Inspector startup failed'); await delay(100) }
     if (!endpoint) throw new Error('Packaged Inspector unavailable')
     const socket = new globalThis.WebSocket(endpoint)
     await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, {once:true}); socket.addEventListener('error', reject, {once:true}) })
@@ -123,12 +124,12 @@ export async function offscreenMac(appPath, directory, options = {}) {
     if (initialized.exceptionDetails || !initialized.result?.value?.isPackaged) throw new Error('Offscreen isolation failed before entry')
     await inspector.send('Debugger.resume')
     let endpointChrome
-    for (let n = 0; n < 900; n++) { endpointChrome = /DevTools listening on (ws:\/\/[^\s]+)/.exec(transcript)?.[1]; if (endpointChrome) break; if (child.exitCode !== null) throw new Error('Packaged browser startup failed'); await delay(100) }
+    for (let n = 0; n < 900; n++) { endpointChrome = /DevTools listening on (ws:\/\/[^\s]+)/.exec(transcript)?.[1]; if (endpointChrome) break; if ((child.exitCode !== null || child.signalCode !== null)) throw new Error('Packaged browser startup failed'); await delay(100) }
     if (!endpointChrome) throw new Error('Packaged browser unavailable')
     browser = await chromium.connectOverCDP(endpointChrome)
     const local = await pageFor('http://127.0.0.1:')
     await local.getByText('本地工作区',{exact:true}).first().waitFor()
     await snapshot()
-    return { evaluate, pageFor, pages, snapshot, close, local }
+    return { evaluate, pageFor, pages, snapshot, close, local, processState: () => ({exitCode:child.exitCode,signalCode:child.signalCode}) }
   } catch (error) { await close(); throw error }
 }

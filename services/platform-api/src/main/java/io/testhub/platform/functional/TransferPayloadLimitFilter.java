@@ -21,7 +21,7 @@ public class TransferPayloadLimitFilter extends OncePerRequestFilter {
     private final ObjectMapper json;
     public TransferPayloadLimitFilter(ObjectMapper json){this.json=json;}
     @Override protected boolean shouldNotFilter(HttpServletRequest request){
-        return !"POST".equals(request.getMethod())||!request.getServletPath().matches("/api/v1/projects/[^/]+/(?:(?:functional|api-design|api-automation|mock|performance|ui-automation|mobile-automation|quality-report|tasks|project-settings|notification-templates)/transfer|(?:files|functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?|versions|api-design|api-automation/(?:assets|scenarios|history|triggers)|performance/history|tasks|project-settings|notification-templates|mock|performance|ui-automation|mobile-automation)/sync)");
+        return !"POST".equals(request.getMethod())||!request.getServletPath().matches("/api/v1/projects/[^/]+/(?:(?:functional|api-design|api-automation|mock|performance|ui-automation|mobile-automation|quality-report|tasks|project-settings|notification-templates)/transfer|(?:files|functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?|versions|api-design|api-automation/(?:assets|scenarios|history|triggers)|performance/(?:history|artifacts)|tasks|project-settings|notification-templates|mock|performance|ui-automation|mobile-automation)/sync)");
     }
     @Override protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,FilterChain chain)throws IOException,ServletException{
         boolean functional=request.getServletPath().endsWith("/versions/sync")||request.getServletPath().matches(".*/functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?/sync");
@@ -41,6 +41,7 @@ public class TransferPayloadLimitFilter extends OncePerRequestFilter {
         if (request.getServletPath().endsWith("/api-automation/history/sync")) { limit=io.testhub.platform.apiautomation.ApiAutomationHistorySyncService.MAX_BYTES; message="历史同步请求不能超过 4 MiB。"; }
         if (request.getServletPath().endsWith("/api-automation/triggers/sync")) { limit=io.testhub.platform.apiautomation.ApiAutomationTriggerSyncService.MAX_BYTES; message="触发配置同步请求不能超过 4 MiB。"; }
         if (request.getServletPath().endsWith("/performance/history/sync")) { limit=io.testhub.platform.performance.PerformanceHistorySyncService.MAX_BYTES; message="性能历史同步请求不能超过 4 MiB。"; }
+        if (request.getServletPath().endsWith("/performance/artifacts/sync")) { limit=io.testhub.platform.performance.PerformanceArtifactSyncService.MAX_BODY; message="原始工件同步请求不能超过 29 MiB。"; }
         final int bodyLimit=limit;
         final String bodyMessage=message;
         if(request.getContentLengthLong()>limit){

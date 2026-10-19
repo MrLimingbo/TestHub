@@ -5,7 +5,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import PerformanceExecutionChart from '@/components/PerformanceExecutionChart.vue'
 import PerformanceHistoryPanel from '@/components/PerformanceHistoryPanel.vue'
 import PerformanceResourceChart from '@/components/PerformanceResourceChart.vue'
-import { isLocalDesktop, isAccountDesktop, openPerformanceSync, openPerformanceHistorySync, ensureLocalJmeter, localJmeterStatus, cancelJmeterPreparation, openLocalExecutionSettings, type LocalEngineStatus } from '@/utils/desktopWorkspace'
+import { isLocalDesktop, isAccountDesktop, openPerformanceSync, openPerformanceHistorySync, openPerformanceArtifactSync, ensureLocalJmeter, localJmeterStatus, cancelJmeterPreparation, openLocalExecutionSettings, type LocalEngineStatus } from '@/utils/desktopWorkspace'
 import { useSessionStore } from '@/stores/session'
 
 interface ApiEnvelope<T> { data: T }
@@ -227,6 +227,10 @@ async function showSync() {
 async function showHistorySync() {
   try { await openPerformanceHistorySync() }
   catch (error) { Message.error(error instanceof Error ? error.message : '打开性能执行历史同步失败') }
+}
+async function showArtifactSync() {
+  try { await openPerformanceArtifactSync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '打开原始 JTL／日志同步失败') }
 }
 async function cancelEnginePreparation() { preparationCancelled = true; await cancelJmeterPreparation() }
 const canSubmit = computed(() => selectedDetail.value?.status === 'READY')
@@ -526,7 +530,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="page performance-page">
     <PageHeader eyebrow="JMETER RUNNER · CONTROL PLANE" title="性能测试" description="维护压测计划，并通过独立 Runner 执行受限 JMeter 任务、追踪实时指标和查看报告。" action="新建压测计划" @action="openCreate" />
-    <div v-if="desktop" class="sync-entry"><a-button @click="showSync">性能计划同步</a-button><a-button @click="showHistorySync">历史同步</a-button><small>计划定义与已结束执行的脱敏报告分别绑定；运行任务和原始工件保留原端。</small></div>
+    <div v-if="desktop" class="sync-entry"><a-button @click="showSync">性能计划同步</a-button><a-button @click="showHistorySync">历史同步</a-button><a-button @click="showArtifactSync">工件同步</a-button><small>计划定义与已结束执行的脱敏报告分别绑定；原始 JTL／日志需单独确认工件绑定，运行任务保留原端。</small></div>
 
     <a-alert v-if="localDesktop" class="runner-alert" :show-icon="true">
       <div aria-live="polite">{{ preparingEngine ? engineStatus?.message || '正在准备 JMeter…' : '首次提交压测时会自动下载并校验 JMeter，安装后可离线复用。压测只访问本地执行设置中允许的目标。' }}</div>

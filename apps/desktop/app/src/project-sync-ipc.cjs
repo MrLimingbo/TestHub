@@ -36,20 +36,20 @@ async function syncRequest(fetcher, url, options = {}, { label = '任务', limit
   catch { throw new Error('同步服务返回的数据无效，请核对服务版本。') }
 }
 
-async function syncBinary(fetcher, url, size, digest, { label = '文件', timeoutMs = 120000 } = {}) {
-  if (!Number.isSafeInteger(size) || size < 1 || size > 20 * 1024 * 1024 || !/^[a-f0-9]{64}$/.test(digest))
+async function syncBinary(fetcher, url, size, digest, { label = '文件', timeoutMs = 120000, allowEmpty = false } = {}) {
+  if (!Number.isSafeInteger(size) || size < (allowEmpty ? 0 : 1) || size > 20 * 1024 * 1024 || !/^[a-f0-9]{64}$/.test(digest))
     throw new Error('文件大小或摘要无效。')
   let response
   try { response = await fetcher(url, { credentials: 'include', redirect: 'error', signal: globalThis.AbortSignal.timeout(timeoutMs) }) }
   catch { throw new Error('文件来源暂时不可达，联网后可重试。') }
-  if (!response.ok) { await response.body?.cancel(); throw new Error(`${label}下载失败（HTTP ${response.status}），请核对来源文件。`) }
+  if (!response.ok) { await response.body?.cancel(); const error = new Error(`${label}下载失败（HTTP ${response.status}），请核对来源文件。`); error.status = response.status; throw error }
   const chunks = []; let length = 0; const hash = crypto.createHash('sha256')
   for await (const chunk of response.body) {
     length += chunk.length
-    if (length > size) throw new Error('文件内容超过记录大小，同步已停止。')
+    if (length > size) { const error = new Error('文件内容超过记录大小，同步已停止。'); error.code = 'SYNC_BINARY_INTEGRITY'; throw error }
     hash.update(chunk); chunks.push(Buffer.from(chunk))
   }
-  if (length !== size || hash.digest('hex') !== digest) throw new Error('来源文件大小或 SHA-256 已变化，同步已停止。')
+  if (length !== size || hash.digest('hex') !== digest) { const error = new Error('来源文件大小或 SHA-256 已变化，同步已停止。'); error.code = 'SYNC_BINARY_INTEGRITY'; throw error }
   return Buffer.concat(chunks)
 }
 
