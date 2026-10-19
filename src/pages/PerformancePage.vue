@@ -3,8 +3,9 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import PerformanceExecutionChart from '@/components/PerformanceExecutionChart.vue'
+import PerformanceHistoryPanel from '@/components/PerformanceHistoryPanel.vue'
 import PerformanceResourceChart from '@/components/PerformanceResourceChart.vue'
-import { isLocalDesktop, isAccountDesktop, openPerformanceSync, ensureLocalJmeter, localJmeterStatus, cancelJmeterPreparation, openLocalExecutionSettings, type LocalEngineStatus } from '@/utils/desktopWorkspace'
+import { isLocalDesktop, isAccountDesktop, openPerformanceSync, openPerformanceHistorySync, ensureLocalJmeter, localJmeterStatus, cancelJmeterPreparation, openLocalExecutionSettings, type LocalEngineStatus } from '@/utils/desktopWorkspace'
 import { useSessionStore } from '@/stores/session'
 
 interface ApiEnvelope<T> { data: T }
@@ -222,6 +223,10 @@ const desktop = localDesktop || isAccountDesktop()
 async function showSync() {
   try { await openPerformanceSync() }
   catch (error) { Message.error(error instanceof Error ? error.message : '打开性能计划同步失败') }
+}
+async function showHistorySync() {
+  try { await openPerformanceHistorySync() }
+  catch (error) { Message.error(error instanceof Error ? error.message : '打开性能执行历史同步失败') }
 }
 async function cancelEnginePreparation() { preparationCancelled = true; await cancelJmeterPreparation() }
 const canSubmit = computed(() => selectedDetail.value?.status === 'READY')
@@ -521,7 +526,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="page performance-page">
     <PageHeader eyebrow="JMETER RUNNER · CONTROL PLANE" title="性能测试" description="维护压测计划，并通过独立 Runner 执行受限 JMeter 任务、追踪实时指标和查看报告。" action="新建压测计划" @action="openCreate" />
-    <div v-if="desktop" class="sync-entry"><a-button @click="showSync">性能计划同步</a-button><small>离线编辑，联网后同步计划定义；执行历史与报告保留各端。</small></div>
+    <div v-if="desktop" class="sync-entry"><a-button @click="showSync">性能计划同步</a-button><a-button @click="showHistorySync">历史同步</a-button><small>计划定义与已结束执行的脱敏报告分别绑定；运行任务和原始工件保留原端。</small></div>
 
     <a-alert v-if="localDesktop" class="runner-alert" :show-icon="true">
       <div aria-live="polite">{{ preparingEngine ? engineStatus?.message || '正在准备 JMeter…' : '首次提交压测时会自动下载并校验 JMeter，安装后可离线复用。压测只访问本地执行设置中允许的目标。' }}</div>
@@ -607,6 +612,8 @@ onBeforeUnmount(() => {
 
       <div v-else class="panel empty-plan"><a-empty description="选择或创建压测计划，开始维护负载配置。"><template #extra><a-button type="primary" @click="openCreate">新建压测计划</a-button></template></a-empty></div>
     </section>
+
+    <PerformanceHistoryPanel :project-id="projectId" />
 
     <a-modal v-model:visible="planDialog" :title="editing ? '编辑压测计划' : '新建压测计划'" width="900px" :ok-loading="saving" :mask-closable="false" :on-before-ok="savePlan">
       <a-form :model="planForm" layout="vertical">

@@ -15,6 +15,7 @@ const modules: Record<string, { label: string; path: string }> = {
   API: { label: '接口自动化', path: '/api-automation' },
   API_HISTORY: { label: '接口自动化同步历史', path: '/api-automation?tab=reports' },
   PERFORMANCE: { label: '性能测试', path: '/performance' },
+  PERFORMANCE_HISTORY: { label: '性能同步历史', path: '/performance#performance-history' },
   UI: { label: 'Web UI', path: '/ui-automation' },
   MOBILE: { label: '移动端', path: '/mobile-automation' },
 }

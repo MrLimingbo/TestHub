@@ -1,6 +1,6 @@
 # TestHub 安装即用改造：依赖审计与实施边界
 
-当前审计入口（2026-10-19）：[Mac 标准打包与完整回归及剩余范围](desktop-standalone-progress-2026-10-19-mac-preview.md)已获审核并提交 main；[浏览器与 JMeter 首次下载验收](desktop-standalone-progress-2026-10-19-first-downloads.md)已获审核，授权先提交 main 再继续下一模块。下文按历史阶段保留记录，不代表其中所有早期待办仍未完成。发行者签名、公证、Windows 安装包验证及移动端真实设备执行按用户要求暂不执行，其他后续工作继续按模块审核。
+当前审计入口（2026-10-19）：[Mac 标准打包与完整回归及剩余范围](desktop-standalone-progress-2026-10-19-mac-preview.md)与[浏览器／JMeter 首次下载验收](desktop-standalone-progress-2026-10-19-first-downloads.md)已获审核并提交 main（最新 `2a16bca`）。[性能执行历史与脱敏报告双向同步](desktop-standalone-progress-2026-10-19-performance-history-sync.md)已完成本轮实现、后台验收与清理，并获审核通过；本次提交 main 后继续原始 JTL／日志同步。下文按历史阶段保留记录，不代表其中所有早期待办仍未完成。发行者签名、公证、Windows 安装包验证及移动端真实设备执行按用户要求暂不执行，其他后续工作继续按模块审核。
 
 日期：2026-09-17。基线：`5d933301e4b990b94b669e9f2f9d128b6a02d163`。
 状态：产品选择已确认，正在实施；未达到独立安装包交付门槛。

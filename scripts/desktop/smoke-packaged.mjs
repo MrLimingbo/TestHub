@@ -251,7 +251,7 @@ try {
     else await fs.rm(directory, { recursive: true, force: true })
   }
   if (process.platform === 'darwin' && !retain) {
-    try { await run('/usr/bin/security', ['delete-generic-password', '-s', sessionName + ' Safe Storage', '-a', sessionName]) }
+    try { await run('/usr/bin/security', ['delete-generic-password', '-s', sessionName + ' Safe Storage', '-a', sessionName + ' Key']) }
     catch (error) { if (error.code !== 44) cleanupError = new Error('Could not remove owned QA Keychain entry') }
   }
 }

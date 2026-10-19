@@ -102,7 +102,7 @@ describe('Performance page', () => {
       : url.endsWith('/report') ? new Promise(resolve => { release = resolve }) : undefined, true)
     const button = wrapper.findAllComponents({ name: 'Button' }).find(b => b.text() === '报告')!
     button.vm.$emit('click'); await flushPromises()
-    const drawer = wrapper.findComponent(Drawer)
+    const drawer = wrapper.findAllComponents(Drawer).find(component => component.props('visible'))!
     drawer.vm.$emit('cancel'); await flushPromises()
     release({ execution, summary: {}, quality: {}, metrics: [], resources: [], errors: [], logs: [], artifacts: [] }); await flushPromises()
     expect(drawer.props('visible')).toBe(false)

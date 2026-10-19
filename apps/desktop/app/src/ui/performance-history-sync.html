@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 性能执行历史同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="performance-history-sync.css" />
+</head><body><main class="card">
+  <h1>性能执行历史同步</h1><p class="description">将已结束执行的脱敏报告双向保存，保留原来源、结果和时间，作为只读历史查看。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p><p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p><label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">计划名称、来源版本、结果、时间、数值汇总、性能与资源指标、质量阈值及项目／执行来源标识会发送到所选账号服务；不发送目标地址、请求头或正文、数据集、密钥、Runner 身份、原始日志或 JTL。</p>
+    <p class="hint">原执行端继续运行自己的任务，迟到指标会更新对应副本。报告不依赖目标当前计划，来源版本保留。最多 1000 条来源历史，单条 1 MiB、每批 20 条／4 MiB；指标与资源采样沿用原报告各最多 2000 条范围。</p>
+    <p class="hint">不同副本或历史缺失暂停核对；同步不删除、重建、取消或重新执行任何任务。</p>
+    <p id="preview" role="status" aria-live="polite"></p><button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p><p class="hint">在性能测试页的“同步历史”查看只读报告；不会创建或改写真实 Runner 任务，也不计入原有质量统计。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button><div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端历史）</button>
+  </section><button id="refresh" type="button">刷新状态</button>
+</main><script src="performance-history-sync.js"></script></body></html>

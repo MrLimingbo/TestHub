@@ -2,6 +2,7 @@ export interface LocalEngineStatus { phase: string; message: string; receivedByt
 interface WorkspaceBridge {
   openApiAutomationScenarioSync?: () => Promise<void>
   openApiAutomationHistorySync?: () => Promise<void>
+  openPerformanceHistorySync?: () => Promise<void>
   openApiAutomationTriggerSync?: () => Promise<void>
   openApiAutomationAssetSync?: () => Promise<void>
   openApiDesignSync?: () => Promise<void>
@@ -51,6 +52,12 @@ export async function openApiAutomationHistorySync() {
   const native = bridge()
   if (!native?.openApiAutomationHistorySync) throw new Error('当前桌面版本不支持接口自动化执行历史同步')
   await native.openApiAutomationHistorySync()
+}
+
+export async function openPerformanceHistorySync() {
+  const native = bridge()
+  if (!native?.openPerformanceHistorySync) throw new Error('当前桌面版本不支持性能执行历史同步')
+  await native.openPerformanceHistorySync()
 }
 
 export async function openApiAutomationTriggerSync() {

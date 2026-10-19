@@ -117,7 +117,7 @@ async function removeOwnedWorkspace() {
     try { await installationQA.removeSession(record.ownership) } catch (error) { if (error.code !== 'ENOENT') throw error }
     if (!windows) {
       const service = record.ownership.cleanRunnerDefaults ? 'testhub-desktop-app' : record.ownership.qaName
-      try { await run('/usr/bin/security', ['delete-generic-password', '-s', service + ' Safe Storage', '-a', service]) }
+      try { await run('/usr/bin/security', ['delete-generic-password', '-s', service + ' Safe Storage', '-a', service + ' Key']) }
       catch (error) { if (error.code !== 44) throw error }
     }
   }

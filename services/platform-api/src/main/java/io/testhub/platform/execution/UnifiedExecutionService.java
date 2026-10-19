@@ -6,6 +6,7 @@ import io.testhub.platform.apiautomation.ApiAutomationHistorySyncService;
 import io.testhub.platform.functional.FunctionalTestExecutionService;
 import io.testhub.platform.mobileautomation.MobileAutomationService;
 import io.testhub.platform.performance.PerformanceTestExecutionService;
+import io.testhub.platform.performance.PerformanceHistorySyncService;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.uiautomation.UiAutomationService;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UnifiedExecutionService {
     private final AccessService access;
     private final ApiAutomationHistorySyncService apiHistory;
+    private final PerformanceHistorySyncService performanceHistory;
     private final FunctionalTestExecutionService functional;
     private final ApiAutomationExecutionService api;
     private final PerformanceTestExecutionService performance;
@@ -26,9 +28,11 @@ public class UnifiedExecutionService {
 
     public UnifiedExecutionService(AccessService access, FunctionalTestExecutionService functional,
             ApiAutomationExecutionService api, PerformanceTestExecutionService performance,
-            UiAutomationService ui, MobileAutomationService mobile, ApiAutomationHistorySyncService apiHistory) {
+            UiAutomationService ui, MobileAutomationService mobile, ApiAutomationHistorySyncService apiHistory,
+            PerformanceHistorySyncService performanceHistory) {
         this.access = access;
         this.apiHistory = apiHistory;
+        this.performanceHistory = performanceHistory;
         this.functional = functional;
         this.api = api;
         this.performance = performance;
@@ -51,6 +55,9 @@ public class UnifiedExecutionService {
                 r.finishedAt(), r.updatedAt(), null, null, null, null)));
         performance.list(principal, projectId).forEach(r -> result.add(new UnifiedExecution(
                 r.id(), r.projectId(), "PERFORMANCE", r.planName(), r.status(), r.createdAt(), r.startedAt(),
+                r.finishedAt(), r.updatedAt(), null, null, null, null)));
+        performanceHistory.recentArchives(principal, projectId).forEach(r -> result.add(new UnifiedExecution(
+                r.key(), projectId, "PERFORMANCE_HISTORY", r.planName(), r.status(), r.requestedAt(), r.startedAt(),
                 r.finishedAt(), r.updatedAt(), null, null, null, null)));
         ui.executions(principal, projectId).forEach(r -> result.add(new UnifiedExecution(
                 r.id(), r.projectId(), "UI", r.scenarioName(), r.status(), r.createdAt(), r.startedAt(),

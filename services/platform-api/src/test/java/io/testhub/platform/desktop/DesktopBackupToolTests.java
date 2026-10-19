@@ -17,7 +17,7 @@ class DesktopBackupToolTests {
             sql.executeUpdate("INSERT INTO desktop_runtime_state(state_key,state_value,expires_at) VALUES('nonce','value',999999)");
             sql.executeUpdate("INSERT INTO desktop_stream(stream_key,last_id) VALUES('queue',0)");
         }
-        assertEquals("42", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
+        assertEquals("43", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
         try (var connection = DriverManager.getConnection(url(), "sa", "backup-fixture"); var sql = connection.createStatement(); var row = sql.executeQuery("SELECT COUNT(*) FROM desktop_runtime_state")) { row.next(); assertEquals(1, row.getInt(1)); }
         DesktopBackupTool.prepare(directory, "backup-fixture", true);
         try (var connection = DriverManager.getConnection(url(), "sa", "backup-fixture"); var sql = connection.createStatement()) {
@@ -42,7 +42,7 @@ class DesktopBackupToolTests {
         }
         assertEquals("3", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
         DesktopBackupTool.prepare(directory, "backup-fixture", true);
-        assertEquals("42", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
+        assertEquals("43", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
         try (var connection = DriverManager.getConnection(url(), "sa", "backup-fixture"); var sql = connection.createStatement();
              var row = sql.executeQuery("SELECT config_value FROM system_config WHERE config_key='backup.fixture'")) {
             assertTrue(row.next()); assertEquals(encrypted, row.getString(1));

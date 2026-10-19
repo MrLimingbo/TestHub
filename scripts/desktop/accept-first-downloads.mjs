@@ -437,7 +437,7 @@ finally {
   if(child&&child.exitCode===null){child.kill('SIGTERM');await finished}
   for(const server of [target,forbidden]){server.closeAllConnections();await new Promise(resolve=>server.close(resolve))}
   await fs.rm(directory,{recursive:true,force:true})
-  try{await run('/usr/bin/security',['delete-generic-password','-s',sessionName+' Safe Storage','-a',sessionName])}catch(error){if(error.code!==44)cleanupError||=error}
+  try{await run('/usr/bin/security',['delete-generic-password','-s',sessionName+' Safe Storage','-a',sessionName+' Key'])}catch(error){if(error.code!==44)cleanupError||=error}
   if(cleanupError){outcome.passed=false;outcome.cleanupFailure=true;failure||=cleanupError}
   outcome.ownedDataAndProcessesRemoved=!cleanupError
   if(!outcome.networkSnapshots)outcome.networkSnapshots=networkSnapshots
