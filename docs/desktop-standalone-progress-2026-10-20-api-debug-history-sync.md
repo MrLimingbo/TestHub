@@ -57,4 +57,4 @@ H2 V49／MySQL V106 新增独立 archive／receipt 表。目标用自己的密�
 
 ## 后续
 
-本模块已审核并提交；后续[质量报告计划持续同步](desktop-standalone-progress-2026-10-20-quality-report-sync.md)已完成本轮实现与后台验收，等待审核。发行者签名、公证、Windows 验证和移动端真实设备执行按用户要求排除；最新 Intel Mac 原生构建验收仍需要对应环境。所有内部测试包保持 `distributionReady=false`，本模块不安装或替换用户现有程序。
+本模块已审核并提交；后续[质量报告计划持续同步](desktop-standalone-progress-2026-10-20-quality-report-sync.md)已审核并推送 main `7f01558`，最新 Mac 整包收尾另行验收。发行者签名、公证、Windows 验证和移动端真实设备执行按用户要求排除；最新 Intel Mac 原生构建验收仍需要对应环境。所有内部测试包保持 `distributionReady=false`，本模块不安装或替换用户现有程序。

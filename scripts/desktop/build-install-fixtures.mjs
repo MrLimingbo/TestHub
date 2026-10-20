@@ -13,6 +13,8 @@ const target = `${process.platform}-${process.arch}`, windows = process.platform
 if (!windows && process.platform !== 'darwin') throw new Error('Installer fixtures require a native Mac or Windows')
 await fs.mkdir(output, { recursive: false })
 const metadata = JSON.parse(await fs.readFile(path.join(path.dirname(baseline), 'baseline.json'), 'utf8'))
+if (!Number.isSafeInteger(metadata.desktopSchemaVersion) || metadata.desktopSchemaVersion < 1)
+  throw new Error('Previous backend schema version is missing; rebuild the immutable installation baseline')
 const shellArchive = path.join(path.dirname(baseline), 'desktop-app.tar')
 if (metadata.commit !== '3932ef152604244438f007b3e61ed4867a23b443' || metadata.shellSource !== metadata.commit + ':apps/desktop/app'
   || metadata.backendSha256 !== await digest(baseline) || !/^[a-f0-9]{64}$/.test(metadata.shellArchiveSha256 || '')
@@ -28,7 +30,8 @@ if (await digest(baseline) === manifest.backendSha256) throw new Error('A distin
 const baselineRoot = path.join(output, 'baseline-runtime'), copied = path.join(baselineRoot, target)
 await fs.mkdir(baselineRoot); await fs.cp(currentRuntime, copied, { recursive: true, verbatimSymlinks: true })
 await fs.copyFile(baseline, path.join(copied, manifest.backend))
-const old = { ...manifest, backendSha256: await digest(baseline), distributionReady: false }
+if (metadata.desktopSchemaVersion > manifest.desktopSchemaVersion) throw new Error('Installation baseline cannot use a newer database schema than the candidate')
+const old = { ...manifest, desktopSchemaVersion: metadata.desktopSchemaVersion, backendSha256: await digest(baseline), distributionReady: false }
 old.integrity = await inventory(copied)
 await fs.writeFile(path.join(copied, 'runtime.json'), JSON.stringify(old, null, 2))
 await verifyIntegrity(copied, old)
@@ -53,5 +56,5 @@ for (const [label, runtime] of [['baseline', baselineRoot], ...(!externalCandida
   await fs.access(fixture[label])
 }
 if (externalCandidate) fixture.candidate = externalCandidate
-await fs.writeFile(path.join(output, 'fixtures.json'), JSON.stringify({ ...fixture, baselineCommit: metadata.commit, baselineShellArchiveSha256: metadata.shellArchiveSha256, baselineBackendSha256: old.backendSha256, candidateBackendSha256: manifest.backendSha256, distributionReady: false }, null, 2))
+await fs.writeFile(path.join(output, 'fixtures.json'), JSON.stringify({ ...fixture, baselineCommit: metadata.commit, baselineSchemaVersion: old.desktopSchemaVersion, candidateSchemaVersion: manifest.desktopSchemaVersion, baselineShellArchiveSha256: metadata.shellArchiveSha256, baselineBackendSha256: old.backendSha256, candidateBackendSha256: manifest.backendSha256, distributionReady: false }, null, 2))
 console.log(JSON.stringify(fixture))

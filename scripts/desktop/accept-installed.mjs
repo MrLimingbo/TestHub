@@ -69,6 +69,8 @@ async function install(image) {
       assert.equal((await fs.readdir(mount)).filter(n => n.endsWith('.app')).length, 1)
       const staged = path.join(directory, 'staged.app')
       await fs.cp(path.join(mount, 'TestHub.app'), staged, { recursive: true, verbatimSymlinks: true })
+      // Verify the actual extracted payload before it replaces even an owned QA installation.
+      await run('/usr/bin/codesign', ['--verify', '--deep', '--strict', staged], { timeout: 120000 })
       if (!await absent(installation)) await fs.rm(installation, { recursive: true })
       await fs.rename(staged, installation)
     } finally {

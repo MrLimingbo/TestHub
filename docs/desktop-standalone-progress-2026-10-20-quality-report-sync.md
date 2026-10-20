@@ -1,6 +1,6 @@
 # 质量报告计划持续同步（2026-10-20）
 
-用户已审核接口调试历史／脱敏重放模板模块，相关 27 个代码、测试和文档文件已提交并推送 GitHub main，核对远端为 `3b23d978658955e3608a4afd3e3c7dd68bd6cd64`。本模块继续实现质量报告计划持续同步，完成隔离数据库复验和最终 Mac arm64 DMG 的后台安装副本验收；阶段清理后交用户审核。2026-10-20 用户已审核通过，并授权先提交 GitHub main，再核查和继续剩余工作。
+用户已审核接口调试历史／脱敏重放模板模块，相关 27 个代码、测试和文档文件已提交并推送 GitHub main，核对远端为 `3b23d978658955e3608a4afd3e3c7dd68bd6cd64`。本模块继续实现质量报告计划持续同步，完成隔离数据库复验和最终 Mac arm64 DMG 的后台安装副本验收；阶段清理后交用户审核。2026-10-20 用户已审核通过，26 个相关文件已提交并推送 GitHub main `7f01558df5fc45f7418b723781e2168bcdc6ebab`，已核对远端；随后继续核查剩余工作。
 
 ## 行为与边界
 
@@ -47,4 +47,4 @@ H2 V50／MySQL V107 为现有计划增加 `config_version`，新增独立同步�
 
 主要入口：`QualityReportSyncService`／`QualityReportSyncController`、H2 V50／MySQL V107；`apps/desktop/app/src/quality-report-sync.cjs`、对应 IPC 和原生页面；`scripts/desktop/accept-quality-report-sync.mjs`、`accept-quality-report-upgrade.mjs`。后两者要求显式临时应用、独占输出和浏览器缓存，升级脚本另需 V49 基线 JAR；桌面流程使用隐藏、不可聚焦的离屏 QA 引导。
 
-本模块已获用户审核通过，本轮按授权提交并继续核查剩余工作。发行者签名、公证、Windows 验证和移动端真实设备执行按用户要求排除；最新 Intel Mac 原生构建验收仍需要对应环境。测试包保持 `distributionReady=false`，本阶段没有执行公网部署。
+本模块已审核并提交；后续[最新 main Mac 交付与跨模块收尾](desktop-standalone-progress-2026-10-20-final-mac-regression.md)已完成本轮验收和清理并获用户审核通过，按授权提交后更新本机 Mac 程序。发行者签名、公证、Windows 验证和移动端真实设备执行按用户要求排除；最新 Intel Mac 原生构建验收仍需要对应环境。测试包保持 `distributionReady=false`，本阶段没有执行公网部署。

@@ -1,6 +1,6 @@
 # TestHub 安装即用改造：依赖审计与实施边界
 
-当前审计入口（2026-10-20）：此前 Mac 标准打包、首次下载、性能／Web UI／移动端历史与产物、应用文件关联、gRPC 描述文件及[接口调试历史／脱敏重放模板持续同步](desktop-standalone-progress-2026-10-20-api-debug-history-sync.md)均已审核并提交 GitHub main，已核对最新远端提交 `3b23d978658955e3608a4afd3e3c7dd68bd6cd64`。[质量报告计划持续同步](desktop-standalone-progress-2026-10-20-quality-report-sync.md)已完成实现、隔离数据库复验、最终 DMG 安装副本后台验收与阶段清理，2026-10-20 用户已审核并授权提交 main，再核查和继续剩余工作。下文保留历史阶段记录，不代表其中所有早期待办仍未完成。发行者签名、公证、Windows 验证和移动端真实设备执行继续按用户要求排除；最新 Intel Mac 原生构建仍需要对应环境。
+当前审计入口（2026-10-20）：此前 Mac 标准打包、首次下载、性能／Web UI／移动端历史与产物、应用文件关联、gRPC 描述文件、接口调试历史／脱敏重放模板及[质量报告计划持续同步](desktop-standalone-progress-2026-10-20-quality-report-sync.md)均已审核并提交 GitHub main，已核对最新远端提交 `7f01558df5fc45f7418b723781e2168bcdc6ebab`。[最新 main 的 Mac 交付与跨模块收尾](desktop-standalone-progress-2026-10-20-final-mac-regression.md)已完成隔离全量回归、最终 DMG 真实执行与 V42→V50 安装生命周期、交付和阶段清理，已获用户审核通过；本轮按授权先提交验收脚本和文档，再安装最新 Mac 版本并保留原工作区与数据。当前已识别且未被排除的环境待办为最新 Intel Mac 原生验收，GitHub Actions 仍因账单／支出限制未启动作业。下文保留历史阶段记录，不代表其中所有早期待办仍未完成。发行者签名、公证、Windows 验证和移动端真实设备执行继续按用户要求排除，公网部署留待以后。
 
 日期：2026-09-17。基线：`5d933301e4b990b94b669e9f2f9d128b6a02d163`。
 状态：产品选择已确认，正在实施；未达到独立安装包交付门槛。
