@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiExceptionHandler {
     public static final String BODY_TOO_LARGE_ATTRIBUTE = "testhub.requestBodyTooLarge";
     public static final String BODY_TOO_LARGE_MESSAGE_ATTRIBUTE = "testhub.requestBodyTooLargeMessage";
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiError> handleOversizedUpload(HttpServletRequest request) {
+        return error(HttpStatus.PAYLOAD_TOO_LARGE, "REQUEST_REJECTED", "上传文件或表单超过允许大小，请缩小文件后重试", request);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     ResponseEntity<ApiError> handleBadCredentials(HttpServletRequest request) {
         return error(HttpStatus.UNAUTHORIZED, "AUTH_INVALID_CREDENTIALS", "账号或密码错误", request);

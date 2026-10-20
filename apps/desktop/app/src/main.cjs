@@ -42,7 +42,10 @@ const { installApiAutomationHistorySync } = require('./api-automation-history-sy
 const { installPerformanceHistorySync } = require('./performance-history-sync-ipc.cjs')
 const { installPerformanceArtifactSync } = require('./performance-artifact-sync-ipc.cjs')
 const { installUiAutomationHistorySync } = require('./ui-automation-history-sync-ipc.cjs')
+const { installMobileAutomationHistorySync } = require('./mobile-automation-history-sync-ipc.cjs')
+const { installMobileApplicationFileSync } = require('./mobile-application-file-sync-ipc.cjs')
 const { installUiAutomationArtifactSync } = require('./ui-automation-artifact-sync-ipc.cjs')
+const { installMobileAutomationArtifactSync } = require('./mobile-automation-artifact-sync-ipc.cjs')
 const { installApiAutomationTriggerSync } = require('./api-automation-trigger-sync-ipc.cjs')
 const { ensureSyncSession } = require('./project-sync-ipc.cjs')
 const { SettingsTransfer, settingsTransferResponseBudget } = require('./settings-transfer.cjs')
@@ -78,7 +81,7 @@ let mainWindow
 let setupWindow
 let activeServerUrl
 let workspaceMode = 'server'
-let taskSync, settingsSync, notificationSync, mockSync, performanceSync, uiAutomationSync, mobileAutomationSync, functionalSync, apiDesignSync, apiAutomationAssetSync, apiAutomationScenarioSync, apiAutomationHistorySync, performanceHistorySync, performanceArtifactSync, uiAutomationHistorySync, uiAutomationArtifactSync, apiAutomationTriggerSync, functionalGovernanceSync, functionalAssetTagSync, functionalDefectSync, projectVersionSync, functionalDefectLinkSync, functionalDefectWorkflowSync, functionalDefectPeopleSync, functionalDefectExecutionSync, functionalHistorySync, projectFileSync, taskSyncTimer
+let taskSync, settingsSync, notificationSync, mockSync, performanceSync, uiAutomationSync, mobileAutomationSync, functionalSync, apiDesignSync, apiAutomationAssetSync, apiAutomationScenarioSync, apiAutomationHistorySync, performanceHistorySync, performanceArtifactSync, uiAutomationHistorySync, uiAutomationArtifactSync, mobileAutomationHistorySync, mobileAutomationArtifactSync, mobileApplicationFileSync, apiAutomationTriggerSync, functionalGovernanceSync, functionalAssetTagSync, functionalDefectSync, projectVersionSync, functionalDefectLinkSync, functionalDefectWorkflowSync, functionalDefectPeopleSync, functionalDefectExecutionSync, functionalHistorySync, projectFileSync, taskSyncTimer
 let localRuntime
 let localEngines
 let preparingJmeter
@@ -381,7 +384,10 @@ function installApplicationMenu() {
         { label: '原始 JTL／日志同步', click: () => { void performanceArtifactSync?.open().catch(showLocalError) } },
         { label: '性能执行历史同步', click: () => { void performanceHistorySync?.open().catch(showLocalError) } },
         { label: 'Web UI 执行历史同步', click: () => { void uiAutomationHistorySync?.open().catch(showLocalError) } },
+        { label: '移动应用文件关联同步', click: () => { void mobileApplicationFileSync?.open().catch(showLocalError) } },
+        { label: '移动端执行历史同步', click: () => { void mobileAutomationHistorySync?.open().catch(showLocalError) } },
         { label: 'Web UI 报告产物同步', click: () => { void uiAutomationArtifactSync?.open().catch(showLocalError) } },
+        { label: '移动端报告产物同步', click: () => { void mobileAutomationArtifactSync?.open().catch(showLocalError) } },
         { label: '接口自动化触发配置同步', click: () => { void apiAutomationTriggerSync?.open().catch(showLocalError) } },
         { label: '移动端资料同步', click: () => { void mobileAutomationSync?.open().catch(showLocalError) } },
         { label: 'Web UI 资料同步', click: () => { void uiAutomationSync?.open().catch(showLocalError) } },
@@ -1356,7 +1362,10 @@ ipcMain.handle('testhub-desktop:backup:run', async (event, value) => {
       await performanceHistorySync?.suspendForRestore()
       await performanceArtifactSync?.suspendForRestore()
       await uiAutomationHistorySync?.suspendForRestore()
+      await mobileAutomationHistorySync?.suspendForRestore()
       await uiAutomationArtifactSync?.suspendForRestore()
+      await mobileAutomationArtifactSync?.suspendForRestore()
+      await mobileApplicationFileSync?.suspendForRestore()
       await apiAutomationTriggerSync?.suspendForRestore()
       await functionalGovernanceSync?.suspendForRestore()
       await functionalAssetTagSync?.suspendForRestore()
@@ -1439,7 +1448,10 @@ if (ownsWorkspace) app.whenReady().then(async () => {
   performanceHistorySync = installPerformanceHistorySync(syncOptions)
   performanceArtifactSync = installPerformanceArtifactSync(syncOptions)
   uiAutomationHistorySync = installUiAutomationHistorySync(syncOptions)
+  mobileAutomationHistorySync = installMobileAutomationHistorySync(syncOptions)
   uiAutomationArtifactSync = installUiAutomationArtifactSync(syncOptions)
+  mobileAutomationArtifactSync = installMobileAutomationArtifactSync(syncOptions)
+  mobileApplicationFileSync = installMobileApplicationFileSync(syncOptions)
   apiAutomationTriggerSync = installApiAutomationTriggerSync(syncOptions)
   functionalGovernanceSync = installFunctionalGovernanceSync(syncOptions)
   functionalAssetTagSync = installFunctionalAssetTagSync(syncOptions)
@@ -1451,7 +1463,7 @@ if (ownsWorkspace) app.whenReady().then(async () => {
   functionalDefectExecutionSync = installFunctionalDefectExecutionSync(syncOptions)
   functionalHistorySync = installFunctionalHistorySync(syncOptions)
   projectFileSync = installProjectFileSync(syncOptions)
-  taskSyncTimer = globalThis.setInterval(() => { void (async () => { await taskSync.tick(); await settingsSync.tick(); await notificationSync.tick(); await mockSync.tick(); await performanceSync.tick(); await uiAutomationSync.tick(); await mobileAutomationSync.tick(); await functionalSync.tick(); await apiDesignSync.tick(); await apiAutomationAssetSync.tick(); await apiAutomationScenarioSync.tick(); await apiAutomationHistorySync.tick(); await performanceHistorySync.tick(); await performanceArtifactSync.tick(); await uiAutomationHistorySync.tick(); await uiAutomationArtifactSync.tick(); await apiAutomationTriggerSync.tick(); await functionalGovernanceSync.tick(); await functionalAssetTagSync.tick(); await functionalDefectSync.tick(); await projectVersionSync.tick(); await functionalDefectLinkSync.tick(); await functionalDefectWorkflowSync.tick(); await functionalDefectPeopleSync.tick(); await functionalDefectExecutionSync.tick(); await functionalHistorySync.tick(); await projectFileSync.tick() })() }, 30000)
+  taskSyncTimer = globalThis.setInterval(() => { void (async () => { await taskSync.tick(); await settingsSync.tick(); await notificationSync.tick(); await mockSync.tick(); await performanceSync.tick(); await uiAutomationSync.tick(); await mobileAutomationSync.tick(); await functionalSync.tick(); await apiDesignSync.tick(); await apiAutomationAssetSync.tick(); await apiAutomationScenarioSync.tick(); await apiAutomationHistorySync.tick(); await performanceHistorySync.tick(); await performanceArtifactSync.tick(); await uiAutomationHistorySync.tick(); await uiAutomationArtifactSync.tick(); await mobileAutomationHistorySync.tick(); await mobileAutomationArtifactSync.tick(); await apiAutomationTriggerSync.tick(); await functionalGovernanceSync.tick(); await functionalAssetTagSync.tick(); await functionalDefectSync.tick(); await projectVersionSync.tick(); await functionalDefectLinkSync.tick(); await functionalDefectWorkflowSync.tick(); await functionalDefectPeopleSync.tick(); await functionalDefectExecutionSync.tick(); await functionalHistorySync.tick(); await projectFileSync.tick(); await mobileApplicationFileSync.tick() })() }, 30000)
   taskSyncTimer.unref()
   protocol.handle('testhub-desktop', (request) => net.fetch(desktopAssetUrl(request.url)))
   installApplicationMenu()
@@ -1470,7 +1482,7 @@ app.on('window-all-closed', () => {
 
 app.on('second-instance', () => { const window = mainWindow || setupWindow; if (window) { if (window.isMinimized()) window.restore(); window.focus() } })
 app.on('before-quit', event => {
-  globalThis.clearInterval(taskSyncTimer); taskSync?.stop(); settingsSync?.stop(); notificationSync?.stop(); mockSync?.stop(); performanceSync?.stop(); uiAutomationSync?.stop(); mobileAutomationSync?.stop(); functionalSync?.stop(); apiDesignSync?.stop(); apiAutomationAssetSync?.stop(); apiAutomationScenarioSync?.stop(); apiAutomationHistorySync?.stop(); performanceHistorySync?.stop(); performanceArtifactSync?.stop(); uiAutomationHistorySync?.stop(); uiAutomationArtifactSync?.stop(); apiAutomationTriggerSync?.stop(); functionalGovernanceSync?.stop(); functionalAssetTagSync?.stop(); functionalDefectSync?.stop(); projectVersionSync?.stop(); functionalDefectLinkSync?.stop(); functionalDefectWorkflowSync?.stop(); functionalDefectPeopleSync?.stop(); functionalDefectExecutionSync?.stop(); functionalHistorySync?.stop(); projectFileSync?.stop()
+  globalThis.clearInterval(taskSyncTimer); taskSync?.stop(); settingsSync?.stop(); notificationSync?.stop(); mockSync?.stop(); performanceSync?.stop(); uiAutomationSync?.stop(); mobileAutomationSync?.stop(); functionalSync?.stop(); apiDesignSync?.stop(); apiAutomationAssetSync?.stop(); apiAutomationScenarioSync?.stop(); apiAutomationHistorySync?.stop(); performanceHistorySync?.stop(); performanceArtifactSync?.stop(); uiAutomationHistorySync?.stop(); uiAutomationArtifactSync?.stop(); mobileAutomationHistorySync?.stop(); mobileAutomationArtifactSync?.stop(); apiAutomationTriggerSync?.stop(); functionalGovernanceSync?.stop(); functionalAssetTagSync?.stop(); functionalDefectSync?.stop(); projectVersionSync?.stop(); functionalDefectLinkSync?.stop(); functionalDefectWorkflowSync?.stop(); functionalDefectPeopleSync?.stop(); functionalDefectExecutionSync?.stop(); functionalHistorySync?.stop(); projectFileSync?.stop(); mobileApplicationFileSync?.stop()
   if (quitting || (!localRuntime && !backupOperation && !transferOperation)) return
   event.preventDefault(); quitting = true
   void (async () => { await Promise.all([backupOperation?.catch(() => {}), transferOperation?.catch(() => {})]); await Promise.all([localEngines?.stop(), localBrowsers?.stop()]); await Promise.all([preparingJmeter?.catch(() => {}), preparingBrowser?.catch(() => {})]); await localRuntime?.stop() })().finally(() => app.quit())

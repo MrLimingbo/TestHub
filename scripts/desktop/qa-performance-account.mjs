@@ -1,4 +1,5 @@
 // Acceptance-only account backend and genuine bundled JMeter/Playwright Runners, using owned loopback data.
+import { mobileProtocolFixture } from './qa-mobile-protocol.mjs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import crypto from 'node:crypto'
@@ -20,7 +21,7 @@ export async function performanceAccount({bundle,directory,origin,backend=bundle
   }
   async function stop(){for(const entry of [...children].reverse()){if(entry.process.exitCode===null){entry.process.stdin.end();entry.process.kill('SIGTERM');await entry.done}await entry.log.close()}children.length=0}
   try {
-    const serverProcess=await child('backend',bundle.java,['-Xmx768m','-jar',backend,'--spring.profiles.active=desktop','--server.port=0'],{...childEnvironment(),TESTHUB_DESKTOP_DATA_DIRECTORY:directory,TESTHUB_LOCAL_DB_PASSWORD:databasePassword,TESTHUB_ENCRYPTION_KEY:encryptionKey,TESTHUB_DESKTOP_SESSION_KEY:sessionKey,TESTHUB_DESKTOP_BROKER_KEY:brokerKey,TESTHUB_PERFORMANCE_RUNNER_HEARTBEAT_KEY:heartbeatKey,TESTHUB_UI_AUTOMATION_RUNNER_HEARTBEAT_KEY:heartbeatKey,TESTHUB_DESKTOP_ALLOWED_ORIGINS:origin,TESTHUB_REGISTRATION_ENABLED:'true',TESTHUB_DESKTOP_READY_FILE:ready,TESTHUB_DESKTOP_FRONTEND_DIRECTORY:bundle.frontend,TESTHUB_DESKTOP_INSTANCE:crypto.randomUUID(),TESTHUB_DESKTOP_WATCH_PARENT:'true'})
+    const serverProcess=await child('backend',bundle.java,['-Xmx768m','-jar',backend,'--spring.profiles.active=desktop','--server.port=0'],{...childEnvironment(),TESTHUB_DESKTOP_DATA_DIRECTORY:directory,TESTHUB_LOCAL_DB_PASSWORD:databasePassword,TESTHUB_ENCRYPTION_KEY:encryptionKey,TESTHUB_DESKTOP_SESSION_KEY:sessionKey,TESTHUB_DESKTOP_BROKER_KEY:brokerKey,TESTHUB_PERFORMANCE_RUNNER_HEARTBEAT_KEY:heartbeatKey,TESTHUB_UI_AUTOMATION_RUNNER_HEARTBEAT_KEY:heartbeatKey,TESTHUB_MOBILE_AUTOMATION_RUNNER_HEARTBEAT_KEY:heartbeatKey,TESTHUB_DESKTOP_ALLOWED_ORIGINS:origin,TESTHUB_REGISTRATION_ENABLED:'true',TESTHUB_DESKTOP_READY_FILE:ready,TESTHUB_DESKTOP_FRONTEND_DIRECTORY:bundle.frontend,TESTHUB_DESKTOP_INSTANCE:crypto.randomUUID(),TESTHUB_DESKTOP_WATCH_PARENT:'true'})
     let server
     for(let n=0;n<900;n++){if(serverProcess.process.exitCode!==null)throw new Error('Owned account backend exited');try{server='http://127.0.0.1:'+JSON.parse(await fs.readFile(ready,'utf8')).port;break}catch{await delay(100)}}
     if(!server)throw new Error('Owned account backend startup timed out')
@@ -36,6 +37,6 @@ export async function performanceAccount({bundle,directory,origin,backend=bundle
       const ready=await waitForRunnerStatus({origin:server,sessionKey,since,statusKey:'playwrightRunnerReady',label:'QA Playwright',checkRunning:()=>{if(runner.process.exitCode!==null)throw new Error('Owned Playwright Runner exited')}})
       if(!ready)throw new Error('Owned Playwright Runner readiness timed out')
     }
-    return {server,startJmeter,startPlaywright,stop}
+    return {server,startJmeter,startPlaywright,mobileFixture:()=>mobileProtocolFixture({origin:server,brokerKey,heartbeatKey,crypto}),stop}
   }catch(error){await stop();throw error}
 }

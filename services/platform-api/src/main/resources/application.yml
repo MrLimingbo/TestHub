@@ -26,7 +26,8 @@ spring:
   servlet:
     multipart:
       max-file-size: 20MB
-      max-request-size: 20MB
+      # Allow multipart headers around a full 20 MiB file without raising the per-file limit.
+      max-request-size: 21MB
   flyway:
     enabled: true
     locations: classpath:db/migration

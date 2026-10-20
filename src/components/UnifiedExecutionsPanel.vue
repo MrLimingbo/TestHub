@@ -19,6 +19,7 @@ const modules: Record<string, { label: string; path: string }> = {
   UI: { label: 'Web UI', path: '/ui-automation' },
   UI_HISTORY: { label: 'Web UI 同步历史', path: '/ui-automation#ui-history' },
   MOBILE: { label: '移动端', path: '/mobile-automation' },
+  MOBILE_HISTORY: { label: '移动端同步历史', path: '/mobile-automation#mobile-history' },
 }
 const statuses: Record<string, string> = {
   NOT_STARTED: '未开始', QUEUED: '排队中', ACCEPTED: '已接收', RUNNING: '执行中', CANCELLING: '取消中',

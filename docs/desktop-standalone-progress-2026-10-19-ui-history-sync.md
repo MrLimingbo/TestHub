@@ -1,6 +1,6 @@
 # Web UI 执行历史与报告产物同步（2026-10-19）
 
-本轮先将用户已审核的原始 JTL／日志模块代码、测试和文档提交并推送至 GitHub `main`：`c6512d70481bf3fe204811dc7b589915f6c62f7c`。本模块已完成实现、后台验收和阶段测试数据清理，并获用户审核通过；按最新授权提交本模块代码和文档至 `main`，再继续移动端执行历史与报告产物同步，仍跳过移动端真实设备执行。
+本轮先将用户已审核的原始 JTL／日志模块代码、测试和文档提交并推送至 GitHub `main`：`c6512d70481bf3fe204811dc7b589915f6c62f7c`。本模块已完成实现、后台验收和阶段测试数据清理，并获用户审核通过；代码和文档已推送 `main`（`0ff58f20011d770fdf7ac027bc4a5ada4ecc5497`）。后续见[移动端执行历史与报告产物同步](desktop-standalone-progress-2026-10-19-mobile-history-sync.md)，仍跳过移动端真实设备执行。
 
 ## 同步行为
 
@@ -68,7 +68,7 @@ Web UI“同步历史”可查看只读步骤报告并下载结构化 JSON；原
 
 自有应用、账号后端、JVM／Runner、MySQL、Redis、浏览器及验收驱动均已退出。同步／升级工作区、数据库、截图／Trace／视频、备份、下载文件、浏览器缓存副本、V44 基线 JAR 和临时 `.app` 已移除；删除 20 份私有日志、216 份本阶段测试报告及 1 个无人使用的旧运行时副本，仅保留当前 V45 开发运行时、脱敏摘要和可复用脚本。专属 QA Keychain 条目确认不存在。
 
-用户工作区、原升级备份、历史 QA 目录和未跟踪 `output/` 保留；未替换 `/Applications/TestHub.app`，其 ASAR 仍为 `c249b1da1d4ed96d875764834b67988fcb193f409a965fb5cfb774f22fe84f03`。本轮未执行远程原生 CI，不能将本机结果记作 Intel Mac 或 Windows 已通过。本模块已审核，当前按授权提交 `main`，提交结果随下一模块记录。
+用户工作区、原升级备份、历史 QA 目录和未跟踪 `output/` 保留；未替换 `/Applications/TestHub.app`，其 ASAR 仍为 `c249b1da1d4ed96d875764834b67988fcb193f409a965fb5cfb774f22fe84f03`。本轮未执行远程原生 CI，不能将本机结果记作 Intel Mac 或 Windows 已通过。本模块已审核并推送 `main`（`0ff58f2`），下一模块见[移动端历史与 PNG 同步](desktop-standalone-progress-2026-10-19-mobile-history-sync.md)。
 
 ## 后续范围
 

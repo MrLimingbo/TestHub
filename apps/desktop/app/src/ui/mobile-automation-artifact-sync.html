@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 移动端报告产物同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="mobile-automation-history-sync.css" />
+</head><body><main class="card">
+  <h1>移动端报告产物同步</h1><p class="description">将已结束移动端执行的原始文件双向保存到对应执行历史，保留原字节与 SHA-256。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p><p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p><label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">原始截图不进行脱敏，可能包含账号、输入、界面内容及其他敏感信息。启用后，完整文件将发送到上述账号服务。</p>
+    <label for="raw-files"><input id="raw-files" type="checkbox" required /> 我确认将原始截图 PNG同步到所选账号服务。</label>
+    <p class="hint">请先完成移动端执行历史同步。每文件最多 25 MiB、每项目 2000 个；每轮最多处理 20 个，剩余下轮继续。同一执行可保留多个同类型产物。</p>
+    <p class="hint">原文件只读；内容不同或已同步文件缺失会暂停核对。不覆盖、不跨端删除、不自动重建，也不创建或重放执行。</p>
+    <p id="preview" role="status" aria-live="polite"></p><button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p><p class="hint">在移动端“同步历史”的报告中下载原始文件。暂停或解除绑定后，两端已同步文件均保留。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button><div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端文件）</button>
+  </section><button id="refresh" type="button">刷新状态</button>
+</main><script src="mobile-automation-artifact-sync.js"></script></body></html>

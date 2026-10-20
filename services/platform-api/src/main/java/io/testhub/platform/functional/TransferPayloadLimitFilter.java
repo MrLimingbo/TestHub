@@ -21,7 +21,7 @@ public class TransferPayloadLimitFilter extends OncePerRequestFilter {
     private final ObjectMapper json;
     public TransferPayloadLimitFilter(ObjectMapper json){this.json=json;}
     @Override protected boolean shouldNotFilter(HttpServletRequest request){
-        return !"POST".equals(request.getMethod())||!request.getServletPath().matches("/api/v1/projects/[^/]+/(?:(?:functional|api-design|api-automation|mock|performance|ui-automation|mobile-automation|quality-report|tasks|project-settings|notification-templates)/transfer|(?:files|functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?|versions|api-design|api-automation/(?:assets|scenarios|history|triggers)|(?:performance|ui-automation)/(?:history|artifacts)|tasks|project-settings|notification-templates|mock|performance|ui-automation|mobile-automation)/sync)");
+        return !"POST".equals(request.getMethod())||!request.getServletPath().matches("/api/v1/projects/[^/]+/(?:(?:functional|api-design|api-automation|mock|performance|ui-automation|mobile-automation|quality-report|tasks|project-settings|notification-templates)/transfer|(?:files|functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?|versions|api-design|api-automation/(?:assets|scenarios|history|triggers)|(?:performance|ui-automation|mobile-automation)/(?:history|artifacts)|mobile-automation/application-files|tasks|project-settings|notification-templates|mock|performance|ui-automation|mobile-automation)/sync)");
     }
     @Override protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,FilterChain chain)throws IOException,ServletException{
         boolean functional=request.getServletPath().endsWith("/versions/sync")||request.getServletPath().matches(".*/functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?/sync");
@@ -44,6 +44,9 @@ public class TransferPayloadLimitFilter extends OncePerRequestFilter {
         if (request.getServletPath().endsWith("/performance/artifacts/sync")) { limit=io.testhub.platform.performance.PerformanceArtifactSyncService.MAX_BODY; message="原始工件同步请求不能超过 29 MiB。"; }
         if (request.getServletPath().endsWith("/ui-automation/history/sync")) { limit=io.testhub.platform.uiautomation.UiAutomationHistorySyncService.MAX_BYTES; message="Web UI 历史同步请求不能超过 4 MiB。"; }
         if (request.getServletPath().endsWith("/ui-automation/artifacts/sync")) { limit=io.testhub.platform.uiautomation.UiAutomationArtifactSyncService.MAX_BODY; message="Web UI 报告产物同步请求不能超过 35 MiB。"; }
+        if (request.getServletPath().endsWith("/mobile-automation/history/sync")) { limit=io.testhub.platform.mobileautomation.MobileAutomationHistorySyncService.MAX_BYTES; message="移动端历史同步请求不能超过 4 MiB。"; }
+        if (request.getServletPath().endsWith("/mobile-automation/artifacts/sync")) { limit=io.testhub.platform.mobileautomation.MobileAutomationArtifactSyncService.MAX_BODY; message="移动端报告产物同步请求不能超过 35 MiB。"; }
+        if (request.getServletPath().endsWith("/mobile-automation/application-files/sync")) { limit=io.testhub.platform.mobileautomation.MobileApplicationFileSyncService.MAX_BYTES; message="应用文件关联请求不能超过 1 MiB。"; }
         final int bodyLimit=limit;
         final String bodyMessage=message;
         if(request.getContentLengthLong()>limit){

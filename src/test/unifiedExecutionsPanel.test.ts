@@ -17,6 +17,10 @@ async function setup(data: unknown[] = [record()], projectId = 'p1') {
 }
 const refresh = (wrapper: ReturnType<typeof mount>) => wrapper.findComponent(Button).vm.$emit('click')
 describe('Unified execution list', () => {
+  it('links imported mobile histories separately from local Runner executions', async () => {
+    const wrapper = await setup([record('MOBILE_HISTORY', 'SUCCEEDED', '来源移动端报告')]); expect(wrapper.text()).toContain('移动端同步历史')
+    expect(wrapper.find('a').attributes('href')).toBe('/mobile-automation#mobile-history')
+  })
   it('separately identifies Web UI imported history and links to its read-only section', async () => {
     const wrapper = await setup([record('UI', 'SUCCEEDED', '真实执行'), record('UI_HISTORY', 'SUCCEEDED', '来源历史')])
     expect(wrapper.text()).toContain('Web UI 同步历史')

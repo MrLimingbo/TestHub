@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>TestHub · 移动应用文件关联同步</title><link rel="stylesheet" href="setup.css" /><link rel="stylesheet" href="settings-sync.css" /><link rel="stylesheet" href="mobile-automation-history-sync.css" />
+</head><body><main class="card">
+  <h1>移动应用文件关联同步</h1><p class="description">将已有移动应用关联到另一端已确认配对的项目文件。原字节通过项目文件同步传输。</p>
+  <p id="status" role="status" aria-live="polite">正在读取同步状态…</p><p id="error" class="error" role="alert" hidden></p>
+  <form id="bind-form" hidden>
+    <p id="account" class="hint"></p><label for="source">本地项目</label><select id="source" required></select>
+    <label for="target">账号项目</label><select id="target" required></select>
+    <p class="hint">请先独立确认同账号、服务和项目范围的“项目文件同步”，并完成移动端资料同步。文件可能包含敏感内容，文件绑定传输原字节；此绑定只更新应用关联。</p>
+    <label for="confirm-files"><input id="confirm-files" type="checkbox" required /> 我确认将应用文件关联同步到所选账号项目。</label>
+    <p class="hint">按应用名称和平台对应，再以已确认文件配对重映射 ID。最多 100 个应用，每轮处理 20 个关联；继承项目文件单个 20 MiB、每项目 1000 个限制。</p>
+    <p class="hint">应用或文件缺失、清空关联会暂停核对；两端关联不同可选择已核对版本。不删除或重建文件，不改变启停、安装应用或触发执行。</p>
+    <p id="preview" role="status" aria-live="polite"></p><button id="prepare" type="submit">预览绑定</button><button id="bind" type="button" disabled>确认绑定并同步</button>
+  </form>
+  <section id="bound" hidden>
+    <p id="binding" class="hint"></p><p id="last-sync" class="hint"></p><p class="hint">在移动端应用配置中查看关联，在项目文件中下载原字节。暂停或解除后，两端已有文件和关联保留。</p>
+    <button id="run" type="button">立即同步</button><button id="toggle" type="button">暂停同步</button><div id="conflicts" aria-live="polite"></div><button id="unbind" type="button">解除绑定（保留两端文件）</button>
+  </section><button id="refresh" type="button">刷新状态</button>
+</main><script src="mobile-application-file-sync.js"></script></body></html>

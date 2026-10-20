@@ -42,7 +42,7 @@ class Inspector {
   }
   close() { this.socket.close(); for (const call of this.pending.values()) { clearTimeout(call.timeout); call.reject(new Error('Inspector closed')) }; for (const event of this.events.values()) clearTimeout(event.timeout) }
 }
-function bootstrap(directory, name) {
+function bootstrap(directory, name, observeRuntime) {
   const electron = require('electron'), Module = require('node:module')
   if (!electron.app.isPackaged) throw new Error('A real packaged executable is required')
   electron.app.setName(name); electron.app.setPath('userData', directory); electron.app.setPath('sessionData', directory)
@@ -52,6 +52,11 @@ function bootstrap(directory, name) {
   for (const method of ['show', 'showInactive', 'focus', 'restore']) Original.prototype[method] = function () {}
   const Hidden = new Proxy(Original, { construct(target, args) { const options = args[0] || {}; return Reflect.construct(target, [{ ...options, show: false, focusable: false, webPreferences: { ...options.webPreferences, offscreen: true, backgroundThrottling: false } }], target) } })
   const quiet = new Proxy(electron, { get(target, name, receiver) { return name === 'BrowserWindow' ? Hidden : Reflect.get(target, name, receiver) } })
+  if (observeRuntime) {
+    const { LocalRuntime } = require(require('node:path').join(process.resourcesPath, 'app.asar/src/local-runtime.cjs'))
+    const start = LocalRuntime.prototype.start
+    LocalRuntime.prototype.start = async function (...args) { const value = await start.apply(this, args); globalThis.__testhubQaLocalRuntime = this; return value }
+  }
   const load = Module._load
   Module._load = function (request, parent, main) { return request === 'electron' ? quiet : load.call(this, request, parent, main) }
   for (const method of ['showMessageBox', 'showMessageBoxSync', 'showOpenDialog', 'showOpenDialogSync', 'showSaveDialog', 'showSaveDialogSync', 'showErrorBox']) electron.dialog[method] = function () { state.unexpectedDialogs++; throw new Error('Unexpected native dialog during offscreen acceptance: ' + method) }
@@ -120,7 +125,7 @@ export async function offscreenMac(appPath, directory, options = {}) {
     }
     const frame = pause.callFrames.find(entry)
     if (!frame) throw new Error('Could not pause before packaged main entry')
-    const initialized = await inspector.send('Debugger.evaluateOnCallFrame', {callFrameId:frame.callFrameId,expression:`(${bootstrap.toString()})(${JSON.stringify(directory)},${JSON.stringify(name)})`,returnByValue:true})
+    const initialized = await inspector.send('Debugger.evaluateOnCallFrame', {callFrameId:frame.callFrameId,expression:`(${bootstrap.toString()})(${JSON.stringify(directory)},${JSON.stringify(name)},${options.observeRuntime === true})`,returnByValue:true})
     if (initialized.exceptionDetails || !initialized.result?.value?.isPackaged) throw new Error('Offscreen isolation failed before entry')
     await inspector.send('Debugger.resume')
     let endpointChrome

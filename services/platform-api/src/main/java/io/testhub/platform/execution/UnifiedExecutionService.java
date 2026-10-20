@@ -5,6 +5,7 @@ import io.testhub.platform.apiautomation.ApiAutomationExecutionService;
 import io.testhub.platform.apiautomation.ApiAutomationHistorySyncService;
 import io.testhub.platform.functional.FunctionalTestExecutionService;
 import io.testhub.platform.mobileautomation.MobileAutomationService;
+import io.testhub.platform.mobileautomation.MobileAutomationHistorySyncService;
 import io.testhub.platform.performance.PerformanceTestExecutionService;
 import io.testhub.platform.performance.PerformanceHistorySyncService;
 import io.testhub.platform.security.AuthenticatedPrincipal;
@@ -27,11 +28,12 @@ public class UnifiedExecutionService {
     private final UiAutomationService ui;
     private final UiAutomationHistorySyncService uiHistory;
     private final MobileAutomationService mobile;
+    private final MobileAutomationHistorySyncService mobileHistory;
 
     public UnifiedExecutionService(AccessService access, FunctionalTestExecutionService functional,
             ApiAutomationExecutionService api, PerformanceTestExecutionService performance,
             UiAutomationService ui, MobileAutomationService mobile, ApiAutomationHistorySyncService apiHistory,
-            PerformanceHistorySyncService performanceHistory, UiAutomationHistorySyncService uiHistory) {
+            PerformanceHistorySyncService performanceHistory, UiAutomationHistorySyncService uiHistory, MobileAutomationHistorySyncService mobileHistory) {
         this.access = access;
         this.apiHistory = apiHistory;
         this.performanceHistory = performanceHistory;
@@ -41,6 +43,7 @@ public class UnifiedExecutionService {
         this.ui = ui;
         this.uiHistory=uiHistory;
         this.mobile = mobile;
+        this.mobileHistory=mobileHistory;
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +74,9 @@ public class UnifiedExecutionService {
         mobile.executions(principal, projectId).forEach(r -> result.add(new UnifiedExecution(
                 r.id(), r.projectId(), "MOBILE", r.scenarioName(), r.status(), r.createdAt(), r.startedAt(),
                 r.finishedAt(), r.updatedAt(), null, null, null, null)));
+        mobileHistory.recentArchives(principal, projectId).forEach(r -> result.add(new UnifiedExecution(
+                r.key(),projectId,"MOBILE_HISTORY",r.scenarioName(),r.status(),r.requestedAt(),r.startedAt(),
+                r.finishedAt(),r.updatedAt(),null,null,null,null)));
         result.sort(Comparator.comparing(UnifiedExecution::createdAt).reversed()
                 .thenComparing(UnifiedExecution::module).thenComparing(UnifiedExecution::id, Comparator.reverseOrder()));
         return List.copyOf(result);

@@ -5,7 +5,10 @@ interface WorkspaceBridge {
   openPerformanceHistorySync?: () => Promise<void>
   openPerformanceArtifactSync?: () => Promise<void>
   openUiAutomationHistorySync?: () => Promise<void>
+  openMobileApplicationFileSync?: () => Promise<void>
+  openMobileAutomationHistorySync?: () => Promise<void>
   openUiAutomationArtifactSync?: () => Promise<void>
+  openMobileAutomationArtifactSync?: () => Promise<void>
   openApiAutomationTriggerSync?: () => Promise<void>
   openApiAutomationAssetSync?: () => Promise<void>
   openApiDesignSync?: () => Promise<void>
@@ -67,6 +70,24 @@ export async function openPerformanceArtifactSync() {
   const native = bridge()
   if (!native?.openPerformanceArtifactSync) throw new Error('当前桌面版本不支持原始 JTL／日志同步')
   await native.openPerformanceArtifactSync()
+}
+
+export async function openMobileAutomationArtifactSync() {
+  const native = bridge()
+  if (!native?.openMobileAutomationArtifactSync) throw new Error('当前桌面版本不支持移动端报告产物同步')
+  await native.openMobileAutomationArtifactSync()
+}
+
+export async function openMobileApplicationFileSync() {
+  const native = bridge()
+  if (!native?.openMobileApplicationFileSync) throw new Error('当前桌面版本不支持移动应用文件关联同步')
+  await native.openMobileApplicationFileSync()
+}
+
+export async function openMobileAutomationHistorySync() {
+  const native = bridge()
+  if (!native?.openMobileAutomationHistorySync) throw new Error('当前桌面版本不支持移动端执行历史同步')
+  await native.openMobileAutomationHistorySync()
 }
 
 export async function openUiAutomationArtifactSync() {
@@ -158,7 +179,7 @@ export async function openUiAutomationSync() {
 }
 
 export async function openMobileAutomationSync() {
-  if (!bridge()?.openMobileAutomationSync) throw new Error('当前桌面版本不支持 移动端 资料同步，请更新 TestHub。')
+  if (!bridge()?.openMobileAutomationSync) throw new Error('当前桌面版本不支持 移动端资料同步，请更新 TestHub。')
   await bridge()?.openMobileAutomationSync?.()
 }
 
