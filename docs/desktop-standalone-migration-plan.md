@@ -1,6 +1,6 @@
 # TestHub 安装即用改造：依赖审计与实施边界
 
-当前审计入口（2026-10-20）：[Mac 标准打包与完整回归](desktop-standalone-progress-2026-10-19-mac-preview.md)、[首次下载](desktop-standalone-progress-2026-10-19-first-downloads.md)、性能／Web UI／[移动端历史与 PNG](desktop-standalone-progress-2026-10-19-mobile-history-sync.md)及[应用文件关联](desktop-standalone-progress-2026-10-19-mobile-application-file-sync.md)均已审核并提交 GitHub main，最新提交为 `9d405f912bc4034144d3a5a84f7baaa37f727032`，已核对远端。[gRPC 描述文件持续同步与用例引用](desktop-standalone-progress-2026-10-20-grpc-descriptor-sync.md)已完成实现、最终包后台验收与阶段清理，2026-10-20 已审核并授权提交 main，再继续调试历史与重放草稿。下文按历史阶段保留记录，不代表其中所有早期待办仍未完成。发行者签名、公证、Windows 验证和移动端真实设备执行继续按要求跳过；后续工作逐模块交审。
+当前审计入口（2026-10-20）：此前 Mac 标准打包、首次下载、性能／Web UI／移动端历史与产物、应用文件关联及 [gRPC 描述文件持续同步与用例引用](desktop-standalone-progress-2026-10-20-grpc-descriptor-sync.md)均已审核并提交 GitHub main，已核对最新远端提交 `498354c7f3bcc1421810990021c147335d545b5b`。[接口调试历史与脱敏重放模板持续同步](desktop-standalone-progress-2026-10-20-api-debug-history-sync.md)已完成实现、最终包后台验收与阶段清理，用户已审核并授权提交 main，再继续质量报告计划持续同步。下文保留历史阶段记录，不代表其中所有早期待办仍未完成。发行者签名、公证、Windows 验证和移动端真实设备执行继续按用户要求排除；最新 Intel Mac 原生构建仍需要对应环境。
 
 日期：2026-09-17。基线：`5d933301e4b990b94b669e9f2f9d128b6a02d163`。
 状态：产品选择已确认，正在实施；未达到独立安装包交付门槛。

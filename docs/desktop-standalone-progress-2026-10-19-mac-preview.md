@@ -49,8 +49,9 @@ QA 脚本及脱敏摘要位于 `.testhub/mac-preview-closure-module-20261019/`�
 | Intel Mac 最新预览包原生构建和验收 | 需恢复原生 CI 或具备 Intel Mac；此前旧提交已通过不等于本轮通过 |
 | 性能、Web UI、移动端的执行历史及报告／产物持续同步 | [性能执行历史及脱敏结构化报告](desktop-standalone-progress-2026-10-19-performance-history-sync.md)和[原始 JTL／日志同步](desktop-standalone-progress-2026-10-19-performance-artifact-sync.md)已审核并提交 main，[Web UI 历史与报告产物同步](desktop-standalone-progress-2026-10-19-ui-history-sync.md)也已审核并推送，Web UI 提交为 `0ff58f2`；[移动端历史与 PNG 产物同步](desktop-standalone-progress-2026-10-19-mobile-history-sync.md)已审核并随应用文件模块提交 main `9d405f9`。既有接口自动化只读执行历史同步已完成 |
 | 移动应用文件的持续同步与关联 | [应用文件关联模块](desktop-standalone-progress-2026-10-19-mobile-application-file-sync.md)实现、最终包后台验收和阶段清理已完成，2026-10-20 已审核并提交 main `9d405f9`；原字节复用明确确认的项目文件绑定 |
-| gRPC 描述文件的持续同步 | [描述文件同步与用例引用模块](desktop-standalone-progress-2026-10-20-grpc-descriptor-sync.md)实现、最终包后台验收和清理已完成，2026-10-20 已审核并授权提交 main；一次性迁移不等于持续同步 |
-| 接口调试历史／重放草稿、质量报告计划的持续同步 | 后续核对范围；已有一次性迁移及本地功能保持原有行为 |
+| gRPC 描述文件的持续同步 | [描述文件同步与用例引用模块](desktop-standalone-progress-2026-10-20-grpc-descriptor-sync.md)实现、最终包后台验收和清理已完成，2026-10-20 已审核并提交 main `498354c`；一次性迁移不等于持续同步 |
+| 接口调试历史／脱敏重放模板持续同步 | [本模块](desktop-standalone-progress-2026-10-20-api-debug-history-sync.md)实现、最终包后台验收与清理已完成，2026-10-20 已审核并授权提交 main；历史／模板分别确认，补齐后手动发送 |
+| 质量报告计划持续同步 | 后续独立模块；已有一次性迁移及本地功能保持原有行为 |
 | 公证、发行者证书签名、Windows 安装包验证 | 用户明确排除，暂不执行 |
 | 移动端真实设备执行 | 用户最新明确要求跳过；协议回归不记作真实设备通过，也不安装模拟器环境 |
 

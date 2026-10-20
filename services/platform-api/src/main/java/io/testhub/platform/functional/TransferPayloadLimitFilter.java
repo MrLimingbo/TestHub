@@ -21,7 +21,7 @@ public class TransferPayloadLimitFilter extends OncePerRequestFilter {
     private final ObjectMapper json;
     public TransferPayloadLimitFilter(ObjectMapper json){this.json=json;}
     @Override protected boolean shouldNotFilter(HttpServletRequest request){
-        return !"POST".equals(request.getMethod())||!request.getServletPath().matches("/api/v1/projects/[^/]+/(?:(?:functional|api-design|api-automation|mock|performance|ui-automation|mobile-automation|quality-report|tasks|project-settings|notification-templates)/transfer|(?:files|functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?|versions|api-design|api-automation/(?:assets|scenarios|history|triggers)|(?:performance|ui-automation|mobile-automation)/(?:history|artifacts)|mobile-automation/application-files|api-debug/grpc/descriptors|tasks|project-settings|notification-templates|mock|performance|ui-automation|mobile-automation)/sync)");
+        return !"POST".equals(request.getMethod())||!request.getServletPath().matches("/api/v1/projects/[^/]+/(?:(?:functional|api-design|api-automation|mock|performance|ui-automation|mobile-automation|quality-report|tasks|project-settings|notification-templates)/transfer|(?:files|functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?|versions|api-design|api-automation/(?:assets|scenarios|history|triggers)|(?:performance|ui-automation|mobile-automation)/(?:history|artifacts)|mobile-automation/application-files|api-debug/grpc/descriptors|api-debug/(?:history|replay-drafts)/archive|tasks|project-settings|notification-templates|mock|performance|ui-automation|mobile-automation)/sync)");
     }
     @Override protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,FilterChain chain)throws IOException,ServletException{
         boolean functional=request.getServletPath().endsWith("/versions/sync")||request.getServletPath().matches(".*/functional(?:/(?:governance|asset-tags|defects|defect-links|defect-workflow|defect-people|defect-execution|history))?/sync");
@@ -48,6 +48,7 @@ public class TransferPayloadLimitFilter extends OncePerRequestFilter {
         if (request.getServletPath().endsWith("/mobile-automation/artifacts/sync")) { limit=io.testhub.platform.mobileautomation.MobileAutomationArtifactSyncService.MAX_BODY; message="移动端报告产物同步请求不能超过 35 MiB。"; }
         if (request.getServletPath().endsWith("/mobile-automation/application-files/sync")) { limit=io.testhub.platform.mobileautomation.MobileApplicationFileSyncService.MAX_BYTES; message="应用文件关联请求不能超过 1 MiB。"; }
         if (request.getServletPath().endsWith("/api-debug/grpc/descriptors/sync")) { limit=io.testhub.platform.apidebug.GrpcDescriptorSyncService.MAX_BODY; message="描述符同步请求不能超过 2 MiB。"; }
+        if (request.getServletPath().matches(".*/api-debug/(?:history|replay-drafts)/archive/sync")) { limit=io.testhub.platform.apidebug.ApiDebugHistorySyncService.MAX_BYTES; message="调试历史同步请求不能超过 4 MiB。"; }
         final int bodyLimit=limit;
         final String bodyMessage=message;
         if(request.getContentLengthLong()>limit){

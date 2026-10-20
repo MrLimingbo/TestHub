@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
 import CodeEditor from '@/components/CodeEditor.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import ApiDebugSyncArchive from '@/components/ApiDebugSyncArchive.vue'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
 import { useSessionStore } from '@/stores/session'
 import { isLocalDesktop, isAccountDesktop, openGrpcDescriptorSync } from '@/utils/desktopWorkspace'
@@ -70,10 +71,31 @@ const emit = defineEmits<{
 }>()
 
 const context = ref<Context | null>(null)
+const syncedTemplate = ref(false)
+const syncedTemplateReviewed = ref(false)
+function canSendReviewedTemplate() {
+  if (syncedTemplate.value && !syncedTemplateReviewed.value) { Message.warning('请补齐脱敏模板并勾选核对后手动发送'); return false }
+  if (syncedTemplate.value) {
+    const activeAuth = (value: typeof auth) => value.type === 'BEARER' ? { type: value.type, token: value.token } : value.type === 'BASIC' ? { type: value.type, username: value.username, password: value.password } : value.type === 'API_KEY' ? { type: value.type, key: value.key, value: value.value, placement: value.placement } : { type: value.type }
+    const content = protocolType.value === 'GRPC' ? { ...grpcCallPayload(), auth: activeAuth({ ...grpcAuth, type: grpcAuth.type as typeof auth.type, placement: 'HEADER' }) } : protocolType.value === 'WEBSOCKET' ? { url: url.value, headers: headers(), auth: activeAuth(auth), subscriptions: webSocket.subscriptions } : { ...quickRequestPayload(), auth: activeAuth(auth), protocol: protocolType.value === 'GRAPHQL' ? graphql : protocolType.value === 'SOAP' ? soap : null }
+    if (/SYNC_REVIEW_[A-Z0-9_]+/.test(JSON.stringify(content))) { Message.warning('模板仍有 SYNC_REVIEW 占位符，请先补齐后发送'); return false }
+  }
+  return true
+}
+function loadSyncedTemplate(serialized: string) {
+  if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '') || grpcStream.session?.status === 'OPEN' || ['OPEN', 'HALF_CLOSED'].includes(grpcClientStream.session?.status ?? '') || ['OPEN', 'HALF_CLOSED'].includes(grpcBidiStream.session?.status ?? '')) { Message.warning('请先结束当前连接或流会话，再载入模板'); return }
+  stopWebSocketPolling(); stopGrpcStreamPolling(); stopGrpcClientStreamPolling(); stopGrpcBidiStreamPolling()
+  webSocket.session = null; webSocket.messages = []; grpcStream.session = null; grpcStream.messages = []; grpcClientStream.session = null; grpcBidiStream.session = null; grpcBidiStream.messages = []
+  grpcDescriptor.selectedId = ''; grpcDiscovery.services = []; grpcDiscovery.methods = []
+  if (!applyStoredReplayDraft(serialized)) { Message.error('脱敏模板格式无效'); return }
+  syncedTemplate.value = true; syncedTemplateReviewed.value = false
+  result.value = null; responseBody.value = '已载入脱敏模板，补齐并核对后手动发送。'
+}
 const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
 const projectId = computed({ get: () => sessionStore.projectId, set: (value: string) => sessionStore.selectProject(value) })
+watch(projectId, () => { if (syncedTemplate.value) { syncedTemplateReviewed.value = false; url.value = '' } })
 const method = ref('POST')
 const url = ref('https://postman-echo.com/post')
 const body = ref('{\n  "source": "testhub-api-debug"\n}')
@@ -435,6 +457,7 @@ function applyRouteDraft(draft: ApiDebugRouteDraft | null) {
 }
 
 async function changeProject() {
+  syncedTemplateReviewed.value = false
   stopWebSocketPolling()
   stopGrpcStreamPolling()
   stopGrpcClientStreamPolling()
@@ -492,6 +515,7 @@ function changeProtocol() {
 }
 
 async function send() {
+  if (!canSendReviewedTemplate()) return
   if (protocolType.value === 'WEBSOCKET') {
     await connectWebSocket()
     return
@@ -533,6 +557,7 @@ function grpcCallPayload() {
 }
 
 async function sendGrpc() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
   sending.value = true
   result.value = null
@@ -580,6 +605,7 @@ async function loadGrpcStreamMessages() {
 }
 
 async function sendGrpcServerStream() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
   if (grpcStream.session?.status === 'OPEN') {
     await loadGrpcStreamMessages()
@@ -642,6 +668,7 @@ function grpcClientStreamStartPayload() {
 }
 
 async function startGrpcClientStream() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
   if (['OPEN', 'HALF_CLOSED'].includes(grpcClientStream.session?.status ?? '')) {
     await loadGrpcClientStream()
@@ -662,6 +689,7 @@ async function startGrpcClientStream() {
 }
 
 async function sendGrpcClientStreamMessage() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value || grpcClientStream.session?.status !== 'OPEN') return
   sending.value = true
   try {
@@ -724,6 +752,7 @@ function grpcBidiStreamStartPayload() {
 }
 
 async function startGrpcBidiStream() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
   if (['OPEN', 'HALF_CLOSED'].includes(grpcBidiStream.session?.status ?? '')) {
     await loadGrpcBidiStream()
@@ -745,6 +774,7 @@ async function startGrpcBidiStream() {
 }
 
 async function sendGrpcBidiStreamMessage() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value || grpcBidiStream.session?.status !== 'OPEN') return
   sending.value = true
   try {
@@ -781,6 +811,7 @@ function grpcDiscoveryPayload(service: string | null) {
 }
 
 async function discoverGrpcServices() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
   grpcDiscovery.loading = true
   try {
@@ -796,6 +827,7 @@ async function discoverGrpcServices() {
 }
 
 async function discoverGrpcMethods() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
   if (!grpc.service.trim()) { Message.warning('请先填写或选择服务名称'); return }
   grpcDiscovery.loading = true
@@ -888,6 +920,7 @@ async function loadWebSocketMessages() {
 }
 
 async function connectWebSocket() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
   if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '')) {
     await loadWebSocketMessages()
@@ -915,6 +948,7 @@ async function connectWebSocket() {
 }
 
 async function sendWebSocketMessage() {
+  if (!canSendReviewedTemplate()) return
   if (!projectId.value || !webSocket.session) return
   if (webSocket.session.status !== 'OPEN') { Message.warning('请先建立 WebSocket 连接'); return }
   sending.value = true
@@ -985,6 +1019,7 @@ function loadHeaders(source: unknown): string {
 }
 
 function applyStoredReplayDraft(serialized: string): boolean {
+  syncedTemplate.value = false; syncedTemplateReviewed.value = false
   try {
     const saved = asRecord(JSON.parse(serialized))
     const request = saved && asRecord(saved.request)
@@ -1285,12 +1320,14 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <div class="environment-bar">
+            <ApiDebugSyncArchive :project-id="projectId" @load="loadSyncedTemplate" />
             <a-select v-model="protocolType" size="small" :style="{ width: '128px' }" @change="changeProtocol"><a-option value="HTTP">HTTP</a-option><a-option value="GRAPHQL">GraphQL</a-option><a-option value="SOAP">SOAP</a-option><a-option value="WEBSOCKET">WebSocket</a-option><a-option value="GRPC">gRPC</a-option></a-select>
             <a-select v-model="environment" size="small" allow-clear placeholder="不使用环境" :style="{ width: '210px' }" @change="changeEnvironment"><a-option v-for="item in environments" :key="item" :value="item" :disabled="projectEnvironments.find((candidate) => candidate.environmentCode === item)?.enabled === false">{{ projectEnvironments.find((candidate) => candidate.environmentCode === item)?.name ?? item }} · {{ item }}</a-option></a-select>
             <a-tag color="arcoblue">{{ environment || '无环境' }}</a-tag><span>变量 {{ variables.length }}</span><span>密钥 {{ secrets.length }}</span><span>{{ protocolType === 'WEBSOCKET' ? '消息上限 32 KB' : protocolType === 'GRPC' ? grpcSelectedCallType === 'SERVER_STREAMING' ? '服务端流 · 100 条 / 512 KB' : grpcSelectedCallType === 'CLIENT_STREAMING' ? '客户端流 · 100 条 / 512 KB' : grpcSelectedCallType === 'BIDI_STREAMING' ? '双向流 · 双向各 100 条 / 512 KB' : 'Unary · 响应上限 512 KB' : `超时 ${timeoutMs / 1000} 秒` }}</span>
             <a-button type="text" size="small" @click="router.push('/system-settings/environments')"><icon-settings /> 管理环境</a-button>
             <a-button type="text" size="small" @click="Message.info('当前 gRPC 支持在线反射或离线 Proto/DescriptorSet 发现、Unary、服务端流、客户端流与双向流；流式调用仅保留当前内存会话，每个方向均受 100 条消息与 512 KB 上限约束。')">查看边界</a-button>
           </div>
+          <a-alert v-if="syncedTemplate" type="warning" class="synced-template-review">脱敏模板已载入。补齐 SYNC_REVIEW 占位符，重新选择环境、文件和 gRPC 描述符，确认目标及请求内容。<br /><a-checkbox v-model="syncedTemplateReviewed">我已补齐并核对模板，下一步由我手动发送</a-checkbox></a-alert>
           <a-tabs v-if="protocolType === 'HTTP'" v-model:active-key="requestTab" class="request-tabs quick-http-tabs">
             <a-tab-pane key="params" :title="`Params ${activeQueryCount || ''}`">
               <div class="quick-table-title">Query 参数 <small>修改后自动同步到 URL</small></div>
