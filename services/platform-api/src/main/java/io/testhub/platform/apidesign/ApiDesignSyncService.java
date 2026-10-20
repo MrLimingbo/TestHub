@@ -44,13 +44,15 @@ public class ApiDesignSyncService {
     private final AccessService access;
     private final AuditService audit;
     private final ProjectFileReferenceGuard fileLinks;
+    private final io.testhub.platform.apidebug.GrpcDescriptorSyncService descriptors;
     private final JdbcClient jdbc;
     private final ObjectMapper json;
 
     public ApiDesignSyncService(ApiDesignSyncProjection projection, ApiDesignService design, ApiDesignRepository repository,
                                 ApiTransferRepository transfer, AccessService access, AuditService audit,
-                                ProjectFileReferenceGuard fileLinks, JdbcClient jdbc, ObjectMapper json) {
+                                ProjectFileReferenceGuard fileLinks, JdbcClient jdbc, ObjectMapper json, io.testhub.platform.apidebug.GrpcDescriptorSyncService descriptors) {
         this.projection = projection; this.design = design; this.repository = repository; this.transfer = transfer;
+        this.descriptors = descriptors;
         this.access = access; this.audit = audit; this.fileLinks = fileLinks; this.jdbc = jdbc; this.json = json;
     }
 
@@ -100,7 +102,10 @@ public class ApiDesignSyncService {
         if (!current.revision().equals(request.expectedRevision())) throw conflict("目标接口设计资料已变化，请重新同步并核对冲突");
         var merged = new LinkedHashMap<String, ApiDesignSyncProjection.Item>();
         current.items().forEach(item -> merged.put(key(item), item));
-        request.operations().forEach(operation -> merged.put(key(operation.item()), operation.item()));
+        request.operations().forEach(operation -> {
+            if (operation.item().kind().equals("CASE")) validateDescriptorReferences(json.valueToTree(operation.item().definition()), projectId);
+            merged.put(key(operation.item()), operation.item());
+        });
         validateReferences(merged.values());
         if (merged.size() > 300 || encoded(merged.values()).length > 8 * 1024 * 1024) throw invalid("合并后的接口资料超过同步范围");
         try {
@@ -259,23 +264,25 @@ public class ApiDesignSyncService {
                 var data = data(item, ApiDesignSyncProjection.Case.class);
                 design.validateCaseInput(new ApiDesignService.CaseInput(names.name(), data.environmentCode(), data.requestSnapshot(),
                         data.expectedStatus(), data.responseValidation(), data.savedResponseBody()));
-                rejectDescriptor(data.requestSnapshot()); value = data;
+                value = data;
             }
             default -> throw invalid("接口设计资料类型无效");
         }
         if (!json.valueToTree(value).equals(json.valueToTree(item.definition()))) throw invalid("接口设计字段不合法或尚未规范化");
     }
 
-    private void rejectDescriptor(com.fasterxml.jackson.databind.JsonNode node) {
+    private void validateDescriptorReferences(com.fasterxml.jackson.databind.JsonNode node, String project) {
         if (node == null) return;
         if (node.isObject()) node.fields().forEachRemaining(field -> {
             String name = field.getKey().replace("_", "").replace("-", "").toLowerCase(Locale.ROOT);
             if ((name.equals("descriptorid") || name.equals("grpcdescriptorid")) && !field.getValue().isNull()
-                    && (!field.getValue().isTextual() || !field.getValue().asText().isBlank()))
-                throw conflict("接口用例包含本端 gRPC 描述符引用，请先同步并确认对应描述符");
-            rejectDescriptor(field.getValue());
+                    && (!field.getValue().isTextual() || !field.getValue().asText().isBlank())) {
+                if (!field.getValue().isTextual()) throw conflict("描述符引用无效，请先确认描述符同步");
+                descriptors.validateReference(project, field.getValue().asText());
+            }
+            validateDescriptorReferences(field.getValue(), project);
         });
-        else if (node.isArray()) node.forEach(this::rejectDescriptor);
+        else if (node.isArray()) node.forEach(value -> validateDescriptorReferences(value, project));
     }
 
     private ApiCatalog catalogByPath(AuthenticatedPrincipal actor, String projectId, String path) {

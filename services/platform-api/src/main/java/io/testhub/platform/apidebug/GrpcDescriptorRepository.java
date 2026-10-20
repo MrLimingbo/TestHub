@@ -15,6 +15,8 @@ public class GrpcDescriptorRepository {
         this.jdbc = jdbc;
     }
 
+    public void lockProject(String projectId) { jdbc.sql("SELECT id FROM project WHERE id=:p FOR UPDATE").param("p",projectId).query(String.class).single(); }
+
     public List<GrpcDescriptor> findByProject(String projectId) {
         return jdbc.sql("""
                 SELECT id, organization_id, project_id, display_name, source_format, descriptor_hash, descriptor_bytes,

@@ -53,7 +53,7 @@ async function syncBinary(fetcher, url, size, digest, { label = '文件', timeou
   return Buffer.concat(chunks)
 }
 
-function installProjectSync({ ipcMain, dialog, session, directory, origin, windows, runtime, server, exclusive, available, openWindow, trusted, fileLinkContext }, definition) {
+function installProjectSync({ ipcMain, dialog, session, directory, origin, windows, runtime, server, exclusive, available, openWindow, trusted, fileLinkContext, descriptorLinkContext }, definition) {
   const { Client, Store, channel, page, filename, title, transport } = definition
   let client, initializing, lastError = '', disposed = false
   const remoteSession = url => session.fromPartition('persist:testhub-server-' + crypto.createHash('sha256').update(url).digest('hex').slice(0, 24))
@@ -61,7 +61,7 @@ function installProjectSync({ ipcMain, dialog, session, directory, origin, windo
     if (!client) {
       if (!initializing) initializing = (async () => {
         const local = await runtime()
-        client = new Client({ store: new Store(directory, local.codec), fileLinkContext,
+        client = new Client({ store: new Store(directory, local.codec), fileLinkContext, descriptorLinkContext,
           guard: async binding => {
             if (disposed || normalizeServerUrl(await server()) !== binding.server) throw new Error('账号服务已切换，同步已停止；请切回绑定服务。')
           },

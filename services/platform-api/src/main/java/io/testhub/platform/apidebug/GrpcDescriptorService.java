@@ -45,10 +45,12 @@ public class GrpcDescriptorService {
         return descriptors.findByProject(projectId).stream().map(this::summary).toList();
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public Summary importFiles(AuthenticatedPrincipal principal, String projectId, String name, List<MultipartFile> files) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
         String normalizedName = displayName(name);
         CompiledImport compiled = compile(files);
+        descriptors.lockProject(projectId);
         GrpcDescriptor descriptor = new GrpcDescriptor(UlidCreator.getUlid().toString(), project.organizationId(), projectId, normalizedName,
                 compiled.format(), sha256(compiled.bytes()), compiled.bytes(), compiled.bytes().length, compiled.services().size(),
                 compiled.sourceCount(), principal.userId(), null);
@@ -88,8 +90,10 @@ public class GrpcDescriptorService {
         }
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void delete(AuthenticatedPrincipal principal, String projectId, String descriptorId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        descriptors.lockProject(projectId);
         GrpcDescriptor descriptor = required(projectId, descriptorId);
         descriptors.delete(projectId, descriptorId);
         audit.record(principal, project.organizationId(), projectId, "GRPC_DESCRIPTOR_DELETED", "GRPC_DESCRIPTOR", descriptor.id(),

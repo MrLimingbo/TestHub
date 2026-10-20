@@ -156,3 +156,36 @@ test('invalid graph and extra fields fail before any write', async () => {
   }
   assert.equal(validateItem(version()).kind, 'VERSION')
 })
+
+
+test('verified descriptor binding maps API-case references both ways and pauses pending replay when disabled', async () => {
+  const f = fixture(), localDescriptor = 'E'.repeat(26), remoteDescriptor = 'F'.repeat(26)
+  let enabled = true
+  f.options.descriptorLinkContext = async () => enabled ? { sourceProject: sourceId, targetProject: targetId,
+    links: [{ key: localDescriptor, localId: localDescriptor, remoteId: remoteDescriptor }] } : null
+  f.rows.local.find(i => i.kind === 'CASE').definition.requestSnapshot = { protocol: { descriptorId: localDescriptor }, requestJson: 'original' }
+  const client = new ApiDesignSync(f.options), p = await client.preview(sourceId, targetId, server)
+  await client.bind(p.token); await client.run()
+  assert.equal(f.rows.remote.find(i => i.kind === 'CASE').definition.requestSnapshot.protocol.descriptorId, remoteDescriptor)
+  assert.equal(client.state.bases.find(i => i.kind === 'CASE').definition.requestSnapshot.protocol.descriptorId, 'testhub-grpc:' + localDescriptor)
+  f.rows.remote.find(i => i.kind === 'CASE').definition.requestSnapshot.requestJson = 'web edit'
+  await client.run()
+  assert.equal(f.rows.local.find(i => i.kind === 'CASE').definition.requestSnapshot.requestJson, 'web edit')
+  assert.equal(f.rows.local.find(i => i.kind === 'CASE').definition.requestSnapshot.protocol.descriptorId, localDescriptor)
+  f.rows.local.find(i => i.kind === 'CASE').definition.requestSnapshot.requestJson = 'pending edit'
+  f.state.loseResponse = true
+  await assert.rejects(client.run(), /response lost/)
+  const pending = copy(client.state.pending), count = f.state.writes.length
+  f.state.loseResponse = false; enabled = false
+  const restarted = new ApiDesignSync(f.options)
+  await assert.rejects(restarted.run(), /尚未配对/)
+  assert.equal(f.state.writes.length, count)
+  enabled = true; await restarted.run()
+  assert.equal(restarted.state.pending, null)
+  assert.deepEqual(f.state.writes.filter(w => w.body.requestKey === pending.request.requestKey).map(w => w.body), [pending.request, pending.request])
+  enabled = false
+  f.rows.local.find(i => i.kind === 'CASE').definition.requestSnapshot.requestJson = 'must stay local'
+  await restarted.run()
+  assert.equal(f.rows.remote.find(i => i.kind === 'CASE').definition.requestSnapshot.requestJson, 'pending edit')
+  assert.ok(restarted.state.conflicts.some(c => c.local?.kind === 'CASE' && !c.canResolve))
+})

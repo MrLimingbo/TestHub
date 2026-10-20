@@ -4,6 +4,7 @@ const { Buffer } = require('node:buffer')
 const { normalizeServerUrl } = require('./desktop-core.cjs')
 const { EncryptedSyncStore } = require('./encrypted-sync-store.cjs')
 const { ProjectFileLinks, blocked } = require('./project-file-links.cjs')
+const { GrpcDescriptorLinks, containsUnmapped } = require('./grpc-descriptor-links.cjs')
 const clone = value => globalThis.structuredClone(value)
 const id = value => typeof value === 'string' && /^[A-Z0-9]{26}$/.test(value)
 const uuid = value => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(value)
@@ -57,15 +58,7 @@ function references(items) {
   const names = new Set(items.map(item => JSON.stringify([item.kind, item.name])))
   if (items.some(item => dependencies(item).some(dep => !names.has(JSON.stringify([dep.kind, dep.name]))))) throw new Error('接口目录、版本或用例引用缺失，请先核对。')
 }
-function containsDescriptor(value) {
-  if (Array.isArray(value)) return value.some(containsDescriptor)
-  if (!value || typeof value !== 'object') return false
-  return Object.entries(value).some(([key, part]) => {
-    const normalized = key.replace(/[_-]/g, '').toLowerCase()
-    return (['descriptorid', 'grpcdescriptorid'].includes(normalized) && part !== null && part !== '') || containsDescriptor(part)
-  })
-}
-function unsupported(item) { return blocked(item) || (item.kind === 'CASE' && containsDescriptor(item.definition.requestSnapshot)) }
+function unsupported(item) { return blocked(item) || (item.kind === 'CASE' && containsUnmapped(item.definition.requestSnapshot)) }
 function validateItem(item) {
   const fail = () => { throw new Error('接口设计同步资料无效，请核对字段与引用。') }
   const exact = (value, fields) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === fields.length && fields.every(field => Object.hasOwn(value, field))
@@ -147,7 +140,7 @@ class ApiDesignSyncStore extends EncryptedSyncStore {
     label: '接口设计 资料', maxPlain: 24 * 1024 * 1024, maxEncrypted: 32 * 1024 * 1024 }) }
 }
 class ApiDesignSync {
-  constructor({ store, local, remote, guard, fileLinkContext, now = () => new Date().toISOString() }) { Object.assign(this, { store, local, remote, guard, fileLinkContext, now }); this.busy = false }
+  constructor({ store, local, remote, guard, fileLinkContext, descriptorLinkContext, now = () => new Date().toISOString() }) { Object.assign(this, { store, local, remote, guard, fileLinkContext, descriptorLinkContext, now }); this.busy = false }
   async load() { if (!this.state) this.state = validateState(await this.store.read()); return this.state }
   async save(value) { await this.store.write(value); this.state = value }
   async status() { await this.load(); return { binding: clone(this.state.binding), conflicts: clone(this.state.conflicts), pending: Boolean(this.state.pending), lastSyncedAt: this.state.lastSyncedAt } }
@@ -155,6 +148,7 @@ class ApiDesignSync {
     await this.guard(b)
     const [local, remote] = await Promise.all([this.local('/api/v1/auth/me'), this.remote('/api/v1/auth/me', undefined, b)])
     if (local.id !== b.localActorId || remote.id !== b.actor.id) throw new Error('登录账号或本地工作区已变化，接口设计 资料同步已停止；请切回绑定账号。')
+    this.descriptorMapper = new GrpcDescriptorLinks(b, await this.descriptorLinkContext?.(b))
     this.fileMapper = new ProjectFileLinks(b, await this.fileLinkContext?.(b))
   }
   async rows(side, b) {
@@ -174,7 +168,7 @@ class ApiDesignSync {
       || Object.values(snapshot.itemIds).some(value => !id(value))) throw new Error('接口设计资料引用标识不完整。')
     if (!Array.isArray(environments) || environments.some(value => typeof value.environmentCode !== 'string' || typeof value.enabled !== 'boolean'))
       throw new Error('目标环境列表不完整，请先核对环境服务。')
-    return { ...snapshot, items: snapshot.items.map(item => this.fileMapper.logical(item, side)),
+    return { ...snapshot, items: snapshot.items.map(item => this.descriptorMapper.logical(this.fileMapper.logical(item, side), side)),
       enabledEnvironments: new Set(environments.filter(value => value.enabled).map(value => value.environmentCode)) }
   }
   async preview(sourceId, targetId, server) {
@@ -286,12 +280,14 @@ class ApiDesignSync {
   async send(side, items, expectedRevision, b) {
     if (!items.length) return
     const next = clone(this.state); next.pending = { side, request: { requestKey: crypto.randomUUID(), expectedUserId: side === 'local' ? b.localActorId : b.actor.id,
-      expectedRevision, operations: items.map(item => ({ operationId: crypto.randomUUID(), item: this.fileMapper.physical(content(item), side) })) } }
+      expectedRevision, operations: items.map(item => ({ operationId: crypto.randomUUID(), item: this.descriptorMapper.physical(this.fileMapper.physical(content(item), side), side) })) } }
     await this.save(next); await this.recoverPending(b)
   }
   async recoverPending(b) {
     const p = this.state.pending; if (!p) return
-    await this.actors(b); const csrf = await this[p.side]('/api/v1/auth/csrf', undefined, b); await this.guard(b)
+    await this.actors(b)
+    for (const op of p.request.operations) { const mapped = this.descriptorMapper.logical(op.item, p.side); if (op.item.kind === 'CASE' && containsUnmapped(mapped.definition.requestSnapshot)) throw new Error('待确认用例的描述符或文件尚未配对，暂停重试。'); this.descriptorMapper.physical(mapped, p.side) }
+    const csrf = await this[p.side]('/api/v1/auth/csrf', undefined, b); await this.guard(b)
     const project = p.side === 'local' ? b.source.id : b.target.id
     let receipt
     try { receipt = await this[p.side](`/api/v1/projects/${project}/api-design/sync`, { method: 'POST', headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: JSON.stringify(p.request) }, b) }
@@ -303,7 +299,7 @@ class ApiDesignSync {
       if (!result || seen.has(result.operationId)) throw new Error('接口设计 同步回执标识不匹配。')
       seen.add(result.operationId); validateItem(result.item)
       if (!same(result.item, op.item)) throw new Error('接口设计 同步回执内容不匹配。')
-      const key = keyOf(op.item); next.bases = next.bases.filter(i => keyOf(i) !== key); next.bases.push(content(this.fileMapper.logical(op.item, p.side)))
+      const key = keyOf(op.item); next.bases = next.bases.filter(i => keyOf(i) !== key); next.bases.push(content(this.descriptorMapper.logical(this.fileMapper.logical(op.item, p.side), p.side)))
       next.conflicts = next.conflicts.filter(c => c.key !== key)
     }
     next.pending = null; await this.save(next)

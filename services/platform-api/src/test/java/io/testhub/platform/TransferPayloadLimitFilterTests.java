@@ -390,4 +390,11 @@ class TransferPayloadLimitFilterTests {
         var declared=new MockHttpServletRequest(){@Override public long getContentLengthLong(){return limit+1L;}};declared.setMethod("POST");declared.setServletPath(route);var response=new MockHttpServletResponse();filter.doFilter(declared,response,(wrapped,res)->fail("Oversized association request must not reach controller"));assertEquals(413,response.getStatus());
     }
 
+    @Test void grpcDescriptorSyncRejectsBodyAboveTwoMiBBeforeJsonDecoding() throws Exception {
+        var request=new org.springframework.mock.web.MockHttpServletRequest("POST","/api/v1/projects/QA/api-debug/grpc/descriptors/sync");
+        request.setServletPath(request.getRequestURI());request.setContent(new byte[2*1024*1024+1]);
+        var response=new org.springframework.mock.web.MockHttpServletResponse();
+        new TransferPayloadLimitFilter(new com.fasterxml.jackson.databind.ObjectMapper()).doFilter(request,response,(req,res)->{throw new AssertionError("Oversized descriptor reached the controller");});
+        assertEquals(413,response.getStatus());
+    }
 }

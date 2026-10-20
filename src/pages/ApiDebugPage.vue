@@ -6,7 +6,7 @@ import CodeEditor from '@/components/CodeEditor.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
 import { useSessionStore } from '@/stores/session'
-import { isLocalDesktop } from '@/utils/desktopWorkspace'
+import { isLocalDesktop, isAccountDesktop, openGrpcDescriptorSync } from '@/utils/desktopWorkspace'
 import { executeDesktopHttpRequest, isDesktopHttpDebugAvailable } from '@/utils/desktopApiDebug'
 import {
   apiDebugDraftFromHistory,
@@ -57,6 +57,11 @@ interface GrpcStreamSession { id: string; status: 'OPEN' | 'COMPLETED' | 'CANCEL
 interface GrpcStreamMessage { id: string; payload: string; truncated: boolean; sizeBytes: number; createdAt: string }
 interface GrpcClientStreamSession { id: string; status: 'OPEN' | 'HALF_CLOSED' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'LIMIT_REACHED'; target: string; service: string; method: string; tls: boolean; environmentCode: string | null; authType: string; metadataCount: number; sentMessageCount: number; sentBytes: number; responseBytes: number; responseBody: string; responseTruncated: boolean; createdAt: string; closedAt: string | null; closeReason: string | null }
 interface GrpcBidiStreamSession { id: string; status: 'OPEN' | 'HALF_CLOSED' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'LIMIT_REACHED'; target: string; service: string; method: string; tls: boolean; environmentCode: string | null; authType: string; metadataCount: number; sentMessageCount: number; sentBytes: number; receivedMessageCount: number; responseBytes: number; createdAt: string; closedAt: string | null; closeReason: string | null }
+
+async function openDescriptorSync() {
+  try { await openGrpcDescriptorSync() } catch (error) { Message.error(error instanceof Error ? error.message : '打开描述文件同步失败') }
+}
+const descriptorSyncAvailable = isLocalDesktop() || isAccountDesktop()
 
 const props = withDefaults(defineProps<{ embedded?: boolean }>(), { embedded: false })
 const emit = defineEmits<{
@@ -1216,6 +1221,7 @@ onBeforeUnmount(() => {
       <router-link to="/api-testing/interfaces" class="quick-workspace-tab"><icon-book /><span>接口管理</span></router-link>
       <span class="quick-workspace-tab active"><icon-thunderbolt /><span>快捷请求</span></span>
     </nav>
+    <a-button v-if="descriptorSyncAvailable" @click="openDescriptorSync">gRPC 描述文件同步</a-button>
     <PageHeader v-if="!props.embedded" eyebrow="API TESTING WORKBENCH" title="快捷请求与高级调试" description="作为接口测试模块的临时请求工作台，可从正式接口载入运行草稿，并继续调试 HTTP、GraphQL、SOAP、WebSocket 与 gRPC 请求。" action="清空响应" @action="clearResponse" />
     <section v-if="!props.embedded" class="debug-summary panel">
       <div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code }}</small></div>

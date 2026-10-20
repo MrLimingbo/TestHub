@@ -1,6 +1,6 @@
 # TestHub 安装即用改造：依赖审计与实施边界
 
-当前审计入口（2026-10-19）：[Mac 标准打包与完整回归及剩余范围](desktop-standalone-progress-2026-10-19-mac-preview.md)、[浏览器／JMeter 首次下载验收](desktop-standalone-progress-2026-10-19-first-downloads.md)、[性能执行历史与脱敏报告](desktop-standalone-progress-2026-10-19-performance-history-sync.md)、[原始 JTL／日志同步](desktop-standalone-progress-2026-10-19-performance-artifact-sync.md)及[Web UI 执行历史与报告产物同步](desktop-standalone-progress-2026-10-19-ui-history-sync.md)均已审核并提交 main，最新提交为 `0ff58f20011d770fdf7ac027bc4a5ada4ecc5497`。[移动端执行历史与报告产物同步](desktop-standalone-progress-2026-10-19-mobile-history-sync.md)已审核通过；本轮继续[移动应用文件关联同步](desktop-standalone-progress-2026-10-19-mobile-application-file-sync.md)，实现、最终包后台验收和清理均已完成，2026-10-20 已审核并授权与移动端历史模块一并提交 main，之后继续独立的 gRPC 描述文件模块。没有启动真机、模拟器或 Appium，协议夹具不计作真实设备执行。下文按历史阶段保留记录，不代表其中所有早期待办仍未完成。发行者签名、公证、Windows 安装包验证及移动端真实设备执行继续按要求跳过；其他后续工作仍逐模块交审。
+当前审计入口（2026-10-20）：[Mac 标准打包与完整回归](desktop-standalone-progress-2026-10-19-mac-preview.md)、[首次下载](desktop-standalone-progress-2026-10-19-first-downloads.md)、性能／Web UI／[移动端历史与 PNG](desktop-standalone-progress-2026-10-19-mobile-history-sync.md)及[应用文件关联](desktop-standalone-progress-2026-10-19-mobile-application-file-sync.md)均已审核并提交 GitHub main，最新提交为 `9d405f912bc4034144d3a5a84f7baaa37f727032`，已核对远端。[gRPC 描述文件持续同步与用例引用](desktop-standalone-progress-2026-10-20-grpc-descriptor-sync.md)已完成实现、最终包后台验收与阶段清理，2026-10-20 已审核并授权提交 main，再继续调试历史与重放草稿。下文按历史阶段保留记录，不代表其中所有早期待办仍未完成。发行者签名、公证、Windows 验证和移动端真实设备执行继续按要求跳过；后续工作逐模块交审。
 
 日期：2026-09-17。基线：`5d933301e4b990b94b669e9f2f9d128b6a02d163`。
 状态：产品选择已确认，正在实施；未达到独立安装包交付门槛。

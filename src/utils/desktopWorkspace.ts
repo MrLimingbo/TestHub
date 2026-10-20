@@ -5,6 +5,7 @@ interface WorkspaceBridge {
   openPerformanceHistorySync?: () => Promise<void>
   openPerformanceArtifactSync?: () => Promise<void>
   openUiAutomationHistorySync?: () => Promise<void>
+  openGrpcDescriptorSync?: () => Promise<void>
   openMobileApplicationFileSync?: () => Promise<void>
   openMobileAutomationHistorySync?: () => Promise<void>
   openUiAutomationArtifactSync?: () => Promise<void>
@@ -76,6 +77,12 @@ export async function openMobileAutomationArtifactSync() {
   const native = bridge()
   if (!native?.openMobileAutomationArtifactSync) throw new Error('当前桌面版本不支持移动端报告产物同步')
   await native.openMobileAutomationArtifactSync()
+}
+
+export async function openGrpcDescriptorSync() {
+  const native = bridge()
+  if (!native?.openGrpcDescriptorSync) throw new Error('当前桌面版本不支持 gRPC 描述文件同步')
+  await native.openGrpcDescriptorSync()
 }
 
 export async function openMobileApplicationFileSync() {
