@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('testhubDesktop', Object.freeze({
   openApiAutomationHistorySync: () => ipcRenderer.invoke('testhub-desktop:api-automation-history-sync:open'),
   openPerformanceHistorySync: () => ipcRenderer.invoke('testhub-desktop:performance-history-sync:open'),
   openPerformanceArtifactSync: () => ipcRenderer.invoke('testhub-desktop:performance-artifact-sync:open'),
+  openQualityReportSync: () => ipcRenderer.invoke('testhub-desktop:quality-report-sync:open'),
   openApiDebugHistorySync: () => ipcRenderer.invoke('testhub-desktop:api-debug-history-sync:open'),
   openApiDebugReplaySync: () => ipcRenderer.invoke('testhub-desktop:api-debug-replay-sync:open'),
   openGrpcDescriptorSync: () => ipcRenderer.invoke('testhub-desktop:grpc-descriptor-sync:open'),

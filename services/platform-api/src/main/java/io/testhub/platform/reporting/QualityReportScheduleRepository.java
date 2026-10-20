@@ -50,7 +50,7 @@ public class QualityReportScheduleRepository {
         return jdbc.sql("""
                 UPDATE quality_report_schedule
                 SET name = :name, project_ids = CAST(:projectIds AS JSON), cron_expression = :cronExpression,
-                    timezone = :timezone, period_days = :periodDays, enabled = :enabled,
+                    timezone = :timezone, period_days = :periodDays, enabled = :enabled, config_version = config_version + 1,
                     updated_at = CURRENT_TIMESTAMP(3)
                 WHERE id = :id AND organization_id = :organizationId
                 """).param("id", id).param("organizationId", organizationId).param("name", name)

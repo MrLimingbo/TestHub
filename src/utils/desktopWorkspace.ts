@@ -5,6 +5,7 @@ interface WorkspaceBridge {
   openPerformanceHistorySync?: () => Promise<void>
   openPerformanceArtifactSync?: () => Promise<void>
   openUiAutomationHistorySync?: () => Promise<void>
+  openQualityReportSync?: () => Promise<void>
   openApiDebugHistorySync?: () => Promise<void>
   openApiDebugReplaySync?: () => Promise<void>
   openGrpcDescriptorSync?: () => Promise<void>
@@ -79,6 +80,12 @@ export async function openMobileAutomationArtifactSync() {
   const native = bridge()
   if (!native?.openMobileAutomationArtifactSync) throw new Error('当前桌面版本不支持移动端报告产物同步')
   await native.openMobileAutomationArtifactSync()
+}
+
+export async function openQualityReportSync() {
+  const native = bridge()
+  if (!native?.openQualityReportSync) throw new Error('当前桌面版本不支持质量报告计划同步')
+  await native.openQualityReportSync()
 }
 
 export async function openApiDebugHistorySync() {

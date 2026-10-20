@@ -29,6 +29,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -42,16 +45,18 @@ public class QualityReportScheduleService {
     private final AccessService access;
     private final AuditService audit;
     private final Scheduler scheduler;
+    private final JdbcClient jdbc;
 
     public QualityReportScheduleService(QualityReportScheduleRepository schedules, QualityReportService reports,
                                         NotificationDeliveryService deliveries, AccessService access,
-                                        AuditService audit, Scheduler scheduler) {
+                                        AuditService audit, Scheduler scheduler, JdbcClient jdbc) {
         this.schedules = schedules;
         this.reports = reports;
         this.deliveries = deliveries;
         this.access = access;
         this.audit = audit;
         this.scheduler = scheduler;
+        this.jdbc = jdbc;
     }
 
     public List<QualityReportSchedule> list(AuthenticatedPrincipal principal) {
@@ -62,6 +67,7 @@ public class QualityReportScheduleService {
     @Transactional
     public QualityReportSchedule create(AuthenticatedPrincipal principal, ScheduleInput input) {
         SchedulePayload payload = payload(principal, input);
+        lockOrganization(payload.organizationId());
         String id = UlidCreator.getUlid().toString();
         try {
             schedules.insert(id, payload.organizationId(), payload.name(), payload.projectIds(), payload.cronExpression(),
@@ -79,6 +85,8 @@ public class QualityReportScheduleService {
     @Transactional
     public QualityReportSchedule update(AuthenticatedPrincipal principal, String scheduleId, ScheduleInput input) {
         QualityReportSchedule existing = owned(principal, scheduleId, true);
+        lockOrganization(existing.organizationId());
+        existing = owned(principal, scheduleId, true);
         SchedulePayload payload = payload(principal, input);
         if (!existing.organizationId().equals(payload.organizationId())) {
             throw rejected("定时报告不可跨组织变更项目范围");
@@ -101,6 +109,8 @@ public class QualityReportScheduleService {
     @Transactional
     public void delete(AuthenticatedPrincipal principal, String scheduleId) {
         QualityReportSchedule schedule = owned(principal, scheduleId, true);
+        lockOrganization(schedule.organizationId());
+        schedule = owned(principal, scheduleId, true);
         removeQuartz(schedule.id());
         schedules.delete(schedule.id(), schedule.organizationId());
         audit.record(principal, schedule.organizationId(), schedule.projectIds().getFirst(), "QUALITY_REPORT_SCHEDULE_DELETED",
@@ -162,7 +172,7 @@ public class QualityReportScheduleService {
         return schedules.findRuns(schedule.id(), 50).stream().filter(run -> run.id().equals(runId)).findFirst().orElseThrow();
     }
 
-    private SchedulePayload payload(AuthenticatedPrincipal principal, ScheduleInput input) {
+    SchedulePayload payload(AuthenticatedPrincipal principal, ScheduleInput input) {
         if (input == null) throw rejected("定时报告参数不能为空");
         String name = required(input.name(), "计划名称", 160);
         List<String> projectIds = normalizeProjectIds(input.projectIds());
@@ -211,6 +221,23 @@ public class QualityReportScheduleService {
             else access.requireProjectRead(principal, projectId);
         }
         return schedule;
+    }
+
+    void lockOrganization(String organizationId) {
+        jdbc.sql("SELECT id FROM organization WHERE id=:org FOR UPDATE").param("org",organizationId).query(String.class).single();
+    }
+
+    /** A rolled-back sync batch must not remove the old enabled Quartz job. */
+    void reconcileAfterCommit(String id) {
+        Runnable reconcile = () -> {
+            QualityReportSchedule current = schedules.findById(id).orElse(null);
+            if (current == null) removeQuartz(id); else sync(current);
+        };
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { reconcile.run(); }
+            });
+        } else reconcile.run();
     }
 
     private void sync(QualityReportSchedule schedule) {
@@ -263,7 +290,7 @@ public class QualityReportScheduleService {
     private JobKey jobKey(String scheduleId) { return new JobKey(scheduleId, QUARTZ_GROUP); }
     private TriggerKey triggerKey(String scheduleId) { return new TriggerKey(scheduleId, QUARTZ_GROUP); }
 
-    private record SchedulePayload(String organizationId, String name, List<String> projectIds, String cronExpression,
+    record SchedulePayload(String organizationId, String name, List<String> projectIds, String cronExpression,
                                    String timezone, int periodDays, boolean enabled) { }
     public record ScheduleInput(String name, List<String> projectIds, String cronExpression, String timezone,
                                 Integer periodDays, Boolean enabled) { }
