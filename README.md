@@ -106,7 +106,7 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 
 将 DMG 与 `SHA256SUMS.txt` 放在同一目录，可在该目录运行 `shasum -a 256 -c SHA256SUMS.txt` 校验下载完整性。包内产品代码对应 `7f01558`；随后 main 的验收脚本及文档更新未改变产品代码。详细构建信息与本次发布前校验结果随 Release 提供。
 
-仓库当前为私有仓库，下载需要登录具有仓库访问权限的 GitHub 账号。源码构建方式见下文，完整流程见[桌面打包文档](docs/desktop-packaging.md)。
+仓库及 Release 附件已公开，无需登录 GitHub 或申请仓库访问权限即可下载。源码构建方式见下文，完整流程见[桌面打包文档](docs/desktop-packaging.md)。
 
 ### 从源码构建 Mac arm64 预览包
 
