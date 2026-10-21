@@ -4,6 +4,12 @@ on:
   push:
     tags: ["desktop-v*"]
   workflow_dispatch:
+    inputs:
+      target:
+        description: Native preview platforms to build and accept
+        type: choice
+        options: [all, windows]
+        default: all
 
 permissions:
   contents: read
@@ -11,8 +17,27 @@ permissions:
 jobs:
   application:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      native-matrix: ${{ steps.platforms.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
+      - name: Select native platforms (formal tags always build every platform)
+        id: platforms
+        env:
+          PREVIEW_TARGET: ${{ github.event_name == 'workflow_dispatch' && inputs.target || 'all' }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs'
+          const platforms = [
+            { runner: 'macos-15', platform: 'darwin', arch: 'arm64', builder: 'mac', app: 'release/desktop/mac-arm64/TestHub.app', artifact: 'TestHub-macOS-arm64.dmg', previewArtifact: 'TestHub-macOS-arm64-preview.dmg' },
+            { runner: 'macos-15-intel', platform: 'darwin', arch: 'x64', builder: 'mac', app: 'release/desktop/mac/TestHub.app', artifact: 'TestHub-macOS-x64.dmg', previewArtifact: 'TestHub-macOS-x64-preview.dmg' },
+            { runner: 'windows-latest', platform: 'win32', arch: 'x64', builder: 'win', app: 'release/desktop/win-unpacked/TestHub.exe', artifact: 'TestHub-Windows-x64.exe', previewArtifact: 'TestHub-Windows-x64-preview.exe' },
+          ]
+          if (!['all', 'windows'].includes(process.env.PREVIEW_TARGET)) throw new Error('Invalid native preview target')
+          const include = platforms.filter(p => process.env.PREVIEW_TARGET === 'all' || p.platform === 'win32')
+          appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({ include })}\n`)
+          NODE
       - uses: pnpm/action-setup@v4
         with:
           version: 10.13.1
@@ -35,6 +60,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-application
+          retention-days: 1
           path: |
             dist
             services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar
@@ -46,31 +72,10 @@ jobs:
 
   native:
     needs: application
+    timeout-minutes: 60
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - runner: macos-15
-            platform: darwin
-            arch: arm64
-            builder: mac
-            app: release/desktop/mac-arm64/TestHub.app
-            artifact: TestHub-macOS-arm64.dmg
-            previewArtifact: TestHub-macOS-arm64-preview.dmg
-          - runner: macos-15-intel
-            platform: darwin
-            arch: x64
-            builder: mac
-            app: release/desktop/mac/TestHub.app
-            artifact: TestHub-macOS-x64.dmg
-            previewArtifact: TestHub-macOS-x64-preview.dmg
-          - runner: windows-latest
-            platform: win32
-            arch: x64
-            builder: win
-            app: release/desktop/win-unpacked/TestHub.exe
-            artifact: TestHub-Windows-x64.exe
-            previewArtifact: TestHub-Windows-x64-preview.exe
+      matrix: ${{ fromJSON(needs.application.outputs.native-matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -176,9 +181,18 @@ jobs:
       - name: Build previous installer while preserving the actual candidate installer
         if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
         run: node scripts/desktop/build-install-fixtures.mjs --baseline-backend artifacts/desktop-install-baseline/platform-api.jar --candidate-installer "release/desktop/${{ matrix.previewArtifact }}" --output .testhub/installation-fixtures
+      - name: Verify unsigned Windows preview and bundled runtime
+        if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'win' }}
+        run: node scripts/desktop/verify-windows-preview.mjs --app "${{ matrix.app }}" --installer "release/desktop/${{ matrix.previewArtifact }}" --output artifacts/desktop/preview-win32-x64.json --revision "${{ github.sha }}"
       - name: Default installation, upgrade, uninstall retention and reinstall on a fresh native runner
         if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') }}
-        run: node scripts/desktop/accept-installed.mjs --fixtures .testhub/installation-fixtures/fixtures.json --output "artifacts/desktop/installed-${{ matrix.platform }}-${{ matrix.arch }}.json" --clean-runner-defaults
+        run: node scripts/desktop/accept-installed.mjs --fixtures .testhub/installation-fixtures/fixtures.json --output "artifacts/desktop/installed-${{ matrix.platform }}-${{ matrix.arch }}.json" --clean-runner-defaults ${{ matrix.builder == 'win' && '--cross-module' || '' }}
+      - name: Match installed Windows payload to the verified preview
+        if: ${{ !startsWith(github.ref, 'refs/tags/desktop-v') && matrix.builder == 'win' }}
+        run: node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; const preview=JSON.parse(fs.readFileSync('artifacts/desktop/preview-win32-x64.json')); const installed=JSON.parse(fs.readFileSync('artifacts/desktop/installed-win32-x64.json')); assert.ok(preview.passed && installed.passed && installed.functional.passed && installed.ownedInstallationDataKeychainAndProcessesRemoved); assert.equal(installed.installerHashes.candidate,preview.installerSha256); for(const phase of installed.phases.filter(p=>p.label!=='baseline')) { assert.equal(phase.asarSha256,preview.asarSha256); assert.equal(phase.backendSha256,preview.backendSha256); }"
+      - name: Remove owned upgrade fixtures and intermediate baseline files
+        if: always()
+        run: node --input-type=module -e "import fs from 'node:fs/promises'; for(const p of ['.testhub/installation-fixtures','artifacts/desktop-install-baseline']) await fs.rm(p,{recursive:true,force:true});"
       - uses: actions/upload-artifact@v4
         with:
           name: TestHub-${{ matrix.platform }}-${{ matrix.arch }}-${{ startsWith(github.ref, 'refs/tags/desktop-v') && 'release' || 'preview' }}

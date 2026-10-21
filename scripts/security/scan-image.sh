@@ -21,7 +21,11 @@ docker run --rm \
   --exit-code 1 \
   --severity HIGH,CRITICAL \
   --ignore-unfixed \
+  --db-repository mirror.gcr.io/aquasec/trivy-db:2 \
+  --db-repository ghcr.io/aquasecurity/trivy-db:2 \
   --db-repository public.ecr.aws/aquasecurity/trivy-db:2 \
+  --java-db-repository mirror.gcr.io/aquasec/trivy-java-db:1 \
+  --java-db-repository ghcr.io/aquasecurity/trivy-java-db:1 \
   --java-db-repository public.ecr.aws/aquasecurity/trivy-java-db:1 \
   "$image"
 

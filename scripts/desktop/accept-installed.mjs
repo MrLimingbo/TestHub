@@ -22,7 +22,7 @@ const name = 'TestHub-QA-' + crypto.randomUUID(), windows = process.platform ===
 const installation = windows ? path.join(process.env.LOCALAPPDATA, 'Programs/TestHub') : clean ? '/Applications/TestHub.app' : path.join('/Applications', name, 'TestHub.app')
 const app = windows ? path.join(installation, 'TestHub.exe') : installation
 const checks = [], phases = [], installerHashes = {}
-let ownsInstallation = false, summary, cleanupError
+let ownsInstallation = false, summary, cleanupError, functional
 const hash = async file => crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex')
 async function absent(file) { try { await fs.lstat(file); return false } catch (error) { if (error.code === 'ENOENT') return true; throw error } }
 async function windowsState(resolveTargets = false) {
@@ -126,7 +126,16 @@ async function removeOwnedWorkspace() {
   await fs.rm(stateFile)
 }
 try {
-  await install(candidate); const fresh = await smoke('seed', 'fresh-current'); await uninstall()
+  await install(candidate); const fresh = await smoke('seed', 'fresh-current')
+  if (args.includes('--cross-module')) {
+    const report = path.join(path.dirname(output), 'cross-module-' + process.platform + '-' + process.arch + '.json')
+    await run(process.execPath, ['scripts/desktop/accept-cross-module.mjs', '--app', app, '--output', report, '--download-components'], { timeout: 1200000, windowsHide: true, maxBuffer: 2 * 1024 * 1024 })
+    functional = JSON.parse(await fs.readFile(report, 'utf8'))
+    assert.equal(functional.passed, true); assert.equal(functional.asarUnchanged, true)
+    assert.equal(functional.ownedDataAndProcessesRemoved, true)
+    console.log('PASS installed cross-module functional regression: ' + functional.checks.length)
+  }
+  await uninstall()
   if (fixtures) assert.equal(fresh.backendSha256, fixtures.candidateBackendSha256)
   checks.push('current installer creates a fresh native default workspace and preserves its new data on a second genuine launch')
   // The fresh-current fixture is owned; clear it before creating the immutable legacy upgrade fixture.
@@ -154,7 +163,7 @@ try {
   summary = { passed: true, platform: process.platform, arch: process.arch, checks, phases, installerHashes, baselineCommit: fixtures?.baselineCommit, baselineShellArchiveSha256: fixtures?.baselineShellArchiveSha256,
     exactInstallationAndDataDefaults: clean, applicationsRootUsed: !windows, isolatedApplicationNameForLocalQA: !clean,
     workspacePathOverridden: false, finderOrInstallerWizardOpened: false, userInstalledApplicationChanged: false,
-    formalSigningOrGatekeeperValidated: false, freshCurrentDefaultWorkspacePassed: true }
+    formalSigningOrGatekeeperValidated: false, freshCurrentDefaultWorkspacePassed: true, functional }
 } finally {
   // Only an installation created after the exclusive absent check above may be cleaned.
   if (ownsInstallation && !await absent(installation)) {

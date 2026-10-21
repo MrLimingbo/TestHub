@@ -46,7 +46,7 @@ function bootstrap(directory, name, observeRuntime) {
   const electron = require('electron'), Module = require('node:module')
   if (!electron.app.isPackaged) throw new Error('A real packaged executable is required')
   electron.app.setName(name); electron.app.setPath('userData', directory); electron.app.setPath('sessionData', directory)
-  electron.app.setActivationPolicy('prohibited')
+  if (process.platform === 'darwin') electron.app.setActivationPolicy('prohibited')
   const state = globalThis.__testhubBackground = { isPackaged: true, created: 0, visibleViolations: 0, unexpectedDialogs: 0, confirmations: [] }
   const Original = electron.BrowserWindow
   for (const method of ['show', 'showInactive', 'focus', 'restore']) Original.prototype[method] = function () {}
@@ -61,14 +61,19 @@ function bootstrap(directory, name, observeRuntime) {
   Module._load = function (request, parent, main) { return request === 'electron' ? quiet : load.call(this, request, parent, main) }
   for (const method of ['showMessageBox', 'showMessageBoxSync', 'showOpenDialog', 'showOpenDialogSync', 'showSaveDialog', 'showSaveDialogSync', 'showErrorBox']) electron.dialog[method] = function () { state.unexpectedDialogs++; throw new Error('Unexpected native dialog during offscreen acceptance: ' + method) }
   electron.app.on('browser-window-created', (_event, window) => { state.created++; if (window.isVisible()) { state.visibleViolations++; throw new Error('Visible acceptance window') } })
-  electron.app.whenReady().then(() => { electron.app.hide(); electron.app.dock?.hide() })
+  if (process.platform === 'darwin') electron.app.whenReady().then(() => { electron.app.hide(); electron.app.dock?.hide() })
   globalThis.__testhubQaElectron = electron
   globalThis.__testhubQaRequire = require
   return state
 }
 export async function offscreenMac(appPath, directory, options = {}) {
   if (process.platform !== 'darwin') throw new Error('Native macOS required')
-  const executable = path.join(await fs.realpath(appPath), 'Contents/MacOS/TestHub')
+  return offscreenPackaged(appPath, directory, options)
+}
+export async function offscreenPackaged(appPath, directory, options = {}) {
+  if (!['darwin', 'win32'].includes(process.platform)) throw new Error('Native macOS or Windows required')
+  const resolved = await fs.realpath(appPath)
+  const executable = process.platform === 'darwin' ? path.join(resolved, 'Contents/MacOS/TestHub') : resolved
   const name = options.name || 'TestHub-QA-' + crypto.randomUUID()
   if (!/^TestHub-QA-[a-f0-9-]{36}$/.test(name)) throw new Error('Only isolated QA Keychain names are permitted')
   let child, done, inspector, browser, transcript = ''
@@ -98,15 +103,16 @@ export async function offscreenMac(appPath, directory, options = {}) {
     } catch (error) { failure = error }
     finally {
       if (child && child.exitCode === null && child.signalCode === null) { child.kill('SIGTERM'); await done }
-      try { if (options.cleanKeychain !== false) await run('/usr/bin/security', ['delete-generic-password', '-s', name + ' Safe Storage', '-a', name + ' Key']) } catch (error) { if (error.code !== 44) failure ||= error }
+      try { if (process.platform === 'darwin' && options.cleanKeychain !== false) await run('/usr/bin/security', ['delete-generic-password', '-s', name + ' Safe Storage', '-a', name + ' Key']) } catch (error) { if (error.code !== 44) failure ||= error }
     }
     if (failure) throw failure
   }
   try {
     const env = { ...process.env }
     for (const key of Object.keys(env)) if (key.startsWith('TESTHUB_') || ['NODE_OPTIONS','ELECTRON_RUN_AS_NODE'].includes(key)) delete env[key]
-    env.PATH = '/usr/bin:/bin:/usr/sbin:/sbin'
-    child = spawn(executable, ['--inspect-brk=0', '--remote-debugging-port=0'], { env, cwd: directory, stdio: ['ignore','pipe','pipe'] })
+    for (const key of Object.keys(env)) if (key.toUpperCase() === 'PATH') delete env[key]
+    env.PATH = process.platform === 'win32' ? path.join(env.SystemRoot || 'C:\\Windows', 'System32') : '/usr/bin:/bin:/usr/sbin:/sbin'
+    child = spawn(executable, ['--inspect-brk=0', '--remote-debugging-port=0'], { env, cwd: directory, windowsHide: true, stdio: ['ignore','pipe','pipe'] })
     done = new Promise((resolve, reject) => { child.once('error', reject); child.once('close', resolve) })
     for (const stream of [child.stdout, child.stderr]) stream.on('data', bytes => { transcript = (transcript + bytes.toString()).slice(-100000); if (options.diagnosticLog) void fs.appendFile(options.diagnosticLog, bytes, {mode:0o600}).catch(() => {}) })
     let endpoint

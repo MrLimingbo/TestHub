@@ -10,20 +10,24 @@ import {execFile} from 'node:child_process'
 import {promisify} from 'node:util'
 import {setTimeout as delay} from 'node:timers/promises'
 import {chromium} from '../../services/playwright-runner/node_modules/playwright/index.mjs'
-import {offscreenMac} from './offscreen-mac-qa.mjs'
+import {offscreenPackaged} from './offscreen-mac-qa.mjs'
 import {performanceAccount} from './qa-performance-account.mjs'
 const args=process.argv.slice(2),value=key=>args[args.indexOf(key)+1]
-for(const key of ['--app','--output','--browser-cache','--jmeter-cache'])if(!args.includes(key))throw new Error('Required argument: '+key)
+for(const key of ['--app','--output'])if(!args.includes(key))throw new Error('Required argument: '+key)
+const downloadComponents=args.includes('--download-components')
+if(downloadComponents&&(args.includes('--browser-cache')||args.includes('--jmeter-cache')))throw new Error('Choose fresh downloads or explicit verified caches, not both')
+if(!downloadComponents)for(const key of ['--browser-cache','--jmeter-cache'])if(!args.includes(key))throw new Error('Required argument: '+key)
 const appPath=await fs.realpath(value('--app')),output=path.resolve(value('--output'));await fs.mkdir(path.dirname(output),{recursive:true});await(await fs.open(output,'wx',0o600)).close()
 const require=createRequire(import.meta.url),{loadBundle}=require('../../apps/desktop/app/src/local-runtime.cjs'),{writeExecutionOrigins}=require('../../apps/desktop/app/src/local-execution.cjs'),{LocalBrowsers}=require('../../apps/desktop/app/src/local-browsers.cjs')
-const resources=path.join(appPath,'Contents/Resources'),bundle=await loadBundle(path.join(resources,'local-runtime/darwin-arm64')),asar=path.join(resources,'app.asar'),hash=async file=>crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex'),originalAsarHash=await hash(asar)
-const directory=await fs.mkdtemp(path.resolve('.testhub/cross-module-qa-')),userData=path.join(directory,'desktop'),screenshots=path.join(directory,'screenshots'),label='packaged-arm64',name='TestHub-QA-'+crypto.randomUUID(),run=promisify(execFile)
+const targetPlatform=process.platform+'-'+process.arch
+const resources=process.platform==='darwin'?path.join(appPath,'Contents/Resources'):path.join(path.dirname(appPath),'resources'),bundle=await loadBundle(path.join(resources,'local-runtime',targetPlatform)),asar=path.join(resources,'app.asar'),hash=async file=>crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex'),originalAsarHash=await hash(asar)
+const directory=await fs.mkdtemp(path.resolve('.testhub/cross-module-qa-')),userData=path.join(directory,'desktop'),screenshots=path.join(directory,'screenshots'),label='packaged-'+targetPlatform,name='TestHub-QA-'+crypto.randomUUID(),run=promisify(execFile)
 await fs.mkdir(userData);await fs.mkdir(screenshots);await fs.writeFile(path.join(directory,'.qa-owner.json'),JSON.stringify({name}),{flag:'wx',mode:0o600})
 const checks=[],launches=[],hits=[],pass=message=>{checks.push(message);console.log('PASS '+message)}
 let nativeApp,accountBrowser,accountService,localOrigin,mockPath,projectId,outcome,failure,forbiddenHits=0,origin
 const app={windows:()=>nativeApp?.pages()||[],evaluate:fn=>nativeApp.evaluate(fn),close:async()=>{if(nativeApp){launches.push(await nativeApp.snapshot());await nativeApp.close();nativeApp=undefined}}}
 async function pageFor(prefix,excluded=''){for(let n=0;n<900;n++){const page=app.windows().find(p=>p.url().startsWith(prefix)&&(!excluded||!p.url().startsWith(excluded)));if(page)return page;await delay(100)}throw new Error('Owned packaged page unavailable')}
-async function launch(){nativeApp=await offscreenMac(appPath,userData,{name,cleanKeychain:false,diagnosticLog:path.join(path.dirname(output),'cross-module-private.log')});localOrigin=new URL(nativeApp.local.url()).origin;return nativeApp.local}
+async function launch(){nativeApp=await offscreenPackaged(appPath,userData,{name,cleanKeychain:false,diagnosticLog:path.join(directory,'cross-module-private.log')});localOrigin=new URL(nativeApp.local.url()).origin;return nativeApp.local}
 const forbidden=http.createServer((_req,res)=>{forbiddenHits++;res.end('Unauthorized fixture')})
 const target=http.createServer(async(req,res)=>{
  hits.push({path:req.url,source:req.headers['x-source']||'browser'})
@@ -97,8 +101,18 @@ async function screenshot(page, name) { await page.screenshot({ path: path.join(
 try {
   await new Promise(resolve=>forbidden.listen(0,'127.0.0.1',resolve));forbiddenOrigin='http://127.0.0.1:'+forbidden.address().port
   await new Promise(resolve=>target.listen(0,'127.0.0.1',resolve));origin='http://127.0.0.1:'+target.address().port
-  await writeExecutionOrigins(userData,[origin]);await fs.mkdir(path.join(userData,'engines'));await fs.cp(await fs.realpath(value('--jmeter-cache')),path.join(userData,'engines/apache-jmeter-5.6.3'),{recursive:true,verbatimSymlinks:true})
-  const manager=new LocalBrowsers({directory:path.join(userData,'browser-engines'),bundle}),plan=await manager.plan('chromium'),sourceCache=await fs.realpath(value('--browser-cache'));await fs.mkdir(plan.cache,{recursive:true});for(const entry of [...plan.components.map(c=>c.directory),'.ready-chromium.json'])await fs.cp(path.join(sourceCache,entry),path.join(plan.cache,entry),{recursive:true,verbatimSymlinks:true});assert.equal(await manager.installed('chromium'),plan.cache)
+  await writeExecutionOrigins(userData,[origin]);await fs.mkdir(path.join(userData,'engines'))
+  const manager=new LocalBrowsers({directory:path.join(userData,'browser-engines'),bundle}),plan=await manager.plan('chromium')
+  if(downloadComponents){
+    const {LocalEngines}=require('../../apps/desktop/app/src/local-engines.cjs')
+    const engines=new LocalEngines({directory:path.join(userData,'engines'),bundle})
+    await engines.ensure();await manager.ensure('chromium')
+    assert.ok(await engines.installed())
+  }else{
+    await fs.cp(await fs.realpath(value('--jmeter-cache')),path.join(userData,'engines/apache-jmeter-5.6.3'),{recursive:true,verbatimSymlinks:true})
+    const sourceCache=await fs.realpath(value('--browser-cache'));await fs.mkdir(plan.cache,{recursive:true});for(const entry of [...plan.components.map(c=>c.directory),'.ready-chromium.json'])await fs.cp(path.join(sourceCache,entry),path.join(plan.cache,entry),{recursive:true,verbatimSymlinks:true})
+  }
+  assert.equal(await manager.installed('chromium'),plan.cache)
   let local = await launch()
   const owner = (await read(local, '/api/v1/auth/me')).id, context = await read(local, '/api/v1/access/context')
   projectId = context.projects[context.organizations[0].id][0].id
@@ -229,7 +243,7 @@ try {
   assert.deepEqual(await read(local,unified()),records); assert.equal(forbiddenHits,0)
   await app.close() // Verify and record the final hidden window state before approving this run.
   const result = {passed:true,checks,realExecutionCount:records.length,summary:report.summary,forbiddenHits,requestCount:hits.length,isPackaged:true,asarUnchanged:crypto.createHash('sha256').update(await fs.readFile(asar)).digest('hex')===originalAsarHash,backgroundWindows:launches,
-    scope:{mobileDeviceExecuted:false,downloadsFirstUseVerified:false,notificationTransportExecuted:false,qualityReportScope:['FUNCTIONAL','API','PERFORMANCE']}}
+    scope:{nativePlatform:process.platform,nativeArch:process.arch,componentsDownloadedForThisRun:downloadComponents,mobileDeviceExecuted:false,downloadsFirstUseVerified:false,notificationTransportExecuted:false,qualityReportScope:['FUNCTIONAL','API','PERFORMANCE']}}
   outcome=result;pass('returning local retains original execution history and unauthorized target received zero requests')
   result.checks=checks
 }catch(error){failure=error;outcome={passed:false,checks,error:error.message,backgroundWindows:launches}}
@@ -237,10 +251,12 @@ finally{
  let cleanupError
  for(const stop of [()=>accountBrowser?.close(),()=>app.close(),()=>accountService?.stop()])try{await stop()}catch(e){cleanupError||=e}
  for(const server of [target,forbidden]){server.closeAllConnections();if(server.listening)await new Promise(resolve=>server.close(resolve))}
- try{await run('/usr/bin/security',['delete-generic-password','-s',name+' Safe Storage','-a',name+' Key'])}catch(e){if(e.code!==44)cleanupError||=e}
- try{await run('/usr/bin/security',['find-generic-password','-s',name+' Safe Storage']);cleanupError||=new Error('Owned QA key remains')}catch(e){if(e.code!==44)cleanupError||=e}
+ if(process.platform==='darwin'){
+  try{await run('/usr/bin/security',['delete-generic-password','-s',name+' Safe Storage','-a',name+' Key'])}catch(e){if(e.code!==44)cleanupError||=e}
+  try{await run('/usr/bin/security',['find-generic-password','-s',name+' Safe Storage']);cleanupError||=new Error('Owned QA key remains')}catch(e){if(e.code!==44)cleanupError||=e}
+ }
  if(!cleanupError)await fs.rm(directory,{recursive:true,force:true})
- outcome.ownedDataAndProcessesRemoved=!cleanupError;outcome.ownedQaKeychainAbsent=!cleanupError
+ outcome.ownedDataAndProcessesRemoved=!cleanupError;outcome.ownedQaKeychainAbsent=process.platform==='darwin'?!cleanupError:null
  if(cleanupError){outcome.passed=false;failure||=cleanupError}
  await fs.writeFile(output,JSON.stringify(outcome,null,2)+'\n',{mode:0o600})
 }
