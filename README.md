@@ -3,6 +3,7 @@
   <h1>TestHub</h1>
   <p><strong>从用例到执行，从接口到质量报告。</strong></p>
   <p>本地即可工作的测试开发平台，也能连接你自己的团队服务。</p>
+  <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/TestHub-macOS-arm64-preview.dmg">下载 Mac Apple Silicon 预览版</a></strong><br /><sub>未签名（无 Developer ID） · 未公证 · arm64</sub></p>
   <p>
     <a href="#开始使用">开始使用</a> ·
     <a href="#功能一览">功能一览</a> ·
@@ -25,7 +26,7 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 - **按需连接团队。** 支持注册、登录及桌面／网页端同账号访问；本地资料通过显式项目绑定与账号工作区同步。
 - **让数据有归属。** 本地工作区、账号工作区及项目权限分别管理，提供加密备份、恢复和升级保护。
 
-> **当前交付状态（2026-10-21）：** Mac Apple Silicon 桌面预览包已完成安装、升级与后台功能回归。仓库尚未发布可直接下载的 GitHub Release；源码运行与预览包构建方式见下文。其他平台及正式签名发行的状态见[验收范围](#验收范围)。
+> **当前交付状态（2026-10-21）：** Mac Apple Silicon 桌面预览包已完成安装、升级与后台功能回归，并提供 [GitHub Release 下载](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261021)。该版本未签名、未公证；其他平台及正式签名发行的状态见[验收范围](#验收范围)。
 
 ## 界面预览
 
@@ -93,9 +94,19 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 
 ### 桌面预览版
 
-已有 Mac arm64 预览包时，打开 DMG，将 `TestHub.app` 放入“应用程序”目录并启动，即可进入本地工作区。旧版用户的现有工作区与连接偏好会保留；首次升级前建议先导出备份。
+**Mac Apple Silicon（M 系列，arm64）· 0.2.0 预览版 · 2026-10-21 发布**
 
-当前预览包使用 ad-hoc 资源封装，尚未完成发行者签名和 Apple 公证。它不是正式签名发行版，也没有公开下载地址。构建和校验步骤见下面的源码入口及[桌面打包文档](docs/desktop-packaging.md)。
+[下载 DMG 安装包](https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/TestHub-macOS-arm64-preview.dmg) · [版本说明与验收信息](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261021) · [SHA-256 校验文件](https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/SHA256SUMS.txt)
+
+**这是未签名、未公证的预览版。** 未使用 Apple Developer ID 发行者证书，仅保留 ad-hoc 资源完整性封装；该封装不验证发行者身份，不代表通过 Apple 公证或 Gatekeeper 验收。当前仅提供上述 arm64 包，Intel Mac 与 Windows 不在本次发布范围。
+
+1. 下载 DMG；旧版用户先在应用中导出备份并退出 TestHub。
+2. 打开 DMG，将 `TestHub.app` 拖入“应用程序”，已有旧版时选择替换，保留原工作区和用户数据目录。
+3. 启动后即可进入本地工作区。如 macOS 提示无法验证开发者，仅在确认来源可信后，按 [Apple 官方说明](https://support.apple.com/zh-cn/102445)在“系统设置 → 隐私与安全性”中对该应用选择“仍要打开”。
+
+将 DMG 与 `SHA256SUMS.txt` 放在同一目录，可在该目录运行 `shasum -a 256 -c SHA256SUMS.txt` 校验下载完整性。包内产品代码对应 `7f01558`；随后 main 的验收脚本及文档更新未改变产品代码。详细构建信息与本次发布前校验结果随 Release 提供。
+
+仓库当前为私有仓库，下载需要登录具有仓库访问权限的 GitHub 账号。源码构建方式见下文，完整流程见[桌面打包文档](docs/desktop-packaging.md)。
 
 ### 从源码构建 Mac arm64 预览包
 
@@ -201,7 +212,7 @@ node services/testhub-cli/src/index.js execution run \
 | 范围 | 状态 |
 | --- | --- |
 | 本地独立工作区、可选账号接入、已约定的模块迁移与持续同步 | 已完成分模块实现与验收 |
-| Mac Apple Silicon 预览包 | 已完成标准打包、真实安装、升级、重装及后台功能回归 |
+| Mac Apple Silicon 预览包 | 已完成标准打包、真实安装、升级、重装及后台功能回归；已发布未签名、未公证的 GitHub 预发布版 |
 | 浏览器／JMeter 首次下载 | 已完成独立验收，覆盖中断、重试与离线相关路径 |
 | Intel Mac 原生验收、Windows 安装包验证 | 暂缓；不以 arm64 的结果代替 |
 | 发行者签名、公证及正式多平台发行 | 尚未完成；当前交付为预览包 |
