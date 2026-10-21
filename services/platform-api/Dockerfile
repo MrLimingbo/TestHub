@@ -5,7 +5,7 @@ COPY services/platform-api/pom.xml services/platform-api/pom.xml
 COPY services/platform-api/src services/platform-api/src
 RUN mvn -q -pl services/platform-api -am package -DskipTests
 
-FROM gcr.io/distroless/java21-debian13@sha256:1a6483661238edd8086d01dd3226fc9e85b88b9f5d61bf6be76b7b900f6d1c31
+FROM gcr.io/distroless/java21-debian13@sha256:27ea9d33a1329dfa96a787e447f5caaf62ff2e21e496ca501fcb56ba3cedd5af
 WORKDIR /app
 COPY --from=build --chown=nonroot:nonroot /workspace/services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar /app/testhub-platform-api.jar
 USER nonroot
