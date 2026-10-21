@@ -6,6 +6,7 @@ import { createRequire } from 'node:module'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { sha256 } from './verify-signed-artifacts.mjs'
+import { windowsPowerShellEnvironment } from './windows-powershell.mjs'
 const run = promisify(execFile), require = createRequire(import.meta.url)
 const { verifyRuntime } = require('../../apps/desktop/build/skip-runtime-dependency-copy.cjs')
 const args = process.argv.slice(2), values = {}
@@ -24,7 +25,7 @@ await fs.mkdir(path.dirname(values['--output']), { recursive: true })
 const output = await fs.open(values['--output'], 'wx', 0o600)
 const report = { version: 1, passed: false, platform: 'win32', arch: 'x64', revision: values['--revision'], distribution: 'unsigned-preview', publisherSigned: false, smartScreenAssessed: false, distributionReady: false }
 try {
-  const signature = await run(path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-Command', "$ErrorActionPreference='Stop'; @($env:TESTHUB_PREVIEW_APP,$env:TESTHUB_PREVIEW_INSTALLER) | ForEach-Object { (Get-AuthenticodeSignature -LiteralPath $_).Status.ToString() }"], { windowsHide: true, env: { ...process.env, TESTHUB_PREVIEW_APP: app, TESTHUB_PREVIEW_INSTALLER: installer } })
+  const signature = await run(path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-Command', "$ErrorActionPreference='Stop'; @($env:TESTHUB_PREVIEW_APP,$env:TESTHUB_PREVIEW_INSTALLER) | ForEach-Object { (Get-AuthenticodeSignature -LiteralPath $_).Status.ToString() }"], { windowsHide: true, env: { ...windowsPowerShellEnvironment(), TESTHUB_PREVIEW_APP: app, TESTHUB_PREVIEW_INSTALLER: installer } })
   assert.deepEqual(signature.stdout.trim().split(/\r?\n/), ['NotSigned', 'NotSigned'])
   const executable = await fs.readFile(app), header = executable.readUInt32LE(0x3c)
   assert.equal(executable.readUInt16LE(0), 0x5a4d); assert.equal(executable.readUInt32LE(header), 0x00004550); assert.equal(executable.readUInt16LE(header + 4), 0x8664)

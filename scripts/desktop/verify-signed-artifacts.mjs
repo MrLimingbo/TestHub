@@ -7,6 +7,7 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import policy from '../../apps/desktop/build/signature-policy.cjs'
+import { windowsPowerShellEnvironment } from './windows-powershell.mjs'
 
 const execute = promisify(execFile)
 export async function nativeCommand(command, args, label, options = {}) {
@@ -68,7 +69,7 @@ export async function inspectArtifacts({ platform, arch, app, installer, teamId 
     const executableSha256 = await sha256(app)
     const result = await command(path.join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe'),
       ['-NoProfile', '-NonInteractive', '-File', fileURLToPath(new URL('./inspect-authenticode.ps1', import.meta.url))], 'Windows Authenticode 校验',
-      { env: { ...process.env, TESTHUB_SIGNED_APPLICATION: path.resolve(app), TESTHUB_SIGNED_INSTALLER: path.resolve(installer) } })
+      { env: { ...windowsPowerShellEnvironment({ ...process.env, SystemRoot: process.env.SystemRoot || 'C:\\Windows' }), TESTHUB_SIGNED_APPLICATION: path.resolve(app), TESTHUB_SIGNED_INSTALLER: path.resolve(installer) } })
     let records
     try { records = JSON.parse(result.stdout.replace(/^\uFEFF/, '')) } catch { throw new Error('Windows 签名检查未返回有效元数据。') }
     signature = { ...policy.windowsSignatures(records), executableSha256, installerPayloadExtracted: false }

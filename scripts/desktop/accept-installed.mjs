@@ -7,6 +7,7 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { setTimeout as delay } from 'node:timers/promises'
 import installationQA from '../../apps/desktop/build/installation-qa.cjs'
+import { windowsPowerShellEnvironment } from './windows-powershell.mjs'
 const run = promisify(execFile), args = process.argv.slice(2)
 const value = name => args.includes(name) ? args[args.indexOf(name) + 1] : undefined
 const fixtures = value('--fixtures') ? JSON.parse(await fs.readFile(value('--fixtures'), 'utf8')) : null
@@ -38,7 +39,7 @@ async function windowsState(resolveTargets = false) {
     "$keys=@(Get-ItemProperty 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*' -ErrorAction SilentlyContinue | Where-Object {$_.DisplayName -match '^TestHub( [0-9].*)?$'});",
     "@{shortcuts=@($links);registryEntries=$keys.Count;processes=@(Get-Process TestHub -ErrorAction SilentlyContinue).Count} | ConvertTo-Json -Depth 4 -Compress",
   ].join(' ')
-  const result = await run(path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-Command', command])
+  const result = await run(path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-Command', command], { windowsHide: true, env: windowsPowerShellEnvironment() })
   return JSON.parse(result.stdout)
 }
 // Refuse installation before running any executable or installer when the destination already exists.

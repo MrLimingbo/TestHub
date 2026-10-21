@@ -94,7 +94,7 @@ jobs:
           architecture: ${{ matrix.arch }}
       - run: pnpm install --frozen-lockfile
       - name: Native workspace backup, restore and upgrade regression
-        run: node --test apps/desktop/test/workspace-archive.test.cjs apps/desktop/test/workspace-restore.test.cjs apps/desktop/test/workspace-upgrade.test.cjs
+        run: node --test apps/desktop/test/workspace-archive.test.cjs apps/desktop/test/workspace-restore.test.cjs apps/desktop/test/workspace-upgrade.test.cjs apps/desktop/test/windows-powershell.test.cjs
       - uses: actions/download-artifact@v4
         with:
           name: desktop-application
