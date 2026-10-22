@@ -27,7 +27,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api/': 'http://localhost:8080',
+      '/api/': process.env.TESTHUB_VITE_API_ORIGIN || 'http://localhost:8080',
     },
   },
 })

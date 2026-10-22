@@ -146,19 +146,26 @@ TESTHUB_DESKTOP_EXPERIMENTAL_PACKAGE=1 CSC_IDENTITY_AUTO_DISCOVERY=false \
 
 ### 启动本地网页服务
 
-需要开发前端、体验注册或联调桌面／网页账号时，在源码目录中准备 Node.js 22+、JDK 21 和 Docker Compose v2。以下脚本面向 macOS／Linux；macOS 可使用 Docker Desktop 或 Colima。
+需要开发前端、体验注册或联调桌面／网页账号时，在源码目录中准备 Node.js 22+、完整 JDK 21、Docker Compose v2 和 Docker Buildx。以下脚本面向 macOS／Linux；macOS 可使用 Docker Desktop 或 Colima，Docker 服务需处于可用状态。
 
 ```bash
-npx pnpm@10.13.1 install --frozen-lockfile
+# 检查环境，不启动服务、不下载依赖
+./start.sh doctor --with-registration
 
-# MinIO 使用仓库固定的源码版本构建，首次构建需要联网
-docker compose build minio
+# 一键启动：按需安装锁定依赖、准备镜像、启动 API 和网页
 ./start.sh --with-registration
+
+# 查看状态、重启、停止（停止会保留数据库及其数据）
+./start.sh status
+./start.sh restart --with-registration
+./start.sh stop
 ```
 
 打开 <http://localhost:5173/login>，可注册独立账号。桌面端连接此服务时填写 Origin `http://localhost:5173`，不包含 `/login` 路径。
 
-`start.sh` 会复用健康的基础设施，重启本项目 API／Web 进程并验证登录代理链路；运行日志在 `.testhub/`。需要 API Runner 时可增加 `--with-api-runner`，实际执行还需完成 Runner 启用、信任校验与目标授权。仅运行 `npx pnpm@10.13.1 dev` 会启动前端开发服务器，仍需可用后端。
+重复执行相同启动命令会复用健康的 API／Web；修改启动选项、依赖或后端代码后请使用 `restart`。首次启动需要联网获取 pnpm／Maven 依赖及镜像，MinIO 使用仓库固定的源码版本构建。脚本验证 API 健康状态和网页代理的 CSRF 链路后才报告成功，不会打开窗口或浏览器；日志在 `.testhub/`。
+
+Colima 用户可显式追加 `--start-colima`，允许启动已停止的默认 Colima 实例；脚本不会自动重启运行中的虚拟机。需要 API Runner 时可追加 `--with-api-runner`，实际执行仍需启用、信任校验与目标授权；性能、Web UI 和移动端 Runner 需单独配置。仅运行 `npx pnpm@10.13.1 dev` 会启动前端开发服务器，仍需可用后端。端口配置、故障处理和隔离验收见[本地 Web 启动指南](docs/local-development.md)。
 
 团队部署请使用[生产 Compose 配置](docs/production-deployment.md)或 [Kubernetes Helm](docs/kubernetes-deployment.md)，配置独立密钥、HTTPS、存储和备份。仓库中的开发配置不用于公网生产环境；当前项目不提供公共账号服务。
 

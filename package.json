@@ -12,6 +12,7 @@
     "build": "vue-tsc --noEmit && vite build",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
+    "test:startup": "node --test scripts/dev/start.test.mjs",
     "test:watch": "vitest",
     "lint": "eslint .",
     "desktop:dev": "pnpm --filter @testhub/desktop dev",
