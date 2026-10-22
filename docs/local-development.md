@@ -98,3 +98,13 @@ node scripts/dev/accept-startup.mjs
 ```
 
 它新建独占 MySQL 数据目录、Redis 实例和文件存储，使用随机端口与随机凭据，真实启动 API／Vite，验证注册、登录、CSRF、健康复用、重启后会话和账号保留。全程后台运行，不打开浏览器。结束后停止所拥有的进程并清理数据库、文件和日志；只留下 `.testhub/startup-acceptance.json` 脱敏摘要。该验收验证 MySQL／Redis／文件存储路径，不代表 Docker／MinIO 的真实启动验收。
+
+真实 Docker／MinIO／API Runner 验收使用独立 Compose 项目：
+
+```bash
+JAVA_HOME=/path/to/jdk-21 node scripts/dev/accept-startup-compose.mjs
+```
+
+它使用随机端口、凭据和新数据卷，重新构建固定源码的 MinIO 与当前 API Runner 镜像，验证签名心跳、注册登录、文件上传下载，以及应用／容器重启后的数据保留。Runner 的真实执行保持停用。专用 Buildx 构建器复用 Docker daemon 的代理设置，并把代理用于构建阶段；不改写全局 Docker 代理配置或当前构建器选择。需要替换 Go 模块代理时，可显式设置 `TESTHUB_QA_GOPROXY`。
+
+验收结束后移除本次 Compose 容器、网络、数据卷、镜像标签、构建器及其缓存和临时目录；核对原有容器、数据卷仍然存在，只保留 `.testhub/startup-compose-acceptance.json` 脱敏摘要。失败时摘要包含经过凭据脱敏的错误片段，原始日志随测试目录清理。未确认 API／Web 已停止时，清理会报错并保留诊断状态。

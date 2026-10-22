@@ -24,7 +24,9 @@
 
 测试进程、临时仓库、数据库、Redis、账号、文件、凭据和日志已清理；仅保留可复用脚本及 `.testhub/startup-acceptance.json` 脱敏摘要。原有工作区、安装程序和 `output/` 未清理。
 
-## 尚未完成的环境验证
+## 初次验收时的环境限制（后续已关闭）
+
+以下保留首次验收时的状态。Colima／Buildx 修复及真实 Docker／MinIO／API Runner 验收现已完成，详见[后续验收记录](web-compose-startup-acceptance-2026-10-22.md)。
 
 本机默认 Colima 启动一直等待 SSH 就绪，未能提供 Docker daemon；已停止本轮尝试启动的实例，保留原有 VM 数据。默认环境运行 `./start.sh doctor` 正确返回 Docker 不可用；Docker Buildx 插件也尚不可用。
 
