@@ -4,6 +4,7 @@
   <p><strong>从用例到执行，从接口到质量报告。</strong></p>
   <p>本地即可工作的测试开发平台，也能连接你自己的团队服务。</p>
   <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/TestHub-macOS-arm64-preview.dmg">下载 Mac Apple Silicon 预览版</a></strong><br /><sub>未签名（无 Developer ID） · 未公证 · arm64</sub></p>
+  <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261022/TestHub-Windows-x64-preview.exe">下载 Windows x64 预览版</a></strong><br /><sub>未签名 · NSIS 安装包 · x64</sub></p>
   <p>
     <a href="#开始使用">开始使用</a> ·
     <a href="#功能一览">功能一览</a> ·
@@ -26,7 +27,7 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 - **按需连接团队。** 支持注册、登录及桌面／网页端同账号访问；本地资料通过显式项目绑定与账号工作区同步。
 - **让数据有归属。** 本地工作区、账号工作区及项目权限分别管理，提供加密备份、恢复和升级保护。
 
-> **当前交付状态（2026-10-21）：** Mac Apple Silicon 桌面预览包已完成安装、升级与后台功能回归，并提供 [GitHub Release 下载](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261021)。该版本未签名、未公证；其他平台及正式签名发行的状态见[验收范围](#验收范围)。
+> **当前交付状态（2026-10-22）：** [Mac Apple Silicon](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261021) 与 [Windows x64](https://github.com/MrLimingbo/TestHub/releases/tag/windows-v0.2.0-preview.20261022) 预览安装包均已完成原生安装、升级和后台功能验收，可公开下载。两个预览版均未做发行者签名，Mac 另未公证；具体平台和验收边界见[验收范围](#验收范围)。
 
 ## 界面预览
 
@@ -98,13 +99,23 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 
 [下载 DMG 安装包](https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/TestHub-macOS-arm64-preview.dmg) · [版本说明与验收信息](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261021) · [SHA-256 校验文件](https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/SHA256SUMS.txt)
 
-**这是未签名、未公证的预览版。** 未使用 Apple Developer ID 发行者证书，仅保留 ad-hoc 资源完整性封装；该封装不验证发行者身份，不代表通过 Apple 公证或 Gatekeeper 验收。当前仅提供上述 arm64 包，Intel Mac 与 Windows 不在本次发布范围。
+**这是未签名、未公证的 Mac 预览版。** 未使用 Apple Developer ID 发行者证书，仅保留 ad-hoc 资源完整性封装；该封装不验证发行者身份，不代表通过 Apple 公证或 Gatekeeper 验收。Mac 当前仅提供上述 arm64 包，Intel Mac 原生验收仍暂缓。
 
 1. 下载 DMG；旧版用户先在应用中导出备份并退出 TestHub。
 2. 打开 DMG，将 `TestHub.app` 拖入“应用程序”，已有旧版时选择替换，保留原工作区和用户数据目录。
 3. 启动后即可进入本地工作区。如 macOS 提示无法验证开发者，仅在确认来源可信后，按 [Apple 官方说明](https://support.apple.com/zh-cn/102445)在“系统设置 → 隐私与安全性”中对该应用选择“仍要打开”。
 
-将 DMG 与 `SHA256SUMS.txt` 放在同一目录，可在该目录运行 `shasum -a 256 -c SHA256SUMS.txt` 校验下载完整性。包内产品代码对应 `7f01558`；随后 main 的验收脚本及文档更新未改变产品代码。详细构建信息与本次发布前校验结果随 Release 提供。
+将 DMG 与 `SHA256SUMS.txt` 放在同一目录，可在该目录运行 `shasum -a 256 -c SHA256SUMS.txt` 校验下载完整性。Mac 包内产品代码对应 `7f01558`，详细构建信息与发布前校验结果随 Release 提供。
+
+**Windows x64 · 0.2.0 预览版 · 2026-10-22 发布**
+
+[下载 EXE 安装包](https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261022/TestHub-Windows-x64-preview.exe) · [版本说明与验收信息](https://github.com/MrLimingbo/TestHub/releases/tag/windows-v0.2.0-preview.20261022) · [SHA-256 校验文件](https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261022/SHA256SUMS.txt)
+
+下载后运行安装向导，完成后直接进入本地工作区。旧版用户请先导出备份并退出 TestHub，再安装到原位置，保留原用户数据目录。在下载目录运行 `Get-FileHash .\TestHub-Windows-x64-preview.exe -Algorithm SHA256`，可与校验文件中的安装器摘要核对。
+
+**这是未做 Authenticode 签名的 Windows 预览版。** 可能出现未知发布者或 SmartScreen 提示；仅在确认来源可信且摘要一致后决定是否继续。Smart App Control 或组织策略可能阻止未签名程序，请遵循 [Microsoft 官方说明](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)。本轮未验证这些安全策略，无需关闭系统整体安全防护。
+
+构建对应 `3f2d041`，已在 Windows Server 2025 x64 原生 CI 验证真实安装、升级保留数据、卸载重装及 20 项跨模块流程；不将此结果视为所有 Windows 10／11 实机或 Windows arm64 均已验收。详见 [Windows 预览版验收记录](docs/desktop-standalone-progress-2026-10-21-windows-preview.md)。
 
 仓库及 Release 附件已公开，无需登录 GitHub 或申请仓库访问权限即可下载。源码构建方式见下文，完整流程见[桌面打包文档](docs/desktop-packaging.md)。
 
@@ -207,19 +218,20 @@ node services/testhub-cli/src/index.js execution run \
 
 ## 验收范围
 
-以下为截至 **2026-10-21** 的项目状态，区分已验证的交付与暂缓工作。
+以下为截至 **2026-10-22** 的项目状态，区分已验证的交付与暂缓工作。
 
 | 范围 | 状态 |
 | --- | --- |
 | 本地独立工作区、可选账号接入、已约定的模块迁移与持续同步 | 已完成分模块实现与验收 |
 | Mac Apple Silicon 预览包 | 已完成标准打包、真实安装、升级、重装及后台功能回归；已发布未签名、未公证的 GitHub 预发布版 |
-| 浏览器／JMeter 首次下载 | 已完成独立验收，覆盖中断、重试与离线相关路径 |
-| Intel Mac 原生验收、Windows 安装包验证 | 暂缓；不以 arm64 的结果代替 |
+| Windows x64 预览包 | 已在 Windows Server 2025 原生 CI 完成真实安装、升级、重装及后台功能验收；已发布未签名的 GitHub 预发布版 |
+| 浏览器／JMeter 首次下载 | Mac 已完成含中断、重试和离线路径的专项验收；Windows 本轮完成 Chromium／JMeter 空缓存下载及真实执行，未复验完整故障矩阵 |
+| Intel Mac 原生验收 | 暂缓；不以 arm64 的结果代替 |
 | 发行者签名、公证及正式多平台发行 | 尚未完成；当前交付为预览包 |
 | 移动端真实设备执行 | 暂缓；配置、历史与产物同步的验证不等同于真机执行验证 |
 | 公网账号服务 | 未提供，云端部署留待后续；当前支持自行部署 |
 
-最近一次整包回归包含后端 **733**、前端 **376**、桌面 **734** 项测试，以及 **20** 项跨模块真实流程和 **5** 项安装生命周期检查。这些是已记录构建的验收结果，不是对后续提交的自动通过声明。详见[整包验收记录](docs/desktop-standalone-progress-2026-10-20-final-mac-regression.md)。
+Mac 已记录的整包回归包含后端 **733**、前端 **376**、桌面 **734** 项测试，以及 **20** 项跨模块真实流程和 **5** 项安装生命周期检查，见 [Mac 整包验收记录](docs/desktop-standalone-progress-2026-10-20-final-mac-regression.md)。Windows 本轮同样通过 **20** 项真实流程、**5** 项安装生命周期检查，原生文件系统与 PowerShell 回归 **22** 项通过、**1** 项平台不适用跳过，见 [Windows 验收记录](docs/desktop-standalone-progress-2026-10-21-windows-preview.md)。这些结果对应记录中的构建，不表示后续提交自动通过。
 
 ## 文档导航
 

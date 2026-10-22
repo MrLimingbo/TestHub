@@ -52,7 +52,7 @@ Mac 的 JDK／Node 不得依赖 Homebrew 等包外运行库。准备脚本保持
 
 ## GitHub 发布
 
-`.github/workflows/desktop-release.yml` 先在 Ubuntu 执行前端／桌面回归和隔离 H2 后端构建，再传递共享应用文件到三个原生任务：Mac arm64、Intel Mac x64、Windows x64。每个任务准备自己的原生 Java／Node 运行时，检查许可与完整性，打包后实际后台启动程序，验证首启和重启持久化。
+`.github/workflows/desktop-release.yml` 先在 Ubuntu 执行前端／桌面回归和隔离 H2 后端构建，再传递共享应用文件到原生任务。手动预览的 `target=all` 默认覆盖 Mac arm64、Intel Mac x64、Windows x64；`target=windows` 仅构建和验收 Windows x64。正式 `desktop-v*` 标签始终要求全部三个平台。每个任务准备自己的原生 Java／Node 运行时，检查许可与完整性，打包后实际后台启动程序，验证首启和重启持久化。
 
 `workflow_dispatch` 上传 `TestHub-macOS-arm64-preview.dmg`、`TestHub-macOS-x64-preview.dmg`、`TestHub-Windows-x64-preview.exe` 和脱敏验收摘要，不创建 GitHub Release。预览文件不等同已签名／公证的发行包。`desktop-v*` 标签必须先通过正式分发门槛和签名配置检查，全部原生任务成功后才发布 `TestHub-macOS-arm64.dmg`、`TestHub-macOS-x64.dmg`、`TestHub-Windows-x64.exe`。当前运行时准备脚本不会自动解除正式门槛。
 
@@ -71,7 +71,17 @@ node scripts/desktop/verify-mac-preview.mjs --arch arm64 \
 
 验证器先检查构建应用的 `codesign --verify --deep --strict`、应用标识、ad-hoc 类型、原生架构和全部运行组件字节清单，再以只读、隐藏方式挂载最终 DMG，对映像内应用重复检查，并核对主程序、ASAR 和运行时清单与构建应用一致。成功摘要只表示这些预览检查通过，不记录 Developer ID、公证或 Gatekeeper 通过。摘要文件必须不存在；失败会留下 `passed=false` 的脱敏结果，卸载映像失败时保留挂载点，禁止递归删除其内容。CI 在上传 Mac 预览安装器前执行此门槛；内部 Mac 目录包和旧版安装夹具也复用预览封装配置。最终包的隐藏启动、功能及安装生命周期仍须另外执行。2026-10-16 的本地 r2 修复已固化到此流程，本轮验收范围见 [Mac 标准打包与完整回归](desktop-standalone-progress-2026-10-19-mac-preview.md)。
 
-正式标签发布必须配置以下 GitHub Actions Secrets；缺失时正式安装器构建会失败，不会发布未签名安装器：
+Windows 未签名预览可单独触发：
+
+```bash
+gh workflow run desktop-release.yml --ref main -f target=windows
+```
+
+此模式生成 assisted NSIS `TestHub-Windows-x64-preview.exe`。`verify-windows-preview.mjs` 要求安装器与应用的 Authenticode 状态均为 `NotSigned`，检查应用 PE x64 架构、运行时完整性，记录源码提交、安装器、ASAR 和后端摘要。随后在全新 Windows 托管 Runner 的真实默认目录安装，以 `accept-installed.mjs --cross-module` 检查安装生命周期并对已安装程序执行跨模块真实回归；Chromium 和 JMeter 从空隔离缓存下载并校验。上传前再核对安装后的 ASAR／后端与预览清单、候选安装器摘要完全一致。
+
+Windows 的签名及安装状态检查仅向系统 PowerShell 5.1 传入其自带模块目录，避免 GitHub Actions 的 PowerShell 7 经 Node 子进程传入不兼容模块；同时执行原生模块加载回归。依据 [Microsoft PSModulePath 说明](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath)。这不修改机器或用户的环境设置。
+
+预览验收仍记录 `distributionReady=false`、`publisherSigned=false`、`smartScreenAssessed=false`。通过应用与安装验收不代表通过 Windows SmartScreen、Smart App Control 或企业策略检查。发布预览时使用独立平台预览标签、标记 GitHub Pre-release，并附安装器、SHA-256、构建来源与脱敏验收摘要；只有验收通过的产物可发布。正式标签发布必须配置以下 GitHub Actions Secrets；缺失时正式安装器构建会失败，不会发布未签名安装器：
 
 | 平台 | Secrets |
 | --- | --- |
