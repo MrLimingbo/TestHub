@@ -12,6 +12,8 @@ import { chromium } from '../../services/playwright-runner/node_modules/playwrig
 const run = promisify(execFile)
 const args = process.argv.slice(2), value = key => args[args.indexOf(key) + 1]
 if (!args.includes('--app') || !args.includes('--output')) throw new Error('Usage: smoke-packaged.mjs --app <TestHub.app|TestHub.exe> --output <summary.json>')
+const restartChecks = args.includes('--restart-checks') ? Number(value('--restart-checks')) : 1
+assert.ok(Number.isInteger(restartChecks) && restartChecks >= 1 && restartChecks <= 8, 'Restart checks must be between 1 and 8')
 const appPath = await fs.realpath(path.resolve(value('--app'))), output = path.resolve(value('--output'))
 const executable = process.platform === 'darwin' ? path.join(appPath, 'Contents/MacOS/TestHub') : appPath
 await fs.access(executable)
@@ -270,11 +272,14 @@ try {
     requirement = await request(page, base + '/requirements', { catalogId: folder.id, requirementCode: 'REQ-PACKAGED', title: '真实包持久化', priority: 'P1', status: 'APPROVED', description: '离线本地数据\n升级验收 UTF-8' })
   }
   assert.ok(identity.id); await hidden(); pass(`unmodified packaged executable uses isPackaged resources and starts native V${manifest.desktopSchemaVersion} workspace with no external development commands`)
-  await close(); page = await launch()
-  assert.equal((await request(page, '/api/v1/auth/me')).id, identity.id)
-  assert.deepEqual((await request(page, base + '/requirements')).find(row => row.id === requirement.id), requirement)
-  await hidden(); pass('second genuine packaged launch preserves encrypted identity and exact business record')
-  await close(); pass('both genuine packaged launches stay hidden offscreen unfocused and shut down owned runtime processes')
+  for (let restart = 0; restart < restartChecks; restart++) {
+    await close(); page = await launch()
+    assert.equal((await request(page, '/api/v1/auth/me')).id, identity.id)
+    assert.deepEqual((await request(page, base + '/requirements')).find(row => row.id === requirement.id), requirement)
+    await hidden()
+  }
+  pass(`${restartChecks} genuine packaged restart(s) preserve encrypted identity and exact business record`)
+  await close(); pass(`${launches.length} genuine packaged launches stay hidden offscreen unfocused and shut down owned runtime processes`)
   const sanitized = launches.map(launch => { const result = { ...launch }; delete result.resources; delete result.executable; delete result.data; return result })
   assert.equal(crypto.createHash('sha256').update(await fs.readFile(asar)).digest('hex'), originalAsarHash)
   if (statePath) {
@@ -283,7 +288,7 @@ try {
     await fs.writeFile(statePath, JSON.stringify(state), { mode: 0o600 })
   }
   summary = { passed: true, platform: process.platform, arch: process.arch, isPackaged: true, checks, launches: sanitized, asarUnchanged: true, asarSha256: originalAsarHash, backendSha256: manifest.backendSha256,
-    externalCommandsExcluded: ['java', 'node', 'mvn', 'pnpm'], defaultUserDataRedirectedForQA: !ownership, applicationNameChangedForQA: !ownership?.cleanRunnerDefaults, nativeDefaultUserData: Boolean(ownership), exactApplicationDefaults: Boolean(ownership?.cleanRunnerDefaults), installed: false }
+    restartChecks, externalCommandsExcluded: ['java', 'node', 'mvn', 'pnpm'], defaultUserDataRedirectedForQA: !ownership, applicationNameChangedForQA: !ownership?.cleanRunnerDefaults, nativeDefaultUserData: Boolean(ownership), exactApplicationDefaults: Boolean(ownership?.cleanRunnerDefaults), installed: false }
 } catch (error) {
   // Collect only bounded, redacted state before owned profiles and processes are removed.
   try { console.error('PACKAGED_ACCEPTANCE_DIAGNOSTIC ' + JSON.stringify(await startupDiagnostics())) }

@@ -82,8 +82,9 @@ async function install(image) {
 }
 async function smoke(stage, label) {
   const report = path.join(directory, label + '.json')
+  const restarts = windows && label === 'fresh-current' ? 6 : 1
   await run(process.execPath, ['scripts/desktop/smoke-packaged.mjs', '--app', app, '--output', report,
-    '--lifecycle-state', stateFile, '--lifecycle-stage', stage, ...(clean ? ['--clean-runner-defaults'] : [])], { timeout: 420000, maxBuffer: 2 * 1024 * 1024 })
+    '--lifecycle-state', stateFile, '--lifecycle-stage', stage, '--restart-checks', String(restarts), ...(clean ? ['--clean-runner-defaults'] : [])], { timeout: 210000 * (restarts + 1), maxBuffer: 2 * 1024 * 1024 })
   const result = JSON.parse(await fs.readFile(report, 'utf8'))
   assert.equal(result.passed, true); assert.equal(result.asarUnchanged, true)
   assert.equal(result.nativeDefaultUserData, true); assert.equal(result.defaultUserDataRedirectedForQA, false)
