@@ -4,7 +4,7 @@
   <p><strong>从用例到执行，从接口到质量报告。</strong></p>
   <p>本地即可工作的测试开发平台，也能连接你自己的团队服务。</p>
   <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261023/TestHub-macOS-arm64-preview.dmg">下载 Mac Apple Silicon 预览版</a></strong><br /><sub>未签名（无 Developer ID） · 未公证 · arm64 · 2026-10-23 启动修复版</sub></p>
-  <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261022/TestHub-Windows-x64-preview.exe">下载 Windows x64 预览版</a></strong><br /><sub>未签名 · NSIS 安装包 · x64</sub></p>
+  <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261023/TestHub-Windows-x64-preview.exe">下载 Windows x64 预览版</a></strong><br /><sub>未签名 · NSIS 安装包 · x64 · 2026-10-23 更新</sub></p>
   <p>
     <a href="#开始使用">开始使用</a> ·
     <a href="#功能一览">功能一览</a> ·
@@ -27,7 +27,7 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 - **按需连接团队。** 支持注册、登录及桌面／网页端同账号访问；本地资料通过显式项目绑定与账号工作区同步。
 - **让数据有归属。** 本地工作区、账号工作区及项目权限分别管理，提供加密备份、恢复和升级保护。
 
-> **当前交付状态（2026-10-23）：** [Mac Apple Silicon 启动修复版](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261023) 与 [Windows x64](https://github.com/MrLimingbo/TestHub/releases/tag/windows-v0.2.0-preview.20261022) 预览安装包可公开下载。Mac 最新版修复了本地 Runner 启动握手偶发 401，已完成后台启动、账号同步及本机替换安装复验；Windows 沿用 2026-10-22 已验收的构建。两个预览版均未做发行者签名，Mac 另未公证；具体平台和验收边界见[验收范围](#验收范围)。
+> **当前交付状态（2026-10-23）：** [Mac Apple Silicon 启动修复版](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261023) 与 [Windows x64 最新预览版](https://github.com/MrLimingbo/TestHub/releases/tag/windows-v0.2.0-preview.20261023) 可公开下载。两端均包含本地 Runner 启动握手修复；Windows 最新构建追加完成默认目录连续重启、跨模块执行及安装升级验收。两个预览版均未做发行者签名，Mac 另未公证；具体平台和验收边界见[验收范围](#验收范围)。
 
 ## 界面预览
 
@@ -109,15 +109,17 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 
 本版修复了 Runner 心跳清理与新心跳写入之间的竞态，避免有效签名握手被误判为 401；签名及权限校验保持启用。最终安装包通过 12 次全新工作区启动、6 次重启，以及 Web 注册、Mac 登录与四类资料双向同步的 15 项联调检查；本机替换安装后再次完成启动、持久化与握手复验，原有工作区和数据保留。详见 [Runner 启动修复与验收](docs/desktop-runner-handshake-fix-2026-10-23.md)。
 
-**Windows x64 · 0.2.0 预览版 · 2026-10-22 发布**
+**Windows x64 · 0.2.0 预览版 · 2026-10-23 更新**
 
-[下载 EXE 安装包](https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261022/TestHub-Windows-x64-preview.exe) · [版本说明与验收信息](https://github.com/MrLimingbo/TestHub/releases/tag/windows-v0.2.0-preview.20261022) · [SHA-256 校验文件](https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261022/SHA256SUMS.txt)
+[下载 EXE 安装包](https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261023/TestHub-Windows-x64-preview.exe) · [版本说明与验收信息](https://github.com/MrLimingbo/TestHub/releases/tag/windows-v0.2.0-preview.20261023) · [SHA-256 校验文件](https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261023/SHA256SUMS.txt)
 
 下载后运行安装向导，完成后直接进入本地工作区。旧版用户请先导出备份并退出 TestHub，再安装到原位置，保留原用户数据目录。在下载目录运行 `Get-FileHash .\TestHub-Windows-x64-preview.exe -Algorithm SHA256`，可与校验文件中的安装器摘要核对。
 
 **这是未做 Authenticode 签名的 Windows 预览版。** 可能出现未知发布者或 SmartScreen 提示；仅在确认来源可信且摘要一致后决定是否继续。Smart App Control 或组织策略可能阻止未签名程序，请遵循 [Microsoft 官方说明](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)。本轮未验证这些安全策略，无需关闭系统整体安全防护。
 
-构建对应 `3f2d041`，已在 Windows Server 2025 x64 原生 CI 验证真实安装、升级保留数据、卸载重装及 20 项跨模块流程；不将此结果视为所有 Windows 10／11 实机或 Windows arm64 均已验收。详见 [Windows 预览版验收记录](docs/desktop-standalone-progress-2026-10-21-windows-preview.md)。
+最新构建对应 `3ad2fbe`，包含共享后端的 Runner 启动握手修复；应用版本字段仍为 `0.2.0`，请按标签、源码提交和 SHA-256 区分构建。已在 Windows Server 2025 x64 原生 CI 验证真实安装、连续重启、升级保留数据、卸载重装及 20 项跨模块流程；不将此结果视为所有 Windows 10／11 实机或 Windows arm64 均已验收。
+
+首轮 CI 出现过一次安装后重启的界面等待超时，现有摘要不足以确定根因；补充脱敏诊断并强化连续 6 次重启检查后，本轮完整原生验收通过、未复现。详情与清理结果见 [Windows 最新预览版验收记录](docs/desktop-windows-preview-2026-10-23.md)。
 
 仓库及 Release 附件已公开，无需登录 GitHub 或申请仓库访问权限即可下载。源码构建方式见下文，完整流程见[桌面打包文档](docs/desktop-packaging.md)。
 
@@ -233,14 +235,14 @@ node services/testhub-cli/src/index.js execution run \
 | --- | --- |
 | 本地独立工作区、可选账号接入、已约定的模块迁移与持续同步 | 已完成分模块实现与验收 |
 | Mac Apple Silicon 预览包 | 已完成标准打包、真实安装、升级、重装及后台功能回归；最新启动修复版追加完成握手、账号同步和替换安装复验，已发布未签名、未公证的 GitHub 预发布版 |
-| Windows x64 预览包 | 已在 Windows Server 2025 原生 CI 完成真实安装、升级、重装及后台功能验收；已发布未签名的 GitHub 预发布版 |
+| Windows x64 预览包 | 最新构建已在 Windows Server 2025 原生 CI 完成真实安装、连续重启、升级、重装及 20 项跨模块验收；已发布未签名的 GitHub 预发布版 |
 | 浏览器／JMeter 首次下载 | Mac 已完成含中断、重试和离线路径的专项验收；Windows 本轮完成 Chromium／JMeter 空缓存下载及真实执行，未复验完整故障矩阵 |
 | Intel Mac 原生验收 | 暂缓；不以 arm64 的结果代替 |
 | 发行者签名、公证及正式多平台发行 | 尚未完成；当前交付为预览包 |
 | 移动端真实设备执行 | 暂缓；配置、历史与产物同步的验证不等同于真机执行验证 |
 | 公网账号服务 | 未提供，云端部署留待后续；当前支持自行部署 |
 
-Mac 已记录的整包回归包含后端 **733**、前端 **376**、桌面 **734** 项测试，以及 **20** 项跨模块真实流程和 **5** 项安装生命周期检查，见 [Mac 整包验收记录](docs/desktop-standalone-progress-2026-10-20-final-mac-regression.md)。Windows 本轮同样通过 **20** 项真实流程、**5** 项安装生命周期检查，原生文件系统与 PowerShell 回归 **22** 项通过、**1** 项平台不适用跳过，见 [Windows 验收记录](docs/desktop-standalone-progress-2026-10-21-windows-preview.md)。这些结果对应记录中的构建，不表示后续提交自动通过。
+Mac 已记录的整包回归包含后端 **733**、前端 **376**、桌面 **734** 项测试，以及 **20** 项跨模块真实流程和 **5** 项安装生命周期检查，见 [Mac 整包验收记录](docs/desktop-standalone-progress-2026-10-20-final-mac-regression.md)。Windows 最新构建通过 **20** 项真实流程、**5** 项安装生命周期检查，新装后追加连续 **6** 次重启；原生文件系统与 PowerShell 回归 **22** 项通过、**1** 项平台不适用跳过，见 [Windows 最新验收记录](docs/desktop-windows-preview-2026-10-23.md)。这些结果对应记录中的构建，不表示后续提交自动通过。
 
 2026-10-23 Mac 启动修复版另完成隔离 H2 和 MySQL／Redis／MinIO 回归，分别 **738** 项通过、零失败、零跳过；对应产品提交 `d091fcd` 的 [GitHub CI](https://github.com/MrLimingbo/TestHub/actions/runs/39890442096) 中，Web、后端与发布门禁均通过。此次专项验收没有重新执行上述全部跨模块和安装生命周期矩阵，范围详见[修复记录](docs/desktop-runner-handshake-fix-2026-10-23.md)。
 
