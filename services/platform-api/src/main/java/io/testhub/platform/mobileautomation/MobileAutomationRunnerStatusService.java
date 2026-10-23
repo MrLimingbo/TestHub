@@ -46,7 +46,7 @@ public class MobileAutomationRunnerStatusService {
     private Optional<MobileAutomationRunnerStatus> read(String runnerId) {
         if (runnerId == null || !runnerId.matches("[A-Za-z0-9._-]{1,64}")) return Optional.empty();
         String body = registry.get(HEARTBEAT_KEY_PREFIX + runnerId);
-        if (body == null) { registry.remove(MEMBER_KEY, runnerId); return Optional.empty(); }
+        if (body == null) { registry.removeIfMissing(MEMBER_KEY, HEARTBEAT_KEY_PREFIX + runnerId, runnerId); return Optional.empty(); }
         try {
             JsonNode value = json.readTree(body);
             if (!runnerId.equals(text(value, "runnerId")) || !"appium".equals(text(value, "runnerType")) || !MobileRunnerProtocol.VERSION.equals(text(value, "protocolVersion")) || !value.path("executionEnabled").isBoolean()) return Optional.empty();

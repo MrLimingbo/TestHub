@@ -157,6 +157,10 @@ public class DesktopRuntimeBroker implements RuntimeStreams, RunnerRegistry {
                     .params(key, member).update();
         });
     }
+    @Override public synchronized void removeIfMissing(String membersKey, String heartbeatKey, String member) {
+        transaction.executeWithoutResult(status -> jdbc.sql("DELETE FROM desktop_runner_heartbeat WHERE members_key=? AND member_name=? AND heartbeat_key=? AND expires_at<=?")
+                .params(membersKey, member, heartbeatKey, clock.millis()).update());
+    }
     @Override public synchronized void delete(String key) {
         transaction.executeWithoutResult(status -> jdbc.sql("DELETE FROM desktop_runner_heartbeat WHERE heartbeat_key=?").param(key).update());
     }

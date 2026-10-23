@@ -1,12 +1,21 @@
 package io.testhub.platform.desktop;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.testhub.platform.apiautomation.ApiRunnerInternalAuthenticationService;
+import io.testhub.platform.apiautomation.ApiRunnerStatusService;
+import io.testhub.platform.shared.runtime.ExpiringStateStore;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.ClassPathResource;
@@ -14,6 +23,7 @@ import org.springframework.data.redis.connection.stream.*;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 class DesktopRuntimeBrokerTests {
     @TempDir Path directory;
@@ -93,6 +103,53 @@ class DesktopRuntimeBrokerTests {
         assertThat(reopen().members("members")).isEmpty();
         broker.cleanup();
         broker.check();
+    }
+    @Test void readinessMissingReadCannotEraseANewHeartbeatBeforeSignedCapabilityDiscovery() throws Exception {
+        String signingKey = UUID.randomUUID() + UUID.randomUUID().toString();
+        for (boolean expired : List.of(false, true)) {
+            String runner = "desktop-api-" + expired;
+            String members = "testhub:runner:api:members:v1", heartbeat = "testhub:runner:api:heartbeat:v1:" + runner;
+            Instant started = Instant.now();
+            String timestamp = started.toString();
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("runnerId", runner); body.put("runnerType", "api"); body.put("protocolVersion", "1");
+            body.put("runnerVersion", "0.1.0-test"); body.put("executionEnabled", false);
+            body.put("startedAt", timestamp); body.put("heartbeatAt", timestamp); body.put("trustVersion", "1");
+            body.put("signature", sign(signingKey, String.join("\n", runner, "api", "1", "0.1.0-test", "false", timestamp, timestamp)));
+            String encoded = new ObjectMapper().writeValueAsString(body);
+            if (expired) {
+                broker.publish(members, heartbeat, runner, "expired", Duration.ofMillis(1));
+                clock.now++;
+            }
+            var observed = spy(broker);
+            var publishOnce = new AtomicBoolean(true);
+            doAnswer(call -> {
+                String value = (String) call.callRealMethod();
+                if (value == null && publishOnce.getAndSet(false)) broker.publish(members, heartbeat, runner, encoded, Duration.ofSeconds(60));
+                return value;
+            }).when(observed).get(heartbeat);
+            var runners = new ApiRunnerStatusService(null, observed, new ObjectMapper(), signingKey);
+            var state = mock(ExpiringStateStore.class);
+            when(state.putIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
+            var authentication = new ApiRunnerInternalAuthenticationService(runners, state, signingKey);
+            // Deterministic ordering: the poll reads no heartbeat, then the Runner publishes before stale cleanup.
+            assertThat(runners.isVerifiedSince(runner, started)).isFalse();
+            String nonce = UUID.randomUUID().toString(), path = "/internal/api-runner/v1/capabilities";
+            var request = new MockHttpServletRequest("GET", path);
+            request.addHeader("X-TestHub-Runner-Id", runner);
+            request.addHeader("X-TestHub-Runner-Timestamp", timestamp);
+            request.addHeader("X-TestHub-Runner-Nonce", nonce);
+            request.addHeader("X-TestHub-Runner-Signature", sign(signingKey, String.join("\n", "testhub.api-runner.internal-auth.v1", "GET", path, runner, timestamp, nonce)));
+            assertThat(authentication.authenticateCapabilities(request)).isEqualTo(runner);
+            assertThat(runners.isVerifiedSince(runner, started)).isTrue();
+            assertThat(broker.get(heartbeat)).isEqualTo(encoded);
+            assertThat(broker.members(members)).contains(runner);
+        }
+    }
+    private static String sign(String key, String payload) throws Exception {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        return HexFormat.of().formatHex(mac.doFinal(payload.getBytes(StandardCharsets.UTF_8)));
     }
     @Test void retentionNeverDeletesPendingOrUnreadMessagesIncludingLateStartingGroups() {
         broker.createGroup("events", ReadOffset.latest(), "a");

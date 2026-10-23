@@ -55,7 +55,7 @@ function bootstrap(directory, name, observeRuntime) {
   if (observeRuntime) {
     const { LocalRuntime } = require(require('node:path').join(process.resourcesPath, 'app.asar/src/local-runtime.cjs'))
     const start = LocalRuntime.prototype.start
-    LocalRuntime.prototype.start = async function (...args) { const value = await start.apply(this, args); globalThis.__testhubQaLocalRuntime = this; return value }
+    LocalRuntime.prototype.start = async function (...args) { globalThis.__testhubQaLocalRuntime = this; return start.apply(this, args) }
   }
   const load = Module._load
   Module._load = function (request, parent, main) { return request === 'electron' ? quiet : load.call(this, request, parent, main) }
@@ -142,5 +142,16 @@ export async function offscreenPackaged(appPath, directory, options = {}) {
     await local.getByText('本地工作区',{exact:true}).first().waitFor()
     await snapshot()
     return { evaluate, pageFor, pages, snapshot, close, local, processState: () => ({exitCode:child.exitCode,signalCode:child.signalCode}) }
-  } catch (error) { await close(); throw error }
+  } catch (error) {
+    if (options.startupDiagnostics && inspector) {
+      const diagnostic = await evaluate(({ BrowserWindow }) => ({
+        background: globalThis.__testhubBackground,
+        runtime: { phase: globalThis.__testhubQaLocalRuntime?.phase, message: globalThis.__testhubQaLocalRuntime?.message },
+        windows: BrowserWindow.getAllWindows().map(window => ({ url: window.webContents.getURL(), visible: window.isVisible(), focused: window.isFocused(), offscreen: window.webContents.isOffscreen() })),
+      })).catch(() => ({ unavailable: true }))
+      try { await fs.writeFile(options.startupDiagnostics, JSON.stringify(diagnostic, null, 2) + '\n', {mode:0o600}) }
+      catch { error.diagnosticsUnavailable = true }
+    }
+    await close(); throw error
+  }
 }

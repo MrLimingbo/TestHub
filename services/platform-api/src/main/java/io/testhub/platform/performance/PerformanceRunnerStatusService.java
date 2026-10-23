@@ -63,7 +63,7 @@ public class PerformanceRunnerStatusService {
         if (runnerId == null || !runnerId.matches("[A-Za-z0-9._-]{1,64}")) return java.util.Optional.empty();
         String body = registry.get(HEARTBEAT_KEY_PREFIX + runnerId);
         if (body == null) {
-            registry.remove(MEMBER_KEY, runnerId);
+            registry.removeIfMissing(MEMBER_KEY, HEARTBEAT_KEY_PREFIX + runnerId, runnerId);
             return java.util.Optional.empty();
         }
         try {
