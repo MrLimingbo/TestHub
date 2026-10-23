@@ -36,7 +36,7 @@ if (statePath && lifecycleStage === 'seed') {
   try { await fs.writeFile(statePath, JSON.stringify({ ownership }), { mode: 0o600 }) }
   catch (error) { await installationQA.removeSession(ownership); await fs.rm(statePath); throw error }
 }
-let child, finished, inspector, browser, transcript = '', summary, cleanupError
+let child, finished, inspector, browser, transcript = '', summary, cleanupError, rendererEvents = []
 const pass = message => { checks.push(message); console.log('PASS ' + message) }
 class Inspector {
   constructor(socket) {
@@ -82,17 +82,26 @@ function bootstrap(directory, qaName, nativeDirectory, cleanRunnerDefaults) {
   if (process.platform === 'darwin') electron.app.setActivationPolicy('prohibited')
   globalThis.__testhubPackagedQA = { isPackaged: electron.app.isPackaged, electronVersion: process.versions.electron, resources: process.resourcesPath, executable: process.execPath, data: electron.app.getPath('userData'), created: 0, visibleViolations: 0, unexpectedDialogs: 0 }
   globalThis.__testhubPackagedQA.failedLocalRequests = []
+  const { LocalRuntime } = require(require('node:path').join(process.resourcesPath, 'app.asar/src/local-runtime.cjs'))
+  const start = LocalRuntime.prototype.start
+  LocalRuntime.prototype.start = function (...args) { globalThis.__testhubQaLocalRuntime = this; return start.apply(this, args) }
   const traceFetch = (original, transport) => async function (...args) {
     const started = Date.now()
-    try { return await original.apply(this, args) }
+    const address = typeof args[0] === 'string' ? args[0] : args[0]?.url
+    const route = /^http:\/\/127\.0\.0\.1:\d+(\/actuator\/health|\/internal\/desktop\/v1\/(?:status|session)|\/api\/v1\/auth\/(?:me|csrf))(?:[?#]|$)/.exec(address || '')?.[1]
+    const record = value => {
+      if (!route) return
+      const requests = globalThis.__testhubPackagedQA.failedLocalRequests
+      requests.push({ transport, path: route, ...value, elapsedMilliseconds: Date.now() - started })
+      if (requests.length > 8) requests.shift()
+    }
+    try {
+      const response = await original.apply(this, args)
+      if (!response.ok) record({ status: response.status })
+      return response
+    }
     catch (error) {
-      const address = typeof args[0] === 'string' ? args[0] : args[0]?.url
-      const route = /^http:\/\/127\.0\.0\.1:\d+(\/actuator\/health|\/internal\/desktop\/v1\/(?:status|session))(?:[?#]|$)/.exec(address || '')?.[1]
-      if (route) {
-        const requests = globalThis.__testhubPackagedQA.failedLocalRequests
-        requests.push({ transport, path: route, error: error.name, elapsedMilliseconds: Date.now() - started })
-        if (requests.length > 8) requests.shift()
-      }
+      record({ error: error.name })
       throw error
     }
   }
@@ -115,13 +124,34 @@ function bootstrap(directory, qaName, nativeDirectory, cleanRunnerDefaults) {
   return globalThis.__testhubPackagedQA
 }
 function safeDiagnostic(value) {
-  return String(value).replace(/(?:password|secret|authorization|token|credential)\s*[:=]\s*[^\s,;]+/gi, '[redacted]')
+  return String(value).replace(/(?:password|secret|authorization|token|credential|cookie|jsessionid)\s*[:=]\s*[^\s,;]+/gi, '[redacted]')
     .replace(/[a-f0-9]{32,}|[A-Za-z0-9+/_=-]{48,}/gi, '[redacted]').slice(0, 2000)
 }
 async function startupDiagnostics() {
-  const result = { pages: browser?.contexts()[0]?.pages().map(p => p.url().split(/[?#]/)[0]) || [], errors: [] }
-  try { Object.assign(result, await inspector.evaluate('({failedLocalRequests:globalThis.__testhubPackagedQA.failedLocalRequests,sessionFetchTracing:globalThis.__testhubPackagedQA.sessionFetchTracing})')) }
+  const result = { pages: browser?.contexts()[0]?.pages().map(p => p.url().split(/[?#]/)[0]) || [], errors: [], rendererEvents,
+    nativeProcess: { exitCode: child?.exitCode, signalCode: child?.signalCode } }
+  try {
+    Object.assign(result, await inspector.evaluate(`({failedLocalRequests:globalThis.__testhubPackagedQA.failedLocalRequests,sessionFetchTracing:globalThis.__testhubPackagedQA.sessionFetchTracing,
+      runtimePhase:globalThis.__testhubQaLocalRuntime?.phase,runtimeMessage:globalThis.__testhubQaLocalRuntime?.message,
+      windows:globalThis.__testhubQaElectron.BrowserWindow.getAllWindows().map(w=>({url:w.webContents.getURL().split(/[?#]/)[0],loading:w.webContents.isLoading(),destroyed:w.webContents.isDestroyed(),visible:w.isVisible(),focused:w.isFocused(),offscreen:w.webContents.isOffscreen()}))})`))
+  }
   catch (error) { result.requestTraceError = safeDiagnostic(error.message) }
+  if (result.runtimeMessage) result.runtimeMessage = safeDiagnostic(result.runtimeMessage)
+  result.renderers = await Promise.all((browser?.contexts()[0]?.pages() || []).map(async page => {
+    const url = page.url().split(/[?#]/)[0]
+    try {
+      return await Promise.race([
+        page.evaluate(url => ({ url, readyState: globalThis.document.readyState, route: globalThis.location.pathname,
+          workspaceMode: globalThis.testhubDesktop?.workspaceMode ?? null,
+          localWorkspaceLabel: (globalThis.document.body?.innerText || '').includes('本地工作区'),
+          loginForm: Boolean(globalThis.document.querySelector('input[type="password"]')),
+          appMounted: Boolean(globalThis.document.querySelector('#app')?.childElementCount),
+          scriptCount: globalThis.document.scripts.length,
+        }), url),
+        delay(2000).then(() => ({ url, probeTimeout: true })),
+      ])
+    } catch (error) { return { url, probeError: error.name } }
+  }))
   const logDirectory = path.join(directory, 'local-workspace/logs')
   try {
     for (const file of (await fs.readdir(logDirectory)).filter(name => name.startsWith('backend-')).slice(-1)) {
@@ -129,10 +159,11 @@ async function startupDiagnostics() {
       result.errors = log.split('\n').filter(line => /ERROR|Exception|Caused by:|APPLICATION FAILED|Description:|Reason:/.test(line)).slice(-10).map(safeDiagnostic)
     }
   } catch (error) { if (error.code !== 'ENOENT') result.logReadError = error.code }
+  result.processErrors = transcript.split('\n').filter(line => /ERROR|Error|failed|crash|ERR_/.test(line)).slice(-10).map(safeDiagnostic)
   return result
 }
 async function launch() {
-  transcript = ''
+  transcript = ''; rendererEvents = []
   const env = { ...process.env }
   for (const key of Object.keys(env)) if (key.startsWith('TESTHUB_') || ['NODE_OPTIONS', 'ELECTRON_RUN_AS_NODE'].includes(key)) delete env[key]
   env.PATH = process.platform === 'win32' ? path.join(env.SystemRoot || 'C:\\Windows', 'System32') : '/usr/bin:/bin:/usr/sbin:/sbin'
@@ -162,6 +193,17 @@ async function launch() {
   for (let n = 0; n < 900; n++) { chrome = /DevTools listening on (ws:\/\/[^\s]+)/.exec(transcript)?.[1]; if (chrome) break; if (child.exitCode !== null) throw new Error('Packaged executable exited during startup'); await delay(100) }
   if (!chrome) throw new Error('Packaged browser unavailable')
   browser = await chromium.connectOverCDP(chrome)
+  const recordRendererEvent = event => { rendererEvents.push(event); if (rendererEvents.length > 12) rendererEvents.shift() }
+  const observePage = page => {
+    page.on('pageerror', error => recordRendererEvent({ type: 'pageerror', message: safeDiagnostic(error.message) }))
+    page.on('console', message => { if (message.type() === 'error') recordRendererEvent({ type: 'console', message: safeDiagnostic(message.text()) }) })
+    page.on('response', response => {
+      const url = new URL(response.url())
+      if (url.hostname === '127.0.0.1' && response.status() >= 400) recordRendererEvent({ type: 'response', path: url.pathname, status: response.status() })
+    })
+  }
+  browser.contexts()[0].on('page', observePage)
+  for (const page of browser.contexts()[0].pages()) observePage(page)
   const workspaceDeadline = Date.now() + 90000
   for (let n = 0; Date.now() < workspaceDeadline; n++) {
     const page = browser.contexts()[0]?.pages().find(p => p.url().startsWith('http://127.0.0.1:'))
@@ -242,6 +284,11 @@ try {
   }
   summary = { passed: true, platform: process.platform, arch: process.arch, isPackaged: true, checks, launches: sanitized, asarUnchanged: true, asarSha256: originalAsarHash, backendSha256: manifest.backendSha256,
     externalCommandsExcluded: ['java', 'node', 'mvn', 'pnpm'], defaultUserDataRedirectedForQA: !ownership, applicationNameChangedForQA: !ownership?.cleanRunnerDefaults, nativeDefaultUserData: Boolean(ownership), exactApplicationDefaults: Boolean(ownership?.cleanRunnerDefaults), installed: false }
+} catch (error) {
+  // Collect only bounded, redacted state before owned profiles and processes are removed.
+  try { console.error('PACKAGED_ACCEPTANCE_DIAGNOSTIC ' + JSON.stringify(await startupDiagnostics())) }
+  catch (diagnosticError) { console.error('PACKAGED_ACCEPTANCE_DIAGNOSTIC_UNAVAILABLE ' + diagnosticError.name) }
+  throw error
 } finally {
   await close().catch(() => {})
   if (child && child.exitCode === null) { child.kill('SIGTERM'); await finished }
