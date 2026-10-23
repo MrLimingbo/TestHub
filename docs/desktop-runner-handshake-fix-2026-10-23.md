@@ -67,4 +67,12 @@ node scripts/desktop/accept-runner-handshake.mjs \
 - `.testhub/runner-handshake-native-20261023.json`：18 次真实打包程序的启动记录。
 - `.testhub/runner-fix-web-mac-sync-20261023.json`：15 项账号与同步复验、原数据保留及清理。
 
-候选包位于 `release/desktop/runner-handshake-fix-20261023/TestHub-macOS-arm64-preview.dmg`，同目录包含 `SHA256SUMS.txt`。该包没有 Apple Developer ID 签名或公证，仅使用预览构建的临时封装签名。现有 `/Applications/TestHub.app` 及其用户工作区保留，本轮不自动替换已安装版本，也不提交或发布 GitHub。
+候选包位于 `release/desktop/runner-handshake-fix-20261023/TestHub-macOS-arm64-preview.dmg`，同目录包含 `SHA256SUMS.txt`。该包没有 Apple Developer ID 签名或公证，仅使用预览构建的临时封装签名。送审时保留现有安装和用户工作区，尚未自动替换或提交 GitHub。
+
+## 审核后的安装与发布
+
+用户审核通过后，修复代码、验收脚本及文档已提交至 `d091fcd285808237427c4fd00ae4fa7454b1c968`。该提交的 [GitHub CI](https://github.com/MrLimingbo/TestHub/actions/runs/39890442096) 中 Web、后端和发布门禁全部通过；后端 738 项测试零失败、零错误、零跳过，并确认隔离容器、网络、数据卷与临时文件已清理。
+
+本机 `/Applications/TestHub.app` 已替换为同一修复包。替换前完成私有用户目录备份，替换后逐文件、目录核对原有数据保持一致；没有打开或迁移真实用户工作区。安装后的两次真实启动与持久化检查，以及另外 12 次全新工作区启动、6 次重启握手检查全部通过，所有窗口隐藏、离屏且不可聚焦。成功后移除了旧程序临时副本、测试目录和 QA 钥匙串，原有数据备份保留。
+
+该已验收的原始 DMG 以 [Mac arm64 2026-10-23 预览版](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261023) 发布，未重新打包或修改二进制。应用版本字段仍为 `0.2.0`，使用标签、产品提交号和 SHA-256 区分构建。Release 提供安装包、`SHA256SUMS.txt`、`BUILD-INFO.json`、`VERIFICATION.json` 与脱敏 `ACCEPTANCE.json`；未做 Developer ID 签名、Apple 公证或干净系统 Gatekeeper 首开验收，`distributionReady=false`。

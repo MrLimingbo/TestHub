@@ -3,7 +3,7 @@
   <h1>TestHub</h1>
   <p><strong>从用例到执行，从接口到质量报告。</strong></p>
   <p>本地即可工作的测试开发平台，也能连接你自己的团队服务。</p>
-  <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/TestHub-macOS-arm64-preview.dmg">下载 Mac Apple Silicon 预览版</a></strong><br /><sub>未签名（无 Developer ID） · 未公证 · arm64</sub></p>
+  <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261023/TestHub-macOS-arm64-preview.dmg">下载 Mac Apple Silicon 预览版</a></strong><br /><sub>未签名（无 Developer ID） · 未公证 · arm64 · 2026-10-23 启动修复版</sub></p>
   <p><strong><a href="https://github.com/MrLimingbo/TestHub/releases/download/windows-v0.2.0-preview.20261022/TestHub-Windows-x64-preview.exe">下载 Windows x64 预览版</a></strong><br /><sub>未签名 · NSIS 安装包 · x64</sub></p>
   <p>
     <a href="#开始使用">开始使用</a> ·
@@ -27,7 +27,7 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 - **按需连接团队。** 支持注册、登录及桌面／网页端同账号访问；本地资料通过显式项目绑定与账号工作区同步。
 - **让数据有归属。** 本地工作区、账号工作区及项目权限分别管理，提供加密备份、恢复和升级保护。
 
-> **当前交付状态（2026-10-22）：** [Mac Apple Silicon](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261021) 与 [Windows x64](https://github.com/MrLimingbo/TestHub/releases/tag/windows-v0.2.0-preview.20261022) 预览安装包均已完成原生安装、升级和后台功能验收，可公开下载。两个预览版均未做发行者签名，Mac 另未公证；具体平台和验收边界见[验收范围](#验收范围)。
+> **当前交付状态（2026-10-23）：** [Mac Apple Silicon 启动修复版](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261023) 与 [Windows x64](https://github.com/MrLimingbo/TestHub/releases/tag/windows-v0.2.0-preview.20261022) 预览安装包可公开下载。Mac 最新版修复了本地 Runner 启动握手偶发 401，已完成后台启动、账号同步及本机替换安装复验；Windows 沿用 2026-10-22 已验收的构建。两个预览版均未做发行者签名，Mac 另未公证；具体平台和验收边界见[验收范围](#验收范围)。
 
 ## 界面预览
 
@@ -95,9 +95,9 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 
 ### 桌面预览版
 
-**Mac Apple Silicon（M 系列，arm64）· 0.2.0 预览版 · 2026-10-21 发布**
+**Mac Apple Silicon（M 系列，arm64）· 0.2.0 预览版 · 2026-10-23 启动修复版**
 
-[下载 DMG 安装包](https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/TestHub-macOS-arm64-preview.dmg) · [版本说明与验收信息](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261021) · [SHA-256 校验文件](https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261021/SHA256SUMS.txt)
+[下载 DMG 安装包](https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261023/TestHub-macOS-arm64-preview.dmg) · [版本说明与验收信息](https://github.com/MrLimingbo/TestHub/releases/tag/mac-v0.2.0-preview.20261023) · [SHA-256 校验文件](https://github.com/MrLimingbo/TestHub/releases/download/mac-v0.2.0-preview.20261023/SHA256SUMS.txt)
 
 **这是未签名、未公证的 Mac 预览版。** 未使用 Apple Developer ID 发行者证书，仅保留 ad-hoc 资源完整性封装；该封装不验证发行者身份，不代表通过 Apple 公证或 Gatekeeper 验收。Mac 当前仅提供上述 arm64 包，Intel Mac 原生验收仍暂缓。
 
@@ -105,7 +105,9 @@ TestHub 将功能测试、接口设计与调试、Mock、自动化执行、性�
 2. 打开 DMG，将 `TestHub.app` 拖入“应用程序”，已有旧版时选择替换，保留原工作区和用户数据目录。
 3. 启动后即可进入本地工作区。如 macOS 提示无法验证开发者，仅在确认来源可信后，按 [Apple 官方说明](https://support.apple.com/zh-cn/102445)在“系统设置 → 隐私与安全性”中对该应用选择“仍要打开”。
 
-将 DMG 与 `SHA256SUMS.txt` 放在同一目录，可在该目录运行 `shasum -a 256 -c SHA256SUMS.txt` 校验下载完整性。Mac 包内产品代码对应 `7f01558`，详细构建信息与发布前校验结果随 Release 提供。
+将 DMG 与 `SHA256SUMS.txt` 放在同一目录，可在该目录运行 `shasum -a 256 -c SHA256SUMS.txt` 校验下载完整性。Mac 包内产品代码对应 `d091fcd`，应用版本字段仍为 `0.2.0`，请按发布日期、标签和摘要区分构建。详细构建信息、验收摘要与发布前校验结果随 Release 提供。
+
+本版修复了 Runner 心跳清理与新心跳写入之间的竞态，避免有效签名握手被误判为 401；签名及权限校验保持启用。最终安装包通过 12 次全新工作区启动、6 次重启，以及 Web 注册、Mac 登录与四类资料双向同步的 15 项联调检查；本机替换安装后再次完成启动、持久化与握手复验，原有工作区和数据保留。详见 [Runner 启动修复与验收](docs/desktop-runner-handshake-fix-2026-10-23.md)。
 
 **Windows x64 · 0.2.0 预览版 · 2026-10-22 发布**
 
@@ -225,12 +227,12 @@ node services/testhub-cli/src/index.js execution run \
 
 ## 验收范围
 
-以下为截至 **2026-10-22** 的项目状态，区分已验证的交付与暂缓工作。
+以下为截至 **2026-10-23** 的项目状态，区分已验证的交付与暂缓工作。
 
 | 范围 | 状态 |
 | --- | --- |
 | 本地独立工作区、可选账号接入、已约定的模块迁移与持续同步 | 已完成分模块实现与验收 |
-| Mac Apple Silicon 预览包 | 已完成标准打包、真实安装、升级、重装及后台功能回归；已发布未签名、未公证的 GitHub 预发布版 |
+| Mac Apple Silicon 预览包 | 已完成标准打包、真实安装、升级、重装及后台功能回归；最新启动修复版追加完成握手、账号同步和替换安装复验，已发布未签名、未公证的 GitHub 预发布版 |
 | Windows x64 预览包 | 已在 Windows Server 2025 原生 CI 完成真实安装、升级、重装及后台功能验收；已发布未签名的 GitHub 预发布版 |
 | 浏览器／JMeter 首次下载 | Mac 已完成含中断、重试和离线路径的专项验收；Windows 本轮完成 Chromium／JMeter 空缓存下载及真实执行，未复验完整故障矩阵 |
 | Intel Mac 原生验收 | 暂缓；不以 arm64 的结果代替 |
@@ -239,6 +241,8 @@ node services/testhub-cli/src/index.js execution run \
 | 公网账号服务 | 未提供，云端部署留待后续；当前支持自行部署 |
 
 Mac 已记录的整包回归包含后端 **733**、前端 **376**、桌面 **734** 项测试，以及 **20** 项跨模块真实流程和 **5** 项安装生命周期检查，见 [Mac 整包验收记录](docs/desktop-standalone-progress-2026-10-20-final-mac-regression.md)。Windows 本轮同样通过 **20** 项真实流程、**5** 项安装生命周期检查，原生文件系统与 PowerShell 回归 **22** 项通过、**1** 项平台不适用跳过，见 [Windows 验收记录](docs/desktop-standalone-progress-2026-10-21-windows-preview.md)。这些结果对应记录中的构建，不表示后续提交自动通过。
+
+2026-10-23 Mac 启动修复版另完成隔离 H2 和 MySQL／Redis／MinIO 回归，分别 **738** 项通过、零失败、零跳过；对应产品提交 `d091fcd` 的 [GitHub CI](https://github.com/MrLimingbo/TestHub/actions/runs/39890442096) 中，Web、后端与发布门禁均通过。此次专项验收没有重新执行上述全部跨模块和安装生命周期矩阵，范围详见[修复记录](docs/desktop-runner-handshake-fix-2026-10-23.md)。
 
 ## 文档导航
 
