@@ -1,0 +1,102 @@
+[
+  {
+    "path": "docs/test-reports/2026-10-29/direct-fixes-r1/summary.json",
+    "sha256": "b10658a3de17679c6bcffe262e4d9c89537bc2b964fef53ccefbb28fb58589da"
+  },
+  {
+    "path": "docs/test-reports/2026-10-29/direct-fixes-r1/execution-results.json",
+    "sha256": "6959846b095f8e0e5ebcb91b1c9d1a81ed754813b62b3251c2204fd4a3dc13f3"
+  },
+  {
+    "path": "docs/test-reports/2026-10-29/direct-fixes-r1/FIX-RESULTS.json",
+    "sha256": "23839d0db11d33b73f33ddacb3455ef5dff0fd6fb18688a423a7b58677426f82"
+  },
+  {
+    "path": "docs/test-reports/2026-10-29/direct-fixes-r1/OBSERVATION-RESULTS.json",
+    "sha256": "f8187a09104a8cfe33208e48e1ea703f23dd2e8800aaabed6bfe3279000d2cf2"
+  },
+  {
+    "path": "output/qa-20261029/direct-fixes-r1/frontend-final.json",
+    "sha256": "45ad9eedcde729fd0d9a46b02d37b1583fae152e2a00bc6f01aabe696de3fe3b"
+  },
+  {
+    "path": "output/qa-20261029/direct-fixes-r1/frontend-final.log",
+    "sha256": "4e7b40aade4b9cd3f602a89be2adbc3c5d0bd914753e70b496ad45ad6b6482b8"
+  },
+  {
+    "path": "output/qa-20261029/direct-fixes-r1/baseline-finalized-cases.json",
+    "sha256": "d0e3db6209c59ed8ea57d5c96fd2d0c6f64269c2d2eef83c4c4176cc3ecfdb1b"
+  },
+  {
+    "path": "output/qa-20261029/direct-fixes-r1/browser-results.json",
+    "sha256": "0d010ef8d514d1fa2ebeeb0d00b12f07520e2387efa7c25e8d32499e9816a266"
+  },
+  {
+    "path": "output/qa-20261029/direct-fixes-r1/lint-final.log",
+    "sha256": "666a3b0963ef4e51fe40998dd5b3bc11c3594111e12a57f751d52d3343170fc0"
+  },
+  {
+    "path": "output/qa-20261029/direct-fixes-r1/build-final.log",
+    "sha256": "24620670ef59a746fa787e50c9fa4d79998a30d2f67e635a7b2851b03f590a7a"
+  },
+  {
+    "path": "src/test/directObservationForms.test.ts",
+    "sha256": "9947482eecb8c911ba6afec4199141872b4315b4a1fd908eb0fa993e09c50df3"
+  },
+  {
+    "path": "scripts/qa/direct-observation-ui.mjs",
+    "sha256": "ad94b8624cf5ff708bacfacf19ec0fa5b5a59752c2c7c4b2dc75ff64ab719a71"
+  },
+  {
+    "path": "src/components/api-automation/AutomationRunPanel.vue",
+    "sha256": "ea0ff8c16229a410b7ef0c17b786e8bb8bb7c8dd407405315202c3daeb4feede"
+  },
+  {
+    "path": "src/pages/ApiDebugPage.vue",
+    "sha256": "703eec27fb243a8c78e23f057b779259170564b7e37bd33cbd272c2e65f95c4c"
+  },
+  {
+    "path": "src/pages/AuditLogPage.vue",
+    "sha256": "6d3696d6c42f03de70610156b4c2eaa0f69188e330c788f3c3ddbd441c648687"
+  },
+  {
+    "path": "src/pages/AutomationPage.vue",
+    "sha256": "3c878e795d66a4a7b492d55727ec664d3cddc3b981a62adc281d44472f62bb8d"
+  },
+  {
+    "path": "src/pages/MockSharePage.vue",
+    "sha256": "3b6d2ee1637b22270b0e29aa8e84a4f403d904ef4f034923491410c03f75b334"
+  },
+  {
+    "path": "src/pages/NotificationTemplatesPage.vue",
+    "sha256": "15616f07c3cbe5bebe891365cfd1ba73f0c8a4283cd63255ae86dfa34de1e18b"
+  },
+  {
+    "path": "src/pages/PluginsPage.vue",
+    "sha256": "6c7640ae578108f7a5c2152518c1b8aca4c603570d696344f957a0b1747d563f"
+  },
+  {
+    "path": "src/pages/ReportsPage.vue",
+    "sha256": "b2e11eaedf3b12718cb4c698d1ba8c306ae49f19c8c4cda442836e9e6e6695b9"
+  },
+  {
+    "path": "src/pages/TasksPage.vue",
+    "sha256": "c4c02d93950bb3cffbb41b48c52773e78f043294004570a0092f79d7ac9cb8c2"
+  },
+  {
+    "path": "src/test/apiAutomationFixes.test.ts",
+    "sha256": "8eb8091808fe57e00a3167f0f4d5faf984c8751d8e399e8ff6937286022fd3da"
+  },
+  {
+    "path": "src/test/apiDebugFixes.test.ts",
+    "sha256": "8e249534a1c62fb77ca1181b8dab6cb7961dd4f67a377142fb0fae70961aa13f"
+  },
+  {
+    "path": "src/test/auditLogPage.test.ts",
+    "sha256": "67c87d5bfb1d189f30de9103e889f3ab37c86d45f54863be1ba13775f5d24bcc"
+  },
+  {
+    "path": "src/test/mockSharePage.test.ts",
+    "sha256": "b684d1274da83681a3096bb33865350f8656a53b5d7eb8056f66f221fa826f4c"
+  }
+]

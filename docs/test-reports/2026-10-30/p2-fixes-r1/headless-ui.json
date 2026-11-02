@@ -1,0 +1,35 @@
+{
+  "headless": true,
+  "isolatedHttpFixtures": true,
+  "realBackendAcceptance": false,
+  "cases": [
+    {
+      "id": "TC-P2-D01-06",
+      "title": "孤立参数可见且编辑禁用",
+      "status": "PASS",
+      "durationMs": 1693
+    },
+    {
+      "id": "TC-P2-D03-CFG-02",
+      "title": "停用环境仍可维护并明确不可执行",
+      "status": "PASS",
+      "durationMs": 2376
+    },
+    {
+      "id": "TC-P2-D10-13",
+      "title": "目录复制断线后重试保持同一Key",
+      "status": "PASS",
+      "durationMs": 1871
+    },
+    {
+      "id": "TC-P2-D22-07/08",
+      "title": "冲突保留草稿，主动读取版本后单独保存",
+      "status": "PASS",
+      "durationMs": 2091
+    }
+  ],
+  "cleanup": true,
+  "browserVersion": "156.0.8078.76",
+  "passed": 4,
+  "failed": 0
+}

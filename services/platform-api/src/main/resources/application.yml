@@ -19,6 +19,8 @@ spring:
       host: ${TESTHUB_REDIS_HOST:localhost}
       port: ${TESTHUB_REDIS_PORT:6380}
       password: ${TESTHUB_REDIS_PASSWORD:testhub_redis_password}
+      connect-timeout: 1s
+      timeout: 2s
   session:
     timeout: 8h
     redis:
@@ -104,6 +106,11 @@ management:
     health:
       probes:
         enabled: true
+      group:
+        readiness:
+          include: readinessState,db,redis,minio
+        liveness:
+          include: livenessState
       show-details: never
     prometheus:
       access: unrestricted

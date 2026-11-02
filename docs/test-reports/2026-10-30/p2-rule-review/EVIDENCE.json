@@ -1,0 +1,180 @@
+{
+  "date": "2026-10-30",
+  "historicalObservations": [
+    {
+      "observationId": "OBS-03B-E001",
+      "historicalCaseId": "E001",
+      "historicalStatus": "OBSERVED",
+      "title": "无定义环境配置的存储与可见性",
+      "factFromApprovedTriage": "无定义环境的参数和密钥仍可保存204，环境列表无对应定义。",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-03b-environments/execution-results.json",
+      "sourceSha256": "764c7b4c54d3cbf831f55911fdce19da5c4201c92e6cba6f734bc15c43875bf0",
+      "retestedThisTurn": false
+    },
+    {
+      "observationId": "OBS-03B-E005",
+      "historicalCaseId": "E005",
+      "historicalStatus": "OBSERVED",
+      "title": "停用环境参数与密钥写入",
+      "factFromApprovedTriage": "停用环境仍允许参数和密钥API写入，页面表单禁选该环境。",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-03b-environments/execution-results.json",
+      "sourceSha256": "764c7b4c54d3cbf831f55911fdce19da5c4201c92e6cba6f734bc15c43875bf0",
+      "retestedThisTurn": false
+    },
+    {
+      "observationId": "OBS-06-E006",
+      "historicalCaseId": "E006",
+      "historicalStatus": "OBSERVED",
+      "title": "非200响应码导入导出保持范围",
+      "factFromApprovedTriage": "导入存储201响应码，但OpenAPI导出只产生200。",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+      "sourceSha256": "490d5698bda5f186e8c07afce50fb98ae816ae2e2d70d53256f48950a373c5d3",
+      "retestedThisTurn": false
+    },
+    {
+      "observationId": "OBS-06-E012",
+      "historicalCaseId": "E012",
+      "historicalStatus": "OBSERVED",
+      "title": "复制目录中途失败的保留与重试",
+      "factFromApprovedTriage": "目录复制中途失败保留部分资产，重试生成另一完整分支。",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+      "sourceSha256": "490d5698bda5f186e8c07afce50fb98ae816ae2e2d70d53256f48950a373c5d3",
+      "retestedThisTurn": false
+    },
+    {
+      "observationId": "OBS-10-E010",
+      "historicalCaseId": "E010",
+      "historicalStatus": "OBSERVED",
+      "title": "去空白query键冲突",
+      "factFromApprovedTriage": "去首尾空白后的query键冲突由后值覆盖。",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261026/module-10-performance-regression/execution-final.json",
+      "sourceSha256": "047b59b6cde977d78d5e527a354f6c480fa3fa6af449dab9140854f5d5b29ce3",
+      "retestedThisTurn": false
+    },
+    {
+      "observationId": "OBS-11-E020",
+      "historicalCaseId": "E020",
+      "historicalStatus": "OBSERVED",
+      "title": "变量键trim后重名策略",
+      "factFromApprovedTriage": "变量键trim后重名由后值覆盖。",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-11-web-ui-regression/execution-final.json",
+      "sourceSha256": "855680e79aa9551a3108d7d014614e769c3731239a565d3230ee8c440e0da421",
+      "retestedThisTurn": false
+    },
+    {
+      "observationId": "OBS-13-E020",
+      "historicalCaseId": "E020",
+      "historicalStatus": "OBSERVED",
+      "title": "无版本计划并发编辑策略",
+      "factFromApprovedTriage": "计划没有版本校验，后一次编辑覆盖前一次值。",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-13-quality-tasks-regression/execution-final.json",
+      "sourceSha256": "73f2e960400834a5b0e110cd36e79c7490003b98313e478411c7170684d780a6",
+      "retestedThisTurn": false
+    },
+    {
+      "observationId": "OBS-14-E025",
+      "historicalCaseId": "E025",
+      "historicalStatus": "OBSERVED",
+      "title": "配置键空白归一冲突",
+      "factFromApprovedTriage": "配置键去空白归一后发生冲突仍被接受。",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-14-notifications-extensions-operations-regression/execution-final.json",
+      "sourceSha256": "52618731fb285d133ae879eb4b9d76e4f0eefb42aff026c04e3baf34853d82a4",
+      "retestedThisTurn": false
+    }
+  ],
+  "currentCode": [
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterService.java",
+      "line": 38,
+      "finding": "定义检查尚未在此写边界出现",
+      "sha256": "342174ad850731732d6137e23c0f89f91b52b6c2fb19b8374f32101ad7ca7d1c",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/parameter/EnvironmentSecretService.java",
+      "line": 41,
+      "finding": "密钥写入现有授权、锁及加密边界",
+      "sha256": "d46e167ec6dc0b024865f7bcb82c486a9acf4628ac7fa65afd83296546810043",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ProjectSettingsPage.vue",
+      "line": 645,
+      "finding": "参数表单禁选停用环境；与现行API维护规则不一致",
+      "sha256": "834d0f1cb87d1e1c4b071c72c835831a1e71c4c2b3e0950852933818ca4714c9",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiInterchangeService.java",
+      "line": 124,
+      "finding": "OpenAPI导出硬编码200",
+      "sha256": "327abfd65b497362b30351a20ca4457071244c397e0965b6d00fffba6a2b926b",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiInterchangeService.java",
+      "line": 715,
+      "finding": "Postman导出同样硬编码200",
+      "sha256": "327abfd65b497362b30351a20ca4457071244c397e0965b6d00fffba6a2b926b",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDesignPage.vue",
+      "line": 700,
+      "finding": "目录复制在浏览器递归逐请求写入",
+      "sha256": "e6afc3bbf3bbdc99968beb054348c5ac72f1a59337ad229773a2292fe23b7753",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java",
+      "line": 245,
+      "finding": "性能query键归一后put未显式拒绝冲突",
+      "sha256": "b9ca6ea416441df72fca37467a3a41c7ea513fc9fb0d14b15a44bb9f5f7a8e1c",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "line": 417,
+      "finding": "Web变量键trim后put",
+      "sha256": "e48fb09bc361382bb19fdde780fcaeee824e18b16d8669406ac1730db2bac637",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/extension/EnterpriseAdapterCatalog.java",
+      "line": 53,
+      "finding": "企业适配器配置trim后put",
+      "sha256": "6cbeb92d3eceb52fe2e62db001b63d4282970cdb074f45f4970b32a273228abb",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleRepository.java",
+      "line": 53,
+      "finding": "已有内部配置版本，但本地编辑UPDATE没有期望版本条件",
+      "sha256": "f432c3f926696a2e8fb6bcda7902c699b507c01d6f29d95c01f12abbe6dc5cb9",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleService.java",
+      "line": 295,
+      "finding": "对外编辑输入尚无版本前置条件",
+      "sha256": "aa96b5975d5d6eaed2150d3efe67cd531b22ab6cd6c7abda27af1799bb8cfc8e",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/resources/db/desktop/V50__quality_report_plan_sync.sql",
+      "line": 1,
+      "finding": "已有配置版本列，默认0",
+      "sha256": "1ecfc8f80b3687f5f2985e3c3723f86ccf6ed11a7b9b31be85ba48609a62d1d4",
+      "verification": "STATIC_SOURCE_REVIEW"
+    },
+    {
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/resources/db/migration/V107__quality_report_plan_sync.sql",
+      "line": 1,
+      "finding": "已有MySQL配置版本列，默认0",
+      "sha256": "1ecfc8f80b3687f5f2985e3c3723f86ccf6ed11a7b9b31be85ba48609a62d1d4",
+      "verification": "STATIC_SOURCE_REVIEW"
+    }
+  ],
+  "newRuntimeExecutions": 0,
+  "note": "历史OBSERVED和当前静态代码复核不能冒充本轮运行结果；未启动服务、复现或实施。"
+}

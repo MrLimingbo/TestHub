@@ -1,0 +1,285 @@
+{
+  "runs": [
+    {
+      "source": "copy-before-results.json",
+      "tests": 12,
+      "failures": 12,
+      "errors": 0,
+      "cases": [
+        {
+          "name": "concurrentRetry",
+          "status": "FAIL"
+        },
+        {
+          "name": "successfulTree",
+          "status": "FAIL"
+        },
+        {
+          "name": "lostResponse",
+          "status": "FAIL"
+        },
+        {
+          "name": "receiptFailure",
+          "status": "FAIL"
+        },
+        {
+          "name": "differentPayload",
+          "status": "FAIL"
+        },
+        {
+          "name": "durableReceipt",
+          "status": "FAIL"
+        },
+        {
+          "name": "overLimit",
+          "status": "FAIL"
+        },
+        {
+          "name": "atLimit",
+          "status": "FAIL"
+        },
+        {
+          "name": "oldPartialRetained",
+          "status": "FAIL"
+        },
+        {
+          "name": "middleFailure",
+          "status": "FAIL"
+        },
+        {
+          "name": "staleSource",
+          "status": "FAIL"
+        },
+        {
+          "name": "explicitNewCopy",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "source": "environment-before-results.json",
+      "tests": 16,
+      "failures": 6,
+      "errors": 0,
+      "cases": [
+        {
+          "name": "normalization",
+          "status": "PASS"
+        },
+        {
+          "name": "disabledDefined",
+          "status": "PASS"
+        },
+        {
+          "name": "definedWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "undefinedOrdinary",
+          "status": "FAIL"
+        },
+        {
+          "name": "undefinedSecret",
+          "status": "FAIL"
+        },
+        {
+          "name": "toggle",
+          "status": "PASS"
+        },
+        {
+          "name": "missingStillRejected",
+          "status": "FAIL"
+        },
+        {
+          "name": "legacyRead",
+          "status": "PASS"
+        },
+        {
+          "name": "disabledLifecycle",
+          "status": "PASS"
+        },
+        {
+          "name": "disabledPermissions",
+          "status": "PASS"
+        },
+        {
+          "name": "projectScope",
+          "status": "FAIL"
+        },
+        {
+          "name": "enabledLifecycle",
+          "status": "PASS"
+        },
+        {
+          "name": "executionStillDisabled",
+          "status": "PASS"
+        },
+        {
+          "name": "deleteRace",
+          "status": "PASS"
+        },
+        {
+          "name": "compatibility",
+          "status": "FAIL"
+        },
+        {
+          "name": "legacyWrite",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "source": "keys-before-results.json",
+      "tests": 10,
+      "failures": 5,
+      "errors": 0,
+      "cases": [
+        {
+          "name": "performanceRejectsTrimCollision",
+          "status": "FAIL"
+        },
+        {
+          "name": "adapterRejectsTrimCollision",
+          "status": "FAIL"
+        },
+        {
+          "name": "separateObjectsMayReuseKeys",
+          "status": "PASS"
+        },
+        {
+          "name": "failedEditsKeepRowsCipherAndAudits",
+          "status": "FAIL"
+        },
+        {
+          "name": "omittedConfigurationKeepsCipher",
+          "status": "PASS"
+        },
+        {
+          "name": "caseRulesRemainDistinct",
+          "status": "PASS"
+        },
+        {
+          "name": "webRejectsTrimCollision",
+          "status": "FAIL"
+        },
+        {
+          "name": "validationAndAuthorizationStillApply",
+          "status": "PASS"
+        },
+        {
+          "name": "repeatedUrlQueryRemainsLegal",
+          "status": "PASS"
+        },
+        {
+          "name": "collisionIsIndependentOfOrderAndValue",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "source": "response-before-results.json",
+      "tests": 13,
+      "failures": 8,
+      "errors": 0,
+      "cases": [
+        {
+          "name": "malformed",
+          "status": "FAIL"
+        },
+        {
+          "name": "openApi",
+          "status": "FAIL"
+        },
+        {
+          "name": "currentVersion",
+          "status": "FAIL"
+        },
+        {
+          "name": "catalogScope",
+          "status": "PASS"
+        },
+        {
+          "name": "postman",
+          "status": "FAIL"
+        },
+        {
+          "name": "roundTrip",
+          "status": "FAIL"
+        },
+        {
+          "name": "har",
+          "status": "PASS"
+        },
+        {
+          "name": "stringStatus",
+          "status": "FAIL"
+        },
+        {
+          "name": "range",
+          "status": "FAIL"
+        },
+        {
+          "name": "missing",
+          "status": "PASS"
+        },
+        {
+          "name": "permissions",
+          "status": "PASS"
+        },
+        {
+          "name": "original",
+          "status": "PASS"
+        },
+        {
+          "name": "decimal",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "source": "version-before-results.json",
+      "tests": 9,
+      "failures": 7,
+      "errors": 1,
+      "cases": [
+        {
+          "name": "concurrentEditorsProduceOneSuccess",
+          "status": "FAIL"
+        },
+        {
+          "name": "invalidTypeRangeAndFractionReturn400",
+          "status": "FAIL"
+        },
+        {
+          "name": "failedPersistenceDoesNotBumpVersionOrEraseHistory",
+          "status": "PASS"
+        },
+        {
+          "name": "runMetadataDoesNotChangeConfigVersion",
+          "status": "FAIL"
+        },
+        {
+          "name": "staleEditorHasNoSideEffects",
+          "status": "FAIL"
+        },
+        {
+          "name": "missingOrNullPreconditionReturns428",
+          "status": "FAIL"
+        },
+        {
+          "name": "initialZeroAndExistingVersionsAreVisible",
+          "status": "FAIL"
+        },
+        {
+          "name": "unauthorizedRequestCannotEditConfiguration",
+          "status": "FAIL"
+        },
+        {
+          "name": "matchingVersionIncrementsExactlyOnce",
+          "status": "FAIL"
+        }
+      ]
+    }
+  ],
+  "note": "先设计后复现。首轮失败包含同观察多个断言；D22并发重复成功使Set.of产生重复元素错误。它们不等于新增缺陷数量。"
+}

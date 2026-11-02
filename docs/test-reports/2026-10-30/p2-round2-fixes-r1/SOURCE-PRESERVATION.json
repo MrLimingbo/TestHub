@@ -1,0 +1,8 @@
+{
+  "baselineFiles": 1345,
+  "modifiedThisBatch": 17,
+  "addedThisBatch": 15,
+  "otherBaselineFilesUnchanged": 1328,
+  "gitOperationsExecuted": [],
+  "note": "Incremental comparison uses saved pre-batch hashes and 17 original-file copies; preexisting working-tree changes preserved."
+}

@@ -1,0 +1,44 @@
+{
+  "exactDuplicates": 0,
+  "nearDuplicatePairs": [
+    {
+      "left": "TC-P2-D01-03",
+      "right": "TC-P2-D01-04",
+      "similarity": 0.944
+    },
+    {
+      "left": "TC-P2-D09-02",
+      "right": "TC-P2-D09-03",
+      "similarity": 0.875
+    },
+    {
+      "left": "TC-P2-D10-10",
+      "right": "TC-P2-D10-11",
+      "similarity": 0.864
+    }
+  ],
+  "disposition": "全部保留，独立入口/格式/边界有不同覆盖目标",
+  "rationales": [
+    {
+      "ids": [
+        "TC-P2-D01-03",
+        "TC-P2-D01-04"
+      ],
+      "reason": "普通参数与密钥分属不同接口、校验和加密路径，均需防止孤立写入。"
+    },
+    {
+      "ids": [
+        "TC-P2-D09-03",
+        "TC-P2-D09-02"
+      ],
+      "reason": "Postman与HAR有独立输出结构和导出器，状态字段不同。"
+    },
+    {
+      "ids": [
+        "TC-P2-D10-10",
+        "TC-P2-D10-11"
+      ],
+      "reason": "201拒绝与200成功构成已批准上界两侧，结果相反，不能合并。"
+    }
+  ]
+}

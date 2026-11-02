@@ -1,0 +1,861 @@
+{
+  "count": 30,
+  "positive": 13,
+  "negative": 17,
+  "passed": 30,
+  "failed": 0,
+  "blocked": 0,
+  "aggregation": "AND across layered evidence; variants/reruns do not add formal cases",
+  "cases": [
+    {
+      "id": "TC-D16API-01",
+      "title": "精确整数等价数字写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "exactIntegralSpellings",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "exactIntegralSpellings",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "exactIntegralSpellings",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "exactIntegralSpellings",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "真实HTTP接受精确等值整数写法并规范化",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-02",
+      "title": "WAIT延迟下边界0可保存",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "lowerBoundary",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "lowerBoundary",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "lowerBoundary",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "lowerBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-03",
+      "title": "WAIT延迟上边界600000可保存",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "upperBoundary",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "upperBoundary",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "upperBoundary",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "upperBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-04",
+      "title": "带非零小数部分不得保存",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "fractions",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "fractions",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "fractions",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "fractions",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "原始小数、微小小数、溢出、非有限JSON和错误类型均400且无新资产",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-05",
+      "title": "微小小数不得先丢精度再通过",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "preciseFraction",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "preciseFraction",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "preciseFraction",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "preciseFraction",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "原始小数、微小小数、溢出、非有限JSON和错误类型均400且无新资产",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-06",
+      "title": "溢出与巨大指数受控拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "overflow",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "overflow",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "overflow",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "overflow",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "原始小数、微小小数、溢出、非有限JSON和错误类型均400且无新资产",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-07",
+      "title": "WAIT拒绝数字字符串",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "strings",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "strings",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "strings",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "strings",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "原始小数、微小小数、溢出、非有限JSON和错误类型均400且无新资产",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-08",
+      "title": "WAIT拒绝布尔和容器类型",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "wrongTypes",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "wrongTypes",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "wrongTypes",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "wrongTypes",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "原始小数、微小小数、溢出、非有限JSON和错误类型均400且无新资产",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-09",
+      "title": "WAIT缺失和null不得归零",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "missingAndNull",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "missingAndNull",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "missingAndNull",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "missingAndNull",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "原始小数、微小小数、溢出、非有限JSON和错误类型均400且无新资产",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-10",
+      "title": "原始非有限JSON不能冒充null验证",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "rawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "rawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "rawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "rawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "原始小数、微小小数、溢出、非有限JSON和错误类型均400且无新资产",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-11",
+      "title": "合法编辑产生新版本且保留旧修订",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "updateValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "updateValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "updateValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "updateValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-12",
+      "title": "非法编辑不改变现有版本或审计",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "updateInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "updateInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "updateInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "updateInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "真实HTTP非法更新不改版本或WAIT",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-13",
+      "title": "公共步骤可保存合法WAIT",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "reusableValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "reusableValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "reusableValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "reusableValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-14",
+      "title": "公共步骤保存与更新拒绝非法WAIT",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "reusableInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "reusableInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "reusableInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "reusableInvalid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-15",
+      "title": "迁移合法WAIT保持可执行整数",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "transferValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-16",
+      "title": "迁移非法WAIT不落入成功回执",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "transferInvalid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-17",
+      "title": "同步合法WAIT不改变数值语义",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "syncValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-18",
+      "title": "同步非法WAIT不绕过保存校验",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "syncInvalid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-19",
+      "title": "旧非法定义仍可读取且不自动改写",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "legacyReadable",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "legacyReadable",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "legacyReadable",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "legacyReadable",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "name": "自有JVM重启后已存合法整数及登录会话保持",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-20",
+      "title": "旧非法WAIT在预检与新入队前阻止",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "legacyQueueRejected",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "legacyQueueRejected",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "legacyQueueRejected",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "legacyQueueRejected",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-21",
+      "title": "引用旧公共步骤和子场景也必须校验WAIT",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "invalidReferencesBlocked",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "invalidReferencesBlocked",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "invalidReferencesBlocked",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "invalidReferencesBlocked",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-22",
+      "title": "Runner接受规范化的有限整数WAIT",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "api-runner-controlled",
+          "name": "TC-D16API-22: Runner precheck accepts bounded integral WAIT without target traffic",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-23",
+      "title": "Runner拒绝非法WAIT且无目标请求",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "api-runner-controlled",
+          "name": "TC-D16API-23: Runner rejects invalid WAIT before any target call",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-24",
+      "title": "页面合法WAIT编辑提交数值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "frontend",
+          "name": "TC-D16API-24: explicit integral input is sent as a bounded JSON number",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "name": "TC-D16API-24: decimal and exponent input keeps exact bounded integer semantics",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "name": "TC-D16API-24",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-25",
+      "title": "页面非法WAIT提示字段且不提交",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "frontend",
+          "name": "TC-D16API-25: fractional or lossy WAIT input cannot trigger a business save",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "name": "TC-D16API-25: tiny fractions, range errors and legacy string values are never rounded away",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "name": "TC-D16API-25",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-26",
+      "title": "非WAIT配置及原类型契约保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "nonWaitUntouched",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "nonWaitUntouched",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "nonWaitUntouched",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "nonWaitUntouched",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-27",
+      "title": "权限隔离仍阻止越权WAIT写入",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "projectDenied",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "projectDenied",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "projectDenied",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "projectDenied",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-28",
+      "title": "乐观锁冲突不被类型修复绕过",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "staleVersion",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "staleVersion",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "staleVersion",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "staleVersion",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-29",
+      "title": "旧执行清单不被新WAIT策略改写",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "oldManifestUnchanged",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "oldManifestUnchanged",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "oldManifestUnchanged",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "oldManifestUnchanged",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16API-30",
+      "title": "旧非法WAIT可经人工明确修复后入队",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "name": "explicitLegacyRepair",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "name": "explicitLegacyRepair",
+          "status": "PASS"
+        },
+        {
+          "layer": "sync-equivalence-h2",
+          "name": "explicitLegacyRepair",
+          "status": "PASS"
+        },
+        {
+          "layer": "mysql-equivalence",
+          "name": "explicitLegacyRepair",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

@@ -245,6 +245,8 @@ export function buildApiRunUrl(definition: ApiDefinitionSource, snapshot: ApiRun
   })
   const missingTemplate = path.replace(/\{\{\s*[^{}\s]+\s*}}/g, '').match(/\{([^}]+)\}/)
   if (missingTemplate) throw new Error(`请填写路径参数：${missingTemplate[1]}`)
+  const missingQuery = snapshot.queryValues.find((item) => item.required && (!item.enabled || !item.value.trim()))
+  if (missingQuery) throw new Error(`请填写 Query 参数：${missingQuery.name}`)
   const query = snapshot.queryValues
     .filter((item) => item.enabled && item.value !== '')
     .map((item) => `${encodeApiUrlComponent(item.name)}=${encodeApiUrlComponent(item.value)}`)
@@ -253,6 +255,8 @@ export function buildApiRunUrl(definition: ApiDefinitionSource, snapshot: ApiRun
 }
 
 export function requestHeaders(snapshot: ApiRunSnapshot): Array<{ name: string; value: string }> {
+  const missingHeader = snapshot.headerValues.find((item) => item.required && (!item.enabled || !item.value.trim()))
+  if (missingHeader) throw new Error(`请填写 Header 参数：${missingHeader.name}`)
   return snapshot.headerValues
     .filter((item) => item.enabled && item.value !== '')
     .map((item) => ({ name: item.name, value: item.value }))

@@ -1,0 +1,110 @@
+[
+  {
+    "path": "docs/test-reports/2026-10-28/environment-blockers.json",
+    "sha256": "7fec867fc09f91d5651ebff13def51ee76a8e570db5f6515742d34bfab95ca4f"
+  },
+  {
+    "path": "docs/test-reports/2026-10-29/OBSERVATION-TRIAGE.json",
+    "sha256": "3fd60f887f921164b8dca70e48ec5efa48658aa4001f422c2bbd188387f1f9bd"
+  },
+  {
+    "path": "docs/test-reports/2026-10-29/RULE-DECISIONS.json",
+    "sha256": "7d306804eef8ce687fdcb8be49ef21ac8a8cafe1f9cdf12b4d50be95ca3aeeaf"
+  },
+  {
+    "path": "docs/test-reports/2026-10-29/UNCONFIRMED-RISK.json",
+    "sha256": "ae1ee9c8ab25f5f5e168acae8916d2fae34e29f3bbb66e54e02b322a2d1429a0"
+  },
+  {
+    "path": "docs/test-reports/2026-10-29/direct-fixes-r1/summary.json",
+    "sha256": "b10658a3de17679c6bcffe262e4d9c89537bc2b964fef53ccefbb28fb58589da"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/access/AccessService.java",
+    "sha256": "7c381b2fa0c64dbda1c44cfb7c08ae1ae03e4cab08a65556a99fd469691ada2b"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/access/TokenRepository.java",
+    "sha256": "1341435716e4baaaf24d3b6f660b519488a40e6e616a7b38ffe4148db704e752"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/account/AccountManagementController.java",
+    "sha256": "a4aced48e7ce5a8fc82e4050a81c79c7345291318b2659f9d239706508d259a0"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/account/AccountManagementService.java",
+    "sha256": "3d6aa5c11a167a44a713b16d98dfd8a0aa4449828db5d54a7efcf083e031c633"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/account/AuthController.java",
+    "sha256": "661b312b6139ce270bb66e89db6a9286927ff4e917398ea7eb8af6a79b018e3c"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationExecutionService.java",
+    "sha256": "f20ac90461e2d1554fb4ecdede2ecf010c4110fecc45be1509a8a6807e605402"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugController.java",
+    "sha256": "ae90c6b0d262d7c5ce99e1f9592da83a3157d439b7453c34d9816c5322e299b5"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugHistoryRepository.java",
+    "sha256": "9b3d10a9e99de9e146ab9bd58210f89cdbe6d643ac6a95694a1f7a74ca1bc9e2"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugService.java",
+    "sha256": "79f7ede4766a15862376977e0f7e1fc4b39eb8d827b95b4f22016040bffd2fec"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/apidebug/GrpcDebugService.java",
+    "sha256": "ee2c6c49a456a263a5801e625b607a5899ed7a5705ed1538fc4693d5a35051bd"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/desktop/DesktopBrokerHealthIndicator.java",
+    "sha256": "1973afa0537edfdbbf52486218cad8d49ff60d81502a84c97d16a97fbc8a77a7"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/operations/MinioHealthIndicator.java",
+    "sha256": "8b24ffd55110a8519596c1fbd08780817d0f316c4f483d3829704e0e65e089bb"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/parameter/EnvironmentSecretService.java",
+    "sha256": "d46e167ec6dc0b024865f7bcb82c486a9acf4628ac7fa65afd83296546810043"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterRepository.java",
+    "sha256": "b887469c2c8a99ecd22f2b376444b19d89805ca7830c9cc43277f6a39cc2804e"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterService.java",
+    "sha256": "342174ad850731732d6137e23c0f89f91b52b6c2fb19b8374f32101ad7ca7d1c"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/security/PersonalAccessTokenAuthenticationFilter.java",
+    "sha256": "7b07d7cc2d04485f0214d67daf4b83cd092a951d63d5fbd3518e30baa31e01a4"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/security/RedisSessionConfiguration.java",
+    "sha256": "197702d8661e1624e3e1bcc74f7162d696712f4f996a21426b946493a431afe9"
+  },
+  {
+    "path": "services/platform-api/src/main/java/io/testhub/platform/security/SecurityConfiguration.java",
+    "sha256": "3db2792a097597a05bd5d1b0b508873863c7e60fa6c6c6ee3eff18e95139fce9"
+  },
+  {
+    "path": "services/platform-api/src/main/resources/application-desktop.yml",
+    "sha256": "2eb111ee108025c5b5169c1a9e44ce2b7f2998ce222f97fdd6b231e0e8e903b9"
+  },
+  {
+    "path": "services/platform-api/src/main/resources/application.yml",
+    "sha256": "74709bcad46fc53f976b2a460264388dbbf290308a5bb37395b6292dc2707448"
+  },
+  {
+    "path": "services/platform-api/src/main/resources/db/migration/V58__api_debug_history_replay_drafts.sql",
+    "sha256": "4eea23c287365e0929aa14b6a25c31bb0be04885cda60cef7bde85d892d4f42e"
+  },
+  {
+    "path": "src/pages/ApiDebugPage.vue",
+    "sha256": "703eec27fb243a8c78e23f057b779259170564b7e37bd33cbd272c2e65f95c4c"
+  }
+]

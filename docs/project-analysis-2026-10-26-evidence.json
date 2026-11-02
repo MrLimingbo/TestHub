@@ -1,0 +1,359 @@
+{
+  "date": "2026-10-26",
+  "baseline_commit": "33c4906f2ebc808718e07cd3280e5f18e27f5ce4",
+  "scope": "Current working tree; targeted architecture and risk review, not exhaustive line-by-line audit",
+  "inventory": [
+    {
+      "path": "src",
+      "files": 144,
+      "lines": 22778,
+      "largest": [
+        {
+          "path": "src/pages/AutomationPage.vue",
+          "lines": 1950
+        },
+        {
+          "path": "src/pages/ApiDesignPage.vue",
+          "lines": 1732
+        },
+        {
+          "path": "src/pages/ApiDebugPage.vue",
+          "lines": 1550
+        },
+        {
+          "path": "src/components/api-testing/ApiInterfaceWorkbench.vue",
+          "lines": 1258
+        }
+      ]
+    },
+    {
+      "path": "apps/desktop",
+      "files": 206,
+      "lines": 23076,
+      "largest": [
+        {
+          "path": "apps/desktop/app/src/main.cjs",
+          "lines": 1505
+        },
+        {
+          "path": "apps/desktop/app/src/setup-preload.cjs",
+          "lines": 357
+        },
+        {
+          "path": "apps/desktop/app/src/api-design-sync.cjs",
+          "lines": 338
+        },
+        {
+          "path": "apps/desktop/test/functional-transfer.test.cjs",
+          "lines": 316
+        }
+      ]
+    },
+    {
+      "path": "services/platform-api/src",
+      "files": 751,
+      "lines": 73713,
+      "largest": [
+        {
+          "path": "services/platform-api/src/main/resources/db/desktop/V1__desktop_schema.sql",
+          "lines": 1776
+        },
+        {
+          "path": "services/platform-api/src/main/java/io/testhub/platform/apidebug/GrpcDebugService.java",
+          "lines": 1470
+        },
+        {
+          "path": "services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiInterchangeService.java",
+          "lines": 1198
+        },
+        {
+          "path": "services/platform-api/src/test/java/io/testhub/platform/FunctionalTransferFlowTests.java",
+          "lines": 933
+        }
+      ]
+    },
+    {
+      "path": "services/api-runner",
+      "files": 11,
+      "lines": 2225,
+      "largest": [
+        {
+          "path": "services/api-runner/src/runner.js",
+          "lines": 605
+        },
+        {
+          "path": "services/api-runner/test/runner.test.js",
+          "lines": 464
+        },
+        {
+          "path": "services/api-runner/src/protocol.js",
+          "lines": 410
+        },
+        {
+          "path": "services/api-runner/test/protocol.test.js",
+          "lines": 205
+        }
+      ]
+    },
+    {
+      "path": "services/jmeter-runner",
+      "files": 12,
+      "lines": 1579,
+      "largest": [
+        {
+          "path": "services/jmeter-runner/src/protocol.js",
+          "lines": 334
+        },
+        {
+          "path": "services/jmeter-runner/src/runner.js",
+          "lines": 317
+        },
+        {
+          "path": "services/jmeter-runner/src/jmeter.js",
+          "lines": 308
+        },
+        {
+          "path": "services/jmeter-runner/test/runner.test.js",
+          "lines": 187
+        }
+      ]
+    },
+    {
+      "path": "services/playwright-runner",
+      "files": 9,
+      "lines": 622,
+      "largest": [
+        {
+          "path": "services/playwright-runner/src/runner.js",
+          "lines": 172
+        },
+        {
+          "path": "services/playwright-runner/test/protocol.test.js",
+          "lines": 85
+        },
+        {
+          "path": "services/playwright-runner/src/desktop-browser-tool.mjs",
+          "lines": 77
+        },
+        {
+          "path": "services/playwright-runner/src/protocol.js",
+          "lines": 71
+        }
+      ]
+    },
+    {
+      "path": "services/appium-runner",
+      "files": 5,
+      "lines": 202,
+      "largest": [
+        {
+          "path": "services/appium-runner/src/runner.js",
+          "lines": 82
+        },
+        {
+          "path": "services/appium-runner/test/protocol.test.js",
+          "lines": 76
+        },
+        {
+          "path": "services/appium-runner/src/config.js",
+          "lines": 18
+        },
+        {
+          "path": "services/appium-runner/src/protocol.js",
+          "lines": 15
+        }
+      ]
+    },
+    {
+      "path": "services/runner-transport",
+      "files": 2,
+      "lines": 189,
+      "largest": [
+        {
+          "path": "services/runner-transport/client.mjs",
+          "lines": 111
+        },
+        {
+          "path": "services/runner-transport/client.test.mjs",
+          "lines": 78
+        }
+      ]
+    },
+    {
+      "path": "services/testhub-cli",
+      "files": 4,
+      "lines": 684,
+      "largest": [
+        {
+          "path": "services/testhub-cli/src/cli.js",
+          "lines": 391
+        },
+        {
+          "path": "services/testhub-cli/test/cli.test.js",
+          "lines": 262
+        },
+        {
+          "path": "services/testhub-cli/test/gitlab-template.test.js",
+          "lines": 21
+        },
+        {
+          "path": "services/testhub-cli/src/index.js",
+          "lines": 10
+        }
+      ]
+    },
+    {
+      "path": "scripts",
+      "files": 52,
+      "lines": 5591,
+      "largest": [
+        {
+          "path": "scripts/desktop/accept-first-downloads.mjs",
+          "lines": 447
+        },
+        {
+          "path": "scripts/desktop/accept-web-mac-account-sync.mjs",
+          "lines": 393
+        },
+        {
+          "path": "scripts/desktop/smoke-packaged.mjs",
+          "lines": 312
+        },
+        {
+          "path": "scripts/desktop/accept-cross-module.mjs",
+          "lines": 264
+        }
+      ]
+    }
+  ],
+  "tests": {
+    "lint": {
+      "exit_code": 1,
+      "summary": [
+        "  40:51  error  'Buffer' is not defined  no-undef",
+        "  14:53  error  'Buffer' is not defined  no-undef",
+        "  23:64  error  'Buffer' is not defined  no-undef"
+      ],
+      "log": ".testhub/project-analysis-20261026/lint.log"
+    },
+    "frontend-test": {
+      "exit_code": 0,
+      "summary": [
+        " Test Files  63 passed (63)",
+        "      Tests  508 passed (508)"
+      ],
+      "log": ".testhub/project-analysis-20261026/frontend-test.log"
+    },
+    "build": {
+      "exit_code": 0,
+      "summary": [
+        "✓ built in 10.63s"
+      ],
+      "log": ".testhub/project-analysis-20261026/build.log"
+    },
+    "workspace-test": {
+      "exit_code": 0,
+      "summary": [
+        "services/appium-runner test: ℹ tests 12",
+        "services/appium-runner test: ℹ pass 12",
+        "services/appium-runner test: ℹ fail 0",
+        "services/appium-runner test: ℹ skipped 0",
+        "services/api-runner test: ℹ tests 48",
+        "services/api-runner test: ℹ pass 48",
+        "services/api-runner test: ℹ fail 0",
+        "services/api-runner test: ℹ skipped 0",
+        "services/testhub-cli test: ℹ tests 11",
+        "services/testhub-cli test: ℹ pass 11",
+        "services/testhub-cli test: ℹ fail 0",
+        "services/testhub-cli test: ℹ skipped 0",
+        "services/playwright-runner test: ℹ tests 15",
+        "services/playwright-runner test: ℹ pass 15",
+        "services/playwright-runner test: ℹ fail 0",
+        "services/playwright-runner test: ℹ skipped 0",
+        "services/jmeter-runner test: ℹ tests 24",
+        "services/jmeter-runner test: ℹ pass 23",
+        "services/jmeter-runner test: ℹ fail 0",
+        "services/jmeter-runner test: ℹ skipped 1",
+        "apps/desktop test: ℹ tests 736",
+        "apps/desktop test: ℹ pass 735",
+        "apps/desktop test: ℹ fail 0",
+        "apps/desktop test: ℹ skipped 1"
+      ],
+      "log": ".testhub/project-analysis-20261026/workspace-test.log"
+    },
+    "startup-test": {
+      "exit_code": 0,
+      "summary": [
+        "ℹ tests 15",
+        "ℹ pass 15",
+        "ℹ fail 0",
+        "ℹ skipped 0"
+      ],
+      "log": ".testhub/project-analysis-20261026/startup-test.log"
+    },
+    "transport-test": {
+      "exit_code": 0,
+      "summary": [
+        "ℹ tests 6",
+        "ℹ pass 6",
+        "ℹ fail 0",
+        "ℹ skipped 0"
+      ],
+      "log": ".testhub/project-analysis-20261026/transport-test.log"
+    },
+    "backend-test": {
+      "exit_code": null,
+      "summary": [
+        "[INFO] Tests run: 901, Failures: 0, Errors: 0, Skipped: 0",
+        "[INFO] BUILD SUCCESS"
+      ],
+      "log": ".testhub/project-analysis-20261026/backend-test.log",
+      "note": "Outer shell timed out while child continued; completion verified from its own log: 901 tests, BUILD SUCCESS, owned temporary data removed. Maven target directory was concurrently used by another visible test process; XML files are not attributed exclusively to this run."
+    },
+    "lint-final": {
+      "exit_code": 0,
+      "summary": [
+        "  23:76  warning  Prop \"api\" should define at least its type      vue/require-prop-types",
+        "  23:83  warning  Prop \"version\" should define at least its type  vue/require-prop-types",
+        "✖ 2 problems (0 errors, 2 warnings)"
+      ],
+      "log": ".testhub/project-analysis-20261026/lint-final.log"
+    },
+    "frontend-test-final": {
+      "exit_code": 0,
+      "summary": [
+        " Test Files  64 passed (64)",
+        "      Tests  543 passed (543)"
+      ],
+      "log": ".testhub/project-analysis-20261026/frontend-test-final.log"
+    },
+    "build-final": {
+      "exit_code": 0,
+      "summary": [
+        "- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.",
+        "✓ built in 26.58s"
+      ],
+      "log": ".testhub/project-analysis-20261026/build-final.log"
+    }
+  },
+  "probe": {
+    "probe": "Cancellation delivered to non-owning API runner",
+    "method": "In-memory clients; no Redis or external network; not a distributed integration test",
+    "nonOwnerAcknowledged": true,
+    "nonOwnerPublishedCancelled": true,
+    "ownerCancellationObserved": false,
+    "conclusion": "Shared cancellation group can consume cancellation on a runner other than the task owner; state is local to each runner."
+  },
+  "migration_counts": {
+    "migration": 108,
+    "desktop": 52
+  },
+  "excluded_validation": [
+    "Isolated MySQL/Redis/MinIO integration",
+    "Native package signing and install acceptance",
+    "Live multi-runner Redis fault injection",
+    "Real mobile devices",
+    "Fresh dependency vulnerability database scan"
+  ],
+  "concurrent_changes_note": "During review other workspace changes added a frontend test file and explicit Buffer imports. Final frontend tests and build and lint were rerun. No product-source modifications were made by this analysis."
+}

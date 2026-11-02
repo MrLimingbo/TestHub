@@ -424,6 +424,7 @@ public class UiAutomationService {
             if (!key.matches("[A-Za-z_][A-Za-z0-9_]{0,63}") || value.length() > 4096 || value.contains("\r") || value.contains("\n")) {
                 throw rejected("场景变量格式不合法");
             }
+            if (result.containsKey(key)) throw rejected("场景变量名称去除首尾空白后不能重复");
             result.put(key, value);
         }
         return Map.copyOf(result);

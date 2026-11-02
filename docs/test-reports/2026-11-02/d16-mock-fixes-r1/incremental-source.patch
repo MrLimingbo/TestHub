@@ -1,0 +1,723 @@
+--- a/src/pages/MockServicePage.vue
++++ b/src/pages/MockServicePage.vue
+@@ -1,4 +1,5 @@
+ <script setup lang="ts">
++import { mockIntegerInput, mockIntegerError } from '@/utils/mockIntegerInput'
+ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+ import { Message } from '@arco-design/web-vue'
+ import CodeEditor from '@/components/CodeEditor.vue'
+@@ -40,6 +41,11 @@
+ const ruleForm = reactive({ name: '', httpMethod: 'GET', path: '/orders', priority: 0, requestQuery: '{\n}', requestHeaders: '{\n}', requestBodyMatch: 'ANY', requestBody: '', responseStatus: 200, headers: '{\n  "Content-Type": "application/json; charset=utf-8"\n}', body: '{\n  "code": 0,\n  "message": "mock response"\n}' })
+ const shareForm = reactive({ name: '', expiresInDays: 30 })
+ const shareNeverExpires = ref(false)
++const ruleNumberText = reactive({ priority: '0', responseStatus: '200' })
++const shareExpiryText = ref('30')
++const priorityError = computed(() => mockIntegerError(ruleNumberText.priority, 0, 1000, 'priority'))
++const statusError = computed(() => mockIntegerError(ruleNumberText.responseStatus, 200, 599, 'responseStatus'))
++const expiryError = computed(() => shareNeverExpires.value ? '' : mockIntegerError(shareExpiryText.value, 1, 365, 'expiresInDays'))
+ const now = ref(Date.now())
+ let shareClock: number | undefined
+ let disposed = false
+@@ -216,12 +222,14 @@
+ 
+ function resetRuleForm() {
+   ruleEditSequence++
++  Object.assign(ruleNumberText, { priority: '0', responseStatus: '200' })
+   editingRuleId.value = ''
+   Object.assign(ruleForm, { name: '', httpMethod: 'GET', path: '/orders', priority: 0, requestQuery: '{\n}', requestHeaders: '{\n}', requestBodyMatch: 'ANY', requestBody: '', responseStatus: 200, headers: '{\n  "Content-Type": "application/json; charset=utf-8"\n}', body: '{\n  "code": 0,\n  "message": "mock response"\n}' })
+ }
+ 
+ function editRule(rule: MockRule) {
+   ruleEditSequence++
++  Object.assign(ruleNumberText, { priority: String(rule.priority), responseStatus: String(rule.responseStatus) })
+   editingRuleId.value = rule.id
+   Object.assign(ruleForm, { name: rule.name, httpMethod: rule.httpMethod, path: rule.path, priority: rule.priority,
+     requestQuery: JSON.stringify(rule.requestQuery, null, 2), requestHeaders: JSON.stringify(rule.requestHeaders, null, 2),
+@@ -245,10 +253,12 @@
+   if (creating.value) return
+   creating.value = true
+   try {
++    const priority = mockIntegerInput(ruleNumberText.priority, 0, 1000, 'priority')
++    const responseStatus = mockIntegerInput(ruleNumberText.responseStatus, 200, 599, 'responseStatus')
+     const rule = await mutate<MockRule>(`/api/v1/projects/${project}/mock/servers/${server}/rules${editing ? '/' + editing : ''}`, {
+-      name: ruleForm.name, httpMethod: ruleForm.httpMethod, path: ruleForm.path, priority: ruleForm.priority,
++      name: ruleForm.name, httpMethod: ruleForm.httpMethod, path: ruleForm.path, priority,
+       requestQuery: requestQuery(), requestHeaders: requestHeaders(), requestBodyMatch: ruleForm.requestBodyMatch,
+-      requestBody: ruleForm.requestBodyMatch === 'ANY' ? '' : ruleForm.requestBody, responseStatus: ruleForm.responseStatus, responseHeaders: responseHeaders(), responseBody: ruleForm.body,
++      requestBody: ruleForm.requestBodyMatch === 'ANY' ? '' : ruleForm.requestBody, responseStatus, responseHeaders: responseHeaders(), responseBody: ruleForm.body,
+     }, editing ? 'PUT' : 'POST', () => currentSelection(project, server) && ruleEditSequence === sequence)
+     if (!currentSelection(project, server) || ruleEditSequence !== sequence) return
+     rules.value = editing ? rules.value.map(item => item.id === editing ? rule : item) : [rule, ...rules.value]
+@@ -302,12 +312,13 @@
+   sharing.value = true
+   try {
+     const share = await mutate<MockShare>(`/api/v1/projects/${project}/mock/servers/${server}/shares`, {
+-      name: shareForm.name, expiresInDays: shareNeverExpires.value ? null : shareForm.expiresInDays,
++      name: shareForm.name, expiresInDays: shareNeverExpires.value ? null : mockIntegerInput(shareExpiryText.value, 1, 365, 'expiresInDays'),
+     }, 'POST', current)
+     if (!current()) return
+     shares.value = [share, ...shares.value]
+     shareForm.name = ''
+     shareForm.expiresInDays = 30
++    shareExpiryText.value = '30'
+     shareNeverExpires.value = false
+     shareVisible.value = false
+     Message.success('只读分享链接已创建')
+@@ -367,8 +378,8 @@
+       <a-table :data="shares" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="分享名称"><template #cell="{ record }"><div class="rule-name"><strong>{{ record.name }}</strong><small>创建于 {{ date(record.createdAt) }}</small></div></template></a-table-column><a-table-column title="有效期"><template #cell="{ record }">{{ date(record.expiresAt) }}</template></a-table-column><a-table-column title="状态" :width="100"><template #cell="{ record }"><a-tag :color="shareStatus(record) === '有效' ? 'green' : 'red'">{{ shareStatus(record) }}</a-tag></template></a-table-column><a-table-column title="操作" :width="190"><template #cell="{ record }"><a-space><a-button v-if="shareStatus(record) === '有效'" type="text" size="small" @click="copyShareUrl(record)">复制链接</a-button><a-popconfirm v-if="!record.revokedAt" content="撤销后该分享链接将立即失效，是否继续？" @ok="revokeShare(record)"><a-button type="text" size="small" status="danger">撤销</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table><a-empty v-if="!shares.length" description="还没有只读分享链接" />
+     </section>
+     <a-modal v-model:visible="serverVisible" title="新建 Mock 服务" :ok-loading="serverCreating" :on-before-ok="() => submitDialog(createServer)" @cancel="invalidateServerDialog"><a-form :model="serverForm" layout="vertical"><a-form-item label="服务名称" required><a-input v-model="serverForm.name" :max-length="160" placeholder="例如：订单服务模拟环境" /></a-form-item><div class="modal-tip">创建后会生成一条公开地址。该地址不需要登录，适用于联调与自动化测试；可随时停用服务。</div></a-form></a-modal>
+-    <a-modal v-model:visible="ruleVisible" :title="editingRuleId ? '编辑 Mock 规则' : '新建 Mock 规则'" width="860px" :ok-loading="creating" :on-before-ok="() => submitDialog(createRule)" @cancel="resetRuleForm"><a-form :model="ruleForm" layout="vertical"><div class="form-grid"><a-form-item label="规则名称" required><a-input v-model="ruleForm.name" :max-length="160" placeholder="例如：预览订单成功" /></a-form-item><a-form-item label="优先级"><a-input-number v-model="ruleForm.priority" :min="0" :max="1000" /><small class="field-tip">数值越大越先匹配；同优先级按创建顺序。</small></a-form-item></div><a-divider orientation="left">请求匹配</a-divider><div class="form-grid"><a-form-item label="请求方法" required><a-select v-model="ruleForm.httpMethod"><a-option v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item><a-form-item label="精确路径" required><a-input v-model="ruleForm.path" :max-length="700" placeholder="/orders" /></a-form-item></div><div class="form-grid"><a-form-item label="请求参数条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestQuery" class="mock-rule-editor" :height="110" /></a-form-item><a-form-item label="请求头条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestHeaders" class="mock-rule-editor" :height="110" /></a-form-item></div><div class="form-grid"><a-form-item label="请求体匹配"><a-select v-model="ruleForm.requestBodyMatch"><a-option value="ANY">任意请求体</a-option><a-option value="EXACT">请求体精确匹配</a-option><a-option value="JSON_SUBSET">JSON 子集匹配</a-option></a-select></a-form-item><div class="match-hint"><strong>{{ ruleForm.requestBodyMatch === 'ANY' ? '不限制请求体' : ruleForm.requestBodyMatch === 'EXACT' ? '字节文本完全一致' : '请求 JSON 必须包含给定字段' }}</strong><small>参数和请求头值均使用精确匹配。</small></div></div><a-form-item v-if="ruleForm.requestBodyMatch !== 'ANY'" :label="ruleForm.requestBodyMatch === 'JSON_SUBSET' ? 'JSON 请求体条件' : '请求体条件'"><CodeEditor v-model="ruleForm.requestBody" class="mock-rule-editor" :height="140" /></a-form-item><a-divider orientation="left">响应配置</a-divider><div class="form-grid"><a-form-item label="响应状态"><a-input-number v-model="ruleForm.responseStatus" :min="200" :max="599" /></a-form-item><div /></div><a-form-item label="响应头（JSON 对象）"><CodeEditor v-model="ruleForm.headers" class="mock-rule-editor" :height="110" /></a-form-item><a-form-item label="响应体"><CodeEditor v-model="ruleForm.body" class="mock-rule-editor" :height="160" /></a-form-item><div class="modal-tip">未命中规则、路径或方法不匹配、服务停用时均返回 404。此节点不执行脚本；JSON 子集仅匹配对象字段，数组需完全一致。</div></a-form></a-modal>
+-    <a-modal v-model:visible="shareVisible" title="创建只读 Mock 分享" width="560px" :ok-loading="sharing" :on-before-ok="() => submitDialog(createShare)" @cancel="invalidateShareDialog"><a-form :model="shareForm" layout="vertical"><a-form-item label="分享名称" required><a-input v-model="shareForm.name" :max-length="120" placeholder="例如：合作方订单联调说明" /></a-form-item><a-form-item label="有效期"><a-input-number v-model="shareForm.expiresInDays" :disabled="shareNeverExpires" :min="1" :max="365" /> <span class="form-hint">天（1–365）</span><a-checkbox v-model="shareNeverExpires" class="never-expire">永不过期</a-checkbox></a-form-item><div class="modal-tip">分享页只显示方法、路径、状态码和匹配条件摘要。它不会公开响应正文、响应头、项目成员、环境变量或密钥；可随时撤销。</div></a-form></a-modal>
++    <a-modal v-model:visible="ruleVisible" :title="editingRuleId ? '编辑 Mock 规则' : '新建 Mock 规则'" width="860px" :ok-loading="creating" :on-before-ok="() => submitDialog(createRule)" @cancel="resetRuleForm"><a-form :model="ruleForm" layout="vertical"><div class="form-grid"><a-form-item label="规则名称" required><a-input v-model="ruleForm.name" :max-length="160" placeholder="例如：预览订单成功" /></a-form-item><a-form-item label="优先级" :validate-status="priorityError ? 'error' : undefined" :help="priorityError"><a-input v-model="ruleNumberText.priority" aria-label="Mock 优先级" inputmode="decimal" /><small class="field-tip">数值越大越先匹配；同优先级按创建顺序。</small></a-form-item></div><a-divider orientation="left">请求匹配</a-divider><div class="form-grid"><a-form-item label="请求方法" required><a-select v-model="ruleForm.httpMethod"><a-option v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item><a-form-item label="精确路径" required><a-input v-model="ruleForm.path" :max-length="700" placeholder="/orders" /></a-form-item></div><div class="form-grid"><a-form-item label="请求参数条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestQuery" class="mock-rule-editor" :height="110" /></a-form-item><a-form-item label="请求头条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestHeaders" class="mock-rule-editor" :height="110" /></a-form-item></div><div class="form-grid"><a-form-item label="请求体匹配"><a-select v-model="ruleForm.requestBodyMatch"><a-option value="ANY">任意请求体</a-option><a-option value="EXACT">请求体精确匹配</a-option><a-option value="JSON_SUBSET">JSON 子集匹配</a-option></a-select></a-form-item><div class="match-hint"><strong>{{ ruleForm.requestBodyMatch === 'ANY' ? '不限制请求体' : ruleForm.requestBodyMatch === 'EXACT' ? '字节文本完全一致' : '请求 JSON 必须包含给定字段' }}</strong><small>参数和请求头值均使用精确匹配。</small></div></div><a-form-item v-if="ruleForm.requestBodyMatch !== 'ANY'" :label="ruleForm.requestBodyMatch === 'JSON_SUBSET' ? 'JSON 请求体条件' : '请求体条件'"><CodeEditor v-model="ruleForm.requestBody" class="mock-rule-editor" :height="140" /></a-form-item><a-divider orientation="left">响应配置</a-divider><div class="form-grid"><a-form-item label="响应状态" :validate-status="statusError ? 'error' : undefined" :help="statusError"><a-input v-model="ruleNumberText.responseStatus" aria-label="Mock 响应状态" inputmode="decimal" /></a-form-item><div /></div><a-form-item label="响应头（JSON 对象）"><CodeEditor v-model="ruleForm.headers" class="mock-rule-editor" :height="110" /></a-form-item><a-form-item label="响应体"><CodeEditor v-model="ruleForm.body" class="mock-rule-editor" :height="160" /></a-form-item><div class="modal-tip">未命中规则、路径或方法不匹配、服务停用时均返回 404。此节点不执行脚本；JSON 子集仅匹配对象字段，数组需完全一致。</div></a-form></a-modal>
++    <a-modal v-model:visible="shareVisible" title="创建只读 Mock 分享" width="560px" :ok-loading="sharing" :on-before-ok="() => submitDialog(createShare)" @cancel="invalidateShareDialog"><a-form :model="shareForm" layout="vertical"><a-form-item label="分享名称" required><a-input v-model="shareForm.name" :max-length="120" placeholder="例如：合作方订单联调说明" /></a-form-item><a-form-item label="有效期" :validate-status="expiryError ? 'error' : undefined" :help="expiryError"><a-input v-model="shareExpiryText" aria-label="Mock 有效期（天）" inputmode="decimal" :disabled="shareNeverExpires" /> <span class="form-hint">天（1–365）</span><a-checkbox v-model="shareNeverExpires" class="never-expire">永不过期</a-checkbox></a-form-item><div class="modal-tip">分享页只显示方法、路径、状态码和匹配条件摘要。它不会公开响应正文、响应头、项目成员、环境变量或密钥；可随时撤销。</div></a-form></a-modal>
+   </div>
+ </template>
+ 
+--- a/services/platform-api/src/main/java/io/testhub/platform/mock/MockSyncService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/mock/MockSyncService.java
+@@ -59,7 +59,7 @@
+         if(bytes==null||bytes.length==0) throw invalid("Mock 同步请求不能为空");
+         if(bytes.length>MAX_BYTES) throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Mock 同步请求不能超过 4 MiB。");
+         try { return json.readerFor(Request.class).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(bytes); }
+-        catch(java.io.IOException error) { throw invalid("Mock 同步 JSON 格式不合法或包含不支持的字段"); }
++        catch(java.io.IOException error) { throw MockJson.rejected(error, "Mock 同步 JSON 格式不合法或包含不支持的字段"); }
+     }
+     @Transactional(isolation=Isolation.READ_COMMITTED)
+     public Receipt apply(AuthenticatedPrincipal actor,String projectId,Request request) {
+--- a/services/platform-api/src/main/java/io/testhub/platform/mock/MockService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/mock/MockService.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.mock;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import com.fasterxml.jackson.core.JsonProcessingException;
+ import com.fasterxml.jackson.databind.JsonNode;
+@@ -476,12 +478,12 @@
+     public record ServerInput(String name) {
+     }
+ 
+-    public record ShareInput(String name, Integer expiresInDays) {
+-    }
+-
+-    public record RuleInput(String name, String httpMethod, String path, Integer priority, Map<String, String> requestQuery,
+-                            Map<String, String> requestHeaders, String requestBodyMatch, String requestBody, Integer responseStatus,
+-                            Map<String, String> responseHeaders, String responseBody) {
++    public record ShareInput(String name, @JsonDeserialize(using = MockJson.Expiry.class) Integer expiresInDays) {
++    }
++
++    public record RuleInput(String name, String httpMethod, String path, @JsonDeserialize(using = MockJson.Priority.class) Integer priority, @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> requestQuery,
++                            @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> requestHeaders, String requestBodyMatch, @JsonDeserialize(using = MockJson.Text.class) String requestBody, @JsonDeserialize(using = MockJson.Status.class) Integer responseStatus,
++                            @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> responseHeaders, @JsonDeserialize(using = MockJson.Text.class) String responseBody) {
+         public RuleInput {
+             requestQuery = copyInputMap(requestQuery);
+             requestHeaders = copyInputMap(requestHeaders);
+--- a/services/platform-api/src/main/java/io/testhub/platform/mock/MockTransferService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/mock/MockTransferService.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.mock;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import com.fasterxml.jackson.core.JsonProcessingException;
+ import com.fasterxml.jackson.databind.DeserializationFeature;
+@@ -77,7 +79,7 @@
+             if (request == null || request.snapshot() == null) throw invalid("Mock 迁移资料不能为空");
+             return request;
+         } catch (java.io.IOException error) {
+-            throw invalid("Mock 迁移请求 JSON 格式不合法或包含不支持的字段");
++            throw MockJson.rejected(error, "Mock 迁移请求 JSON 格式不合法或包含不支持的字段");
+         }
+     }
+ 
+@@ -202,10 +204,10 @@
+     public record Snapshot(int version, String sourceProjectId, List<Server> servers) { }
+     public record Server(String id, String name, boolean enabled, boolean smartExampleEnabled,
+                          List<Rule> rules, List<Share> shares) { }
+-    public record Rule(String id, String name, String httpMethod, String path, int priority,
+-                       Map<String, String> requestQuery, Map<String, String> requestHeaders, String requestBodyMatch,
+-                       String requestBody, int responseStatus, Map<String, String> responseHeaders,
+-                       String responseBody, boolean enabled) { }
++    public record Rule(String id, String name, String httpMethod, String path, @JsonDeserialize(using = MockJson.TransferPriority.class) int priority,
++                       @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> requestQuery, @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> requestHeaders, String requestBodyMatch,
++                       @JsonDeserialize(using = MockJson.Text.class) String requestBody, @JsonDeserialize(using = MockJson.TransferStatus.class) int responseStatus, @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> responseHeaders,
++                       @JsonDeserialize(using = MockJson.Text.class) String responseBody, boolean enabled) { }
+     public record Share(String id, String name, Instant expiresAt, Instant revokedAt) { }
+     public record ImportRequest(String requestKey, String expectedUserId, Snapshot snapshot) { }
+     public record Receipt(String id, int servers, int rules, int shares) { }
+--- a/services/platform-api/src/main/java/io/testhub/platform/mock/MockManagementController.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/mock/MockManagementController.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.mock;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import io.testhub.platform.security.AuthenticatedPrincipal;
+ import io.testhub.platform.shared.api.ApiResponse;
+@@ -110,14 +112,14 @@
+     }
+     public record EnabledRequest(@NotNull Boolean enabled) {
+     }
+-    public record ShareRequest(@NotBlank @Size(max = 120) String name, Integer expiresInDays) {
++    public record ShareRequest(@NotBlank @Size(max = 120) String name, @JsonDeserialize(using = MockJson.Expiry.class) Integer expiresInDays) {
+     }
+     public record RuleRequest(@NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 12) String httpMethod,
+-                              @NotBlank @Size(max = 700) String path, Integer priority,
+-                              @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> requestQuery,
+-                              @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> requestHeaders,
+-                              @Size(max = 16) String requestBodyMatch, @Size(max = 524288) String requestBody, Integer responseStatus,
+-                              @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> responseHeaders,
+-                              @Size(max = 524288) String responseBody) {
++                              @NotBlank @Size(max = 700) String path, @JsonDeserialize(using = MockJson.Priority.class) Integer priority,
++                              @JsonDeserialize(contentUsing = MockJson.Text.class) @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> requestQuery,
++                              @JsonDeserialize(contentUsing = MockJson.Text.class) @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> requestHeaders,
++                              @Size(max = 16) String requestBodyMatch, @JsonDeserialize(using = MockJson.Text.class) @Size(max = 524288) String requestBody, @JsonDeserialize(using = MockJson.Status.class) Integer responseStatus,
++                              @JsonDeserialize(contentUsing = MockJson.Text.class) @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> responseHeaders,
++                              @JsonDeserialize(using = MockJson.Text.class) @Size(max = 524288) String responseBody) {
+     }
+ }
+--- /dev/null
++++ b/services/platform-api/src/main/java/io/testhub/platform/mock/MockJson.java
+@@ -0,0 +1,71 @@
++package io.testhub.platform.mock;
++
++import com.fasterxml.jackson.core.JsonParser;
++import com.fasterxml.jackson.core.JsonToken;
++import com.fasterxml.jackson.databind.DeserializationContext;
++import com.fasterxml.jackson.databind.JsonMappingException;
++import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
++import java.io.IOException;
++import java.util.Set;
++import org.springframework.http.HttpStatus;
++import org.springframework.web.server.ResponseStatusException;
++
++/** Local wire contracts for Mock business fields; the application mapper remains unchanged. */
++public final class MockJson {
++    private MockJson() { }
++    private static final Set<String> FIELDS = Set.of("priority", "expiresInDays", "responseStatus", "requestQuery",
++            "requestHeaders", "responseHeaders", "requestBody", "responseBody");
++
++    private abstract static class IntegerValue extends StdDeserializer<Integer> {
++        private final int minimum, maximum;
++        private final String field;
++        IntegerValue(String field, int minimum, int maximum) {
++            super(Integer.class); this.field = field; this.minimum = minimum; this.maximum = maximum;
++        }
++        @Override public Integer deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            if (parser.currentToken().isNumeric()) {
++                try {
++                    // Business range checks stay in MockService, preserving its existing error contract.
++                    return parser.getDecimalValue().intValueExact();
++                } catch (ArithmeticException | NumberFormatException ignored) {
++                    // Fractions and overflow must be rejected before an int conversion can discard information.
++                }
++            }
++            return context.reportInputMismatch(Integer.class,
++                    "Mock %s 必须是 %d 到 %d 之间的精确整数 JSON 数值", field, minimum, maximum);
++        }
++    }
++    public static class Priority extends IntegerValue { public Priority() { super("priority", 0, 1000); } }
++    public static final class Expiry extends IntegerValue { public Expiry() { super("expiresInDays", 1, 365); } }
++    public static class Status extends IntegerValue { public Status() { super("responseStatus", 200, 599); } }
++    // Version-one transfer records use primitive fields. Preserve their existing absent/null defaults.
++    public static final class TransferPriority extends Priority {
++        @Override public Integer getNullValue(DeserializationContext context) { return 0; }
++    }
++    public static final class TransferStatus extends Status {
++        @Override public Integer getNullValue(DeserializationContext context) { return 0; }
++    }
++    public static final class Text extends StdDeserializer<String> {
++        public Text() { super(String.class); }
++        @Override public String deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            if (parser.hasToken(JsonToken.VALUE_STRING)) return parser.getText();
++            return context.reportInputMismatch(String.class, "Mock 文本或条件值必须是 JSON 字符串");
++        }
++    }
++
++    static String field(Throwable error) {
++        for (int depth = 0; error != null && depth < 12; depth++, error = error.getCause()) {
++            if (error instanceof JsonMappingException mapping) {
++                for (var reference : mapping.getPath()) {
++                    if (reference.getFieldName() != null && FIELDS.contains(reference.getFieldName())) return reference.getFieldName();
++                }
++            }
++        }
++        return null;
++    }
++    static ResponseStatusException rejected(IOException error, String fallback) {
++        String field = field(error);
++        return new ResponseStatusException(HttpStatus.BAD_REQUEST,
++                field == null ? fallback : "Mock 字段 " + field + " 类型或数值不合法");
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/main/java/io/testhub/platform/mock/MockInputExceptionHandler.java
+@@ -0,0 +1,32 @@
++package io.testhub.platform.mock;
++
++import io.testhub.platform.shared.api.ApiError;
++import io.testhub.platform.shared.api.ApiExceptionHandler;
++import io.testhub.platform.shared.api.RequestIdFilter;
++import jakarta.servlet.http.HttpServletRequest;
++import java.util.Map;
++import org.springframework.core.Ordered;
++import org.springframework.core.annotation.Order;
++import org.springframework.http.ResponseEntity;
++import org.springframework.http.converter.HttpMessageNotReadableException;
++import org.springframework.web.bind.annotation.ExceptionHandler;
++import org.springframework.web.bind.annotation.RestControllerAdvice;
++
++/** Expose only fixed field names, never Jackson's raw input/value messages. */
++@Order(Ordered.HIGHEST_PRECEDENCE)
++@RestControllerAdvice(assignableTypes = MockManagementController.class)
++public class MockInputExceptionHandler {
++    @ExceptionHandler(HttpMessageNotReadableException.class)
++    ResponseEntity<ApiError> unreadable(HttpServletRequest request, HttpMessageNotReadableException error) {
++        String requestId = (String) request.getAttribute(RequestIdFilter.REQUEST_ID_ATTRIBUTE);
++        if (Boolean.TRUE.equals(request.getAttribute(ApiExceptionHandler.BODY_TOO_LARGE_ATTRIBUTE))) {
++            String message = request.getAttribute(ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE) instanceof String value
++                    ? value : "迁移请求不能超过 33 MiB。";
++            return ResponseEntity.status(413).body(new ApiError("REQUEST_REJECTED", message, requestId, Map.of()));
++        }
++        String field = MockJson.field(error);
++        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_FAILED",
++                field == null ? "请求正文缺失或 JSON 格式不合法" : "Mock 字段 " + field + " 类型或数值不合法",
++                requestId, field == null ? Map.of() : Map.of(field, "应使用字段要求的 JSON 类型和取值范围")));
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/test/java/io/testhub/platform/P2D16MockFlowTests.java
+@@ -0,0 +1,105 @@
++package io.testhub.platform;
++
++import com.fasterxml.jackson.databind.JsonNode;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.mock.*;
++import java.util.*;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.http.MediaType;
++import org.springframework.test.web.servlet.MvcResult;
++import org.springframework.web.server.ResponseStatusException;
++import static org.junit.jupiter.api.Assertions.*;
++import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++
++class P2D16MockFlowTests extends P1FlowTestSupport {
++    @Autowired MockService mocks;
++    @Autowired MockTransferService transfer;
++    @Autowired MockSyncService sync;
++    record F(PlatformUserPrincipal actor,String project,MockServer server) { }
++    F fixture(){var a=actor();var p=project(a);var s=mocks.createServer(a,p,new MockService.ServerInput(unique()));return new F(a,p,s);}
++    String base(F f){return "/api/v1/projects/"+f.project+"/mock/servers/"+f.server.id();}
++    Map<String,Object> definition(){var d=new LinkedHashMap<String,Object>();d.put("name",unique());d.put("httpMethod","POST");d.put("path","/qa");d.put("priority",10);d.put("requestQuery",Map.of());d.put("requestHeaders",Map.of());d.put("requestBodyMatch","ANY");d.put("requestBody","");d.put("responseStatus",210);d.put("responseHeaders",Map.of("Content-Type","application/json; charset=utf-8"));d.put("responseBody","reply");return d;}
++    String raw(String field,String token)throws Exception{var d=definition();d.put(field,"RAW_TOKEN");return json.writeValueAsString(d).replace("\"RAW_TOKEN\"",token);}
++    MvcResult submit(F f,String suffix,String body)throws Exception{return mvc.perform(post(base(f)+suffix).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andReturn();}
++    JsonNode data(MvcResult r)throws Exception{return json.readTree(r.getResponse().getContentAsString()).path("data");}
++    void status(int expected,MvcResult r)throws Exception{assertEquals(expected,r.getResponse().getStatus(),r.getResponse().getContentAsString());}
++    Map<String,Long> counts(){var result=new LinkedHashMap<String,Long>();for(String t:List.of("mock_server","mock_rule","mock_share","mock_transfer_receipt","mock_sync_receipt","audit_log"))result.put(t,jdbc.sql("SELECT COUNT(*) FROM "+t).query(Long.class).single());return result;}
++    void invalid(F f,String field,String token)throws Exception{var before=counts();status(400,field.equals("expiresInDays")?submit(f,"/shares","{\"name\":\"QA\",\"expiresInDays\":"+token+"}"):submit(f,"/rules",raw(field,token)));assertEquals(before,counts());}
++    void invalidRange(F f,String field,String token)throws Exception{var before=counts();var r=field.equals("expiresInDays")?submit(f,"/shares","{\"name\":\"QA\",\"expiresInDays\":"+token+"}"):submit(f,"/rules",raw(field,token));status(400,r);assertEquals("REQUEST_REJECTED",json.readTree(r.getResponse().getContentAsString()).path("code").asText());assertEquals(before,counts());}
++    MockRule rule(F f){return mocks.createRule(f.actor,f.project,f.server.id(),new MockService.RuleInput(unique(),"POST","/qa",10,Map.of(),Map.of(),"ANY","",210,Map.of(),"reply"));}
++    void rejected(Runnable action){assertEquals(400,assertThrows(ResponseStatusException.class,action::run).getStatusCode().value());}
++    MockSyncService.Request request(F source,F target){var items=sync.snapshot(source.actor,source.project,source.actor.userId()).items();return new MockSyncService.Request(UUID.randomUUID().toString(),target.actor.userId(),sync.snapshot(target.actor,target.project,target.actor.userId()).revision(),items.stream().map(x->new MockSyncService.Operation(UUID.randomUUID().toString(),x)).toList());}
++
++    List<String> invalidExchangePayloads(String original) {
++        var variants = new java.util.ArrayList<String>();
++        for (String field : List.of("priority", "responseStatus")) {
++            String source = "\"" + field + "\":" + (field.equals("priority") ? "10" : "210");
++            for (String token : List.of("1.5", "1.0000000000000001", "\"10\"", "true", "[]", "{}")) {
++                String changed = original.replace(source, "\"" + field + "\":" + token);
++                assertNotEquals(original, changed); variants.add(changed);
++            }
++        }
++        for (String field : List.of("requestQuery", "requestHeaders", "responseHeaders")) {
++            for (String token : List.of("1", "true", "[]", "{}")) {
++                String changed = original.replaceAll("\"" + field + "\":\\{[^}]*\\}", "\"" + field + "\":{\"X-Code\":" + token + "}");
++                assertNotEquals(original, changed); variants.add(changed);
++            }
++        }
++        for (String field : List.of("requestBody", "responseBody")) {
++            String source = "\"" + field + "\":\"" + (field.equals("requestBody") ? "" : "reply") + "\"";
++            String changed = original.replace(source, "\"" + field + "\":true");
++            assertNotEquals(original, changed); variants.add(changed);
++        }
++        return variants;
++    }
++
++    @Test @DisplayName("TC-D16MOCK-01") void priorityExact()throws Exception{var f=fixture();for(String v:List.of("10","10.0","1e1")){var r=submit(f,"/rules",raw("priority",v));status(200,r);assertEquals(10,data(r).path("priority").asInt());}}
++    @Test @DisplayName("TC-D16MOCK-02") void priorityLower()throws Exception{var f=fixture();status(200,submit(f,"/rules",raw("priority","0")));invalidRange(f,"priority","-1");}
++    @Test @DisplayName("TC-D16MOCK-03") void priorityUpper()throws Exception{var f=fixture();status(200,submit(f,"/rules",raw("priority","1000")));invalidRange(f,"priority","1001");}
++    @Test @DisplayName("TC-D16MOCK-04") void priorityFractions()throws Exception{var f=fixture();for(String v:List.of("1.5","1.0000000000000001"))invalid(f,"priority",v);}
++    @Test @DisplayName("TC-D16MOCK-05") void numericStrings()throws Exception{var f=fixture();for(String field:List.of("priority","expiresInDays","responseStatus"))for(String v:List.of(field.equals("responseStatus")?"\"200\"":"\"10\"","\" 10 \"","\"null\""))invalid(f,field,v);}
++    @Test @DisplayName("TC-D16MOCK-06") void numericTypes()throws Exception{var f=fixture();for(String field:List.of("priority","expiresInDays","responseStatus"))for(String v:List.of("true","[]","{}"))invalid(f,field,v);}
++    @Test @DisplayName("TC-D16MOCK-07") void overflowAndRawNonFinite()throws Exception{var f=fixture();for(String field:List.of("priority","expiresInDays","responseStatus"))for(String v:List.of("4294967296","18446744073709551616","1e10000","NaN","Infinity","-Infinity"))invalid(f,field,v);}
++    @Test @DisplayName("TC-D16MOCK-08") void expiryExact()throws Exception{var f=fixture();for(String v:List.of("1","1.0","1e0")){var r=submit(f,"/shares","{\"name\":\"QA\",\"expiresInDays\":"+v+"}");status(200,r);assertFalse(data(r).path("expiresAt").isNull());}}
++    @Test @DisplayName("TC-D16MOCK-09") void expiryUpper()throws Exception{var f=fixture();status(200,submit(f,"/shares","{\"name\":\"QA\",\"expiresInDays\":365}"));invalidRange(f,"expiresInDays","366");}
++    @Test @DisplayName("TC-D16MOCK-10") void expiryInvalid()throws Exception{var f=fixture();for(String v:List.of("0","-1","1.5","1.0000000000000001"))invalid(f,"expiresInDays",v);}
++    @Test @DisplayName("TC-D16MOCK-11") void expiryPermanent()throws Exception{var f=fixture();for(String body:List.of("{\"name\":\"QA\"}","{\"name\":\"QA\",\"expiresInDays\":null}")){var r=submit(f,"/shares",body);status(200,r);assertTrue(data(r).path("expiresAt").isNull());}}
++    @Test @DisplayName("TC-D16MOCK-12") void statusExact()throws Exception{var f=fixture();for(String v:List.of("200","200.0","2e2")){var r=submit(f,"/rules",raw("responseStatus",v));status(200,r);assertEquals(200,data(r).path("responseStatus").asInt());}}
++    @Test @DisplayName("TC-D16MOCK-13") void statusUpper()throws Exception{var f=fixture();status(200,submit(f,"/rules",raw("responseStatus","599")));}
++    @Test @DisplayName("TC-D16MOCK-14") void statusFractions()throws Exception{var f=fixture();for(String v:List.of("200.5","200.0000000000000001"))invalid(f,"responseStatus",v);}
++    @Test @DisplayName("TC-D16MOCK-15") void statusRange()throws Exception{var f=fixture();for(String v:List.of("199","600"))invalidRange(f,"responseStatus",v);}
++    @Test @DisplayName("TC-D16MOCK-16") void ruleDefaults()throws Exception{var f=fixture();for(boolean missing:List.of(true,false)){var d=definition();if(missing){d.remove("priority");d.remove("responseStatus");}else{d.put("priority",null);d.put("responseStatus",null);}var r=submit(f,"/rules",json.writeValueAsString(d));status(200,r);assertEquals(0,data(r).path("priority").asInt());assertEquals(200,data(r).path("responseStatus").asInt());}}
++    @Test @DisplayName("TC-D16MOCK-17") void queryStrings()throws Exception{var f=fixture();var d=definition();d.put("requestQuery",Map.of("id","001","flag","false","literal","null","blank",""));var r=submit(f,"/rules",json.writeValueAsString(d));status(200,r);assertEquals(json.valueToTree(d.get("requestQuery")),data(r).path("requestQuery"));}
++    @Test @DisplayName("TC-D16MOCK-18") void headerStrings()throws Exception{var f=fixture();var d=definition();d.put("requestHeaders",Map.of("X-Code","001","X-Flag","false"));d.put("responseHeaders",Map.of("X-Code","001","X-Literal","null"));var r=submit(f,"/rules",json.writeValueAsString(d));status(200,r);assertEquals("001",data(r).path("requestHeaders").path("x-code").asText());assertEquals("null",data(r).path("responseHeaders").path("X-Literal").asText());}
++    @Test @DisplayName("TC-D16MOCK-19") void bodyStrings()throws Exception{var f=fixture();var d=definition();d.put("requestBodyMatch","JSON_SUBSET");d.put("requestBody","{\"n\":1}");d.put("responseBody","001");var r=submit(f,"/rules",json.writeValueAsString(d));status(200,r);assertEquals("{\"n\":1}",data(r).path("requestBody").asText());assertEquals("001",data(r).path("responseBody").asText());}
++    @Test @DisplayName("TC-D16MOCK-20") void mapTypes()throws Exception{var f=fixture();for(String field:List.of("requestQuery","requestHeaders","responseHeaders"))for(String v:List.of("1","true","[]","{}"))invalid(f,field,"{\"X-Code\":"+v+"}");}
++    @Test @DisplayName("TC-D16MOCK-21") void bodyTypes()throws Exception{var f=fixture();for(String field:List.of("requestBody","responseBody"))for(String v:List.of("1","true","[]","{}"))invalid(f,field,v);}
++    @Test @DisplayName("TC-D16MOCK-22") void nullTextPolicy()throws Exception{var f=fixture();var d=definition();d.put("requestQuery",Collections.singletonMap("id",null));d.put("requestHeaders",Collections.singletonMap("X-Null",null));d.put("responseHeaders",Collections.singletonMap("X-Null",null));d.put("requestBody",null);d.put("responseBody",null);var r=submit(f,"/rules",json.writeValueAsString(d));status(200,r);assertEquals("",data(r).path("requestQuery").path("id").asText());assertEquals("",data(r).path("requestHeaders").path("x-null").asText());assertEquals("",data(r).path("responseHeaders").path("X-Null").asText());assertEquals("",data(r).path("responseBody").asText());}
++    @Test @DisplayName("TC-D16MOCK-23") void editValid()throws Exception{var f=fixture();var original=rule(f);mocks.setRuleEnabled(f.actor,f.project,f.server.id(),original.id(),false);var d=definition();d.put("name",original.name());d.put("priority",100);var r=mvc.perform(put(base(f)+"/rules/"+original.id()).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(d))).andReturn();status(200,r);assertEquals(100,data(r).path("priority").asInt());assertFalse(data(r).path("enabled").asBoolean());}
++    @Test @DisplayName("TC-D16MOCK-24") void editInvalid()throws Exception{var f=fixture();var original=rule(f);var before=counts();for(String token:List.of("1.5","1.0000000000000001")){var r=mvc.perform(put(base(f)+"/rules/"+original.id()).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(raw("priority",token))).andReturn();status(400,r);assertEquals(before,counts());assertEquals(original,mocks.rules(f.actor,f.project,f.server.id()).getFirst());}}
++    @Test @DisplayName("TC-D16MOCK-25") void runtimeMatching(){var f=fixture();mocks.setServerEnabled(f.actor,f.project,f.server.id(),true);mocks.createRule(f.actor,f.project,f.server.id(),new MockService.RuleInput(unique(),"POST","/qa",0,Map.of(),Map.of(),"ANY","",201,Map.of(),"low"));mocks.createRule(f.actor,f.project,f.server.id(),new MockService.RuleInput(unique(),"POST","/qa",1000,Map.of("code","001"),Map.of("X-Flag","false"),"EXACT","{\"v\":1}",202,Map.of(),"high"));var r=mocks.runtime(f.server.publicKey(),new MockRuntimeRequest("POST","/qa",Map.of("code",List.of("001")),Map.of("x-flag","false"),"{\"v\":1}")).orElseThrow();assertEquals(202,r.status());assertEquals("high",r.body());}
++    @Test @DisplayName("TC-D16MOCK-26") void shareAtomic()throws Exception{var f=fixture();var before=counts();var r=submit(f,"/shares","{\"name\":\"QA\",\"expiresInDays\":1.5}");status(400,r);assertFalse(r.getResponse().getContentAsString().contains("shareKey"));assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16MOCK-27") void transferValid()throws Exception{var source=fixture();rule(source);mocks.createShare(source.actor,source.project,source.server.id(),new MockService.ShareInput("share",null));for(String token:List.of("10","10.0","1e1")){var target=fixture();String raw=json.writeValueAsString(new MockTransferService.ImportRequest(UUID.randomUUID().toString(),target.actor.userId(),transfer.export(source.actor,source.project))).replace("\"priority\":10","\"priority\":"+token).replace("\"responseStatus\":210", "\"responseStatus\":" + (token.equals("10") ? "210" : token.equals("10.0") ? "210.0" : "2.1e2"));var receipt=transfer.transfer(target.actor,target.project,transfer.decode(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8)));assertEquals(1,receipt.rules());var imported=mocks.servers(target.actor,target.project).stream().filter(s->s.name().equals(source.server.name())).findFirst().orElseThrow();assertFalse(imported.enabled());assertEquals(10,mocks.rules(target.actor,target.project,imported.id()).getFirst().priority());assertNotNull(mocks.shares(target.actor,target.project,imported.id()).getFirst().revokedAt());}}
++    @Test @DisplayName("TC-D16MOCK-28") void transferInvalid()throws Exception {
++        var source=fixture(); rule(source); var target=fixture();
++        String original=json.writeValueAsString(new MockTransferService.ImportRequest(UUID.randomUUID().toString(),target.actor.userId(),transfer.export(source.actor,source.project)));
++        for (String raw : invalidExchangePayloads(original)) {
++            var before=counts(); rejected(()->transfer.transfer(target.actor,target.project,transfer.decode(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8)))); assertEquals(before,counts());
++        }
++    }
++    @Test @DisplayName("TC-D16MOCK-29") void syncValid()throws Exception{var source=fixture();rule(source);for(String token:List.of("10","10.0","1e1")){var target=fixture();String raw=json.writeValueAsString(request(source,target)).replace("\"priority\":10","\"priority\":"+token).replace("\"responseStatus\":210", "\"responseStatus\":" + (token.equals("10") ? "210" : token.equals("10.0") ? "210.0" : "2.1e2"));assertEquals(2,sync.apply(target.actor,target.project,sync.decode(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8))).results().size());}}
++    @Test @DisplayName("TC-D16MOCK-30") void syncInvalid()throws Exception {
++        var source=fixture(); rule(source); var target=fixture(); String original=json.writeValueAsString(request(source,target));
++        for (String raw : invalidExchangePayloads(original)) {
++            var before=counts(); rejected(()->sync.apply(target.actor,target.project,sync.decode(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8)))); assertEquals(before,counts());
++        }
++    }
++    @Test @DisplayName("TC-D16MOCK-31") void oldReadOnly(){var f=fixture();var r=rule(f);var share=mocks.createShare(f.actor,f.project,f.server.id(),new MockService.ShareInput("history",null));var before=counts();assertEquals(r,mocks.rules(f.actor,f.project,f.server.id()).getFirst());assertEquals(share,mocks.shares(f.actor,f.project,f.server.id()).getFirst());transfer.export(f.actor,f.project);sync.snapshot(f.actor,f.project,f.actor.userId());assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16MOCK-32") void permission()throws Exception{var f=fixture();var other=actor();var before=counts();var r=mvc.perform(post(base(f)+"/rules").with(user(other)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(raw("priority","10"))).andReturn();status(403,r);assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16MOCK-33") void revisionConflict(){var source=fixture();rule(source);var target=fixture();var req=request(source,target);rule(target);var before=counts();assertEquals(409,assertThrows(ResponseStatusException.class,()->sync.apply(target.actor,target.project,req)).getStatusCode().value());assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16MOCK-34") void receipts(){var source=fixture();rule(source);var target=fixture();var req=request(source,target);var first=sync.apply(target.actor,target.project,req);var before=counts();assertEquals(first,sync.apply(target.actor,target.project,req));assertEquals(before,counts());var other=fixture();var input=new MockTransferService.ImportRequest(UUID.randomUUID().toString(),other.actor.userId(),transfer.export(source.actor,source.project));var receipt=transfer.transfer(other.actor,other.project,input);before=counts();assertEquals(receipt,transfer.transfer(other.actor,other.project,input));assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16MOCK-39") void errorLocationAndPrivacy()throws Exception{var f=fixture();var r=submit(f,"/rules",raw("priority","\"D16_SYNTHETIC_PRIVATE_VALUE\""));status(400,r);var body=json.readTree(r.getResponse().getContentAsString());assertTrue(body.path("details").has("priority"));assertFalse(body.toString().contains("D16_SYNTHETIC_PRIVATE_VALUE"));r=submit(f,"/rules",raw("requestBody","{\"token\":\"D16_SYNTHETIC_BODY_VALUE\"}"));status(400,r);body=json.readTree(r.getResponse().getContentAsString());assertTrue(body.path("details").has("requestBody"));assertFalse(body.toString().contains("D16_SYNTHETIC_BODY_VALUE"));}
++}
+--- /dev/null
++++ b/src/utils/mockIntegerInput.ts
+@@ -0,0 +1,29 @@
++/** Check decimal text before Number conversion can round away a fractional part. */
++export function mockIntegerInput(raw: string, minimum: number, maximum: number, field: string): number {
++  const invalid = () => new Error(`${field} 必须是 ${minimum} 到 ${maximum} 之间的精确整数数值`)
++  const match = /^(-?)(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(raw.trim())
++  if (!match) throw invalid()
++  const fraction = match[3] ?? ''
++  let digits = (match[2]! + fraction).replace(/^0+/, '')
++  if (!digits) { if (minimum === 0) return 0; throw invalid() }
++  if (match[1] === '-') throw invalid()
++  const scale = BigInt(fraction.length) - BigInt(match[4] ?? '0')
++  if (scale > 0n) {
++    if (scale >= BigInt(digits.length)) throw invalid()
++    const removed = Number(scale)
++    if (!/^0+$/.test(digits.slice(-removed))) throw invalid()
++    digits = digits.slice(0, -removed)
++  } else if (scale < 0n) {
++    if (BigInt(digits.length) - scale > BigInt(String(maximum).length)) throw invalid()
++    digits += '0'.repeat(Number(-scale))
++  }
++  if (digits.length > String(maximum).length) throw invalid()
++  const value = Number(digits)
++  if (value < minimum || value > maximum) throw invalid()
++  return value
++}
++
++export function mockIntegerError(raw: string, minimum: number, maximum: number, field: string): string {
++  try { mockIntegerInput(raw, minimum, maximum, field); return '' }
++  catch (error) { return error instanceof Error ? error.message : `${field} 不合法` }
++}
+--- /dev/null
++++ b/src/test/d16MockPage.test.ts
+@@ -0,0 +1,61 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { createMemoryHistory, createRouter } from 'vue-router'
++import { flushPromises, shallowMount, type VueWrapper } from '@vue/test-utils'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import MockServicePage from '@/pages/MockServicePage.vue'
++import { useSessionStore } from '@/stores/session'
++const wrappers: VueWrapper[] = []
++afterEach(() => { wrappers.splice(0).forEach(w => w.unmount()); vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear() })
++const stamp = '2026-11-02T00:00:00Z'
++const response = (data: unknown) => new Response(JSON.stringify({ data }))
++async function setup() {
++  for (const kind of ['success', 'error', 'warning'] as const) vi.spyOn(Message, kind).mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(); useSessionStore(pinia).projectId = 'p'
++  const server = { id: 's', projectId: 'p', name: 'QA', publicKey: 'fixture-public', enabled: true, smartExampleEnabled: false, ruleCount: 0, createdAt: stamp, updatedAt: stamp }
++  const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
++    if (init?.method === 'POST') { const body = JSON.parse(String(init.body)); return response(url.endsWith('/shares') ? { id: 'share', name: body.name, shareKey: 'fixture-share', expiresAt: null, revokedAt: null, createdAt: stamp } : { id: 'r', serverId: 's', ...body, enabled: true, createdAt: stamp, updatedAt: stamp }) }
++    return response(url.endsWith('/csrf') ? { token: 'fixture', headerName: 'X-CSRF' } : url.endsWith('/context') ? { organizations: [{ id: 'o' }], projects: { o: [{ id: 'p', name: 'QA', code: 'QA' }] } } : url.endsWith('/servers') ? [server] : [])
++  }); vi.stubGlobal('fetch', fetcher)
++  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/mock', component: { template: '<div />' } }] }); await router.push('/mock')
++  const w = shallowMount(MockServicePage, { global: { plugins: [pinia, ArcoVue, router], renderStubDefaultSlot: true, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises(); return { w, fetcher }
++}
++const modal = (w: VueWrapper, title: string) => w.findAllComponents({ name: 'Modal' }).find(m => m.props('title') === title)!
++async function open(q: Awaited<ReturnType<typeof setup>>, share = false) {
++  q.w.findAllComponents({ name: 'Button' }).find(b => b.text().trim() === (share ? '创建只读分享' : '新建规则'))!.vm.$emit('click'); await flushPromises()
++  const dialog = modal(q.w, share ? '创建只读 Mock 分享' : '新建 Mock 规则')
++  dialog.findAllComponents({ name: 'Input' }).find(i => i.props('placeholder') === (share ? '例如：合作方订单联调说明' : '例如：预览订单成功'))!.vm.$emit('update:modelValue', 'QA'); await flushPromises(); return dialog
++}
++async function numeric(dialog: VueWrapper, label: string, raw: string) {
++  const f = dialog.findAllComponents({ name: 'FormItem' }).find(i => i.props('label') === label)!, number = f.findComponent({ name: 'InputNumber' })
++  if (number.exists()) { number.vm.$emit('input', Number(raw), raw, new Event('input')); number.vm.$emit('update:modelValue', Number(raw)); number.vm.$emit('change', Number(raw)) }
++  else { const input = f.findComponent({ name: 'Input' }); input.vm.$emit('input', raw); input.vm.$emit('update:modelValue', raw) }
++  await flushPromises()
++}
++async function save(dialog: VueWrapper) { await ((dialog.props() as Record<string, unknown>).onBeforeOk as () => Promise<boolean>)(); await flushPromises() }
++const writes = (q: Awaited<ReturnType<typeof setup>>) => q.fetcher.mock.calls.filter(([,i]) => i?.method === 'POST')
++it('TC-D16MOCK-35: invalid rule numbers remain visible and never submit', async () => {
++  const q = await setup(), d = await open(q)
++  for (const raw of ['1.5', '1.0000000000000001', '-1', '1001']) { await numeric(d, '优先级', raw); await save(d); expect(writes(q)).toHaveLength(0); expect(d.props('visible')).toBe(true) }
++  expect(Message.error).toHaveBeenCalledWith(expect.stringContaining('priority'))
++  await numeric(d, '优先级', '10')
++  for (const raw of ['200.5', '200.0000000000000001', '199', '600']) { await numeric(d, '响应状态', raw); await save(d); expect(writes(q)).toHaveLength(0); expect(d.props('visible')).toBe(true) }
++  expect(Message.error).toHaveBeenCalledWith(expect.stringContaining('responseStatus'))
++})
++it('TC-D16MOCK-36: invalid expiry never creates a share', async () => {
++  const q = await setup(), d = await open(q, true)
++  for (const raw of ['1.5', '1.0000000000000001', '0', '366']) { await numeric(d, '有效期', raw); await save(d); expect(writes(q)).toHaveLength(0); expect(d.props('visible')).toBe(true) }
++})
++it('TC-D16MOCK-37: explicit integral spellings submit JSON numbers', async () => {
++  const q = await setup(), d = await open(q); await numeric(d, '优先级', '1e1'); await numeric(d, '响应状态', '200.0'); await save(d)
++  const body = JSON.parse(String(writes(q)[0]![1]!.body)); expect(body.priority).toBe(10); expect(body.responseStatus).toBe(200)
++})
++it('TC-D16MOCK-38: existing string-only JSON editor guard remains', async () => {
++  const q = await setup(), d = await open(q)
++  d.findAllComponents({ name: 'CodeEditor' })[0]!.vm.$emit('update:modelValue', '{"id":1}'); await flushPromises(); await save(d); expect(writes(q)).toHaveLength(0); expect(Message.error).toHaveBeenCalledWith(expect.stringContaining('字符串'))
++})
++it('TC-D16MOCK-40: never-expiring share ignores the disabled expiry input', async () => {
++  const q = await setup(), d = await open(q, true); await numeric(d, '有效期', '1.5')
++  d.findComponent({ name: 'Checkbox' }).vm.$emit('update:modelValue', true); await flushPromises(); await save(d)
++  expect(JSON.parse(String(writes(q)[0]![1]!.body)).expiresInDays).toBeNull()
++})
+--- /dev/null
++++ b/src/test/d16MockIntegerInput.test.ts
+@@ -0,0 +1,13 @@
++import { expect, it } from 'vitest'
++import { mockIntegerInput, mockIntegerError } from '@/utils/mockIntegerInput'
++it('TC-D16MOCK-37: exact decimals and exponents respect each Mock integer range', () => {
++  for (const raw of ['10', '10.0', '1e1', '100e-1']) expect(mockIntegerInput(raw, 0, 1000, 'priority')).toBe(10)
++  expect(mockIntegerInput('-0', 0, 1000, 'priority')).toBe(0)
++  expect(mockIntegerInput('2e2', 200, 599, 'responseStatus')).toBe(200)
++  expect(mockIntegerInput('365.0', 1, 365, 'expiresInDays')).toBe(365)
++})
++it('TC-D16MOCK-35/36: invalid text is rejected before numeric rounding or bounds clipping', () => {
++  for (const raw of ['1.5', '1.0000000000000001', '1001', '-1', '1e10000', '1e-10000', 'NaN', '"10"', '']) expect(mockIntegerError(raw, 0, 1000, 'priority')).toContain('priority')
++  expect(() => mockIntegerInput('0', 1, 365, 'expiresInDays')).toThrow('expiresInDays')
++  expect(() => mockIntegerInput('199', 200, 599, 'responseStatus')).toThrow('responseStatus')
++})
+--- /dev/null
++++ b/scripts/qa/d16-mock-ui.mjs
+@@ -0,0 +1,93 @@
++// Headless Mock page acceptance uses controlled API fixtures; native HTTP has a separate QA script.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import http from 'node:http'
++import path from 'node:path'
++import process from 'node:process'
++import { fileURLToPath, URL } from 'node:url'
++import { chromium } from '../../services/playwright-runner/node_modules/playwright/index.mjs'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261102/d16-mock-fixes-r1'), dist = path.join(root, 'dist')
++const stamp = '2026-10-30T00:00:00Z'
++const result = { headless: true, isolatedHttpFixtures: true, realBackendAcceptance: false, cases: [], cleanup: false }
++const server = http.createServer(async (req, res) => {
++  try {
++    let file = path.resolve(dist, '.' + decodeURIComponent(new URL(req.url, 'http://qa.invalid').pathname))
++    if (!file.startsWith(dist + path.sep) || !path.extname(file)) file = path.join(dist, 'index.html')
++    res.writeHead(200, { 'Content-Type': { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }[path.extname(file)] || 'application/octet-stream' })
++    res.end(await fs.readFile(file))
++  } catch { res.writeHead(404); res.end() }
++})
++await fs.mkdir(out, { recursive: true }); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
++const origin = `http://127.0.0.1:${server.address().port}`
++let browser
++async function run(id, share, operation) {
++  const context = await browser.newContext({ viewport: { width: 1600, height: 1100 } }), writes = [], errors = []
++  const mockServer = { id: 's', projectId: 'p', name: 'Mock验收', publicKey: 'fixture-public', enabled: true, smartExampleEnabled: false, ruleCount: 0, createdAt: stamp, updatedAt: stamp }
++  await context.route('**/api/**', async route => {
++    const r = route.request(), p = new URL(r.url()).pathname; let data
++    if (r.method() === 'POST') {
++      const input = r.postDataJSON(); writes.push({ path: p, input })
++      data = p.endsWith('/shares') ? { id: 'share', ...input, shareKey: 'fixture-share', expiresAt: null, revokedAt: null, createdAt: stamp } : { id: 'r', serverId: 's', ...input, enabled: true, createdAt: stamp, updatedAt: stamp }
++    }
++    else if (p.endsWith('/auth/me')) data = { id: 'qa', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: stamp }
++    else if (p.endsWith('/auth/csrf')) data = { token: 'fixture', headerName: 'X-CSRF' }
++    else if (p.endsWith('/auth/capabilities')) data = { registrationEnabled: true }
++    else if (p.endsWith('/access/context')) data = { organizations: [{ id: 'o', name: 'QA', code: 'QA' }], projects: { o: [{ id: 'p', name: 'QA项目', code: 'QA', status: 'ACTIVE', createdAt: stamp, updatedAt: stamp }] } }
++    else if (p.endsWith('/capabilities')) data = { systemAdministration: true }
++    else if (p.endsWith('/servers')) data = [mockServer]
++    else data = []
++    await route.fulfill({ json: { data } })
++  })
++  const page = await context.newPage(); page.setDefaultTimeout(10_000); page.on('pageerror', error => errors.push(error.message))
++  try {
++    await page.goto(origin + '/mock')
++    await page.getByRole('button', { name: share ? '创建只读分享' : '新建规则', exact: true }).click()
++    await page.getByPlaceholder(share ? '例如：合作方订单联调说明' : '例如：预览订单成功').fill('QA')
++    const dialog = page.locator('.arco-modal').filter({ has: page.getByPlaceholder(share ? '例如：合作方订单联调说明' : '例如：预览订单成功') })
++    await operation(page, dialog, writes); assert.deepEqual(errors, []); result.cases.push({ id, status: 'PASS' })
++  } catch (error) { result.cases.push({ id, status: 'FAIL', error: error.message, browserErrors: errors }) }
++  finally { await context.close() }
++}
++try {
++  browser = await chromium.launch({ headless: true, channel: 'chrome' }); result.browserVersion = browser.version()
++  await run('TC-D16MOCK-35', false, async (page, dialog, writes) => {
++    const field = page.getByLabel('Mock 优先级').locator('input')
++    for (const raw of ['1.5', '1.0000000000000001', '1001']) {
++      await field.fill(raw); await dialog.locator('.arco-modal-footer .arco-btn-primary').click()
++      await page.locator('.arco-message').filter({ hasText: 'priority' }).first().waitFor()
++      assert.equal(writes.length, 0); assert.equal(await field.inputValue(), raw)
++    }
++    await field.fill('10')
++    const status = page.getByLabel('Mock 响应状态').locator('input')
++    for (const raw of ['200.5', '200.0000000000000001', '199', '600']) {
++      await status.fill(raw); await dialog.locator('.arco-modal-footer .arco-btn-primary').click()
++      await page.locator('.arco-message').filter({ hasText: 'responseStatus' }).first().waitFor()
++      assert.equal(writes.length, 0); assert.equal(await status.inputValue(), raw)
++    }
++  })
++  await run('TC-D16MOCK-36', true, async (page, dialog, writes) => {
++    const field = page.getByLabel('Mock 有效期（天）').locator('input')
++    for (const raw of ['1.5', '1.0000000000000001', '0', '366']) {
++      await field.fill(raw); await dialog.locator('.arco-modal-footer .arco-btn-primary').click()
++      await page.locator('.arco-message').filter({ hasText: 'expiresInDays' }).first().waitFor()
++      assert.equal(writes.length, 0); assert.equal(await field.inputValue(), raw)
++    }
++  })
++  await run('TC-D16MOCK-37', false, async (page, dialog, writes) => {
++    await page.getByLabel('Mock 优先级').locator('input').fill('1e1')
++    await page.getByLabel('Mock 响应状态').locator('input').fill('200.0')
++    await Promise.all([page.waitForResponse(r => r.url().endsWith('/rules') && r.request().method() === 'POST'), dialog.locator('.arco-modal-footer .arco-btn-primary').click()])
++    assert.equal(writes.at(-1).input.priority, 10); assert.equal(writes.at(-1).input.responseStatus, 200)
++  })
++  await run('TC-D16MOCK-40', true, async (page, dialog, writes) => {
++    await page.getByLabel('Mock 有效期（天）').locator('input').fill('1.5')
++    await page.getByText('永不过期', { exact: true }).click()
++    await Promise.all([page.waitForResponse(r => r.url().endsWith('/shares') && r.request().method() === 'POST'), dialog.locator('.arco-modal-footer .arco-btn-primary').click()])
++    assert.equal(writes.at(-1).input.expiresInDays, null)
++  })
++} finally {
++  await browser?.close(); await new Promise(resolve => server.close(resolve)); result.cleanup = true
++  result.passed = result.cases.filter(c => c.status === 'PASS').length; result.failed = result.cases.length - result.passed
++  await fs.writeFile(path.join(out, 'headless-ui.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n'); if (result.failed) process.exitCode = 1
++}
+--- /dev/null
++++ b/scripts/qa/d16-mock-http.mjs
+@@ -0,0 +1,116 @@
++/* global fetch, AbortSignal */
++// Native JVM acceptance in a new filesystem workspace; no Electron window or user workspace is used.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import path from 'node:path'
++import crypto from 'node:crypto'
++import process from 'node:process'
++import { spawn } from 'node:child_process'
++import { fileURLToPath } from 'node:url'
++import { setTimeout as delay } from 'node:timers/promises'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261102/d16-mock-fixes-r1'), directory = await fs.mkdtemp(path.join(root, '.testhub/d16-mock-http-qa-'))
++const java = path.join(process.env.JAVA_HOME, 'bin/java'), jar = path.join(root, 'services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar')
++const result = { headless: true, realPackagedJvm: true, desktopProfile: true, electronUpgradeTest: false, cases: [], cleanup: false }
++const env = { ...process.env }
++for (const key of Object.keys(env)) if (key.startsWith('TESTHUB_') || key.startsWith('SPRING_')) delete env[key]
++Object.assign(env, { SPRING_PROFILES_ACTIVE: 'desktop', TESTHUB_DESKTOP_DATA_DIRECTORY: directory, TESTHUB_LOCAL_DB_PASSWORD: crypto.randomBytes(24).toString('hex'),
++  TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test', TESTHUB_REGISTRATION_ENABLED: 'true' })
++let child, origin, logHandle, launch = 0
++async function start() {
++  const file = path.join(directory, `backend-${++launch}.log`); logHandle = await fs.open(file, 'w')
++  child = spawn(java, ['-jar', jar, '--server.port=0', '--testhub.registration.enabled=true', '--testhub.bootstrap.demo-enabled=false'], { cwd: root, env, stdio: ['ignore', logHandle.fd, logHandle.fd] })
++  child.on('error', error => { result.launchError = error.message })
++  for (let n = 0; n < 300; n++) {
++    if (child.exitCode !== null || child.signalCode !== null || result.launchError) throw new Error('Owned QA JVM failed to start')
++    const match = /Tomcat started on port (\d+)/.exec(await fs.readFile(file, 'utf8'))
++    if (match) {
++      origin = 'http://127.0.0.1:' + match[1]
++      try { if ((await fetch(origin + '/actuator/health/readiness', { signal: AbortSignal.timeout(5_500) })).status === 200) return } catch { /* Wait for ApplicationReadyEvent. */ }
++    }
++    await delay(250)
++  }
++  throw new Error('Owned QA JVM did not become ready within 75 seconds')
++}
++async function stop() {
++  if (!child) return
++  const running = child; child = null
++  if (running.exitCode === null && running.signalCode === null) {
++    running.kill('SIGTERM')
++    for (let n = 0; n < 150 && running.exitCode === null && running.signalCode === null; n++) await delay(100)
++    if (running.exitCode === null && running.signalCode === null) { running.kill('SIGKILL'); await new Promise(resolve => running.once('exit', resolve)); throw new Error('Owned JVM failed to stop within 15 seconds') }
++  }
++  await logHandle?.close(); logHandle = null
++}
++function browser() { return { cookies: new Map() } }
++async function request(client, url, method = 'GET', payload) {
++  const headers = { Cookie: [...client.cookies].map(([key, value]) => key + '=' + value).join('; ') }
++  if (payload !== undefined) {
++    const csrf = await request(client, '/api/v1/auth/csrf')
++    assert.equal(csrf.status, 200); headers[csrf.body.data.headerName] = csrf.body.data.token
++    headers.Cookie = [...client.cookies].map(([key, value]) => key + '=' + value).join('; '); headers['Content-Type'] = 'application/json'
++  }
++  const response = await fetch(origin + url, { method, headers, body: payload === undefined ? undefined : JSON.stringify(payload), signal: AbortSignal.timeout(8_000) })
++  for (const cookie of response.headers.getSetCookie()) {
++    const [pair] = cookie.split(';'), equals = pair.indexOf('='); client.cookies.set(pair.slice(0, equals), pair.slice(equals + 1))
++  }
++  return { status: response.status, body: response.status === 204 ? null : await response.json() }
++}
++async function step(id, title, operation) { await operation(); result.cases.push({ id, title, status: 'PASS' }) }
++async function rawRequest(client, url, method, body) {
++  const csrf = await request(client, '/api/v1/auth/csrf'); assert.equal(csrf.status, 200)
++  const headers = { Cookie: [...client.cookies].map(([k,v]) => k + '=' + v).join('; '), 'Content-Type': 'application/json', [csrf.body.data.headerName]: csrf.body.data.token }
++  const response = await fetch(origin + url, { method, headers, body, signal: AbortSignal.timeout(8_000) })
++  return { status: response.status, body: await response.json() }
++}
++const rule = (field, token) => JSON.stringify({ name: crypto.randomUUID(), httpMethod: 'GET', path: '/qa', priority: 10, requestQuery: {}, requestHeaders: {}, requestBodyMatch: 'ANY', requestBody: '', responseStatus: 200, responseHeaders: {}, responseBody: '{"ok":true}', [field]: 'RAW_TOKEN' }).replace('"RAW_TOKEN"', token)
++try {
++  await start()
++  const client = browser(), account = 'd16-' + crypto.randomUUID(), password = crypto.randomUUID() + 'Aa1!'
++  assert.equal((await request(client, '/api/v1/auth/register', 'POST', { account, email: crypto.randomUUID() + '@example.test', displayName: 'D16隔离验收', password })).status, 201)
++  const project = Object.values((await request(client, '/api/v1/access/context')).body.data.projects).flat()[0].id
++  const base = '/api/v1/projects/' + project + '/mock/servers'
++  const server = await request(client, base, 'POST', { name: 'D16 QA' }); assert.equal(server.status, 200)
++  const rules = base + '/' + server.body.data.id + '/rules', shares = base + '/' + server.body.data.id + '/shares'
++  let created
++  await step('TC-D16MOCK-01/12', '真实HTTP接受精确等值整数写法并规范化', async () => {
++    for (const value of ['10', '10.0', '1e1']) { const r = await rawRequest(client, rules, 'POST', rule('priority', value)); assert.equal(r.status, 200); assert.equal(r.body.data.priority, 10); created = r.body.data }
++    const r = await rawRequest(client, rules, 'POST', rule('responseStatus', '2e2')); assert.equal(r.status, 200); assert.equal(r.body.data.responseStatus, 200)
++  })
++  await step('TC-D16MOCK-04/05/06/07/14/20/21/39', '原始JSON小数溢出错误类型及文本隐式转换均400且无新资产', async () => {
++    const before = (await request(client, rules)).body.data.length
++    for (const value of ['1.5', '1.0000000000000001', '18446744073709551616', '1e10000', '"10"', 'true', '[]', '{}', 'NaN', 'Infinity']) {
++      const r = await rawRequest(client, rules, 'POST', rule('priority', value)); assert.equal(r.status, 400)
++    }
++    for (const token of ['200.5', '200.0000000000000001']) assert.equal((await rawRequest(client, rules, 'POST', rule('responseStatus', token))).status, 400)
++    for (const field of ['requestQuery', 'requestHeaders', 'responseHeaders']) {
++      const r = await rawRequest(client, rules, 'POST', rule(field, '{"synthetic-private-key":true}')); assert.equal(r.status, 400)
++      assert.ok(JSON.stringify(r.body).includes(field)); assert.ok(!JSON.stringify(r.body).includes('synthetic-private-key'))
++    }
++    for (const field of ['requestBody', 'responseBody']) assert.equal((await rawRequest(client, rules, 'POST', rule(field, '123'))).status, 400)
++    assert.equal((await request(client, rules)).body.data.length, before)
++  })
++  await step('TC-D16MOCK-08/10/11/26', '有效期严格校验且永久分享原语义不变', async () => {
++    const before = (await request(client, shares)).body.data.length
++    for (const token of ['1.5', '1.0000000000000001', '0', '366', '"10"']) assert.equal((await rawRequest(client, shares, 'POST', '{"name":"QA","expiresInDays":' + token + '}')).status, 400)
++    assert.equal((await request(client, shares)).body.data.length, before)
++    for (const token of ['10.0', '1e1', 'null']) { const r = await rawRequest(client, shares, 'POST', '{"name":"QA","expiresInDays":' + token + '}'); assert.equal(r.status, 200); assert.equal(r.body.data.expiresAt === null, token === 'null') }
++    const r = await request(client, shares, 'POST', { name: 'QA' }); assert.equal(r.status, 200); assert.equal(r.body.data.expiresAt, null)
++  })
++  await step('TC-D16MOCK-17/19/24', '字符串文本原样保留且非法更新不改原记录', async () => {
++    const r = await rawRequest(client, rules, 'POST', rule('requestQuery', '{"id":"001","value":"false"}')); assert.equal(r.status, 200); assert.equal(r.body.data.requestQuery.id, '001'); assert.equal(r.body.data.responseBody, '{"ok":true}')
++    assert.equal((await rawRequest(client, rules + '/' + created.id, 'PUT', rule('priority', '1.0000000000000001'))).status, 400)
++    const saved = (await request(client, rules)).body.data.find(r => r.id === created.id); assert.equal(saved.priority, 10); assert.equal(saved.name, created.name)
++  })
++  await stop(); await start()
++  await step('TC-D16MOCK-31', '自有JVM重启后合法记录和登录会话保持（非升级复验）', async () => {
++    assert.equal((await request(client, '/api/v1/auth/me')).status, 200)
++    const saved = (await request(client, rules)).body.data.find(r => r.id === created.id); assert.equal(saved.priority, 10); assert.equal(saved.responseStatus, 200)
++  })
++} catch (error) { result.error = error.message; process.exitCode = 1 }
++finally {
++  try { await stop() } catch (error) { result.cleanupError = error.message; process.exitCode = 1 }
++  await fs.rm(directory, { recursive: true, force: true }); result.cleanup = true
++  result.passed = result.cases.length; result.failed = result.error ? 1 : 0
++  await fs.mkdir(out, { recursive: true }); await fs.writeFile(path.join(out, 'native-http.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n')
++}

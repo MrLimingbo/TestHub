@@ -146,6 +146,13 @@ class UiAutomationFlowTests {
         byte[] screenshot = "png-artifact-bytes".getBytes(StandardCharsets.UTF_8);
         MvcResult archivedScreenshot = mvc.perform(post(ARTIFACT_PATH).contentType("image/png").content(screenshot)
                         .headers(artifactHeaders(taskId, executionId, "SCREENSHOT", screenshot, "nonce_ui_screenshot_987654")))
+                .andDo(result -> {
+                    if (result.getResponse().getStatus() >= 400 && result.getResolvedException() != null) {
+                        var types = new ArrayList<String>();
+                        for (Throwable cause = result.getResolvedException(); cause != null && types.size() < 10; cause = cause.getCause()) types.add(cause.getClass().getName());
+                        throw new AssertionError("Artifact dependency exception types: " + types);
+                    }
+                })
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.artifactType").value("SCREENSHOT")).andReturn();
         String screenshotId = body(archivedScreenshot).at("/data/id").asText();
         byte[] trace = "trace-artifact-bytes".getBytes(StandardCharsets.UTF_8);

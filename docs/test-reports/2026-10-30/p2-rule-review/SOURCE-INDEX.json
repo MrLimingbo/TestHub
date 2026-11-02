@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-30",
+  "status": "PENDING_USER_RULE_REVIEW",
+  "artifacts": [
+    {
+      "file": "DECISIONS.json",
+      "sha256": "3238b44eacba48310874c539c78031b428ff07902ccbee2cc75018aceec7c245",
+      "bytes": 24090
+    },
+    {
+      "file": "ENVIRONMENT-BLOCKERS.json",
+      "sha256": "e957d72701b0ab230744231872b3f07339e22284f4510f23614c35545b1afa00",
+      "bytes": 10782
+    },
+    {
+      "file": "EVIDENCE.json",
+      "sha256": "677f31ff922e51ac5dfa80ed80f761ab6050c956974aa3cd58ef6b467bfbdd0c",
+      "bytes": 9439
+    },
+    {
+      "file": "OBSERVATION-STATUS.json",
+      "sha256": "edb5d271bed19a0df2df15b5ba008851de222b39435f1dd2e6d78117d9c823e4",
+      "bytes": 19228
+    },
+    {
+      "file": "OBSERVATION-STATUS.md",
+      "sha256": "345150daabc03a90604abbadb10014f3566c7da477bd00d03256377e3a6285f0",
+      "bytes": 5514
+    },
+    {
+      "file": "P2-RULES-AND-ACCEPTANCE.md",
+      "sha256": "a96c58ff4cfaf20271d2cd619101797474ad456cd7f1932e936ea324a2bf4638",
+      "bytes": 19275
+    },
+    {
+      "file": "README.md",
+      "sha256": "f6ba9e42df19b4f4712ba93bd9ae1ecf6388643da684037e3edf6e7392693112",
+      "bytes": 2040
+    },
+    {
+      "file": "SOURCE-BASELINE.json",
+      "sha256": "b3aa09449add6bd942e2f3abbebfc7f5463282274b0ecff22c1892a824dc105f",
+      "bytes": 182383
+    },
+    {
+      "file": "UNCONFIRMED-RISK.json",
+      "sha256": "aae766d317835e3c190ff657e62683c74e829399a89ee5b2f3e2557b68e2be9c",
+      "bytes": 1021
+    },
+    {
+      "file": "USER-REVIEW.md",
+      "sha256": "c136ff54dde0ea1889563050cedd970720056b1965e6437ac20c37fab6528f58",
+      "bytes": 2101
+    },
+    {
+      "file": "VALIDATION.json",
+      "sha256": "fe47736921b6f99250b207f0306879a6a25b391cb9a3ee0911dd08615ec5c911",
+      "bytes": 633
+    },
+    {
+      "file": "summary.json",
+      "sha256": "bbe145b4a4901e9931e6ac5b9a54f971c9787fb71d6b99871a111428541d1ec8",
+      "bytes": 963
+    }
+  ],
+  "priorApprovalAndPlanningReferences": [
+    {
+      "file": "docs/test-reports/2026-10-29/p1-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "c5a935a99c87d18bdc19c2ded20806207d0540c9ca8f246a25b4ea657a59b1e0"
+    },
+    {
+      "file": "docs/test-reports/2026-10-29/p1-fixes-r1/summary.json",
+      "sha256": "35d0a653f7d76864f92d0c6fdc79a89f299b59b69ce000d3e00509fcf833c3a0"
+    },
+    {
+      "file": "docs/test-reports/2026-10-29/direct-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "ce8e02016ce4b721b93f05a1085051b2929958fcbbaf352dea412b614df2d582"
+    },
+    {
+      "file": "docs/test-reports/2026-10-29/RULE-DECISIONS.json",
+      "sha256": "7d306804eef8ce687fdcb8be49ef21ac8a8cafe1f9cdf12b4d50be95ca3aeeaf"
+    }
+  ]
+}

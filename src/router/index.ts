@@ -82,9 +82,9 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const session = useSessionStore()
-  await session.initialize()
+  await session.initialize(to.path === '/login' && session.signedIn)
   if (!to.meta.public && !session.signedIn) return '/login'
-  if (to.path === '/login' && session.signedIn) return '/dashboard'
+  if (to.path === '/login' && session.signedIn && !session.initializationError) return '/dashboard'
   if (to.meta.projectRequired && !session.projectId) return '/project-settings?required=1'
 })
 

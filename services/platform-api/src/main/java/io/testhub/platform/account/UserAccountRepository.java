@@ -3,9 +3,12 @@ package io.testhub.platform.account;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class UserAccountRepository {
@@ -17,7 +20,7 @@ public class UserAccountRepository {
 
     public Optional<UserAccount> findByEmail(String email) {
         return jdbc.sql("""
-                SELECT id, account, email, display_name, password_hash, enabled
+                SELECT id, account, email, display_name, password_hash, enabled, security_version
                 FROM user_account WHERE LOWER(email) = :email AND deleted_at IS NULL
                 """)
                 .param("email", email.toLowerCase())
@@ -26,19 +29,22 @@ public class UserAccountRepository {
     }
 
     public Optional<UserAccount> findByAccountOrEmail(String value) {
-        return jdbc.sql("""
-                SELECT id, account, email, display_name, password_hash, enabled
+        List<UserAccount> matches = jdbc.sql("""
+                SELECT id, account, email, display_name, password_hash, enabled, security_version
                 FROM user_account
                 WHERE deleted_at IS NULL AND (LOWER(account) = :value OR LOWER(email) = :value)
+                LIMIT 2
                 """)
-                .param("value", value.toLowerCase())
+                .param("value", value.toLowerCase(Locale.ROOT))
                 .query((rs, rowNumber) -> mapUser(rs))
-                .optional();
+                .list();
+        // Legacy cross-field collisions must never authenticate an arbitrary matching account.
+        return matches.size() == 1 ? Optional.of(matches.getFirst()) : Optional.empty();
     }
 
     public Optional<UserAccount> findById(String id) {
         return jdbc.sql("""
-                SELECT id, account, email, display_name, password_hash, enabled
+                SELECT id, account, email, display_name, password_hash, enabled, security_version
                 FROM user_account WHERE id = :id AND deleted_at IS NULL
                 """)
                 .param("id", id)
@@ -52,11 +58,14 @@ public class UserAccountRepository {
                 .single();
     }
 
+    @Transactional
     public void insert(UserAccount account) {
         insert(account, null);
     }
 
+    @Transactional
     public void insert(UserAccount account, String phone) {
+        requireAvailableIdentifiers(account.id(), account.account(), account.email());
         jdbc.sql("""
                 INSERT INTO user_account (id, account, email, display_name, phone, password_hash, enabled)
                 VALUES (:id, :account, :email, :displayName, :phone, :passwordHash, :enabled)
@@ -148,10 +157,13 @@ public class UserAccountRepository {
                         rs.getString("display_name"), rs.getString("email"))).list();
     }
 
+    @Transactional
     public void update(String id, String account, String displayName, String email, String phone, boolean enabled) {
+        requireAvailableIdentifiers(id, account, email);
         jdbc.sql("""
                 UPDATE user_account
-                SET account = :account, display_name = :displayName, email = :email, phone = :phone, enabled = :enabled
+                SET security_version = security_version + CASE WHEN enabled <> :enabled THEN 1 ELSE 0 END,
+                    account = :account, display_name = :displayName, email = :email, phone = :phone, enabled = :enabled
                 WHERE id = :id AND deleted_at IS NULL
                 """)
                 .param("id", id)
@@ -165,7 +177,7 @@ public class UserAccountRepository {
 
     public void updatePassword(String id, String passwordHash) {
         jdbc.sql("""
-                UPDATE user_account SET password_hash = :passwordHash
+                UPDATE user_account SET security_version = security_version + 1, password_hash = :passwordHash
                 WHERE id = :id AND deleted_at IS NULL
                 """)
                 .param("id", id)
@@ -173,10 +185,12 @@ public class UserAccountRepository {
                 .update();
     }
 
+    @Transactional
     public void softDelete(String id) {
+        lockIdentityChanges();
         jdbc.sql("""
                 UPDATE user_account
-                SET enabled = FALSE, deleted_at = CURRENT_TIMESTAMP(3),
+                SET security_version = security_version + 1, enabled = FALSE, deleted_at = CURRENT_TIMESTAMP(3),
                     account = CONCAT(LEFT(account, 119), '-deleted-', LOWER(id)),
                     email = CONCAT(LOWER(id), '@deleted.testhub.local')
                 WHERE id = :id AND deleted_at IS NULL
@@ -185,9 +199,30 @@ public class UserAccountRepository {
                 .update();
     }
 
+    private void lockIdentityChanges() {
+        jdbc.sql("SELECT singleton_id FROM account_identity_guard WHERE singleton_id = 1 FOR UPDATE")
+                .query(Integer.class).single();
+    }
+
+    private void requireAvailableIdentifiers(String id, String account, String email) {
+        // One database lock covers both columns and also works across application instances.
+        lockIdentityChanges();
+        var conflicts = jdbc.sql("""
+                SELECT id FROM user_account
+                WHERE deleted_at IS NULL AND id <> :id
+                  AND (LOWER(account) IN (:account, :email) OR LOWER(email) IN (:account, :email))
+                FOR UPDATE
+                """)
+                .param("id", id)
+                .param("account", account.toLowerCase(Locale.ROOT))
+                .param("email", email.toLowerCase(Locale.ROOT))
+                .query(String.class).list();
+        if (!conflicts.isEmpty()) throw new DuplicateKeyException("账号或邮箱已存在");
+    }
+
     private UserAccount mapUser(java.sql.ResultSet rs) throws java.sql.SQLException {
         return new UserAccount(rs.getString("id"), rs.getString("account"), rs.getString("email"),
-                rs.getString("display_name"), rs.getString("password_hash"), rs.getBoolean("enabled"));
+                rs.getString("display_name"), rs.getString("password_hash"), rs.getBoolean("enabled"), rs.getLong("security_version"));
     }
 
     private Instant instant(Timestamp value) {

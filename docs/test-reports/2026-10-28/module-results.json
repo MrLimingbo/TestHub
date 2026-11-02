@@ -1,0 +1,479 @@
+[
+  {
+    "id": "01",
+    "name": "登录、注册与会话",
+    "directory": "output/qa-20261023/module-01-auth",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 4,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 105,
+    "polarity": {
+      "positive": 46,
+      "negative": 59
+    },
+    "originalBatchCounts": {
+      "PASS": 105
+    },
+    "finalDispositionCounts": {
+      "PASS": 105
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-01-auth/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "02",
+    "name": "工作台",
+    "directory": "output/qa-20261023/module-02-dashboard",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 4,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 103,
+    "polarity": {
+      "positive": 74,
+      "negative": 29
+    },
+    "originalBatchCounts": {
+      "PASS": 103
+    },
+    "finalDispositionCounts": {
+      "PASS": 103
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-02-dashboard/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "03A",
+    "name": "项目管理与成员权限",
+    "directory": "output/qa-20261023/module-03a-projects",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 4,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 120,
+    "polarity": {
+      "positive": 65,
+      "negative": 55
+    },
+    "originalBatchCounts": {
+      "PASS": 120
+    },
+    "finalDispositionCounts": {
+      "PASS": 120
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-03a-projects/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "03B",
+    "name": "项目环境、参数与密钥",
+    "directory": "output/qa-20261023/module-03b-environments",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 3,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 132,
+    "polarity": {
+      "positive": 62,
+      "negative": 70
+    },
+    "originalBatchCounts": {
+      "PASS": 123,
+      "FAIL": 6,
+      "OBSERVED": 3
+    },
+    "finalDispositionCounts": {
+      "PASS": 129,
+      "OBSERVED": 3
+    },
+    "followedUpCases": 6,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-03b-environments/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "03C",
+    "name": "文件管理与操作日志",
+    "directory": "output/qa-20261024/module-03c-files-audit",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 5,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 109,
+    "polarity": {
+      "positive": 57,
+      "negative": 52
+    },
+    "originalBatchCounts": {
+      "PASS": 102,
+      "FAIL": 5,
+      "OBSERVED": 2
+    },
+    "finalDispositionCounts": {
+      "PASS": 107,
+      "OBSERVED": 2
+    },
+    "followedUpCases": 5,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-03c-files-audit/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "03D",
+    "name": "账号管理与系统参数",
+    "directory": "output/qa-20261024/module-03d-accounts-config/regression-r1",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 4,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 139,
+    "polarity": {
+      "positive": 75,
+      "negative": 64
+    },
+    "originalBatchCounts": {
+      "PASS": 137,
+      "OBSERVED": 2
+    },
+    "finalDispositionCounts": {
+      "PASS": 137,
+      "OBSERVED": 2
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-03d-accounts-config/regression-r1/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "04",
+    "name": "功能测试资产与治理",
+    "directory": "output/qa-20261024/module-04-functional-assets/regression-r1",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 6,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 159,
+    "polarity": {
+      "positive": 91,
+      "negative": 68
+    },
+    "originalBatchCounts": {
+      "PASS": 159
+    },
+    "finalDispositionCounts": {
+      "PASS": 159
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-04-functional-assets/regression-r1/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "05",
+    "name": "测试计划与交付",
+    "directory": "output/qa-20261024/module-05-plans-delivery/regression-r1",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 11,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 181,
+    "polarity": {
+      "positive": 104,
+      "negative": 77
+    },
+    "originalBatchCounts": {
+      "PASS": 179,
+      "OBSERVED": 2
+    },
+    "finalDispositionCounts": {
+      "PASS": 179,
+      "OBSERVED": 2
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-05-plans-delivery/regression-r1/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "06",
+    "name": "接口设计与导入",
+    "directory": "output/qa-20261024/module-06-api-design/regression-r1",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 9,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 190,
+    "polarity": {
+      "positive": 112,
+      "negative": 78
+    },
+    "originalBatchCounts": {
+      "PASS": 188,
+      "OBSERVED": 2
+    },
+    "finalDispositionCounts": {
+      "PASS": 188,
+      "OBSERVED": 2
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-06-api-design/regression-r1/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "07",
+    "name": "接口调试",
+    "directory": "output/qa-20261024/module-07-api-debug/regression-r1",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 10,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 217,
+    "polarity": {
+      "positive": 122,
+      "negative": 95
+    },
+    "originalBatchCounts": {
+      "PASS": 211,
+      "OBSERVED": 6
+    },
+    "finalDispositionCounts": {
+      "PASS": 211,
+      "OBSERVED": 6
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-07-api-debug/regression-r1/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "08",
+    "name": "接口自动化",
+    "directory": "output/qa-20261026/module-08-api-automation/regression-r1",
+    "executionFile": "execution-results.json",
+    "expectedProductBugs": 12,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 214,
+    "polarity": {
+      "positive": 117,
+      "negative": 97
+    },
+    "originalBatchCounts": {
+      "PASS": 211,
+      "OBSERVED": 3
+    },
+    "finalDispositionCounts": {
+      "PASS": 211,
+      "OBSERVED": 3
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261026/module-08-api-automation/regression-r1/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "09",
+    "name": "Mock",
+    "directory": "output/qa-20261026/module-09-mock-regression",
+    "executionFile": "execution-regression.json",
+    "expectedProductBugs": 8,
+    "approved": true,
+    "extraExecutionFiles": [
+      "supplemental-results.json"
+    ],
+    "caseCount": 162,
+    "polarity": {
+      "positive": 90,
+      "negative": 72
+    },
+    "originalBatchCounts": {
+      "PASS": 160,
+      "OBSERVED": 2
+    },
+    "finalDispositionCounts": {
+      "PASS": 160,
+      "OBSERVED": 2
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261026/module-09-mock-regression/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "10",
+    "name": "性能测试",
+    "directory": "output/qa-20261026/module-10-performance-regression",
+    "executionFile": "execution-final.json",
+    "expectedProductBugs": 4,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 214,
+    "polarity": {
+      "positive": 125,
+      "negative": 89
+    },
+    "originalBatchCounts": {
+      "PASS": 212,
+      "OBSERVED": 2
+    },
+    "finalDispositionCounts": {
+      "PASS": 212,
+      "OBSERVED": 2
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261026/module-10-performance-regression/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "11",
+    "name": "Web UI自动化",
+    "directory": "output/qa-20261027/module-11-web-ui-regression",
+    "executionFile": "execution-final.json",
+    "expectedProductBugs": 6,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 220,
+    "polarity": {
+      "positive": 116,
+      "negative": 104
+    },
+    "originalBatchCounts": {
+      "PASS": 217,
+      "OBSERVED": 3
+    },
+    "finalDispositionCounts": {
+      "PASS": 217,
+      "OBSERVED": 3
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-11-web-ui-regression/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "12",
+    "name": "移动端自动化",
+    "directory": "output/qa-20261027/module-12-mobile-regression",
+    "executionFile": "execution-final.json",
+    "expectedProductBugs": 8,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 179,
+    "polarity": {
+      "positive": 77,
+      "negative": 102
+    },
+    "originalBatchCounts": {
+      "PASS": 173,
+      "OBSERVED": 2,
+      "BLOCKED": 4
+    },
+    "finalDispositionCounts": {
+      "PASS": 173,
+      "OBSERVED": 2,
+      "BLOCKED": 4
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "13",
+    "name": "质量报告与任务",
+    "directory": "output/qa-20261027/module-13-quality-tasks-regression",
+    "executionFile": "execution-final.json",
+    "expectedProductBugs": 5,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 158,
+    "polarity": {
+      "positive": 90,
+      "negative": 68
+    },
+    "originalBatchCounts": {
+      "PASS": 151,
+      "OBSERVED": 7
+    },
+    "finalDispositionCounts": {
+      "PASS": 151,
+      "OBSERVED": 7
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-13-quality-tasks-regression/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "14",
+    "name": "通知、集成、插件与运维",
+    "directory": "output/qa-20261027/module-14-notifications-extensions-operations-regression",
+    "executionFile": "execution-final.json",
+    "expectedProductBugs": 5,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 187,
+    "polarity": {
+      "positive": 86,
+      "negative": 101
+    },
+    "originalBatchCounts": {
+      "PASS": 180,
+      "OBSERVED": 7
+    },
+    "finalDispositionCounts": {
+      "PASS": 180,
+      "OBSERVED": 7
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-14-notifications-extensions-operations-regression/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "15",
+    "name": "桌面工作区与跨端",
+    "directory": "output/qa-20261028/module-15-desktop-workspace-cross-end",
+    "executionFile": "execution-final.json",
+    "expectedProductBugs": 0,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 218,
+    "polarity": {
+      "positive": 82,
+      "negative": 136
+    },
+    "originalBatchCounts": {
+      "PASS": 213,
+      "BLOCKED": 4,
+      "OBSERVED": 1
+    },
+    "finalDispositionCounts": {
+      "PASS": 213,
+      "BLOCKED": 4,
+      "OBSERVED": 1
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  },
+  {
+    "id": "16",
+    "name": "横向回归",
+    "directory": "output/qa-20261028/module-16-cross-regression-fixed",
+    "executionFile": "execution-final.json",
+    "expectedProductBugs": 0,
+    "approved": true,
+    "extraExecutionFiles": [],
+    "caseCount": 83,
+    "polarity": {
+      "positive": 52,
+      "negative": 31
+    },
+    "originalBatchCounts": {
+      "PASS": 76,
+      "OBSERVED": 3,
+      "BLOCKED": 4
+    },
+    "finalDispositionCounts": {
+      "PASS": 76,
+      "OBSERVED": 3,
+      "BLOCKED": 4
+    },
+    "followedUpCases": 0,
+    "sourceReport": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/TEST-REPORT.md",
+    "approvalBasis": "用户逐模块审核并授权后续模块；本轮明确确认横向回归审核通过。"
+  }
+]

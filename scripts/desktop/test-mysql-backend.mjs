@@ -7,6 +7,12 @@ import { spawn, execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 const execute = promisify(execFile)
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+// Optional targeted acceptance keeps exactly the same exclusively owned infrastructure.
+const option = process.argv[2]
+if (process.argv.length > 3 || (option !== undefined && !/^--tests=[A-Za-z0-9_.*,-]+$/.test(option))) {
+  throw new Error('Usage: node test-mysql-backend.mjs [--tests=ClassPattern,OtherPattern]')
+}
+const selectedTests = option?.slice('--tests='.length)
 await fs.mkdir(path.join(root, '.testhub'), { recursive: true })
 const directory = await fs.mkdtemp(path.join(root, '.testhub/backend-mysql-qa-'))
 const project = 'testhub-qa-' + crypto.randomUUID()
@@ -61,12 +67,15 @@ try {
     TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test',
   })
   await fs.mkdir(env.TESTHUB_DESKTOP_DATA_DIRECTORY)
-  console.log('Running the complete backend suite against isolated MySQL/Redis/S3')
+  console.log(`Running ${selectedTests ? 'selected backend tests' : 'the complete backend suite'} against isolated MySQL/Redis/S3`)
   const windows = process.platform === 'win32'
   const executable = windows ? path.join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe') : path.join(root, 'mvnw')
   if (windows) env.TESTHUB_BACKEND_QA_MAVEN_WRAPPER = path.join(root, 'mvnw.cmd')
-  const args = windows ? ['-NoProfile', '-NonInteractive', '-Command', '& $env:TESTHUB_BACKEND_QA_MAVEN_WRAPPER -pl services/platform-api -am -Dtesthub.bootstrap.demo-enabled=true test; exit $LASTEXITCODE']
-    : ['-pl', 'services/platform-api', '-am', '-Dtesthub.bootstrap.demo-enabled=true', 'test']
+  const mavenArgs = ['-pl', 'services/platform-api', '-am', '-Dtesthub.bootstrap.demo-enabled=true',
+    ...(selectedTests ? [`-Dtest=${selectedTests}`, '-Dsurefire.failIfNoSpecifiedTests=false'] : []), 'test']
+  const args = windows ? ['-NoProfile', '-NonInteractive', '-Command',
+    `& $env:TESTHUB_BACKEND_QA_MAVEN_WRAPPER ${mavenArgs.map(value => `'${value}'`).join(' ')}; exit $LASTEXITCODE`]
+    : mavenArgs
   child = spawn(executable, args, { cwd: root, env, stdio: 'inherit' })
   testCode = await new Promise((resolve, reject) => { child.once('error', reject); child.once('close', code => resolve(code ?? 1)) })
   process.exitCode = testCode

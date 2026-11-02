@@ -1,10 +1,12 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import router from '@/router'
+import { useSessionStore } from '@/stores/session'
 
 describe('router access', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+    localStorage.clear()
     globalThis.fetch = vi.fn().mockResolvedValue(new Response(null, { status: 401 }))
   })
 
@@ -18,6 +20,29 @@ describe('router access', () => {
     await router.push('/mock/share/01J7F6WHVXGFQ3WJ41GXZW0SNP')
     await router.isReady()
     expect(router.currentRoute.value.path).toBe('/mock/share/01J7F6WHVXGFQ3WJ41GXZW0SNP')
+  })
+
+  it('renders the public login route when the initial session request fails', async () => {
+    await router.push('/mock/share/qa-network-check')
+    globalThis.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'))
+    useSessionStore().initialized = false
+    await router.push('/login')
+    expect(router.currentRoute.value.path).toBe('/login')
+    expect(useSessionStore().initializationError).toContain('无法连接 Platform API')
+  })
+
+  it('allows reauthentication when the server has invalidated a cached session', async () => {
+    const session = useSessionStore()
+    session.initialized = true
+    session.signedIn = true
+    session.profile = { id: 'qa-user', account: 'qa-user', email: 'qa@example.test', displayName: '测试用户', authenticatedAt: '' }
+    session.selectProject('qa-project')
+    await router.push('/dashboard')
+    await router.push('/login')
+    expect(router.currentRoute.value.path).toBe('/login')
+    expect(session.signedIn).toBe(false)
+    expect(session.projectId).toBe('')
+    expect(fetch).toHaveBeenCalledWith('/api/v1/auth/me', { credentials: 'include' })
   })
 
   it('allows signed-in users to open every product module', async () => {

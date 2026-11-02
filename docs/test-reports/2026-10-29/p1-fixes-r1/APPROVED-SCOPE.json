@@ -1,0 +1,24 @@
+{
+  "status": "IMPLEMENTATION_AUTHORIZED",
+  "date": "2026-10-29",
+  "approvedRules": {
+    "D02": "A",
+    "D05": "A/P0",
+    "D11": "A",
+    "D12": "A/30d/L0/G0",
+    "D03": "A",
+    "D25": "A/5s"
+  },
+  "observations": [
+    "OBS-03B-E002",
+    "OBS-03D-E006",
+    "OBS-07-S005",
+    "OBS-07-E013",
+    "OBS-08-E011",
+    "OBS-16-E003"
+  ],
+  "oldCiphertextBulkDeletionAuthorized": false,
+  "otherObservationsDeferred": 31,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED"
+}

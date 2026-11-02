@@ -14,7 +14,7 @@ const projectId = computed({ get: () => session.projectId, set: (value: string) 
 const templates = ref<NotificationTemplate[]>([]), deliveries = ref<NotificationDelivery[]>([])
 const loading = ref(false), loadError = ref(''), saving = ref(false), visible = ref(false)
 const editingId = ref<string | null>(null), existingSecret = ref(false)
-const pending = reactive(new Set<string>())
+const pending = reactive(new Map<string, symbol>())
 let disposed = false, requestSequence = 0, viewSequence = 0, formSequence = 0, formProjectId = ''
 const current = (project: string, view: number) => !disposed && project === projectId.value && view === viewSequence
 const channels = ['EMAIL', 'WEBHOOK', 'WECHAT', 'DINGTALK']
@@ -23,17 +23,18 @@ const form = reactive(initial())
 const projects = computed(() => session.projects)
 const selectedProject = computed(() => session.currentProject)
 const date = (value: string) => new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
-function cancel() { formSequence++; form.signingSecret = '' }
-function captureForm() { formSequence++; formProjectId = projectId.value }
+function cancel() { formSequence++; saving.value = false; form.signingSecret = '' }
+function captureForm() { formSequence++; saving.value = false; formProjectId = projectId.value }
 async function read<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { credentials: 'include', ...init })
   const body = await response.json().catch(() => ({})) as ApiEnvelope<T> & { message?: string }
   if (!response.ok) throw new Error(body.message ?? '请求失败，请稍后重试')
   return body.data
 }
-async function mutate(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown) {
+async function mutate(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, canSend?: () => boolean) {
   const encoded = body === undefined ? undefined : JSON.stringify(body)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (canSend && !canSend()) throw new Error('操作已取消')
   await read<void>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: encoded })
 }
 async function loadTemplates() {
@@ -57,7 +58,7 @@ async function openSync() {
   catch (error) { Message.error(error instanceof Error ? error.message : '无法打开通知模板同步') }
 }
 function create() {
-  if (!projectId.value || loading.value) return
+  if (disposed || !selectedProject.value) return
   captureForm(); editingId.value = null; existingSecret.value = false; Object.assign(form, initial()); visible.value = true
 }
 function edit(template: NotificationTemplate) {
@@ -68,16 +69,17 @@ function edit(template: NotificationTemplate) {
   visible.value = true
 }
 async function save(): Promise<boolean> {
-  if (saving.value || disposed) return false
+  if (saving.value || disposed || !visible.value) return false
   if (!form.name.trim() || !form.eventCode.trim() || !form.subjectTemplate.trim() || !form.bodyTemplate.trim()) {
     Message.warning('请填写模板名称、事件编码、主题和正文'); return false
   }
   const project = formProjectId, view = viewSequence, sequence = formSequence, id = editingId.value, input = { ...form }
+  const canSave = () => current(project, view) && sequence === formSequence
   if (!current(project, view)) return false
   saving.value = true
   try {
     const url = `/api/v1/projects/${project}/notification-templates` + (id ? `/${id}` : '')
-    await mutate(url, id ? 'PUT' : 'POST', input)
+    await mutate(url, id ? 'PUT' : 'POST', input, canSave)
     if (!current(project, view) || sequence !== formSequence) return false
     visible.value = false; form.signingSecret = ''
     await loadTemplates()
@@ -86,19 +88,20 @@ async function save(): Promise<boolean> {
   } catch (error) {
     if (current(project, view) && sequence === formSequence) Message.error(error instanceof Error ? error.message : '保存失败')
     return false
-  } finally { saving.value = false }
+  } finally { if (sequence === formSequence) saving.value = false }
 }
 async function action(key: string, url: string, method: 'POST' | 'DELETE', message: string) {
   const project = projectId.value, view = viewSequence
   if (disposed || !project || pending.has(key)) return
-  pending.add(key)
+  const token = Symbol(key)
+  pending.set(key, token)
   try {
-    await mutate(url, method)
+    await mutate(url, method, undefined, () => current(project, view) && pending.get(key) === token)
     if (!current(project, view)) return
     await loadTemplates()
     if (current(project, view)) Message.success(message)
   } catch (error) { if (current(project, view)) Message.error(error instanceof Error ? error.message : '操作失败') }
-  finally { pending.delete(key) }
+  finally { if (pending.get(key) === token) pending.delete(key) }
 }
 async function retry(delivery: NotificationDelivery) {
   await action('retry:' + delivery.id, `/api/v1/projects/${projectId.value}/notification-deliveries/${delivery.id}/retry`, 'POST', '通知已重新进入投递队列')
@@ -106,7 +109,7 @@ async function retry(delivery: NotificationDelivery) {
 async function remove(template: NotificationTemplate) {
   await action('delete:' + template.id, `/api/v1/projects/${projectId.value}/notification-templates/${template.id}`, 'DELETE', '通知模板已删除')
 }
-watch(() => projectId.value, () => { viewSequence++; requestSequence++; cancel(); visible.value = false; void loadTemplates() }, { flush: 'sync' })
+watch([projectId, () => session.authGeneration, () => session.profile?.id, () => session.profile?.authenticatedAt, () => session.signedIn], () => { viewSequence++; pending.clear(); requestSequence++; cancel(); visible.value = false; void loadTemplates() }, { flush: 'sync' })
 watch(() => form.channel, value => { if (value !== 'WEBHOOK') form.signingSecret = '' }, { flush: 'sync' })
 onBeforeUnmount(() => { disposed = true; requestSequence++; cancel() })
 onMounted(loadTemplates)
@@ -120,7 +123,7 @@ onMounted(loadTemplates)
     <a-alert v-if="isAccountDesktop()" type="info">可从本地工作区复制停用模板定义，接收地址与签名密钥需在本账号重新配置。<a-button type="text" @click="openAccountTransfer">本地资料迁入账号</a-button></a-alert>
     <a-alert v-if="isLocalDesktop() || isAccountDesktop()" type="info">可绑定本地项目与账号项目，联网时自动同步模板定义；新模板保持停用，地址、密钥和投递历史独立保留。<a-button type="text" @click="openSync">通知模板同步</a-button></a-alert>
     <section class="panel template-summary"><div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code }}</small></div><a-select v-model="projectId" :style="{ width: '240px' }"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select><div><span>模板总数</span><strong>{{ templates.length }}</strong></div><div><span>已启用</span><strong>{{ templates.filter((item) => item.enabled).length }}</strong></div></section>
-    <section class="panel data-panel"><div class="template-toolbar"><div><a-tag color="arcoblue">项目级模板</a-tag><span class="toolbar-note">事件编码可被任务、流水线和 Webhook 适配器复用</span></div><a-button type="primary" :disabled="!projectId || loading" @click="create"><icon-plus /> 新建模板</a-button></div><a-spin :loading="loading"><a-table :data="templates" :pagination="false" row-key="id"><template #columns><a-table-column title="模板名称" data-index="name"><template #cell="{ record }"><strong>{{ record.name }}</strong><small class="template-meta">{{ record.eventCode }}</small></template></a-table-column><a-table-column title="渠道" data-index="channel"><template #cell="{ record }"><a-tag :color="record.channel === 'EMAIL' ? 'arcoblue' : record.channel === 'WEBHOOK' ? 'purple' : 'orange'">{{ record.channel }}</a-tag></template></a-table-column><a-table-column title="主题模板" data-index="subjectTemplate"><template #cell="{ record }"><span class="ellipsis">{{ record.subjectTemplate }}</span></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-badge :status="record.enabled ? 'success' : 'normal'" :text="record.enabled ? (record.channel === 'WEBHOOK' && (!record.targetUrl || !record.signingSecretConfigured) ? '待完善投递配置' : '已启用') : '已停用'" /></template></a-table-column><a-table-column title="更新时间" data-index="updatedAt"><template #cell="{ record }">{{ date(record.updatedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" @click="edit(record)">编辑</a-button><a-popconfirm content="确定删除模板？已有待发记录仍会按原记录投递，历史记录保留。" @ok="remove(record)"><a-button type="text" status="danger" :loading="pending.has('delete:' + record.id)">删除</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table></a-spin><a-empty v-if="!loading && templates.length === 0" description="当前项目还没有通知模板，先创建一个用于任务和集成通知。" /></section>
+    <section class="panel data-panel"><div class="template-toolbar"><div><a-tag color="arcoblue">项目级模板</a-tag><span class="toolbar-note">事件编码可被任务、流水线和 Webhook 适配器复用</span></div><a-button type="primary" :disabled="!selectedProject" @click="create"><icon-plus /> 新建模板</a-button></div><a-spin :loading="loading"><a-table :data="templates" :pagination="false" row-key="id"><template #columns><a-table-column title="模板名称" data-index="name"><template #cell="{ record }"><strong>{{ record.name }}</strong><small class="template-meta">{{ record.eventCode }}</small></template></a-table-column><a-table-column title="渠道" data-index="channel"><template #cell="{ record }"><a-tag :color="record.channel === 'EMAIL' ? 'arcoblue' : record.channel === 'WEBHOOK' ? 'purple' : 'orange'">{{ record.channel }}</a-tag></template></a-table-column><a-table-column title="主题模板" data-index="subjectTemplate"><template #cell="{ record }"><span class="ellipsis">{{ record.subjectTemplate }}</span></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-badge :status="record.enabled ? 'success' : 'normal'" :text="record.enabled ? (record.channel === 'WEBHOOK' && (!record.targetUrl || !record.signingSecretConfigured) ? '待完善投递配置' : '已启用') : '已停用'" /></template></a-table-column><a-table-column title="更新时间" data-index="updatedAt"><template #cell="{ record }">{{ date(record.updatedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" @click="edit(record)">编辑</a-button><a-popconfirm content="确定删除模板？已有待发记录仍会按原记录投递，历史记录保留。" @ok="remove(record)"><a-button type="text" status="danger" :loading="pending.has('delete:' + record.id)">删除</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table></a-spin><a-empty v-if="!loading && templates.length === 0" description="当前项目还没有通知模板，先创建一个用于任务和集成通知。" /></section>
     <section class="integration-grid">
       <article class="panel contract-panel">
         <div class="panel-title"><div><h3>质量报告 Webhook 契约</h3><p>CI 或自建服务使用签名头验证来源，并根据事件编码路由。</p></div><a-tag color="purple">HMAC-SHA256</a-tag></div><div class="contract-headers"><code>X-TestHub-Event</code><span>quality.report.ready / quality.report.risk</span><code>X-TestHub-Delivery-Id</code><span>幂等投递标识</span><code>X-TestHub-Timestamp</code><span>Unix 秒级时间戳</span><code>X-TestHub-Signature</code><span>sha256=HMAC(secret, timestamp + '\n' + body)</span></div><pre>curl -X POST "$WEBHOOK_URL" \

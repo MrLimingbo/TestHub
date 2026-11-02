@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-29",
+  "timezone": "Asia/Shanghai",
+  "status": "AWAITING_USER_REVIEW",
+  "approvedOverallReport": "2026-10-28/OVERALL-TEST-REPORT.md",
+  "observations": 47,
+  "priorityCounts": {
+    "P1": 6,
+    "P2": 30,
+    "P3": 11
+  },
+  "tracks": {
+    "RULE": 35,
+    "DIRECT": 10,
+    "SPEC": 2
+  },
+  "directFixCandidates": 10,
+  "ruleDependentObservations": 35,
+  "specificationDependentObservations": 2,
+  "decisionCards": 26,
+  "selectedDecisionCards": 0,
+  "blockedCases": 12,
+  "environmentGroups": 7,
+  "unconfirmedRisks": 1,
+  "productCodeChanges": 0,
+  "productTestRuns": 0,
+  "environmentProvisioningRuns": 0,
+  "executionCurrentlyAuthorized": false,
+  "ruleRecommendationsAutomaticallySelected": false,
+  "note": "整体报告已批准；本处理计划尚待审核。未执行修复、复验、安装、采购、CI、签名、发布或Git提交。",
+  "counterScope": "原梳理阶段快照；本轮实现与执行计数见direct-fixes-r1/summary.json",
+  "currentFollowup": {
+    "status": "APPROVED",
+    "approvedDirectCandidates": 10,
+    "fixedVerifiedCandidates": 10,
+    "deferredObservations": 37,
+    "deferredEnvironmentBlockedCases": 12,
+    "report": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-29/direct-fixes-r1/REPORT.md",
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "approvedFixedCandidates": 10,
+    "approvalRecord": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-29/direct-fixes-r1/REVIEW-APPROVAL.json"
+  },
+  "currentRuleReview": {
+    "status": "AWAITING_USER_RULE_REVIEW",
+    "p1Observations": 6,
+    "otherDeferredObservations": 31,
+    "environmentBlockedCases": 12,
+    "executionAuthorized": false,
+    "report": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-29/p1-rule-review/P1-RULES-AND-ACCEPTANCE.md"
+  }
+}

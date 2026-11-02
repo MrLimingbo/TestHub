@@ -1,0 +1,550 @@
+[
+  {
+    "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "recovery",
+        "seconds": 0.013,
+        "status": "PASS"
+      },
+      {
+        "name": "failedDependency",
+        "seconds": 0.003,
+        "status": "PASS"
+      },
+      {
+        "name": "saturation",
+        "seconds": 4.814,
+        "status": "PASS"
+      },
+      {
+        "name": "deadline",
+        "seconds": 4.812,
+        "status": "PASS"
+      },
+      {
+        "name": "healthy",
+        "seconds": 0.003,
+        "status": "PASS"
+      },
+      {
+        "name": "permissionStatus",
+        "seconds": 0.181,
+        "status": "PASS"
+      },
+      {
+        "name": "profileReadiness",
+        "seconds": 0.002,
+        "status": "PASS"
+      },
+      {
+        "name": "businessErrors",
+        "seconds": 0.082,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+    "tests": 15,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "idempotentCleanup",
+        "seconds": 0.081,
+        "status": "PASS"
+      },
+      {
+        "name": "summaryOnly",
+        "seconds": 0.082,
+        "status": "PASS"
+      },
+      {
+        "name": "transferCannotBypass",
+        "seconds": 0.082,
+        "status": "PASS"
+      },
+      {
+        "name": "unexpiredNotCleared",
+        "seconds": 0.079,
+        "status": "PASS"
+      },
+      {
+        "name": "beforeCutoff",
+        "seconds": 0.079,
+        "status": "PASS"
+      },
+      {
+        "name": "exactCutoff",
+        "seconds": 0.076,
+        "status": "PASS"
+      },
+      {
+        "name": "activeRoundTrip",
+        "seconds": 0.077,
+        "status": "PASS"
+      },
+      {
+        "name": "legacyCutoff",
+        "seconds": 0.077,
+        "status": "PASS"
+      },
+      {
+        "name": "futureTime",
+        "seconds": 0.078,
+        "status": "PASS"
+      },
+      {
+        "name": "unreadable",
+        "seconds": 0.082,
+        "status": "PASS"
+      },
+      {
+        "name": "managedCleanup",
+        "seconds": 0.08,
+        "status": "PASS"
+      },
+      {
+        "name": "inactiveFields",
+        "seconds": 0.076,
+        "status": "PASS"
+      },
+      {
+        "name": "importedRetention",
+        "seconds": 0.075,
+        "status": "PASS"
+      },
+      {
+        "name": "noRenewal",
+        "seconds": 0.074,
+        "status": "PASS"
+      },
+      {
+        "name": "activeAuth",
+        "seconds": 0.075,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.P1CompatibilityTests",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "cases": [
+      {
+        "name": "h2UpgradePreservesLegacyCiphertextAndDefaultsSecurityVersion",
+        "seconds": 0.294,
+        "status": "PASS"
+      },
+      {
+        "name": "previouslySerializedAccountDefaultsItsMissingSecurityVersionToZero",
+        "seconds": 0.344,
+        "status": "PASS"
+      },
+      {
+        "name": "mysqlUpgradePreservesLegacyCiphertextAndDefaultsSecurityVersion",
+        "seconds": 0.0,
+        "status": "SKIP"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "concurrentTypes",
+        "seconds": 0.086,
+        "status": "PASS"
+      },
+      {
+        "name": "secretToOrdinary",
+        "seconds": 0.078,
+        "status": "PASS"
+      },
+      {
+        "name": "normalization",
+        "seconds": 0.078,
+        "status": "PASS"
+      },
+      {
+        "name": "isolatedScopes",
+        "seconds": 0.151,
+        "status": "PASS"
+      },
+      {
+        "name": "reserved",
+        "seconds": 0.078,
+        "status": "PASS"
+      },
+      {
+        "name": "validation",
+        "seconds": 0.079,
+        "status": "PASS"
+      },
+      {
+        "name": "ordinaryToSecret",
+        "seconds": 0.079,
+        "status": "PASS"
+      },
+      {
+        "name": "ordinaryUpdate",
+        "seconds": 0.079,
+        "status": "PASS"
+      },
+      {
+        "name": "secretUpdate",
+        "seconds": 0.078,
+        "status": "PASS"
+      },
+      {
+        "name": "permissions",
+        "seconds": 0.15,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "reenabled",
+        "seconds": 0.106,
+        "status": "PASS"
+      },
+      {
+        "name": "enabledQueue",
+        "seconds": 0.084,
+        "status": "PASS"
+      },
+      {
+        "name": "disabledQueue",
+        "seconds": 0.08,
+        "status": "PASS"
+      },
+      {
+        "name": "signedWebhook",
+        "seconds": 0.093,
+        "status": "PASS"
+      },
+      {
+        "name": "readonlyPreview",
+        "seconds": 0.082,
+        "status": "PASS"
+      },
+      {
+        "name": "pat",
+        "seconds": 0.104,
+        "status": "PASS"
+      },
+      {
+        "name": "race",
+        "seconds": 0.088,
+        "status": "PASS"
+      },
+      {
+        "name": "acceptedContinues",
+        "seconds": 0.09,
+        "status": "PASS"
+      },
+      {
+        "name": "profileOverride",
+        "seconds": 0.086,
+        "status": "PASS"
+      },
+      {
+        "name": "undefinedStillLegacy",
+        "seconds": 0.079,
+        "status": "PASS"
+      },
+      {
+        "name": "quartzSkip",
+        "seconds": 0.09,
+        "status": "PASS"
+      },
+      {
+        "name": "dataSet",
+        "seconds": 0.097,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.storage.P1StorageProbeTests",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "lazyCreationAndItsCacheUseOnlyTheExistingBusinessClient",
+        "seconds": 0.052,
+        "status": "PASS"
+      },
+      {
+        "name": "readinessUsesItsBoundedClientWithoutTouchingTheFileClient",
+        "seconds": 0.001,
+        "status": "PASS"
+      },
+      {
+        "name": "destroyingTheStorageClosesOnlyItsOwnedProbeClient",
+        "seconds": 0.0,
+        "status": "PASS"
+      },
+      {
+        "name": "failedProbeCannotChangeBusinessBucketInitialization",
+        "seconds": 0.001,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.NotificationOperationsFixesFlowTests",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "aMissingLazyBucketRemainsReady",
+        "seconds": 0.011,
+        "status": "PASS"
+      },
+      {
+        "name": "readinessRecoversWhenStorageReturns",
+        "seconds": 0.003,
+        "status": "PASS"
+      },
+      {
+        "name": "unavailableStorageFailsReadinessWithoutExposingDetailsOrFailingLiveness",
+        "seconds": 0.018,
+        "status": "PASS"
+      },
+      {
+        "name": "anExistingBucketRemainsReady",
+        "seconds": 0.002,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.P1SessionRulesFlowTests",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "selfReset",
+        "seconds": 0.171,
+        "status": "PASS"
+      },
+      {
+        "name": "deleteAccount",
+        "seconds": 0.154,
+        "status": "PASS"
+      },
+      {
+        "name": "noResurrection",
+        "seconds": 0.153,
+        "status": "PASS"
+      },
+      {
+        "name": "patDisabledOrDeleted",
+        "seconds": 0.223,
+        "status": "PASS"
+      },
+      {
+        "name": "patSurvivesPasswordReset",
+        "seconds": 0.22,
+        "status": "PASS"
+      },
+      {
+        "name": "normal",
+        "seconds": 0.151,
+        "status": "PASS"
+      },
+      {
+        "name": "freshLogin",
+        "seconds": 0.442,
+        "status": "PASS"
+      },
+      {
+        "name": "otherAccount",
+        "seconds": 0.218,
+        "status": "PASS"
+      },
+      {
+        "name": "disable",
+        "seconds": 0.148,
+        "status": "PASS"
+      },
+      {
+        "name": "resetRejectsReadAndWrite",
+        "seconds": 0.221,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "failedCleanupRetainsDataAndRetriesOnTheNextInvocation",
+        "seconds": 0.004,
+        "status": "PASS"
+      },
+      {
+        "name": "grpcUnaryRetainsOnlyActiveAuthenticationFields(String)[1]",
+        "seconds": 0.045,
+        "status": "PASS"
+      },
+      {
+        "name": "grpcUnaryRetainsOnlyActiveAuthenticationFields(String)[2]",
+        "seconds": 0.002,
+        "status": "PASS"
+      },
+      {
+        "name": "grpcUnaryRetainsOnlyActiveAuthenticationFields(String)[3]",
+        "seconds": 0.002,
+        "status": "PASS"
+      },
+      {
+        "name": "grpcUnaryRetainsOnlyActiveAuthenticationFields(String)[4]",
+        "seconds": 0.002,
+        "status": "PASS"
+      },
+      {
+        "name": "encryptionFailureCannotPersistPlaintextOrReportDraftSuccess",
+        "seconds": 0.008,
+        "status": "PASS"
+      },
+      {
+        "name": "unknownCreationTimeFailsClosedWithoutDeletingOrInventingTime",
+        "seconds": 0.001,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "browserRoleMatrix",
+        "seconds": 0.983,
+        "status": "PASS"
+      },
+      {
+        "name": "historyShapeDoesNotChangePermission",
+        "seconds": 0.109,
+        "status": "PASS"
+      },
+      {
+        "name": "readScope",
+        "seconds": 0.088,
+        "status": "PASS"
+      },
+      {
+        "name": "scopesDoNotImplyOthers",
+        "seconds": 0.088,
+        "status": "PASS"
+      },
+      {
+        "name": "writeScope",
+        "seconds": 0.097,
+        "status": "PASS"
+      },
+      {
+        "name": "bothScopes",
+        "seconds": 0.086,
+        "status": "PASS"
+      },
+      {
+        "name": "roleRevocation",
+        "seconds": 0.087,
+        "status": "PASS"
+      },
+      {
+        "name": "tokenBoundary",
+        "seconds": 0.159,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.shared.api.P1DependencyFailureTests",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "sessionPhaseFailureReturnsSharedSanitized503WithoutForwardingTheBrokenSession",
+        "seconds": 0.001,
+        "status": "PASS"
+      },
+      {
+        "name": "redisProgrammingErrorsAreNotDisguisedAsOutages",
+        "seconds": 0.0,
+        "status": "PASS"
+      },
+      {
+        "name": "jdbcConnectionFailureIsUnavailable",
+        "seconds": 0.0,
+        "status": "PASS"
+      },
+      {
+        "name": "unrelatedSocketErrorsAreNotBroadlyReclassified",
+        "seconds": 0.001,
+        "status": "PASS"
+      },
+      {
+        "name": "wrappedRedisConnectionResetIsUnavailable",
+        "seconds": 0.0,
+        "status": "PASS"
+      },
+      {
+        "name": "redisCommandTimeoutIsUnavailable",
+        "seconds": 0.0,
+        "status": "PASS"
+      }
+    ]
+  },
+  {
+    "class": "io.testhub.platform.P1RedisHttpFlowTests",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "cases": [
+      {
+        "name": "realRedisRefusalStallRecoveryAndSessionInvalidationOverHttp",
+        "seconds": 0.0,
+        "status": "SKIP"
+      }
+    ]
+  }
+]

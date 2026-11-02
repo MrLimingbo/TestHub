@@ -1,0 +1,76 @@
+{
+  "platform": "darwin",
+  "architecture": "arm64",
+  "java": [
+    "openjdk 21.0.12.1 2026-08-18 LTS",
+    "OpenJDK Runtime Environment Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS)",
+    "OpenJDK 64-Bit Server VM Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS, mixed mode)"
+  ],
+  "commands": [
+    {
+      "id": "full-frontend",
+      "command": "npx pnpm@10.13.1 exec vitest run --maxWorkers=2",
+      "exitCode": 0,
+      "occurrences": 834
+    },
+    {
+      "id": "full-H2-package",
+      "command": "JAVA_HOME=<native JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "occurrences": 1095
+    },
+    {
+      "id": "full-MySQL-Redis-S3",
+      "command": "JAVA_HOME=<native JDK21> node scripts/desktop/test-mysql-backend.mjs",
+      "exitCode": 0,
+      "occurrences": 1095
+    },
+    {
+      "id": "latest-P2-package",
+      "command": "JAVA_HOME=<native JDK21> node scripts/qa/test-p2-backend.mjs 'P2*Tests' package",
+      "exitCode": 0,
+      "occurrences": 60
+    },
+    {
+      "id": "headless-UI",
+      "command": "node scripts/qa/p2-observation-ui.mjs",
+      "exitCode": 0,
+      "occurrences": 4
+    },
+    {
+      "id": "real-HTTP-restart",
+      "command": "JAVA_HOME=<native JDK21> node scripts/qa/p2-desktop-http.mjs",
+      "exitCode": 0,
+      "occurrences": 4
+    },
+    {
+      "id": "lint",
+      "command": "npx pnpm@10.13.1 lint",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "build",
+      "command": "npx pnpm@10.13.1 build",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "whitespace",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "typecheck",
+      "command": "npx pnpm@10.13.1 typecheck",
+      "exitCode": 0,
+      "occurrences": null
+    }
+  ],
+  "finalJarSha256": "91397c16901d91aeab86a03d69534dede105c6a0701913ce0d4042f3ae67dbd2",
+  "distIndexSha256": "2298fee706b89d6fc8df3998a37f2283293193aba3f14d8b14a2ba58236ea4ce",
+  "countsAreNotAdditive": true,
+  "additionalFocusedVerification": "同一D10用例补齐首/中/末写入故障矩阵后，60条P2专项再次全部通过，不增加正式用例分母。",
+  "finalFrontendFixture": "日期测试按页面初始值计算前一天与非法结束日期，消除固定日期依赖后，75个套件834条再次全通过。"
+}

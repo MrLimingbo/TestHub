@@ -1,0 +1,13 @@
+﻿编号,模块,用例,检查目标,环境组,来源
+BLOCK-12-D001,移动端自动化,D001,Android设备七种步骤及PNG,ENV-ANDROID,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/execution-final.json
+BLOCK-12-D002,移动端自动化,D002,iOS设备七种步骤及PNG,ENV-IOS,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/execution-final.json
+BLOCK-12-D003,移动端自动化,D003,真实设备断开与授权错误,"ENV-ANDROID,ENV-IOS",/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/execution-final.json
+BLOCK-12-D004,移动端自动化,D004,真实设备超时取消与会话释放,"ENV-ANDROID,ENV-IOS",/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/execution-final.json
+BLOCK-15-F016,桌面工作区与跨端,F016,大小写重名拒绝,ENV-CASE-FS,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json
+BLOCK-15-X001,桌面工作区与跨端,X001,Intel Mac原生运行,ENV-INTEL,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json
+BLOCK-15-X002,桌面工作区与跨端,X002,Windows原生运行与恢复,ENV-WINDOWS,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json
+BLOCK-15-X003,桌面工作区与跨端,X003,正式安装及Gatekeeper首启,ENV-CLEAN-INSTALL,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json
+BLOCK-16-Z001,横向回归,Z001,Intel Mac原生包及运行,ENV-INTEL,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/execution-final.json
+BLOCK-16-Z002,横向回归,Z002,Windows原生安装与运行,ENV-WINDOWS,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/execution-final.json
+BLOCK-16-Z003,横向回归,Z003,发行者签名与公证,ENV-SIGNING,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/execution-final.json
+BLOCK-16-Z004,横向回归,Z004,Finder/Gatekeeper干净机器安装首启,ENV-CLEAN-INSTALL,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/execution-final.json

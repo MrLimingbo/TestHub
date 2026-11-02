@@ -1,3 +1,4 @@
+import { createPinia } from 'pinia'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import ArcoVue, { Button, Input, Modal, Popconfirm, Textarea } from '@arco-design/web-vue'
@@ -18,7 +19,7 @@ async function setup(component: typeof PluginsPage | typeof OperationsPage, over
     const data = custom ?? (url.endsWith('/capabilities') ? { systemAdministration: true } : url.endsWith('/csrf') ? { token: 'fixture', headerName: 'X-CSRF' } : url.endsWith('/overview') ? overview : url.endsWith('/plugins') ? [plugin] : url.endsWith('/adapters') ? [adapter] : url.endsWith('/signing-keys') ? [key] : url.endsWith('/adapter-definitions') ? [{ type: 'OIDC', displayName: 'OIDC', category: '身份', requiredFields: ['clientId', 'clientSecret'], description: 'QA' }] : {})
     return { ok: true, json: async () => ({ data }) }
   }))
-  const wrapper = mount(component, { global: { plugins: [ArcoVue], stubs: { Modal: true, Drawer: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } })
+  const wrapper = mount(component, { global: { plugins: [createPinia(), ArcoVue], stubs: { Modal: true, Drawer: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } })
   wrappers.push(wrapper); await flushPromises(); return wrapper
 }
 const button = (w: ReturnType<typeof mount>, text: string) => w.findAllComponents(Button).find(b => b.text() === text)!
@@ -55,12 +56,12 @@ describe('extensions capability and forms', () => {
     const pending = submit(w, 2); expect(await submit(w, 2)).toBe(false); await flushPromises(); expect(mutations()).toHaveLength(1)
     release(failed); expect(await pending).toBe(false); expect(modal(w, 2).props('visible')).toBe(true); expect(modal(w, 2).findComponent(Textarea).props('modelValue')).toContain('qa-secret-draft')
   })
-  it('adapter target and fields are frozen before CSRF; cancelled callback cannot close replacement', async () => {
+  it('adapter cancellation during CSRF prevents the old write and preserves replacement', async () => {
     let release!: (value: unknown) => void
     const w = await setup(PluginsPage, url => url.endsWith('/csrf') ? new Promise(r => { release = r }) : undefined)
     button(w, '编辑').vm.$emit('click'); await flushPromises(); const pending = submit(w, 2); await flushPromises()
     modal(w, 2).vm.$emit('cancel'); button(w, '新建适配器').vm.$emit('click'); await flushPromises()
-    release({ token: 'fixture', headerName: 'X-CSRF' }); expect(await pending).toBe(false); expect(mutations()[0]![0]).toBe('/api/v1/extensions/adapters/adapter-one'); expect(JSON.parse(String(mutations()[0]![1]!.body)).configuration).toBeNull(); expect(modal(w, 2).props('visible')).toBe(true)
+    release({ token: 'fixture', headerName: 'X-CSRF' }); expect(await pending).toBe(false); expect(mutations()).toHaveLength(0); expect(modal(w, 2).props('visible')).toBe(true)
   })
   it('package failure retains exact signed characters and cancel clears manifest/signature', async () => {
     const w = await setup(PluginsPage, (_, init) => init?.method === 'POST' ? failed : undefined)

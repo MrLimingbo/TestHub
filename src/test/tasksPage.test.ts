@@ -47,14 +47,14 @@ describe('Task registration page', () => {
     expect(modal(wrapper).props('visible')).toBe(false); expect(wrapper.text()).toContain('项目二登记')
     release([task('p1', '迟到旧任务')]); await flushPromises(); expect(wrapper.text()).not.toContain('迟到旧任务'); expect(wrapper.text()).toContain('项目二登记')
   })
-  it('captures the edited project before awaiting CSRF and leaves the new project intact', async () => {
+  it('cancels the obsolete edited form during CSRF and leaves the new project intact', async () => {
     let release!: (value: unknown) => void
     const { wrapper, session } = await setup(url => url.endsWith('/csrf') ? new Promise(resolve => { release = resolve }) : undefined)
     button(wrapper, '编辑').vm.$emit('click'); await flushPromises()
     const save = modal(wrapper).props('onBeforeOk')!(vi.fn()); await flushPromises(); session.selectProject('p2'); await flushPromises()
     release({ token: 'fixture', headerName: 'X-CSRF' }); await flushPromises(); expect(await save).toBe(false)
-    const call = vi.mocked(fetch).mock.calls.find(([, init]) => init?.method === 'PUT')!
-    expect(String(call[0])).toBe('/api/v1/projects/p1/tasks/t-p1'); expect(wrapper.text()).toContain('项目二登记'); expect(modal(wrapper).props('visible')).toBe(false)
+    const calls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === 'PUT')
+    expect(calls).toHaveLength(0); expect(wrapper.text()).toContain('项目二登记'); expect(modal(wrapper).props('visible')).toBe(false)
   })
   it('a failed new-project load clears old rows and displays the failure', async () => {
     const { wrapper, session } = await setup(url => url.endsWith('/p2/tasks') ? { ok: false, json: async () => ({ message: '服务暂不可用' }) } : undefined)

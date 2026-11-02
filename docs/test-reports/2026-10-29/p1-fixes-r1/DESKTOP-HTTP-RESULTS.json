@@ -1,0 +1,47 @@
+{
+  "headless": true,
+  "realPackagedJvm": true,
+  "desktopProfile": true,
+  "electronUpgradeTest": false,
+  "cases": [
+    {
+      "id": "P1-HTTP-01",
+      "title": "两个真实浏览器会话可读取账号及桌面就绪",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-HTTP-02",
+      "title": "JVM重启后合法持久会话仍可用且桌面不要求Redis",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-HTTP-03",
+      "title": "ApplicationReadyEvent补偿清理仅清新策略到期密文",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-HTTP-04",
+      "title": "管理员真实HTTP重置密码成功且自身保持登录",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-HTTP-05",
+      "title": "重置后重启仍拒绝两个旧Cookie",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-HTTP-06",
+      "title": "旧密码不能新登录，新密码可登录",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-HTTP-07",
+      "title": "重复启动清理幂等，旧密文及未到期密文字节不变、摘要三行保留",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": true,
+  "passed": 7,
+  "failed": 0,
+  "status": "PASS"
+}

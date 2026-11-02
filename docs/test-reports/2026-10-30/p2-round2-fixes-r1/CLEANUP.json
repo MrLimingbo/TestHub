@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-02",
+  "complete": true,
+  "nativeHTTPWorkspacesRemoved": true,
+  "H2WrapperWorkspacesRemoved": true,
+  "mysqlComposeContainersNetworkVolumesRemoved": true,
+  "mysqlWrapperWorkspacesRemoved": true,
+  "ownedWorkspaceLeftovers": [],
+  "rawReportFilesRemoved": 292,
+  "temporaryWorkItemsRemoved": 72,
+  "retained": "脱敏逐条结果、先行设计/来源、批准依据、变更指纹及增量差异；两份可复用脚本留在scripts/qa/p2r2-*。",
+  "userWorkspacesOrSharedServicesRemoved": false,
+  "preexistingUnknownQaFoldersRemoved": false,
+  "installedRuntimeReplaced": false,
+  "upgradeInvestigationExecuted": false,
+  "ownedQaProcessesRemaining": [],
+  "runtimePreviousCopiesRemaining": []
+}

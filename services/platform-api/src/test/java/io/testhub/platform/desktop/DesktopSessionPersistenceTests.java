@@ -18,6 +18,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
+import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.transaction.support.TransactionTemplate;
 
 class DesktopSessionPersistenceTests {
@@ -82,6 +83,32 @@ class DesktopSessionPersistenceTests {
         assertThat(repository.findById(expired.getId())).isNull();
         implementation.cleanUpExpiredSessions();
         assertThat(JdbcClient.create(source).sql("SELECT COUNT(*) FROM desktop_session_attributes").query(Integer.class).single()).isZero();
+    }
+
+    @Test void widensPrincipalNamesWithoutInvalidatingVersionFiftySessions() {
+        var source = source();
+        Flyway.configure().dataSource(source).locations("classpath:db/desktop").target("50").load().migrate();
+        var sessions = contract(repository(source));
+        var existing = sessions.createSession();
+        existing.setAttribute("workspace", "preserved-after-email-upgrade");
+        existing.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME, "existing@example.test");
+        sessions.save(existing);
+
+        var migrated = Flyway.configure().dataSource(source).locations("classpath:db/desktop").target("51").load().migrate();
+        assertThat(migrated.migrationsExecuted).isEqualTo(1);
+        var reopened = contract(repository(source()));
+        assertThat((String) reopened.findById(existing.getId()).getAttribute("workspace"))
+                .isEqualTo("preserved-after-email-upgrade");
+        for (int length : new int[] {100, 101, 189, 190}) {
+            var session = reopened.createSession();
+            String email = "a".repeat(64) + "@" + "b".repeat(length - 70) + ".test";
+            session.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME, email);
+            reopened.save(session);
+            assertThat((String) reopened.findById(session.getId())
+                    .getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME)).isEqualTo(email);
+            assertThat(JdbcClient.create(source).sql("SELECT principal_name FROM desktop_session WHERE session_id = ?")
+                    .param(session.getId()).query(String.class).single()).isEqualTo(email);
+        }
     }
 
     // JDBC's concrete session type is package-private; exercise its public Session contract.

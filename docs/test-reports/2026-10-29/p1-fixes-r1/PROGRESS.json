@@ -1,0 +1,10 @@
+{
+  "status": "VERIFIED_AWAITING_USER_REVIEW",
+  "finalReport": "REPORT.md",
+  "remaining": [
+    "用户审核本批6项P1结果"
+  ],
+  "deferredObservations": 31,
+  "deferredEnvironmentBlockers": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED"
+}

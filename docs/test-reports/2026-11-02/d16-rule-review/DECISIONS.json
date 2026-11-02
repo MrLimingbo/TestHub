@@ -1,0 +1,121 @@
+{
+  "date": "2026-11-02",
+  "rule": "D16",
+  "priority": "P2",
+  "status": "PROPOSED_PENDING_RULE_REVIEW",
+  "observations": [
+    "OBS-08-E010",
+    "OBS-09-E013",
+    "OBS-10-E011",
+    "OBS-11-E021",
+    "OBS-12-E020",
+    "OBS-13-E018"
+  ],
+  "recommendedCombination": "D16-I=A,D16-N=A,D16-S=A,D16-NULL=A,D16-OLD=A",
+  "cards": [
+    {
+      "id": "D16-I",
+      "title": "整数字段按精确数学值还是JSON写法判定",
+      "recommendedOption": "A",
+      "optionA": "接受有限、精确、在业务范围内的整数值。10、10.0、1e1均代表整数10；1.5及1.0000000000000001拒绝。不能先转double/long再判断而丢精度。",
+      "optionB": "只接受JSON整数标记10；10.0和1e1即使值为整数也拒绝。",
+      "impact": "A保留数学上等值的数字写法，同时消除有损截断；B进一步收紧数字写法，可能影响浮点序列化客户端。",
+      "sources": [
+        "C02",
+        "C03",
+        "C06",
+        "C08",
+        "C10",
+        "C12",
+        "C14"
+      ],
+      "selectedOption": null,
+      "status": "PROPOSED_PENDING_RULE_REVIEW"
+    },
+    {
+      "id": "D16-N",
+      "title": "数字字符串是否兼容",
+      "recommendedOption": "A",
+      "optionA": "本矩阵数值字段只接受JSON number，拒绝\"10\"、\" 10 \"、\"10.0\"、\"NaN\"和布尔/数组/对象。错误率仍允许数值小数，但不接受数字字符串。",
+      "optionB": "显式兼容：整数字段接受首尾trim后[+-]?\\d+的十进制字符串（含前导零），范围内转整数；错误率另允许最多两位小数的十进制字符串；不接受指数、空串或非有限字面量字符串。",
+      "impact": "A会改变依赖Jackson或Long.parseLong隐式转换的旧调用方，需发布说明；B保留一个明确白名单，不能恢复小数截断。",
+      "sources": [
+        "H01",
+        "C01",
+        "C02",
+        "C04",
+        "C06",
+        "C08",
+        "C10",
+        "C12",
+        "C14"
+      ],
+      "selectedOption": null,
+      "status": "PROPOSED_PENDING_RULE_REVIEW"
+    },
+    {
+      "id": "D16-S",
+      "title": "文本、条件和变量是否允许数字转字符串",
+      "recommendedOption": "A",
+      "optionA": "仅本字段矩阵列明的字符串字段要求JSON string；拒绝数字/布尔/数组/对象自动转字符串。\"001\"、\"false\"、\"null\"和变量占位符按原文本规则保留；真实null沿用已有字段规则。",
+      "optionB": "显式兼容有限JSON数字和布尔转字符串：数字按精确十进制输出，不保留指数/冗余尾零，-0变0，10.0变\"10\"、1e1变\"10\"；布尔变\"true\"/\"false\"。数组/对象拒绝，转换后仍检查原长度和业务规则；null按原字段规则。",
+      "impact": "A防止001等标识/业务条件被转换改变含义；不改变API自动化config的通用多类型契约或Appium capabilities。",
+      "sources": [
+        "H02",
+        "C04",
+        "C06",
+        "C08",
+        "C09",
+        "C10",
+        "C11"
+      ],
+      "selectedOption": null,
+      "status": "PROPOSED_PENDING_RULE_REVIEW"
+    },
+    {
+      "id": "D16-NULL",
+      "title": "缺失/null与任务进度",
+      "recommendedOption": "A",
+      "optionA": "保留矩阵中既有可选字段的默认值、无阈值或永久有效语义；必填字段缺失/null返回400。任务PUT的progress改为必须显式提供0..100，不能因primitive默认0意外清零。",
+      "optionB": "其他字段同A；仅任务progress继续兼容缺失/null为0，并在接口说明中明示可能清零。",
+      "impact": "A对省略progress的旧任务客户端是行为变更；不改变QUEUED归0/SUCCEEDED归100的既有状态规则，非法输入先拒绝。",
+      "sources": [
+        "C05",
+        "C07",
+        "C09",
+        "C11",
+        "C12",
+        "C13",
+        "C14"
+      ],
+      "selectedOption": null,
+      "status": "PROPOSED_PENDING_RULE_REVIEW"
+    },
+    {
+      "id": "D16-OLD",
+      "title": "生效与存量兼容",
+      "recommendedOption": "A",
+      "optionA": "获准后对本矩阵字段可达的新建/编辑/导入/同步及新入队统一执行，不设继续有损转换的宽限期。旧记录可读、不批量重写；旧非法定义新执行应在预检拒绝，旧快照不改写，已运行任务不自动取消。",
+      "optionB": "先盘点旧客户端并提交兼容白名单及生效时间，再批准实现；当前不启用新类型约束。",
+      "impact": "A需要在发布说明列受影响字段和调用示例；历史已截断/字符串化的数据无法推断原值，不尝试恢复，不新增批量迁移。",
+      "sources": [
+        "H01",
+        "H02",
+        "C02",
+        "C03",
+        "C07",
+        "C09",
+        "C11",
+        "C13",
+        "C15"
+      ],
+      "selectedOption": null,
+      "status": "PROPOSED_PENDING_RULE_REVIEW"
+    }
+  ],
+  "implementationExecuted": false,
+  "dynamicTestsExecuted": false,
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED"
+}

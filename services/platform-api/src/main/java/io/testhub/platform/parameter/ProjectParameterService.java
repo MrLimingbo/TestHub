@@ -40,12 +40,13 @@ public class ProjectParameterService {
         parameters.lockProject(projectId);
         String normalizedEnvironment = normalizeEnvironment(environmentCode);
         String normalizedKey = normalizeKey(key);
-        if ("BASE_URL".equals(normalizedKey)) {
+        if ("BASE_URL".equalsIgnoreCase(normalizedKey)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BASE_URL 由环境基础地址维护，请前往环境管理修改");
         }
         if (value == null || value.length() > 20_000) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "参数值不能为空且不能超过 20000 字符");
         }
+        parameters.requireDefinedEnvironment(projectId, normalizedEnvironment);
         parameters.upsert(UlidCreator.getUlid().toString(), project.organizationId(), project.id(), normalizedEnvironment,
                 normalizedKey, value, principal.userId());
         audit.record(principal, project.organizationId(), project.id(), "PROJECT_PARAMETER_UPSERTED", "PROJECT_PARAMETER",
@@ -57,6 +58,9 @@ public class ProjectParameterService {
     public void delete(AuthenticatedPrincipal principal, String projectId, String parameterId) {
         ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, PARAMETER_WRITERS);
         parameters.lockProject(projectId);
+        if (parameters.findNonSecretKey(parameterId, projectId).filter("BASE_URL"::equalsIgnoreCase).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BASE_URL 由环境基础地址维护，请前往环境管理修改");
+        }
         parameters.delete(parameterId, projectId);
         audit.record(principal, project.organizationId(), project.id(), "PROJECT_PARAMETER_DELETED", "PROJECT_PARAMETER",
                 parameterId, java.util.Map.of());

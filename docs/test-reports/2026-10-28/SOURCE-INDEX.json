@@ -1,0 +1,279 @@
+{
+  "generatedAt": "2026-10-28T19:03:47+08:00",
+  "files": [
+    {
+      "path": "output/qa-20261023/module-01-auth/BUGS.md",
+      "sha256": "d1194086ec632b937e12356183f6750a13939e582eeb4de6719844817a83ccdf"
+    },
+    {
+      "path": "output/qa-20261023/module-01-auth/TEST-REPORT.md",
+      "sha256": "c5a578343225479e6dfbffb2317ba33a4b72e2a7bfb25514f3893aba8f92e4e0"
+    },
+    {
+      "path": "output/qa-20261023/module-01-auth/execution-results.json",
+      "sha256": "2929e108f56c72aeb32cbc0f86284c4b60f48498a972b64e266aba987dcc1f21"
+    },
+    {
+      "path": "output/qa-20261023/module-02-dashboard/BUGS.md",
+      "sha256": "d469802ec3ce948f67192df0105a32ab591a7d6aa8a452c7f3177db86cbb937f"
+    },
+    {
+      "path": "output/qa-20261023/module-02-dashboard/TEST-REPORT.md",
+      "sha256": "d08098a7f8e14c1923e2b177c2266c7fac7f193c77077fce148a5a5e9f8e9698"
+    },
+    {
+      "path": "output/qa-20261023/module-02-dashboard/execution-results.json",
+      "sha256": "cd4cbf8daf6cd892016159a1d81d4fce3864d9d6a8506995487c3c05b987c2eb"
+    },
+    {
+      "path": "output/qa-20261023/module-03a-projects/BUGS.md",
+      "sha256": "55bfc7c56ec70db530ee4af1f8c66d5ad07357b04083ac9bb86f7f1b81825d6c"
+    },
+    {
+      "path": "output/qa-20261023/module-03a-projects/TEST-REPORT.md",
+      "sha256": "e1abddc97cd7cd1a292c4b85c8dae9003e316c2bfd7e282a8c40be0228eaa480"
+    },
+    {
+      "path": "output/qa-20261023/module-03a-projects/execution-results.json",
+      "sha256": "1d1c581cfa11d0bc50668d8c6ca5aa9948ee7bd1e3becce011e172613db9a6d7"
+    },
+    {
+      "path": "output/qa-20261023/module-03b-environments/BUGS.md",
+      "sha256": "5044d9282194dbc0c713a205e8dcfb0ec0a7d2fc46cb54e4532c11c4f6250b6c"
+    },
+    {
+      "path": "output/qa-20261023/module-03b-environments/TEST-REPORT.md",
+      "sha256": "fbe8896d44500082ae07e570d96aa42ccfc0bd4f4b6b34bd4cca5c601ba59b25"
+    },
+    {
+      "path": "output/qa-20261023/module-03b-environments/execution-results.json",
+      "sha256": "764c7b4c54d3cbf831f55911fdce19da5c4201c92e6cba6f734bc15c43875bf0"
+    },
+    {
+      "path": "output/qa-20261024/module-03c-files-audit/BUGS.md",
+      "sha256": "fe63575285bc85d6edd9c1ca98f350d8e98343e76d1a536180283141734503fc"
+    },
+    {
+      "path": "output/qa-20261024/module-03c-files-audit/TEST-REPORT.md",
+      "sha256": "a847081c49937d4f789628535840957a08cddb551eeef9438ddff14da4e594b6"
+    },
+    {
+      "path": "output/qa-20261024/module-03c-files-audit/execution-results.json",
+      "sha256": "dc1067e6b6e7d8750c2bc862fac2e9be0d91202f354f08a6be745414eba4b700"
+    },
+    {
+      "path": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+      "sha256": "a3e40eee10ad6e8c753391fa98ffc9c6079f20a42fad0be4fc000c920290e68d"
+    },
+    {
+      "path": "output/qa-20261024/module-03d-accounts-config/regression-r1/TEST-REPORT.md",
+      "sha256": "e2d1f893e5273c0ffb49ed76b3d9fc88f2fbafd0a2b00382ed624ce69971f314"
+    },
+    {
+      "path": "output/qa-20261024/module-03d-accounts-config/regression-r1/execution-results.json",
+      "sha256": "2d52aad23e75f345b94bc73a8c67daa7d4c799b1d0f4017fdeec76816ebec5db"
+    },
+    {
+      "path": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+      "sha256": "91b186fd2dab0ccfa8d851d6a827fe20a7c785da845173384bcf1bd27d6e709e"
+    },
+    {
+      "path": "output/qa-20261024/module-04-functional-assets/regression-r1/TEST-REPORT.md",
+      "sha256": "a15771e03e28a6872cd2093c8ddabae1bc5e4510092cd7ab8904483d28a988b2"
+    },
+    {
+      "path": "output/qa-20261024/module-04-functional-assets/regression-r1/execution-results.json",
+      "sha256": "0961fb1ca31e91c43fe238021f25cae27b67b3ae756dfa279ff8428bdd626ddf"
+    },
+    {
+      "path": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+      "sha256": "5774b1609941c88ab867b6975d8880e8215364fbfb10d60beb809669fc39724e"
+    },
+    {
+      "path": "output/qa-20261024/module-05-plans-delivery/regression-r1/TEST-REPORT.md",
+      "sha256": "81621afe3f65223213b7288fc3409dd80314b7c4e371f1554183b0e3dd35fa9e"
+    },
+    {
+      "path": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+      "sha256": "cce4e0d61c42c5dccec9d0ff4e69d275d53051db2eab5717e1c8a92ed3cac3ec"
+    },
+    {
+      "path": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+      "sha256": "30c417f2a6775a514d96acb68a3852d7dcd313e55d62709fe292d9108e3b81be"
+    },
+    {
+      "path": "output/qa-20261024/module-06-api-design/regression-r1/TEST-REPORT.md",
+      "sha256": "c243f072bbe4ba85a911b94537a43c6a2496fc58fab4cea08b028cfd4c054eb4"
+    },
+    {
+      "path": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+      "sha256": "490d5698bda5f186e8c07afce50fb98ae816ae2e2d70d53256f48950a373c5d3"
+    },
+    {
+      "path": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+      "sha256": "b82cc01e99d030b7087b79d9b25f4f7cce066946e20fb549f65fb9c2fd744c6b"
+    },
+    {
+      "path": "output/qa-20261024/module-07-api-debug/regression-r1/TEST-REPORT.md",
+      "sha256": "f20af839255f52b96d78b051ce1906ca83d81fcd051f9d221b7ec62021d0c547"
+    },
+    {
+      "path": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+      "sha256": "2361be2a49590f95f60623b6f7486f5f6b4dc7ba991d2f9baf831c700a42df72"
+    },
+    {
+      "path": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+      "sha256": "1f727aeb4d0809c4abcd970b8649e47d8cccf6a9f4ef24de7e4467e0e0781fdc"
+    },
+    {
+      "path": "output/qa-20261026/module-08-api-automation/regression-r1/TEST-REPORT.md",
+      "sha256": "0c98e17dc617292321cb67833432b297c9ebac54be744fad1055b1f4c0cb0961"
+    },
+    {
+      "path": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+      "sha256": "5abd1d86fa3adff966fb2eb9512df72a52eb1f953165b806a29f30800919786b"
+    },
+    {
+      "path": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+      "sha256": "0910ffebe48251bb2558a7953f4c64a6cabea8d162f225d47ed72d15733e9f3d"
+    },
+    {
+      "path": "output/qa-20261026/module-09-mock-regression/TEST-REPORT.md",
+      "sha256": "d77853302ea2b751fa4dcaa0adad60bf9796f310a48bd98bf8280649491a3900"
+    },
+    {
+      "path": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+      "sha256": "abbc04561952b0663bdbc077e96af2694c48f6ad8ac92c2a5ca700dda2ee674a"
+    },
+    {
+      "path": "output/qa-20261026/module-09-mock-regression/supplemental-results.json",
+      "sha256": "ab533e2ec5a4c03f95c62bc6553294a62577f96a4107341ed4e13a5b5527c93a"
+    },
+    {
+      "path": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+      "sha256": "b36d8d599e288818f7354300dfeb4493cce2127fd05ae2a67e45aa5cfcc1adab"
+    },
+    {
+      "path": "output/qa-20261026/module-10-performance-regression/TEST-REPORT.md",
+      "sha256": "2f867831a2bab797ab35200ec104bf480e40a2595e4682112b6797afc26aee47"
+    },
+    {
+      "path": "output/qa-20261026/module-10-performance-regression/execution-final.json",
+      "sha256": "047b59b6cde977d78d5e527a354f6c480fa3fa6af449dab9140854f5d5b29ce3"
+    },
+    {
+      "path": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+      "sha256": "bd20b4f0e420d26662a8336a133e0142962ff213383a48ea4ce9f8fbbba82260"
+    },
+    {
+      "path": "output/qa-20261027/module-11-web-ui-regression/TEST-REPORT.md",
+      "sha256": "96f0d6ab897e4d296f1165e502185c96329b01f9d661806b84f65ac18f54d359"
+    },
+    {
+      "path": "output/qa-20261027/module-11-web-ui-regression/execution-final.json",
+      "sha256": "855680e79aa9551a3108d7d014614e769c3731239a565d3230ee8c440e0da421"
+    },
+    {
+      "path": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+      "sha256": "3dc35bbb31dd3c6774a1df50a1835f175723e1daa4a20130b8936441d1e7bad3"
+    },
+    {
+      "path": "output/qa-20261027/module-12-mobile-regression/TEST-REPORT.md",
+      "sha256": "5b01855fed1821a0462cb06cab7bd125ba503a77889c311eb5f1c65283151b29"
+    },
+    {
+      "path": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+      "sha256": "318e06c1c4be7dd0cf3aa86756244348bc7e21f26c92ff4c04e48e2a2b4769e9"
+    },
+    {
+      "path": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+      "sha256": "be442517f6861beb89968023476f0be672c34b67d4ca766262ed2f12d1ed5068"
+    },
+    {
+      "path": "output/qa-20261027/module-13-quality-tasks-regression/TEST-REPORT.md",
+      "sha256": "cb363a4bb63585cea8527f1f7fdc2d42330c3bfe80b1e688cff50f167a118936"
+    },
+    {
+      "path": "output/qa-20261027/module-13-quality-tasks-regression/execution-final.json",
+      "sha256": "73f2e960400834a5b0e110cd36e79c7490003b98313e478411c7170684d780a6"
+    },
+    {
+      "path": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+      "sha256": "31aa4f6072d39f9bcc1d2ca6f368e8b845e6589786f6a448c940862800ba9507"
+    },
+    {
+      "path": "output/qa-20261027/module-14-notifications-extensions-operations-regression/TEST-REPORT.md",
+      "sha256": "a6e76dec9fc5073e814063841917de8c46b9f7d8eb2e28e90833d62c9cbe2658"
+    },
+    {
+      "path": "output/qa-20261027/module-14-notifications-extensions-operations-regression/execution-final.json",
+      "sha256": "52618731fb285d133ae879eb4b9d76e4f0eefb42aff026c04e3baf34853d82a4"
+    },
+    {
+      "path": "output/qa-20261028/module-15-desktop-workspace-cross-end/TEST-REPORT.md",
+      "sha256": "bd5f3cc27d2aad387ca19c949d772d3c4e8b210b7bb3cda25655fc8061750022"
+    },
+    {
+      "path": "output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json",
+      "sha256": "c280460b6e7aa5099bede1e679282f623ec131dcad7de093e381194964256942"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/TEST-REPORT.md",
+      "sha256": "bf4f912961632fc7b1a6d68fbece8a8ad9b078d6872033fbaba839e3d090f4f6"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/backend-existing-verification.json",
+      "sha256": "146a1b133bc862a22501ba19e287b868a65060b5e434fb40453e5b87077a3abb"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+      "sha256": "f33ca18c96bce1098b1d60ccc883b4818a9dafafcf3cb334c506d431400777d2"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/design-evidence.json",
+      "sha256": "7f8b979ed8cfd4449c354722f11a30cdc0f1ad8851d22e58e892c856236161f5"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/execution-final.json",
+      "sha256": "9f915b7c7ca724a58d56a944b6e55dc037f16177e12b38972ef06d506b321219"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/execution-package-final.json",
+      "sha256": "1e761833e970fb5893ac168f855d3f4ec8bdcbdb7f58a739f9d32f717a0e3bed"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/focused_backend-existing-verification.json",
+      "sha256": "6ea21b3984b456ef1178f17f32cfa246513ec7608ddadda7ca0adc547c254041"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/shutdown-observation.json",
+      "sha256": "aa971f6b174cf7acd5ecd089fb0200bda899cb0ca23ad74fda03040fb61975c8"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/summary.json",
+      "sha256": "90a7c028e7fde3b1b55420cbdc15678b74851c55f9b7a663ab0b06c0f2211888"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/supplemental-contract-checks.json",
+      "sha256": "7ac2ffc6e453539fc2514120e86e55f9059a901ef5d3573a9a6a9d6408927b54"
+    },
+    {
+      "path": "output/qa-20261028/overall-report/bug-inventory.json",
+      "sha256": "9afc29ac23399bbadc4c824ae6b566480e1fa4987122502f6a2d06d144faf534"
+    },
+    {
+      "path": "output/qa-20261028/overall-report/module-sources.json",
+      "sha256": "9017e07392538a5cc367a1ce386071c23952f466e002be6a8c82ce1f1d14930f"
+    },
+    {
+      "path": "output/qa-20261028/overall-report/observation-notes.json",
+      "sha256": "aec5c0ec035d296c8d612097de2d7370a7144eaa1cd9a0c50aab11fa91efb2ca"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/CrossRegressionFixesFlowTests.java",
+      "sha256": "e39df2812a5a687b488b12f1f4a7ffb52f42611d4fa33735c510f18920e8c20b"
+    }
+  ],
+  "userApprovalBasis": "用户逐模块明确审核；本轮已明确批准横向回归并要求汇总。",
+  "aggregationScript": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/overall-report/build-overall-report.py"
+}

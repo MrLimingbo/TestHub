@@ -1,0 +1,30 @@
+{
+  "id": "OBS-XREG-SHUTDOWN",
+  "status": "UNCONFIRMED_RETAINED",
+  "originalCase": "P013",
+  "observedError": "Offscreen app shutdown exceeded 30 seconds",
+  "originalEvidence": "execution-package.json",
+  "rechecksPassed": 2,
+  "sameCandidateComponents": true,
+  "rootCauseConfirmed": false,
+  "closeDurations": [
+    {
+      "attempt": 1,
+      "baselineMilliseconds": 686.0,
+      "candidateMilliseconds": 769.0
+    },
+    {
+      "attempt": 2,
+      "baselineMilliseconds": 970.0,
+      "candidateMilliseconds": 492.0
+    }
+  ],
+  "caseCountImpact": 0,
+  "notAddedTo83CaseDenominator": true,
+  "note": "No new product defect is confirmed from this single occurrence. The initial timeout remains a review risk; do not describe it as fixed or silently erase it.",
+  "recordedAt": "2026-10-28T08:27:47.649768+00:00",
+  "planningDate": "2026-10-29",
+  "investigationStarted": false,
+  "handling": "继续保留，未确认根因；本轮不复现、不加日志、不放宽退出阈值，后续调查须在获批范围内执行。",
+  "thisReviewStatus": "独立保留；不纳入6项P1，不执行调查、不改退出阈值。"
+}

@@ -1,0 +1,203 @@
+{
+  "sources": [
+    {
+      "id": "E01",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/AuditLogPage.vue",
+      "relativePath": "src/pages/AuditLogPage.vue",
+      "lineStart": 13,
+      "lineEnd": 13,
+      "sha256": "6d3696d6c42f03de70610156b4c2eaa0f69188e330c788f3c3ddbd441c648687",
+      "excerpt": "const actions = computed(() => [...new Set(entries.value.map((entry) => entry.action))])",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E02",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/administration/AdministrationController.java",
+      "relativePath": "services/platform-api/src/main/java/io/testhub/platform/administration/AdministrationController.java",
+      "lineStart": 56,
+      "lineEnd": 64,
+      "sha256": "7e0365f105a7ce5a38d839474743b7faf9858699ce17e9656049a130b6c7c379",
+      "excerpt": "    @GetMapping(\"/audit-logs\")\n    public ApiResponse<List<AuditLogEntry>> auditLogs(Authentication authentication,\n                                                        @RequestParam(required = false) String projectId,\n                                                        @RequestParam(required = false) String action,\n                                                        @RequestParam(defaultValue = \"50\") int limit) {\n        AuthenticatedPrincipal principal = principal(authentication);\n        access.requireSystemAdmin(principal);\n        return ApiResponse.of(audit.recent(projectId, action, limit));\n    }",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E03",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/audit/AuditRepository.java",
+      "relativePath": "services/platform-api/src/main/java/io/testhub/platform/audit/AuditRepository.java",
+      "lineStart": 35,
+      "lineEnd": 47,
+      "sha256": "316b19780975c5b6d8e2f42d3149e573ac4038d11a86a777c2d5d57bc80e8cde",
+      "excerpt": "    public List<AuditLogEntry> findRecent(String projectId, String action, int limit) {\n        return jdbc.sql(\"\"\"\n                SELECT id, user_id, organization_id, project_id, action, resource_type, resource_id, outcome,\n                       request_id, client_ip, detail, created_at\n                FROM audit_log\n                WHERE (:projectId IS NULL OR project_id = :projectId)\n                  AND (:action IS NULL OR action = :action)\n                ORDER BY created_at DESC LIMIT :limit\n                \"\"\").param(\"projectId\", projectId).param(\"action\", action).param(\"limit\", limit).query((rs, rowNumber) -> new AuditLogEntry(\n                rs.getString(\"id\"), rs.getString(\"user_id\"), rs.getString(\"organization_id\"), rs.getString(\"project_id\"),\n                rs.getString(\"action\"), rs.getString(\"resource_type\"), rs.getString(\"resource_id\"),\n                rs.getString(\"outcome\"), rs.getString(\"request_id\"), rs.getString(\"client_ip\"),\n                fromJson(rs.getString(\"detail\")), instant(rs.getTimestamp(\"created_at\")))).list();",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E04",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1166,
+      "lineEnd": 1191,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "excerpt": "function loadHistoryRequest(item: History, notify = true): boolean {\n  const unavailable = apiDebugReplayUnavailableReason(item.replayStatus)\n  if (unavailable) { if (notify) Message.warning(unavailable); return false }\n  const draft = apiDebugDraftFromHistory(item)\n  if (draft?.replayDraft && applyStoredReplayDraft(draft.replayDraft)) {\n    result.value = null\n    responseBody.value = '已载入加密保存的请求配置，可检查参数后再次发送。'\n    if (notify) Message.success('已载入历史请求，可检查参数后再次发送')\n    return true\n  }\n  if (!draft) {\n    if (notify) Message.warning('该历史记录没有可回放的请求配置')\n    return false\n  }\n  protocolType.value = 'HTTP'\n  quickRequestName.value = '快捷请求'\n  changeProtocol()\n  method.value = draft.method ?? 'GET'\n  url.value = draft.url ?? ''\n  requestTab.value = 'body'\n  result.value = null\n  hydrateQuickHttpEditor()\n  responseBody.value = '已载入历史请求。历史仅保存脱敏的 Method 与 URL，重发会沿用当前 Header、Auth 与 Body。'\n  if (notify) Message.success('已载入历史请求，可检查参数后再次发送')\n  return true\n}",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E05",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1193,
+      "lineEnd": 1207,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "excerpt": "async function replayHistoryRequest(item: History) {\n  if (!loadHistoryRequest(item, false)) {\n    Message.warning(apiDebugReplayUnavailableReason(item.replayStatus) || '该历史记录没有可回放的请求配置')\n    return\n  }\n  if (isRedactedApiDebugUrl(item.requestUrl)) {\n    Message.warning('该历史 URL 含已脱敏参数，请补充真实参数后再发送')\n    return\n  }\n  replayingHistoryId.value = item.id\n  try {\n    await send()\n  } finally {\n    replayingHistoryId.value = ''\n  }",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E06",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 572,
+      "lineEnd": 587,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "excerpt": "async function send() {\n  if (!canSendReviewedTemplate()) return\n  if (protocolType.value === 'WEBSOCKET') {\n    await connectWebSocket()\n    return\n  }\n  if (protocolType.value === 'GRPC') {\n    if (grpcSelectedCallType.value === 'SERVER_STREAMING') await sendGrpcServerStream()\n    else if (grpcSelectedCallType.value === 'CLIENT_STREAMING') await startGrpcClientStream()\n    else if (grpcSelectedCallType.value === 'BIDI_STREAMING') await startGrpcBidiStream()\n    else await sendGrpc()\n    return\n  }\n  if (disposed || sending.value || !projectId.value) return\n  const scope = requestContext(), request = ++httpRequestSequence\n  const current = () => scope.current() && request === httpRequestSequence",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E07",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/utils/apiDebugDraft.ts",
+      "relativePath": "src/utils/apiDebugDraft.ts",
+      "lineStart": 346,
+      "lineEnd": 348,
+      "sha256": "055de9fd8aa56c0f0b2204b82ee2d745de803eb5e7dea87668d5884319ecbf8d",
+      "excerpt": "export function isRedactedApiDebugUrl(value: string): boolean {\n  return value.includes('***')\n}",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E08",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1001,
+      "lineEnd": 1028,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "excerpt": "async function connectWebSocket() {\n  if (!canSendReviewedTemplate() || !projectId.value || sending.value) return\n  const scope = requestContext(), generation = ++webSocketGeneration\n  const current = () => scope.current() && generation === webSocketGeneration\n  if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '')) {\n    if (await loadWebSocketMessages() && current()) Message.info(webSocket.session?.status === 'OPEN' ? 'WebSocket 已连接，已刷新消息' : 'WebSocket 正在连接或重连')\n    return\n  }\n  sending.value = true\n  try {\n    const session = await mutate<WebSocketSession>(`/api/v1/projects/${scope.projectId}/api-debug/websocket/connect`, {\n      url: url.value,\n      headers: headers(),\n      environmentCode: environment.value || null,\n      auth: { ...auth },\n      subprotocols: webSocket.subprotocolsText.split(',').map((item) => item.trim()).filter(Boolean),\n      subscriptions: [...webSocket.subscriptions],\n      reconnect: { enabled: webSocket.autoReconnect, maxAttempts: webSocket.maxReconnectAttempts, delayMs: webSocket.reconnectDelayMs },\n    }, () => { if (!current()) throw new Error('连接上下文已改变') })\n    if (!current()) return\n    webSocket.session = session\n    if (!await loadWebSocketMessages() || !current()) return\n    await loadHistory()\n    if (!current()) return\n    if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '')) startWebSocketPolling()\n    if (webSocket.session?.status === 'OPEN') Message.success('WebSocket 已连接')\n  } catch (error) {\n    if (current()) Message.error(error instanceof Error ? error.message : '连接 WebSocket 失败')",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E09",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1046,
+      "lineEnd": 1062,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "excerpt": "async function closeWebSocket() {\n  if (!projectId.value || !webSocket.session || sending.value) return\n  const scope = requestContext(), generation = ++webSocketGeneration, sessionId = webSocket.session.id\n  const current = () => scope.current() && generation === webSocketGeneration\n  sending.value = true\n  try {\n    const session = await mutate<WebSocketSession>(`/api/v1/projects/${scope.projectId}/api-debug/websocket/sessions/${sessionId}/close`, {}, () => { if (!current()) throw new Error('连接上下文已改变') })\n    if (!current()) return\n    webSocket.session = session\n    if (!await loadWebSocketMessages() || !current()) return\n    stopWebSocketPolling()\n    Message.success('WebSocket 已关闭')\n  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '关闭 WebSocket 失败') } finally { if (current()) sending.value = false }\n}\n\nfunction addSubscription() {\n  const value = webSocket.subscriptionDraft.trim()",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E10",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/components/api-testing/ApiInterfaceWorkbench.vue",
+      "relativePath": "src/components/api-testing/ApiInterfaceWorkbench.vue",
+      "lineStart": 439,
+      "lineEnd": 456,
+      "sha256": "98c4a5de267ab87b91ab1f0d203ec905e468410629b7644f93eb992e1f19c33e",
+      "excerpt": "async function openAdvancedDebug() {\n  try {\n    const draft = storeApiDebugRouteDraft(window.sessionStorage, {\n      method: props.api.method,\n      url: safeRequestUrl(),\n      body: snapshot.body,\n      headers: requestHeaders(snapshot).map((item) => `${item.name}: ${item.value}`).join('\\n'),\n      environment: environment.value,\n      protocol: 'HTTP',\n    })\n    await router.push({\n      path: '/api-testing/quick-request',\n      query: { draft, sourceApiId: props.api.id },\n    })\n  } catch (error) {\n    Message.error(error instanceof Error ? error.message : '无法打开高级调试')\n  }\n}",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E11",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/utils/apiDebugDraft.ts",
+      "relativePath": "src/utils/apiDebugDraft.ts",
+      "lineStart": 130,
+      "lineEnd": 135,
+      "sha256": "055de9fd8aa56c0f0b2204b82ee2d745de803eb5e7dea87668d5884319ecbf8d",
+      "excerpt": "export function storeApiDebugRouteDraft(storage: Storage, draft: ApiDebugRouteDraft): string {\n  const key = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`\n  storage.setItem(`${STORAGE_PREFIX}${key}`, JSON.stringify(draft))\n  return key\n}\n",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E12",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/TasksPage.vue",
+      "relativePath": "src/pages/TasksPage.vue",
+      "lineStart": 105,
+      "lineEnd": 115,
+      "sha256": "c4c02d93950bb3cffbb41b48c52773e78f043294004570a0092f79d7ac9cb8c2",
+      "excerpt": "async function act(task: ExecutionTask, method: 'POST' | 'PUT', suffix: string, input: unknown, message: string) {\n  if (disposed || task.projectId !== projectId.value || pendingTasks.value.has(task.id)) return\n  pendingTasks.value.add(task.id)\n  try {\n    await mutate(`/api/v1/projects/${task.projectId}/tasks/${task.id}${suffix}`, method, input)\n    if (disposed || task.projectId !== projectId.value) return\n    await loadTasks()\n    if (!disposed && task.projectId === projectId.value) Message.success(message)\n  } catch (error) { if (!disposed && task.projectId === projectId.value) Message.error(error instanceof Error ? error.message : '操作失败') }\n  finally { pendingTasks.value.delete(task.id) }\n}",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E13",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/NotificationTemplatesPage.vue",
+      "relativePath": "src/pages/NotificationTemplatesPage.vue",
+      "lineStart": 93,
+      "lineEnd": 103,
+      "sha256": "15616f07c3cbe5bebe891365cfd1ba73f0c8a4283cd63255ae86dfa34de1e18b",
+      "excerpt": "async function action(key: string, url: string, method: 'POST' | 'DELETE', message: string) {\n  const project = projectId.value, view = viewSequence\n  if (disposed || !project || pending.has(key)) return\n  pending.add(key)\n  try {\n    await mutate(url, method)\n    if (!current(project, view)) return\n    await loadTemplates()\n    if (current(project, view)) Message.success(message)\n  } catch (error) { if (current(project, view)) Message.error(error instanceof Error ? error.message : '操作失败') }\n  finally { pending.delete(key) }",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E14",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/PluginsPage.vue",
+      "relativePath": "src/pages/PluginsPage.vue",
+      "lineStart": 99,
+      "lineEnd": 105,
+      "sha256": "6c7640ae578108f7a5c2152518c1b8aca4c603570d696344f957a0b1747d563f",
+      "excerpt": "async function action(key: string, url: string, message: string, method: 'POST' | 'DELETE' = 'POST') {\n  if (disposed || !allowed.value || pending.has(key)) return\n  pending.add(key)\n  try { await mutate(url, method); if (disposed) return; await load(); if (!disposed) Message.success(message) }\n  catch (error) { if (!disposed) Message.error(error instanceof Error ? error.message : '操作失败') }\n  finally { pending.delete(key) }\n}",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E15",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/UiAutomationPage.vue",
+      "relativePath": "src/pages/UiAutomationPage.vue",
+      "lineStart": 283,
+      "lineEnd": 283,
+      "sha256": "c5e1ec2057300babfd7df337c785685b12de97df8b44c44f38b608dfd0dc30d6",
+      "excerpt": "      <a-tab-pane key=\"objects\" title=\"页面对象\"><div class=\"toolbar\"><span>用稳定的定位器抽离页面元素，场景保存时会冻结实际定位器。</span><a-button type=\"primary\" size=\"small\" @click=\"resetObject(); objectVisible = true\"><icon-plus /> 新建页面对象</a-button></div><a-table :data=\"pageObjects\" :pagination=\"false\" row-key=\"id\" size=\"small\"><template #columns><a-table-column title=\"名称\" data-index=\"name\" /><a-table-column title=\"定位器\"><template #cell=\"{ record }\"><code>{{ record.selectorValue }}</code></template></a-table-column><a-table-column title=\"说明\" data-index=\"description\" /><a-table-column title=\"更新于\"><template #cell=\"{ record }\">{{ date(record.updatedAt) }}</template></a-table-column><a-table-column title=\"操作\"><template #cell=\"{ record }\"><a-button size=\"mini\" @click=\"editObject(record)\">编辑</a-button></template></a-table-column></template></a-table><a-empty v-if=\"!loading && pageObjects.length === 0\" description=\"可先创建登录按钮、搜索框等页面对象\" /></a-tab-pane>",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E16",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "relativePath": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "lineStart": 471,
+      "lineEnd": 478,
+      "sha256": "b83d7409cf640402da1bd72fd598508271b3f51a92412b52ca7d1b45a6e65010",
+      "excerpt": "    private UiAutomationManifest.Snapshot manifest(String projectId, UiAutomationScenario scenario, UiAutomationBrowserProfile profile) {\n        List<UiAutomationManifest.ResolvedStep> steps = scenario.steps().stream().map(step -> new UiAutomationManifest.ResolvedStep(\n                step.id(), step.type(), step.name(), step.pageObjectId() == null ? step.selector() : pageObject(projectId, step.pageObjectId()).selectorValue(),\n                step.value(), step.url(), step.expectedText(), step.timeoutMillis())).toList();\n        return new UiAutomationManifest.Snapshot(\"testhub.ui-automation.manifest\", 1,\n                new UiAutomationManifest.BrowserProfile(profile.name(), profile.browser(), profile.baseUrl(), profile.viewportWidth(), profile.viewportHeight()),\n                new UiAutomationManifest.Scenario(scenario.name(), scenario.failureStrategy(), scenario.variables(), steps));\n    }",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E17",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "relativePath": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "lineStart": 330,
+      "lineEnd": 348,
+      "sha256": "b83d7409cf640402da1bd72fd598508271b3f51a92412b52ca7d1b45a6e65010",
+      "excerpt": "    private UiAutomationExecution queueExecution(String organizationId, String projectId, String requestedBy, String scenarioId,\n                                                 int timeout, UiAutomationSchedule schedule, FunctionalTestPlan plan,\n                                                 UiAutomationExecution retryOf, int retryAttempt, Instant requestedAt) {\n        UiAutomationScenario scenario = scenario(projectId, scenarioId);\n        UiAutomationBrowserProfile profile = profile(projectId, scenario.browserProfileId());\n        if (!profile.enabled()) throw conflict(\"浏览器配置已停用，不能执行场景\");\n        String executionId = UlidCreator.getUlid().toString();\n        String taskId = UlidCreator.getUlid().toString();\n        Instant deadlineAt = requestedAt.plusSeconds(timeout);\n        String manifestRef = \"ui-automation/manifests/\" + executionId + \"/v1.json\";\n        automation.insertExecution(executionId, taskId, organizationId, projectId, scenario, profile,\n                schedule == null ? null : schedule.id(), plan == null ? null : plan.id(), plan == null ? null : plan.name(),\n                retryOf == null ? null : retryOf.id(), retryAttempt, manifestRef, requestedBy, requestedAt, deadlineAt);\n        UiAutomationExecution execution = automation.findExecution(projectId, executionId).orElseThrow();\n        UiAutomationManifest.Snapshot snapshot = manifest(projectId, scenario, profile);\n        String manifestContent = json(snapshot);\n        automation.insertManifest(UlidCreator.getUlid().toString(), execution, snapshot, manifestContent, sha256(manifestContent));\n        automation.insertOutbox(taskId, executionId, \"TASK\", UiAutomationRunnerProtocol.TASK_STREAM, taskPayload(taskId, execution, requestedAt), requestedAt);\n        return execution;",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E18",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1385,
+      "lineEnd": 1385,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "excerpt": "                <a-button size=\"mini\" type=\"primary\" :loading=\"replayingHistoryId === item.id\" :disabled=\"sending || !!apiDebugReplayUnavailableReason(item.replayStatus)\" @click=\"replayHistoryRequest(item)\">重发</a-button>",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    }
+  ],
+  "note": "仅源代码静态核对；不将历史观察、当前代码事实或拟定规则当作本轮动态测试结果。"
+}

@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ApiDefinitionEditor from '@/components/api-testing/ApiDefinitionEditor.vue'
 import ApiDebugPage from '@/pages/ApiDebugPage.vue'
 import ApiInterfaceWorkbench from '@/components/api-testing/ApiInterfaceWorkbench.vue'
-import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
+import { ApiRequestError, clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
 import { useSessionStore } from '@/stores/session'
 import {
   apiTreeDisplayText,
@@ -18,7 +18,7 @@ import {
   type ApiTreeStatusFilter,
 } from '@/utils/apiManagementTree'
 import { apiCaseType, formatApiParameterLines, parseApiParameterLines } from '@/utils/apiTesting'
-import { apiDebugDraftFromHistory, apiDebugRequestNameFromReplayDraft, storeApiDebugRouteDraft, type ApiDebugRouteDraft } from '@/utils/apiDebugDraft'
+import { apiDebugDraftFromHistory, apiDebugReplayUnavailableReason, apiDebugRequestNameFromReplayDraft, storeApiDebugRouteDraft, type ApiDebugRouteDraft } from '@/utils/apiDebugDraft'
 import {
   API_INTERCHANGE_MAX_LABEL,
   apiInterchangeDocumentSizeError,
@@ -38,7 +38,7 @@ interface Parameter { name: string; type: string; required: boolean; example: st
 interface ApiVersion { id: string; versionName: string; summary: string; description: string; requestHeaders: string; requestQuery: string; requestPath: string; requestBody: string; responseBody: string; exampleResponse: string; status: string; publishedAt: string | null; createdAt: string }
 interface ApiTreeCase { id: string; apiId: string; name: string; responseValidation: string }
 interface ImportResult { format: string; importedCount: number; items: string[]; caseCount?: number; skippedCount?: number; warnings?: string[] }
-interface QuickRequestHistory { importSourceId?: string | null; id: string; method: string; protocol?: string; requestUrl: string; responseStatus: number | null; durationMs: number; result: string; createdAt: string; replayDraft?: string; localDraft?: ApiDebugRouteDraft }
+interface QuickRequestHistory { importSourceId?: string | null; id: string; method: string; protocol?: string; requestUrl: string; responseStatus: number | null; durationMs: number; result: string; createdAt: string; replayDraft?: string; localDraft?: ApiDebugRouteDraft; replayStatus?: string; replayExpiresAt?: string | null }
 interface QuickRequestFolder { id: string; parentId: string | null; name: string }
 interface QuickRequestFolderRow extends QuickRequestFolder { depth: number }
 type DocumentInterchangeKind = 'OPENAPI' | 'POSTMAN' | 'HAR'
@@ -58,8 +58,29 @@ const selectedCatalogId = ref('')
 const selectedApiId = ref('')
 const versions = ref<ApiVersion[]>([])
 const selectedVersionId = ref('')
+const versionBase = ref<ApiVersion | null>(null)
 const loading = ref(true)
 const saving = ref(false)
+type AssetFormKind = 'catalog' | 'definition' | 'version' | 'interchange'
+const formSaving = reactive<Record<AssetFormKind, boolean>>({ catalog: false, definition: false, version: false, interchange: false })
+const formGeneration: Record<AssetFormKind, number> = { catalog: 0, definition: 0, version: 0, interchange: 0 }
+let pageActive = true
+let fileReadGeneration = 0
+function resetFormSession(kind: AssetFormKind) { ++formGeneration[kind]; formSaving[kind] = false }
+function formSession(kind: AssetFormKind) {
+  const generation = formGeneration[kind], pid = projectId.value, userId = session.profile?.id
+  return () => pageActive && generation === formGeneration[kind] && pid === projectId.value && userId === session.profile?.id
+}
+function cancelCatalog() { resetFormSession('catalog'); catalogDialog.value = false }
+function cancelDefinition() { resetFormSession('definition'); definitionDialog.value = false }
+function cancelVersion() { resetFormSession('version'); versionDialog.value = false; versionBase.value = null }
+function cancelInterchange() {
+  resetFormSession('interchange'); ++fileReadGeneration; interchangeDialog.value = false; interchangeResult.value = null
+}
+function invalidateAssetForms() { cancelCatalog(); cancelDefinition(); cancelVersion(); cancelInterchange() }
+async function refreshSavedAssets(pid: string, userId: string | undefined) {
+  if (pageActive && pid === projectId.value && userId === session.profile?.id) await loadAssets()
+}
 const catalogDialog = ref(false)
 const definitionDialog = ref(false)
 const versionDialog = ref(false)
@@ -226,18 +247,24 @@ const interchangeResultSummary = computed(() => interchangeResult.value
   : '')
 
 async function read<T>(url: string, init?: RequestInit): Promise<T> { const response = await fetch(url, { credentials: 'include', ...init }); const body = await response.json().catch(() => ({})) as ApiEnvelope<T> & { code?: string; message?: string; details?: Record<string, unknown> }; if (!response.ok) throw toApiRequestError(response, body); return body.data }
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, beforeSend?: () => void): Promise<T> { const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf'); beforeSend?.(); return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) }) }
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, beforeSend?: () => void): Promise<T> {
+  const payload = body === undefined ? undefined : JSON.stringify(body)
+  const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  beforeSend?.()
+  return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: payload })
+}
 async function loadVersions() {
   const generation = ++versionLoadGeneration
   const apiId = selectedApiId.value
   const activeProjectId = projectId.value
+  const activeUserId = session.profile?.id
   if (!apiId) {
     versions.value = []
     selectedVersionId.value = ''
     return
   }
   const data = await read<ApiVersion[]>(`/api/v1/projects/${activeProjectId}/api-design/definitions/${apiId}/versions`)
-  if (generation !== versionLoadGeneration || apiId !== selectedApiId.value || activeProjectId !== projectId.value) return
+  if (!pageActive || generation !== versionLoadGeneration || apiId !== selectedApiId.value || activeProjectId !== projectId.value || activeUserId !== session.profile?.id) return
   versions.value = data
   selectedVersionId.value = data.find((version) => version.id === selectedApi.value?.currentVersionId)?.id ?? data[0]?.id ?? ''
 }
@@ -261,14 +288,15 @@ let assetsGeneration = 0
 async function loadAssets() {
   const generation = ++assetsGeneration
   const activeProjectId = projectId.value
-  if (!activeProjectId) return
+  const activeUserId = session.profile?.id
+  if (!pageActive || !activeProjectId) return
   const [catalogData, definitionData, historyData, caseData] = await Promise.all([
     read<Catalog[]>(`/api/v1/projects/${activeProjectId}/api-design/catalogs`),
     read<ApiDefinition[]>(`/api/v1/projects/${activeProjectId}/api-design/definitions`),
     read<QuickRequestHistory[]>(`/api/v1/projects/${activeProjectId}/api-debug/history?limit=20`),
     read<ApiTreeCase[]>(`/api/v1/projects/${activeProjectId}/api-design/cases`),
   ])
-  if (generation !== assetsGeneration || activeProjectId !== projectId.value) return
+  if (!pageActive || generation !== assetsGeneration || activeProjectId !== projectId.value || activeUserId !== session.profile?.id) return
   catalogs.value = catalogData
   definitions.value = definitionData
   quickRequestHistory.value = historyData
@@ -286,7 +314,7 @@ async function loadAssets() {
   if (selectedApi.value) expandCatalogPath(selectedApi.value.catalogId)
   await loadVersions()
 }
-async function load() { loading.value = true; try { context.value = await read<Context>('/api/v1/access/context'); projectId.value = session.resolveProjectId(projects.value); await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '加载接口资产失败') } finally { loading.value = false } }
+async function load() { loading.value = true; try { const data = await read<Context>('/api/v1/access/context'); if (!pageActive) return; context.value = data; projectId.value = session.resolveProjectId(projects.value); await loadAssets() } catch (error) { if (pageActive) Message.error(error instanceof Error ? error.message : '加载接口资产失败') } finally { if (pageActive) loading.value = false } }
 async function changeProject() {
   selectedCatalogId.value = ''
   selectedApiId.value = ''
@@ -501,6 +529,7 @@ function confirmDeleteQuickRequestFolder(folder: QuickRequestFolder) {
   })
 }
 function draftFromQuickRequest(item: QuickRequestHistory): ApiDebugRouteDraft | null {
+  if (apiDebugReplayUnavailableReason(item.replayStatus)) return null
   const storedDraft = item.localDraft ?? apiDebugDraftFromHistory(item)
   if (storedDraft) return storedDraft
   const protocol = (item.protocol ?? item.method).toUpperCase()
@@ -574,6 +603,8 @@ function confirmDeleteQuickRequest(item: QuickRequestHistory) {
   })
 }
 async function loadQuickRequest(item: QuickRequestHistory) {
+  const unavailable = apiDebugReplayUnavailableReason(item.replayStatus)
+  if (unavailable) { Message.warning(unavailable); return }
   const draft = draftFromQuickRequest(item)
   if (!draft) {
     Message.warning('仅 HTTP 请求历史支持载入与重发')
@@ -621,14 +652,6 @@ async function moveCatalog(catalog: Catalog, parentId: string | null) {
     Message.success(parent ? `目录已移动到“${parent.name}”` : '目录已移动到接口根目录')
   } catch (error) { Message.error(error instanceof Error ? error.message : '移动目录失败') }
 }
-function uniqueCatalogCopyName(catalog: Catalog) {
-  const siblingNames = new Set(catalogs.value.filter((item) => item.parentId === catalog.parentId).map((item) => item.name))
-  const base = `${catalog.name} 副本`
-  let candidate = base
-  let suffix = 2
-  while (siblingNames.has(candidate)) candidate = `${base} ${suffix++}`
-  return candidate
-}
 function currentVersionOf(api: ApiDefinition, items: ApiVersion[]) {
   return items.find((version) => version.id === api.currentVersionId) ?? items[0]
 }
@@ -666,31 +689,43 @@ async function copyDefinition(api: ApiDefinition) {
     Message.success('接口已复制，副本请求路径已自动避让冲突')
   } catch (error) { Message.error(error instanceof Error ? error.message : '复制接口失败') } finally { saving.value = false }
 }
+// A transport failure may follow a commit: keep the original identity until a receipt is confirmed.
+let catalogCopyScope = 0
+const catalogCopyRequests = new Map<string, { requestKey: string; expectedSourceDigest: string }>()
 async function copyCatalog(catalog: Catalog) {
+  if (saving.value) return
   saving.value = true
-  const routeRegistry = [...definitions.value]
+  const ownerProject = projectId.value
+  const ownerScope = catalogCopyScope
+  const ownerUser = session.profile?.id
+  const identity = `${ownerUser ?? ''}/${ownerProject}/${catalog.id}`
+  const current = () => pageActive && ownerScope === catalogCopyScope && ownerProject === projectId.value && ownerUser === session.profile?.id
+  let submitted = false
   try {
-    const copyBranch = async (source: Catalog, parentId: string | null, root: boolean) => {
-      const created = await mutate<Catalog>(`/api/v1/projects/${projectId.value}/api-design/catalogs`, 'POST', {
-        name: root ? uniqueCatalogCopyName(source) : source.name,
-        parentId,
-        sortOrder: source.sortOrder,
-      })
-      for (const api of definitions.value.filter((item) => item.catalogId === source.id)) {
-        await createDefinitionCopy(api, created.id, routeRegistry)
-      }
-      for (const child of catalogs.value.filter((item) => item.parentId === source.id)) {
-        await copyBranch(child, created.id, false)
-      }
-      return created
+    let request = catalogCopyRequests.get(identity)
+    if (!request) {
+      const preview = await read<{ sourceDigest: string; itemCount: number; limit: number }>(`/api/v1/projects/${ownerProject}/api-design/catalogs/${catalog.id}/copy-preview`)
+      if (!current()) return
+      if (preview.itemCount > preview.limit) throw new Error(`单次目录复制最多${preview.limit}个目录与接口，未创建副本`)
+      request = { requestKey: crypto.randomUUID(), expectedSourceDigest: preview.sourceDigest }
+      catalogCopyRequests.set(identity, request)
     }
-    const created = await copyBranch(catalog, catalog.parentId, true)
+    const result = await mutate<{ rootCatalogId: string }>(`/api/v1/projects/${ownerProject}/api-design/catalogs/${catalog.id}/copy`, 'POST', request, () => {
+      if (!current()) throw new Error('复制所属项目已切换，请返回原项目后重试')
+      submitted = true
+    })
+    catalogCopyRequests.delete(identity)
+    if (!current()) return
     await loadAssets()
-    expandedCatalogIds.value = new Set([...expandedCatalogIds.value, created.id])
-    Message.success('接口目录及其中接口已复制')
+    if (!current()) return
+    expandedCatalogIds.value = new Set([...expandedCatalogIds.value, result.rootCatalogId])
+    Message.success('接口目录及当前版本已完整复制')
   } catch (error) {
-    await loadAssets()
-    Message.error(error instanceof Error ? `${error.message}；已保留成功创建的资产` : '复制接口目录失败')
+    const rejected = error instanceof ApiRequestError && error.status >= 400 && error.status < 500
+    if (rejected) catalogCopyRequests.delete(identity)
+    if (!current()) return
+    const reason = error instanceof Error ? error.message : '复制接口目录失败'
+    Message.error(submitted && !rejected ? `${reason}；提交状态未确认，请使用相同请求重试` : reason)
   } finally { saving.value = false }
 }
 async function updateDefinitionMetadata(api: ApiDefinition, values: Partial<Pick<ApiDefinition, 'catalogId' | 'name'>>) {
@@ -790,8 +825,32 @@ async function exportScope(kind: 'OPENAPI' | 'POSTMAN' | 'HAR', catalogId = '') 
   else if (kind === 'POSTMAN') await downloadPostman()
   else await downloadHar()
 }
-function openCatalog(catalog?: Catalog, parentId = '') { clearFormErrors(catalogErrors); editingCatalogId.value = catalog?.id ?? ''; Object.assign(catalogForm, { name: catalog?.name ?? '', parentId: catalog ? (catalog.parentId ?? '') : (parentId || selectedCatalogId.value), sortOrder: catalog?.sortOrder ?? catalogs.value.length }); catalogDialog.value = true }
-async function saveCatalog() { clearFormErrors(catalogErrors); if (!catalogForm.name.trim()) { catalogErrors.name = '请输入目录名称'; return false }; saving.value = true; try { const url = editingCatalogId.value ? `/api/v1/projects/${projectId.value}/api-design/catalogs/${editingCatalogId.value}` : `/api/v1/projects/${projectId.value}/api-design/catalogs`; const catalog = await mutate<Catalog>(url, editingCatalogId.value ? 'PUT' : 'POST', { ...catalogForm, parentId: catalogForm.parentId || null }); catalogDialog.value = false; selectedCatalogId.value = catalog.id; await loadAssets(); Message.success(editingCatalogId.value ? '接口目录已更新' : '接口目录已创建'); return true } catch (error) { Object.assign(catalogErrors, formErrorsFrom(error)); if (!Object.keys(catalogErrors).length) catalogErrors.name = error instanceof Error ? error.message : '保存目录失败'; return false } finally { saving.value = false } }
+function openCatalog(catalog?: Catalog, parentId = '') {
+  resetFormSession('catalog'); clearFormErrors(catalogErrors)
+  editingCatalogId.value = catalog?.id ?? ''
+  Object.assign(catalogForm, { name: catalog?.name ?? '', parentId: catalog ? (catalog.parentId ?? '') : (parentId || selectedCatalogId.value), sortOrder: catalog?.sortOrder ?? catalogs.value.length })
+  catalogDialog.value = true
+}
+async function saveCatalog(): Promise<boolean> {
+  if (formSaving.catalog) return false
+  clearFormErrors(catalogErrors)
+  if (!catalogForm.name.trim()) { catalogErrors.name = '请输入目录名称'; return false }
+  const current = formSession('catalog'), pid = projectId.value, userId = session.profile?.id, id = editingCatalogId.value
+  formSaving.catalog = true
+  try {
+    const catalog = await mutate<Catalog>(`/api/v1/projects/${pid}/api-design/catalogs${id ? `/${id}` : ''}`, id ? 'PUT' : 'POST', { ...catalogForm, parentId: catalogForm.parentId || null }, () => {
+      if (!current() || !catalogDialog.value) throw new Error('操作已取消')
+    })
+    if (current()) { catalogDialog.value = false; selectedCatalogId.value = catalog.id }
+    await refreshSavedAssets(pid, userId)
+    if (!current()) return false
+    Message.success(id ? '接口目录已更新' : '接口目录已创建')
+    return true
+  } catch (error) {
+    if (current()) { Object.assign(catalogErrors, formErrorsFrom(error)); if (!Object.keys(catalogErrors).length) catalogErrors.name = error instanceof Error ? error.message : '保存目录失败' }
+    return false
+  } finally { if (current()) formSaving.catalog = false }
+}
 async function deleteCatalog(catalog: Catalog) { try { await mutate<void>(`/api/v1/projects/${projectId.value}/api-design/catalogs/${catalog.id}`, 'DELETE'); if (selectedCatalogId.value === catalog.id) selectedCatalogId.value = ''; await loadAssets(); Message.success('接口目录已删除') } catch (error) { Message.error(error instanceof Error ? error.message : '删除目录失败') } }
 function confirmDeleteCatalog(catalog: Catalog) {
   Modal.confirm({
@@ -809,7 +868,7 @@ function prepareDefinition(api?: ApiDefinition) {
     Message.warning('请先创建接口目录')
     return false
   }
-  clearFormErrors(definitionErrors)
+  resetFormSession('definition'); clearFormErrors(definitionErrors)
   editingApiId.value = api?.id ?? ''
   const current = api ? selectedVersion.value : null
   Object.assign(definitionForm, {
@@ -839,7 +898,10 @@ function prepareInlineEditor() {
 function clearDefinitionError(field: string) {
   delete definitionErrors[field]
 }
-async function saveDefinition() {
+async function saveDefinition(): Promise<boolean> {
+  if (formSaving.definition) return false
+  const sameForm = formSession('definition'), pid = projectId.value, userId = session.profile?.id, id = editingApiId.value, modalSave = definitionDialog.value
+  const current = () => sameForm() && (modalSave || selectedApiId.value === id)
   clearFormErrors(definitionErrors)
   if (!definitionForm.catalogId) definitionErrors.catalogId = '请选择接口目录'
   if (!definitionForm.name.trim()) definitionErrors.name = '请输入接口名称'
@@ -854,7 +916,7 @@ async function saveDefinition() {
     }
   }
   if (Object.keys(definitionErrors).length) return false
-  saving.value = true
+  formSaving.definition = true
   try {
     const payload = {
       catalogId: definitionForm.catalogId,
@@ -872,20 +934,25 @@ async function saveDefinition() {
       exampleResponse: { statusCode: definitionForm.responseStatus },
     }
     const saved = await mutate<ApiDefinition>(
-      editingApiId.value
-        ? `/api/v1/projects/${projectId.value}/api-design/definitions/${editingApiId.value}/draft`
-        : `/api/v1/projects/${projectId.value}/api-design/definitions`,
-      editingApiId.value ? 'PUT' : 'POST',
+      id
+        ? `/api/v1/projects/${pid}/api-design/definitions/${id}/draft`
+        : `/api/v1/projects/${pid}/api-design/definitions`,
+      id ? 'PUT' : 'POST',
       payload,
+      () => { if (!current() || (modalSave && !definitionDialog.value)) throw new Error('操作已取消') },
     )
-    definitionDialog.value = false
-    selectedApiId.value = saved.id
-    if (!openApiIds.value.includes(saved.id)) openApiIds.value = [...openApiIds.value, saved.id]
-    await loadAssets()
+    if (current()) {
+      definitionDialog.value = false; selectedApiId.value = saved.id
+      if (!openApiIds.value.includes(saved.id)) openApiIds.value = [...openApiIds.value, saved.id]
+    }
+    await refreshSavedAssets(pid, userId)
+    if (!current()) return false
     await syncRouteToApi()
-    Message.success(editingApiId.value ? '接口已更新并创建新版本快照' : '接口与初始版本已创建')
+    if (!current()) return false
+    Message.success(id ? '接口已更新并创建新版本快照' : '接口与初始版本已创建')
     return true
   } catch (error) {
+    if (!current()) return false
     Object.assign(definitionErrors, formErrorsFrom(error))
     if (!Object.keys(definitionErrors).length) {
       const message = error instanceof Error ? error.message : '保存接口失败'
@@ -895,7 +962,7 @@ async function saveDefinition() {
     }
     return false
   } finally {
-    saving.value = false
+    if (current()) formSaving.definition = false
   }
 }
 async function deleteDefinition(api: ApiDefinition) {
@@ -949,6 +1016,7 @@ async function syncRouteToApi() {
   await router.replace({ path, query, hash: route.hash })
 }
 async function selectApi(id: string) {
+  if (id !== selectedApiId.value && !definitionDialog.value) resetFormSession('definition')
   if (!openApiIds.value.includes(id)) openApiIds.value = [...openApiIds.value, id]
   selectedApiId.value = id
   const api = definitions.value.find((item) => item.id === id)
@@ -981,22 +1049,26 @@ function toggleMultiSelectMode() {
 }
 function openVersion() {
   if (!selectedVersion.value) return
-  clearFormErrors(versionErrors)
+  resetFormSession('version'); clearFormErrors(versionErrors)
+  versionBase.value = { ...selectedVersion.value }
   versionForm.versionName = nextVersion(selectedVersion.value.versionName)
   versionForm.summary = selectedVersion.value.summary
   versionDialog.value = true
 }
-async function saveVersion() {
+async function saveVersion(): Promise<boolean> {
+  if (formSaving.version) return false
+  const sameForm = formSession('version'), pid = projectId.value, userId = session.profile?.id, apiId = selectedApiId.value
+  const current = () => sameForm() && apiId === selectedApiId.value
   clearFormErrors(versionErrors)
-  if (!selectedApiId.value || !selectedVersion.value) return false
+  if (!selectedApiId.value || !versionBase.value) return false
   if (!versionForm.versionName.trim()) {
     versionErrors.versionName = '请输入新版本名称'
     return false
   }
-  saving.value = true
+  formSaving.version = true
   try {
-    const base = selectedVersion.value
-    const created = await mutate<ApiVersion>(`/api/v1/projects/${projectId.value}/api-design/definitions/${selectedApiId.value}/versions`, 'POST', {
+    const base = versionBase.value
+    const created = await mutate<ApiVersion>(`/api/v1/projects/${pid}/api-design/definitions/${apiId}/versions`, 'POST', {
       versionName: versionForm.versionName,
       summary: versionForm.summary,
       description: base.description,
@@ -1006,13 +1078,15 @@ async function saveVersion() {
       requestBody: base.requestBody,
       responseBody: base.responseBody,
       exampleResponse: JSON.parse(base.exampleResponse || '{}'),
-    })
-    versionDialog.value = false
-    await loadAssets()
+    }, () => { if (!current() || !versionDialog.value) throw new Error('操作已取消') })
+    if (current()) versionDialog.value = false
+    await refreshSavedAssets(pid, userId)
+    if (!current()) return false
     selectedVersionId.value = created.id
     Message.success('版本快照已创建')
     return true
   } catch (error) {
+    if (!current()) return false
     Object.assign(versionErrors, formErrorsFrom(error))
     if (!Object.keys(versionErrors).length) {
       const message = error instanceof Error ? error.message : '创建版本失败'
@@ -1021,11 +1095,11 @@ async function saveVersion() {
     }
     return false
   } finally {
-    saving.value = false
+    if (current()) formSaving.version = false
   }
 }
 async function publishVersion() { if (!selectedApiId.value || !selectedVersionId.value) return; try { await mutate(`/api/v1/projects/${projectId.value}/api-design/definitions/${selectedApiId.value}/versions/${selectedVersionId.value}/publish`, 'POST'); await loadAssets(); Message.success('版本已发布，在线文档已更新') } catch (error) { Message.error(error instanceof Error ? error.message : '发布失败') } }
-function openInterchange() { if (!catalogs.value.length) { Message.warning('请先创建接口目录'); return }; Object.assign(interchangeForm, { catalogId: selectedCatalogId.value || catalogs.value[0].id, document: '', name: '', command: "curl -X POST 'https://api.example.com/api/v1/orders?dryRun=true' -H 'Authorization: Bearer <token>' --data-raw '{\"name\":\"示例\"}'" }); interchangeKind.value = 'OPENAPI'; specFileName.value = ''; interchangeResult.value = null; curlPreview.value = ''; interchangeDialog.value = true }
+function openInterchange() { if (!catalogs.value.length) { Message.warning('请先创建接口目录'); return }; resetFormSession('interchange'); ++fileReadGeneration; Object.assign(interchangeForm, { catalogId: selectedCatalogId.value || catalogs.value[0].id, document: '', name: '', command: "curl -X POST 'https://api.example.com/api/v1/orders?dryRun=true' -H 'Authorization: Bearer <token>' --data-raw '{\"name\":\"示例\"}'" }); interchangeKind.value = 'OPENAPI'; specFileName.value = ''; interchangeResult.value = null; curlPreview.value = ''; interchangeDialog.value = true }
 async function openDescriptorSync() {
   try { await openGrpcDescriptorSync() } catch (error) { Message.error(error instanceof Error ? error.message : '打开描述文件同步失败') }
 }
@@ -1035,34 +1109,25 @@ async function openNativeSync() {
 }
 function chooseSpecFile() { specInput.value?.click() }
 async function specChanged(event: Event) {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
+  const input = event.target as HTMLInputElement, file = input.files?.[0]
   if (!file) return
-  interchangeForm.document = ''
-  specFileName.value = ''
-  interchangeResult.value = null
+  interchangeForm.document = ''; specFileName.value = ''; interchangeResult.value = null
+  resetFormSession('interchange')
+  const request = ++fileReadGeneration, sameForm = formSession('interchange')
+  const current = () => sameForm() && interchangeDialog.value && request === fileReadGeneration
   try {
-    const fileSizeError = apiInterchangeSizeError(file.size)
-    if (fileSizeError) {
-      Message.error(fileSizeError)
-      return
-    }
+    const sizeError = apiInterchangeSizeError(file.size)
+    if (sizeError) { if (current()) Message.error(sizeError); return }
     const document = await file.text()
+    if (!current()) return
     const documentSizeError = apiInterchangeDocumentSizeError(document)
-    if (documentSizeError) {
-      Message.error(documentSizeError)
-      return
-    }
-    interchangeForm.document = document
-    specFileName.value = file.name
+    if (documentSizeError) { Message.error(documentSizeError); return }
+    interchangeForm.document = document; specFileName.value = file.name
     Message.success(`已读取 ${file.name}`)
   } catch {
-    interchangeForm.document = ''
-    specFileName.value = ''
-    Message.error('读取接口文档失败')
+    if (current()) { interchangeForm.document = ''; specFileName.value = ''; Message.error('读取接口文档失败') }
   } finally {
-    input.value = ''
-    if (specInput.value && specInput.value !== input) specInput.value.value = ''
+    if (pageActive && request === fileReadGeneration) input.value = ''
   }
 }
 const documentImportOptions: Record<DocumentInterchangeKind, { path: string; label: string }> = {
@@ -1086,47 +1151,46 @@ function documentImportIsValid() {
   }
   return true
 }
-async function importDocument(kind: DocumentInterchangeKind) {
-  interchangeResult.value = null
-  if (!documentImportIsValid()) return
-  saving.value = true
-  try {
-    const option = documentImportOptions[kind]
-    const result = await mutate<ImportResult>(`/api/v1/projects/${projectId.value}/api-design/interchange/${option.path}/import`, 'POST', {
-      catalogId: interchangeForm.catalogId,
-      document: interchangeForm.document,
-    })
-    interchangeResult.value = result
-    await loadAssets()
-    Message.success(`已导入 ${option.label}：${importResultSummary(result)}`)
-  } catch (error) {
-    Message.error(error instanceof Error ? error.message : '导入接口资产失败')
-  } finally {
-    saving.value = false
-  }
-}
 async function importInterchange() {
+  if (formSaving.interchange) return
   interchangeResult.value = null
-  if (interchangeKind.value !== 'CURL') {
-    await importDocument(interchangeKind.value)
-    return
-  }
-  saving.value = true
+  const kind = interchangeKind.value
+  if (kind !== 'CURL' && !documentImportIsValid()) return
+  const sameForm = formSession('interchange'), pid = projectId.value, userId = session.profile?.id
+  const current = () => sameForm() && interchangeDialog.value
+  const option = kind === 'CURL' ? { path: 'curl', label: 'cURL' } : documentImportOptions[kind]
+  const payload = kind === 'CURL'
+    ? { catalogId: interchangeForm.catalogId, name: interchangeForm.name, command: interchangeForm.command }
+    : { catalogId: interchangeForm.catalogId, document: interchangeForm.document }
+  formSaving.interchange = true
   try {
-    const result = await mutate<ImportResult>(`/api/v1/projects/${projectId.value}/api-design/interchange/curl/import`, 'POST', { catalogId: interchangeForm.catalogId, name: interchangeForm.name, command: interchangeForm.command })
-    interchangeResult.value = result
-    await loadAssets()
-    Message.success(`已导入 cURL：${importResultSummary(result)}`)
+    const result = await mutate<ImportResult>(`/api/v1/projects/${pid}/api-design/interchange/${option.path}/import`, 'POST', payload, () => {
+      if (!current()) throw new Error('操作已取消')
+    })
+    if (current()) interchangeResult.value = result
+    await refreshSavedAssets(pid, userId)
+    if (current()) Message.success(`已导入 ${option.label}：${importResultSummary(result)}`)
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '导入接口资产失败')
-  } finally {
-    saving.value = false
-  }
+    if (current()) Message.error(error instanceof Error ? error.message : '导入接口资产失败')
+  } finally { if (current()) formSaving.interchange = false }
 }
 async function downloadOpenApi() { try { const scope = selectedCatalogId.value ? `?catalogId=${encodeURIComponent(selectedCatalogId.value)}` : ''; const response = await fetch(`/api/v1/projects/${projectId.value}/api-design/interchange/openapi/export${scope}`, { credentials: 'include' }); if (!response.ok) { const body = await response.json().catch(() => ({})) as { message?: string }; throw new Error(body.message ?? '导出失败') }; const blob = await response.blob(); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'testhub-openapi.json'; link.click(); URL.revokeObjectURL(link.href); Message.success('OpenAPI 3.1 文档已导出') } catch (error) { Message.error(error instanceof Error ? error.message : '导出接口文档失败') } }
 async function downloadPostman() { try { const scope = selectedCatalogId.value ? '?catalogId=' + encodeURIComponent(selectedCatalogId.value) : ''; const response = await fetch('/api/v1/projects/' + projectId.value + '/api-design/interchange/postman/export' + scope, { credentials: 'include' }); if (!response.ok) { const body = await response.json().catch(() => ({})) as { message?: string }; throw new Error(body.message ?? '导出失败') }; const blob = await response.blob(); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'testhub-postman-collection.json'; link.click(); URL.revokeObjectURL(link.href); Message.success('Postman Collection 2.1 已导出') } catch (error) { Message.error(error instanceof Error ? error.message : '导出 Postman Collection 失败') } }
 async function downloadHar() { try { const scope = selectedCatalogId.value ? '?catalogId=' + encodeURIComponent(selectedCatalogId.value) : ''; const response = await fetch('/api/v1/projects/' + projectId.value + '/api-design/interchange/har/export' + scope, { credentials: 'include' }); if (!response.ok) { const body = await response.json().catch(() => ({})) as { message?: string }; throw new Error(body.message ?? '导出失败') }; const blob = await response.blob(); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'testhub-api-archive.har'; link.click(); URL.revokeObjectURL(link.href); Message.success('HAR 1.2 文档已导出') } catch (error) { Message.error(error instanceof Error ? error.message : '导出 HAR 文档失败') } }
-async function previewCurl() { if (!selectedApi.value) { Message.warning('请先选择一个接口'); return }; try { const result = await read<{ command: string }>(`/api/v1/projects/${projectId.value}/api-design/definitions/${selectedApi.value.id}/interchange/curl?baseUrl=${encodeURIComponent('https://api.example.com')}`); curlPreview.value = result.command; interchangeDialog.value = true } catch (error) { Message.error(error instanceof Error ? error.message : '生成 cURL 失败') } }
+async function previewCurl() {
+  if (!selectedApi.value) { Message.warning('请先选择一个接口'); return }
+  if (!interchangeDialog.value) { resetFormSession('interchange'); interchangeResult.value = null; curlPreview.value = '' }
+  const current = formSession('interchange'), pid = projectId.value, apiId = selectedApi.value.id
+  try {
+    const result = await read<{ command: string }>(`/api/v1/projects/${pid}/api-design/definitions/${apiId}/interchange/curl?baseUrl=${encodeURIComponent('https://api.example.com')}`)
+    if (current()) { curlPreview.value = result.command; interchangeDialog.value = true }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '生成 cURL 失败') }
+}
+watch([() => interchangeForm.catalogId, () => interchangeForm.document, () => interchangeForm.name, () => interchangeForm.command, interchangeKind], () => {
+  resetFormSession('interchange'); interchangeResult.value = null
+}, { flush: 'sync' })
+watch([projectId, () => session.profile?.id], () => { catalogCopyScope++; invalidateAssetForms() }, { flush: 'sync' })
+watch(selectedApiId, cancelVersion, { flush: 'sync' })
 watch(() => route.query.apiId, async (value) => {
   if (typeof value !== 'string' || value === selectedApiId.value || !definitions.value.some((api) => api.id === value)) return
   await selectApi(value)
@@ -1137,7 +1201,7 @@ watch([projectId, () => session.profile?.id], ([, userId], previous) => {
   quickRequestHistory.value = []
   void loadQuickRequestTreeState()
 }, { immediate: true, flush: 'sync' })
-onBeforeUnmount(() => { preferencesGeneration++; assetsGeneration++; preferenceClient.dispose() })
+onBeforeUnmount(() => { pageActive = false; invalidateAssetForms(); preferencesGeneration++; assetsGeneration++; versionLoadGeneration++; preferenceClient.dispose() })
 onMounted(load)
 </script>
 
@@ -1458,6 +1522,7 @@ onMounted(load)
                     >
                       <span class="method-label" :class="methodClass(row.item.method)">{{ row.item.method }}</span>
                       <span>{{ quickRequestLabel(row.item) }}</span>
+                      <small v-if="apiDebugReplayUnavailableReason(row.item.replayStatus)">{{ row.item.replayStatus === 'EXPIRED' ? '回放已到期' : '回放不可用' }}</small>
                       <small v-if="row.item.importSourceId">迁入历史</small>
                       <small>{{ row.item.result === 'DRAFT' ? '草稿' : row.item.protocol === 'WEBSOCKET' && row.item.result === 'COMPLETED' ? '已连接' : row.item.responseStatus ?? '失败' }}</small>
                     </button>
@@ -1573,7 +1638,7 @@ onMounted(load)
                 :errors="definitionErrors"
                 :editing="true"
                 :inline="true"
-                :saving="saving"
+                :saving="formSaving.definition"
                 :show-actions="true"
                 @update:model-value="Object.assign(definitionForm, $event)"
                 @save="saveDefinition"
@@ -1599,7 +1664,7 @@ onMounted(load)
         </a-form-item>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="catalogDialog" :title="editingCatalogId ? '修改接口目录' : '新建接口目录'" width="520px" :ok-loading="saving" :on-before-ok="saveCatalog">
+    <a-modal v-model:visible="catalogDialog" :title="editingCatalogId ? '修改接口目录' : '新建接口目录'" width="520px" :ok-loading="formSaving.catalog" :on-before-ok="saveCatalog" @cancel="cancelCatalog">
       <a-form :model="catalogForm" layout="vertical">
         <a-form-item label="目录名称" required :validate-status="catalogErrors.name ? 'error' : undefined" :help="catalogErrors.name">
           <a-input v-model="catalogForm.name" placeholder="例如：订单服务" @input="catalogErrors.name = ''" />
@@ -1611,18 +1676,18 @@ onMounted(load)
         </a-form-item>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="definitionDialog" :title="editingApiId ? '修改接口并创建新版本' : '新建接口与初始版本'" width="800px" :ok-loading="saving" :on-before-ok="saveDefinition">
+    <a-modal v-model:visible="definitionDialog" :title="editingApiId ? '修改接口并创建新版本' : '新建接口与初始版本'" width="800px" :ok-loading="formSaving.definition" :on-before-ok="saveDefinition" @cancel="cancelDefinition">
       <ApiDefinitionEditor
         :model-value="definitionForm"
         :catalogs="catalogs"
         :errors="definitionErrors"
         :editing="Boolean(editingApiId)"
-        :saving="saving"
+        :saving="formSaving.definition"
         @update:model-value="Object.assign(definitionForm, $event)"
         @clear-error="clearDefinitionError"
       />
     </a-modal>
-    <a-modal v-model:visible="versionDialog" title="基于当前版本创建快照" width="520px" :ok-loading="saving" :on-before-ok="saveVersion">
+    <a-modal v-model:visible="versionDialog" title="基于当前版本创建快照" width="520px" :ok-loading="formSaving.version" :on-before-ok="saveVersion" @cancel="cancelVersion">
       <a-form :model="versionForm" layout="vertical">
         <a-alert type="info">新版本将继承当前文档内容；创建后可继续修改接口并形成下一版快照。</a-alert>
         <a-alert v-if="versionErrors.form" type="error">{{ versionErrors.form }}</a-alert>
@@ -1632,7 +1697,7 @@ onMounted(load)
         <a-form-item label="版本摘要"><a-input v-model="versionForm.summary" placeholder="例如：增加订单扩展字段" /></a-form-item>
       </a-form>
     </a-modal>
-    <a-modal v-model:visible="interchangeDialog" title="导入 / 导出接口资产" width="820px" :footer="false">
+    <a-modal v-model:visible="interchangeDialog" title="导入 / 导出接口资产" width="820px" :footer="false" @cancel="cancelInterchange">
       <div class="interchange-dialog">
         <a-alert type="info">导入会在写入前校验；任一接口冲突或格式错误都不会留下部分资产。</a-alert>
         <div class="interchange-actions"><a-button @click="downloadOpenApi"><icon-download /> 导出 OpenAPI 3.1</a-button><a-button @click="downloadPostman"><icon-download /> 导出 Postman Collection</a-button><a-button @click="downloadHar"><icon-download /> 导出 HAR 1.2</a-button><a-button :disabled="!selectedApi" @click="previewCurl"><icon-code /> 生成当前接口 cURL</a-button></div>
@@ -1646,7 +1711,7 @@ onMounted(load)
             <a-form-item label="接口名称" extra="留空时使用方法与请求路径自动命名。"><a-input v-model="interchangeForm.name" placeholder="例如：创建订单" /></a-form-item>
             <a-form-item label="cURL 命令" required extra="支持 -X/--request、-H/--header、-d/--data-raw 等常用参数。"><a-textarea v-model="interchangeForm.command" :auto-size="{ minRows: 7, maxRows: 12 }" /></a-form-item>
           </template>
-          <a-button type="primary" :loading="saving" @click="importInterchange"><icon-import /> 校验并导入</a-button>
+          <a-button type="primary" :loading="formSaving.interchange" @click="importInterchange"><icon-import /> 校验并导入</a-button>
         </a-form>
         <section v-if="interchangeResult" class="interchange-result">
           <a-result status="success" title="导入完成" :subtitle="`${interchangeResult.format} 已写入当前项目并记录审计日志。`" />

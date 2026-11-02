@@ -1,0 +1,108 @@
+{
+  "total": 826,
+  "passed": 806,
+  "failed": 20,
+  "failures": [
+    {
+      "name": "replacement version draft retains its original base after an old save refreshes versions",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/apiDesignFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "OPENAPI: late import 200 cannot decorate a replacement draft",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/apiDesignFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "OPENAPI: an old import cannot clear a newer spinner or result",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/apiDesignFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "POSTMAN: late import 200 cannot decorate a replacement draft",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/apiDesignFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "HAR: an old import cannot clear a newer spinner or result",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/apiDesignFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "import: edit during CSRF prevents stale submission",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/apiDesignFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "late file read cannot overwrite a newer file",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/apiDesignFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "cases: late 200 cannot close, clear or show errors on the replacement draft",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/functionalAssetFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "scenario: cancel while CSRF is pending prevents an obsolete write",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/mobileAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "scenario: an old completion cannot clear the new save spinner",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/mobileAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "execute: a late 503 after cancellation has no toast or follow-up",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/mobileAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "duplicate element save callbacks only send one write",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/mobileAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "router access allows reauthentication when the server has invalidated a cached session",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/router.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "router access allows signed-in users to open every product module",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/router.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "object: late create 503 preserves a replacement draft",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/uiAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "schedule: late edit 200 preserves a replacement draft",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/uiAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "schedule: project-return while CSRF is pending prevents an obsolete write",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/uiAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "execute: project-return during CSRF cannot queue a task",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/uiAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "execute: unmount during CSRF cannot queue a task",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/uiAutomationFixes.test.ts",
+      "timeout": false
+    },
+    {
+      "name": "execute: a late 503 after cancellation has no toast or follow-up",
+      "file": "/Users/limingbo/Documents/codeXProject/testHub/src/test/uiAutomationFixes.test.ts",
+      "timeout": false
+    }
+  ],
+  "recheck": "826/826 passed with maxWorkers=2, original five-second timeout retained"
+}

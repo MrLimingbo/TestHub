@@ -1,0 +1,2279 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "name": "TestHub D16接口自动化修复回归",
+    "version": "2026-11-02 五项A",
+    "scope": "仅OBS-08-E010；其他五模块按模块审核门槛等待，其他9项/12环境/升级关闭不执行。",
+    "generated_at": "2026-11-02T00:00:00+08:00"
+  },
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "DECISIONS.json",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/DECISIONS.json",
+      "sha256": "ba93f52672a1e239258a9cbf5dfd2fb74a2ec1eedef196d8c717323e6e722039"
+    },
+    {
+      "id": "SRC-002",
+      "name": "D16-RULES-AND-ACCEPTANCE.md",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/D16-RULES-AND-ACCEPTANCE.md",
+      "sha256": "72d76f9f0cccc63de4a9d8e0e2dd4dec1130a990a4c69b9e4df52ca9a005da3a"
+    },
+    {
+      "id": "SRC-003",
+      "name": "FIELD-MATRIX.md",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/FIELD-MATRIX.md",
+      "sha256": "06ba7b080ea0b5d2d12bbe034fd53182a7e90427d5832a460cfc04cf3fbb31a1"
+    },
+    {
+      "id": "SRC-004",
+      "name": "REVIEW-APPROVAL.json",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "ff13bab3a7282612746835ad181ee82f23b813be54a4119d079cc879e523e0ad"
+    },
+    {
+      "id": "SRC-005",
+      "name": "APPROVED-SCOPE.json",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/APPROVED-SCOPE.json",
+      "sha256": "c83833fbc2ab586e0258e9db581a6652e4ce3b5dc98320781ce2379c17803d38"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-D16API-NUM",
+      "title": "WAIT原始类型及精确整数",
+      "description": "WAIT原始类型及精确整数",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16API-01",
+          "text": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-02",
+          "text": "0/600000允许；-1/600001拒绝；新建与编辑采用相同规则。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-03",
+          "text": "0/600000允许；-1/600001拒绝；新建与编辑采用相同规则。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-04",
+          "text": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-05",
+          "text": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-06",
+          "text": "18446744073709551616、1e10000及超范围值受控拒绝；不得long/int回绕或500。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-07",
+          "text": "按N-A拒绝整数字段\"10\"、\" 10 \"、\"10.0\"和错误率\"2.50\"；若选B按明示白名单验收。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-08",
+          "text": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-09",
+          "text": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-10",
+          "text": "发送原始NaN/Infinity/-Infinity字节应400；不能使用JSON.stringify后变null的样例冒充验证。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16API-WRITE",
+      "title": "写入入口一致性",
+      "description": "写入入口一致性",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16API-11",
+          "text": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-12",
+          "text": "WAIT=1.5保存400，不新增场景/修订/成功业务审计，不留先保存后执行才失败的入口。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-13",
+          "text": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-14",
+          "text": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-15",
+          "text": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-16",
+          "text": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-17",
+          "text": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-18",
+          "text": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16API-OLD",
+      "title": "存量及新执行边界",
+      "description": "存量及新执行边界",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16API-19",
+          "text": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-20",
+          "text": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-21",
+          "text": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-29",
+          "text": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-30",
+          "text": "新入队前校验；旧排队任务在预检校验规范化运行值、失败有原因且不创建外部资源；已有运行不自动取消。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16API-RUN",
+      "title": "受控Runner校验",
+      "description": "受控Runner校验",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16API-22",
+          "text": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-23",
+          "text": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16API-UI",
+      "title": "页面与兼容回归",
+      "description": "页面与兼容回归",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16API-24",
+          "text": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-25",
+          "text": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-26",
+          "text": "真实小数百分比、通用步骤config、原expectedVersion及未列字段契约保持。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-27",
+          "text": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16API-28",
+          "text": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "id": "COV-D16API-01",
+      "title": "精确整数等价数字写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-02",
+      "title": "WAIT延迟下边界0可保存",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-03",
+      "title": "WAIT延迟上边界600000可保存",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-04",
+      "title": "带非零小数部分不得保存",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-05",
+      "title": "微小小数不得先丢精度再通过",
+      "technique": "error-guessing",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-06",
+      "title": "溢出与巨大指数受控拒绝",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-07",
+      "title": "WAIT拒绝数字字符串",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-08",
+      "title": "WAIT拒绝布尔和容器类型",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-09",
+      "title": "WAIT缺失和null不得归零",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-09"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-10",
+      "title": "原始非有限JSON不能冒充null验证",
+      "technique": "error-guessing",
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-10"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-11",
+      "title": "合法编辑产生新版本且保留旧修订",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-11"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-12",
+      "title": "非法编辑不改变现有版本或审计",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-12"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-13",
+      "title": "公共步骤可保存合法WAIT",
+      "technique": "scenario",
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-13"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-14",
+      "title": "公共步骤保存与更新拒绝非法WAIT",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-14"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-15",
+      "title": "迁移合法WAIT保持可执行整数",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-15"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-16",
+      "title": "迁移非法WAIT不落入成功回执",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-16"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-17",
+      "title": "同步合法WAIT不改变数值语义",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-17"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-18",
+      "title": "同步非法WAIT不绕过保存校验",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-18"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-19",
+      "title": "旧非法定义仍可读取且不自动改写",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-19"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-20",
+      "title": "旧非法WAIT在预检与新入队前阻止",
+      "technique": "scenario",
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-20"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-21",
+      "title": "引用旧公共步骤和子场景也必须校验WAIT",
+      "technique": "scenario",
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-21"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-22",
+      "title": "Runner接受规范化的有限整数WAIT",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16API-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-22"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-23",
+      "title": "Runner拒绝非法WAIT且无目标请求",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16API-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-23"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-24",
+      "title": "页面合法WAIT编辑提交数值",
+      "technique": "scenario",
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-24"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-25",
+      "title": "页面非法WAIT提示字段且不提交",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-25"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-26",
+      "title": "非WAIT配置及原类型契约保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-26"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-27",
+      "title": "权限隔离仍阻止越权WAIT写入",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-27"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-28",
+      "title": "乐观锁冲突不被类型修复绕过",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-28"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-29",
+      "title": "旧执行清单不被新WAIT策略改写",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-29"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16API-30",
+      "title": "旧非法WAIT可经人工明确修复后入队",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-30"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "document_review": [],
+  "cases": [
+    {
+      "id": "TC-D16API-01",
+      "module": "接口自动化 / WAIT",
+      "title": "精确整数等价数字写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-01"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "新建含WAIT的合法场景，分别提交10、10.0及1e1，读取保存结果",
+          "expected": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-02",
+      "module": "接口自动化 / WAIT",
+      "title": "WAIT延迟下边界0可保存",
+      "type": "boundary",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-02"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以0毫秒创建WAIT；读取保存定义",
+          "expected": "0/600000允许；-1/600001拒绝；新建与编辑采用相同规则。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "0/600000允许；-1/600001拒绝；新建与编辑采用相同规则。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-03",
+      "module": "接口自动化 / WAIT",
+      "title": "WAIT延迟上边界600000可保存",
+      "type": "boundary",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-03"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以600000毫秒创建WAIT；读取保存定义",
+          "expected": "0/600000允许；-1/600001拒绝；新建与编辑采用相同规则。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "0/600000允许；-1/600001拒绝；新建与编辑采用相同规则。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-04",
+      "module": "接口自动化 / WAIT",
+      "title": "带非零小数部分不得保存",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-04"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交1.5及负小数的WAIT并检查资产/修订未增加",
+          "expected": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-05",
+      "module": "接口自动化 / WAIT",
+      "title": "微小小数不得先丢精度再通过",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "error-guessing"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-05"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "原始JSON提交1.0000000000000001并核对无新修订",
+          "expected": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-06",
+      "module": "接口自动化 / WAIT",
+      "title": "溢出与巨大指数受控拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-06"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "原始JSON提交18446744073709551616、1e10000，检查拒绝及无资产写入",
+          "expected": "18446744073709551616、1e10000及超范围值受控拒绝；不得long/int回绕或500。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "18446744073709551616、1e10000及超范围值受控拒绝；不得long/int回绕或500。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-07",
+      "module": "接口自动化 / WAIT",
+      "title": "WAIT拒绝数字字符串",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-07"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交\"10\"、\" 10 \"、\"10.0\"、\"NaN\"的WAIT",
+          "expected": "按N-A拒绝整数字段\"10\"、\" 10 \"、\"10.0\"和错误率\"2.50\"；若选B按明示白名单验收。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "按N-A拒绝整数字段\"10\"、\" 10 \"、\"10.0\"和错误率\"2.50\"；若选B按明示白名单验收。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-08",
+      "module": "接口自动化 / WAIT",
+      "title": "WAIT拒绝布尔和容器类型",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-08"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交true、[]、{}和空串的WAIT",
+          "expected": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-09",
+      "module": "接口自动化 / WAIT",
+      "title": "WAIT缺失和null不得归零",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-09"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "省略delayMillis或传null再尝试保存",
+          "expected": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-09"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-10",
+      "module": "接口自动化 / WAIT",
+      "title": "原始非有限JSON不能冒充null验证",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "error-guessing"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-10"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "逐一发送含裸NaN、Infinity、-Infinity的原始HTTP正文",
+          "expected": "发送原始NaN/Infinity/-Infinity字节应400；不能使用JSON.stringify后变null的样例冒充验证。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "发送原始NaN/Infinity/-Infinity字节应400；不能使用JSON.stringify后变null的样例冒充验证。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-10"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-11",
+      "module": "接口自动化 / WAIT",
+      "title": "合法编辑产生新版本且保留旧修订",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-11"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取原场景修订后，以合法整数更新WAIT，再读取新旧修订",
+          "expected": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-11"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-12",
+      "module": "接口自动化 / WAIT",
+      "title": "非法编辑不改变现有版本或审计",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-12"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对已有场景以小数更新WAIT；检查现有定义、修订和业务审计",
+          "expected": "WAIT=1.5保存400，不新增场景/修订/成功业务审计，不留先保存后执行才失败的入口。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "WAIT=1.5保存400，不新增场景/修订/成功业务审计，不留先保存后执行才失败的入口。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-12"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-13",
+      "module": "接口自动化 / WAIT",
+      "title": "公共步骤可保存合法WAIT",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "scenario"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-13"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在公共步骤中保存合法WAIT并读取定义",
+          "expected": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-13"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-14",
+      "module": "接口自动化 / WAIT",
+      "title": "公共步骤保存与更新拒绝非法WAIT",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-14"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在公共步骤新建和更新中提交小数/字符串WAIT，检查拒绝原子性",
+          "expected": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-14"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-15",
+      "module": "接口自动化 / WAIT",
+      "title": "迁移合法WAIT保持可执行整数",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-15"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "按现有导入协议迁移合法WAIT，读取目标定义与回执",
+          "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-15"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-16",
+      "module": "接口自动化 / WAIT",
+      "title": "迁移非法WAIT不落入成功回执",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-16"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "迁移含非法WAIT的场景/公共步骤修订，检查事务与回执",
+          "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-16"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-17",
+      "module": "接口自动化 / WAIT",
+      "title": "同步合法WAIT不改变数值语义",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-17"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "通过场景/公共步骤同步入口提交合法WAIT并读取目标",
+          "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-17"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-18",
+      "module": "接口自动化 / WAIT",
+      "title": "同步非法WAIT不绕过保存校验",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-18"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "同步含小数或字符串WAIT的定义，检查目标和回执未写入",
+          "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-18"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-19",
+      "module": "接口自动化 / WAIT",
+      "title": "旧非法定义仍可读取且不自动改写",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-19"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在隔离数据库建立旧非法WAIT定义，读取定义及旧修订并比对原值",
+          "expected": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-19"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-20",
+      "module": "接口自动化 / WAIT",
+      "title": "旧非法WAIT在预检与新入队前阻止",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "scenario"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-20"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对旧非法WAIT直接执行预览和入队；检查执行、任务及outbox未新增",
+          "expected": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-20"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-21",
+      "module": "接口自动化 / WAIT",
+      "title": "引用旧公共步骤和子场景也必须校验WAIT",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "scenario"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-21"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对引用旧非法公共步骤/子场景的根场景尝试新入队",
+          "expected": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-21"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-22",
+      "module": "接口自动化 / WAIT",
+      "title": "Runner接受规范化的有限整数WAIT",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-22"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "向受控Runner提供合法规范化WAIT，在虚拟时钟下完成预检/等待",
+          "expected": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-22"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-23",
+      "module": "接口自动化 / WAIT",
+      "title": "Runner拒绝非法WAIT且无目标请求",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-23"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "向受控Runner提供小数、数字字符串或非有限WAIT；核对无目标HTTP调用",
+          "expected": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-23"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-24",
+      "module": "接口自动化 / WAIT",
+      "title": "页面合法WAIT编辑提交数值",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "scenario"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-24"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在页面输入精确整数等价写法并手动保存，检查发送JSON number",
+          "expected": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-24"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-25",
+      "module": "接口自动化 / WAIT",
+      "title": "页面非法WAIT提示字段且不提交",
+      "type": "usability",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-25"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "页面输入小数/微小小数并尝试保存或执行，检查提示和业务请求",
+          "expected": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-25"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-26",
+      "module": "接口自动化 / WAIT",
+      "title": "非WAIT配置及原类型契约保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-26"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对照通用非WAIT步骤配置，检查原字符串/布尔/数值契约未扩展修改",
+          "expected": "真实小数百分比、通用步骤config、原expectedVersion及未列字段契约保持。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "真实小数百分比、通用步骤config、原expectedVersion及未列字段契约保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-26"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-27",
+      "module": "接口自动化 / WAIT",
+      "title": "权限隔离仍阻止越权WAIT写入",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-27"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "用原有无权项目会话尝试写WAIT，核对原项目资产未改变",
+          "expected": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-27"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-28",
+      "module": "接口自动化 / WAIT",
+      "title": "乐观锁冲突不被类型修复绕过",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-28"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "合法更新后再用旧版本保存WAIT，核对原冲突保护",
+          "expected": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-28"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-29",
+      "module": "接口自动化 / WAIT",
+      "title": "旧执行清单不被新WAIT策略改写",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-29"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "记录已有清单内容/校验和，修改定义或触发预检后比对旧清单",
+          "expected": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-29"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16API-30",
+      "module": "接口自动化 / WAIT",
+      "title": "旧非法WAIT可经人工明确修复后入队",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A及既有WAIT观察设计一个主要业务目标；同一分区的数据变体不重复计为正式用例。",
+      "coverage_item_refs": [
+        "COV-D16API-30"
+      ],
+      "preconditions": [
+        "在全新隔离QA项目/账号及受控Runner/浏览器夹具执行；所需原资产与版本按用例准备。"
+      ],
+      "test_data": "使用本用例引用的验收规则中的数字/类型与边界；未给具体资产名时使用{有效隔离资产}。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取旧非法WAIT后明确改为合法整数并保存，核对新入队使用新值及旧快照保持",
+          "expected": "新入队前校验；旧排队任务在预检校验规范化运行值、失败有原因且不创建外部资源；已有运行不自动取消。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "新入队前校验；旧排队任务在预检校验规范化运行值、失败有原因且不创建外部资源；已有运行不自动取消。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16API-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16API-30"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-08-E010",
+        "D16-A"
+      ],
+      "notes": "实际执行状态保存在独立结果文件；数字/入口变体是工程证据，不增加正式分母。"
+    }
+  ]
+}

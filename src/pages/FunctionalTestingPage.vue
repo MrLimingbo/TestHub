@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import {
   type FunctionalCase,
@@ -20,7 +20,11 @@ const keyword = ref('')
 const caseTypeFilter = ref<string>()
 const selectedAssetIds = ref<string[]>([])
 const saving = ref(false)
+const batchDeleting = ref(false)
 const dialogVisible = ref(false)
+let formVersion = 0
+let active = true
+onBeforeUnmount(() => { active = false; formVersion++ })
 const editingId = ref<string | null>(null)
 const formErrors = reactive<Record<string, string>>({})
 const form = reactive({
@@ -76,13 +80,15 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
   return body.data
 }
 
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+async function mutate(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, canSend?: () => boolean): Promise<boolean> {
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
-  return read<T>(url, {
+  if (canSend && !canSend()) return false
+  await read(url, {
     method,
     headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
     body: body === undefined ? undefined : JSON.stringify(body),
   })
+  return true
 }
 
 function clearForm() {
@@ -108,6 +114,8 @@ function openAsset(item?: FunctionalRequirement | FunctionalCase) {
     Message.warning('请先在左侧创建资产目录')
     return
   }
+  formVersion++
+  saving.value = false
   editingId.value = item?.id ?? null
   clearForm()
   if (item) {
@@ -117,6 +125,11 @@ function openAsset(item?: FunctionalRequirement | FunctionalCase) {
   dialogVisible.value = true
 }
 
+function cancelAsset() {
+  formVersion++
+  saving.value = false
+}
+
 function showSaveError(error: unknown, fallback: string) {
   clearFormErrors(formErrors)
   Object.assign(formErrors, formErrorsFrom(error))
@@ -124,25 +137,32 @@ function showSaveError(error: unknown, fallback: string) {
 }
 
 async function save(): Promise<boolean> {
+  if (saving.value) return false
+  const version = formVersion
+  const projectId = session.projectId
+  const assetType = props.assetType
+  const sameForm = () => active && version === formVersion && projectId === session.projectId && assetType === props.assetType
+  const canSend = () => sameForm() && dialogVisible.value
   saving.value = true
   try {
+    let saved: boolean
     if (isRequirements.value) {
       const url = editingId.value
         ? `/api/v1/projects/${session.projectId}/functional/requirements/${editingId.value}`
         : `/api/v1/projects/${session.projectId}/functional/requirements`
-      await mutate(url, editingId.value ? 'PUT' : 'POST', {
+      saved = await mutate(url, editingId.value ? 'PUT' : 'POST', {
         catalogId: form.catalogId,
         requirementCode: form.requirementCode,
         title: form.title,
         priority: form.priority,
         status: form.status,
         description: form.description,
-      })
+      }, canSend)
     } else {
       const url = editingId.value
         ? `/api/v1/projects/${session.projectId}/functional/cases/${editingId.value}`
         : `/api/v1/projects/${session.projectId}/functional/cases`
-      await mutate(url, editingId.value ? 'PUT' : 'POST', {
+      saved = await mutate(url, editingId.value ? 'PUT' : 'POST', {
         catalogId: form.catalogId,
         requirementId: form.requirementId || null,
         caseCode: form.caseCode,
@@ -153,17 +173,19 @@ async function save(): Promise<boolean> {
         precondition: form.precondition,
         steps: form.steps,
         expectedResult: form.expectedResult,
-      })
+      }, canSend)
     }
-    dialogVisible.value = false
-    await workspace.reload()
+    if (!saved) return false
+    if (sameForm()) dialogVisible.value = false
+    if (active && projectId === session.projectId && assetType === props.assetType) await workspace.reload()
+    if (!sameForm()) return false
     Message.success(isRequirements.value ? '需求已保存' : '测试用例已保存')
     return true
   } catch (error) {
-    showSaveError(error, '保存失败')
+    if (sameForm()) showSaveError(error, '保存失败')
     return false
   } finally {
-    saving.value = false
+    if (sameForm()) saving.value = false
   }
 }
 
@@ -179,15 +201,29 @@ async function remove(item: FunctionalRequirement | FunctionalCase) {
 }
 
 async function removeSelected() {
-  if (!selectedAssetIds.value.length) return
+  if (!selectedAssetIds.value.length || batchDeleting.value) return
   const ids = [...selectedAssetIds.value]
+  const projectId = session.projectId
+  const resource = activeResource.value
+  batchDeleting.value = true
   try {
-    await Promise.all(ids.map((id) => mutate(`/api/v1/projects/${session.projectId}/functional/${activeResource.value}/${id}`, 'DELETE')))
+    const results = await Promise.allSettled(ids.map((id) => mutate(`/api/v1/projects/${projectId}/functional/${resource}/${id}`, 'DELETE')))
+    if (!active || projectId !== session.projectId || resource !== activeResource.value) return
+    const deleted = new Set(ids.filter((_, index) => results[index]?.status === 'fulfilled'))
+    // Reconcile committed deletes even if refreshing the remaining records fails.
+    if (resource === 'requirements') requirements.value = requirements.value.filter(item => !deleted.has(item.id))
+    else cases.value = cases.value.filter(item => !deleted.has(item.id))
+    selectedAssetIds.value = selectedAssetIds.value.filter(id => !deleted.has(id))
+    const failed = results.find((result): result is PromiseRejectedResult => result.status === 'rejected')
+    if (failed) Message.error(failed.reason instanceof Error ? failed.reason.message : '批量删除失败')
     await workspace.reload()
-    selectedAssetIds.value = []
-    Message.success(`已删除 ${ids.length} 条${isRequirements.value ? '需求' : '测试用例'}`)
+    if (!failed && active && projectId === session.projectId && resource === activeResource.value) {
+      Message.success(`已删除 ${ids.length} 条${isRequirements.value ? '需求' : '测试用例'}`)
+    }
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '批量删除失败')
+    if (active && projectId === session.projectId && resource === activeResource.value) Message.error(error instanceof Error ? error.message : '批量删除失败')
+  } finally {
+    if (active) batchDeleting.value = false
   }
 }
 
@@ -216,7 +252,7 @@ watch(() => props.assetType, () => { selectedAssetIds.value = [] })
         <a-tooltip content="刷新"><a-button shape="circle" aria-label="刷新资产" @click="workspace.reload"><icon-refresh /></a-button></a-tooltip>
         <a-button class="create-asset" type="primary" @click="openAsset()"><icon-plus /> {{ isRequirements ? '新建需求' : '新建用例' }}</a-button>
         <a-popconfirm :disabled="!selectedAssetIds.length" :content="`确认删除选中的 ${selectedAssetIds.length} 条${isRequirements ? '需求' : '测试用例'}吗？`" @ok="removeSelected">
-          <a-button class="batch-delete" status="danger" :disabled="!selectedAssetIds.length"><icon-delete /> 批量删除（{{ selectedAssetIds.length }}）</a-button>
+          <a-button class="batch-delete" status="danger" :disabled="!selectedAssetIds.length" :loading="batchDeleting"><icon-delete /> 批量删除（{{ selectedAssetIds.length }}）</a-button>
         </a-popconfirm>
       </div>
     </header>
@@ -259,7 +295,7 @@ watch(() => props.assetType, () => { selectedAssetIds.value = [] })
       </a-table>
     </a-spin>
 
-    <a-modal v-model:visible="dialogVisible" :title="`${editingId ? '编辑' : '新建'}${isRequirements ? '需求' : '测试用例'}`" width="680px" :ok-loading="saving" :on-before-ok="save">
+    <a-modal v-model:visible="dialogVisible" :title="`${editingId ? '编辑' : '新建'}${isRequirements ? '需求' : '测试用例'}`" width="680px" :ok-loading="saving" :on-before-ok="save" @cancel="cancelAsset">
       <a-form :model="form" layout="vertical">
         <a-form-item label="所属目录" required :validate-status="formErrors.catalogId ? 'error' : undefined" :help="formErrors.catalogId"><a-select v-model="form.catalogId" @change="delete formErrors.catalogId"><a-option v-for="catalog in catalogs" :key="catalog.id" :value="catalog.id">{{ catalog.name }}</a-option></a-select></a-form-item>
         <template v-if="isRequirements">

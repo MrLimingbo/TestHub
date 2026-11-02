@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-10-28T19:03:47+08:00",
+  "testPeriod": "2026-10-23—2026-10-28",
+  "status": "APPROVED",
+  "mainModules": 16,
+  "acceptanceScopes": 19,
+  "allModulesApproved": true,
+  "registeredCaseOccurrences": 3090,
+  "polarity": {
+    "positive": 1643,
+    "negative": 1447
+  },
+  "finalDispositionCounts": {
+    "PASS": 3031,
+    "FAIL": 0,
+    "OBSERVED": 47,
+    "BLOCKED": 12
+  },
+  "originalSelectedBatchCounts": {
+    "PASS": 3020,
+    "FAIL": 11,
+    "OBSERVED": 47,
+    "BLOCKED": 12
+  },
+  "followupResolvedHistoricalCases": 11,
+  "uniqueProductBugs": 108,
+  "fixedProductBugs": 108,
+  "openConfirmedProductBugs": 0,
+  "fixedTestAssetIssues": 1,
+  "observationRecords": 47,
+  "blockedCaseRecords": 12,
+  "environmentGroups": 7,
+  "additionalUnconfirmedRisks": 1,
+  "shutdownRisk": {
+    "id": "OBS-XREG-SHUTDOWN",
+    "status": "UNCONFIRMED_RETAINED",
+    "originalCase": "P013",
+    "observedError": "Offscreen app shutdown exceeded 30 seconds",
+    "originalEvidence": "execution-package.json",
+    "rechecksPassed": 2,
+    "sameCandidateComponents": true,
+    "rootCauseConfirmed": false,
+    "closeDurations": [
+      {
+        "attempt": 1,
+        "baselineMilliseconds": 686.0,
+        "candidateMilliseconds": 769.0
+      },
+      {
+        "attempt": 2,
+        "baselineMilliseconds": 970.0,
+        "candidateMilliseconds": 492.0
+      }
+    ],
+    "caseCountImpact": 0,
+    "notAddedTo83CaseDenominator": true,
+    "note": "No new product defect is confirmed from this single occurrence. The initial timeout remains a review risk; do not describe it as fixed or silently erase it.",
+    "recordedAt": "2026-10-28T08:27:47.649768+00:00"
+  },
+  "latestEngineeringVerification": {
+    "backendTests": 951,
+    "backendPassed": 951,
+    "frontendTests": 761,
+    "frontendPassed": 761,
+    "desktopTests": 736,
+    "desktopPassed": 735,
+    "desktopSkipped": 1,
+    "lintExitCode": 0,
+    "buildExitCode": 0,
+    "suiteCountsAddedToModuleTotal": false
+  },
+  "limitations": [
+    "模块检查项次包含跨模块复用，非全系统互斥场景或产品覆盖率。",
+    "跨日期最终审核证据汇总，不是当前V53同一轮重新执行全部3090项。",
+    "03B/03C保留原整批历史，以模块16及H2/MySQL专项关联11条后续通过，不冒称整批重跑。",
+    "47条观察、12条阻塞未算通过；额外关闭超时风险不占新增用例分母。",
+    "移动端真实设备执行0；协议模拟不能代替真机验收。",
+    "本次仅汇总，不新增测试执行、安装、部署或Git提交。"
+  ],
+  "overallReportApprovedOn": "2026-10-29",
+  "approvalNote": "用户已明确审核通过整体测试报告；47条观察、12条环境阻塞和升级关闭超时未确认风险继续保留。后续仅梳理建议，待审核后执行。"
+}

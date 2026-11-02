@@ -52,6 +52,7 @@ class ProjectSettingsSyncFlowTests {
     @Autowired ProjectEnvironmentService environments;
     @Autowired ProjectParameterService parameters;
     @Autowired EnvironmentSecretService secrets;
+    @Autowired io.testhub.platform.security.SecretCipher cipher;
     @Autowired JdbcClient jdbc;
     @Autowired org.springframework.jdbc.core.JdbcTemplate batchJdbc;
     @Autowired MockMvc mvc;
@@ -89,7 +90,12 @@ class ProjectSettingsSyncFlowTests {
         assertFalse(json.writeValueAsString(before).contains("secret-fixture-must-not-export"));
         var r=request(f,env("newenv","必须回滚",""),param("test","token","不得替代密钥"));
         assertEquals(409,assertThrows(ResponseStatusException.class,()->sync.apply(f.actor(),f.project(),r)).getStatusCode().value());assertEquals(before,snapshot(f));
-        secrets.upsert(f.actor(),f.project(),"test","BASE_URL","secret-base-fixture");
+        // Simulate a legacy collision that the public secret API now rejects.
+        jdbc.sql("INSERT INTO project_parameter(id,organization_id,project_id,environment_code,parameter_key,parameter_value,secret,updated_by) VALUES(:id,:org,:p,'test','BASE_URL',:value,TRUE,:actor) ON DUPLICATE KEY UPDATE parameter_value=VALUES(parameter_value),secret=TRUE")
+                .param("id",com.github.f4b6a3.ulid.UlidCreator.getUlid().toString())
+                .param("org",environments.list(f.actor(),f.project()).getFirst().organizationId())
+                .param("p",f.project()).param("actor",f.actor().userId())
+                .param("value",cipher.encrypt(UUID.randomUUID().toString())).update();
         assertEquals(409,assertThrows(ResponseStatusException.class,()->apply(f,env("test","必须拒绝","https://example.test"))).getStatusCode().value());
         assertEquals(2,secrets.list(f.actor(),f.project(),null).secrets().size());
     }
@@ -103,10 +109,16 @@ class ProjectSettingsSyncFlowTests {
         var changed=new Request(input.requestKey(),input.expectedUserId(),input.expectedRevision(),List.of(new Operation(input.operations().getFirst().operationId(),env("syncenv","修改内容",""))));
         assertEquals(409,assertThrows(ResponseStatusException.class,()->sync.apply(f.actor(),f.project(),changed)).getStatusCode().value());
     }
-    @Test void concurrentOrdinaryEditAndSecretConversionInvalidateWholeBatchWithoutLostWrites() {
+    @Test void concurrentOrdinaryEditAndExplicitSecretReplacementInvalidateWholeBatchWithoutLostWrites() {
         for(boolean convert:List.of(false,true)) {
             var f=fixture();parameters.upsert(f.actor(),f.project(),"test","MODE","base");var input=request(f,env("newenv","不应出现",""),param("test","MODE","overwrite"));
-            if(convert) secrets.upsert(f.actor(),f.project(),"test","MODE","new-secret-fixture"); else parameters.upsert(f.actor(),f.project(),"test","MODE","concurrent");
+            if(convert) {
+                // D02 forbids implicit conversion. Model an explicit delete/create by the fixture owner.
+                assertEquals(409,assertThrows(ResponseStatusException.class,()->secrets.upsert(f.actor(),f.project(),"test","MODE","new-secret-fixture")).getStatusCode().value());
+                var original=parameters.list(f.actor(),f.project(),"test").parameters().stream().filter(p->p.key().equals("MODE")).findFirst().orElseThrow();
+                parameters.delete(f.actor(),f.project(),original.id());
+                secrets.upsert(f.actor(),f.project(),"test","MODE","new-secret-fixture");
+            } else parameters.upsert(f.actor(),f.project(),"test","MODE","concurrent");
             var current=snapshot(f);assertEquals(409,assertThrows(ResponseStatusException.class,()->sync.apply(f.actor(),f.project(),input)).getStatusCode().value());assertEquals(current,snapshot(f));
         }
     }

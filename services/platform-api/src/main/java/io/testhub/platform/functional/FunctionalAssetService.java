@@ -53,6 +53,7 @@ public class FunctionalAssetService {
         String scope = normalizeCatalogScope(input.scope(), "REQUIREMENTS");
         String parentId = blankToNull(input.parentId());
         validateCatalogParent(projectId, scope, parentId, null);
+        requireUniqueCatalogName(projectId, scope, parentId, name, null);
         String id = UlidCreator.getUlid().toString();
         try {
             catalogs.insert(id, project.organizationId(), projectId, scope, parentId, name, input.sortOrder(), principal.userId());
@@ -77,6 +78,7 @@ public class FunctionalAssetService {
         }
         String parentId = blankToNull(input.parentId());
         validateCatalogParent(projectId, scope, parentId, catalogId);
+        requireUniqueCatalogName(projectId, scope, parentId, name, catalogId);
         try {
             if (catalogs.update(projectId, catalogId, parentId, name, input.sortOrder()) == 0) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "目录不存在");
@@ -148,7 +150,11 @@ public class FunctionalAssetService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteRequirement(AuthenticatedPrincipal principal, String projectId, String id) {
         ProjectSummary project = writeAccess(principal, projectId);
-        if (requirements.delete(projectId, id) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "需求不存在");
+        try {
+            if (requirements.delete(projectId, id) == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "需求不存在");
+        } catch (DataIntegrityViolationException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "需求仍被其他资产引用，请先解除关联后再删除", exception);
+        }
         audit.record(principal, project.organizationId(), projectId, "FUNCTIONAL_REQUIREMENT_DELETED", "FUNCTIONAL_REQUIREMENT", id,
                 Map.of());
     }
@@ -214,6 +220,13 @@ public class FunctionalAssetService {
 
     private FunctionalCatalog requireCatalog(String projectId, String id) {
         return catalogs.findById(projectId, id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "目录不存在"));
+    }
+
+    private void requireUniqueCatalogName(String projectId, String scope, String parentId, String name, String excludedId) {
+        // The project row is locked by writeAccess, including when the parent is the nullable root.
+        if (catalogs.nameExists(projectId, scope, parentId, name, excludedId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "同级目录名称已存在");
+        }
     }
 
     private FunctionalCatalog requireCatalog(String projectId, String id, String scope) {

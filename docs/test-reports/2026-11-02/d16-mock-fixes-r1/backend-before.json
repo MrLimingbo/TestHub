@@ -1,0 +1,147 @@
+{
+  "total": 35,
+  "failed": 11,
+  "errors": 0,
+  "cases": [
+    {
+      "name": "transferValid",
+      "status": "PASS"
+    },
+    {
+      "name": "errorLocationAndPrivacy",
+      "status": "FAIL"
+    },
+    {
+      "name": "editValid",
+      "status": "PASS"
+    },
+    {
+      "name": "statusExact",
+      "status": "PASS"
+    },
+    {
+      "name": "statusRange",
+      "status": "PASS"
+    },
+    {
+      "name": "statusUpper",
+      "status": "PASS"
+    },
+    {
+      "name": "transferInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "numericStrings",
+      "status": "FAIL"
+    },
+    {
+      "name": "receipts",
+      "status": "PASS"
+    },
+    {
+      "name": "revisionConflict",
+      "status": "PASS"
+    },
+    {
+      "name": "runtimeMatching",
+      "status": "PASS"
+    },
+    {
+      "name": "permission",
+      "status": "PASS"
+    },
+    {
+      "name": "bodyStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "statusFractions",
+      "status": "FAIL"
+    },
+    {
+      "name": "editInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "shareAtomic",
+      "status": "FAIL"
+    },
+    {
+      "name": "queryStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "overflowAndRawNonFinite",
+      "status": "PASS"
+    },
+    {
+      "name": "nullTextPolicy",
+      "status": "PASS"
+    },
+    {
+      "name": "expiryInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "mapTypes",
+      "status": "FAIL"
+    },
+    {
+      "name": "syncInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "expiryExact",
+      "status": "PASS"
+    },
+    {
+      "name": "expiryUpper",
+      "status": "PASS"
+    },
+    {
+      "name": "syncValid",
+      "status": "PASS"
+    },
+    {
+      "name": "priorityExact",
+      "status": "PASS"
+    },
+    {
+      "name": "priorityLower",
+      "status": "PASS"
+    },
+    {
+      "name": "priorityUpper",
+      "status": "PASS"
+    },
+    {
+      "name": "ruleDefaults",
+      "status": "PASS"
+    },
+    {
+      "name": "expiryPermanent",
+      "status": "PASS"
+    },
+    {
+      "name": "bodyTypes",
+      "status": "FAIL"
+    },
+    {
+      "name": "oldReadOnly",
+      "status": "PASS"
+    },
+    {
+      "name": "priorityFractions",
+      "status": "FAIL"
+    },
+    {
+      "name": "headerStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "numericTypes",
+      "status": "PASS"
+    }
+  ]
+}

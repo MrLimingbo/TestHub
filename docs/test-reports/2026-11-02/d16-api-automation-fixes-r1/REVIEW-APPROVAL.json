@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-02",
+  "status": "APPROVED",
+  "basis": "用户两次消息：审核通过 继续；视为同一次接口自动化结果审批，不视为预先批准Mock结果。",
+  "approvedObservation": "OBS-08-E010",
+  "acceptedResults": {
+    "formalCases": 30,
+    "positive": 13,
+    "negative": 17,
+    "passed": 30,
+    "failed": 0,
+    "blocked": 0,
+    "frontendPassed": 895,
+    "H2Passed": 1129,
+    "H2Skipped": 3,
+    "MySQLAffectedPassed": 95,
+    "apiRunnerPassed": 50
+  },
+  "snapshotSha256": "4c8a5198fe0e5ae2a38f0decc34e8914e703451894101d65432f0de9de48b647",
+  "executionSnapshotPreserved": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/summary.json",
+  "nextModule": "Mock",
+  "d16RulesAlreadyAuthorized": true,
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

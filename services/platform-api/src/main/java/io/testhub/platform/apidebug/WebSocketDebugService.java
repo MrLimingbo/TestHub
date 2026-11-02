@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
 import io.testhub.platform.audit.AuditService;
+import io.testhub.platform.parameter.ProjectEnvironmentRepository;
 import io.testhub.platform.parameter.ProjectParameterRepository;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.security.SecretCipher;
@@ -64,17 +65,19 @@ public class WebSocketDebugService {
     private final AccessService access;
     private final AuditService audit;
     private final ProjectParameterRepository parameters;
+    private final ProjectEnvironmentRepository environments;
     private final SecretCipher cipher;
     private final ObjectMapper json;
     private final DesktopApiDebugTargetPolicy desktopTargets;
 
     public WebSocketDebugService(WebSocketDebugClient client, ApiDebugHistoryRepository history, AccessService access, AuditService audit,
-                                 ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json, DesktopApiDebugTargetPolicy desktopTargets) {
+                                 ProjectParameterRepository parameters, ProjectEnvironmentRepository environments, SecretCipher cipher, ObjectMapper json, DesktopApiDebugTargetPolicy desktopTargets) {
         this.client = client;
         this.history = history;
         this.access = access;
         this.audit = audit;
         this.parameters = parameters;
+        this.environments = environments;
         this.cipher = cipher;
         this.json = json;
         this.desktopTargets = desktopTargets;
@@ -294,6 +297,9 @@ public class WebSocketDebugService {
     private ResolutionContext variables(String projectId, String environmentCode) {
         Map<String, VariableValue> values = new HashMap<>();
         if (environmentCode != null) {
+            var selectedEnvironment = environments.findByCode(projectId, environmentCode)
+                    .orElseThrow(() -> rejected("请选择当前项目中已存在的运行环境"));
+            if (!selectedEnvironment.enabled()) throw rejected("所选运行环境已停用");
             for (ProjectParameterRepository.DebugParameter parameter : parameters.findForDebug(projectId, environmentCode)) {
                 try {
                     values.put(parameter.key(), new VariableValue(parameter.secret() ? cipher.decrypt(parameter.value()) : parameter.value(), parameter.secret()));
@@ -339,8 +345,11 @@ public class WebSocketDebugService {
         String query = url.getRawQuery();
         String item = URLEncoder.encode(key, StandardCharsets.UTF_8) + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8);
         try {
-            return new URI(url.getScheme(), null, url.getHost(), url.getPort(), url.getRawPath(),
-                    query == null || query.isBlank() ? item : query + "&" + item, null);
+            String target = url.toASCIIString();
+            int fragment = target.indexOf('#');
+            if (fragment >= 0) target = target.substring(0, fragment);
+            // The URI already contains escaped path/query components; do not quote them again.
+            return URI.create(target + (query == null ? "?" : query.isEmpty() ? "" : "&") + item);
         } catch (Exception exception) {
             throw rejected("API Key 查询参数格式不合法");
         }

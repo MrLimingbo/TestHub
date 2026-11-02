@@ -153,13 +153,13 @@ class ApiWorkspacePreferencesFlowTests {
 
     @Test void readOnlyProjectTokensCannotChangePreferences() throws Exception {
         var f = fixture();
-        var readToken = new io.testhub.platform.access.ApiTokenPrincipal(f.actor().account(), f.project(), List.of("project:read"));
-        mvc.perform(get(url(f)).with(user(readToken))).andExpect(status().isOk());
-        mvc.perform(put(url(f)).with(user(readToken)).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        var readToken = access.createToken(f.actor(), f.project(), "只读偏好验收", List.of("project:read"), 1).token();
+        mvc.perform(get(url(f)).header("Authorization", "Bearer " + readToken)).andExpect(status().isOk());
+        mvc.perform(put(url(f)).header("Authorization", "Bearer " + readToken).contentType(MediaType.APPLICATION_JSON)
                 .content(body(0, state()).toString())).andExpect(status().isForbidden());
         assertEquals(0, read(f).get("revision").asLong());
-        var writeToken = new io.testhub.platform.access.ApiTokenPrincipal(f.actor().account(), f.project(), List.of("project:read", "project:write"));
-        mvc.perform(put(url(f)).with(user(writeToken)).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        var writeToken = access.createToken(f.actor(), f.project(), "读写偏好验收", List.of("project:read", "project:write"), 1).token();
+        mvc.perform(put(url(f)).header("Authorization", "Bearer " + writeToken).contentType(MediaType.APPLICATION_JSON)
                 .content(body(0, state()).toString())).andExpect(status().isOk());
         assertEquals(state(), read(f).get("state"));
     }

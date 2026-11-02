@@ -1,0 +1,1222 @@
+{
+  "formalCases": 40,
+  "positive": 21,
+  "negative": 19,
+  "passed": 40,
+  "failed": 0,
+  "blocked": 0,
+  "notExecuted": 0,
+  "aggregation": "AND of required evidence; layered/environment/variant occurrences not added to denominator",
+  "cases": [
+    {
+      "id": "TC-D16MOCK-01",
+      "title": "优先级精确整数等价写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "priorityExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "priorityExact",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "priorityExact",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "priorityExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-01/12",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-02",
+      "title": "优先级下边界与邻界",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "priorityLower",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "priorityLower",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "priorityLower",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "priorityLower",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-03",
+      "title": "优先级上边界与邻界",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "priorityUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "priorityUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "priorityUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "priorityUpper",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-04",
+      "title": "优先级拒绝小数和微小小数",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "priorityFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "priorityFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "priorityFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "priorityFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-05",
+      "title": "三类数值字段拒绝数字字符串",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "numericStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "numericStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "numericStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "numericStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-06",
+      "title": "三类数值字段拒绝布尔和容器",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "numericTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "numericTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "numericTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "numericTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-07",
+      "title": "溢出和原始非有限数值受控拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "overflowAndRawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "overflowAndRawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "overflowAndRawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "overflowAndRawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-08",
+      "title": "有效期接受精确整数等价写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "expiryExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "expiryExact",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "expiryExact",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "expiryExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-08/10/11/26",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-09",
+      "title": "有效期上边界365天与邻界",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "expiryUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "expiryUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "expiryUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "expiryUpper",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-10",
+      "title": "有效期拒绝非法范围及小数",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "expiryInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "expiryInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "expiryInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "expiryInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-08/10/11/26",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-11",
+      "title": "有效期省略和null仍为永久",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "expiryPermanent",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "expiryPermanent",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "expiryPermanent",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "expiryPermanent",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-08/10/11/26",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-12",
+      "title": "响应状态接受等价整数及下边界",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "statusExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "statusExact",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "statusExact",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "statusExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-01/12",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-13",
+      "title": "响应状态上边界599可用",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "statusUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "statusUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "statusUpper",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "statusUpper",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-14",
+      "title": "响应状态拒绝非整数",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "statusFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "statusFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "statusFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "statusFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-15",
+      "title": "响应状态拒绝邻界199和600",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "statusRange",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "statusRange",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "statusRange",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "statusRange",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-16",
+      "title": "管理API可选优先级和状态默认保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "ruleDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "ruleDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "ruleDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "ruleDefaults",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-17",
+      "title": "查询条件字符串不损失字面值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "queryStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "queryStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "queryStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "queryStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-17/19/24",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-18",
+      "title": "请求与响应头字符串保持原值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "headerStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "headerStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "headerStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "headerStrings",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-19",
+      "title": "正文中的JSON数字作为文本保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "bodyStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "bodyStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "bodyStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "bodyStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-17/19/24",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-20",
+      "title": "条件及Header拒绝数值和布尔转换",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "mapTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "mapTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "mapTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "mapTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-21",
+      "title": "请求与响应正文拒绝非字符串值",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "bodyTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "bodyTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "bodyTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "bodyTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-22",
+      "title": "真实null仍按原空值策略处理",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "nullTextPolicy",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "nullTextPolicy",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "nullTextPolicy",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "nullTextPolicy",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-23",
+      "title": "合法编辑保持启停状态",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "editValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "editValid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "editValid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "editValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-24",
+      "title": "非法编辑不改变旧规则或业务审计",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "editInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "editInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "editInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "editInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-17/19/24",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-25",
+      "title": "原运行匹配和优先级顺序保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "runtimeMatching",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "runtimeMatching",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "runtimeMatching",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "runtimeMatching",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-26",
+      "title": "非法有效期不生成分享或成功审计",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "shareAtomic",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "shareAtomic",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "shareAtomic",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "shareAtomic",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-08/10/11/26",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-27",
+      "title": "合法迁移接受等值整数",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "transferValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-28",
+      "title": "非法迁移不留部分资产或成功回执",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-29",
+      "title": "合法同步接受等值整数",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "syncValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-30",
+      "title": "非法同步不绕过类型校验",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-31",
+      "title": "旧规则与分享可读不批量重写",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-31",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-32",
+      "title": "项目权限保护保持",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "permission",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "permission",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "permission",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "permission",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-33",
+      "title": "同步目标修订冲突仍拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "revisionConflict",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "revisionConflict",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "revisionConflict",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "revisionConflict",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-34",
+      "title": "原requestKey回执规则保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "receipts",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "receipts",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "receipts",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "receipts",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-35",
+      "title": "页面规则小数提示并阻止提交",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16MOCK-35/36: invalid text is rejected before numeric rounding or bounds clipping",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16MOCK-35: invalid rule numbers remain visible and never submit",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-typefix.json",
+          "test": "TC-D16MOCK-35/36: invalid text is rejected before numeric rounding or bounds clipping",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-typefix.json",
+          "test": "TC-D16MOCK-35: invalid rule numbers remain visible and never submit",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16MOCK-35",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-36",
+      "title": "页面有效期非法值不发分享请求",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16MOCK-35/36: invalid text is rejected before numeric rounding or bounds clipping",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16MOCK-36: invalid expiry never creates a share",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-typefix.json",
+          "test": "TC-D16MOCK-35/36: invalid text is rejected before numeric rounding or bounds clipping",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-typefix.json",
+          "test": "TC-D16MOCK-36: invalid expiry never creates a share",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16MOCK-36",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-37",
+      "title": "页面等价整数提交JSON数值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16MOCK-37: exact decimals and exponents respect each Mock integer range",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16MOCK-37: explicit integral spellings submit JSON numbers",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-typefix.json",
+          "test": "TC-D16MOCK-37: exact decimals and exponents respect each Mock integer range",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-typefix.json",
+          "test": "TC-D16MOCK-37: explicit integral spellings submit JSON numbers",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16MOCK-37",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-38",
+      "title": "页面条件编辑器已有字符串保护保持",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16MOCK-38: existing string-only JSON editor guard remains",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-typefix.json",
+          "test": "TC-D16MOCK-38: existing string-only JSON editor guard remains",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-39",
+      "title": "错误信封定位字段且不泄露值",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "errorLocationAndPrivacy",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "errorLocationAndPrivacy",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-mysql.json",
+          "test": "errorLocationAndPrivacy",
+          "status": "PASS"
+        },
+        {
+          "file": "exchange-h2.json",
+          "test": "errorLocationAndPrivacy",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16MOCK-40",
+      "title": "永久分享不受未采用有效期值阻止",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16MOCK-40: never-expiring share ignores the disabled expiry input",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-typefix.json",
+          "test": "TC-D16MOCK-40: never-expiring share ignores the disabled expiry input",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16MOCK-40",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

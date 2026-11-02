@@ -191,7 +191,7 @@ public class ApiAutomationScenarioService {
             String type = step.type() == null ? "" : step.type().trim().toUpperCase(Locale.ROOT);
             if (!STEP_TYPES.contains(type)) throw rejected("当前节点不支持的步骤类型：" + type);
             String name = required(step.name(), "步骤名称", 160);
-            Map<String, Object> config = config(type, step.config());
+            Map<String, Object> config = config(type, step.config(), id);
             validateStepConfig(type, config);
             return new AutomationStep(id, type, name, config);
         }).toList();
@@ -208,7 +208,7 @@ public class ApiAutomationScenarioService {
         return result;
     }
 
-    private Map<String, Object> config(String type, Map<String, Object> input) {
+    private Map<String, Object> config(String type, Map<String, Object> input, String stepId) {
         Map<String, Object> source = input == null ? Map.of() : input;
         if (source.size() > 50) throw rejected("步骤配置最多支持 50 项");
         if ("PARALLEL".equals(type)) return parallelConfig(source);
@@ -217,12 +217,13 @@ public class ApiAutomationScenarioService {
             String key = entry.getKey() == null ? "" : entry.getKey().trim();
             if (!key.matches("[A-Za-z][A-Za-z0-9_-]{0,63}")) throw rejected("步骤配置名称不合法：" + key);
             Object value = entry.getValue();
-            if (!(value instanceof String || value instanceof Number || value instanceof Boolean)) {
+            if (!"WAIT".equals(type) && !(value instanceof String || value instanceof Number || value instanceof Boolean)) {
                 throw rejected("步骤配置仅支持字符串、数值或布尔值：" + key);
             }
             if (String.valueOf(value).length() > 10_000) throw rejected("步骤配置值过长：" + key);
             result.put(key, value);
         }
+        if ("WAIT".equals(type)) return WaitDelayMillis.config(result, "steps[" + stepId + "].config");
         return Map.copyOf(result);
     }
 
@@ -258,14 +259,7 @@ public class ApiAutomationScenarioService {
         if ("REQUEST".equals(type)) {
             validateRequestConfig(config, "请求步骤", true);
         }
-        if ("WAIT".equals(type)) {
-            if (!config.keySet().equals(Set.of("delayMillis"))) throw rejected("等待步骤只支持 delayMillis 配置");
-            Object delay = config.get("delayMillis");
-            long delayMillis;
-            try { delayMillis = delay instanceof Number number ? number.longValue() : Long.parseLong(String.valueOf(delay)); }
-            catch (Exception exception) { throw rejected("等待步骤必须配置 delayMillis"); }
-            if (delayMillis < 0 || delayMillis > 600_000) throw rejected("等待步骤延迟应在 0 到 600000 毫秒之间");
-        }
+        if ("WAIT".equals(type)) WaitDelayMillis.config(config, "steps.config");
         if ("CONDITION".equals(type)) {
             if (!config.keySet().equals(Set.of("source", "operator", "expectedStatus"))
                     || !LAST_STATUS_CODE.equals(value(config, "source"))) {

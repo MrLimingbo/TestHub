@@ -275,7 +275,6 @@ export class ApiRunner {
         }
         if (skipNextRequest) {
           skipNextRequest = false
-          lastRequest = undefined
           continue
         }
         lastRequest = await this.executeRequest(task, step, ++requestSequence, localVariables, artifact.scripts,

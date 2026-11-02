@@ -1,0 +1,34 @@
+{
+  "headless": true,
+  "realPackagedJvm": true,
+  "desktopProfile": true,
+  "electronUpgradeTest": false,
+  "cases": [
+    {
+      "id": "TC-P2R2-D04-04",
+      "title": "普通账号403、匿名401，元数据沿用既有管理员权限",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D04-01",
+      "title": "真实HTTP动作筛选不收缩独立动作集合",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D04-02",
+      "title": "真实持久化稀有动作超出200条仍在元数据中",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D04-03",
+      "title": "空筛选不影响去重排序动作集合",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D04-06",
+      "title": "元数据只返回动作字符串，原列表limit仍生效",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": true
+}

@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -175,6 +176,14 @@ public class ApiAutomationExecutionService {
                 executionOverrides(overrides), Instant.now());
     }
 
+    @Transactional
+    public Optional<ApiAutomationExecution> createScheduled(AuthenticatedPrincipal principal, String projectId,
+                                                            String scenarioId, Integer timeoutSeconds, String profileId) {
+        // Catch before crossing the transaction interceptor: a deliberate skip must not mark the schedule transaction rollback-only.
+        try { return Optional.of(create(principal, projectId, scenarioId, timeoutSeconds, profileId, Map.of())); }
+        catch (DisabledExecutionEnvironment exception) { return Optional.empty(); }
+    }
+
     /**
      * Resolves the exact source of each referenced variable without creating an execution, an audit event, an
      * outbox record, or a value-bearing snapshot. The same resolver is used by the subsequent submit operation.
@@ -240,6 +249,10 @@ public class ApiAutomationExecutionService {
                                                    Map<String, String> overrides, Instant requestedAt) {
         String projectId = project.id();
         ApiAutomationScenarioDetail expandedScenario = expandedScenario(projectId, scenario, profile);
+        parameters.lockProject(projectId);
+        if (parameters.isEnvironmentDisabled(projectId, expandedScenario.environmentCode())) {
+            throw new DisabledExecutionEnvironment();
+        }
         VariableResolution variables = resolveVariables(projectId, expandedScenario, dataSetRow,
                 profile == null ? Map.of() : profile.variables(), overrides);
         String executionId = UlidCreator.getUlid().toString();
@@ -290,6 +303,10 @@ public class ApiAutomationExecutionService {
                         "scenarioVersion", scenario.version(), "executionProfileId", profile == null ? "" : profile.id(),
                         "executionProfileVersion", profile == null ? 0 : profile.version(), "timeoutSeconds", timeout));
         return queued;
+    }
+
+    private static final class DisabledExecutionEnvironment extends ResponseStatusException {
+        DisabledExecutionEnvironment() { super(HttpStatus.CONFLICT, "执行环境已停用，请重新启用或选择其他环境后执行"); }
     }
 
     private ApiAutomationScenarioDetail expandedScenario(String projectId, ApiAutomationScenarioDetail source,
@@ -459,7 +476,7 @@ public class ApiAutomationExecutionService {
         for (VariableSource source : variables.selectedSources().values()) {
             if (RUNNER_LOCAL_SOURCE.equals(source.source())) continue;
             if (source.secret()) {
-                withheldSecretNames.add(source.name());
+                if (variables.locations().containsKey(source.name())) withheldSecretNames.add(source.name());
             } else {
                 resolved.add(new ApiAutomationExecutionRuntimeSnapshot.Variable(source.name(), source.source(), source.value()));
             }

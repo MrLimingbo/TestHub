@@ -1,0 +1,81 @@
+{
+  "date": "2026-11-02",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "commands": [
+    {
+      "id": "full-frontend",
+      "command": "npx pnpm@10.13.1 exec vitest run --maxWorkers=1",
+      "exitCode": 0,
+      "occurrences": 891
+    },
+    {
+      "id": "full-H2-package",
+      "command": "JAVA_HOME=<native JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "occurrences": 1106
+    },
+    {
+      "id": "full-MySQL-Redis-S3",
+      "command": "JAVA_HOME=<native JDK21> node scripts/desktop/test-mysql-backend.mjs",
+      "exitCode": 0,
+      "occurrences": 1106
+    },
+    {
+      "id": "headless-UI",
+      "command": "node scripts/qa/p2r2-observation-ui.mjs",
+      "exitCode": 0,
+      "occurrences": 6
+    },
+    {
+      "id": "real-HTTP",
+      "command": "JAVA_HOME=<native JDK21> node scripts/qa/p2r2-desktop-http.mjs",
+      "exitCode": 0,
+      "occurrences": 5
+    },
+    {
+      "id": "targeted-resume",
+      "command": "npx pnpm@10.13.1 exec vitest run src/test/p2r2HandoffPage.test.ts src/test/uiAutomationFixes.test.ts --maxWorkers=1",
+      "exitCode": 0,
+      "occurrences": 51
+    },
+    {
+      "id": "lint",
+      "command": "npx pnpm@10.13.1 lint",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "typecheck",
+      "command": "npx pnpm@10.13.1 typecheck",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "build",
+      "command": "npx pnpm@10.13.1 build",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "whitespace",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "occurrences": null
+    }
+  ],
+  "H2Pass": 1103,
+  "H2MySQLOnlySkipped": 3,
+  "MySQLPass": 1106,
+  "finalJarSha256": "ca76efc6c04c0689a499fe14a06bb356a2046aa77dbb7363a4a5f29001872afa",
+  "distIndexSha256": "bcc3f482903a70bd893a902b3c111870757147426d829e1b32a0f237a2b1a439",
+  "countsAreNotAdditive": true,
+  "backgroundOnly": true,
+  "installedRuntimeReplaced": false,
+  "environmentBlockerPreparationExecuted": false,
+  "shutdownInvestigationExecuted": false,
+  "additionalFocusedLint": {
+    "command": "npx pnpm@10.13.1 exec eslint scripts/qa/p2r2-observation-ui.mjs scripts/qa/p2r2-desktop-http.mjs src/test/p2r2HandoffPage.test.ts",
+    "exitCode": 0
+  }
+}

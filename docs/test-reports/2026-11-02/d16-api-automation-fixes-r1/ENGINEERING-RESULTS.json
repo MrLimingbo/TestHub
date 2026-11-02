@@ -1,0 +1,60 @@
+{
+  "frontend": {
+    "total": 895,
+    "passed": 895
+  },
+  "H2": {
+    "total": 1132,
+    "passed": 1129,
+    "skipped": 3
+  },
+  "MySQLAffected": {
+    "suites": 18,
+    "total": 95,
+    "passed": 95,
+    "fullSuite": false
+  },
+  "syncEquivalenceConfirmation": {
+    "H2Passed": 26,
+    "MySQLPassed": 26,
+    "caseIdsUnchanged": true
+  },
+  "apiRunner": {
+    "total": 50,
+    "passed": 50,
+    "controlledClients": true
+  },
+  "headlessBrowser": {
+    "groups": 2,
+    "passed": 2,
+    "controlledHttpFixtures": true
+  },
+  "nativeJarHttp": {
+    "groups": 4,
+    "passed": 4
+  },
+  "before": {
+    "backend": {
+      "total": 26,
+      "passed": 16,
+      "failed": 10,
+      "errors": 0
+    },
+    "frontend": {
+      "total": 2,
+      "passed": 1,
+      "failed": 1
+    }
+  },
+  "formalDenominator": 30,
+  "initialFixtureIssuesExcluded": [
+    "Java test helper checked exception declaration before valid red run",
+    "Raw source backup outside desktop lint globals moved to a non-code extension before final lint",
+    "Node test-directory invocation corrected to explicit test glob"
+  ],
+  "existingWarnings": [
+    "2 prop-type warnings in apiDesignFixes.test.ts",
+    "Monaco dependency sourcemap unavailable",
+    "Vite chunk size advisory"
+  ]
+}

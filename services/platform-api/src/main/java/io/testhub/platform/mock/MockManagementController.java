@@ -1,5 +1,7 @@
 package io.testhub.platform.mock;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
@@ -110,14 +112,14 @@ public class MockManagementController {
     }
     public record EnabledRequest(@NotNull Boolean enabled) {
     }
-    public record ShareRequest(@NotBlank @Size(max = 120) String name, Integer expiresInDays) {
+    public record ShareRequest(@NotBlank @Size(max = 120) String name, @JsonDeserialize(using = MockJson.Expiry.class) Integer expiresInDays) {
     }
     public record RuleRequest(@NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 12) String httpMethod,
-                              @NotBlank @Size(max = 700) String path, Integer priority,
-                              @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> requestQuery,
-                              @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> requestHeaders,
-                              @Size(max = 16) String requestBodyMatch, @Size(max = 524288) String requestBody, Integer responseStatus,
-                              @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> responseHeaders,
-                              @Size(max = 524288) String responseBody) {
+                              @NotBlank @Size(max = 700) String path, @JsonDeserialize(using = MockJson.Priority.class) Integer priority,
+                              @JsonDeserialize(contentUsing = MockJson.Text.class) @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> requestQuery,
+                              @JsonDeserialize(contentUsing = MockJson.Text.class) @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> requestHeaders,
+                              @Size(max = 16) String requestBodyMatch, @JsonDeserialize(using = MockJson.Text.class) @Size(max = 524288) String requestBody, @JsonDeserialize(using = MockJson.Status.class) Integer responseStatus,
+                              @JsonDeserialize(contentUsing = MockJson.Text.class) @Size(max = 32) Map<@NotBlank @Size(max = 128) String, @Size(max = 8192) String> responseHeaders,
+                              @JsonDeserialize(using = MockJson.Text.class) @Size(max = 524288) String responseBody) {
     }
 }

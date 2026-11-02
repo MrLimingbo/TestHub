@@ -60,6 +60,7 @@ public class EnterpriseAdapterCatalog {
             if (!key.matches("[a-z][a-zA-Z0-9_.-]{0,79}") || value.isBlank() || value.length() > 20_000) {
                 throw rejected("适配器配置字段不合法");
             }
+            if (normalized.containsKey(key)) throw rejected("适配器配置字段去除首尾空白后不能重复");
             normalized.put(key, value);
         }
         if (!normalized.keySet().containsAll(definition.requiredFields())) {

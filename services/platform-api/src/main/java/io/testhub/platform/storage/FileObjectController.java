@@ -49,11 +49,11 @@ public class FileObjectController {
     public ResponseEntity<InputStreamResource> download(Authentication authentication, @PathVariable String projectId,
                                                         @PathVariable String fileId) {
         FileObject file = files.metadata(principal(authentication), projectId, fileId);
-        InputStream object = files.download(principal(authentication), projectId, fileId);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(file.contentType()));
+        headers.setContentType(FileObjectService.downloadContentType(file.contentType()));
         headers.setContentLength(file.sizeBytes());
         headers.setContentDisposition(ContentDisposition.attachment().filename(file.originalName(), java.nio.charset.StandardCharsets.UTF_8).build());
+        InputStream object = files.download(principal(authentication), projectId, fileId);
         return ResponseEntity.ok().headers(headers).body(new InputStreamResource(object));
     }
 

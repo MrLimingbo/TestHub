@@ -1,0 +1,1164 @@
+{
+  "date": "2026-11-02",
+  "count": 45,
+  "positive": 25,
+  "negative": 20,
+  "passed": 45,
+  "failed": 0,
+  "blocked": 0,
+  "aggregation": "AND across evidence; engineering variants and environments do not add formal cases",
+  "cases": [
+    {
+      "id": "TC-P2R2-D20-01",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "任务行操作遇到切项目",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D20-01"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-01: scope invalidation before dispatch cancels task",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "CSRF等待中切换项目，业务请求不发出",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D20-02",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "通知重试/删除遇到切项目",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D20-02"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-02: scope invalidation before dispatch cancels notification",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D20-03",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "全局插件操作离页与项目切换",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D20-03"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-03: plugin leave cancels precommit action",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-03: a project selection alone does not cancel a global action",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D20-04",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "A→B→A与重新登录",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D20-04"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-04: A/B/A invalidates task",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-04: A/B/A invalidates notification",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-04: same-account reauthentication invalidates task",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-04: same-account reauthentication invalidates notification",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-04: same-account reauthentication invalidates plugin",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D20-05",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "请求已经发出",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D20-05"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-05: dispatched work keeps its original URL and payload",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D20-06",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "迟到响应与新视图",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D20-06"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-06: late completion after A/B/A cannot decorate the replacement view",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D20-07",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "重复点击与恢复",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D20-07"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-07: a cancelled token cannot clear a newer pending action",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D20-08",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "401/403与错误信息",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D20-08"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2RowActions.test.ts",
+          "name": "TC-P2R2-D20-08: CSRF authorization refusal never produces a business write",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D13-01",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "仅载入旧摘要",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D13-01"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-01: legacy summary clears unrelated credentials without auto execution",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "嵌入式旧摘要必须重建核对后手动发送",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D13-02",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "未补齐的历史占位",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D13-02"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=false",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=true",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "嵌入式旧摘要必须重建核对后手动发送",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D13-03",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "合法普通星号",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D13-03"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-03: an ordinary wildcard request is not a historical placeholder",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "嵌入式旧摘要必须重建核对后手动发送",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D13-04",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "明确补齐后主动发送",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D13-04"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-04: reconstructed and explicitly reviewed history can be manually sent",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D13-05",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "有效加密草稿",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D13-05"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-05: valid encrypted replay does not reject its redacted summary URL",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D13-06",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "P1不可回放状态",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D13-06"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-06: P1 unavailable states remain disabled",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D13-07",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "来源切换/退出",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D13-07"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-07: A/B/A invalidates historical reconstruction approval",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D13-08",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "直接API兼容边界",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D13-08"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HistorySend.test.ts",
+          "name": "TC-P2R2-D13-08: new ordinary drafts keep the original API payload without a star blacklist",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D14-01",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "只读载入",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D14-01"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2WebSocketPage.test.ts",
+          "name": "TC-P2R2-D14-01: read-only history load keeps old session but prevents sending new draft to it",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "草稿改变后禁用旧连接发送，显式替换先关闭自有连接",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D14-02",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "相同配置复用",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D14-02"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2OwnedWebSocket.test.ts",
+          "name": "TC-P2R2-D14-02: unchanged page configuration reuses only its own active session",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D14-03",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "新配置替换",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D14-03"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2WebSocketPage.test.ts",
+          "name": "TC-P2R2-D14-03: explicit replacement closes the owned old session before new connect",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "草稿改变后禁用旧连接发送，显式替换先关闭自有连接",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D14-04",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "关闭失败或超时",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D14-04"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2OwnedWebSocket.test.ts",
+          "name": "TC-P2R2-D14-04: a failed close retains the exact old owner for explicit retry",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2WebSocketPage.test.ts",
+          "name": "TC-P2R2-D14-04: failed close preserves the old handle and prevents a second connection",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D14-05",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "异步晚到连接",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D14-05"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2WebSocketPage.test.ts",
+          "name": "TC-P2R2-D14-05: late creation after project cleans only its own original-project session",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2WebSocketPage.test.ts",
+          "name": "TC-P2R2-D14-05: late creation after unmount cleans only its own original-project session",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D14-06",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "手动关闭与重连",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D14-06"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2OwnedWebSocket.test.ts",
+          "name": "TC-P2R2-D14-06: manual close is terminal, repeat close does not reopen or resubscribe",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D14-07",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "权限与所有权",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D14-07"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2OwnedWebSocket.test.ts",
+          "name": "TC-P2R2-D14-07: foreign session updates cannot change which owned session gets closed",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D14-08",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "载入失败及草稿回退",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D14-08"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2OwnedWebSocket.test.ts",
+          "name": "TC-P2R2-D14-08: invalid or failed creation never takes ownership of a foreign handle",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D15-01",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "支持的Auth矩阵",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D15-01"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2DebugHandoff.test.ts",
+          "name": "TC-P2R2-D15-01: all supported auth configurations preserve the full runtime request",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime NONE/HEADER reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime BEARER/HEADER reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime BASIC/HEADER reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime API_KEY/HEADER reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime API_KEY/QUERY reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "实际源页面到高级调试传递认证和完整请求且不落Web Storage",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D15-02",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "导航与存储边界",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D15-02"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2DebugHandoff.test.ts",
+          "name": "TC-P2R2-D15-02: a complete handoff never writes credentials to Web Storage",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2WorkbenchHandoff.test.ts",
+          "name": "TC-P2R2-D15-02: advanced navigation carries full runtime auth in memory with no Web Storage write",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "实际源页面到高级调试传递认证和完整请求且不落Web Storage",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D15-03",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "账号/登录会话/项目隔离",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D15-03"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2DebugHandoff.test.ts",
+          "name": "TC-P2R2-D15-03: project A/B/A and same-account reauthentication invalidate pending packets",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-03: a scope round-trip or source-ID mismatch rejects the handoff",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-03/06: a consumed runtime request cannot survive a project round-trip",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D15-04",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "一次消费与刷新",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D15-04"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2DebugHandoff.test.ts",
+          "name": "TC-P2R2-D15-04: single use, another window/store and missing keys cannot restore old auth",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-04: missing packet starts blank and warns instead of restoring another draft",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D15-05",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "仅交接不执行",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D15-05"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2DebugHandoff.test.ts",
+          "name": "TC-P2R2-D15-05: creating and consuming a handoff perform no request or history write",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D15-06",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "实际发送一致性",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D15-06"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2DebugHandoff.test.ts",
+          "name": "TC-P2R2-D15-06: header/query placement and variable references are never resolved during navigation",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime NONE/HEADER reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime BEARER/HEADER reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime BASIC/HEADER reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime API_KEY/HEADER reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-01/06: runtime API_KEY/QUERY reaches manual execution unchanged",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2HandoffPage.test.ts",
+          "name": "TC-P2R2-D15-03/06: a consumed runtime request cannot survive a project round-trip",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "实际源页面到高级调试传递认证和完整请求且不落Web Storage",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D15-07",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "不支持/损坏认证",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D15-07"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2DebugHandoff.test.ts",
+          "name": "TC-P2R2-D15-07: unknown auth and malformed fields are rejected before creating a packet",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D15-08",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "旧入口与内存清理",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D15-08"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2DebugHandoff.test.ts",
+          "name": "TC-P2R2-D15-08: discard invalidates only the selected packet and legacy route storage stays compatible",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D04-01",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "筛选可达性",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D04-01"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2AuditOptions.test.ts",
+          "name": "TC-P2R2-D04-01: an action filter never shrinks the options",
+          "status": "PASSED"
+        },
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "optionsDoNotShrinkWithActionFilter",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "optionsDoNotShrinkWithActionFilter",
+          "status": "PASS"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "真实Arco下拉切换A到B仍可选择超出行限制的稀有动作",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "source": "native-http.json",
+          "name": "真实HTTP动作筛选不收缩独立动作集合",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D04-02",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "旧于列表上限的动作",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D04-02"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2AuditOptions.test.ts",
+          "name": "TC-P2R2-D04-02: metadata includes actions outside the current rows",
+          "status": "PASSED"
+        },
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "rareActionOlderThanTheListLimitIsStillReachable",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "rareActionOlderThanTheListLimitIsStillReachable",
+          "status": "PASS"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "真实Arco下拉切换A到B仍可选择超出行限制的稀有动作",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "source": "native-http.json",
+          "name": "真实持久化稀有动作超出200条仍在元数据中",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D04-03",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "空结果与刷新",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D04-03"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2AuditOptions.test.ts",
+          "name": "TC-P2R2-D04-03: an empty row query leaves the action collection intact",
+          "status": "PASSED"
+        },
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "emptyResultsDoNotEraseDistinctSortedMetadata",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "emptyResultsDoNotEraseDistinctSortedMetadata",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "source": "native-http.json",
+          "name": "空筛选不影响去重排序动作集合",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D04-04",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "权限和范围",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D04-04"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2AuditOptions.test.ts",
+          "name": "TC-P2R2-D04-04: permission loss clears cached action names and rows",
+          "status": "PASSED"
+        },
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "metadataUsesTheExistingAdminAndProjectScope",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "metadataUsesTheExistingAdminAndProjectScope",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "source": "native-http.json",
+          "name": "普通账号403、匿名401，元数据沿用既有管理员权限",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D04-05",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "失败与竞态",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D04-05"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2AuditOptions.test.ts",
+          "name": "TC-P2R2-D04-05: metadata failure exposes stale options without pretending they are fresh",
+          "status": "PASSED"
+        },
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2AuditOptions.test.ts",
+          "name": "TC-P2R2-D04-05: delayed metadata cannot overwrite a newer selection",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D04-06",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "原日志行为",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D04-06"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2AuditOptions.test.ts",
+          "name": "TC-P2R2-D04-06: row requests retain their original limit",
+          "status": "PASSED"
+        },
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "metadataNeverContainsAuditDetailsAndLeavesRowLimitIntact",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2AuditActionsFlowTests",
+          "name": "metadataNeverContainsAuditDetailsAndLeavesRowLimitIntact",
+          "status": "PASS"
+        },
+        {
+          "layer": "native-http",
+          "source": "native-http.json",
+          "name": "元数据只返回动作字符串，原列表limit仍生效",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D18-01",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "保存后、入队前修改对象",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D18-01"
+      ],
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "objectIsResolvedAtQueueTime",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "objectIsResolvedAtQueueTime",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D18-02",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "入队快照一致",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D18-02"
+      ],
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "manifestAndChecksumDescribeTheActualQueuedSnapshot",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "manifestAndChecksumDescribeTheActualQueuedSnapshot",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D18-03",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "入队后修改对象",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D18-03"
+      ],
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "objectEditsNeverRewriteExistingManifest",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "objectEditsNeverRewriteExistingManifest",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D18-04",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "直接定位器",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D18-04"
+      ],
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "aDirectSelectorDoesNotFollowAnUnrelatedObject",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "aDirectSelectorDoesNotFollowAnUnrelatedObject",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D18-05",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "界面和说明一致",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D18-05"
+      ],
+      "evidence": [
+        {
+          "layer": "frontend",
+          "source": "src/test/p2r2FreezeWording.test.ts",
+          "name": "TC-P2R2-D18-05: object tab says queue-time resolution and does not promise save-time freezing",
+          "status": "PASSED"
+        },
+        {
+          "layer": "headless-ui",
+          "source": "headless-ui.json",
+          "name": "页面对象说明与入队冻结规则一致",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D18-06",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "范围与失败",
+      "polarity": "negative",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D18-06"
+      ],
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "invalidScopeOrObjectAndDisabledProfileLeaveNoPartialQueue",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "invalidScopeOrObjectAndDisabledProfileLeaveNoPartialQueue",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2R2-D18-07",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "手动/定时/重试",
+      "polarity": "positive",
+      "status": "PASS",
+      "acceptanceCriteria": [
+        "AC-P2R2-D18-07"
+      ],
+      "evidence": [
+        {
+          "layer": "backend-h2",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "newScheduledAndRetryExecutionsResolveCurrentObjects",
+          "status": "PASS"
+        },
+        {
+          "layer": "backend-mysql",
+          "source": "io.testhub.platform.P2R2UiFreezeFlowTests",
+          "name": "newScheduledAndRetryExecutionsResolveCurrentObjects",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

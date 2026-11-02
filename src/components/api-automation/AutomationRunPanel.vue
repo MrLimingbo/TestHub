@@ -102,7 +102,7 @@ const emit = defineEmits<{
       <a-alert v-if="!executionEnabled" type="warning" :show-icon="true">场景仍可保存；Runner 未通过可信校验或未启用 HTTP 时，执行会安全收敛。</a-alert>
     </div>
 
-    <div class="run-switch-row"><div><strong>本页提醒</strong><small>提交后提示，并在测试报告持续展示</small></div><a-switch :model-value="notificationEnabled" size="small" @change="emit('update:notificationEnabled', Boolean($event))" /></div>
+    <div class="run-switch-row"><div><strong>本页提交提示</strong><small>仅显示本页提示；刷新后重置，不保存、不发送外部通知。执行状态可在测试报告查看。</small></div><a-switch :model-value="notificationEnabled" aria-label="本页提交提示" size="small" @change="emit('update:notificationEnabled', Boolean($event))" /></div>
 
     <a-collapse :bordered="false" class="advanced-settings">
       <a-collapse-item key="advanced" header="高级设置">

@@ -1,0 +1,16 @@
+{
+  "valid": true,
+  "errors": [],
+  "approvedResults": 24,
+  "proposedGroups": 6,
+  "proposedObservations": 8,
+  "deferredObservations": 15,
+  "acceptanceGroups": 45,
+  "sourceAnchors": 18,
+  "sourceFilesCompared": 1345,
+  "sourceFilesChanged": [],
+  "runtimeTestsExecuted": false,
+  "formalCasesDesigned": 0,
+  "environmentPreparationExecuted": false,
+  "upgradeRisk": "UNCONFIRMED_RETAINED"
+}

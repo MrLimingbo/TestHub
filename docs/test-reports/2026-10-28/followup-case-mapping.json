@@ -1,0 +1,101 @@
+[
+  {
+    "module": "03B",
+    "caseId": "A050",
+    "bugId": "QA-ENV-001",
+    "followupCase": "16/K001",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03B",
+    "caseId": "A051",
+    "bugId": "QA-ENV-001",
+    "followupCase": "16/K001",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03B",
+    "caseId": "A067",
+    "bugId": "QA-ENV-001",
+    "followupCase": "16/K001",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03B",
+    "caseId": "A068",
+    "bugId": "QA-ENV-001",
+    "followupCase": "16/K001",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03B",
+    "caseId": "E003",
+    "bugId": "QA-ENV-002",
+    "followupCase": "16/K002",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03B",
+    "caseId": "E004",
+    "bugId": "QA-ENV-003",
+    "followupCase": "16/K003",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03C",
+    "caseId": "E001",
+    "bugId": "QA-FILE-001",
+    "followupCase": "16/K004",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03C",
+    "caseId": "E002",
+    "bugId": "QA-FILE-002",
+    "followupCase": "16/K005",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03C",
+    "caseId": "E003",
+    "bugId": "QA-FILE-003",
+    "followupCase": "16/K006",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03C",
+    "caseId": "E004",
+    "bugId": "QA-FILE-004",
+    "followupCase": "16/K007",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  },
+  {
+    "module": "03C",
+    "caseId": "E006",
+    "bugId": "QA-AUDIT-001",
+    "followupCase": "16/K008",
+    "evidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/bug-regressions.json",
+    "sourceMode": "FOLLOWUP_REGRESSION",
+    "supplement": "CrossRegressionFixesFlowTests 33/33 in H2 and MySQL; full-name boundaries and filesystem compatibility covered"
+  }
+]

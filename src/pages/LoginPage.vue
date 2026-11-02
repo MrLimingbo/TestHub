@@ -74,6 +74,7 @@ const login = async () => {
         <div class="eyebrow">{{ registering ? '创建个人账号' : '欢迎回来' }}</div>
         <h2>{{ registering ? '注册 TestHub' : '登录 TestHub' }}</h2>
         <p>{{ registering ? '创建属于你的个人工作区' : '进入你的质量工作空间' }}</p>
+        <a-alert v-if="session.initializationError" type="error" :style="{ marginBottom: '16px' }">{{ session.initializationError }}</a-alert>
         <a-form :model="form" layout="vertical" @submit-success="login">
           <a-form-item field="account" label="账号" :rules="[{ required: true, message: '请输入账号' }]"><a-input v-model="form.account" size="large" :placeholder="registering ? '3–64 位字母、数字、点、下划线或短横线' : '请输入账号或邮箱'" :max-length="registering ? 64 : 190"><template #prefix><icon-user /></template></a-input></a-form-item>
           <a-form-item v-if="registering" field="email" label="邮箱" :rules="[{ required: true, type: 'email', message: '请输入有效邮箱' }]"><a-input v-model="form.email" size="large" placeholder="请输入邮箱" /></a-form-item>

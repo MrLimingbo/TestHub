@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -75,8 +76,12 @@ public class AccessService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "项目标识已存在");
         }
         String id = UlidCreator.getUlid().toString();
-        access.insertProject(id, organization.id(), normalizeProjectName(name), normalizedCode,
-                normalizeDescription(description), principal.userId());
+        try {
+            access.insertProject(id, organization.id(), normalizeProjectName(name), normalizedCode,
+                    normalizeDescription(description), principal.userId());
+        } catch (DuplicateKeyException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "项目标识已存在", exception);
+        }
         environments.insert(UlidCreator.getUlid().toString(), organization.id(), id, "默认测试环境", "test", "",
                 "项目创建时生成的默认环境", true, true, principal.userId());
         audit.record(principal, organization.id(), id, "PROJECT_CREATED", "PROJECT", id,
@@ -94,7 +99,11 @@ public class AccessService {
                 .ifPresent(candidate -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "项目标识已存在");
                 });
-        access.updateProject(projectId, normalizeProjectName(name), normalizedCode, normalizeDescription(description));
+        try {
+            access.updateProject(projectId, normalizeProjectName(name), normalizedCode, normalizeDescription(description));
+        } catch (DuplicateKeyException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "项目标识已存在", exception);
+        }
         audit.record(principal, project.organizationId(), projectId, "PROJECT_UPDATED", "PROJECT", projectId,
                 java.util.Map.of("name", name.trim(), "code", normalizedCode));
         return access.findProject(projectId).orElseThrow();
@@ -201,6 +210,9 @@ public class AccessService {
         ProjectSummary project = requireProjectAccess(principal, projectId, true);
         if (name == null || name.isBlank() || name.length() > 120) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "令牌名称长度应在 1 到 120 字符之间");
+        }
+        if (scopes != null && scopes.stream().anyMatch(scope -> scope == null || scope.isBlank())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "令牌权限范围不能为空");
         }
         List<String> normalizedScopes = scopes == null || scopes.isEmpty() ? List.of("project:read") : scopes.stream()
                 .map(scope -> scope.trim().toLowerCase(Locale.ROOT)).distinct().toList();

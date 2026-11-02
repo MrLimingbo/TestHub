@@ -1,0 +1,8 @@
+{
+  "previousBatchFormalCases": 63,
+  "currentBatchFormalCases": 45,
+  "currentExactDuplicateIds": 0,
+  "currentValidatorNearDuplicates": [],
+  "previousCaseIdCollisions": 0,
+  "scope": "Previous 63-case batch retained; this batch addresses different 8 observation records. No previous case/result snapshots rewritten."
+}

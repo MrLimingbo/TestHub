@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-29",
+  "status": "AWAITING_USER_RULE_REVIEW",
+  "approvedFixedObservations": 10,
+  "p1Observations": 6,
+  "otherDeferredObservations": 31,
+  "otherDeferredRules": 29,
+  "otherDeferredSpecifications": 2,
+  "environmentBlockedCases": 12,
+  "environmentGroups": 7,
+  "ruleCards": 6,
+  "selectedRuleCards": 0,
+  "acceptanceCheckGroups": 41,
+  "productCodeChangesThisTurn": 0,
+  "productTestRunsThisTurn": 0,
+  "environmentPreparationRunsThisTurn": 0,
+  "shutdownRiskStatus": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "executionAuthorized": false,
+  "sharedD03P2ObservationDeferred": "OBS-03B-E005"
+}

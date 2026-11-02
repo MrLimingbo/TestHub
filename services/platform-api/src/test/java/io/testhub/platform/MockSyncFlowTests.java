@@ -98,7 +98,7 @@ class MockSyncFlowTests {
         var f=fixture();create(f,"QA");var before=snapshot(f);assertThrows(ResponseStatusException.class,()->apply(f,server("新增"),server("qa")));assertEquals(before,snapshot(f));
         assertThrows(ResponseStatusException.class,()->apply(f,rule("missing","R","响应")));assertEquals(before,snapshot(f));
         if(FunctionalDatabaseProfile.mysql()) {
-            assertThrows(org.springframework.dao.DuplicateKeyException.class,()->create(f,"qa"));assertEquals(before,snapshot(f));
+            assertEquals(409,assertThrows(ResponseStatusException.class,()->create(f,"qa")).getStatusCode().value());assertEquals(before,snapshot(f));
             create(f,"café");var accented=snapshot(f);assertEquals(409,assertThrows(ResponseStatusException.class,()->apply(f,server("cafe"),server("不可出现"))).getStatusCode().value());assertEquals(accented,snapshot(f));
         } else {create(f,"qa");assertThrows(ResponseStatusException.class,()->snapshot(f));}
         var g=fixture();var s=create(g,"QA");mocks.createRule(g.actor(),g.project(),s.id(),rule("QA","R","一").rule());mocks.createRule(g.actor(),g.project(),s.id(),rule("QA","r","二").rule());assertThrows(ResponseStatusException.class,()->snapshot(g));

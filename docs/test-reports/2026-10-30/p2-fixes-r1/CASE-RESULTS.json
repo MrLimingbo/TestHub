@@ -1,0 +1,1263 @@
+{
+  "formalCases": 63,
+  "positive": 30,
+  "negative": 33,
+  "passed": 63,
+  "failed": 0,
+  "blocked": 0,
+  "counting": "同一ID多层证据取AND，不将层、数据库或数据变体累加为正式用例。",
+  "cases": [
+    {
+      "id": "TC-P2-D01-01",
+      "module": "D01 环境定义与孤立配置",
+      "title": "定义存在的配置新增与更新",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.definedWrites"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.definedWrites"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-02",
+      "module": "D01 环境定义与孤立配置",
+      "title": "环境代码规范化保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.normalization"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.normalization"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-03",
+      "module": "D01 环境定义与孤立配置",
+      "title": "未定义环境普通参数拒写",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.undefinedOrdinary"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.undefinedOrdinary"
+        },
+        {
+          "layer": "real-HTTP-JAR-restart",
+          "status": "PASS",
+          "test": "真实HTTP拒绝未定义环境普通参数"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-04",
+      "module": "D01 环境定义与孤立配置",
+      "title": "未定义环境密钥拒写",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.undefinedSecret"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.undefinedSecret"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-05",
+      "module": "D01 环境定义与孤立配置",
+      "title": "其他项目定义不能替代本项目",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.projectScope"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.projectScope"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-06",
+      "module": "D01 环境定义与孤立配置",
+      "title": "旧孤立配置只读可见",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.legacyRead"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.legacyRead"
+        },
+        {
+          "layer": "component-test",
+          "status": "PASS",
+          "test": "[TC-P2-D01-06][POS][UI] orphan rows remain visible with a missing-definition label"
+        },
+        {
+          "layer": "headless-Chrome-HTTP-fixture",
+          "status": "PASS",
+          "test": "孤立参数可见且编辑禁用"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-07",
+      "module": "D01 环境定义与孤立配置",
+      "title": "旧孤立配置更新拒绝且原值保留",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.legacyWrite"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.legacyWrite"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-08",
+      "module": "D01 环境定义与孤立配置",
+      "title": "已定义停用环境仍可维护",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.disabledDefined"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.disabledDefined"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-09",
+      "module": "D01 环境定义与孤立配置",
+      "title": "删除与写入不产生孤立行",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.deleteRace"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.deleteRace"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D01-10",
+      "module": "D01 环境定义与孤立配置",
+      "title": "旧调用方和原保护的兼容边界",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.compatibility"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.compatibility"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D03-CFG-01",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "启用环境配置维护保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.enabledLifecycle"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.enabledLifecycle"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D03-CFG-02",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "停用环境界面与API维护一致",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.disabledLifecycle"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.disabledLifecycle"
+        },
+        {
+          "layer": "component-test",
+          "status": "PASS",
+          "test": "[TC-P2-D03-CFG-02][POS][UI] disabled definitions are selectable for maintenance with an execution warning"
+        },
+        {
+          "layer": "headless-Chrome-HTTP-fixture",
+          "status": "PASS",
+          "test": "停用环境仍可维护并明确不可执行"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D03-CFG-03",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "启停与编辑提交归属一致",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.toggle"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.toggle"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D03-CFG-04",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "停用维护不扩大权限与秘密读取",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.disabledPermissions"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.disabledPermissions"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D03-CFG-05",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "维护不放宽P1执行限制",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.executionStillDisabled"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.executionStillDisabled"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D03-CFG-06",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "缺失定义和空环境不误选",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.missingStillRejected"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2EnvironmentRulesFlowTests.missingStillRejected"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-01",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "OpenAPI非200状态码保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.openApi"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.openApi"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-02",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "Postman非200状态码保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.postman"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.postman"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-03",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "HAR非200状态码保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.har"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.har"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-04",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "缺失状态元数据默认200",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.missing"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.missing"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-05",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "小数类型状态码拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.decimal"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.decimal"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-06",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "状态码范围外拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.range"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.range"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-07",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "非数字与损坏元数据拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.malformed"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.malformed"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-08",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "单响应导入导出闭环",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.roundTrip"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.roundTrip"
+        },
+        {
+          "layer": "real-HTTP-JAR-restart",
+          "status": "PASS",
+          "test": "真实HTTP导出保留当前201响应"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-09",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "导出当前版本选择保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.currentVersion"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.currentVersion"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-10",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "导出目录过滤保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.catalogScope"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.catalogScope"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-11",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "无权范围不能导出",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.permissions"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.permissions"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-12",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "数字字符串兼容",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.stringStatus"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.stringStatus"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D09-13",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "原200格式继续可消费",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.original"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ResponseCodeFlowTests.original"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-01",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "完整目录树及当前版本复制",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.successfulTree"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.successfulTree"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-02",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "中间写入失败整批回滚",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.middleFailure"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.middleFailure"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-03",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "回执前失败不遗留副本",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.receiptFailure"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.receiptFailure"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-04",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "响应丢失同请求返回原结果",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.lostResponse"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.lostResponse"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-05",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "同请求Key不同载荷拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.differentPayload"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.differentPayload"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-06",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "并发同请求只提交一份",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.concurrentRetry"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.concurrentRetry"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-07",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "重启后持久回执判重",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.durableReceipt"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.durableReceipt"
+        },
+        {
+          "layer": "real-HTTP-JAR-restart",
+          "status": "PASS",
+          "test": "真实JVM重启后同Key返回已持久化回执且不再复制"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-08",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "新请求Key可明确再复制",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.explicitNewCopy"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.explicitNewCopy"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-09",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "源摘要变化拒绝且无半批",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.staleSource"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.staleSource"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-10",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "201项超过复制上限拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.overLimit"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.overLimit"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-11",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "200项复制上限可提交",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.atLimit"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.atLimit"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-12",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "旧半成品不自动清理",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.oldPartialRetained"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2CatalogCopyFlowTests.oldPartialRetained"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D10-13",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "复制失败和切项目保持原归属",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "component-test",
+          "status": "PASS",
+          "test": "TC-P2-D10-13: ambiguous failure reuses the durable request key and digest"
+        },
+        {
+          "layer": "component-test",
+          "status": "PASS",
+          "test": "TC-P2-D10-13: project switch during CSRF prevents a copy to the new project"
+        },
+        {
+          "layer": "component-test",
+          "status": "PASS",
+          "test": "TC-P2-D10-13: late successful copy cannot refresh the current project"
+        },
+        {
+          "layer": "component-test",
+          "status": "PASS",
+          "test": "TC-P2-D10-13: leaving and returning during CSRF cancels the original submission"
+        },
+        {
+          "layer": "headless-Chrome-HTTP-fixture",
+          "status": "PASS",
+          "test": "目录复制断线后重试保持同一Key"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-01",
+      "module": "D17 键trim后的冲突",
+      "title": "性能query归一重名拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.performanceRejectsTrimCollision"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.performanceRejectsTrimCollision"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-02",
+      "module": "D17 键trim后的冲突",
+      "title": "Web变量归一重名拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.webRejectsTrimCollision"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.webRejectsTrimCollision"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-03",
+      "module": "D17 键trim后的冲突",
+      "title": "适配器配置归一重名拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.adapterRejectsTrimCollision"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.adapterRejectsTrimCollision"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-04",
+      "module": "D17 键trim后的冲突",
+      "title": "顺序和同值不能绕过冲突",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.collisionIsIndependentOfOrderAndValue"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.collisionIsIndependentOfOrderAndValue"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-05",
+      "module": "D17 键trim后的冲突",
+      "title": "独立范围允许同名",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.separateObjectsMayReuseKeys"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.separateObjectsMayReuseKeys"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-06",
+      "module": "D17 键trim后的冲突",
+      "title": "合法大小写边界保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.caseRulesRemainDistinct"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.caseRulesRemainDistinct"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-07",
+      "module": "D17 键trim后的冲突",
+      "title": "冲突整批不改原值或密文",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.failedEditsKeepRowsCipherAndAudits"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.failedEditsKeepRowsCipherAndAudits"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-08",
+      "module": "D17 键trim后的冲突",
+      "title": "原有格式和权限校验保持",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.validationAndAuthorizationStillApply"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.validationAndAuthorizationStillApply"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-09",
+      "module": "D17 键trim后的冲突",
+      "title": "省略适配器配置保留密文",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.omittedConfigurationKeepsCipher"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.omittedConfigurationKeepsCipher"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D17-10",
+      "module": "D17 键trim后的冲突",
+      "title": "合法URL重复query不受影响",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.repeatedUrlQueryRemainsLegal"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2NormalizedKeysFlowTests.repeatedUrlQueryRemainsLegal"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-01",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "现有零版本与新建版本可读取",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.initialZeroAndExistingVersionsAreVisible"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.initialZeroAndExistingVersionsAreVisible"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-02",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "当前版本编辑原子递增一次",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.matchingVersionIncrementsExactlyOnce"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.matchingVersionIncrementsExactlyOnce"
+        },
+        {
+          "layer": "real-HTTP-JAR-restart",
+          "status": "PASS",
+          "test": "真实HTTP版本0可保存、缺失428、旧版409"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-03",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "陈旧编辑不覆盖新配置",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.staleEditorHasNoSideEffects"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.staleEditorHasNoSideEffects"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-04",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "并发编辑仅一方提交",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.concurrentEditorsProduceOneSuccess"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.concurrentEditorsProduceOneSuccess"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-05",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "缺失与null前置版本428",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.missingOrNullPreconditionReturns428"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.missingOrNullPreconditionReturns428"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-06",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "非法版本类型400",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.invalidTypeRangeAndFractionReturn400"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.invalidTypeRangeAndFractionReturn400"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-07",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "冲突保留界面草稿",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "component-test",
+          "status": "PASS",
+          "test": "TC-P2-D22-07: stale update keeps draft and original version without an automatic retry"
+        },
+        {
+          "layer": "headless-Chrome-HTTP-fixture",
+          "status": "PASS",
+          "test": "冲突保留草稿，主动读取版本后单独保存"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-08",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "显式取得新版本后重新提交",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "component-test",
+          "status": "PASS",
+          "test": "TC-P2-D22-08: explicit version refresh keeps draft and requires a separate save"
+        },
+        {
+          "layer": "headless-Chrome-HTTP-fixture",
+          "status": "PASS",
+          "test": "冲突保留草稿，主动读取版本后单独保存"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-09",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "运行元数据不制造配置冲突",
+      "polarity": "positive",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.runMetadataDoesNotChangeConfigVersion"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.runMetadataDoesNotChangeConfigVersion"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-10",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "同步保护和权限边界保持",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.unauthorizedRequestCannotEditConfiguration"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.unauthorizedRequestCannotEditConfiguration"
+        }
+      ]
+    },
+    {
+      "id": "TC-P2-D22-11",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "事务失败不改历史运行",
+      "polarity": "negative",
+      "status": "PASS",
+      "proofs": [
+        {
+          "layer": "isolated-H2-latest-specialist",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.failedPersistenceDoesNotBumpVersionOrEraseHistory"
+        },
+        {
+          "layer": "isolated-MySQL-full",
+          "status": "PASS",
+          "test": "io.testhub.platform.P2ScheduleVersionFlowTests.failedPersistenceDoesNotBumpVersionOrEraseHistory"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "decision": "D02",
+    "tests": 10,
+    "assertionFailures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 7
+  },
+  {
+    "decision": "D05",
+    "tests": 10,
+    "assertionFailures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 5
+  },
+  {
+    "decision": "D12",
+    "tests": 14,
+    "assertionFailures": 8,
+    "errors": 4,
+    "skipped": 0,
+    "passed": 2
+  },
+  {
+    "decision": "D03",
+    "tests": 12,
+    "assertionFailures": 6,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 6
+  },
+  {
+    "decision": "D25",
+    "tests": 8,
+    "assertionFailures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 5
+  },
+  {
+    "decision": "D11",
+    "tests": 6,
+    "passed": 6,
+    "assertionFailures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "note": "A preserves the existing contract; no manufactured failing baseline"
+  }
+]

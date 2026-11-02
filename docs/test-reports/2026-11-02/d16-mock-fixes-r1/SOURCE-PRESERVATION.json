@@ -1,0 +1,13 @@
+{
+  "baselineCount": 1395,
+  "modifiedCount": 5,
+  "addedCount": 8,
+  "unchangedCount": 1390,
+  "missingBaselineFiles": [],
+  "priorApprovedArtifactManifestEntries": 35,
+  "priorApprovedArtifactMismatches": [],
+  "newApprovalCompanion": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/REVIEW-APPROVAL.json",
+  "preservedUserChanges": true,
+  "dependencyFilesUnchanged": true,
+  "scope": "Only baseline source files and prior approved batch manifest; documentation indexes intentionally updated separately."
+}

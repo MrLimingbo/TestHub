@@ -1,0 +1,460 @@
+{
+  "date": "2026-10-30",
+  "status": "PROPOSED_NOT_IMPLEMENTED",
+  "scope": {
+    "decisionGroups": 6,
+    "observations": 8,
+    "remainingUnimplemented": 31,
+    "otherDeferred": 23,
+    "environmentBlockersDeferred": 12
+  },
+  "recommendation": "六组均选A，包含各卡列出的兼容边界和建议上限；未自动选中。",
+  "cards": [
+    {
+      "id": "D01",
+      "title": "环境定义与孤立配置",
+      "coveredObservations": [
+        "OBS-03B-E001"
+      ],
+      "order": 1,
+      "whyFirst": "先确定环境是否必须存在，才能统一停用环境维护的UI/API边界。避免继续产生界面不可见的孤立配置。",
+      "verifiedFacts": [
+        "历史夹具：未定义环境的普通参数/密钥写入204。",
+        "当前写服务做格式、权限及跨类型检查，但未要求project_environment存在该代码。"
+      ],
+      "optionA": "新增和更新普通参数/密钥均须引用同项目已定义环境；缺失定义400且不写入。旧孤立配置保持可读，不自动补环境、绑定、迁移或删除。",
+      "optionB": "继续支持自由环境代码；需补完整的孤立配置展示、来源和可管理入口，不把自由代码误标为已有环境。",
+      "recommendedDetails": [
+        "推荐立即生效，不新增宽松兼容开关；旧CLI/脚本须先通过原环境管理API创建定义，再写配置。",
+        "只检查环境存在；是否启用由D03-CFG决定，不把已停用环境当不存在。",
+        "现有项目列表提供缺失定义的只读标识，旧孤立配置不能静默消失；读取不显示密钥原文。",
+        "原有显式删除入口沿用当前权限/审计；本批不执行真实存量盘点或自动删除。",
+        "沿用trim/小写环境代码及现有Key规则；BASE_URL专属维护、D02跨类型409和权限保护保留。",
+        "校验顺序明确：无权先拒绝；未定义环境优先400；已定义环境的跨类型写入继续D02的409，均不得改原值。"
+      ],
+      "compatibilityImpact": "A会使旧式向未定义环境写入的调用由204变为400，包括旧孤立记录的更新；不能无提示宣称完全向后兼容。",
+      "acceptance": [
+        {
+          "id": "P2-D01-01",
+          "scenario": "合法定义及规范化",
+          "expected": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D01-02",
+          "scenario": "未定义环境的双类型写入",
+          "expected": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D01-03",
+          "scenario": "跨项目同名环境",
+          "expected": "其他项目有同名定义不满足当前项目检查；无越权查看/写入。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D01-04",
+          "scenario": "旧孤立数据",
+          "expected": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D01-05",
+          "scenario": "停用但已定义",
+          "expected": "按D03-CFG选定维护规则处理，不错误返回未定义；P1执行限制仍生效。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D01-06",
+          "scenario": "环境删除与写入竞态",
+          "expected": "提交边界一致：环境删除成功后不遗留此次新增孤立行；已有保护性删除/引用规则保持，不扩大强制删除。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D01-07",
+          "scenario": "兼容及失败反馈",
+          "expected": "新调用方先建环境可成功；旧调用方未定义写入400并有提示；已定义环境的跨类型409、BASE_URL400、未授权401/403保持。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        }
+      ],
+      "priority": "P2",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "status": "PENDING_USER_RULE_REVIEW",
+      "implemented": false
+    },
+    {
+      "id": "D03-CFG",
+      "originalDecisionId": "D03",
+      "title": "停用环境的配置维护一致性",
+      "coveredObservations": [
+        "OBS-03B-E005"
+      ],
+      "order": 2,
+      "whyFirst": "闭合P1后保留的同卡P2分支；只处理配置维护，不重开已批准执行规则。",
+      "verifiedFacts": [
+        "历史API仍允许停用环境的参数/密钥写入，而页面表单禁选。",
+        "P1审批明确未包含这项P2，配置维护保持当时API行为。"
+      ],
+      "optionA": "已定义但停用的环境允许授权配置维护；UI可选择并标记已停用/不可执行，API维持合法204。",
+      "optionB": "停用时冻结普通参数/密钥新增及更新，UI与API一致拒绝，API409；读取和现有显式删除保持原规则。",
+      "recommendedDetails": [
+        "A为推荐，保留现行服务端维护能力；列表清楚区分维护与执行。",
+        "D01仍要求定义存在；不允许用未定义代码绕过。",
+        "不扩大角色权限，不显示密钥原文，不新增网络访问或Runner执行。",
+        "P1中普通/PAT/Webhook/定时等新执行拒绝、已接受任务继续、纯预览无副作用均保持。"
+      ],
+      "compatibilityImpact": "A主要调整维护表单与提示；B会改变现行API写入契约，需明确通知既有配置维护脚本。",
+      "acceptance": [
+        {
+          "id": "P2-D03CFG-01",
+          "scenario": "启用环境维护",
+          "expected": "UI/API合法新建、编辑及现有显式删除维持原能力。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D03CFG-02",
+          "scenario": "停用环境UI/API一致",
+          "expected": "选A时授权UI可维护且API204，显示不可执行；选B则需另拆冻结写入用例，不能用A的204作为标准。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D03CFG-03",
+          "scenario": "启停与编辑竞态",
+          "expected": "选A时启停本身不丢失已提交合法配置；请求归属项目固定，失败不报成功。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D03CFG-04",
+          "scenario": "权限与秘密",
+          "expected": "无权账号不能借停用维护写入或读取密钥原文；BASE_URL及类型保护保持。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D03CFG-05",
+          "scenario": "P1执行边界保护",
+          "expected": "停用环境的新执行仍409，Quartz仍跳过；已接受manifest不变，修改配置不改写已有快照。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D03CFG-06",
+          "scenario": "定义缺失及空状态",
+          "expected": "D01拒绝未定义环境；无可维护环境时给出明确空状态，禁止偷偷选其他项目环境。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        }
+      ],
+      "priority": "P2",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "status": "PENDING_USER_RULE_REVIEW",
+      "implemented": false
+    },
+    {
+      "id": "D09",
+      "title": "导出保留已存响应状态码",
+      "coveredObservations": [
+        "OBS-06-E006"
+      ],
+      "order": 3,
+      "whyFirst": "避免导出产生静默有损数据；同一字段同时覆盖OpenAPI/Postman并保护现有HAR。",
+      "verifiedFacts": [
+        "历史导入保存201，但OpenAPI导出只生成200。",
+        "当前OpenAPI与Postman均硬编码200；HAR已有从exampleResponse.statusCode取码的路径。"
+      ],
+      "optionA": "OpenAPI、Postman、HAR按当前单响应模型统一保留已存合法状态码；仅缺失时默认200，明确非法时400且不产生可误用的导出文件。",
+      "optionB": "只修OpenAPI的合法响应码保持；Postman保留兼容200并明确有损提示，HAR维持当前策略，后续再统一。",
+      "recommendedDetails": [
+        "推荐A同时覆盖三种既有导出；不新增多响应模型，不改历史版本或响应正文。",
+        "合法码为100至599整数数值；兼容trim后纯十进制数字字符串如201。200.0等小数JSON类型、越界、非数字或非空损坏元数据视为非法；只限本字段，不扩大D16。",
+        "字段缺失或null/空元数据按未提供处理为200；已填写的空字符串或错误值不猜测修复。",
+        "状态文案不得把4xx/5xx一概描述为成功；沿用现有字典，未知合法码可使用HTTP加数字描述。"
+      ],
+      "compatibilityImpact": "A中原有坏元数据可能由静默回退200变为400，需要调用方修正；B保留已知格式差异。",
+      "acceptance": [
+        {
+          "id": "P2-D09-01",
+          "scenario": "非200合法码",
+          "expected": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D09-02",
+          "scenario": "缺失元数据",
+          "expected": "确实未提供时默认200，可重新导入；不把其他字段缺失误判为响应码。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D09-03",
+          "scenario": "非法元数据",
+          "expected": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D09-04",
+          "scenario": "导入导出闭环",
+          "expected": "从既有支持格式导入单响应后导出，检查存储与各出口码一致；正文及描述字段保持。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D09-05",
+          "scenario": "当前版本选择",
+          "expected": "已发布/草稿选择沿用原规则；不能为了保留码而导出错误版本或混合两个版本。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D09-06",
+          "scenario": "目录与权限隔离",
+          "expected": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D09-07",
+          "scenario": "旧格式与HAR回归",
+          "expected": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        }
+      ],
+      "priority": "P2",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "status": "PENDING_USER_RULE_REVIEW",
+      "implemented": false
+    },
+    {
+      "id": "D10",
+      "title": "目录复制原子性与同请求重试",
+      "coveredObservations": [
+        "OBS-06-E012"
+      ],
+      "order": 4,
+      "whyFirst": "中途失败会生成半成品，重试又可能重复；需要明确一次复制的业务提交边界。",
+      "verifiedFacts": [
+        "历史夹具显示部分成功保留且重试另生成分支。",
+        "当前浏览器递归发出多个目录/接口创建请求，无法由前端承诺整批事务。"
+      ],
+      "optionA": "以服务端单次批量操作完成原子复制，失败整批回滚；使用同请求Key幂等，避免响应丢失后的重复副本。",
+      "optionB": "保留部分成功，提供逐项回执、失败原因及仅重试失败项，不将整批部分成功显示为成功。",
+      "recommendedDetails": [
+        "推荐A：需新增服务端复制入口，前端不再串行递归创建来冒充原子操作。",
+        "同项目/请求账号/操作类型/请求Key隔离回执；同Key同载荷返回首次结果，异载荷409；新Key表示用户明确发起另一次复制。",
+        "只复制原功能覆盖的目录及接口当前版本；保留原命名、请求路径避让规则，不新增全历史、执行记录、文件原件或密钥复制。",
+        "目标维持原操作的同项目、同父级复制，不增加任意目标选择、移动或跨项目复制。",
+        "执行前形成包含源树、当前版本和目标位置的一致快照/摘要；不符预检摘要409，快照形成后的源变更不混入本批。",
+        "建议单批最多200个目录加接口，含根目录；超上限400且不写入，本期不增加大批异步复制。",
+        "回执和副本ID在进程重启后仍可判重；本批不新增回执定期清理，不自动删除以前的半成品。"
+      ],
+      "compatibilityImpact": "A增加新的批量事务及幂等契约；B需要更复杂的逐项恢复规则。200为待确认的新业务上限，不是当前事实。",
+      "acceptance": [
+        {
+          "id": "P2-D10-01",
+          "scenario": "完整树成功复制",
+          "expected": "根/子目录、空目录、当前版本接口和路径避让一致；源分支无改写。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D10-02",
+          "scenario": "中途失败",
+          "expected": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D10-03",
+          "scenario": "提交成功但响应丢失",
+          "expected": "同Key重试返回原副本ID，不再新增目录、接口或版本。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D10-04",
+          "scenario": "重试边界",
+          "expected": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D10-05",
+          "scenario": "源/目标并发变化",
+          "expected": "源摘要不符受控409；快照一致不混版本；目标不可用或路径冲突不能遗留半批。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D10-06",
+          "scenario": "大小及无权范围",
+          "expected": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D10-07",
+          "scenario": "旧半成品",
+          "expected": "仅使用隔离旧夹具验证仍存在；无自动扫描、合并、覆盖或删除真实旧半成品。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D10-08",
+          "scenario": "UI归属与恢复",
+          "expected": "失败保留原范围和重试Key；提交状态未知不能假报已回滚；切项目不误选或覆盖当前分支。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        }
+      ],
+      "priority": "P2",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "status": "PENDING_USER_RULE_REVIEW",
+      "implemented": false
+    },
+    {
+      "id": "D17",
+      "title": "键trim后的冲突",
+      "coveredObservations": [
+        "OBS-10-E010",
+        "OBS-11-E020",
+        "OBS-14-E025"
+      ],
+      "order": 5,
+      "whyFirst": "三处都会在put覆盖前值，适合一次确认相同的拒绝规则，但保留各自类型和大小写契约。",
+      "verifiedFacts": [
+        "历史性能query、Web变量、适配器配置均观察到trim重名被后值覆盖。",
+        "当前三个归一函数均向Map.put写入，未明确检测归一冲突。"
+      ],
+      "optionA": "同一目标Map中，不同原键trim后相同则在合并/加密/落库前400，原值保持；禁止静默后值覆盖。",
+      "optionB": "允许确定顺序的覆盖，但UI须展示覆盖项并显式确认，API需返回覆盖回执且审计可追踪。",
+      "recommendedDetails": [
+        "A范围只含性能queryParameters、Web场景variables、企业适配器configuration这三处。",
+        "各自大小写规则保持；不增加大小写折叠、Unicode归一或跨层级重名限制。",
+        "本批针对不同原始键经trim后冲突；完全相同原始JSON属性在解析前的重复检测不扩入，不能声称已覆盖所有原始JSON重名。",
+        "不改变合法URL中的重复query、不扩HTTP Header规则、不改变D16数值转换或D23额外字段策略，也不全局修改ObjectMapper。",
+        "适配器configuration省略时保留旧密文；冲突时不先覆盖或重新加密现有配置，错误和日志无配置值。"
+      ],
+      "compatibilityImpact": "依赖最后写入的调用方需先消除trim重名；存量已折叠的数据无法恢复原始两个值，不自动重建。",
+      "acceptance": [
+        {
+          "id": "P2-D17-01",
+          "scenario": "三处归一冲突",
+          "expected": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D17-02",
+          "scenario": "顺序与值边界",
+          "expected": "调换键顺序、前后值相同/不同均拒绝，不能只检查值不同的冲突。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D17-03",
+          "scenario": "合法同名范围",
+          "expected": "不同项目/独立Map同名允许；大小写不同沿用原约定，不新增大小写不敏感规则。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D17-04",
+          "scenario": "整批失败与密文",
+          "expected": "冲突校验先于put覆盖、落库和加密替换；原版本/值/密文及其他合法字段均保持。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D17-05",
+          "scenario": "其他原校验",
+          "expected": "数量、长度、空键、字符校验和无权访问保持原受控反馈；数值转换不借机扩修。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D17-06",
+          "scenario": "适配器省略配置",
+          "expected": "configuration不提供时仍按原规则保留密文；提交冲突配置不会在错误、摘要和日志回显值。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D17-07",
+          "scenario": "明确未覆盖范围",
+          "expected": "普通URL重复query不被拒绝；原始完全同名JSON及跨来源覆盖不冒充本批通过，单列兼容界限。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        }
+      ],
+      "priority": "P2",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "status": "PENDING_USER_RULE_REVIEW",
+      "implemented": false
+    },
+    {
+      "id": "D22",
+      "title": "质量报告计划编辑的版本前置条件",
+      "coveredObservations": [
+        "OBS-13-E020"
+      ],
+      "order": 6,
+      "whyFirst": "当前配置版本虽然递增，但不在编辑请求中校验，串行数据库锁不能防止旧页面覆盖新配置。",
+      "verifiedFacts": [
+        "历史两次编辑后写覆盖前写。",
+        "数据库已有默认0的config_version，用于计划同步；原生编辑DTO未提供期望版本，UPDATE条件只限制ID和组织。"
+      ],
+      "optionA": "复用现有config_version，对外返回版本，更新必须带expectedVersion；缺失/未提供428，过期409，成功原子递增一次。",
+      "optionB": "保留最后写入，明确覆盖提示和审计；不声称有乐观锁保护，旧客户端契约保持。",
+      "recommendedDetails": [
+        "推荐A立即要求版本，不保留可被绕过的无版本兼容写通道；旧调用方先GET取得版本再PUT，现有前端同批调整。",
+        "版本0是合法现有初值；新增计划无需expectedVersion，更新非整数/负数/非法类型400，缺失或null按前置条件未提供428。",
+        "覆盖名称、项目范围、Cron、时区、周期和启停等原生配置编辑；历史运行和报告不改写。",
+        "过期冲突不调用成功调度更新、不生成成功审计；UI保留草稿，刷新后由用户决定重新提交，不自动覆盖或合并。",
+        "Quartz更新last_run等运行元数据不改变配置版本；现有同步/迁移的revision保护不能被新原生PUT绕开。",
+        "删除和立即运行维持现有权限、状态控制，本批不扩并发删除策略；不重复新增已存在的版本列。",
+        "不引入跨数据库/Quartz资源的原子事务承诺；调度提交后同步及恢复机制沿用原契约，重点保护过期编辑不产生调度副作用。"
+      ],
+      "compatibilityImpact": "A会改变旧PUT无版本调用；必须明确接受428升级要求。已有内部版本列不等于现有原生编辑已具备并发保护。",
+      "acceptance": [
+        {
+          "id": "P2-D22-01",
+          "scenario": "现有版本及新计划",
+          "expected": "GET返回现有版本0/非0；新建合法成功，能取得用于后续编辑的版本。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D22-02",
+          "scenario": "正常编辑",
+          "expected": "带当前版本更新成功；数据与配置版本在同一提交中变化一次，按最终配置更新调度。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D22-03",
+          "scenario": "陈旧编辑与并发",
+          "expected": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D22-04",
+          "scenario": "缺失与非法前置条件",
+          "expected": "缺失/null428，负数/小数/非法类型400；均不改配置、调度或成功审计，不受D16其他字段宽松转换影响。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D22-05",
+          "scenario": "失败与UI恢复",
+          "expected": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D22-06",
+          "scenario": "运行元数据更新",
+          "expected": "Quartz完成run或更新last_run期间，配置未改则原有效版本仍可编辑，不制造无关409。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D22-07",
+          "scenario": "同步、组织与权限",
+          "expected": "既有同步revision保护保持；跨组织/无权账号仍先拒绝，不用版本返回泄漏配置；原D05失效会话不能写。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        },
+        {
+          "id": "P2-D22-08",
+          "scenario": "历史与事务失败",
+          "expected": "持久化冲突/失败不假报成功，不改历史运行和执行快照；调度沿用现有提交后同步/恢复契约，单列协同证据，不冒称跨资源原子回滚。",
+          "status": "DESIGNED_NOT_EXECUTED"
+        }
+      ],
+      "priority": "P2",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "status": "PENDING_USER_RULE_REVIEW",
+      "implemented": false
+    }
+  ],
+  "acceptanceGroups": 43,
+  "runtimeTestsExecuted": 0
+}

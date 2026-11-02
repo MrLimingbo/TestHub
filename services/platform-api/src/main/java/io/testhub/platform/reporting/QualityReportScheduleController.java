@@ -1,5 +1,6 @@
 package io.testhub.platform.reporting;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
@@ -65,7 +66,7 @@ public class QualityReportScheduleController {
 
     private QualityReportScheduleService.ScheduleInput input(ScheduleRequest request) {
         return new QualityReportScheduleService.ScheduleInput(request.name(), request.projectIds(), request.cronExpression(),
-                request.timezone(), request.periodDays(), request.enabled());
+                request.timezone(), request.periodDays(), request.enabled(), request.expectedVersion());
     }
 
     private AuthenticatedPrincipal principal(Authentication authentication) {
@@ -74,5 +75,5 @@ public class QualityReportScheduleController {
 
     public record ScheduleRequest(@NotBlank @Size(max = 160) String name, @NotEmpty @Size(max = 50) List<@NotBlank @Size(max = 26) String> projectIds,
                                   @NotBlank @Size(max = 160) String cronExpression, @NotBlank @Size(max = 64) String timezone,
-                                  @NotNull @Min(1) @Max(90) Integer periodDays, @NotNull Boolean enabled) { }
+                                  @NotNull @Min(1) @Max(90) Integer periodDays, @NotNull Boolean enabled, JsonNode expectedVersion) { }
 }

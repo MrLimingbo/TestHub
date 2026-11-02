@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-02",
+  "platform": "darwin-arm64",
+  "commands": [
+    {
+      "id": "frontend",
+      "command": "npx pnpm@10.13.1 exec vitest run --maxWorkers=1",
+      "exitCode": 0,
+      "occurrences": 895
+    },
+    {
+      "id": "H2-package",
+      "command": "JAVA_HOME=<JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "occurrences": 1132
+    },
+    {
+      "id": "MySQL-affected",
+      "command": "JAVA_HOME=<JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D16ApiWaitFlowTests,ApiAutomation*Tests,ApiRunner*Tests'",
+      "exitCode": 0,
+      "occurrences": 95
+    },
+    {
+      "id": "MySQL-equivalence",
+      "command": "JAVA_HOME=<JDK21> node scripts/desktop/test-mysql-backend.mjs --tests=P2D16ApiWaitFlowTests",
+      "exitCode": 0,
+      "occurrences": 26
+    },
+    {
+      "id": "H2-equivalence",
+      "command": "JAVA_HOME=<JDK21> node scripts/qa/test-p2-backend.mjs P2D16ApiWaitFlowTests",
+      "exitCode": 0,
+      "occurrences": 26
+    },
+    {
+      "id": "api-runner",
+      "command": "node --test services/api-runner/test/*.test.js",
+      "exitCode": 0,
+      "occurrences": 50
+    },
+    {
+      "id": "headless-browser",
+      "command": "node scripts/qa/d16-api-wait-ui.mjs",
+      "exitCode": 0,
+      "occurrences": 2
+    },
+    {
+      "id": "real-HTTP",
+      "command": "JAVA_HOME=<JDK21> node scripts/qa/d16-api-wait-http.mjs",
+      "exitCode": 0,
+      "occurrences": 4
+    },
+    {
+      "id": "lint",
+      "command": "npx pnpm@10.13.1 lint",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "build-and-typecheck",
+      "command": "npx pnpm@10.13.1 build",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "whitespace",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "occurrences": null
+    }
+  ],
+  "jarSha256": "93b9d844017bf67ca479b4efa9285b5f87cf6b7b5288beb0b42038c574785962",
+  "distIndexSha256": "e72549c58370020fe2ebf87a04b6adb56d2e049288f8984adc24ed28a5994107",
+  "countsNotAdditive": true,
+  "formalCases": 30,
+  "installedRuntimeReplaced": false,
+  "newEnvironmentBlockerPreparation": false,
+  "shutdownInvestigationExecuted": false
+}

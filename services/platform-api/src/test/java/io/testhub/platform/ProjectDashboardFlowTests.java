@@ -14,6 +14,8 @@ import jakarta.servlet.http.Cookie;
 import java.time.Instant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -90,6 +92,19 @@ class ProjectDashboardFlowTests {
                         .cookie(administrator.sessionCookie()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("REQUEST_REJECTED"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"abc", "7.5", "2147483648", "-2147483649"})
+    void rejectsMalformedDashboardPeriodsAsClientErrors(String days) throws Exception {
+        LoginSession administrator = login();
+        String projectId = context(administrator).projectId();
+        mvc.perform(get("/api/v1/projects/{projectId}/dashboard", projectId).param("days", days)
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("REQUEST_REJECTED"))
+                .andExpect(jsonPath("$.requestId").isNotEmpty())
+                .andExpect(jsonPath("$.details").isMap());
     }
 
     private void createDashboardFixtures(Context context) {

@@ -50,12 +50,7 @@ public class FileTransferStorage {
         try {if(type==null||type.length()>255||type.chars().anyMatch(Character::isISOControl))throw new IllegalArgumentException();MediaType.parseMediaType(type);}
         catch(IllegalArgumentException error){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"迁入文件类型无效。");}
         String id=UlidCreator.getUlid().toString(), key=projectId+"/"+id;
-        independent.executeWithoutResult(status -> jdbc.sql("INSERT INTO file_transfer_intent(id,organization_id,project_id,bucket,object_key) VALUES(:id,:org,:project,:bucket,:key)")
-                .param("id",id).param("org",project.organizationId()).param("project",projectId).param("bucket",bucket).param("key",key).update());
-        if(lock(id)==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"文件准备已过期，请重新迁移。");
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){
-            @Override public void afterCompletion(int status){recover(id);}
-        });
+        track(id,project.organizationId(),projectId,key);
         try {
             storage.ensureBucket(bucket);
             storage.put(bucket,key,new ByteArrayInputStream(bytes),bytes.length,type);
@@ -63,6 +58,23 @@ public class FileTransferStorage {
         }catch(Exception error){throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"迁入文件存储失败，已安排回收。",error);}
         audit.record(principal,project.organizationId(),projectId,"FILE_TRANSFERRED","FILE_OBJECT",id,Map.of("name",name,"sizeBytes",bytes.length));
         return files.findById(projectId,id).orElseThrow();
+    }
+
+    /** Metadata decides ownership after commit/rollback; cleanup failure keeps this durable retry record. */
+    @Transactional(propagation=Propagation.MANDATORY)
+    public void track(String id,String organizationId,String projectId,String key) {
+        independent.executeWithoutResult(status -> jdbc.sql("""
+                INSERT INTO file_transfer_intent(id,organization_id,project_id,bucket,object_key)
+                VALUES(:id,:org,:project,:bucket,:key)
+                ON DUPLICATE KEY UPDATE id=VALUES(id)
+                """).param("id",id).param("org",organizationId).param("project",projectId)
+                .param("bucket",bucket).param("key",key).update());
+        var intent=lock(id);
+        if(intent==null||!intent.project().equals(projectId)||!intent.bucket().equals(bucket)||!intent.key().equals(key))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"文件回收记录不一致，请稍后重试。");
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){
+            @Override public void afterCompletion(int status){recover(id);}
+        });
     }
     private Intent lock(String id){
         return jdbc.sql("SELECT project_id,bucket,object_key FROM file_transfer_intent WHERE id=:id FOR UPDATE").param("id",id)

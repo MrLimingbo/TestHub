@@ -1,0 +1,207 @@
+{
+  "artifacts": [
+    {
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-29/RULE-DECISIONS.json",
+      "sha256": "7d306804eef8ce687fdcb8be49ef21ac8a8cafe1f9cdf12b4d50be95ca3aeeaf"
+    },
+    {
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "fa3ea55938075aa8408a780b22a4161a269e437d1b276afc00f48414af9b68d6"
+    },
+    {
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-fixes-r1/OBSERVATION-STATUS.json",
+      "sha256": "714c613ce6f54d1610b20a7556b15cadd4c523f2d92e7e23af9417248537efe6"
+    },
+    {
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-fixes-r1/UNCONFIRMED-RISK.json",
+      "sha256": "d02bac8f2a82e4bc882b1049d84925eb533261b1d380004f32aee7addbe3a351"
+    },
+    {
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-fixes-r1/ENVIRONMENT-BLOCKERS.json",
+      "sha256": "e957d72701b0ab230744231872b3f07339e22284f4510f23614c35545b1afa00"
+    }
+  ],
+  "codeAnchors": [
+    {
+      "id": "E01",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/AuditLogPage.vue",
+      "relativePath": "src/pages/AuditLogPage.vue",
+      "lineStart": 13,
+      "lineEnd": 13,
+      "sha256": "6d3696d6c42f03de70610156b4c2eaa0f69188e330c788f3c3ddbd441c648687",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E02",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/administration/AdministrationController.java",
+      "relativePath": "services/platform-api/src/main/java/io/testhub/platform/administration/AdministrationController.java",
+      "lineStart": 56,
+      "lineEnd": 64,
+      "sha256": "7e0365f105a7ce5a38d839474743b7faf9858699ce17e9656049a130b6c7c379",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E03",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/audit/AuditRepository.java",
+      "relativePath": "services/platform-api/src/main/java/io/testhub/platform/audit/AuditRepository.java",
+      "lineStart": 35,
+      "lineEnd": 47,
+      "sha256": "316b19780975c5b6d8e2f42d3149e573ac4038d11a86a777c2d5d57bc80e8cde",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E04",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1166,
+      "lineEnd": 1191,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E05",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1193,
+      "lineEnd": 1207,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E06",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 572,
+      "lineEnd": 587,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E07",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/utils/apiDebugDraft.ts",
+      "relativePath": "src/utils/apiDebugDraft.ts",
+      "lineStart": 346,
+      "lineEnd": 348,
+      "sha256": "055de9fd8aa56c0f0b2204b82ee2d745de803eb5e7dea87668d5884319ecbf8d",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E08",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1001,
+      "lineEnd": 1028,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E09",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1046,
+      "lineEnd": 1062,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E10",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/components/api-testing/ApiInterfaceWorkbench.vue",
+      "relativePath": "src/components/api-testing/ApiInterfaceWorkbench.vue",
+      "lineStart": 439,
+      "lineEnd": 456,
+      "sha256": "98c4a5de267ab87b91ab1f0d203ec905e468410629b7644f93eb992e1f19c33e",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E11",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/utils/apiDebugDraft.ts",
+      "relativePath": "src/utils/apiDebugDraft.ts",
+      "lineStart": 130,
+      "lineEnd": 135,
+      "sha256": "055de9fd8aa56c0f0b2204b82ee2d745de803eb5e7dea87668d5884319ecbf8d",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E12",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/TasksPage.vue",
+      "relativePath": "src/pages/TasksPage.vue",
+      "lineStart": 105,
+      "lineEnd": 115,
+      "sha256": "c4c02d93950bb3cffbb41b48c52773e78f043294004570a0092f79d7ac9cb8c2",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E13",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/NotificationTemplatesPage.vue",
+      "relativePath": "src/pages/NotificationTemplatesPage.vue",
+      "lineStart": 93,
+      "lineEnd": 103,
+      "sha256": "15616f07c3cbe5bebe891365cfd1ba73f0c8a4283cd63255ae86dfa34de1e18b",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E14",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/PluginsPage.vue",
+      "relativePath": "src/pages/PluginsPage.vue",
+      "lineStart": 99,
+      "lineEnd": 105,
+      "sha256": "6c7640ae578108f7a5c2152518c1b8aca4c603570d696344f957a0b1747d563f",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E15",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/UiAutomationPage.vue",
+      "relativePath": "src/pages/UiAutomationPage.vue",
+      "lineStart": 283,
+      "lineEnd": 283,
+      "sha256": "c5e1ec2057300babfd7df337c785685b12de97df8b44c44f38b608dfd0dc30d6",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E16",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "relativePath": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "lineStart": 471,
+      "lineEnd": 478,
+      "sha256": "b83d7409cf640402da1bd72fd598508271b3f51a92412b52ca7d1b45a6e65010",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E17",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "relativePath": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "lineStart": 330,
+      "lineEnd": 348,
+      "sha256": "b83d7409cf640402da1bd72fd598508271b3f51a92412b52ca7d1b45a6e65010",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    },
+    {
+      "id": "E18",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/src/pages/ApiDebugPage.vue",
+      "relativePath": "src/pages/ApiDebugPage.vue",
+      "lineStart": 1385,
+      "lineEnd": 1385,
+      "sha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "kind": "CURRENT_CODE_STATIC_REVIEW",
+      "runtimeVerifiedThisTurn": false
+    }
+  ],
+  "note": "历史fact与当前静态代码分别留证；A/B为待审推荐，非当前已实现行为。"
+}

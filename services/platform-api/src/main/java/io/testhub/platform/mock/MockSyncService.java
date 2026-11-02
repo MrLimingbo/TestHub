@@ -59,7 +59,7 @@ public class MockSyncService {
         if(bytes==null||bytes.length==0) throw invalid("Mock 同步请求不能为空");
         if(bytes.length>MAX_BYTES) throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"Mock 同步请求不能超过 4 MiB。");
         try { return json.readerFor(Request.class).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(bytes); }
-        catch(java.io.IOException error) { throw invalid("Mock 同步 JSON 格式不合法或包含不支持的字段"); }
+        catch(java.io.IOException error) { throw MockJson.rejected(error, "Mock 同步 JSON 格式不合法或包含不支持的字段"); }
     }
     @Transactional(isolation=Isolation.READ_COMMITTED)
     public Receipt apply(AuthenticatedPrincipal actor,String projectId,Request request) {

@@ -1,0 +1,450 @@
+[
+  {
+    "id": "DF-N01",
+    "polarity": "POS",
+    "observation": "OBS-08-E012",
+    "scenario": "the run panel describes a page-local submission hint without persistence or delivery",
+    "testFile": "src/test/apiAutomationFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-N02",
+    "polarity": "POS",
+    "observation": "OBS-08-E012",
+    "scenario": "enabling the hint keeps it local and resets on page remount",
+    "testFile": "src/test/apiAutomationFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-N03",
+    "polarity": "POS",
+    "observation": "OBS-08-E012",
+    "scenario": "hint=true only controls the existing local message",
+    "testFile": "src/test/apiAutomationFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-N04",
+    "polarity": "NEG",
+    "observation": "OBS-08-E012",
+    "scenario": "hint=false only controls the existing local message",
+    "testFile": "src/test/apiAutomationFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-D01",
+    "polarity": "POS",
+    "observation": "OBS-07-E006",
+    "scenario": "current HTTP completion identifies its project and execution",
+    "testFile": "src/test/apiDebugFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-D02",
+    "polarity": "NEG",
+    "observation": "OBS-07-E006",
+    "scenario": "old HTTP 200 is attributed to its origin without altering a newer response",
+    "testFile": "src/test/apiDebugFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-D03",
+    "polarity": "NEG",
+    "observation": "OBS-07-E006",
+    "scenario": "old HTTP 503 is attributed to its origin without altering a newer response",
+    "testFile": "src/test/apiDebugFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-D04",
+    "polarity": "NEG",
+    "observation": "OBS-07-E006",
+    "scenario": "an A/B/A round trip does not let the original completion stop a new send",
+    "testFile": "src/test/apiDebugFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-D05",
+    "polarity": "NEG",
+    "observation": "OBS-07-E006",
+    "scenario": "an unmounted HTTP completion preserves the existing notification with its original scope",
+    "testFile": "src/test/apiDebugFixes.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-A01",
+    "polarity": "POS",
+    "observation": "OBS-03C-E007",
+    "scenario": "shows the successful load time and clears stale feedback after retry",
+    "testFile": "src/test/auditLogPage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-A02",
+    "polarity": "NEG",
+    "observation": "OBS-03C-E007",
+    "scenario": "first-load failure does not invent a last successful result",
+    "testFile": "src/test/auditLogPage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-A03",
+    "polarity": "NEG",
+    "observation": "OBS-03C-E007",
+    "scenario": "a successful empty result remains distinguishable from never loaded",
+    "testFile": "src/test/auditLogPage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-A04",
+    "polarity": "NEG",
+    "observation": "OBS-03C-E007",
+    "scenario": "a failed filter change identifies the retained result scope",
+    "testFile": "src/test/auditLogPage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-A05",
+    "polarity": "NEG",
+    "observation": "OBS-03C-E007",
+    "scenario": "obsolete success cannot replace the current stale state",
+    "testFile": "src/test/auditLogPage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-A06",
+    "polarity": "NEG",
+    "observation": "OBS-03C-E007",
+    "scenario": "obsolete failure cannot replace the current stale state",
+    "testFile": "src/test/auditLogPage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R01",
+    "polarity": "POS",
+    "observation": "OBS-13-E015",
+    "scenario": "fifty accessible projects retain the existing initial report",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R02",
+    "polarity": "NEG",
+    "observation": "OBS-13-E015",
+    "scenario": "fifty-one projects wait for explicit selection without an implicit all-project request",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R03",
+    "polarity": "POS",
+    "observation": "OBS-13-E015",
+    "scenario": "explicit 1-project selection queries and exports exactly that scope",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R04",
+    "polarity": "POS",
+    "observation": "OBS-13-E015",
+    "scenario": "explicit 50-project selection queries and exports exactly that scope",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R05",
+    "polarity": "NEG",
+    "observation": "OBS-13-E015",
+    "scenario": "clearing a large scope gates refresh and export as well as automatic querying",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R06",
+    "polarity": "NEG",
+    "observation": "OBS-13-E015",
+    "scenario": "an injected oversized selection cannot bypass request guards",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R07",
+    "polarity": "NEG",
+    "observation": "OBS-13-E015",
+    "scenario": "selecting a fifty-first project gives an explicit limit explanation",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R08",
+    "polarity": "NEG",
+    "observation": "OBS-13-E015",
+    "scenario": "a late report cannot repopulate a cleared large-project scope",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R09",
+    "polarity": "POS",
+    "observation": "OBS-13-E015",
+    "scenario": "clearing a scope of fifty or fewer retains the existing all-project semantics",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-R10",
+    "polarity": "NEG",
+    "observation": "OBS-13-E015",
+    "scenario": "empty and oversized schedule selections do not send invalid writes",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-T01",
+    "polarity": "POS",
+    "observation": "OBS-13-E009",
+    "scenario": "refreshing the task list does not disable opening a fresh draft",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-T02",
+    "polarity": "NEG",
+    "observation": "OBS-13-E009",
+    "scenario": "late task refresh 200 preserves a new draft",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-T03",
+    "polarity": "NEG",
+    "observation": "OBS-13-E009",
+    "scenario": "late task refresh 503 preserves a new draft",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-T04",
+    "polarity": "NEG",
+    "observation": "OBS-13-E009",
+    "scenario": "a project round trip still cancels a draft opened while refreshing",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-S01",
+    "polarity": "NEG",
+    "observation": "OBS-13-E017",
+    "scenario": "old csrf 200 cannot lock or unlock a replacement save",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-S02",
+    "polarity": "NEG",
+    "observation": "OBS-13-E017",
+    "scenario": "old csrf 503 cannot lock or unlock a replacement save",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-S11",
+    "polarity": "NEG",
+    "observation": "OBS-13-E017",
+    "scenario": "old business 200 cannot lock or unlock a replacement save",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-S12",
+    "polarity": "NEG",
+    "observation": "OBS-13-E017",
+    "scenario": "old business 503 cannot lock or unlock a replacement save",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-S21",
+    "polarity": "NEG",
+    "observation": "OBS-13-E017",
+    "scenario": "old reload 200 cannot lock or unlock a replacement save",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-S22",
+    "polarity": "NEG",
+    "observation": "OBS-13-E017",
+    "scenario": "old reload 503 cannot lock or unlock a replacement save",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-S07",
+    "polarity": "POS",
+    "observation": "OBS-13-E017",
+    "scenario": "current task failure releases its own save state and supports retry",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F01",
+    "polarity": "POS",
+    "observation": "OBS-14-E004",
+    "scenario": "a pending list refresh permits a new authorized draft without a write",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F02",
+    "polarity": "NEG",
+    "observation": "OBS-14-E004",
+    "scenario": "list 200 cannot overwrite a draft opened during refresh",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F03",
+    "polarity": "NEG",
+    "observation": "OBS-14-E004",
+    "scenario": "list 503 cannot overwrite a draft opened during refresh",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F11",
+    "polarity": "POS",
+    "observation": "OBS-14-E014",
+    "scenario": "a pending list refresh permits a new authorized draft without a write",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F12",
+    "polarity": "NEG",
+    "observation": "OBS-14-E014",
+    "scenario": "list 200 cannot overwrite a draft opened during refresh",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F13",
+    "polarity": "NEG",
+    "observation": "OBS-14-E014",
+    "scenario": "list 503 cannot overwrite a draft opened during refresh",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F21",
+    "polarity": "POS",
+    "observation": "OBS-14-E019",
+    "scenario": "a pending list refresh permits a new authorized draft without a write",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F22",
+    "polarity": "NEG",
+    "observation": "OBS-14-E019",
+    "scenario": "list 200 cannot overwrite a draft opened during refresh",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F23",
+    "polarity": "NEG",
+    "observation": "OBS-14-E019",
+    "scenario": "list 503 cannot overwrite a draft opened during refresh",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-F04",
+    "polarity": "NEG",
+    "observation": "OBS-14-E004",
+    "scenario": "switching projects invalidates a template draft opened during refresh",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-P01",
+    "polarity": "NEG",
+    "observation": "OBS-14-E014",
+    "scenario": "read-only users cannot open or submit administrative drafts",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-P02",
+    "polarity": "NEG",
+    "observation": "OBS-14-E014",
+    "scenario": "a confirmed permission revocation invalidates the pending draft",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-P11",
+    "polarity": "NEG",
+    "observation": "OBS-14-E019",
+    "scenario": "read-only users cannot open or submit administrative drafts",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-P12",
+    "polarity": "NEG",
+    "observation": "OBS-14-E019",
+    "scenario": "a confirmed permission revocation invalidates the pending draft",
+    "testFile": "src/test/directObservationForms.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-M01",
+    "polarity": "POS",
+    "observation": "OBS-09-E012",
+    "scenario": "copies the complete runtime URL through an isolated clipboard double",
+    "testFile": "src/test/mockSharePage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-M02",
+    "polarity": "NEG",
+    "observation": "OBS-09-E012",
+    "scenario": "rejected clipboard gives manual-copy feedback without false success",
+    "testFile": "src/test/mockSharePage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-M03",
+    "polarity": "NEG",
+    "observation": "OBS-09-E012",
+    "scenario": "missing clipboard gives manual-copy feedback without false success",
+    "testFile": "src/test/mockSharePage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-M04",
+    "polarity": "NEG",
+    "observation": "OBS-09-E012",
+    "scenario": "throws clipboard gives manual-copy feedback without false success",
+    "testFile": "src/test/mockSharePage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-M05",
+    "polarity": "POS",
+    "observation": "OBS-09-E012",
+    "scenario": "a rejected copy can be retried successfully",
+    "testFile": "src/test/mockSharePage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  },
+  {
+    "id": "DF-M06",
+    "polarity": "NEG",
+    "observation": "OBS-09-E012",
+    "scenario": "copy completion for a previous share cannot label a new share as copied",
+    "testFile": "src/test/mockSharePage.test.ts",
+    "designBasis": "批准清单及先行TEST-PLAN；最终用例已在只读修复前快照和修复后分别执行"
+  }
+]

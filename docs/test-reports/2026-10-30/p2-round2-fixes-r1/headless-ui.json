@@ -1,0 +1,41 @@
+{
+  "headless": true,
+  "isolatedHttpFixtures": true,
+  "realBackendAcceptance": false,
+  "cases": [
+    {
+      "id": "TC-P2R2-D20-01",
+      "title": "CSRF等待中切换项目，业务请求不发出",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D13-01/02/03",
+      "title": "嵌入式旧摘要必须重建核对后手动发送",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D14-01/03",
+      "title": "草稿改变后禁用旧连接发送，显式替换先关闭自有连接",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D15-01/02/06",
+      "title": "实际源页面到高级调试传递认证和完整请求且不落Web Storage",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D04-01/02",
+      "title": "真实Arco下拉切换A到B仍可选择超出行限制的稀有动作",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2R2-D18-05",
+      "title": "页面对象说明与入队冻结规则一致",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": true,
+  "browserVersion": "156.0.8078.76",
+  "passed": 6,
+  "failed": 0
+}

@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-02",
+  "status": "PROPOSED_PENDING_RULE_REVIEW",
+  "previousBatchResultsApproved": 8,
+  "totalObservations": 47,
+  "resultsApproved": 32,
+  "observationClosurePercent": 68.1,
+  "ruleGroup": "D16",
+  "proposedObservations": 6,
+  "otherDeferredObservations": 9,
+  "totalUnimplementedObservations": 15,
+  "environmentBlockers": 12,
+  "ruleCards": 5,
+  "fieldGroups": 21,
+  "acceptanceGroups": 35,
+  "implementationExecuted": false,
+  "dynamicTestsExecuted": 0,
+  "upgradeShutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

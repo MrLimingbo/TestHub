@@ -1,0 +1,111 @@
+{
+  "total": 26,
+  "failed": 10,
+  "errors": 0,
+  "cases": [
+    {
+      "name": "transferValid",
+      "status": "PASS"
+    },
+    {
+      "name": "strings",
+      "status": "FAIL"
+    },
+    {
+      "name": "projectDenied",
+      "status": "PASS"
+    },
+    {
+      "name": "oldManifestUnchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "transferInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "rawNonFinite",
+      "status": "PASS"
+    },
+    {
+      "name": "updateValid",
+      "status": "PASS"
+    },
+    {
+      "name": "invalidReferencesBlocked",
+      "status": "FAIL"
+    },
+    {
+      "name": "reusableInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "preciseFraction",
+      "status": "FAIL"
+    },
+    {
+      "name": "reusableValid",
+      "status": "PASS"
+    },
+    {
+      "name": "explicitLegacyRepair",
+      "status": "PASS"
+    },
+    {
+      "name": "wrongTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "fractions",
+      "status": "FAIL"
+    },
+    {
+      "name": "syncInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "lowerBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "exactIntegralSpellings",
+      "status": "PASS"
+    },
+    {
+      "name": "updateInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "syncValid",
+      "status": "PASS"
+    },
+    {
+      "name": "overflow",
+      "status": "FAIL"
+    },
+    {
+      "name": "missingAndNull",
+      "status": "PASS"
+    },
+    {
+      "name": "legacyReadable",
+      "status": "PASS"
+    },
+    {
+      "name": "nonWaitUntouched",
+      "status": "PASS"
+    },
+    {
+      "name": "upperBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "staleVersion",
+      "status": "PASS"
+    },
+    {
+      "name": "legacyQueueRejected",
+      "status": "FAIL"
+    }
+  ]
+}

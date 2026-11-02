@@ -1,0 +1,97 @@
+{
+  "project": {
+    "name": "TestHub 第二批P2修复回归",
+    "version": "2026-10-30 A组合",
+    "scope": "D20/D13/D14/D15/D04/D18；8项观察。其余15项、12项环境补齐及升级关闭调查不执行。",
+    "generated_at": "2026-10-30T00:00:00+08:00"
+  },
+  "coverage_definitions": {
+    "requirement_coverage_percent": "有至少一条正式用例引用的需求数 / 需求总数",
+    "acceptance_criteria_coverage_percent": "有至少一条正式用例引用的验收标准数 / 验收标准总数",
+    "design_coverage_percent": "有至少一条正式用例引用的测试设计覆盖项数 / 设计覆盖项总数"
+  },
+  "stats": {
+    "case_count": 45,
+    "requirement_count": 6,
+    "covered_requirement_count": 6,
+    "requirement_coverage_percent": 100.0,
+    "acceptance_criteria_count": 45,
+    "covered_acceptance_criteria_count": 45,
+    "acceptance_criteria_coverage_percent": 100.0,
+    "coverage_item_count": 45,
+    "covered_coverage_item_count": 45,
+    "design_coverage_percent": 100.0,
+    "positive_count": 25,
+    "negative_count": 20,
+    "polarity_counts": {
+      "negative": 20,
+      "positive": 25
+    },
+    "priority_counts": {
+      "P2": 45
+    },
+    "type_counts": {
+      "compatibility": 3,
+      "negative": 8,
+      "permission": 4,
+      "positive": 16,
+      "recovery": 7,
+      "state": 7
+    },
+    "technique_counts": {
+      "acceptance-criteria": 10,
+      "compatibility-configuration": 3,
+      "data-lifecycle": 11,
+      "equivalence-partitioning": 3,
+      "recovery-idempotency": 7,
+      "role-permission": 4,
+      "state-transition": 7
+    },
+    "module_counts": {
+      "D04 审计动作选项的完整权限范围": 6,
+      "D13 脱敏历史的载入与所有UI发送入口": 8,
+      "D14 WS历史草稿与本页连接的替换": 8,
+      "D15 高级调试Auth的一次性交接": 8,
+      "D18 页面对象在入队时冻结的统一语义": 7,
+      "D20 行操作在CSRF等待期间失效的撤销边界": 8
+    },
+    "document_review_count": 0,
+    "document_review_type_counts": {},
+    "document_review_severity_counts": {},
+    "evidence_bundle_verified": true,
+    "evidence_reference_count": 237,
+    "unique_evidence_reference_count": 7,
+    "invalid_evidence_reference_count": 0,
+    "verified_evidence_quote_count": 45,
+    "invalid_evidence_quote_count": 0,
+    "visual_observation_count": 0,
+    "confirmed_visual_evidence_count": 0,
+    "exact_duplicate_group_count": 0,
+    "near_duplicate_pair_count": 0,
+    "untraceable_case_count": 0,
+    "case_quality_score": 100.0,
+    "case_quality_gate": "pass",
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "error_count": 0,
+    "warning_count": 0
+  },
+  "quality": {
+    "case_quality_score": 100.0,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 100.0
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "warnings": [],
+  "near_duplicates": [],
+  "document_review": []
+}

@@ -1,0 +1,34 @@
+{
+  "numTotalTests": 5,
+  "numPassedTests": 3,
+  "numFailedTests": 2,
+  "numPendingTests": 0,
+  "success": false,
+  "suites": [
+    {
+      "name": "src/test/d16MockPage.test.ts",
+      "cases": [
+        {
+          "title": "TC-D16MOCK-35: invalid rule numbers remain visible and never submit",
+          "status": "FAILED"
+        },
+        {
+          "title": "TC-D16MOCK-36: invalid expiry never creates a share",
+          "status": "FAILED"
+        },
+        {
+          "title": "TC-D16MOCK-37: explicit integral spellings submit JSON numbers",
+          "status": "PASSED"
+        },
+        {
+          "title": "TC-D16MOCK-38: existing string-only JSON editor guard remains",
+          "status": "PASSED"
+        },
+        {
+          "title": "TC-D16MOCK-40: never-expiring share ignores the disabled expiry input",
+          "status": "PASSED"
+        }
+      ]
+    }
+  ]
+}

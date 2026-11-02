@@ -1,0 +1,92 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "duplicates: near-duplicate cases TC-D16API-02 and TC-D16API-03 (similarity 0.937); consolidate unless coverage targets differ"
+  ],
+  "near_duplicates": [
+    {
+      "left": "TC-D16API-02",
+      "right": "TC-D16API-03",
+      "similarity": 0.937
+    }
+  ],
+  "quality": {
+    "case_quality_score": 99.9,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 99.33
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "stats": {
+    "case_count": 30,
+    "requirement_count": 5,
+    "covered_requirement_count": 5,
+    "requirement_coverage_percent": 100.0,
+    "acceptance_criteria_count": 30,
+    "covered_acceptance_criteria_count": 30,
+    "acceptance_criteria_coverage_percent": 100.0,
+    "coverage_item_count": 30,
+    "covered_coverage_item_count": 30,
+    "design_coverage_percent": 100.0,
+    "positive_count": 13,
+    "negative_count": 17,
+    "polarity_counts": {
+      "negative": 17,
+      "positive": 13
+    },
+    "priority_counts": {
+      "P2": 30
+    },
+    "type_counts": {
+      "boundary": 2,
+      "compatibility": 4,
+      "negative": 14,
+      "permission": 1,
+      "positive": 7,
+      "state": 1,
+      "usability": 1
+    },
+    "technique_counts": {
+      "boundary-value-2": 2,
+      "compatibility-configuration": 4,
+      "data-lifecycle": 8,
+      "equivalence-partitioning": 8,
+      "error-guessing": 2,
+      "role-permission": 1,
+      "scenario": 4,
+      "state-transition": 1
+    },
+    "module_counts": {
+      "接口自动化 / WAIT": 30
+    },
+    "document_review_count": 0,
+    "document_review_type_counts": {},
+    "document_review_severity_counts": {},
+    "evidence_bundle_verified": true,
+    "evidence_reference_count": 195,
+    "unique_evidence_reference_count": 3,
+    "invalid_evidence_reference_count": 0,
+    "verified_evidence_quote_count": 30,
+    "invalid_evidence_quote_count": 0,
+    "visual_observation_count": 0,
+    "confirmed_visual_evidence_count": 0,
+    "exact_duplicate_group_count": 0,
+    "near_duplicate_pair_count": 1,
+    "untraceable_case_count": 0,
+    "case_quality_score": 99.9,
+    "case_quality_gate": "pass",
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "error_count": 0,
+    "warning_count": 1
+  }
+}

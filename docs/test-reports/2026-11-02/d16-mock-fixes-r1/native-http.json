@@ -1,0 +1,36 @@
+{
+  "headless": true,
+  "realPackagedJvm": true,
+  "desktopProfile": true,
+  "electronUpgradeTest": false,
+  "cases": [
+    {
+      "id": "TC-D16MOCK-01/12",
+      "title": "真实HTTP接受精确等值整数写法并规范化",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16MOCK-04/05/06/07/14/20/21/39",
+      "title": "原始JSON小数溢出错误类型及文本隐式转换均400且无新资产",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16MOCK-08/10/11/26",
+      "title": "有效期严格校验且永久分享原语义不变",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16MOCK-17/19/24",
+      "title": "字符串文本原样保留且非法更新不改原记录",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16MOCK-31",
+      "title": "自有JVM重启后合法记录和登录会话保持（非升级复验）",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": true,
+  "passed": 5,
+  "failed": 0
+}

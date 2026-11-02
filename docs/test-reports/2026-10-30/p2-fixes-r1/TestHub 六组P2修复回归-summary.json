@@ -1,0 +1,117 @@
+{
+  "project": {
+    "name": "TestHub 六组P2修复回归",
+    "version": "2026-10-30 A组合",
+    "scope": "D01/D03-CFG/D09/D10/D17/D22，8项观察；不含其余23项、12项环境补齐及升级关闭调查",
+    "generated_at": "2026-10-30T00:00:00+08:00"
+  },
+  "coverage_definitions": {
+    "requirement_coverage_percent": "有至少一条正式用例引用的需求数 / 需求总数",
+    "acceptance_criteria_coverage_percent": "有至少一条正式用例引用的验收标准数 / 验收标准总数",
+    "design_coverage_percent": "有至少一条正式用例引用的测试设计覆盖项数 / 设计覆盖项总数"
+  },
+  "stats": {
+    "case_count": 63,
+    "requirement_count": 6,
+    "covered_requirement_count": 6,
+    "requirement_coverage_percent": 100.0,
+    "acceptance_criteria_count": 43,
+    "covered_acceptance_criteria_count": 43,
+    "acceptance_criteria_coverage_percent": 100.0,
+    "coverage_item_count": 63,
+    "covered_coverage_item_count": 63,
+    "design_coverage_percent": 100.0,
+    "positive_count": 30,
+    "negative_count": 33,
+    "polarity_counts": {
+      "negative": 33,
+      "positive": 30
+    },
+    "priority_counts": {
+      "P2": 63
+    },
+    "type_counts": {
+      "boundary": 2,
+      "compatibility": 5,
+      "negative": 25,
+      "permission": 4,
+      "positive": 20,
+      "recovery": 7
+    },
+    "technique_counts": {
+      "acceptance-criteria": 38,
+      "boundary-value-2": 2,
+      "compatibility-configuration": 5,
+      "data-lifecycle": 2,
+      "decision-table": 5,
+      "recovery-idempotency": 7,
+      "role-permission": 4
+    },
+    "module_counts": {
+      "D01 环境定义与孤立配置": 10,
+      "D03-CFG 停用环境的配置维护一致性": 6,
+      "D09 导出保留已存响应状态码": 13,
+      "D10 目录复制原子性与同请求重试": 13,
+      "D17 键trim后的冲突": 10,
+      "D22 质量报告计划编辑的版本前置条件": 11
+    },
+    "document_review_count": 0,
+    "document_review_type_counts": {},
+    "document_review_severity_counts": {},
+    "evidence_bundle_verified": true,
+    "evidence_reference_count": 414,
+    "unique_evidence_reference_count": 7,
+    "invalid_evidence_reference_count": 0,
+    "verified_evidence_quote_count": 170,
+    "invalid_evidence_quote_count": 0,
+    "visual_observation_count": 0,
+    "confirmed_visual_evidence_count": 0,
+    "exact_duplicate_group_count": 0,
+    "near_duplicate_pair_count": 3,
+    "untraceable_case_count": 0,
+    "case_quality_score": 99.86,
+    "case_quality_gate": "pass",
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "error_count": 0,
+    "warning_count": 3
+  },
+  "quality": {
+    "case_quality_score": 99.86,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 99.05
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "warnings": [
+    "duplicates: near-duplicate cases TC-P2-D01-03 and TC-P2-D01-04 (similarity 0.944); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-P2-D09-02 and TC-P2-D09-03 (similarity 0.875); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-P2-D10-10 and TC-P2-D10-11 (similarity 0.864); consolidate unless coverage targets differ"
+  ],
+  "near_duplicates": [
+    {
+      "left": "TC-P2-D01-03",
+      "right": "TC-P2-D01-04",
+      "similarity": 0.944
+    },
+    {
+      "left": "TC-P2-D09-02",
+      "right": "TC-P2-D09-03",
+      "similarity": 0.875
+    },
+    {
+      "left": "TC-P2-D10-10",
+      "right": "TC-P2-D10-11",
+      "similarity": 0.864
+    }
+  ],
+  "document_review": []
+}

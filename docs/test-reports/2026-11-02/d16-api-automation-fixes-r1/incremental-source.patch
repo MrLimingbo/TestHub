@@ -1,0 +1,693 @@
+--- a/src/pages/AutomationPage.vue
++++ b/src/pages/AutomationPage.vue
+@@ -1,4 +1,5 @@
+ <script setup lang="ts">
++import { parseWaitDelayInput, validateWaitSteps } from '@/utils/waitDelay'
+ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+ import { useRoute } from 'vue-router'
+ import { Message } from '@arco-design/web-vue'
+@@ -194,6 +195,19 @@
+   ?? environments.value.find((item) => item.enabled)?.environmentCode
+   ?? '')
+ const selectedStep = computed(() => detail.value?.steps.find((step) => step.id === selectedStepId.value) ?? null)
++const waitDelayText = ref('')
++watch(selectedStep, step => { waitDelayText.value = step?.type === 'WAIT' ? String(step.config.delayMillis ?? '') : '' }, { immediate: true })
++const waitDelayError = computed(() => {
++  if (selectedStep.value?.type !== 'WAIT') return ''
++  const parsed = parseWaitDelayInput(waitDelayText.value)
++  return parsed.error || (typeof selectedStep.value.config.delayMillis !== 'number' ? 'config.delayMillis 原值不是 JSON 数值，请明确重新输入合法整数' : '')
++})
++function setWaitDelayInput(raw: string) {
++  waitDelayText.value = raw
++  const parsed = parseWaitDelayInput(raw)
++  setConfig('delayMillis', parsed.error ? raw : parsed.value)
++}
++
+ const onlineRunner = computed(() => runners.value[0] ?? null)
+ const runnerTrusted = computed(() => onlineRunner.value?.trusted === true)
+ const runnerHttpExecutionEnabled = computed(() => runnerTrusted.value && onlineRunner.value?.executionEnabled === true)
+@@ -661,6 +675,7 @@
+   }
+   savingReusableStep.value = true
+   try {
++    validateWaitSteps([selectedStep.value])
+     const copied = { id: selectedStep.value.id, type: selectedStep.value.type, name: selectedStep.value.name,
+       config: { ...selectedStep.value.config } }
+     const created = await mutate<AutomationReusableStepDetail>(`/api/v1/projects/${projectId.value}/api-automation/reusable-steps`, 'POST', {
+@@ -695,6 +710,7 @@
+ async function saveBeforeExecution(): Promise<boolean> {
+   if (!detail.value) return false
+   try {
++    validateWaitSteps(detail.value.steps)
+     if (JSON.stringify(scenarioContent(detail.value, variables())) === savedScenarioContent.value) return true
+     return await saveScenario()
+   } catch (error) {
+@@ -716,6 +732,7 @@
+   saving.value = true
+   try {
+     const scenario = detail.value
++    validateWaitSteps(scenario.steps)
+     const result = await mutate<ScenarioDetail>(`/api/v1/projects/${scope.project}/api-automation/scenarios/${scenario.id}`, 'PUT', {
+       expectedVersion: scenario.version,
+       scenario: scenarioContent(scenario, variables()),
+@@ -1383,7 +1400,7 @@
+           <template v-else-if="selectedStep.type === 'ASSERT'"><a-form-item label="期望状态码"><a-input-number :model-value="Number(configValue('expectedStatus', 200))" :min="100" :max="599" :style="{ width: '100%' }" @change="setConfig('expectedStatus', Number($event))" /></a-form-item></template>
+           <template v-else-if="selectedStep.type === 'CONDITION'"><a-form-item label="条件"><a-select :model-value="String(configValue('operator', 'EQUALS'))" @change="setConfig('operator', String($event))"><a-option value="EQUALS">状态码等于</a-option><a-option value="NOT_EQUALS">状态码不等于</a-option></a-select></a-form-item><a-form-item label="状态码"><a-input-number :model-value="Number(configValue('expectedStatus', 200))" :min="100" :max="599" :style="{ width: '100%' }" @change="setConfig('expectedStatus', Number($event))" /></a-form-item></template>
+           <template v-else-if="selectedStep.type === 'LOOP'"><a-form-item label="总执行次数"><a-input-number :model-value="Number(configValue('totalRuns', 2))" :min="1" :max="10" :style="{ width: '100%' }" @change="setConfig('totalRuns', Number($event))" /></a-form-item></template>
+-          <template v-else-if="selectedStep.type === 'WAIT'"><a-form-item label="等待时间"><a-input-number :model-value="Number(configValue('delayMillis', 300))" :min="0" :max="600000" :style="{ width: '100%' }" @change="setConfig('delayMillis', Number($event))"><template #suffix>ms</template></a-input-number></a-form-item></template>
++          <template v-else-if="selectedStep.type === 'WAIT'"><a-form-item label="等待时间" :validate-status="waitDelayError ? 'error' : undefined" :help="waitDelayError || '0–600000 毫秒；支持精确整数写法，如 10、10.0、1e1。'"><a-input :model-value="waitDelayText" aria-label="WAIT 延迟（毫秒）" inputmode="decimal" @input="setWaitDelayInput"><template #suffix>ms</template></a-input></a-form-item></template>
+           <template v-else-if="selectedStep.type === 'REUSABLE_STEP'"><a-form-item label="公共步骤"><a-select :model-value="String(configValue('reusableStepId', ''))" @change="selectReusableStep(String($event))"><a-option v-for="item in reusableSteps" :key="item.id" :value="item.id">{{ item.name }} · v{{ item.version }}</a-option></a-select></a-form-item></template>
+           <template v-else-if="selectedStep.type === 'SUB_SCENARIO'"><a-form-item label="其他场景"><a-select :model-value="String(configValue('scenarioId', ''))" @change="selectSubScenario(String($event))"><a-option v-for="item in scenarios.filter((scenario) => scenario.id !== detail?.id)" :key="item.id" :value="item.id">{{ item.name }} · v{{ item.version }}</a-option></a-select></a-form-item></template>
+         </a-form>
+--- a/scripts/desktop/test-mysql-backend.mjs
++++ b/scripts/desktop/test-mysql-backend.mjs
+@@ -7,6 +7,12 @@
+ import { promisify } from 'node:util'
+ const execute = promisify(execFile)
+ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++// Optional targeted acceptance keeps exactly the same exclusively owned infrastructure.
++const option = process.argv[2]
++if (process.argv.length > 3 || (option !== undefined && !/^--tests=[A-Za-z0-9_.*,-]+$/.test(option))) {
++  throw new Error('Usage: node test-mysql-backend.mjs [--tests=ClassPattern,OtherPattern]')
++}
++const selectedTests = option?.slice('--tests='.length)
+ await fs.mkdir(path.join(root, '.testhub'), { recursive: true })
+ const directory = await fs.mkdtemp(path.join(root, '.testhub/backend-mysql-qa-'))
+ const project = 'testhub-qa-' + crypto.randomUUID()
+@@ -61,12 +67,15 @@
+     TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test',
+   })
+   await fs.mkdir(env.TESTHUB_DESKTOP_DATA_DIRECTORY)
+-  console.log('Running the complete backend suite against isolated MySQL/Redis/S3')
++  console.log(`Running ${selectedTests ? 'selected backend tests' : 'the complete backend suite'} against isolated MySQL/Redis/S3`)
+   const windows = process.platform === 'win32'
+   const executable = windows ? path.join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe') : path.join(root, 'mvnw')
+   if (windows) env.TESTHUB_BACKEND_QA_MAVEN_WRAPPER = path.join(root, 'mvnw.cmd')
+-  const args = windows ? ['-NoProfile', '-NonInteractive', '-Command', '& $env:TESTHUB_BACKEND_QA_MAVEN_WRAPPER -pl services/platform-api -am -Dtesthub.bootstrap.demo-enabled=true test; exit $LASTEXITCODE']
+-    : ['-pl', 'services/platform-api', '-am', '-Dtesthub.bootstrap.demo-enabled=true', 'test']
++  const mavenArgs = ['-pl', 'services/platform-api', '-am', '-Dtesthub.bootstrap.demo-enabled=true',
++    ...(selectedTests ? [`-Dtest=${selectedTests}`, '-Dsurefire.failIfNoSpecifiedTests=false'] : []), 'test']
++  const args = windows ? ['-NoProfile', '-NonInteractive', '-Command',
++    `& $env:TESTHUB_BACKEND_QA_MAVEN_WRAPPER ${mavenArgs.map(value => `'${value}'`).join(' ')}; exit $LASTEXITCODE`]
++    : mavenArgs
+   child = spawn(executable, args, { cwd: root, env, stdio: 'inherit' })
+   testCode = await new Promise((resolve, reject) => { child.once('error', reject); child.once('close', code => resolve(code ?? 1)) })
+   process.exitCode = testCode
+--- a/services/platform-api/src/main/java/io/testhub/platform/apiautomation/AutomationStep.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/AutomationStep.java
+@@ -3,7 +3,7 @@
+ import java.util.LinkedHashMap;
+ import java.util.Map;
+ 
+-public record AutomationStep(String id, String type, String name, Map<String, Object> config) {
++public record AutomationStep(String id, String type, String name, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Config.class) Map<String, Object> config) {
+     public AutomationStep {
+         config = config == null ? Map.of() : java.util.Collections.unmodifiableMap(new LinkedHashMap<>(config));
+     }
+--- a/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioController.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioController.java
+@@ -86,6 +86,6 @@
+     public record ScenarioUpdateRequest(@NotNull @Valid ScenarioRequest scenario, @Min(1) Integer expectedVersion) {
+     }
+     public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 24) String type,
+-                              @NotBlank @Size(max = 160) String name, @Size(max = 50) Map<String, Object> config) {
++                              @NotBlank @Size(max = 160) String name, @Size(max = 50) @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Config.class) Map<String, Object> config) {
+     }
+ }
+--- a/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioExpansionService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioExpansionService.java
+@@ -99,6 +99,8 @@
+     private void add(List<AutomationStep> target, Set<String> ids, AutomationStep step) {
+         if (target.size() >= MAX_EXPANDED_STEPS) throw rejected("公共步骤和子场景展开后最多支持 300 个步骤");
+         if (step == null || step.id() == null || !ids.add(step.id())) throw rejected("展开后的步骤标识重复或不合法");
++        if ("WAIT".equals(step.type())) step = new AutomationStep(step.id(), step.type(), step.name(),
++                WaitDelayMillis.config(step.config(), "steps[" + step.id() + "].config"));
+         target.add(step);
+     }
+ 
+--- a/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioSyncProjection.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioSyncProjection.java
+@@ -114,7 +114,7 @@
+     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
+     public record Snapshot(int version, String scope, String projectId, String actorId, String revision, List<Item> items,
+                            Map<String, String> blockedNames, Map<String, String> itemIds, Map<String, String> referenceIds) { }
+-    public record Item(String name, Map<String, Object> definition) { }
++    public record Item(String name, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Definition.class) Map<String, Object> definition) { }
+     public record Definition(String description, String environmentCode, String failureStrategy, List<AutomationStep> steps,
+                              Map<String, String> variables, String preRequestScript, String postResponseScript) { }
+ }
+--- a/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationReusableStepController.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationReusableStepController.java
+@@ -67,5 +67,5 @@
+                                       @NotEmpty @Size(max = 300) List<@Valid StepRequest> steps) { }
+     public record ReusableStepUpdateRequest(@NotNull @Valid ReusableStepRequest reusableStep, @Min(1) Integer expectedVersion) { }
+     public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 24) String type,
+-                              @NotBlank @Size(max = 160) String name, @Size(max = 50) Map<String, Object> config) { }
++                              @NotBlank @Size(max = 160) String name, @Size(max = 50) @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Config.class) Map<String, Object> config) { }
+ }
+--- a/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioService.java
+@@ -191,7 +191,7 @@
+             String type = step.type() == null ? "" : step.type().trim().toUpperCase(Locale.ROOT);
+             if (!STEP_TYPES.contains(type)) throw rejected("当前节点不支持的步骤类型：" + type);
+             String name = required(step.name(), "步骤名称", 160);
+-            Map<String, Object> config = config(type, step.config());
++            Map<String, Object> config = config(type, step.config(), id);
+             validateStepConfig(type, config);
+             return new AutomationStep(id, type, name, config);
+         }).toList();
+@@ -208,7 +208,7 @@
+         return result;
+     }
+ 
+-    private Map<String, Object> config(String type, Map<String, Object> input) {
++    private Map<String, Object> config(String type, Map<String, Object> input, String stepId) {
+         Map<String, Object> source = input == null ? Map.of() : input;
+         if (source.size() > 50) throw rejected("步骤配置最多支持 50 项");
+         if ("PARALLEL".equals(type)) return parallelConfig(source);
+@@ -217,12 +217,13 @@
+             String key = entry.getKey() == null ? "" : entry.getKey().trim();
+             if (!key.matches("[A-Za-z][A-Za-z0-9_-]{0,63}")) throw rejected("步骤配置名称不合法：" + key);
+             Object value = entry.getValue();
+-            if (!(value instanceof String || value instanceof Number || value instanceof Boolean)) {
++            if (!"WAIT".equals(type) && !(value instanceof String || value instanceof Number || value instanceof Boolean)) {
+                 throw rejected("步骤配置仅支持字符串、数值或布尔值：" + key);
+             }
+             if (String.valueOf(value).length() > 10_000) throw rejected("步骤配置值过长：" + key);
+             result.put(key, value);
+         }
++        if ("WAIT".equals(type)) return WaitDelayMillis.config(result, "steps[" + stepId + "].config");
+         return Map.copyOf(result);
+     }
+ 
+@@ -258,14 +259,7 @@
+         if ("REQUEST".equals(type)) {
+             validateRequestConfig(config, "请求步骤", true);
+         }
+-        if ("WAIT".equals(type)) {
+-            if (!config.keySet().equals(Set.of("delayMillis"))) throw rejected("等待步骤只支持 delayMillis 配置");
+-            Object delay = config.get("delayMillis");
+-            long delayMillis;
+-            try { delayMillis = delay instanceof Number number ? number.longValue() : Long.parseLong(String.valueOf(delay)); }
+-            catch (Exception exception) { throw rejected("等待步骤必须配置 delayMillis"); }
+-            if (delayMillis < 0 || delayMillis > 600_000) throw rejected("等待步骤延迟应在 0 到 600000 毫秒之间");
+-        }
++        if ("WAIT".equals(type)) WaitDelayMillis.config(config, "steps.config");
+         if ("CONDITION".equals(type)) {
+             if (!config.keySet().equals(Set.of("source", "operator", "expectedStatus"))
+                     || !LAST_STATUS_CODE.equals(value(config, "source"))) {
+--- a/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationAssetSyncService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationAssetSyncService.java
+@@ -283,7 +283,7 @@
+     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
+     private ResponseStatusException tooLarge() { return new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "接口自动化资料同步请求不能超过 10 MiB"); }
+     public record Snapshot(int version, String scope, String projectId, String actorId, String revision, List<Item> items, Map<String, String> itemIds) { }
+-    public record Item(String kind, String name, Map<String, Object> definition) { }
++    public record Item(String kind, String name, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Definition.class) Map<String, Object> definition) { }
+     public record Reusable(String description, List<AutomationStep> steps) { }
+     public record DataSet(String sourceFormat, List<String> columns, List<Map<String, String>> rows, String sourceFileLink) { }
+     public record Profile(String environmentCode, Map<String, String> variables) { }
+--- a/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiRunnerRuntimeLeaseService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiRunnerRuntimeLeaseService.java
+@@ -147,11 +147,12 @@
+                     null, null, null, null, null, null, requests);
+         }
+         if ("WAIT".equals(step.type())) {
++            long delayMillis;
++            try { delayMillis = WaitDelayMillis.require(step.config().get("delayMillis"), "steps[" + step.id() + "].config.delayMillis"); }
++            catch (ResponseStatusException error) { throw unsupported(error.getReason()); }
+             if (!step.config().keySet().equals(Set.of("delayMillis"))) throw unsupported("等待步骤不符合受限 Runner 协议");
+-            int delayMillis = integer(step.config().get("delayMillis"), "delayMillis");
+-            if (delayMillis < 0 || delayMillis > 600_000) throw unsupported("等待步骤延迟不合法");
+             return new ApiRunnerRuntimeConfiguration.Step(step.id(), "WAIT", null, null, null, null,
+-                    null, null, (long) delayMillis, null, null, null, null);
++                    null, null, delayMillis, null, null, null, null);
+         }
+         if ("CONDITION".equals(step.type())) {
+             if (!step.config().keySet().equals(Set.of("source", "operator", "expectedStatus"))
+--- /dev/null
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/WaitDelayMillis.java
+@@ -0,0 +1,32 @@
++package io.testhub.platform.apiautomation;
++
++import java.math.BigDecimal;
++import java.util.Map;
++import java.util.Set;
++import org.springframework.http.HttpStatus;
++import org.springframework.web.server.ResponseStatusException;
++
++/** WAIT alone uses an exact numeric contract; other step configuration stays unchanged. */
++final class WaitDelayMillis {
++    private WaitDelayMillis() { }
++
++    static long require(Object value, String field) {
++        if (value instanceof Number number) {
++            try {
++                long delay = new BigDecimal(number.toString()).longValueExact();
++                if (delay >= 0 && delay <= 600_000) return delay;
++            } catch (NumberFormatException | ArithmeticException ignored) {
++                // Reject fractions, non-finite numbers and overflow before any narrowing conversion.
++            }
++        }
++        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
++                field + " 必须是 0 到 600000 之间的精确整数 JSON 数值，不能使用字符串或小数部分");
++    }
++
++    static Map<String, Object> config(Map<String, Object> config, String field) {
++        if (config == null || !config.keySet().equals(Set.of("delayMillis"))) {
++            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, field + " 只支持必填 delayMillis");
++        }
++        return Map.of("delayMillis", require(config.get("delayMillis"), field + ".delayMillis"));
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/main/java/io/testhub/platform/apiautomation/WaitStepJson.java
+@@ -0,0 +1,59 @@
++package io.testhub.platform.apiautomation;
++
++import com.fasterxml.jackson.core.JsonParser;
++import com.fasterxml.jackson.core.JsonToken;
++import com.fasterxml.jackson.databind.DeserializationContext;
++import com.fasterxml.jackson.databind.JsonDeserializer;
++import java.io.IOException;
++import java.util.ArrayList;
++import java.util.LinkedHashMap;
++import java.util.Map;
++
++/** Preserve only config.delayMillis before untyped Double decoding can discard a fractional part. */
++public final class WaitStepJson {
++    private WaitStepJson() { }
++
++    public static final class Config extends JsonDeserializer<Map<String, Object>> {
++        @Override public Map<String, Object> deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            return object(parser, context, true);
++        }
++    }
++    public static final class Definition extends JsonDeserializer<Map<String, Object>> {
++        @Override public Map<String, Object> deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            return object(parser, context, false);
++        }
++    }
++
++    private static Map<String, Object> object(JsonParser parser, DeserializationContext context, boolean config) throws IOException {
++        if (!parser.isExpectedStartObjectToken()) {
++            context.reportInputMismatch(Map.class, "步骤配置必须是 JSON 对象");
++        }
++        Map<String, Object> result = new LinkedHashMap<>();
++        while (parser.nextToken() != JsonToken.END_OBJECT) {
++            String key = parser.currentName();
++            parser.nextToken();
++            Object value;
++            if (config && "delayMillis".equals(key) && parser.currentToken().isNumeric()) {
++                value = parser.getDecimalValue();
++            } else if (parser.currentToken() == JsonToken.START_OBJECT) {
++                value = object(parser, context, "config".equals(key));
++            } else if (parser.currentToken() == JsonToken.START_ARRAY) {
++                value = array(parser, context);
++            } else {
++                value = context.readValue(parser, Object.class);
++            }
++            result.put(key, value);
++        }
++        return result;
++    }
++
++    private static Object array(JsonParser parser, DeserializationContext context) throws IOException {
++        var result = new ArrayList<>();
++        while (parser.nextToken() != JsonToken.END_ARRAY) {
++            if (parser.currentToken() == JsonToken.START_OBJECT) result.add(object(parser, context, false));
++            else if (parser.currentToken() == JsonToken.START_ARRAY) result.add(array(parser, context));
++            else result.add(context.readValue(parser, Object.class));
++        }
++        return result;
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/test/java/io/testhub/platform/P2D16ApiWaitFlowTests.java
+@@ -0,0 +1,81 @@
++package io.testhub.platform;
++
++import com.fasterxml.jackson.databind.JsonNode;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.apiautomation.*;
++import io.testhub.platform.parameter.ProjectEnvironmentService;
++import java.math.BigDecimal;
++import java.util.*;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.http.MediaType;
++import org.springframework.test.web.servlet.MvcResult;
++import org.springframework.web.server.ResponseStatusException;
++import static org.junit.jupiter.api.Assertions.*;
++import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++
++class P2D16ApiWaitFlowTests extends P1FlowTestSupport {
++    @Autowired ApiAutomationScenarioService scenarios;
++    @Autowired ApiAutomationReusableStepService reusable;
++    @Autowired ApiAutomationExecutionService executions;
++    @Autowired ApiAutomationTransferService transfer;
++    @Autowired ApiAutomationScenarioSyncService sync;
++    @Autowired ApiAutomationAssetSyncService assetSync;
++    @Autowired ProjectEnvironmentService environments;
++    record Fixture(PlatformUserPrincipal actor,String project) { }
++    Fixture fixture(){var a=actor();var p=project(a);environments.create(a,p,new ProjectEnvironmentService.CreateInput("D16环境","qa","https://8.8.8.8","",true,false));return new Fixture(a,p);}
++    String base(Fixture f){return "/api/v1/projects/"+f.project+"/api-automation";}
++    List<AutomationStep> steps(Object delay){return List.of(new AutomationStep("request","REQUEST","请求",Map.of("method","GET","url","https://8.8.8.8/qa")),new AutomationStep("wait","WAIT","等待",Collections.singletonMap("delayMillis",delay)));}
++    ApiAutomationScenarioDetail create(Fixture f,Object delay){return scenarios.create(f.actor,f.project,new ApiAutomationScenarioService.ScenarioInput(unique(),"","qa","STOP",steps(delay),Map.of(),"","",null));}
++    String body(String name,String token) throws Exception{return json.writeValueAsString(Map.of("name",name,"description","","environmentCode","qa","failureStrategy","STOP","steps",steps("TOKEN"),"variables",Map.of(),"preRequestScript","","postResponseScript","")).replace("\"TOKEN\"",token);}
++    MvcResult postBody(Fixture f,String path,String body) throws Exception{return mvc.perform(post(base(f)+path).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andReturn();}
++    JsonNode data(MvcResult r) throws Exception{return json.readTree(r.getResponse().getContentAsString()).path("data");}
++    void status(int expected,MvcResult result) throws Exception {assertEquals(expected,result.getResponse().getStatus(),result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8));}
++    long count(String table){return jdbc.sql("SELECT COUNT(*) FROM "+table).query(Long.class).single();}
++    Map<String,Long> writes(){var result=new LinkedHashMap<String,Long>();for(String t:List.of("api_automation_scenario","api_automation_scenario_revision","api_automation_reusable_step","api_automation_reusable_step_revision","api_automation_execution","audit_log"))result.put(t,count(t));return result;}
++    void invalid(Fixture f,String token) throws Exception {var before=writes();status(400,postBody(f,"/scenarios",body(unique(),token)));assertEquals(before,writes());}
++    void legacy(Fixture f,ApiAutomationScenarioDetail s,Object value) throws Exception{jdbc.sql("UPDATE api_automation_scenario SET steps=CAST(:steps AS JSON) WHERE id=:id").param("steps",json.writeValueAsString(steps(value))).param("id",s.id()).update();}
++    void rejected(Runnable action){assertEquals(400,assertThrows(ResponseStatusException.class,action::run).getStatusCode().value());}
++    ApiAutomationReusableStepDetail publicStep(Fixture f){return reusable.create(f.actor,f.project,new ApiAutomationReusableStepService.ReusableStepInput(unique(),"",steps(1),null));}
++    ApiAutomationScenarioDetail reference(Fixture f,String type,Map<String,Object> config){return scenarios.create(f.actor,f.project,new ApiAutomationScenarioService.ScenarioInput(unique(),"","qa","STOP",List.of(new AutomationStep("ref",type,"引用",config)),Map.of(),"","",null));}
++
++    @Test @DisplayName("TC-D16API-01") void exactIntegralSpellings() throws Exception{var f=fixture();for(String v:List.of("10","10.0","1e1")){var r=postBody(f,"/scenarios",body(unique(),v));status(200,r);assertEquals(0,new BigDecimal("10").compareTo(data(r).path("steps").get(1).path("config").path("delayMillis").decimalValue()));}}
++    @Test @DisplayName("TC-D16API-02") void lowerBoundary() throws Exception{var f=fixture();status(200,postBody(f,"/scenarios",body(unique(),"0")));invalid(f,"-1");}
++    @Test @DisplayName("TC-D16API-03") void upperBoundary() throws Exception{var f=fixture();status(200,postBody(f,"/scenarios",body(unique(),"600000")));invalid(f,"600001");}
++    @Test @DisplayName("TC-D16API-04") void fractions() throws Exception{var f=fixture();for(String v:List.of("1.5","-0.5"))invalid(f,v);}
++    @Test @DisplayName("TC-D16API-05") void preciseFraction() throws Exception{invalid(fixture(),"1.0000000000000001");}
++    @Test @DisplayName("TC-D16API-06") void overflow() throws Exception{var f=fixture();for(String v:List.of("18446744073709551616","1e10000"))invalid(f,v);}
++    @Test @DisplayName("TC-D16API-07") void strings() throws Exception{var f=fixture();for(String v:List.of("\"10\"","\" 10 \"","\"10.0\"","\"NaN\""))invalid(f,v);}
++    @Test @DisplayName("TC-D16API-08") void wrongTypes() throws Exception{var f=fixture();for(String v:List.of("true","[]","{}","\"\""))invalid(f,v);}
++    @Test @DisplayName("TC-D16API-09") void missingAndNull() throws Exception{var f=fixture();invalid(f,"null");var before=writes();status(400,postBody(f,"/scenarios",body(unique(),"1").replace("\"delayMillis\":1","\"other\":1")));assertEquals(before,writes());}
++    @Test @DisplayName("TC-D16API-10") void rawNonFinite() throws Exception{var f=fixture();for(String v:List.of("NaN","Infinity","-Infinity"))invalid(f,v);}
++    @Test @DisplayName("TC-D16API-11") void updateValid() throws Exception{var f=fixture();var s=create(f,1);var r=mvc.perform(put(base(f)+"/scenarios/"+s.id()).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{\"expectedVersion\":1,\"scenario\":"+body(s.name(),"1e1")+"}")).andReturn();status(200,r);assertEquals(2,data(r).path("version").asInt());assertEquals(2,scenarios.revisions(f.actor,f.project,s.id()).size());}
++    @Test @DisplayName("TC-D16API-12") void updateInvalid() throws Exception{var f=fixture();var s=create(f,1);var before=writes();var r=mvc.perform(put(base(f)+"/scenarios/"+s.id()).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{\"expectedVersion\":1,\"scenario\":"+body(s.name(),"1.5")+"}")).andReturn();status(400,r);assertEquals(before,writes());assertEquals(1,scenarios.detail(f.actor,f.project,s.id()).version());}
++    @Test @DisplayName("TC-D16API-13") void reusableValid() throws Exception{var f=fixture();String b=json.writeValueAsString(Map.of("name",unique(),"description","","steps",steps("TOKEN"))).replace("\"TOKEN\"","10.0");status(200,postBody(f,"/reusable-steps",b));}
++    @Test @DisplayName("TC-D16API-14") void reusableInvalid() throws Exception{var f=fixture();var s=publicStep(f);for(String token:List.of("1.5","1.0000000000000001","\"10\"")){String b=json.writeValueAsString(Map.of("name",unique(),"description","","steps",steps("TOKEN"))).replace("\"TOKEN\"",token);var before=writes();status(400,postBody(f,"/reusable-steps",b));var r=mvc.perform(put(base(f)+"/reusable-steps/"+s.id()).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{\"expectedVersion\":1,\"reusableStep\":"+b+"}")).andReturn();status(400,r);assertEquals(before,writes());}}
++    @Test @DisplayName("TC-D16API-15") void transferValid() throws Exception{var source=fixture();create(source,10);var target=fixture();var r=transfer.transfer(target.actor,target.project,new ApiAutomationTransferService.ImportRequest(UUID.randomUUID().toString(),target.actor.userId(),transfer.export(source.actor,source.project)));assertEquals(1,r.scenarios());}
++    @Test @DisplayName("TC-D16API-16") void transferInvalid() throws Exception{var source=fixture();create(source,1);publicStep(source);var target=fixture();for(String token:List.of("1.5","1.0000000000000001","\"10\"")){String bytes=json.writeValueAsString(new ApiAutomationTransferService.ImportRequest(UUID.randomUUID().toString(),target.actor.userId(),transfer.export(source.actor,source.project))).replace("\"delayMillis\":1","\"delayMillis\":"+token);var before=writes();rejected(()->transfer.transfer(target.actor,target.project,transfer.decode(bytes.getBytes(java.nio.charset.StandardCharsets.UTF_8))));assertEquals(before,writes());}}
++    @Test @DisplayName("TC-D16API-17") void syncValid() throws Exception {
++        var source=fixture();create(source,1);publicStep(source);
++        for(String token:List.of("1","1.0","1e0")) {
++            var target=fixture();var item=sync.snapshot(source.actor,source.project,source.actor.userId()).items().getFirst();
++            String body=json.writeValueAsString(new ApiAutomationScenarioSyncService.Request(UUID.randomUUID().toString(),target.actor.userId(),sync.snapshot(target.actor,target.project,target.actor.userId()).revision(),List.of(new ApiAutomationScenarioSyncService.Operation(UUID.randomUUID().toString(),item)))).replace("\"delayMillis\":1","\"delayMillis\":"+token);
++            assertEquals(1,sync.apply(target.actor,target.project,sync.decode(body.getBytes(java.nio.charset.StandardCharsets.UTF_8))).results().size());
++            var publicItem=assetSync.snapshot(source.actor,source.project,source.actor.userId()).items().stream().filter(x->x.kind().equals("REUSABLE_STEP")).findFirst().orElseThrow();
++            String assets=json.writeValueAsString(new ApiAutomationAssetSyncService.Request(UUID.randomUUID().toString(),target.actor.userId(),assetSync.snapshot(target.actor,target.project,target.actor.userId()).revision(),List.of(new ApiAutomationAssetSyncService.Operation(UUID.randomUUID().toString(),publicItem)))).replace("\"delayMillis\":1","\"delayMillis\":"+token);
++            assertEquals(1,assetSync.apply(target.actor,target.project,assetSync.decode(assets.getBytes(java.nio.charset.StandardCharsets.UTF_8))).results().size());
++        }
++    }
++    @Test @DisplayName("TC-D16API-18") void syncInvalid() throws Exception{var source=fixture();create(source,1);publicStep(source);var target=fixture();var item=sync.snapshot(source.actor,source.project,source.actor.userId()).items().getFirst();for(String token:List.of("1.5","1.0000000000000001","\"10\"")){String bytes=json.writeValueAsString(new ApiAutomationScenarioSyncService.Request(UUID.randomUUID().toString(),target.actor.userId(),sync.snapshot(target.actor,target.project,target.actor.userId()).revision(),List.of(new ApiAutomationScenarioSyncService.Operation(UUID.randomUUID().toString(),item)))).replace("\"delayMillis\":1","\"delayMillis\":"+token);var before=writes();rejected(()->sync.apply(target.actor,target.project,sync.decode(bytes.getBytes(java.nio.charset.StandardCharsets.UTF_8))));assertEquals(before,writes());}
++        var publicItem=assetSync.snapshot(source.actor,source.project,source.actor.userId()).items().stream().filter(x->x.kind().equals("REUSABLE_STEP")).findFirst().orElseThrow();String bytes=json.writeValueAsString(new ApiAutomationAssetSyncService.Request(UUID.randomUUID().toString(),target.actor.userId(),assetSync.snapshot(target.actor,target.project,target.actor.userId()).revision(),List.of(new ApiAutomationAssetSyncService.Operation(UUID.randomUUID().toString(),publicItem)))).replace("\"delayMillis\":1","\"delayMillis\":1.0000000000000001");var before=writes();rejected(()->assetSync.apply(target.actor,target.project,assetSync.decode(bytes.getBytes(java.nio.charset.StandardCharsets.UTF_8))));assertEquals(before,writes());}
++    @Test @DisplayName("TC-D16API-19") void legacyReadable() throws Exception{var f=fixture();var s=create(f,1);legacy(f,s,new BigDecimal("1.5"));var before=writes();assertEquals("1.5",scenarios.detail(f.actor,f.project,s.id()).steps().get(1).config().get("delayMillis").toString());assertEquals(before,writes());}
++    @Test @DisplayName("TC-D16API-20") void legacyQueueRejected() throws Exception{var f=fixture();var s=create(f,1);legacy(f,s,new BigDecimal("1.5"));var before=writes();rejected(()->executions.previewConfiguration(f.actor,f.project,s.id(),null,Map.of()));rejected(()->executions.create(f.actor,f.project,s.id(),30,null,Map.of()));assertEquals(before,writes());}
++    @Test @DisplayName("TC-D16API-21") void invalidReferencesBlocked() throws Exception{var f=fixture();var child=create(f,1);var pub=publicStep(f);var root=reference(f,"SUB_SCENARIO",Map.of("scenarioId",child.id(),"scenarioVersion",1));var publicRoot=reference(f,"REUSABLE_STEP",Map.of("reusableStepId",pub.id(),"reusableStepVersion",1));String scenario=json.writeValueAsString(new ApiAutomationScenarioRevisionSnapshot(child.name(),"","qa","STOP",steps(new BigDecimal("1.5")),Map.of(),"",""));jdbc.sql("UPDATE api_automation_scenario_revision SET snapshot=CAST(:v AS JSON) WHERE scenario_id=:id").param("v",scenario).param("id",child.id()).update();String publicSnapshot=json.writeValueAsString(new ApiAutomationReusableStepRevisionSnapshot(pub.name(),"",steps(new BigDecimal("1.5"))));jdbc.sql("UPDATE api_automation_reusable_step_revision SET snapshot=CAST(:v AS JSON) WHERE reusable_step_id=:id").param("v",publicSnapshot).param("id",pub.id()).update();var before=writes();for(var s:List.of(root,publicRoot))rejected(()->executions.create(f.actor,f.project,s.id(),30,null,Map.of()));assertEquals(before,writes());}
++    @Test @DisplayName("TC-D16API-26") void nonWaitUntouched() throws Exception{var f=fixture();String b=body(unique(),"10").replace("\"method\":\"GET\"","\"method\":\"GET\",\"extraNumber\":1.5,\"extraString\":\"10\",\"extraBoolean\":true");var r=postBody(f,"/scenarios",b);status(200,r);var config=data(r).path("steps").get(0).path("config");assertEquals(1.5,config.path("extraNumber").asDouble());assertEquals("10",config.path("extraString").asText());assertTrue(config.path("extraBoolean").asBoolean());}
++    @Test @DisplayName("TC-D16API-27") void projectDenied() throws Exception{var f=fixture();var other=actor();var before=writes();var r=mvc.perform(post(base(f)+"/scenarios").with(user(other)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body(unique(),"10"))).andReturn();status(403,r);assertEquals(before,writes());}
++    @Test @DisplayName("TC-D16API-28") void staleVersion() {var f=fixture();var s=create(f,1);var first=new ApiAutomationScenarioService.ScenarioInput(s.name(),"","qa","STOP",steps(10),Map.of(),"","",1);scenarios.update(f.actor,f.project,s.id(),first);var before=writes();assertEquals(409,assertThrows(ResponseStatusException.class,()->scenarios.update(f.actor,f.project,s.id(),first)).getStatusCode().value());assertEquals(before,writes());}
++    @Test @DisplayName("TC-D16API-29") void oldManifestUnchanged() {var f=fixture();var s=create(f,1);var execution=executions.create(f.actor,f.project,s.id(),30,null,Map.of());var before=executions.manifest(f.actor,f.project,execution.id());scenarios.update(f.actor,f.project,s.id(),new ApiAutomationScenarioService.ScenarioInput(s.name(),"","qa","STOP",steps(10),Map.of(),"","",1));assertEquals(before,executions.manifest(f.actor,f.project,execution.id()));}
++    @Test @DisplayName("TC-D16API-30") void explicitLegacyRepair() throws Exception{var f=fixture();var s=create(f,1);legacy(f,s,new BigDecimal("1.5"));scenarios.update(f.actor,f.project,s.id(),new ApiAutomationScenarioService.ScenarioInput(s.name(),"","qa","STOP",steps(10),Map.of(),"","",1));assertNotNull(executions.create(f.actor,f.project,s.id(),30,null,Map.of()).id());}
++}
+--- /dev/null
++++ b/services/api-runner/test/d16-wait.test.js
+@@ -0,0 +1,16 @@
++import assert from 'node:assert/strict'
++import test from 'node:test'
++import { ApiRunner } from '../src/runner.js'
++const task = { taskId: 'task-qa', executionId: 'execution-qa', deadlineAt: '2026-11-02T00:15:00Z' }
++function setup(value) {
++  let calls = 0
++  const runner = new ApiRunner({ commandClient: {}, readClient: {}, now: () => new Date('2026-11-02T00:00:00Z'), config: { allowedHttpOrigins: ['https://8.8.8.8'] }, fetcher: async () => { calls++; throw new Error('Unexpected target request') }, logger: { info() {}, error() {} } })
++  const artifact = { contract: 'testhub.api-runner.runtime-configuration', artifactVersion: 5, taskId: task.taskId, executionId: task.executionId, variables: {}, scripts: { preRequestScript: '', postResponseScript: '' }, steps: [{ stepId: 'request', type: 'REQUEST', method: 'GET', url: 'https://8.8.8.8/qa', body: '', contentType: 'application/json' }, { stepId: 'wait', type: 'WAIT', delayMillis: value }] }
++  return { runner, artifact, calls: () => calls }
++}
++test('TC-D16API-22: Runner precheck accepts bounded integral WAIT without target traffic', async () => {
++  for (const delay of [0, 10, 10.0, 1e1, 600000]) { const q = setup(delay); assert.doesNotThrow(() => q.runner.validateArtifact(task, q.artifact)); assert.equal(q.calls(), 0); if (delay <= 10) assert.equal(await q.runner.waitForStep(task, delay), true) }
++})
++test('TC-D16API-23: Runner rejects invalid WAIT before any target call', () => {
++  for (const delay of [-1, 600001, 1.5, '10', NaN, Infinity, true, null, undefined]) { const q = setup(delay); assert.throws(() => q.runner.validateArtifact(task, q.artifact)); assert.equal(q.calls(), 0) }
++})
+--- /dev/null
++++ b/src/utils/waitDelay.ts
+@@ -0,0 +1,34 @@
++const message = 'config.delayMillis 必须是 0 到 600000 之间的精确整数数值'
++
++// Inspect decimal digits before Number conversion, including scientific notation.
++export function parseWaitDelayInput(raw: string): { value?: number; error?: string } {
++  const match = /^(-?)(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(raw.trim())
++  if (!match) return { error: message }
++  const fraction = match[3] ?? ''
++  let digits = (match[2]! + fraction).replace(/^0+/, '')
++  if (!digits) return { value: 0 }
++  if (match[1] === '-') return { error: message }
++  const scale = BigInt(fraction.length) - BigInt(match[4] ?? '0')
++  if (scale > 0n) {
++    if (scale >= BigInt(digits.length)) return { error: message }
++    const removed = Number(scale)
++    if (!/^0+$/.test(digits.slice(-removed))) return { error: message }
++    digits = digits.slice(0, -removed)
++  } else if (scale < 0n) {
++    if (BigInt(digits.length) - scale > 6n) return { error: message }
++    digits += '0'.repeat(Number(-scale))
++  }
++  if (digits.length > 6) return { error: message }
++  const value = Number(digits)
++  return value <= 600_000 ? { value } : { error: message }
++}
++
++export function validateWaitSteps(steps: { id: string; type: string; config: Record<string, unknown> }[]) {
++  for (const step of steps) {
++    if (step.type !== 'WAIT') continue
++    const value = step.config.delayMillis
++    if (Object.keys(step.config).length !== 1 || typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 600_000) {
++      throw new Error(`步骤 ${step.id} 的 ${message}`)
++    }
++  }
++}
+--- /dev/null
++++ b/src/test/d16ApiWaitPage.test.ts
+@@ -0,0 +1,42 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { createMemoryHistory, createRouter } from 'vue-router'
++import { flushPromises, shallowMount, type VueWrapper } from '@vue/test-utils'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import AutomationPage from '@/pages/AutomationPage.vue'
++import AutomationSidebar from '@/components/api-automation/AutomationSidebar.vue'
++import { useSessionStore } from '@/stores/session'
++const wrappers: VueWrapper[] = []
++afterEach(() => { wrappers.splice(0).forEach(w => w.unmount()); vi.unstubAllGlobals(); vi.restoreAllMocks() })
++const response = (data: unknown) => new Response(JSON.stringify({ data }))
++async function setup() {
++  vi.spyOn(Message, 'success').mockImplementation(() => ({ close: vi.fn() })); vi.spyOn(Message, 'error').mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(); useSessionStore(pinia).projectId = 'p'
++  let current = { id: 's', projectId: 'p', name: 'QA', description: '', environmentCode: 'test', failureStrategy: 'STOP', version: 1, variables: {}, preRequestScript: '', postResponseScript: '', steps: [{ id: 'get', type: 'REQUEST', name: 'HTTP', config: { method: 'GET', url: 'https://8.8.8.8/qa' } }, { id: 'wait', type: 'WAIT', name: '等待', config: { delayMillis: 1 } }], createdAt: '2026-11-02T00:00:00Z', updatedAt: '2026-11-02T00:00:00Z' }
++  const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
++    if (init?.method === 'PUT') { const input = JSON.parse(String(init.body)); current = { ...current, ...input.scenario, version: current.version + 1 }; return response(current) }
++    return response(url.endsWith('/csrf') ? { token: 'fixture', headerName: 'X-CSRF' } : url.endsWith('/context') ? { organizations: [{ id: 'o' }], projects: { o: [{ id: 'p', organizationId: 'o', name: 'QA', code: 'QA' }] } } : url.endsWith('/environments') ? [{ id: 'env', name: 'QA', environmentCode: 'test', enabled: true, defaultEnvironment: true }] : url.endsWith('/scenarios') ? [current] : url.endsWith('/scenarios/s') ? current : [])
++  }); vi.stubGlobal('fetch', fetcher)
++  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/api-automation', component: { template: '<div />' } }] }); await router.push('/api-automation')
++  const w = shallowMount(AutomationPage, { global: { plugins: [pinia, ArcoVue, router], renderStubDefaultSlot: true, stubs: { Popover: { template: '<div><slot/><slot name="content"/></div>' } }, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises()
++  w.findComponent(AutomationSidebar).vm.$emit('select', 's'); await flushPromises(); await w.findAll('.scenario-flow-node')[1]!.trigger('click'); await flushPromises()
++  return { w, fetcher }
++}
++async function input(q: Awaited<ReturnType<typeof setup>>, raw: string) {
++  const form = q.w.findAllComponents({ name: 'FormItem' }).find(c => c.props('label') === '等待时间')!
++  const number = form.findComponent({ name: 'InputNumber' })
++  if (number.exists()) { number.vm.$emit('input', Number(raw), raw, new Event('input')); number.vm.$emit('change', Number(raw)) }
++  else form.findComponent({ name: 'Input' }).vm.$emit('input', raw)
++  await flushPromises()
++}
++async function save(w: VueWrapper) { w.findAllComponents({ name: 'Button' }).find(c => c.text().trim() === '保存场景')!.vm.$emit('click'); await flushPromises() }
++const writes = (q: Awaited<ReturnType<typeof setup>>) => q.fetcher.mock.calls.filter(([,init]) => init?.method === 'PUT')
++it('TC-D16API-24: explicit integral input is sent as a bounded JSON number', async () => {
++  const q = await setup()
++  for (const raw of ['10', '10.0', '1e1', '0', '600000']) { await input(q, raw); await save(q.w); const call = writes(q).at(-1)!; expect(JSON.parse(String(call[1]!.body)).scenario.steps[1].config.delayMillis).toBe(Number(raw)) }
++})
++it('TC-D16API-25: fractional or lossy WAIT input cannot trigger a business save', async () => {
++  const q = await setup()
++  for (const raw of ['1.5', '1.0000000000000001', '-1', '600001', 'NaN', 'Infinity', '', '1e10000', '"10"']) { await input(q, raw); await save(q.w); expect(writes(q)).toHaveLength(0) }
++  expect(Message.error).toHaveBeenCalledWith(expect.stringContaining('delayMillis'))
++})
+--- /dev/null
++++ b/src/test/d16WaitDelay.test.ts
+@@ -0,0 +1,9 @@
++import { expect, it } from 'vitest'
++import { parseWaitDelayInput, validateWaitSteps } from '@/utils/waitDelay'
++it('TC-D16API-24: decimal and exponent input keeps exact bounded integer semantics', () => {
++  for (const [raw, value] of [['10', 10], ['10.0', 10], ['1e1', 10], ['0.1e1', 1], ['10e-1', 1], ['-0', 0], ['0e10000', 0], ['600000.0', 600000]] as const) expect(parseWaitDelayInput(raw)).toEqual({ value })
++})
++it('TC-D16API-25: tiny fractions, range errors and legacy string values are never rounded away', () => {
++  for (const raw of ['1.0000000000000001', '0.00001', '0.1e0', '-0.5', '600001', '1e10000', '1e-10000', 'NaN', '"10"', '']) expect(parseWaitDelayInput(raw).error).toContain('delayMillis')
++  for (const delayMillis of ['10', 1.5, null, Infinity]) expect(() => validateWaitSteps([{ id: 'wait', type: 'WAIT', config: { delayMillis } }])).toThrow('delayMillis')
++})
+--- /dev/null
++++ b/scripts/qa/d16-api-wait-http.mjs
+@@ -0,0 +1,97 @@
++/* global fetch, AbortSignal */
++// Native JVM acceptance in a new filesystem workspace; no Electron window or user workspace is used.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import path from 'node:path'
++import crypto from 'node:crypto'
++import process from 'node:process'
++import { spawn } from 'node:child_process'
++import { fileURLToPath } from 'node:url'
++import { setTimeout as delay } from 'node:timers/promises'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261102/d16-api-automation-fixes-r1'), directory = await fs.mkdtemp(path.join(root, '.testhub/d16-api-http-qa-'))
++const java = path.join(process.env.JAVA_HOME, 'bin/java'), jar = path.join(root, 'services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar')
++const result = { headless: true, realPackagedJvm: true, desktopProfile: true, electronUpgradeTest: false, cases: [], cleanup: false }
++const env = { ...process.env }
++for (const key of Object.keys(env)) if (key.startsWith('TESTHUB_') || key.startsWith('SPRING_')) delete env[key]
++Object.assign(env, { SPRING_PROFILES_ACTIVE: 'desktop', TESTHUB_DESKTOP_DATA_DIRECTORY: directory, TESTHUB_LOCAL_DB_PASSWORD: crypto.randomBytes(24).toString('hex'),
++  TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test', TESTHUB_REGISTRATION_ENABLED: 'true' })
++let child, origin, logHandle, launch = 0
++async function start() {
++  const file = path.join(directory, `backend-${++launch}.log`); logHandle = await fs.open(file, 'w')
++  child = spawn(java, ['-jar', jar, '--server.port=0', '--testhub.registration.enabled=true', '--testhub.bootstrap.demo-enabled=false'], { cwd: root, env, stdio: ['ignore', logHandle.fd, logHandle.fd] })
++  child.on('error', error => { result.launchError = error.message })
++  for (let n = 0; n < 300; n++) {
++    if (child.exitCode !== null || child.signalCode !== null || result.launchError) throw new Error('Owned QA JVM failed to start')
++    const match = /Tomcat started on port (\d+)/.exec(await fs.readFile(file, 'utf8'))
++    if (match) {
++      origin = 'http://127.0.0.1:' + match[1]
++      try { if ((await fetch(origin + '/actuator/health/readiness', { signal: AbortSignal.timeout(5_500) })).status === 200) return } catch { /* Wait for ApplicationReadyEvent. */ }
++    }
++    await delay(250)
++  }
++  throw new Error('Owned QA JVM did not become ready within 75 seconds')
++}
++async function stop() {
++  if (!child) return
++  const running = child; child = null
++  if (running.exitCode === null && running.signalCode === null) {
++    running.kill('SIGTERM')
++    for (let n = 0; n < 150 && running.exitCode === null && running.signalCode === null; n++) await delay(100)
++    if (running.exitCode === null && running.signalCode === null) { running.kill('SIGKILL'); await new Promise(resolve => running.once('exit', resolve)); throw new Error('Owned JVM failed to stop within 15 seconds') }
++  }
++  await logHandle?.close(); logHandle = null
++}
++function browser() { return { cookies: new Map() } }
++async function request(client, url, method = 'GET', payload) {
++  const headers = { Cookie: [...client.cookies].map(([key, value]) => key + '=' + value).join('; ') }
++  if (payload !== undefined) {
++    const csrf = await request(client, '/api/v1/auth/csrf')
++    assert.equal(csrf.status, 200); headers[csrf.body.data.headerName] = csrf.body.data.token
++    headers.Cookie = [...client.cookies].map(([key, value]) => key + '=' + value).join('; '); headers['Content-Type'] = 'application/json'
++  }
++  const response = await fetch(origin + url, { method, headers, body: payload === undefined ? undefined : JSON.stringify(payload), signal: AbortSignal.timeout(8_000) })
++  for (const cookie of response.headers.getSetCookie()) {
++    const [pair] = cookie.split(';'), equals = pair.indexOf('='); client.cookies.set(pair.slice(0, equals), pair.slice(equals + 1))
++  }
++  return { status: response.status, body: response.status === 204 ? null : await response.json() }
++}
++async function step(id, title, operation) { await operation(); result.cases.push({ id, title, status: 'PASS' }) }
++async function rawRequest(client, url, method, body) {
++  const csrf = await request(client, '/api/v1/auth/csrf'); assert.equal(csrf.status, 200)
++  const headers = { Cookie: [...client.cookies].map(([k,v]) => k + '=' + v).join('; '), 'Content-Type': 'application/json', [csrf.body.data.headerName]: csrf.body.data.token }
++  const response = await fetch(origin + url, { method, headers, body, signal: AbortSignal.timeout(8_000) })
++  return { status: response.status, body: await response.json() }
++}
++const definition = (value, name = crypto.randomUUID()) => JSON.stringify({ name, description: '', environmentCode: 'qa', failureStrategy: 'STOP', variables: {}, preRequestScript: '', postResponseScript: '', steps: [{ id: 'request', type: 'REQUEST', name: 'HTTP', config: { method: 'GET', url: 'https://8.8.8.8/qa' } }, { id: 'wait', type: 'WAIT', name: 'WAIT', config: { delayMillis: 'RAW_TOKEN' } }] }).replace('"RAW_TOKEN"', value)
++try {
++  await start()
++  const client = browser(), account = 'd16-' + crypto.randomUUID(), password = crypto.randomUUID() + 'Aa1!'
++  assert.equal((await request(client, '/api/v1/auth/register', 'POST', { account, email: crypto.randomUUID() + '@example.test', displayName: 'D16隔离验收', password })).status, 201)
++  const project = Object.values((await request(client, '/api/v1/access/context')).body.data.projects).flat()[0].id
++  const base = '/api/v1/projects/' + project, path = base + '/api-automation/scenarios'
++  assert.equal((await request(client, base + '/environments', 'POST', { name: 'QA', environmentCode: 'qa', baseUrl: 'https://8.8.8.8', description: '', enabled: true, defaultEnvironment: false })).status, 200)
++  let created
++  await step('TC-D16API-01', '真实HTTP接受精确等值整数写法并规范化', async () => {
++    for (const value of ['10', '10.0', '1e1']) { const r = await rawRequest(client, path, 'POST', definition(value)); assert.equal(r.status, 200); assert.equal(r.body.data.steps[1].config.delayMillis, 10); created = r.body.data }
++  })
++  await step('TC-D16API-04/05/06/07/08/09/10', '原始小数、微小小数、溢出、非有限JSON和错误类型均400且无新资产', async () => {
++    const before = (await request(client, path)).body.data.length
++    for (const value of ['1.5', '1.0000000000000001', '18446744073709551616', '1e10000', '"10"', '" 10 "', 'true', '[]', '{}', 'null', 'NaN', 'Infinity', '-Infinity']) assert.equal((await rawRequest(client, path, 'POST', definition(value))).status, 400, 'Raw payload class rejected')
++    assert.equal((await request(client, path)).body.data.length, before)
++  })
++  await step('TC-D16API-12', '真实HTTP非法更新不改版本或WAIT', async () => {
++    const r = await rawRequest(client, path + '/' + created.id, 'PUT', '{"expectedVersion":1,"scenario":' + definition('1.0000000000000001', created.name) + '}'); assert.equal(r.status, 400)
++    const saved = (await request(client, path + '/' + created.id)).body.data; assert.equal(saved.version, 1); assert.equal(saved.steps[1].config.delayMillis, 10)
++  })
++  await stop(); await start()
++  await step('TC-D16API-19', '自有JVM重启后已存合法整数及登录会话保持', async () => {
++    assert.equal((await request(client, '/api/v1/auth/me')).status, 200)
++    const saved = (await request(client, path + '/' + created.id)).body.data; assert.equal(saved.steps[1].config.delayMillis, 10)
++  })
++} catch (error) { result.error = error.message; process.exitCode = 1 }
++finally {
++  try { await stop() } catch (error) { result.cleanupError = error.message; process.exitCode = 1 }
++  await fs.rm(directory, { recursive: true, force: true }); result.cleanup = true
++  await fs.mkdir(out, { recursive: true }); await fs.writeFile(path.join(out, 'native-http.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n')
++}
+--- /dev/null
++++ b/scripts/qa/d16-api-wait-ui.mjs
+@@ -0,0 +1,69 @@
++// Browser acceptance uses controlled API fixtures. It does not claim real Runner or remote WS coverage.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import http from 'node:http'
++import path from 'node:path'
++import process from 'node:process'
++import { fileURLToPath, URL } from 'node:url'
++import { chromium } from '../../services/playwright-runner/node_modules/playwright/index.mjs'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261102/d16-api-automation-fixes-r1'), dist = path.join(root, 'dist')
++const stamp = '2026-10-30T00:00:00Z'
++const result = { headless: true, isolatedHttpFixtures: true, realBackendAcceptance: false, cases: [], cleanup: false }
++const server = http.createServer(async (req, res) => {
++  try {
++    let file = path.resolve(dist, '.' + decodeURIComponent(new URL(req.url, 'http://qa.invalid').pathname))
++    if (!file.startsWith(dist + path.sep) || !path.extname(file)) file = path.join(dist, 'index.html')
++    res.writeHead(200, { 'Content-Type': { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }[path.extname(file)] || 'application/octet-stream' })
++    res.end(await fs.readFile(file))
++  } catch { res.writeHead(404); res.end() }
++})
++await fs.mkdir(out, { recursive: true }); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
++const origin = `http://127.0.0.1:${server.address().port}`
++let browser
++async function run(id, initialDelay, operation) {
++  const context = await browser.newContext({ viewport: { width: 1600, height: 1100 } }), writes = [], errors = []
++  let current = { id: 's', projectId: 'p', name: 'WAIT验收', description: '', environmentCode: 'test', failureStrategy: 'STOP', version: 1, variables: {}, preRequestScript: '', postResponseScript: '', steps: [{ id: 'get', type: 'REQUEST', name: 'HTTP', config: { method: 'GET', url: 'https://8.8.8.8/qa' } }, { id: 'wait', type: 'WAIT', name: '等待', config: { delayMillis: initialDelay } }], createdAt: stamp, updatedAt: stamp }
++  await context.route('**/api/**', async route => {
++    const r = route.request(), p = new URL(r.url()).pathname; let data
++    if (r.method() === 'PUT') { const input = r.postDataJSON(); writes.push(input); current = { ...current, ...input.scenario, version: current.version + 1 }; data = current }
++    else if (p.endsWith('/auth/me')) data = { id: 'qa', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: stamp }
++    else if (p.endsWith('/auth/csrf')) data = { token: 'fixture', headerName: 'X-CSRF' }
++    else if (p.endsWith('/auth/capabilities')) data = { registrationEnabled: true }
++    else if (p.endsWith('/access/context')) data = { organizations: [{ id: 'o', name: 'QA', code: 'QA' }], projects: { o: [{ id: 'p', name: 'QA项目', code: 'QA', status: 'ACTIVE', createdAt: stamp, updatedAt: stamp }] } }
++    else if (p.endsWith('/capabilities')) data = { systemAdministration: true }
++    else if (p.endsWith('/environments')) data = [{ id: 'env', name: 'QA', environmentCode: 'test', enabled: true, defaultEnvironment: true }]
++    else if (p.endsWith('/scenarios')) data = [current]
++    else if (p.endsWith('/scenarios/s')) data = current
++    else data = []
++    await route.fulfill({ json: { data } })
++  })
++  const page = await context.newPage(); page.setDefaultTimeout(10_000); page.on('pageerror', error => errors.push(error.message))
++  try {
++    await page.goto(origin + '/api-automation'); await page.getByText('WAIT验收', { exact: true }).first().click()
++    await page.locator('.scenario-flow-node').filter({ hasText: '等待' }).click()
++    const field = page.getByLabel('WAIT 延迟（毫秒）').locator('input')
++    await field.waitFor(); await operation(page, field, writes); assert.deepEqual(errors, []); result.cases.push({ id, status: 'PASS' })
++  } catch (error) { result.cases.push({ id, status: 'FAIL', error: error.message, browserErrors: errors }) }
++  finally { await context.close() }
++}
++try {
++  browser = await chromium.launch({ headless: true, channel: 'chrome' }); result.browserVersion = browser.version()
++  await run('TC-D16API-24', 1, async (page, field, writes) => {
++    for (const raw of ['10.0', '1e1']) {
++      await field.fill(raw)
++      await Promise.all([page.waitForResponse(r => r.url().endsWith('/scenarios/s') && r.request().method() === 'PUT'), page.getByRole('button', { name: '保存场景', exact: true }).click()])
++      assert.equal(writes.at(-1).scenario.steps[1].config.delayMillis, 10)
++    }
++  })
++  await run('TC-D16API-25', 1.5, async (page, field, writes) => {
++    for (const raw of ['1.5', '1.0000000000000001', '1e10000', '-1', '600001']) {
++      await field.fill(raw); await page.getByRole('button', { name: '保存场景', exact: true }).click()
++      await page.locator('.arco-message').filter({ hasText: 'delayMillis' }).first().waitFor(); assert.equal(writes.length, 0); assert.equal(await field.inputValue(), raw)
++    }
++  })
++} finally {
++  await browser?.close(); await new Promise(resolve => server.close(resolve)); result.cleanup = true
++  result.passed = result.cases.filter(c => c.status === 'PASS').length; result.failed = result.cases.length - result.passed
++  await fs.writeFile(path.join(out, 'headless-ui.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n'); if (result.failed) process.exitCode = 1
++}

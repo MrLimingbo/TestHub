@@ -1,0 +1,366 @@
+{
+  "sources": [
+    {
+      "id": "H01",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-29/RULE-DECISIONS.json",
+      "sha256": "7d306804eef8ce687fdcb8be49ef21ac8a8cafe1f9cdf12b4d50be95ca3aeeaf",
+      "anchors": [
+        {
+          "line": 230,
+          "pattern": "跨模块数值与类型转换",
+          "excerpt": "    \"title\": \"跨模块数值与类型转换\","
+        }
+      ]
+    },
+    {
+      "id": "H02",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-29/OBSERVATION-DETAILS.md",
+      "sha256": "16320afc5f104f1aa14d8a5b6a4117c2fefac7eb841841eb9393262a56105caf",
+      "anchors": [
+        {
+          "line": 229,
+          "pattern": "OBS-08-E010",
+          "excerpt": "## P2 · OBS-08-E010 · WAIT小数与非有限数值"
+        },
+        {
+          "line": 243,
+          "pattern": "OBS-09-E013",
+          "excerpt": "## P2 · OBS-09-E013 · 优先级与有效期小数输入"
+        },
+        {
+          "line": 271,
+          "pattern": "OBS-10-E011",
+          "excerpt": "## P2 · OBS-10-E011 · 小数到整数输入转换"
+        },
+        {
+          "line": 299,
+          "pattern": "OBS-11-E021",
+          "excerpt": "## P2 · OBS-11-E021 · 数值到整数/字符串的转换策略"
+        },
+        {
+          "line": 327,
+          "pattern": "OBS-12-E020",
+          "excerpt": "## P2 · OBS-12-E020 · JSON数字转整数/字符串策略"
+        },
+        {
+          "line": 397,
+          "pattern": "OBS-13-E018",
+          "excerpt": "## P2 · OBS-13-E018 · 进度与周期JSON小数转换"
+        }
+      ]
+    },
+    {
+      "id": "C01",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioController.java",
+      "sha256": "d9ab80b8b03dd6e528110610ba59ee29f678242247ea781b03b982c37eb36bdf",
+      "anchors": [
+        {
+          "line": 88,
+          "pattern": "public record StepRequest",
+          "excerpt": "    public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 24) String type,"
+        }
+      ]
+    },
+    {
+      "id": "C02",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioService.java",
+      "sha256": "e65d0cfeee7f59e21c99ea311229bfb756dfaa08224eb31bb0948e6415781f59",
+      "anchors": [
+        {
+          "line": 261,
+          "pattern": "if (\"WAIT\".equals(type))",
+          "excerpt": "        if (\"WAIT\".equals(type)) {"
+        },
+        {
+          "line": 407,
+          "pattern": "private int integer(",
+          "excerpt": "    private int integer(Object value, String label) {"
+        }
+      ]
+    },
+    {
+      "id": "C03",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/api-runner/src/runner.js",
+      "sha256": "076d193aa8c5ce79ccadc222050672a3086ba48e12a1265979f49854dbaac3f7",
+      "anchors": [
+        {
+          "line": 399,
+          "pattern": "async waitForStep",
+          "excerpt": "  async waitForStep(task, delayMillis) {"
+        },
+        {
+          "line": 498,
+          "pattern": "Number.isInteger(step.delayMillis)",
+          "excerpt": "        if (!Number.isInteger(step.delayMillis) || step.delayMillis < 0 || step.delayMillis > 600_000) {"
+        }
+      ]
+    },
+    {
+      "id": "C04",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/mock/MockManagementController.java",
+      "sha256": "ce93b503f4b298d5899271ad909bca1f97d2da1003770c349981bcfc27bfc0fe",
+      "anchors": [
+        {
+          "line": 113,
+          "pattern": "public record ShareRequest",
+          "excerpt": "    public record ShareRequest(@NotBlank @Size(max = 120) String name, Integer expiresInDays) {"
+        },
+        {
+          "line": 115,
+          "pattern": "public record RuleRequest",
+          "excerpt": "    public record RuleRequest(@NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 12) String httpMethod,"
+        }
+      ]
+    },
+    {
+      "id": "C05",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/mock/MockService.java",
+      "sha256": "b05800dc5160f621721e8eb8a3bd655d39dccd6803a60def1718b0716909c04f",
+      "anchors": [
+        {
+          "line": 135,
+          "pattern": "Integer expiresInDays =",
+          "excerpt": "        Integer expiresInDays = input.expiresInDays();"
+        },
+        {
+          "line": 221,
+          "pattern": "int priority = input.priority()",
+          "excerpt": "        int priority = input.priority() == null ? 0 : input.priority();"
+        },
+        {
+          "line": 227,
+          "pattern": "int responseStatus = input.responseStatus()",
+          "excerpt": "        int responseStatus = input.responseStatus() == null ? 200 : input.responseStatus();"
+        }
+      ]
+    },
+    {
+      "id": "C06",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanController.java",
+      "sha256": "68bdc1f777babcda5ae49ac1cfe48490e8f28a14a82e651389c45334c3721b0d",
+      "anchors": [
+        {
+          "line": 85,
+          "pattern": "public record ThreadGroupRequest",
+          "excerpt": "    public record ThreadGroupRequest(@NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 2_048) String targetUrl,"
+        }
+      ]
+    },
+    {
+      "id": "C07",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java",
+      "sha256": "a89d27aa046f573928dff7e167f0defe52b161504c8a6130bef57e521ad76af3",
+      "anchors": [
+        {
+          "line": 150,
+          "pattern": "int threadCount = range",
+          "excerpt": "        int threadCount = range(input.threadCount(), 1, 100_000, \"并发线程数\");"
+        },
+        {
+          "line": 180,
+          "pattern": "private SteppedRampPayload",
+          "excerpt": "    private SteppedRampPayload steppedRamp(String loadModel, int threadCount, int rampUpSeconds, int durationSeconds,"
+        },
+        {
+          "line": 349,
+          "pattern": "private BigDecimal percent",
+          "excerpt": "    private BigDecimal percent(BigDecimal value) {"
+        }
+      ]
+    },
+    {
+      "id": "C08",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationController.java",
+      "sha256": "d8a2f5ff2083ca9c0088fe97a3b66a729178b7027818c0bd261d82c35d106b6f",
+      "anchors": [
+        {
+          "line": 134,
+          "pattern": "public record ProfileRequest",
+          "excerpt": "    public record ProfileRequest(@NotBlank @Size(max = 120) String name, @NotBlank @Size(max = 16) String browser,"
+        },
+        {
+          "line": 139,
+          "pattern": "public record ScenarioRequest",
+          "excerpt": "    public record ScenarioRequest(@NotBlank @Size(max = 26) String browserProfileId, @NotBlank @Size(max = 160) String name,"
+        },
+        {
+          "line": 142,
+          "pattern": "public record StepRequest",
+          "excerpt": "    public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 32) String type,"
+        },
+        {
+          "line": 146,
+          "pattern": "public record ExecuteRequest",
+          "excerpt": "    public record ExecuteRequest(@Min(10) @Max(3600) Integer timeoutSeconds, @Size(max = 26) String functionalPlanId) { }"
+        }
+      ]
+    },
+    {
+      "id": "C09",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "sha256": "b83d7409cf640402da1bd72fd598508271b3f51a92412b52ca7d1b45a6e65010",
+      "anchors": [
+        {
+          "line": 395,
+          "pattern": "int width = integer",
+          "excerpt": "        int width = integer(request.viewportWidth(), 1440, 320, 3840, \"视口宽度\");"
+        },
+        {
+          "line": 417,
+          "pattern": "private Map<String, String> variables",
+          "excerpt": "    private Map<String, String> variables(Map<String, String> source) {"
+        },
+        {
+          "line": 461,
+          "pattern": "Integer timeout = step.timeoutMillis()",
+          "excerpt": "            Integer timeout = step.timeoutMillis();"
+        },
+        {
+          "line": 508,
+          "pattern": "private int timeout(",
+          "excerpt": "    private int timeout(Integer value) { return integer(value, 300, 10, 3600, \"执行超时\"); }"
+        }
+      ]
+    },
+    {
+      "id": "C10",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileAutomationController.java",
+      "sha256": "0e1a97a7594451f89ad0d97986275076ebb313377345c7bbff78281ab967246f",
+      "anchors": [
+        {
+          "line": 81,
+          "pattern": "public record ScenarioRequest",
+          "excerpt": "    public record ScenarioRequest(@NotBlank @Size(max = 26) String deviceId, @NotBlank @Size(max = 26) String applicationId, @NotBlank @Size(max = 160) String name, @Size(max = 2000) String description, @NotBlank @Size(max = 16) String failureStrategy, Map<String, String> variables, @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps) { }"
+        },
+        {
+          "line": 82,
+          "pattern": "public record StepRequest",
+          "excerpt": "    public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 32) String type, @NotBlank @Size(max = 160) String name, @Size(max = 26) String elementId, @Size(max = 4096) String value, @Size(max = 4096) String expectedText, @Min(1) @Max(60000) Integer timeoutMillis) { }"
+        },
+        {
+          "line": 87,
+          "pattern": "public record ExecuteRequest",
+          "excerpt": "    public record ExecuteRequest(@Min(10) @Max(3600) Integer timeoutSeconds) { }"
+        }
+      ]
+    },
+    {
+      "id": "C11",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileAutomationService.java",
+      "sha256": "f5327ee6ac6fffe33277b13459ecd842b526a7254eb0150df9204c76e192ffb5",
+      "anchors": [
+        {
+          "line": 356,
+          "pattern": "private Step stepInput",
+          "excerpt": "    private Step stepInput(Step value) { if (value == null) throw invalid(\"步骤不能为空\"); String type=choice(value.type(),STEP_TYPES,\"步骤类型\"); String elementId=blank(value.elementId()); if(Set.of(\"TAP\",\"INPUT\",\"ASSERT_VISIBLE\",\"ASSERT_TEXT\").contains(type)&&elementId==null) throw invalid(type+\" 步骤必须引用元素\"); if(elementId!=null&&!elementId.matches(\"[0-9A-HJKMNP-TV-Z]{26}\")) throw invalid(\"元素标识不合法\"); return new Step(required(value.id(),64,\"步骤标识\"),type,required(value.name(),160,\"步骤名称\"),elementId,nullable(v"
+        },
+        {
+          "line": 367,
+          "pattern": "private Map<String,String> variables",
+          "excerpt": "    private Map<String,String> variables(Map<String,String> value) { if(value==null) return Map.of(); if(value.size()>50||value.entrySet().stream().anyMatch(entry->entry.getKey()==null||!entry.getKey().matches(\"[A-Za-z_][A-Za-z0-9_]{0,63}\")||entry.getValue()==null||entry.getValue().length()>4096)) throw invalid(\"变量或能力参数不合法\"); return Map.copyOf(value); }"
+        },
+        {
+          "line": 369,
+          "pattern": "private int timeout(",
+          "excerpt": "    private int timeout(Integer value) { int valueOrDefault=value==null?300:value; if(valueOrDefault<10||valueOrDefault>3600) throw invalid(\"执行超时应在 10 到 3600 秒之间\"); return valueOrDefault; }"
+        },
+        {
+          "line": 370,
+          "pattern": "private Integer timeoutMillis(",
+          "excerpt": "    private Integer timeoutMillis(Integer value) { int valueOrDefault=value==null?30000:value; if(valueOrDefault<1||valueOrDefault>60000) throw invalid(\"步骤超时应在 1 到 60000 毫秒之间\"); return valueOrDefault; }"
+        }
+      ]
+    },
+    {
+      "id": "C12",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/execution/ExecutionTaskController.java",
+      "sha256": "f93d6d3c37e3bffe3bddf876ff8d780f73942d90dabc9e37b1cf2c4de9f09f8d",
+      "anchors": [
+        {
+          "line": 59,
+          "pattern": "public record TaskUpdateRequest",
+          "excerpt": "    public record TaskUpdateRequest(@NotBlank @Size(max = 160) String name, @NotBlank String status, int progress, @Min(1) Long expectedVersion) {}"
+        }
+      ]
+    },
+    {
+      "id": "C13",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/execution/ExecutionTaskService.java",
+      "sha256": "cb3df2139840158283f51edd8ff34a4342986704a552d5958abaece9636982f3",
+      "anchors": [
+        {
+          "line": 58,
+          "pattern": "int progress = input.progress()",
+          "excerpt": "        int progress = input.progress();"
+        }
+      ]
+    },
+    {
+      "id": "C14",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleController.java",
+      "sha256": "d76dc37bd8bffa46308ee430ba93817a64d847f63f9ab175d3264bd32ae84795",
+      "anchors": [
+        {
+          "line": 76,
+          "pattern": "public record ScheduleRequest",
+          "excerpt": "    public record ScheduleRequest(@NotBlank @Size(max = 160) String name, @NotEmpty @Size(max = 50) List<@NotBlank @Size(max = 26) String> projectIds,"
+        }
+      ]
+    },
+    {
+      "id": "C15",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleService.java",
+      "sha256": "e9568a1325d6cb70c23a7f190be2abf8648893c67445a80390b699c1f58a43f9",
+      "anchors": [
+        {
+          "line": 191,
+          "pattern": "if (input.periodDays()",
+          "excerpt": "        if (input.periodDays() == null || input.periodDays() < 1 || input.periodDays() > 90) {"
+        },
+        {
+          "line": 297,
+          "pattern": "public record ScheduleInput",
+          "excerpt": "    public record ScheduleInput(String name, List<String> projectIds, String cronExpression, String timezone,"
+        }
+      ]
+    },
+    {
+      "id": "C16",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/platform-api/src/main/java/io/testhub/platform/shared/api/ApiExceptionHandler.java",
+      "sha256": "ea3ca8600b91bd4c5652d5584df5e84e55709227314ae4304ad632476c605060",
+      "anchors": [
+        {
+          "line": 49,
+          "pattern": "@ExceptionHandler(HttpMessageNotReadableException.class)",
+          "excerpt": "    @ExceptionHandler(HttpMessageNotReadableException.class)"
+        }
+      ]
+    },
+    {
+      "id": "C17",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/appium-runner/src/runner.js",
+      "sha256": "ee8b500c95a99d2275df6b0557b8bab90dc4081ca58e1d0f3cffcef944c40b40",
+      "anchors": [
+        {
+          "line": 60,
+          "pattern": "async step(active, step, variables)",
+          "excerpt": "  async step(active, step, variables) { const timeout = Math.min(Math.max(Number(step.timeoutMillis) || 30000, 1), 60000); if (step.type === 'LAUNCH') return"
+        }
+      ]
+    },
+    {
+      "id": "C18",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/services/playwright-runner/src/runner.js",
+      "sha256": "cf47c869c695ffcc1d05fe01f37b99398721da78406f4169f426d459b9ee30d7",
+      "anchors": [
+        {
+          "line": 125,
+          "pattern": "async step(page, step, variables, base)",
+          "excerpt": "  async step(page, step, variables, base) {"
+        }
+      ]
+    }
+  ],
+  "allSourcesLocalPrimaryCodeOrHistoricalReport": true,
+  "dynamicTestsExecuted": false
+}

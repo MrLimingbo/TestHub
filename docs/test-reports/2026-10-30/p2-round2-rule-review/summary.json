@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-30",
+  "status": "PROPOSED_PENDING_RULE_REVIEW",
+  "totalObservations": 47,
+  "approvedResults": 24,
+  "remainingObservations": 23,
+  "recommendedRuleGroups": 6,
+  "recommendedObservations": 8,
+  "acceptanceGroups": 45,
+  "otherObservationsDeferred": 15,
+  "environmentBlockersDeferred": 12,
+  "formalTestCasesDesigned": 0,
+  "runtimeTestsExecuted": false,
+  "productCodeChanged": false,
+  "upgradeShutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

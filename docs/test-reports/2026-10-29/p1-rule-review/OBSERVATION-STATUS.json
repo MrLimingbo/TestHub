@@ -1,0 +1,378 @@
+[
+  {
+    "id": "OBS-03B-E002",
+    "priority": "P1",
+    "track": "RULE",
+    "status": "AWAITING_USER_RULE_REVIEW",
+    "decisionId": "D02",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-03D-E006",
+    "priority": "P1",
+    "track": "RULE",
+    "status": "AWAITING_USER_RULE_REVIEW",
+    "decisionId": "D05",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-07-E013",
+    "priority": "P1",
+    "track": "RULE",
+    "status": "AWAITING_USER_RULE_REVIEW",
+    "decisionId": "D12",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-07-S005",
+    "priority": "P1",
+    "track": "RULE",
+    "status": "AWAITING_USER_RULE_REVIEW",
+    "decisionId": "D11",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-08-E011",
+    "priority": "P1",
+    "track": "RULE",
+    "status": "AWAITING_USER_RULE_REVIEW",
+    "decisionId": "D03",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-16-E003",
+    "priority": "P1",
+    "track": "RULE",
+    "status": "AWAITING_USER_RULE_REVIEW",
+    "decisionId": "D25",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-03B-E001",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D01",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-03B-E005",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D03",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-03C-E005",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D04",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-03C-E007",
+    "priority": "P2",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-05-E003",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D08",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-06-E006",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D09",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-06-E012",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D10",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-07-E012",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D14",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-07-F012",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D15",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-07-U012",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D13",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-08-E010",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D16",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-09-E013",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D16",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-10-E010",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D17",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-10-E011",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D16",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-11-E020",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D17",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-11-E021",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D16",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-11-E022",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D18",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-12-E020",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D16",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-12-E022",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D19",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-13-E014",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D20",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-13-E015",
+    "priority": "P2",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-13-E017",
+    "priority": "P2",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-13-E018",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D16",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-13-E020",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D22",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-14-E022",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D20",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-14-E023",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D20",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-14-E025",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D17",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-15-E001",
+    "priority": "P2",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D24",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-16-E001",
+    "priority": "P2",
+    "track": "SPEC",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D26",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-16-E002",
+    "priority": "P2",
+    "track": "SPEC",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D26",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-03D-E007",
+    "priority": "P3",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D06",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-05-E002",
+    "priority": "P3",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D07",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-07-E006",
+    "priority": "P3",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-08-E012",
+    "priority": "P3",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-09-E012",
+    "priority": "P3",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-13-E009",
+    "priority": "P3",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-13-E019",
+    "priority": "P3",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D21",
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-14-E004",
+    "priority": "P3",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-14-E014",
+    "priority": "P3",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-14-E019",
+    "priority": "P3",
+    "track": "DIRECT",
+    "status": "FIXED_VERIFIED_APPROVED",
+    "decisionId": null,
+    "implementationAuthorizedThisTurn": false
+  },
+  {
+    "id": "OBS-14-E024",
+    "priority": "P3",
+    "track": "RULE",
+    "status": "DEFERRED_BY_USER",
+    "decisionId": "D23",
+    "implementationAuthorizedThisTurn": false
+  }
+]

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { mockIntegerInput, mockIntegerError } from '@/utils/mockIntegerInput'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import CodeEditor from '@/components/CodeEditor.vue'
@@ -31,6 +32,7 @@ const loading = ref(true)
 const rulesLoading = ref(false)
 const smartLoading = ref(false)
 const creating = ref(false)
+const serverCreating = ref(false)
 const sharing = ref(false)
 const serverVisible = ref(false)
 const ruleVisible = ref(false)
@@ -39,8 +41,20 @@ const serverForm = reactive({ name: '' })
 const ruleForm = reactive({ name: '', httpMethod: 'GET', path: '/orders', priority: 0, requestQuery: '{\n}', requestHeaders: '{\n}', requestBodyMatch: 'ANY', requestBody: '', responseStatus: 200, headers: '{\n  "Content-Type": "application/json; charset=utf-8"\n}', body: '{\n  "code": 0,\n  "message": "mock response"\n}' })
 const shareForm = reactive({ name: '', expiresInDays: 30 })
 const shareNeverExpires = ref(false)
+const ruleNumberText = reactive({ priority: '0', responseStatus: '200' })
+const shareExpiryText = ref('30')
+const priorityError = computed(() => mockIntegerError(ruleNumberText.priority, 0, 1000, 'priority'))
+const statusError = computed(() => mockIntegerError(ruleNumberText.responseStatus, 200, 599, 'responseStatus'))
+const expiryError = computed(() => shareNeverExpires.value ? '' : mockIntegerError(shareExpiryText.value, 1, 365, 'expiresInDays'))
 const now = ref(Date.now())
 let shareClock: number | undefined
+let disposed = false
+let projectSequence = 0
+let serverDialogSequence = 0
+let shareDialogSequence = 0
+let rulesLoadSequence = 0
+let smartLoadSequence = 0
+let sharesLoadSequence = 0
 
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
 const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value))
@@ -65,50 +79,59 @@ async function mutate<T>(path: string, body: unknown, method = 'POST', guard?: (
 }
 
 function currentSelection(project: string, server: string) {
-  return projectId.value === project && selectedServerId.value === server
+  return !disposed && projectId.value === project && selectedServerId.value === server
 }
 
 function clearDetails() {
+  rulesLoadSequence++
+  smartLoadSequence++
+  sharesLoadSequence++
   rules.value = []
   smartExamples.value = []
   shares.value = []
 }
 
 async function loadRules() {
+  const sequence = ++rulesLoadSequence
   const project = projectId.value
   const server = selectedServerId.value
+  const current = () => sequence === rulesLoadSequence && currentSelection(project, server)
   if (!project || !server) { rules.value = []; return }
   rulesLoading.value = true
   try {
     const result = await read<MockRule[]>(`/api/v1/projects/${project}/mock/servers/${server}/rules`)
-    if (currentSelection(project, server)) rules.value = result
+    if (current()) rules.value = result
   } catch (error) {
-    if (currentSelection(project, server)) Message.error(error instanceof Error ? error.message : '加载 Mock 规则失败')
-  } finally { if (currentSelection(project, server)) rulesLoading.value = false }
+    if (current()) Message.error(error instanceof Error ? error.message : '加载 Mock 规则失败')
+  } finally { if (current()) rulesLoading.value = false }
 }
 
 async function loadSmartExamples() {
+  const sequence = ++smartLoadSequence
   const project = projectId.value
   const server = selectedServerId.value
+  const current = () => sequence === smartLoadSequence && currentSelection(project, server)
   if (!project || !server) { smartExamples.value = []; return }
   smartLoading.value = true
   try {
     const result = await read<SmartMockExample[]>(`/api/v1/projects/${project}/mock/servers/${server}/smart-examples`)
-    if (currentSelection(project, server)) smartExamples.value = result
+    if (current()) smartExamples.value = result
   } catch (error) {
-    if (currentSelection(project, server)) Message.error(error instanceof Error ? error.message : '加载智能示例失败')
-  } finally { if (currentSelection(project, server)) smartLoading.value = false }
+    if (current()) Message.error(error instanceof Error ? error.message : '加载智能示例失败')
+  } finally { if (current()) smartLoading.value = false }
 }
 
 async function loadShares() {
+  const sequence = ++sharesLoadSequence
   const project = projectId.value
   const server = selectedServerId.value
+  const current = () => sequence === sharesLoadSequence && currentSelection(project, server)
   if (!project || !server) { shares.value = []; return }
   try {
     const result = await read<MockShare[]>(`/api/v1/projects/${project}/mock/servers/${server}/shares`)
-    if (currentSelection(project, server)) { shares.value = result; now.value = Date.now() }
+    if (current()) { shares.value = result; now.value = Date.now() }
   } catch (error) {
-    if (currentSelection(project, server)) Message.error(error instanceof Error ? error.message : '加载 Mock 分享链接失败')
+    if (current()) Message.error(error instanceof Error ? error.message : '加载 Mock 分享链接失败')
   }
 }
 
@@ -128,12 +151,12 @@ async function loadServers() {
   if (!project) { servers.value = []; selectedServerId.value = ''; clearDetails(); return }
   try {
     const result = await read<MockServer[]>(`/api/v1/projects/${project}/mock/servers`)
-    if (sequence !== serverLoadSequence || project !== projectId.value) return
+    if (disposed || sequence !== serverLoadSequence || project !== projectId.value) return
     servers.value = result
     const server = result.some((item) => item.id === selectedServerId.value) ? selectedServerId.value : result[0]?.id ?? ''
     await selectServer(server)
   } catch (error) {
-    if (sequence === serverLoadSequence && project === projectId.value) Message.error(error instanceof Error ? error.message : '加载 Mock 服务失败')
+    if (!disposed && sequence === serverLoadSequence && project === projectId.value) Message.error(error instanceof Error ? error.message : '加载 Mock 服务失败')
   }
 }
 
@@ -159,16 +182,27 @@ async function submitDialog(action: () => Promise<void>): Promise<boolean> {
 
 async function createServer() {
   if (!projectId.value || !serverForm.name.trim()) { Message.warning('请填写 Mock 服务名称'); return }
-  creating.value = true
+  if (serverCreating.value) return
+  const project = projectId.value, projectRevision = projectSequence, sequence = serverDialogSequence
+  const current = () => !disposed && projectId.value === project && projectSequence === projectRevision && serverDialogSequence === sequence
+  serverCreating.value = true
   try {
-    const server = await mutate<MockServer>(`/api/v1/projects/${projectId.value}/mock/servers`, { name: serverForm.name })
+    const server = await mutate<MockServer>(`/api/v1/projects/${project}/mock/servers`, { name: serverForm.name }, 'POST', current)
+    if (!current()) return
     servers.value = [server, ...servers.value]
     await selectServer(server.id)
+    if (!current()) return
     serverForm.name = ''
     serverVisible.value = false
     Message.success('Mock 服务已创建')
-  } catch (error) { Message.error(error instanceof Error ? error.message : '创建 Mock 服务失败') } finally { creating.value = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '创建 Mock 服务失败') }
+  finally { if (current()) serverCreating.value = false }
 }
+
+function invalidateServerDialog() { serverDialogSequence++; serverCreating.value = false }
+function invalidateShareDialog() { shareDialogSequence++; sharing.value = false }
+watch(serverVisible, invalidateServerDialog, { flush: 'sync' })
+watch(shareVisible, invalidateShareDialog, { flush: 'sync' })
 
 function stringMap(source: string, label: string) {
   let value: unknown
@@ -188,12 +222,14 @@ function requestHeaders() { return stringMap(ruleForm.requestHeaders, '请求头
 
 function resetRuleForm() {
   ruleEditSequence++
+  Object.assign(ruleNumberText, { priority: '0', responseStatus: '200' })
   editingRuleId.value = ''
   Object.assign(ruleForm, { name: '', httpMethod: 'GET', path: '/orders', priority: 0, requestQuery: '{\n}', requestHeaders: '{\n}', requestBodyMatch: 'ANY', requestBody: '', responseStatus: 200, headers: '{\n  "Content-Type": "application/json; charset=utf-8"\n}', body: '{\n  "code": 0,\n  "message": "mock response"\n}' })
 }
 
 function editRule(rule: MockRule) {
   ruleEditSequence++
+  Object.assign(ruleNumberText, { priority: String(rule.priority), responseStatus: String(rule.responseStatus) })
   editingRuleId.value = rule.id
   Object.assign(ruleForm, { name: rule.name, httpMethod: rule.httpMethod, path: rule.path, priority: rule.priority,
     requestQuery: JSON.stringify(rule.requestQuery, null, 2), requestHeaders: JSON.stringify(rule.requestHeaders, null, 2),
@@ -217,10 +253,12 @@ async function createRule() {
   if (creating.value) return
   creating.value = true
   try {
+    const priority = mockIntegerInput(ruleNumberText.priority, 0, 1000, 'priority')
+    const responseStatus = mockIntegerInput(ruleNumberText.responseStatus, 200, 599, 'responseStatus')
     const rule = await mutate<MockRule>(`/api/v1/projects/${project}/mock/servers/${server}/rules${editing ? '/' + editing : ''}`, {
-      name: ruleForm.name, httpMethod: ruleForm.httpMethod, path: ruleForm.path, priority: ruleForm.priority,
+      name: ruleForm.name, httpMethod: ruleForm.httpMethod, path: ruleForm.path, priority,
       requestQuery: requestQuery(), requestHeaders: requestHeaders(), requestBodyMatch: ruleForm.requestBodyMatch,
-      requestBody: ruleForm.requestBodyMatch === 'ANY' ? '' : ruleForm.requestBody, responseStatus: ruleForm.responseStatus, responseHeaders: responseHeaders(), responseBody: ruleForm.body,
+      requestBody: ruleForm.requestBodyMatch === 'ANY' ? '' : ruleForm.requestBody, responseStatus, responseHeaders: responseHeaders(), responseBody: ruleForm.body,
     }, editing ? 'PUT' : 'POST', () => currentSelection(project, server) && ruleEditSequence === sequence)
     if (!currentSelection(project, server) || ruleEditSequence !== sequence) return
     rules.value = editing ? rules.value.map(item => item.id === editing ? rule : item) : [rule, ...rules.value]
@@ -231,8 +269,15 @@ async function createRule() {
     if (currentSelection(project, server) && ruleEditSequence === sequence) Message.error(error instanceof Error ? error.message : '保存 Mock 规则失败')
   } finally { creating.value = false }
 }
-watch(projectId, () => { ruleVisible.value = false; serverVisible.value = false; shareVisible.value = false; resetRuleForm(); void changeProject() })
-watch(selectedServerId, () => { ruleVisible.value = false; resetRuleForm() })
+watch(projectId, () => {
+  projectSequence++
+  ruleVisible.value = false; serverVisible.value = false; shareVisible.value = false
+  resetRuleForm(); invalidateServerDialog(); invalidateShareDialog(); void changeProject()
+}, { flush: 'sync' })
+watch(selectedServerId, () => {
+  ruleVisible.value = false; shareVisible.value = false
+  resetRuleForm(); invalidateShareDialog()
+}, { flush: 'sync' })
 
 async function setEnabled(value: boolean | string | number) {
   if (!projectId.value || !selectedServer.value) return
@@ -261,18 +306,24 @@ function shareUrl(share: MockShare) { return `${window.location.origin}/mock/sha
 
 async function createShare() {
   if (!projectId.value || !selectedServer.value || !shareForm.name.trim()) { Message.warning('请填写分享名称'); return }
+  if (sharing.value) return
+  const project = projectId.value, server = selectedServer.value.id, sequence = shareDialogSequence
+  const current = () => currentSelection(project, server) && shareDialogSequence === sequence
   sharing.value = true
   try {
-    const share = await mutate<MockShare>(`/api/v1/projects/${projectId.value}/mock/servers/${selectedServer.value.id}/shares`, {
-      name: shareForm.name, expiresInDays: shareNeverExpires.value ? null : shareForm.expiresInDays,
-    })
+    const share = await mutate<MockShare>(`/api/v1/projects/${project}/mock/servers/${server}/shares`, {
+      name: shareForm.name, expiresInDays: shareNeverExpires.value ? null : mockIntegerInput(shareExpiryText.value, 1, 365, 'expiresInDays'),
+    }, 'POST', current)
+    if (!current()) return
     shares.value = [share, ...shares.value]
     shareForm.name = ''
     shareForm.expiresInDays = 30
+    shareExpiryText.value = '30'
     shareNeverExpires.value = false
     shareVisible.value = false
     Message.success('只读分享链接已创建')
-  } catch (error) { Message.error(error instanceof Error ? error.message : '创建分享链接失败') } finally { sharing.value = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '创建分享链接失败') }
+  finally { if (current()) sharing.value = false }
 }
 
 async function revokeShare(share: MockShare) {
@@ -309,7 +360,7 @@ onMounted(() => {
   void load()
   shareClock = window.setInterval(() => { now.value = Date.now() }, 30_000)
 })
-onUnmounted(() => { if (shareClock) window.clearInterval(shareClock) })
+onUnmounted(() => { disposed = true; if (shareClock) window.clearInterval(shareClock) })
 </script>
 
 <template>
@@ -326,9 +377,9 @@ onUnmounted(() => { if (shareClock) window.clearInterval(shareClock) })
       <div class="share-status"><a-tag color="arcoblue">{{ activeShareCount }} 条有效链接</a-tag><span>已撤销或已过期的链接不能再读取说明。</span><a-button size="mini" @click="loadShares">刷新链接</a-button></div>
       <a-table :data="shares" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="分享名称"><template #cell="{ record }"><div class="rule-name"><strong>{{ record.name }}</strong><small>创建于 {{ date(record.createdAt) }}</small></div></template></a-table-column><a-table-column title="有效期"><template #cell="{ record }">{{ date(record.expiresAt) }}</template></a-table-column><a-table-column title="状态" :width="100"><template #cell="{ record }"><a-tag :color="shareStatus(record) === '有效' ? 'green' : 'red'">{{ shareStatus(record) }}</a-tag></template></a-table-column><a-table-column title="操作" :width="190"><template #cell="{ record }"><a-space><a-button v-if="shareStatus(record) === '有效'" type="text" size="small" @click="copyShareUrl(record)">复制链接</a-button><a-popconfirm v-if="!record.revokedAt" content="撤销后该分享链接将立即失效，是否继续？" @ok="revokeShare(record)"><a-button type="text" size="small" status="danger">撤销</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table><a-empty v-if="!shares.length" description="还没有只读分享链接" />
     </section>
-    <a-modal v-model:visible="serverVisible" title="新建 Mock 服务" :ok-loading="creating" :on-before-ok="() => submitDialog(createServer)"><a-form :model="serverForm" layout="vertical"><a-form-item label="服务名称" required><a-input v-model="serverForm.name" :max-length="160" placeholder="例如：订单服务模拟环境" /></a-form-item><div class="modal-tip">创建后会生成一条公开地址。该地址不需要登录，适用于联调与自动化测试；可随时停用服务。</div></a-form></a-modal>
-    <a-modal v-model:visible="ruleVisible" :title="editingRuleId ? '编辑 Mock 规则' : '新建 Mock 规则'" width="860px" :ok-loading="creating" :on-before-ok="() => submitDialog(createRule)" @cancel="resetRuleForm"><a-form :model="ruleForm" layout="vertical"><div class="form-grid"><a-form-item label="规则名称" required><a-input v-model="ruleForm.name" :max-length="160" placeholder="例如：预览订单成功" /></a-form-item><a-form-item label="优先级"><a-input-number v-model="ruleForm.priority" :min="0" :max="1000" /><small class="field-tip">数值越大越先匹配；同优先级按创建顺序。</small></a-form-item></div><a-divider orientation="left">请求匹配</a-divider><div class="form-grid"><a-form-item label="请求方法" required><a-select v-model="ruleForm.httpMethod"><a-option v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item><a-form-item label="精确路径" required><a-input v-model="ruleForm.path" :max-length="700" placeholder="/orders" /></a-form-item></div><div class="form-grid"><a-form-item label="请求参数条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestQuery" class="mock-rule-editor" :height="110" /></a-form-item><a-form-item label="请求头条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestHeaders" class="mock-rule-editor" :height="110" /></a-form-item></div><div class="form-grid"><a-form-item label="请求体匹配"><a-select v-model="ruleForm.requestBodyMatch"><a-option value="ANY">任意请求体</a-option><a-option value="EXACT">请求体精确匹配</a-option><a-option value="JSON_SUBSET">JSON 子集匹配</a-option></a-select></a-form-item><div class="match-hint"><strong>{{ ruleForm.requestBodyMatch === 'ANY' ? '不限制请求体' : ruleForm.requestBodyMatch === 'EXACT' ? '字节文本完全一致' : '请求 JSON 必须包含给定字段' }}</strong><small>参数和请求头值均使用精确匹配。</small></div></div><a-form-item v-if="ruleForm.requestBodyMatch !== 'ANY'" :label="ruleForm.requestBodyMatch === 'JSON_SUBSET' ? 'JSON 请求体条件' : '请求体条件'"><CodeEditor v-model="ruleForm.requestBody" class="mock-rule-editor" :height="140" /></a-form-item><a-divider orientation="left">响应配置</a-divider><div class="form-grid"><a-form-item label="响应状态"><a-input-number v-model="ruleForm.responseStatus" :min="200" :max="599" /></a-form-item><div /></div><a-form-item label="响应头（JSON 对象）"><CodeEditor v-model="ruleForm.headers" class="mock-rule-editor" :height="110" /></a-form-item><a-form-item label="响应体"><CodeEditor v-model="ruleForm.body" class="mock-rule-editor" :height="160" /></a-form-item><div class="modal-tip">未命中规则、路径或方法不匹配、服务停用时均返回 404。此节点不执行脚本；JSON 子集仅匹配对象字段，数组需完全一致。</div></a-form></a-modal>
-    <a-modal v-model:visible="shareVisible" title="创建只读 Mock 分享" width="560px" :ok-loading="sharing" :on-before-ok="() => submitDialog(createShare)"><a-form :model="shareForm" layout="vertical"><a-form-item label="分享名称" required><a-input v-model="shareForm.name" :max-length="120" placeholder="例如：合作方订单联调说明" /></a-form-item><a-form-item label="有效期"><a-input-number v-model="shareForm.expiresInDays" :disabled="shareNeverExpires" :min="1" :max="365" /> <span class="form-hint">天（1–365）</span><a-checkbox v-model="shareNeverExpires" class="never-expire">永不过期</a-checkbox></a-form-item><div class="modal-tip">分享页只显示方法、路径、状态码和匹配条件摘要。它不会公开响应正文、响应头、项目成员、环境变量或密钥；可随时撤销。</div></a-form></a-modal>
+    <a-modal v-model:visible="serverVisible" title="新建 Mock 服务" :ok-loading="serverCreating" :on-before-ok="() => submitDialog(createServer)" @cancel="invalidateServerDialog"><a-form :model="serverForm" layout="vertical"><a-form-item label="服务名称" required><a-input v-model="serverForm.name" :max-length="160" placeholder="例如：订单服务模拟环境" /></a-form-item><div class="modal-tip">创建后会生成一条公开地址。该地址不需要登录，适用于联调与自动化测试；可随时停用服务。</div></a-form></a-modal>
+    <a-modal v-model:visible="ruleVisible" :title="editingRuleId ? '编辑 Mock 规则' : '新建 Mock 规则'" width="860px" :ok-loading="creating" :on-before-ok="() => submitDialog(createRule)" @cancel="resetRuleForm"><a-form :model="ruleForm" layout="vertical"><div class="form-grid"><a-form-item label="规则名称" required><a-input v-model="ruleForm.name" :max-length="160" placeholder="例如：预览订单成功" /></a-form-item><a-form-item label="优先级" :validate-status="priorityError ? 'error' : undefined" :help="priorityError"><a-input v-model="ruleNumberText.priority" aria-label="Mock 优先级" inputmode="decimal" /><small class="field-tip">数值越大越先匹配；同优先级按创建顺序。</small></a-form-item></div><a-divider orientation="left">请求匹配</a-divider><div class="form-grid"><a-form-item label="请求方法" required><a-select v-model="ruleForm.httpMethod"><a-option v-for="method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']" :key="method" :value="method">{{ method }}</a-option></a-select></a-form-item><a-form-item label="精确路径" required><a-input v-model="ruleForm.path" :max-length="700" placeholder="/orders" /></a-form-item></div><div class="form-grid"><a-form-item label="请求参数条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestQuery" class="mock-rule-editor" :height="110" /></a-form-item><a-form-item label="请求头条件（JSON 对象）"><CodeEditor v-model="ruleForm.requestHeaders" class="mock-rule-editor" :height="110" /></a-form-item></div><div class="form-grid"><a-form-item label="请求体匹配"><a-select v-model="ruleForm.requestBodyMatch"><a-option value="ANY">任意请求体</a-option><a-option value="EXACT">请求体精确匹配</a-option><a-option value="JSON_SUBSET">JSON 子集匹配</a-option></a-select></a-form-item><div class="match-hint"><strong>{{ ruleForm.requestBodyMatch === 'ANY' ? '不限制请求体' : ruleForm.requestBodyMatch === 'EXACT' ? '字节文本完全一致' : '请求 JSON 必须包含给定字段' }}</strong><small>参数和请求头值均使用精确匹配。</small></div></div><a-form-item v-if="ruleForm.requestBodyMatch !== 'ANY'" :label="ruleForm.requestBodyMatch === 'JSON_SUBSET' ? 'JSON 请求体条件' : '请求体条件'"><CodeEditor v-model="ruleForm.requestBody" class="mock-rule-editor" :height="140" /></a-form-item><a-divider orientation="left">响应配置</a-divider><div class="form-grid"><a-form-item label="响应状态" :validate-status="statusError ? 'error' : undefined" :help="statusError"><a-input v-model="ruleNumberText.responseStatus" aria-label="Mock 响应状态" inputmode="decimal" /></a-form-item><div /></div><a-form-item label="响应头（JSON 对象）"><CodeEditor v-model="ruleForm.headers" class="mock-rule-editor" :height="110" /></a-form-item><a-form-item label="响应体"><CodeEditor v-model="ruleForm.body" class="mock-rule-editor" :height="160" /></a-form-item><div class="modal-tip">未命中规则、路径或方法不匹配、服务停用时均返回 404。此节点不执行脚本；JSON 子集仅匹配对象字段，数组需完全一致。</div></a-form></a-modal>
+    <a-modal v-model:visible="shareVisible" title="创建只读 Mock 分享" width="560px" :ok-loading="sharing" :on-before-ok="() => submitDialog(createShare)" @cancel="invalidateShareDialog"><a-form :model="shareForm" layout="vertical"><a-form-item label="分享名称" required><a-input v-model="shareForm.name" :max-length="120" placeholder="例如：合作方订单联调说明" /></a-form-item><a-form-item label="有效期" :validate-status="expiryError ? 'error' : undefined" :help="expiryError"><a-input v-model="shareExpiryText" aria-label="Mock 有效期（天）" inputmode="decimal" :disabled="shareNeverExpires" /> <span class="form-hint">天（1–365）</span><a-checkbox v-model="shareNeverExpires" class="never-expire">永不过期</a-checkbox></a-form-item><div class="modal-tip">分享页只显示方法、路径、状态码和匹配条件摘要。它不会公开响应正文、响应头、项目成员、环境变量或密钥；可随时撤销。</div></a-form></a-modal>
   </div>
 </template>
 

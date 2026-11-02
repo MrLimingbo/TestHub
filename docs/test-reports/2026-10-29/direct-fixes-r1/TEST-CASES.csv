@@ -1,0 +1,57 @@
+﻿用例编号,观察项,类型,场景,修复前快照,本轮回归,证据文件
+DF-N01,OBS-08-E012,正向,the run panel describes a page-local submission hint without persistence or delivery,failed,passed,src/test/apiAutomationFixes.test.ts
+DF-N02,OBS-08-E012,正向,enabling the hint keeps it local and resets on page remount,passed,passed,src/test/apiAutomationFixes.test.ts
+DF-N03,OBS-08-E012,正向,hint=true only controls the existing local message,failed,passed,src/test/apiAutomationFixes.test.ts
+DF-N04,OBS-08-E012,反向/边界,hint=false only controls the existing local message,passed,passed,src/test/apiAutomationFixes.test.ts
+DF-D01,OBS-07-E006,正向,current HTTP completion identifies its project and execution,failed,passed,src/test/apiDebugFixes.test.ts
+DF-D02,OBS-07-E006,反向/边界,old HTTP 200 is attributed to its origin without altering a newer response,failed,passed,src/test/apiDebugFixes.test.ts
+DF-D03,OBS-07-E006,反向/边界,old HTTP 503 is attributed to its origin without altering a newer response,failed,passed,src/test/apiDebugFixes.test.ts
+DF-D04,OBS-07-E006,反向/边界,an A/B/A round trip does not let the original completion stop a new send,failed,passed,src/test/apiDebugFixes.test.ts
+DF-D05,OBS-07-E006,反向/边界,an unmounted HTTP completion preserves the existing notification with its original scope,failed,passed,src/test/apiDebugFixes.test.ts
+DF-A01,OBS-03C-E007,正向,shows the successful load time and clears stale feedback after retry,failed,passed,src/test/auditLogPage.test.ts
+DF-A02,OBS-03C-E007,反向/边界,first-load failure does not invent a last successful result,failed,passed,src/test/auditLogPage.test.ts
+DF-A03,OBS-03C-E007,反向/边界,a successful empty result remains distinguishable from never loaded,failed,passed,src/test/auditLogPage.test.ts
+DF-A04,OBS-03C-E007,反向/边界,a failed filter change identifies the retained result scope,failed,passed,src/test/auditLogPage.test.ts
+DF-A05,OBS-03C-E007,反向/边界,obsolete success cannot replace the current stale state,failed,passed,src/test/auditLogPage.test.ts
+DF-A06,OBS-03C-E007,反向/边界,obsolete failure cannot replace the current stale state,failed,passed,src/test/auditLogPage.test.ts
+DF-R01,OBS-13-E015,正向,fifty accessible projects retain the existing initial report,passed,passed,src/test/directObservationForms.test.ts
+DF-R02,OBS-13-E015,反向/边界,fifty-one projects wait for explicit selection without an implicit all-project request,failed,passed,src/test/directObservationForms.test.ts
+DF-R03,OBS-13-E015,正向,explicit 1-project selection queries and exports exactly that scope,failed,passed,src/test/directObservationForms.test.ts
+DF-R04,OBS-13-E015,正向,explicit 50-project selection queries and exports exactly that scope,failed,passed,src/test/directObservationForms.test.ts
+DF-R05,OBS-13-E015,反向/边界,clearing a large scope gates refresh and export as well as automatic querying,failed,passed,src/test/directObservationForms.test.ts
+DF-R06,OBS-13-E015,反向/边界,an injected oversized selection cannot bypass request guards,failed,passed,src/test/directObservationForms.test.ts
+DF-R07,OBS-13-E015,反向/边界,selecting a fifty-first project gives an explicit limit explanation,failed,passed,src/test/directObservationForms.test.ts
+DF-R08,OBS-13-E015,反向/边界,a late report cannot repopulate a cleared large-project scope,failed,passed,src/test/directObservationForms.test.ts
+DF-R09,OBS-13-E015,正向,clearing a scope of fifty or fewer retains the existing all-project semantics,passed,passed,src/test/directObservationForms.test.ts
+DF-R10,OBS-13-E015,反向/边界,empty and oversized schedule selections do not send invalid writes,failed,passed,src/test/directObservationForms.test.ts
+DF-T01,OBS-13-E009,正向,refreshing the task list does not disable opening a fresh draft,failed,passed,src/test/directObservationForms.test.ts
+DF-T02,OBS-13-E009,反向/边界,late task refresh 200 preserves a new draft,failed,passed,src/test/directObservationForms.test.ts
+DF-T03,OBS-13-E009,反向/边界,late task refresh 503 preserves a new draft,failed,passed,src/test/directObservationForms.test.ts
+DF-T04,OBS-13-E009,反向/边界,a project round trip still cancels a draft opened while refreshing,passed,passed,src/test/directObservationForms.test.ts
+DF-S01,OBS-13-E017,反向/边界,old csrf 200 cannot lock or unlock a replacement save,failed,passed,src/test/directObservationForms.test.ts
+DF-S02,OBS-13-E017,反向/边界,old csrf 503 cannot lock or unlock a replacement save,failed,passed,src/test/directObservationForms.test.ts
+DF-S11,OBS-13-E017,反向/边界,old business 200 cannot lock or unlock a replacement save,failed,passed,src/test/directObservationForms.test.ts
+DF-S12,OBS-13-E017,反向/边界,old business 503 cannot lock or unlock a replacement save,failed,passed,src/test/directObservationForms.test.ts
+DF-S21,OBS-13-E017,反向/边界,old reload 200 cannot lock or unlock a replacement save,failed,passed,src/test/directObservationForms.test.ts
+DF-S22,OBS-13-E017,反向/边界,old reload 503 cannot lock or unlock a replacement save,failed,passed,src/test/directObservationForms.test.ts
+DF-S07,OBS-13-E017,正向,current task failure releases its own save state and supports retry,passed,passed,src/test/directObservationForms.test.ts
+DF-F01,OBS-14-E004,正向,a pending list refresh permits a new authorized draft without a write,failed,passed,src/test/directObservationForms.test.ts
+DF-F02,OBS-14-E004,反向/边界,list 200 cannot overwrite a draft opened during refresh,failed,passed,src/test/directObservationForms.test.ts
+DF-F03,OBS-14-E004,反向/边界,list 503 cannot overwrite a draft opened during refresh,failed,passed,src/test/directObservationForms.test.ts
+DF-F11,OBS-14-E014,正向,a pending list refresh permits a new authorized draft without a write,failed,passed,src/test/directObservationForms.test.ts
+DF-F12,OBS-14-E014,反向/边界,list 200 cannot overwrite a draft opened during refresh,failed,passed,src/test/directObservationForms.test.ts
+DF-F13,OBS-14-E014,反向/边界,list 503 cannot overwrite a draft opened during refresh,failed,passed,src/test/directObservationForms.test.ts
+DF-F21,OBS-14-E019,正向,a pending list refresh permits a new authorized draft without a write,failed,passed,src/test/directObservationForms.test.ts
+DF-F22,OBS-14-E019,反向/边界,list 200 cannot overwrite a draft opened during refresh,failed,passed,src/test/directObservationForms.test.ts
+DF-F23,OBS-14-E019,反向/边界,list 503 cannot overwrite a draft opened during refresh,failed,passed,src/test/directObservationForms.test.ts
+DF-F04,OBS-14-E004,反向/边界,switching projects invalidates a template draft opened during refresh,passed,passed,src/test/directObservationForms.test.ts
+DF-P01,OBS-14-E014,反向/边界,read-only users cannot open or submit administrative drafts,passed,passed,src/test/directObservationForms.test.ts
+DF-P02,OBS-14-E014,反向/边界,a confirmed permission revocation invalidates the pending draft,failed,passed,src/test/directObservationForms.test.ts
+DF-P11,OBS-14-E019,反向/边界,read-only users cannot open or submit administrative drafts,passed,passed,src/test/directObservationForms.test.ts
+DF-P12,OBS-14-E019,反向/边界,a confirmed permission revocation invalidates the pending draft,failed,passed,src/test/directObservationForms.test.ts
+DF-M01,OBS-09-E012,正向,copies the complete runtime URL through an isolated clipboard double,failed,passed,src/test/mockSharePage.test.ts
+DF-M02,OBS-09-E012,反向/边界,rejected clipboard gives manual-copy feedback without false success,failed,passed,src/test/mockSharePage.test.ts
+DF-M03,OBS-09-E012,反向/边界,missing clipboard gives manual-copy feedback without false success,failed,passed,src/test/mockSharePage.test.ts
+DF-M04,OBS-09-E012,反向/边界,throws clipboard gives manual-copy feedback without false success,failed,passed,src/test/mockSharePage.test.ts
+DF-M05,OBS-09-E012,正向,a rejected copy can be retried successfully,failed,passed,src/test/mockSharePage.test.ts
+DF-M06,OBS-09-E012,反向/边界,copy completion for a previous share cannot label a new share as copied,passed,passed,src/test/mockSharePage.test.ts

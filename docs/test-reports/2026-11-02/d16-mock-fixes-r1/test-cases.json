@@ -1,0 +1,3006 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "name": "TestHub D16 Mock修复回归",
+    "version": "2026-11-02 五项A",
+    "scope": "仅OBS-09-E013；保留原完整迁移/同步及事务契约。其他四个D16模块及9项/12环境/升级退出调查不执行。",
+    "generated_at": "2026-11-02T00:00:00+08:00"
+  },
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "DECISIONS.json",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/DECISIONS.json",
+      "sha256": "ba93f52672a1e239258a9cbf5dfd2fb74a2ec1eedef196d8c717323e6e722039"
+    },
+    {
+      "id": "SRC-002",
+      "name": "D16-RULES-AND-ACCEPTANCE.md",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/D16-RULES-AND-ACCEPTANCE.md",
+      "sha256": "72d76f9f0cccc63de4a9d8e0e2dd4dec1130a990a4c69b9e4df52ca9a005da3a"
+    },
+    {
+      "id": "SRC-003",
+      "name": "FIELD-MATRIX.md",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/FIELD-MATRIX.md",
+      "sha256": "06ba7b080ea0b5d2d12bbe034fd53182a7e90427d5832a460cfc04cf3fbb31a1"
+    },
+    {
+      "id": "SRC-004",
+      "name": "REVIEW-APPROVAL.json",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "ff13bab3a7282612746835ad181ee82f23b813be54a4119d079cc879e523e0ad"
+    },
+    {
+      "id": "SRC-005",
+      "name": "APPROVED-SCOPE.json",
+      "type": "requirement",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-mock-fixes-r1/APPROVED-SCOPE.json",
+      "sha256": "72096193a4f049809bfc8b35c0ba1ddc876751d5a592a6aa04edc73dd74727e8"
+    },
+    {
+      "id": "SRC-006",
+      "name": "BASELINE-CONTRACT.md",
+      "type": "data",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-mock-fixes-r1/BASELINE-CONTRACT.md",
+      "sha256": "5669f5c92db117325de3d5c3632550a97c233f3151450bade891411243108ef1"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-D16MOCK-NUM",
+      "title": "Mock数值类型与边界",
+      "description": "Mock数值类型与边界",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16MOCK-01",
+          "text": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-02",
+          "text": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-03",
+          "text": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-04",
+          "text": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-05",
+          "text": "按N-A拒绝整数字段\"10\"、\" 10 \"、\"10.0\"和错误率\"2.50\"；若选B按明示白名单验收。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-06",
+          "text": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-07",
+          "text": "18446744073709551616、1e10000及超范围值受控拒绝；不得long/int回绕或500。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-08",
+          "text": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-09",
+          "text": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-10",
+          "text": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-11",
+          "text": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-12",
+          "text": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-13",
+          "text": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-14",
+          "text": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-15",
+          "text": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-16",
+          "text": "逐项核对Mock默认优先级/状态/永久、Web视口、Web/移动执行超时和移动步骤超时。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16MOCK-TEXT",
+      "title": "文本和空值",
+      "description": "文本和空值",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16MOCK-17",
+          "text": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-18",
+          "text": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-19",
+          "text": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-20",
+          "text": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-21",
+          "text": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-22",
+          "text": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16MOCK-WRITE",
+      "title": "编辑与运行",
+      "description": "编辑与运行",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16MOCK-23",
+          "text": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-24",
+          "text": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-25",
+          "text": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-26",
+          "text": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16MOCK-EXCHANGE",
+      "title": "迁移同步及兼容",
+      "description": "迁移同步及兼容",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16MOCK-27",
+          "text": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-28",
+          "text": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-29",
+          "text": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-30",
+          "text": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-31",
+          "text": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-32",
+          "text": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-33",
+          "text": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-34",
+          "text": "迁移/同步仍要求原有完整、已规范化资料，保留名称、权限、并发修订和requestKey回执规则。",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16MOCK-UI",
+      "title": "后台页面与错误",
+      "description": "后台页面与错误",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16MOCK-35",
+          "text": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-36",
+          "text": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-37",
+          "text": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-38",
+          "text": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-39",
+          "text": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16MOCK-40",
+          "text": "页面勾选永不过期时，提交expiresInDays=null；未采用的有效期输入不应阻止永久分享。",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "id": "COV-D16MOCK-01",
+      "title": "优先级精确整数等价写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-02",
+      "title": "优先级下边界与邻界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-03",
+      "title": "优先级上边界与邻界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-04",
+      "title": "优先级拒绝小数和微小小数",
+      "technique": "error-guessing",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-05",
+      "title": "三类数值字段拒绝数字字符串",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-06",
+      "title": "三类数值字段拒绝布尔和容器",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-07",
+      "title": "溢出和原始非有限数值受控拒绝",
+      "technique": "error-guessing",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-08",
+      "title": "有效期接受精确整数等价写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-09",
+      "title": "有效期上边界365天与邻界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-09"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-10",
+      "title": "有效期拒绝非法范围及小数",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-10"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-11",
+      "title": "有效期省略和null仍为永久",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-11"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-12",
+      "title": "响应状态接受等价整数及下边界",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-12"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-13",
+      "title": "响应状态上边界599可用",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-13"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-14",
+      "title": "响应状态拒绝非整数",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-14"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-15",
+      "title": "响应状态拒绝邻界199和600",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-15"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-16",
+      "title": "管理API可选优先级和状态默认保持",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-16"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-17",
+      "title": "查询条件字符串不损失字面值",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-17"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-18",
+      "title": "请求与响应头字符串保持原值",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-18"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-19",
+      "title": "正文中的JSON数字作为文本保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-19"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-20",
+      "title": "条件及Header拒绝数值和布尔转换",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-20"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-21",
+      "title": "请求与响应正文拒绝非字符串值",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-21"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-22",
+      "title": "真实null仍按原空值策略处理",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-22"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-23",
+      "title": "合法编辑保持启停状态",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16MOCK-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-23"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-24",
+      "title": "非法编辑不改变旧规则或业务审计",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16MOCK-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-24"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-25",
+      "title": "原运行匹配和优先级顺序保持",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16MOCK-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-25"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-26",
+      "title": "非法有效期不生成分享或成功审计",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16MOCK-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-26"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-27",
+      "title": "合法迁移接受等值整数",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-27"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-28",
+      "title": "非法迁移不留部分资产或成功回执",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-28"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-29",
+      "title": "合法同步接受等值整数",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-29"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-30",
+      "title": "非法同步不绕过类型校验",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-30"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-31",
+      "title": "旧规则与分享可读不批量重写",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-31"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-32",
+      "title": "项目权限保护保持",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-32"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-33",
+      "title": "同步目标修订冲突仍拒绝",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-33"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-34",
+      "title": "原requestKey回执规则保持",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-34"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-35",
+      "title": "页面规则小数提示并阻止提交",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-35"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-36",
+      "title": "页面有效期非法值不发分享请求",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-36"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-37",
+      "title": "页面等价整数提交JSON数值",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-37"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-38",
+      "title": "页面条件编辑器已有字符串保护保持",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-38"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-39",
+      "title": "错误信封定位字段且不泄露值",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-39"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16MOCK-40",
+      "title": "永久分享不受未采用有效期值阻止",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-40"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "document_review": [],
+  "cases": [
+    {
+      "id": "TC-D16MOCK-01",
+      "module": "Mock / D16类型规则",
+      "title": "优先级精确整数等价写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-01"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以10、10.0、1e1创建规则并读取优先级",
+          "expected": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-02",
+      "module": "Mock / D16类型规则",
+      "title": "优先级下边界与邻界",
+      "type": "boundary",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-02"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对照priority=0与-1，检查接受/拒绝及写入效果",
+          "expected": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-03",
+      "module": "Mock / D16类型规则",
+      "title": "优先级上边界与邻界",
+      "type": "boundary",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-03"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对照priority=1000与1001，检查接受/拒绝及写入效果",
+          "expected": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-04",
+      "module": "Mock / D16类型规则",
+      "title": "优先级拒绝小数和微小小数",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "error-guessing"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-04"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "原始JSON提交priority=1.5、1.0000000000000001并核对无资产写入",
+          "expected": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-05",
+      "module": "Mock / D16类型规则",
+      "title": "三类数值字段拒绝数字字符串",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-05"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别把priority、expiresInDays、responseStatus改为数字字符串提交",
+          "expected": "按N-A拒绝整数字段\"10\"、\" 10 \"、\"10.0\"和错误率\"2.50\"；若选B按明示白名单验收。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "按N-A拒绝整数字段\"10\"、\" 10 \"、\"10.0\"和错误率\"2.50\"；若选B按明示白名单验收。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-06",
+      "module": "Mock / D16类型规则",
+      "title": "三类数值字段拒绝布尔和容器",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-06"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别为三类数值字段提交true、数组和对象",
+          "expected": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-07",
+      "module": "Mock / D16类型规则",
+      "title": "溢出和原始非有限数值受控拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "error-guessing"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-07"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "原始字节提交巨大整数/指数及裸NaN、Infinity，不先用JSON序列化改变数据",
+          "expected": "18446744073709551616、1e10000及超范围值受控拒绝；不得long/int回绕或500。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "18446744073709551616、1e10000及超范围值受控拒绝；不得long/int回绕或500。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-08",
+      "module": "Mock / D16类型规则",
+      "title": "有效期接受精确整数等价写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-08"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以1、1.0、1e0创建分享并核对按整数天计算",
+          "expected": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-09",
+      "module": "Mock / D16类型规则",
+      "title": "有效期上边界365天与邻界",
+      "type": "boundary",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-09"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对照365与366天创建分享",
+          "expected": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-09"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-10",
+      "module": "Mock / D16类型规则",
+      "title": "有效期拒绝非法范围及小数",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-10"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交0、负数和1.5/微小小数有效期",
+          "expected": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-10"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-11",
+      "module": "Mock / D16类型规则",
+      "title": "有效期省略和null仍为永久",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-11"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别省略expiresInDays和传null创建分享，核对永久语义",
+          "expected": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-11"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-12",
+      "module": "Mock / D16类型规则",
+      "title": "响应状态接受等价整数及下边界",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-12"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以200、200.0、2e2创建规则并读取响应状态",
+          "expected": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-12"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-13",
+      "module": "Mock / D16类型规则",
+      "title": "响应状态上边界599可用",
+      "type": "boundary",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-13"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "用599创建规则并读取保存状态",
+          "expected": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-13"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-14",
+      "module": "Mock / D16类型规则",
+      "title": "响应状态拒绝非整数",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-14"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以响应状态的小数和微小小数提交规则",
+          "expected": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-14"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-15",
+      "module": "Mock / D16类型规则",
+      "title": "响应状态拒绝邻界199和600",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-15"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "用199和600创建规则并核对无写入",
+          "expected": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-15"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-16",
+      "module": "Mock / D16类型规则",
+      "title": "管理API可选优先级和状态默认保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-16"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别省略或置null优先级/响应状态，读取默认值",
+          "expected": "逐项核对Mock默认优先级/状态/永久、Web视口、Web/移动执行超时和移动步骤超时。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "逐项核对Mock默认优先级/状态/永久、Web视口、Web/移动执行超时和移动步骤超时。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-16"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-17",
+      "module": "Mock / D16类型规则",
+      "title": "查询条件字符串不损失字面值",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-17"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存显式字符串001、false、null及合法空串，再读取查询条件",
+          "expected": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-17"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-18",
+      "module": "Mock / D16类型规则",
+      "title": "请求与响应头字符串保持原值",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-18"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存合法Header字符串并读取，核对原Header规范化规则",
+          "expected": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-18"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-19",
+      "module": "Mock / D16类型规则",
+      "title": "正文中的JSON数字作为文本保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-19"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "用显式JSON正文字符串及数字外观字符串保存规则，读取正文",
+          "expected": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-19"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-20",
+      "module": "Mock / D16类型规则",
+      "title": "条件及Header拒绝数值和布尔转换",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-20"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "把查询条件/请求头/响应头值换为数字、布尔或容器提交",
+          "expected": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-20"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-21",
+      "module": "Mock / D16类型规则",
+      "title": "请求与响应正文拒绝非字符串值",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-21"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "把请求正文与响应正文换为数字、布尔或容器后提交",
+          "expected": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-21"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-22",
+      "module": "Mock / D16类型规则",
+      "title": "真实null仍按原空值策略处理",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-22"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交原先允许的条件/Header/null正文，核对未字符串化为null",
+          "expected": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-22"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-23",
+      "module": "Mock / D16类型规则",
+      "title": "合法编辑保持启停状态",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-23"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "编辑合法规则的优先级及正文，读取修改与原启停状态",
+          "expected": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-23"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-24",
+      "module": "Mock / D16类型规则",
+      "title": "非法编辑不改变旧规则或业务审计",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-24"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对已有规则提交小数或非字符串字段，核对旧内容与审计",
+          "expected": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-24"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-25",
+      "module": "Mock / D16类型规则",
+      "title": "原运行匹配和优先级顺序保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-25"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建不同优先级合法规则，使用受控运行请求检查匹配结果",
+          "expected": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-25"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-26",
+      "module": "Mock / D16类型规则",
+      "title": "非法有效期不生成分享或成功审计",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-26"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对同一服务提交非法有效期，核对分享记录与成功业务审计不增加",
+          "expected": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-WRITE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-26"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-27",
+      "module": "Mock / D16类型规则",
+      "title": "合法迁移接受等值整数",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-27"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "迁移含合法整数写法的规则，读取目标及既有停用/分享元数据规则",
+          "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-27"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-28",
+      "module": "Mock / D16类型规则",
+      "title": "非法迁移不留部分资产或成功回执",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-28"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在迁移资料中提交小数、微小小数、数字字符串或非字符串条件",
+          "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-28"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-29",
+      "module": "Mock / D16类型规则",
+      "title": "合法同步接受等值整数",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-29"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对完整规范化资料提交等价整数写法同步并读取目标",
+          "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-29"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-30",
+      "module": "Mock / D16类型规则",
+      "title": "非法同步不绕过类型校验",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-30"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对同步资料提交小数、微小小数或字符串条件错误，检查资产和回执",
+          "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-30"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-31",
+      "module": "Mock / D16类型规则",
+      "title": "旧规则与分享可读不批量重写",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-31"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "记录旧规则与历史分享，读取和预览后比对没有后台改写",
+          "expected": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-31"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-32",
+      "module": "Mock / D16类型规则",
+      "title": "项目权限保护保持",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-32"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "用无权项目会话提交合法规则，核对未跨项目写入",
+          "expected": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-32"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-33",
+      "module": "Mock / D16类型规则",
+      "title": "同步目标修订冲突仍拒绝",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-33"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "取得目标修订后修改目标，再使用旧修订同步",
+          "expected": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-33"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-34",
+      "module": "Mock / D16类型规则",
+      "title": "原requestKey回执规则保持",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-34"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "重放原已成功的相同迁移/同步请求，核对原回执及写入数量",
+          "expected": "迁移/同步仍要求原有完整、已规范化资料，保留名称、权限、并发修订和requestKey回执规则。",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "迁移/同步仍要求原有完整、已规范化资料，保留名称、权限、并发修订和requestKey回执规则。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-34"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-35",
+      "module": "Mock / D16类型规则",
+      "title": "页面规则小数提示并阻止提交",
+      "type": "usability",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-35"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在规则编辑器输入小数和微小小数并提交，观察提示和业务请求",
+          "expected": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-35"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-36",
+      "module": "Mock / D16类型规则",
+      "title": "页面有效期非法值不发分享请求",
+      "type": "usability",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-36"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "输入非法有效期创建分享，观察提示及业务请求",
+          "expected": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-36"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-37",
+      "module": "Mock / D16类型规则",
+      "title": "页面等价整数提交JSON数值",
+      "type": "usability",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-37"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "页面输入10.0、1e1或合法状态码等值写法后保存",
+          "expected": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-37"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-38",
+      "module": "Mock / D16类型规则",
+      "title": "页面条件编辑器已有字符串保护保持",
+      "type": "usability",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-38"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在查询条件或Header JSON编辑器填数字值并尝试保存",
+          "expected": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-38"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-39",
+      "module": "Mock / D16类型规则",
+      "title": "错误信封定位字段且不泄露值",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-39"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交包含合成敏感标记的类型错误，检查HTTP400、字段定位和错误正文",
+          "expected": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-39"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    },
+    {
+      "id": "TC-D16MOCK-40",
+      "module": "Mock / D16类型规则",
+      "title": "永久分享不受未采用有效期值阻止",
+      "type": "state",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准规则和原兼容基准设计一个主要字段/入口目标；独立边界与入口分别有COV，数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D16MOCK-40"
+      ],
+      "preconditions": [
+        "全新隔离QA账号/项目/Mock服务；按用例准备原规则、分享或同步版本。"
+      ],
+      "test_data": "使用引用规则中的数值/类型/边界；其余用{合法隔离资产}等符号代表，具体夹具见复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "先输入非法有效期再勾选永不过期，提交并核对expiresInDays为null",
+          "expected": "页面勾选永不过期时，提交expiresInDays=null；未采用的有效期输入不应阻止永久分享。",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "页面勾选永不过期时，提交expiresInDays=null；未采用的有效期输入不应阻止永久分享。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16MOCK-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16MOCK-40"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-09-E013",
+        "D16-A"
+      ],
+      "notes": "先行设计不含实际状态；各环境和变体按独立结果文件汇总，不增加正式分母。"
+    }
+  ]
+}

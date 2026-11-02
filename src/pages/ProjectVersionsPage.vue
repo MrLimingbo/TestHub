@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRoute } from 'vue-router'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
@@ -28,6 +28,9 @@ const route = useRoute()
 const versions = ref<ProjectVersion[]>([])
 const loading = ref(false)
 const saving = ref(false)
+let active = true
+let formVersion = 0
+let loadRequest = 0
 const keyword = ref('')
 const statusFilter = ref<'ALL' | VersionStatus>('ALL')
 const editorVisible = ref(false)
@@ -100,31 +103,38 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
   return body.data
 }
 
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, canSend = () => true): Promise<T> {
+  const payload = body === undefined ? undefined : JSON.stringify(body)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (!canSend()) throw new Error('操作已取消')
   return read<T>(url, {
     method,
     headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: payload,
   })
 }
 
 async function load() {
-  if (!projectId.value) return
+  const pid = projectId.value, request = ++loadRequest
+  const current = () => active && pid === projectId.value && request === loadRequest
+  if (!pid) return
   loading.value = true
   try {
-    versions.value = await read<ProjectVersion[]>(`/api/v1/projects/${projectId.value}/versions`)
+    const data = await read<ProjectVersion[]>(`/api/v1/projects/${pid}/versions`)
+    if (!current()) return
+    versions.value = data
     const linkedVersionId = typeof route.query.version === 'string' ? route.query.version : ''
     const linkedVersion = versions.value.find((version) => version.id === linkedVersionId)
     if (linkedVersion) showDetail(linkedVersion)
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载版本列表失败')
+    if (current()) Message.error(error instanceof Error ? error.message : '加载版本列表失败')
   } finally {
-    loading.value = false
+    if (current()) loading.value = false
   }
 }
 
 function openEditor(version?: ProjectVersion) {
+  ++formVersion; saving.value = false
   clearFormErrors(formErrors)
   editingId.value = version?.id ?? null
   Object.assign(form, {
@@ -138,7 +148,12 @@ function openEditor(version?: ProjectVersion) {
   editorVisible.value = true
 }
 
+function cancelEditor() { ++formVersion; saving.value = false; editorVisible.value = false }
+
 async function save(): Promise<boolean> {
+  if (saving.value) return false
+  const version = formVersion, pid = projectId.value, id = editingId.value
+  const current = () => active && version === formVersion && pid === projectId.value
   clearFormErrors(formErrors)
   form.versionNumber = form.versionNumber.trim()
   form.buildNumbers = form.buildNumbers.map((item) => item.trim()).filter(Boolean)
@@ -151,27 +166,23 @@ async function save(): Promise<boolean> {
   if (Object.keys(formErrors).length > 0) return false
   saving.value = true
   try {
-    const url = editingId.value
-      ? `/api/v1/projects/${projectId.value}/versions/${editingId.value}`
-      : `/api/v1/projects/${projectId.value}/versions`
-    await mutate<ProjectVersion>(url, editingId.value ? 'PUT' : 'POST', {
+    await mutate<ProjectVersion>(`/api/v1/projects/${pid}/versions${id ? `/${id}` : ''}`, id ? 'PUT' : 'POST', {
       ...form,
       plannedReleaseDate: form.plannedReleaseDate || null,
       actualReleaseDate: form.actualReleaseDate || null,
-    })
-    editorVisible.value = false
-    await load()
-    Message.success(editingId.value ? '版本已更新' : '版本已创建')
+    }, () => current() && editorVisible.value)
+    if (current()) editorVisible.value = false
+    if (active && pid === projectId.value) await load()
+    if (!current()) return false
+    Message.success(id ? '版本已更新' : '版本已创建')
     return true
   } catch (error) {
-    Object.assign(formErrors, formErrorsFrom(error))
-    if (Object.keys(formErrors).length === 0) {
-      Message.error(error instanceof Error ? error.message : '保存版本失败')
+    if (current()) {
+      Object.assign(formErrors, formErrorsFrom(error))
+      if (Object.keys(formErrors).length === 0) Message.error(error instanceof Error ? error.message : '保存版本失败')
     }
     return false
-  } finally {
-    saving.value = false
-  }
+  } finally { if (current()) saving.value = false }
 }
 
 async function changeStatus(version: ProjectVersion, status: VersionStatus) {
@@ -223,7 +234,9 @@ function localToday() {
   return `${year}-${month}-${day}`
 }
 
+onBeforeUnmount(() => { active = false; ++formVersion; ++loadRequest })
 watch(projectId, () => {
+  cancelEditor(); ++loadRequest; versions.value = []; detailVisible.value = false; selectedVersion.value = null
   statusFilter.value = 'ALL'
   keyword.value = ''
   void load()
@@ -332,7 +345,7 @@ onMounted(load)
       :title="editingId ? '编辑版本' : '创建版本'"
       width="660px"
       :ok-loading="saving"
-      :on-before-ok="save"
+      :on-before-ok="save" @cancel="cancelEditor"
     >
       <a-form :model="form" layout="vertical">
         <div class="form-grid">

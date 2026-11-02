@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch, type Ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { ensureLocalAppium, isLocalDesktop, isAccountDesktop, openMobileAutomationSync, openMobileAutomationHistorySync, openMobileAutomationArtifactSync, openMobileApplicationFileSync, openLocalExecutionSettings } from '@/utils/desktopWorkspace'
 import MobileAutomationHistoryPanel from '@/components/MobileAutomationHistoryPanel.vue'
@@ -50,13 +50,83 @@ const statusText = (value: string) => ({ QUEUED: '排队中', ACCEPTED: '已接�
 const statusColor = (value: string) => ({ QUEUED: 'arcoblue', ACCEPTED: 'cyan', RUNNING: 'orange', CANCELLING: 'orange', CANCELLED: 'gray', TIMED_OUT: 'red', SUCCEEDED: 'green', FAILED: 'red', REJECTED: 'orange' }[value] ?? 'gray')
 const date = (value?: string) => value ? new Intl.DateTimeFormat('zh-CN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : '—'
 async function read<T>(url: string, init?: RequestInit): Promise<T> { const response = await fetch(url, { credentials: 'include', ...init }); const body = await response.json().catch(() => ({})) as Envelope<T> & { message?: string }; if (!response.ok) throw new Error(body.message ?? '请求失败，请稍后重试'); return body.data }
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> { const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf'); return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) }) }
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, current?: () => boolean): Promise<T> {
+  const content = body === undefined ? undefined : JSON.stringify(body)
+  const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (current && !current()) throw new Error('操作已取消，请重新确认。')
+  return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: content })
+}
 let assetsRequest = 0, reportRequest = 0, timer: number | undefined
+let disposed = false, projectRevision = 0, saveRevision = 0, preparationRevision = 0
+let preparationOwner: (() => boolean) | undefined
 const reportExecutionId = ref(''), reportError = ref('')
-async function loadAssets() { const project = projectId.value, request = ++assetsRequest; if (!project) return; const value = await read<Snapshot>(`/api/v1/projects/${project}/mobile-automation`); if (project !== projectId.value || request !== assetsRequest) return; assets.value = value; if (!value.scenarios.some(item => item.id === selectedScenarioId.value)) selectedScenarioId.value = value.scenarios[0]?.id ?? '' }
-
-async function load() { loading.value = true; try { context.value = await read<Context>('/api/v1/access/context'); projectId.value = session.resolveProjectId(projects.value); await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '加载移动端自动化资源失败') } finally { loading.value = false } }
-async function changeProject() { assetsRequest++; selectedScenarioId.value = ''; assets.value = { devices: [], applications: [], elements: [], scenarios: [], executions: [] }; closeReport(); deviceVisible.value = appVisible.value = elementVisible.value = scenarioVisible.value = executeVisible.value = false; executionTarget.value = null; try { await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '切换项目失败') } }
+function projectGuard() {
+  const project = projectId.value, revision = projectRevision
+  return () => !disposed && project === projectId.value && revision === projectRevision
+}
+function invalidateSave() {
+  saveRevision++; saving.value = false
+  if (preparationOwner && !preparationOwner()) {
+    preparationRevision++; preparationOwner = undefined; preparingAppium.value = false
+  }
+}
+watch([deviceVisible, appVisible, elementVisible, scenarioVisible, executeVisible], invalidateSave, { flush: 'sync' })
+watch(projectId, () => {
+  projectRevision++; assetsRequest++; invalidateSave(); closeReport()
+  deviceVisible.value = appVisible.value = elementVisible.value = scenarioVisible.value = executeVisible.value = false
+  executionTarget.value = null
+}, { flush: 'sync' })
+async function loadAssets(owner: () => boolean = () => true) {
+  if (disposed || !projectId.value || !owner()) return
+  const project = projectId.value, request = ++assetsRequest, sameProject = projectGuard()
+  const current = () => sameProject() && request === assetsRequest && owner()
+  try {
+    const value = await read<Snapshot>(`/api/v1/projects/${project}/mobile-automation`)
+    if (!current()) return
+    assets.value = value
+    if (!value.scenarios.some(item => item.id === selectedScenarioId.value)) selectedScenarioId.value = value.scenarios[0]?.id ?? ''
+  } catch (error) { if (current()) throw error }
+}
+async function refreshAssets() {
+  const current = projectGuard()
+  try { await loadAssets(current) } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '刷新失败') }
+}
+async function load() {
+  let current = projectGuard()
+  loading.value = true
+  try {
+    const value = await read<Context>('/api/v1/access/context')
+    if (!current()) return
+    context.value = value; projectId.value = session.resolveProjectId(projects.value); current = projectGuard()
+    await loadAssets(current)
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '加载移动端自动化资源失败') }
+  finally { if (current()) loading.value = false }
+}
+async function changeProject() {
+  const current = projectGuard()
+  assetsRequest++; selectedScenarioId.value = ''; assets.value = { devices: [], applications: [], elements: [], scenarios: [], executions: [] }; closeReport()
+  deviceVisible.value = appVisible.value = elementVisible.value = scenarioVisible.value = executeVisible.value = false; executionTarget.value = null
+  try { await loadAssets(current) } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '切换项目失败') }
+}
+async function saveDialog<T>(visible: Ref<boolean>, action: (project: string, current: () => boolean) => Promise<T>, message: string, apply?: (result: T) => void) {
+  if (disposed || saving.value || !visible.value) return false
+  const project = projectId.value, sameProject = projectGuard()
+  let revision = saveRevision
+  const current = () => sameProject() && revision === saveRevision
+  saving.value = true
+  try {
+    const result = await action(project, current)
+    if (!current()) return false
+    apply?.(result); visible.value = false
+    // Own this close, while yielding to a dialog opened during the list reload.
+    revision = saveRevision
+    await loadAssets(current)
+    if (current()) Message.success(message)
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '保存失败') }
+  finally { if (current()) saving.value = false }
+  // Arco must not close a replacement dialog when an older callback settles.
+  return false
+}
 
 function parse(text: string, label: string) { try { const value = JSON.parse(text || '{}'); if (!value || Array.isArray(value) || typeof value !== 'object') throw new Error(); return value as Record<string, string> } catch { throw new Error(`${label}必须是 JSON 对象`) } }
 function resetDevice() { Object.assign(deviceForm, { id: '', version: 0, name: '', platform: 'ANDROID', udid: '', automationName: 'UiAutomator2', capabilitiesText: '{}', enabled: true }) }
@@ -68,49 +138,55 @@ function editDevice(item: Device) { Object.assign(deviceForm, item, { capabiliti
 function editApp(item: App) { Object.assign(appForm, item, { appFileId: item.appFileId || '' }); appVisible.value = true }
 function editElement(item: Element) { Object.assign(elementForm, item, { expectedUpdatedAt: item.updatedAt }); elementVisible.value = true }
 function editScenario(item: Scenario) { Object.assign(scenarioForm, item, { variablesText: JSON.stringify(item.variables, null, 2), steps: item.steps.map(step => ({ ...step })) }); scenarioVisible.value = true }
-async function saveDevice() { saving.value = true; try {
-  const { id, version, name, platform, udid, automationName, enabled } = deviceForm
-  const device = { name, platform, udid, automationName, enabled, capabilities: parse(deviceForm.capabilitiesText, '设备能力参数') }
-  const base = `/api/v1/projects/${projectId.value}/mobile-automation/devices`
-  await mutate(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', id ? { expectedVersion: version, device } : device)
-  deviceVisible.value = false; await loadAssets(); Message.success('设备已保存'); return true
-} catch (error) { Message.error(error instanceof Error ? error.message : '保存失败'); return false } finally { saving.value = false } }
-async function saveApp() { saving.value = true; try {
-  const { id, version, name, platform, appIdentifier, versionName, enabled } = appForm
-  const application = { name, platform, appIdentifier, versionName, enabled, appFileId: appForm.appFileId || null }
-  const base = `/api/v1/projects/${projectId.value}/mobile-automation/applications`
-  await mutate(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', id ? { expectedVersion: version, application } : application)
-  appVisible.value = false; await loadAssets(); Message.success('移动应用已保存'); return true
-} catch (error) { Message.error(error instanceof Error ? error.message : '保存失败'); return false } finally { saving.value = false } }
-async function saveElement() { saving.value = true; try {
-  const { id, expectedUpdatedAt, name, platform, locatorStrategy, locatorValue, description } = elementForm
-  const element = { name, platform, locatorStrategy, locatorValue, description }
-  const base = `/api/v1/projects/${projectId.value}/mobile-automation/elements`
-  await mutate(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', id ? { expectedUpdatedAt, element } : element)
-  elementVisible.value = false; await loadAssets(); Message.success('元素对象已保存'); return true
-} catch (error) { Message.error(error instanceof Error ? error.message : '保存失败'); return false } finally { saving.value = false } }
-async function saveScenario() { saving.value = true; try {
-  const { id, version, name, deviceId, applicationId, description, failureStrategy } = scenarioForm
-  const scenario = { name, deviceId, applicationId, description, failureStrategy, variables: parse(scenarioForm.variablesText, '场景变量'), steps: scenarioForm.steps.map(step => ({ ...step })) }
-  const base = `/api/v1/projects/${projectId.value}/mobile-automation/scenarios`
-  const saved = await mutate<Scenario>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', id ? { expectedVersion: version, scenario } : scenario)
-  scenarioVisible.value = false; await loadAssets(); selectedScenarioId.value = saved.id; Message.success('移动端场景已保存'); return true
-} catch (error) { Message.error(error instanceof Error ? error.message : '保存失败'); return false } finally { saving.value = false } }
+async function saveDevice() {
+  return saveDialog(deviceVisible, (project, current) => {
+    const { id, version, name, platform, udid, automationName, enabled } = deviceForm
+    const device = { name, platform, udid, automationName, enabled, capabilities: parse(deviceForm.capabilitiesText, '设备能力参数') }
+    const base = `/api/v1/projects/${project}/mobile-automation/devices`
+    return mutate(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', id ? { expectedVersion: version, device } : device, current)
+  }, '设备已保存')
+}
+async function saveApp() {
+  return saveDialog(appVisible, (project, current) => {
+    const { id, version, name, platform, appIdentifier, versionName, enabled } = appForm
+    const application = { name, platform, appIdentifier, versionName, enabled, appFileId: appForm.appFileId || null }
+    const base = `/api/v1/projects/${project}/mobile-automation/applications`
+    return mutate(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', id ? { expectedVersion: version, application } : application, current)
+  }, '移动应用已保存')
+}
+async function saveElement() {
+  return saveDialog(elementVisible, (project, current) => {
+    const { id, expectedUpdatedAt, name, platform, locatorStrategy, locatorValue, description } = elementForm
+    const element = { name, platform, locatorStrategy, locatorValue, description }
+    const base = `/api/v1/projects/${project}/mobile-automation/elements`
+    return mutate(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', id ? { expectedUpdatedAt, element } : element, current)
+  }, '元素对象已保存')
+}
+async function saveScenario() {
+  return saveDialog(scenarioVisible, (project, current) => {
+    const { id, version, name, deviceId, applicationId, description, failureStrategy } = scenarioForm
+    const scenario = { name, deviceId, applicationId, description, failureStrategy, variables: parse(scenarioForm.variablesText, '场景变量'), steps: scenarioForm.steps.map(step => ({ ...step })) }
+    const base = `/api/v1/projects/${project}/mobile-automation/scenarios`
+    return mutate<Scenario>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', id ? { expectedVersion: version, scenario } : scenario, current)
+  }, '移动端场景已保存', saved => { selectedScenarioId.value = saved.id })
+}
 async function remove(path: string, label: string) { try { await mutate(path, 'DELETE'); await loadAssets(); Message.success(`${label}已删除`) } catch (error) { Message.error(error instanceof Error ? error.message : '删除失败') } }
 function openExecution(item: Scenario) { executionTarget.value = item; executeForm.timeoutSeconds = 300; executeVisible.value = true }
 async function execute() {
   if (!executionTarget.value || preparingAppium.value) return false
-  const project = projectId.value, target = executionTarget.value, timeoutSeconds = executeForm.timeoutSeconds
-  saving.value = true
-  try {
+  const target = executionTarget.value, timeoutSeconds = executeForm.timeoutSeconds
+  return saveDialog(executeVisible, async (project, current) => {
     if (localDesktop) {
-      preparingAppium.value = true; await ensureLocalAppium()
-      if (!executeVisible.value || projectId.value !== project || executionTarget.value?.id !== target.id) return false
+      const preparation = ++preparationRevision
+      preparationOwner = current; preparingAppium.value = true
+      try { await ensureLocalAppium() }
+      finally {
+        if (preparation === preparationRevision) { preparingAppium.value = false; preparationOwner = undefined }
+      }
     }
-    await mutate(`/api/v1/projects/${project}/mobile-automation/scenarios/${target.id}/executions`, 'POST', { timeoutSeconds })
-    executeVisible.value = false; await loadAssets(); Message.success('移动端执行已提交'); return true
-  } catch (error) { Message.error(error instanceof Error ? error.message : '提交失败'); return false }
-  finally { saving.value = false; preparingAppium.value = false }
+    if (!current()) return
+    return mutate(`/api/v1/projects/${project}/mobile-automation/scenarios/${target.id}/executions`, 'POST', { timeoutSeconds }, current)
+  }, '移动端执行已提交')
 }
 
 function closeReport() { reportRequest++; reportVisible.value = false; reportExecutionId.value = ''; report.value = null; reportArtifacts.value = []; reportError.value = '' }
@@ -130,8 +206,8 @@ async function cancelExecution() { if (!report.value) return; saving.value = tru
 function artifactUrl(artifact: Artifact, mode: 'view' | 'download') { return `/api/v1/projects/${projectId.value}/mobile-automation/executions/${report.value?.execution.id}/artifacts/${artifact.id}/${mode}` }
 function elementFor(step: Step) { return assets.value.elements.find((item) => item.id === step.elementId) }
 function requiresElement(type: StepType) { return ['TAP', 'INPUT', 'ASSERT_VISIBLE', 'ASSERT_TEXT'].includes(type) }
-onMounted(() => { void load(); timer = window.setInterval(() => { if (projectId.value) void loadAssets().catch(error => Message.error(error instanceof Error ? error.message : '刷新失败')); if (reportVisible.value) void loadReport() }, 3000) })
-onBeforeUnmount(() => { if (timer) window.clearInterval(timer); assetsRequest++; closeReport() })
+onMounted(() => { void load(); timer = window.setInterval(() => { if (projectId.value) void refreshAssets(); if (reportVisible.value) void loadReport() }, 3000) })
+onBeforeUnmount(() => { disposed = true; invalidateSave(); if (timer) window.clearInterval(timer); assetsRequest++; closeReport() })
 </script>
 
 <template>
@@ -144,7 +220,7 @@ onBeforeUnmount(() => { if (timer) window.clearInterval(timer); assetsRequest++;
       <a-tab-pane key="apps" title="应用包"><div class="toolbar"><span>应用包可关联项目文件；首节点先冻结包标识、版本和文件标识。</span><a-button type="primary" size="small" @click="resetApp(); appVisible = true">新建应用</a-button></div><a-table :data="assets.applications" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="名称" data-index="name" /><a-table-column title="平台" data-index="platform" /><a-table-column title="应用标识" data-index="appIdentifier" /><a-table-column title="版本" data-index="versionName" /><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="editApp(record)">编辑</a-button><a-button size="mini" status="danger" @click="remove(`/api/v1/projects/${projectId}/mobile-automation/applications/${record.id}`, '应用')">删除</a-button></template></a-table-column></template></a-table><a-empty v-if="!loading && !assets.applications.length" description="尚未登记移动应用" /></a-tab-pane>
       <a-tab-pane key="elements" title="元素对象"><div class="toolbar"><span>优先使用 accessibility id；XPath 仅用于无稳定标识的兼容场景。</span><a-button type="primary" size="small" @click="resetElement(); elementVisible = true">新建元素</a-button></div><a-table :data="assets.elements" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="名称" data-index="name" /><a-table-column title="平台" data-index="platform" /><a-table-column title="策略" data-index="locatorStrategy" /><a-table-column title="定位值"><template #cell="{ record }"><code>{{ record.locatorValue }}</code></template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="editElement(record)">编辑</a-button><a-button size="mini" status="danger" @click="remove(`/api/v1/projects/${projectId}/mobile-automation/elements/${record.id}`, '元素')">删除</a-button></template></a-table-column></template></a-table><a-empty v-if="!loading && !assets.elements.length" description="尚未配置元素对象" /></a-tab-pane></a-tabs></section>
     <section class="workspace"><aside class="panel scenarios"><header><div><span class="eyebrow">MOBILE FLOWS</span><h3>自动化场景</h3></div><a-button type="primary" size="small" @click="resetScenario(); scenarioVisible = true">新建</a-button></header><button v-for="item in assets.scenarios" :key="item.id" class="scenario" :class="{ selected: selectedScenarioId === item.id }" @click="selectedScenarioId = item.id"><span><strong>{{ item.name }}</strong><small>{{ assets.devices.find((device) => device.id === item.deviceId)?.name ?? '设备已删除' }}</small></span><a-tag size="small">{{ item.steps.length }}</a-tag></button><a-empty v-if="!loading && !assets.scenarios.length" description="尚无场景" /></aside>
-      <main v-if="selectedScenarioId" class="scenario-main"><section class="panel scenario-header"><div><span class="eyebrow">IMMUTABLE DEVICE MANIFEST</span><h2>{{ currentScenario.name }}</h2><p>{{ currentScenario.description || '暂无场景说明' }}</p></div><a-space><a-button v-if="localDesktop" @click="openLocalExecutionSettings">本地执行设置</a-button><a-button type="primary" :disabled="preparingAppium || !assets.devices.find(item => item.id === currentScenario.deviceId)?.enabled || !assets.applications.find(item => item.id === currentScenario.applicationId)?.enabled" @click="openExecution(currentScenario)">执行场景</a-button><a-button @click="editScenario(currentScenario)">编辑编排</a-button><a-button status="danger" @click="remove(`/api/v1/projects/${projectId}/mobile-automation/scenarios/${currentScenario.id}`, '场景')">删除</a-button></a-space></section><section class="overview panel"><div><span>目标设备</span><strong>{{ assets.devices.find((item) => item.id === currentScenario.deviceId)?.name ?? '已删除' }}</strong></div><div><span>应用</span><strong>{{ assets.applications.find((item) => item.id === currentScenario.applicationId)?.name ?? '已删除' }}</strong></div><div><span>失败策略</span><strong>{{ currentScenario.failureStrategy === 'CONTINUE' ? '失败后继续' : '首次失败停止' }}</strong></div><div><span>步骤</span><strong>{{ currentScenario.steps.length }}</strong></div></section><section class="panel steps"><header><div><span class="eyebrow">DECLARATIVE APPIUM FLOW</span><h3>移动端步骤</h3></div><span>无脚本 · 受限设备边界</span></header><ol><li v-for="(step, index) in currentScenario.steps" :key="step.id"><b>{{ index + 1 }}</b><article><a-tag color="arcoblue">{{ stepMeta[step.type] }}</a-tag><strong>{{ step.name }}</strong><small>{{ step.timeoutMillis }}ms</small><code v-if="elementFor(step)">{{ elementFor(step)?.locatorStrategy }} · {{ elementFor(step)?.locatorValue }}</code><p v-if="step.value">输入：{{ step.value }}</p><p v-if="step.expectedText">期望：{{ step.expectedText }}</p></article></li></ol></section><section class="panel history"><header><h3>执行记录</h3><a-button size="small" @click="loadAssets">刷新</a-button></header><a-table :data="assets.executions.filter((item) => item.scenarioId === currentScenario.id)" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="任务"><template #cell="{ record }"><strong>{{ record.taskId }}</strong><small>{{ record.deviceName }} · {{ record.applicationName }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusText(record.status) }}</a-tag><small>{{ record.statusCode }}</small></template></a-table-column><a-table-column title="提交时间"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="openReport(record)">报告</a-button></template></a-table-column></template></a-table><a-empty v-if="!assets.executions.some((item) => item.scenarioId === currentScenario.id)" description="当前场景暂无执行记录" /></section></main>
+      <main v-if="selectedScenarioId" class="scenario-main"><section class="panel scenario-header"><div><span class="eyebrow">IMMUTABLE DEVICE MANIFEST</span><h2>{{ currentScenario.name }}</h2><p>{{ currentScenario.description || '暂无场景说明' }}</p></div><a-space><a-button v-if="localDesktop" @click="openLocalExecutionSettings">本地执行设置</a-button><a-button type="primary" :disabled="preparingAppium || !assets.devices.find(item => item.id === currentScenario.deviceId)?.enabled || !assets.applications.find(item => item.id === currentScenario.applicationId)?.enabled" @click="openExecution(currentScenario)">执行场景</a-button><a-button @click="editScenario(currentScenario)">编辑编排</a-button><a-button status="danger" @click="remove(`/api/v1/projects/${projectId}/mobile-automation/scenarios/${currentScenario.id}`, '场景')">删除</a-button></a-space></section><section class="overview panel"><div><span>目标设备</span><strong>{{ assets.devices.find((item) => item.id === currentScenario.deviceId)?.name ?? '已删除' }}</strong></div><div><span>应用</span><strong>{{ assets.applications.find((item) => item.id === currentScenario.applicationId)?.name ?? '已删除' }}</strong></div><div><span>失败策略</span><strong>{{ currentScenario.failureStrategy === 'CONTINUE' ? '失败后继续' : '首次失败停止' }}</strong></div><div><span>步骤</span><strong>{{ currentScenario.steps.length }}</strong></div></section><section class="panel steps"><header><div><span class="eyebrow">DECLARATIVE APPIUM FLOW</span><h3>移动端步骤</h3></div><span>无脚本 · 受限设备边界</span></header><ol><li v-for="(step, index) in currentScenario.steps" :key="step.id"><b>{{ index + 1 }}</b><article><a-tag color="arcoblue">{{ stepMeta[step.type] }}</a-tag><strong>{{ step.name }}</strong><small>{{ step.timeoutMillis }}ms</small><code v-if="elementFor(step)">{{ elementFor(step)?.locatorStrategy }} · {{ elementFor(step)?.locatorValue }}</code><p v-if="step.value">输入：{{ step.value }}</p><p v-if="step.expectedText">期望：{{ step.expectedText }}</p></article></li></ol></section><section class="panel history"><header><h3>执行记录</h3><a-button size="small" @click="refreshAssets()">刷新</a-button></header><a-table :data="assets.executions.filter((item) => item.scenarioId === currentScenario.id)" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="任务"><template #cell="{ record }"><strong>{{ record.taskId }}</strong><small>{{ record.deviceName }} · {{ record.applicationName }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusText(record.status) }}</a-tag><small>{{ record.statusCode }}</small></template></a-table-column><a-table-column title="提交时间"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="openReport(record)">报告</a-button></template></a-table-column></template></a-table><a-empty v-if="!assets.executions.some((item) => item.scenarioId === currentScenario.id)" description="当前场景暂无执行记录" /></section></main>
       <main v-else class="panel empty"><a-empty description="创建一个移动端场景开始编排"><template #extra><a-button type="primary" @click="resetScenario(); scenarioVisible = true">创建场景</a-button></template></a-empty></main></section>
     <a-modal v-model:visible="deviceVisible" :title="deviceForm.id ? '编辑设备' : '新建设备'" :ok-loading="saving" :on-before-ok="saveDevice"><a-form :model="deviceForm" layout="vertical"><div class="two"><a-form-item label="设备名称" required><a-input v-model="deviceForm.name" placeholder="例如：Pixel 8 · Android 15" /></a-form-item><a-form-item label="平台"><a-select v-model="deviceForm.platform" :disabled="!!deviceForm.id" @change="deviceForm.automationName = deviceForm.platform === 'IOS' ? 'XCUITest' : 'UiAutomator2'"><a-option value="ANDROID">Android</a-option><a-option value="IOS">iOS</a-option></a-select></a-form-item></div><div class="two"><a-form-item label="UDID" required><a-input v-model="deviceForm.udid" placeholder="设备序列号或云真机 ID" /></a-form-item><a-form-item label="Appium 引擎" required><a-input v-model="deviceForm.automationName" placeholder="UiAutomator2 / XCUITest" /></a-form-item></div><a-form-item label="能力参数（JSON）"><a-textarea v-model="deviceForm.capabilitiesText" :auto-size="{ minRows: 3, maxRows: 6 }" placeholder="{ &quot;appium:platformVersion&quot;: &quot;15&quot; }" /></a-form-item><a-form-item label="启用设备"><a-switch v-model="deviceForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item></a-form></a-modal>
     <a-modal v-model:visible="appVisible" :title="appForm.id ? '编辑移动应用' : '新建移动应用'" :ok-loading="saving" :on-before-ok="saveApp"><a-form :model="appForm" layout="vertical"><div class="two"><a-form-item label="应用名称" required><a-input v-model="appForm.name" placeholder="例如：交易客户端 Android" /></a-form-item><a-form-item label="平台"><a-select v-model="appForm.platform" :disabled="!!appForm.id"><a-option value="ANDROID">Android</a-option><a-option value="IOS">iOS</a-option></a-select></a-form-item></div><div class="two"><a-form-item label="应用包标识" required><a-input v-model="appForm.appIdentifier" placeholder="com.example.trade" /></a-form-item><a-form-item label="版本"><a-input v-model="appForm.versionName" placeholder="3.2.0" /></a-form-item></div><a-form-item label="项目文件标识（可选）"><a-input v-model="appForm.appFileId" placeholder="关联已上传的 APK / IPA 文件 ID" /></a-form-item><a-form-item label="启用应用"><a-switch v-model="appForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item></a-form></a-modal>

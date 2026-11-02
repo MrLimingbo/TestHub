@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-02",
+  "platform": "darwin-arm64",
+  "commands": [
+    {
+      "id": "frontend",
+      "command": "npx pnpm@10.13.1 exec vitest run --maxWorkers=1",
+      "exitCode": 0,
+      "occurrences": 902
+    },
+    {
+      "id": "frontend-type-fixture",
+      "command": "npx pnpm@10.13.1 exec vitest run src/test/d16MockPage.test.ts src/test/d16MockIntegerInput.test.ts --maxWorkers=1",
+      "exitCode": 0,
+      "occurrences": 7
+    },
+    {
+      "id": "H2-package",
+      "command": "JAVA_HOME=<native JDK 21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "occurrences": 1167
+    },
+    {
+      "id": "MySQL-affected",
+      "command": "JAVA_HOME=<native JDK 21> node scripts/desktop/test-mysql-backend.mjs --tests=P2D16MockFlowTests,Mock*Tests",
+      "exitCode": 0,
+      "occurrences": 61
+    },
+    {
+      "id": "H2-exchange-variants",
+      "command": "JAVA_HOME=<JDK21> node scripts/qa/test-p2-backend.mjs P2D16MockFlowTests",
+      "exitCode": 0,
+      "occurrences": 35
+    },
+    {
+      "id": "MySQL-exchange-variants",
+      "command": "JAVA_HOME=<native JDK 21> node scripts/desktop/test-mysql-backend.mjs --tests=P2D16MockFlowTests",
+      "exitCode": 0,
+      "occurrences": 35
+    },
+    {
+      "id": "headless-browser",
+      "command": "node scripts/qa/d16-mock-ui.mjs",
+      "exitCode": 0,
+      "occurrences": 4
+    },
+    {
+      "id": "real-HTTP",
+      "command": "JAVA_HOME=<native JDK 21> node scripts/qa/d16-mock-http.mjs",
+      "exitCode": 0,
+      "occurrences": 5
+    },
+    {
+      "id": "lint",
+      "command": "npx pnpm@10.13.1 lint",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "build-and-typecheck",
+      "command": "npx pnpm@10.13.1 build",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "whitespace",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "occurrences": null
+    }
+  ],
+  "jarSha256": "bb8d5c2d509f916308fba6609d0e15efbe87999abaf4a812f24ead098875ddc3",
+  "distIndexSha256": "9ab7c767b7283355c7b1e64966fe6f55238e596e130990b4f9eff22defbffa0f",
+  "finalSourceHashes": {
+    "src/pages/MockServicePage.vue": "2359b3625e0a86f61b0e964bcdfd35faa897b17262ee0c99ff073b83c3a5c04d",
+    "services/platform-api/src/main/java/io/testhub/platform/mock/MockSyncService.java": "3698e798e39e99ba7071afafda1abd34a26de5c862ca90a4e9f5a4339a51a683",
+    "services/platform-api/src/main/java/io/testhub/platform/mock/MockService.java": "6c8ed12b0b7a9948069f23401b93b2a6f36b2ae28fc0484e5ec275a31ba17392",
+    "services/platform-api/src/main/java/io/testhub/platform/mock/MockTransferService.java": "68fdfbcef356ac2fd555c69d5add7b9983afb25ae6460fa257e2b20df166d823",
+    "services/platform-api/src/main/java/io/testhub/platform/mock/MockManagementController.java": "e4993ce5739feb16a682031a99fa3f02689570755085476f0c77d8d006692f54",
+    "services/platform-api/src/main/java/io/testhub/platform/mock/MockJson.java": "bf9d289f4b069081659bca8f51d0ebc3b17d3b65df056bbafab5fe307192294d",
+    "services/platform-api/src/main/java/io/testhub/platform/mock/MockInputExceptionHandler.java": "7b64d9d6c5b7cb4d69ef3e16c0ec6467720f19871b1279e686d22e50868b4368",
+    "services/platform-api/src/test/java/io/testhub/platform/P2D16MockFlowTests.java": "d8845c1f3a1281755705cd56880f0a41bb983706b4aa65a7998c57691d299f57",
+    "src/utils/mockIntegerInput.ts": "d2628cfa1d9064b8085f047e0a6f2d56732d5022f26401b0c887fbc883105a67",
+    "src/test/d16MockPage.test.ts": "eff7974281dbdc983bda4e69baaccd46403570fd35e40e86d6f05bc84f853ccc",
+    "src/test/d16MockIntegerInput.test.ts": "aa5d4ee5903cb6db95d8fc55139aaa418d1e29a9514bbc93830387824f243efe",
+    "scripts/qa/d16-mock-ui.mjs": "2bdf8b91885f1e9614e08c06c1405ad55e95dc880e30f2c5eeb6c83e79829cd0",
+    "scripts/qa/d16-mock-http.mjs": "b0011f38ffb473ee848982afe51b5ad11686413dc3d3b6e0d1baa06b437f1319"
+  },
+  "formalCases": 40,
+  "countsNotAdditive": true,
+  "productionChangedAfterFullH2AndBuild": false,
+  "testExpansionAfterFullH2": "Only existing27–30 transfer/sync variants; final35 class passed H2/MySQL again.",
+  "installedRuntimeReplaced": false,
+  "newEnvironmentBlockerPreparation": false,
+  "shutdownInvestigationExecuted": false
+}

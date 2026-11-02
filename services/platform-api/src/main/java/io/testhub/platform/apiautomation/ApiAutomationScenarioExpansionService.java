@@ -99,6 +99,8 @@ public class ApiAutomationScenarioExpansionService {
     private void add(List<AutomationStep> target, Set<String> ids, AutomationStep step) {
         if (target.size() >= MAX_EXPANDED_STEPS) throw rejected("公共步骤和子场景展开后最多支持 300 个步骤");
         if (step == null || step.id() == null || !ids.add(step.id())) throw rejected("展开后的步骤标识重复或不合法");
+        if ("WAIT".equals(step.type())) step = new AutomationStep(step.id(), step.type(), step.name(),
+                WaitDelayMillis.config(step.config(), "steps[" + step.id() + "].config"));
         target.add(step);
     }
 

@@ -9,6 +9,8 @@ export interface ApiDebugRouteDraft {
   environment?: string
   protocol?: ApiDebugProtocol
   replayDraft?: string
+  legacyHistory?: boolean
+  legacyHistoryId?: string
 }
 
 export interface ApiDebugRequestHeader {
@@ -123,6 +125,9 @@ export function apiDebugDraftFromQuery(query: Record<string, unknown>): ApiDebug
   if (headers !== undefined) draft.headers = headers
   if (environment !== undefined) draft.environment = environment.trim()
   if (replayDraft !== undefined) draft.replayDraft = replayDraft
+  if (query.legacyHistory === true || query.legacyHistory === '1') draft.legacyHistory = true
+  const legacyHistoryId = nonBlankText(query.legacyHistoryId)
+  if (draft.legacyHistory && legacyHistoryId) draft.legacyHistoryId = legacyHistoryId
 
   return Object.keys(draft).length ? draft : null
 }
@@ -313,13 +318,21 @@ export function buildApiDebugCurlCommand(request: ApiDebugCurlRequest): ApiDebug
   return { command: parts.join(' '), secretsRemoved }
 }
 
-export function apiDebugDraftFromHistory(value: { method?: unknown; requestUrl?: unknown; replayDraft?: unknown }): ApiDebugRouteDraft | null {
+export function apiDebugReplayUnavailableReason(status: unknown): string {
+  return status === 'EXPIRED' ? '回放已到期，请根据摘要重新配置请求'
+    : status === 'UNKNOWN_CREATED_AT' ? '回放创建时间待核对，暂不可回放'
+      : status === 'UNREADABLE' ? '回放草稿不可解密，请重新配置请求' : ''
+}
+
+export function apiDebugDraftFromHistory(value: { id?: unknown; method?: unknown; requestUrl?: unknown; replayDraft?: unknown; replayStatus?: unknown }): ApiDebugRouteDraft | null {
+  if (apiDebugReplayUnavailableReason(value.replayStatus)) return null
   const replayDraft = nonBlankText(value.replayDraft)
   if (replayDraft) return { replayDraft }
   const method = nonBlankText(value.method)?.toUpperCase()
   const requestUrl = nonBlankText(value.requestUrl)
   if (!method || !HTTP_METHODS.has(method) || !requestUrl) return null
-  return { method, url: requestUrl, protocol: 'HTTP' }
+  const id = nonBlankText(value.id)
+  return { method, url: requestUrl, protocol: 'HTTP', legacyHistory: true, ...(id ? { legacyHistoryId: id } : {}) }
 }
 
 export function apiDebugRequestNameFromReplayDraft(value: unknown): string | undefined {

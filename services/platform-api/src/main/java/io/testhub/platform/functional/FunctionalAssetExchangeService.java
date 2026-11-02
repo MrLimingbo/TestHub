@@ -170,8 +170,12 @@ public class FunctionalAssetExchangeService {
             if (row.title().isBlank() || row.title().length() > 200) errors.add(new ImportError(row.rowNumber(), "标题不能为空且不能超过 200 个字符"));
             if (!Set.of("P0", "P1", "P2", "P3").contains(row.priority().toUpperCase(Locale.ROOT))) errors.add(new ImportError(row.rowNumber(), "优先级必须为 P0、P1、P2 或 P3"));
             if (type == AssetKind.REQUIREMENTS) {
+                validateTextLength(errors, row.rowNumber(), "需求说明", row.description());
                 if (!Set.of("DRAFT", "REVIEWING", "APPROVED", "ARCHIVED").contains(row.status().toUpperCase(Locale.ROOT))) errors.add(new ImportError(row.rowNumber(), "需求状态不合法"));
             } else {
+                validateTextLength(errors, row.rowNumber(), "前置条件", row.precondition());
+                validateTextLength(errors, row.rowNumber(), "测试步骤", row.steps());
+                validateTextLength(errors, row.rowNumber(), "预期结果", row.expectedResult());
                 if (!FunctionalAssetService.CASE_TYPES.contains(row.caseType())) errors.add(new ImportError(row.rowNumber(), "用例类型不合法"));
                 if (!Set.of("DRAFT", "READY", "BLOCKED", "ARCHIVED").contains(row.status().toUpperCase(Locale.ROOT))) errors.add(new ImportError(row.rowNumber(), "用例状态不合法"));
                 if (row.steps().isBlank() || row.expectedResult().isBlank()) errors.add(new ImportError(row.rowNumber(), "测试步骤和预期结果不能为空"));
@@ -185,6 +189,10 @@ public class FunctionalAssetExchangeService {
             row.status(row.status().toUpperCase(Locale.ROOT));
         }
         return errors;
+    }
+
+    private void validateTextLength(List<ImportError> errors, int rowNumber, String label, String value) {
+        if (value.length() > 20_000) errors.add(new ImportError(rowNumber, label + "不能超过 20000 个字符"));
     }
 
     private void verifyHeader(Row row, String[] expected) {

@@ -58,6 +58,19 @@ public class QualityReportScheduleRepository {
                 .param("periodDays", periodDays).param("enabled", enabled).update();
     }
 
+    public int updateVersioned(String id, String organizationId, String name, List<String> projectIds, String cronExpression,
+                      String timezone, int periodDays, boolean enabled, long expectedVersion) {
+        return jdbc.sql("""
+                UPDATE quality_report_schedule
+                SET name = :name, project_ids = CAST(:projectIds AS JSON), cron_expression = :cronExpression,
+                    timezone = :timezone, period_days = :periodDays, enabled = :enabled, config_version = config_version + 1,
+                    updated_at = CURRENT_TIMESTAMP(3)
+                WHERE id = :id AND organization_id = :organizationId AND config_version = :expectedVersion
+                """).param("id", id).param("organizationId", organizationId).param("name", name)
+                .param("projectIds", write(projectIds)).param("cronExpression", cronExpression).param("timezone", timezone)
+                .param("expectedVersion", expectedVersion).param("periodDays", periodDays).param("enabled", enabled).update();
+    }
+
     public void delete(String id, String organizationId) {
         jdbc.sql("DELETE FROM quality_report_schedule WHERE id = :id AND organization_id = :organizationId")
                 .param("id", id).param("organizationId", organizationId).update();
@@ -111,7 +124,7 @@ public class QualityReportScheduleRepository {
 
     private String scheduleSelect() {
         return "SELECT id, organization_id, name, project_ids, cron_expression, timezone, period_days, enabled, last_run_id, "
-                + "last_run_status, last_run_at, created_by, created_at, updated_at FROM quality_report_schedule";
+                + "last_run_status, last_run_at, created_by, created_at, updated_at, config_version FROM quality_report_schedule";
     }
 
     private QualityReportSchedule schedule(java.sql.ResultSet rs) throws java.sql.SQLException {
@@ -119,7 +132,7 @@ public class QualityReportScheduleRepository {
                 projectIds(rs.getString("project_ids")), rs.getString("cron_expression"), rs.getString("timezone"),
                 rs.getInt("period_days"), rs.getBoolean("enabled"), rs.getString("last_run_id"),
                 rs.getString("last_run_status"), instant(rs.getTimestamp("last_run_at")), rs.getString("created_by"),
-                instant(rs.getTimestamp("created_at")), instant(rs.getTimestamp("updated_at")));
+                instant(rs.getTimestamp("created_at")), instant(rs.getTimestamp("updated_at")), rs.getLong("config_version"));
     }
 
     private List<String> projectIds(String value) {

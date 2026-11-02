@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-02",
+  "complete": true,
+  "ownedWorkspaceLeftovers": [],
+  "ownedQaProcessesRemaining": [],
+  "nativeHTTPWorkspacesRemoved": true,
+  "H2WorkspacesRemoved": true,
+  "MySQLProjectsRemoved": 2,
+  "mysqlOwnedContainersNetworksVolumesRemoved": true,
+  "backgroundBrowsersClosed": true,
+  "rawSurefireReportsRemoved": 294,
+  "temporaryWorkItemsRemoved": 39,
+  "userWorkspacesOrSharedServicesRemoved": false,
+  "unknownExistingQaFoldersRemoved": false,
+  "installedRuntimeReplaced": false,
+  "oldRuntimeCopiesRemaining": [],
+  "shutdownInvestigationExecuted": false,
+  "retained": "脱敏结果、批准依据、先行用例与证据、源文件指纹和增量差异；复用脚本保留scripts/qa/d16-api-wait-*，MySQL选择参数保留原QA包装器。"
+}

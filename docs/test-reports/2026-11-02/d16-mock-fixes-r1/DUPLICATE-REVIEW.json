@@ -1,0 +1,14 @@
+{
+  "exactDuplicates": 0,
+  "nearDuplicatePairs": [
+    {
+      "caseIds": [
+        "TC-D16MOCK-02",
+        "TC-D16MOCK-03"
+      ],
+      "disposition": "RETAIN_DISTINCT_BOUNDARIES",
+      "reason": "下边界0/-1和上边界1000/1001是独立COV，非同分区换数据。"
+    }
+  ],
+  "unresolvedDuplicates": 0
+}

@@ -160,7 +160,7 @@ public class AccessController {
                                  @Size(max = 2000) String description) {
     }
 
-    public record TokenRequest(@NotBlank @Size(max = 120) String name, @NotEmpty List<String> scopes,
+    public record TokenRequest(@NotBlank @Size(max = 120) String name, @NotEmpty List<@NotBlank String> scopes,
                                Integer expiresInDays) {
     }
 

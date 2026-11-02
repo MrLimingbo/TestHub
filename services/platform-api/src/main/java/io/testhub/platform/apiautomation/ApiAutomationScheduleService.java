@@ -137,8 +137,13 @@ public class ApiAutomationScheduleService {
         ApiAutomationSchedule schedule = schedules.findById(scheduleId).orElse(null);
         if (schedule == null || !schedule.enabled()) return;
         ScheduledAutomationPrincipal principal = new ScheduledAutomationPrincipal(schedule.createdBy(), schedule.projectId(), schedule.id());
-        ApiAutomationExecution execution = executions.create(principal, schedule.projectId(), schedule.scenarioId(), schedule.timeoutSeconds(),
-                schedule.executionProfileId(), Map.of());
+        var submitted = executions.createScheduled(principal, schedule.projectId(), schedule.scenarioId(), schedule.timeoutSeconds(), schedule.executionProfileId());
+        if (submitted.isEmpty()) {
+            audit.record(principal, schedule.organizationId(), schedule.projectId(), "API_AUTOMATION_SCHEDULE_SKIPPED",
+                    "API_AUTOMATION_SCHEDULE", schedule.id(), Map.of("reason", "ENVIRONMENT_DISABLED", "scenarioId", schedule.scenarioId()));
+            return;
+        }
+        ApiAutomationExecution execution = submitted.get();
         schedules.markTriggered(schedule.id(), execution.id(), Instant.now());
         audit.record(principal, schedule.organizationId(), schedule.projectId(), "API_AUTOMATION_SCHEDULE_TRIGGERED",
                 "API_AUTOMATION_EXECUTION", execution.id(), Map.of("scheduleId", schedule.id(), "scenarioId", schedule.scenarioId()));

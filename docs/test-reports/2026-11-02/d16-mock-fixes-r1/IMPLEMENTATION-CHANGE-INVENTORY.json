@@ -1,0 +1,68 @@
+{
+  "baselineFiles": 1395,
+  "modified": [
+    {
+      "path": "src/pages/MockServicePage.vue",
+      "beforeSha256": "e28c776a447a2d86474a08f477f9fff77b39201138ce134e9a232b633849d613",
+      "afterSha256": "2359b3625e0a86f61b0e964bcdfd35faa897b17262ee0c99ff073b83c3a5c04d"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mock/MockSyncService.java",
+      "beforeSha256": "80ed5d17824bccd139abecb5c5e010c81aa0c23a351b0bc639137bb3c4e11609",
+      "afterSha256": "3698e798e39e99ba7071afafda1abd34a26de5c862ca90a4e9f5a4339a51a683"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mock/MockService.java",
+      "beforeSha256": "b05800dc5160f621721e8eb8a3bd655d39dccd6803a60def1718b0716909c04f",
+      "afterSha256": "6c8ed12b0b7a9948069f23401b93b2a6f36b2ae28fc0484e5ec275a31ba17392"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mock/MockTransferService.java",
+      "beforeSha256": "320994d3cb4d151b03f69de5c91383aa5c839c9d4bef731ac19a75f40d4b9d79",
+      "afterSha256": "68fdfbcef356ac2fd555c69d5add7b9983afb25ae6460fa257e2b20df166d823"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mock/MockManagementController.java",
+      "beforeSha256": "ce93b503f4b298d5899271ad909bca1f97d2da1003770c349981bcfc27bfc0fe",
+      "afterSha256": "e4993ce5739feb16a682031a99fa3f02689570755085476f0c77d8d006692f54"
+    }
+  ],
+  "added": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mock/MockJson.java",
+      "sha256": "bf9d289f4b069081659bca8f51d0ebc3b17d3b65df056bbafab5fe307192294d"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mock/MockInputExceptionHandler.java",
+      "sha256": "7b64d9d6c5b7cb4d69ef3e16c0ec6467720f19871b1279e686d22e50868b4368"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D16MockFlowTests.java",
+      "sha256": "d8845c1f3a1281755705cd56880f0a41bb983706b4aa65a7998c57691d299f57"
+    },
+    {
+      "path": "src/utils/mockIntegerInput.ts",
+      "sha256": "d2628cfa1d9064b8085f047e0a6f2d56732d5022f26401b0c887fbc883105a67"
+    },
+    {
+      "path": "src/test/d16MockPage.test.ts",
+      "sha256": "eff7974281dbdc983bda4e69baaccd46403570fd35e40e86d6f05bc84f853ccc"
+    },
+    {
+      "path": "src/test/d16MockIntegerInput.test.ts",
+      "sha256": "aa5d4ee5903cb6db95d8fc55139aaa418d1e29a9514bbc93830387824f243efe"
+    },
+    {
+      "path": "scripts/qa/d16-mock-ui.mjs",
+      "sha256": "2bdf8b91885f1e9614e08c06c1405ad55e95dc880e30f2c5eeb6c83e79829cd0"
+    },
+    {
+      "path": "scripts/qa/d16-mock-http.mjs",
+      "sha256": "b0011f38ffb473ee848982afe51b5ad11686413dc3d3b6e0d1baa06b437f1319"
+    }
+  ],
+  "untouchedBaselineFiles": 1390,
+  "dependencyOrGlobalMapperChanges": false,
+  "branchCommitPushOrPrCreated": false,
+  "installedRuntimeReplaced": false
+}

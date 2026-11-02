@@ -19,6 +19,16 @@ public class FunctionalCatalogRepository {
         jdbc.sql("SELECT id FROM project WHERE id=:p FOR UPDATE").param("p", projectId).query(String.class).single();
     }
 
+    public boolean nameExists(String projectId, String scope, String parentId, String name, String excludedId) {
+        return jdbc.sql("""
+                SELECT COUNT(*) FROM functional_catalog
+                WHERE project_id = :projectId AND scope = :scope AND name = :name
+                  AND ((:parentId IS NULL AND parent_id IS NULL) OR parent_id = :parentId)
+                  AND (:excludedId IS NULL OR id <> :excludedId)
+                """).param("projectId", projectId).param("scope", scope).param("name", name)
+                .param("parentId", parentId).param("excludedId", excludedId).query(Long.class).single() > 0;
+    }
+
     public List<FunctionalCatalog> findByProject(String projectId, String scope) {
         return jdbc.sql("""
                 SELECT id, organization_id, project_id, scope, parent_id, name, sort_order, created_by, created_at

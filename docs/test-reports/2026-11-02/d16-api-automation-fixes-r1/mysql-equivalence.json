@@ -1,0 +1,112 @@
+{
+  "environment": "isolated MySQL/Redis/S3",
+  "tests": 26,
+  "failures": 0,
+  "errors": 0,
+  "cases": [
+    {
+      "name": "transferValid",
+      "status": "PASS"
+    },
+    {
+      "name": "strings",
+      "status": "PASS"
+    },
+    {
+      "name": "projectDenied",
+      "status": "PASS"
+    },
+    {
+      "name": "oldManifestUnchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "transferInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "rawNonFinite",
+      "status": "PASS"
+    },
+    {
+      "name": "updateValid",
+      "status": "PASS"
+    },
+    {
+      "name": "invalidReferencesBlocked",
+      "status": "PASS"
+    },
+    {
+      "name": "reusableInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "preciseFraction",
+      "status": "PASS"
+    },
+    {
+      "name": "reusableValid",
+      "status": "PASS"
+    },
+    {
+      "name": "explicitLegacyRepair",
+      "status": "PASS"
+    },
+    {
+      "name": "wrongTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "fractions",
+      "status": "PASS"
+    },
+    {
+      "name": "syncInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "lowerBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "exactIntegralSpellings",
+      "status": "PASS"
+    },
+    {
+      "name": "updateInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "syncValid",
+      "status": "PASS"
+    },
+    {
+      "name": "overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "missingAndNull",
+      "status": "PASS"
+    },
+    {
+      "name": "legacyReadable",
+      "status": "PASS"
+    },
+    {
+      "name": "nonWaitUntouched",
+      "status": "PASS"
+    },
+    {
+      "name": "upperBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "staleVersion",
+      "status": "PASS"
+    },
+    {
+      "name": "legacyQueueRejected",
+      "status": "PASS"
+    }
+  ]
+}

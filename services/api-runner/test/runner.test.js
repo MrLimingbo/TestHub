@@ -299,6 +299,33 @@ test('a false fixed condition skips exactly its following request without persis
   assert.equal(commands.some((command) => command.includes('https://api.example.test/never')), false)
 })
 
+test('a skipped request preserves the last real response for subsequent conditions and extraction', async () => {
+  const commands = [], requests = []
+  const runner = new ApiRunner({
+    commandClient: { sendCommand: async command => { commands.push(command) } }, readClient: {}, cancelReadClient: {},
+    config: { runnerId: 'runner-test', heartbeatSigningKey: 'a'.repeat(32), controlPlaneUrl: 'https://platform.test',
+      httpExecutionEnabled: true, allowedHttpOrigins: ['https://api.example.test'], precheckDelayMilliseconds: 0 },
+    logger: { info() {}, error() {} }, now: () => new Date('2026-07-14T08:00:00.000Z'),
+    fetcher: async url => url.endsWith('/runtime-leases')
+      ? { ok: true, json: async () => ({ data: { taskId: task.taskId, executionId: task.executionId, lease: 'E'.repeat(43), purpose: 'HTTP_REQUEST_EXECUTION' } }) }
+      : { ok: true, json: async () => ({ data: { contract: 'testhub.api-runner.runtime-configuration', artifactVersion: 5, taskId: task.taskId, executionId: task.executionId,
+        variables: {}, scripts: { preRequestScript: '', postResponseScript: '' }, steps: [
+          { stepId: 'first', type: 'REQUEST', method: 'GET', url: 'https://api.example.test/first', body: '', contentType: '' },
+          { stepId: 'false', type: 'CONDITION', conditionOperator: 'EQUALS', expectedStatusCode: 201 },
+          { stepId: 'skipped', type: 'REQUEST', method: 'GET', url: 'https://api.example.test/never', body: '', contentType: '' },
+          { stepId: 'true', type: 'CONDITION', conditionOperator: 'NOT_EQUALS', expectedStatusCode: 201 },
+          { stepId: 'last', type: 'REQUEST', method: 'GET', url: 'https://api.example.test/last', body: '', contentType: '' },
+          { stepId: 'extract', type: 'EXTRACT', variableName: 'status' },
+        ] } }) },
+    httpExecutor: async request => { requests.push(request.url); return { status: 200, ok: true } },
+  })
+  runner.runtimeConfiguration = 'HTTP_FLOW_CONTROL_SCRIPTS_V2'
+  await runner.handleEntry({ id: '1710000000000-8', fields: task })
+  assert.deepEqual(requests, ['https://api.example.test/first', 'https://api.example.test/last'])
+  assert.ok(commands.some(command => command.includes('SUCCEEDED')))
+  assert.ok(!commands.some(command => command.includes('HTTP_EXECUTION_FAILED')))
+})
+
 test('scripts mutate only the ephemeral Runner variable map and publish redacted aggregate assertion counts', async () => {
   const commands = []
   const requests = []

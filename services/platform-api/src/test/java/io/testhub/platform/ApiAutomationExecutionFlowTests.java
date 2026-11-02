@@ -63,6 +63,30 @@ class ApiAutomationExecutionFlowTests {
     }
 
     @Test
+    void ignoresUnreferencedEnvironmentSecretsInRuntimeSnapshot() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        addParameter(projectId, "runner_runtime_env_secret", "opaque-unused-secret-must-not-copy", true);
+        Csrf csrf = csrf(administrator);
+        MvcResult scenario = mvc.perform(post("/api/v1/projects/{projectId}/api-automation/scenarios", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content("""
+                                {"name":"Runner 执行验收 未引用密钥","environmentCode":"test","variables":{},"steps":[
+                                {"id":"request","type":"REQUEST","name":"读取","config":{"method":"GET","url":"https://api.example.test/echo"}}]}
+                                """))
+                .andExpect(status().isOk()).andReturn();
+        String executionId = createExecution(administrator, projectId, json(scenario).at("/data/id").asText(), 300);
+        mvc.perform(get("/api/v1/projects/{projectId}/api-automation/executions/{executionId}/runtime-snapshot", projectId, executionId)
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.withheldSecretCount").value(0))
+                .andExpect(jsonPath("$.data.snapshot.withheldSecretNames.length()").value(0));
+        String frozen = jdbc.sql("SELECT content FROM api_automation_execution_runtime_snapshot WHERE execution_id = :executionId")
+                .param("executionId", executionId).query(String.class).single();
+        org.junit.jupiter.api.Assertions.assertFalse(frozen.contains("runner_runtime_env_secret"));
+        org.junit.jupiter.api.Assertions.assertFalse(frozen.contains("opaque-unused-secret-must-not-copy"));
+    }
+
+    @Test
     void freezesOnlyStructureAndVariableReferenceMetadataForEachExecution() throws Exception {
         LoginSession administrator = login();
         String projectId = projectId(administrator);

@@ -32,6 +32,14 @@ public class AuditRepository {
                 .param("clientIp", entry.clientIp()).param("detail", toJson(entry.detail())).update();
     }
 
+    public List<String> findActions(String projectId) {
+        return jdbc.sql("""
+                SELECT DISTINCT action FROM audit_log
+                WHERE (:projectId IS NULL OR project_id = :projectId)
+                ORDER BY action
+                """).param("projectId", projectId).query(String.class).list();
+    }
+
     public List<AuditLogEntry> findRecent(String projectId, String action, int limit) {
         return jdbc.sql("""
                 SELECT id, user_id, organization_id, project_id, action, resource_type, resource_id, outcome,

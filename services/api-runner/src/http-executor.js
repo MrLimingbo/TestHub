@@ -2,6 +2,7 @@ import http from 'node:http'
 import https from 'node:https'
 import { lookup } from 'node:dns/promises'
 import net from 'node:net'
+import { Buffer } from 'node:buffer'
 
 function privateAddress(address) {
   if (net.isIP(address) === 4) {
@@ -36,7 +37,8 @@ async function targetAddresses(hostname, allowPrivateNetwork) {
 function requestWithPinnedAddress(request, url, addresses, timeoutMilliseconds) {
   return new Promise((resolve, reject) => {
     const transport = url.protocol === 'https:' ? https : http
-    const headers = request.contentType ? { 'Content-Type': request.contentType } : undefined
+    const headers = request.contentType ? { 'Content-Type': request.contentType } : {}
+    if (request.body) headers['Content-Length'] = Buffer.byteLength(request.body, 'utf8')
     const clientRequest = transport.request({
       protocol: url.protocol,
       hostname: url.hostname.replace(/^\[|\]$/g, ''),

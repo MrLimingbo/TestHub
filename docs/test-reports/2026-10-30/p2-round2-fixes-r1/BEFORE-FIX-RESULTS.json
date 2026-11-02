@@ -1,0 +1,229 @@
+{
+  "records": [
+    {
+      "group": "D20",
+      "layer": "frontend",
+      "total": 13,
+      "passed": 3,
+      "failed": 10,
+      "source": "d20-before-valid.json",
+      "assertions": [
+        {
+          "name": "TC-P2R2-D20-01: scope invalidation before dispatch cancels task",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-02: scope invalidation before dispatch cancels notification",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-03: plugin leave cancels precommit action",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-03: a project selection alone does not cancel a global action",
+          "status": "passed"
+        },
+        {
+          "name": "TC-P2R2-D20-04: A/B/A invalidates task",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-04: A/B/A invalidates notification",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-04: same-account reauthentication invalidates task",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-04: same-account reauthentication invalidates notification",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-04: same-account reauthentication invalidates plugin",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-05: dispatched work keeps its original URL and payload",
+          "status": "passed"
+        },
+        {
+          "name": "TC-P2R2-D20-06: late completion after A/B/A cannot decorate the replacement view",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-07: a cancelled token cannot clear a newer pending action",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D20-08: CSRF authorization refusal never produces a business write",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "D13",
+      "layer": "frontend",
+      "total": 9,
+      "passed": 3,
+      "failed": 6,
+      "source": "d13-before-valid.json",
+      "assertions": [
+        {
+          "name": "TC-P2R2-D13-01: legacy summary clears unrelated credentials without auto execution",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=false",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=true",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D13-03: an ordinary wildcard request is not a historical placeholder",
+          "status": "passed"
+        },
+        {
+          "name": "TC-P2R2-D13-04: reconstructed and explicitly reviewed history can be manually sent",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D13-05: valid encrypted replay does not reject its redacted summary URL",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D13-06: P1 unavailable states remain disabled",
+          "status": "passed"
+        },
+        {
+          "name": "TC-P2R2-D13-07: A/B/A invalidates historical reconstruction approval",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D13-08: new ordinary drafts keep the original API payload without a star blacklist",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "D14",
+      "layer": "frontend",
+      "total": 5,
+      "passed": 0,
+      "failed": 5,
+      "source": "d14-page-before.json",
+      "assertions": [
+        {
+          "name": "TC-P2R2-D14-01: read-only history load keeps old session but prevents sending new draft to it",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D14-03: explicit replacement closes the owned old session before new connect",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D14-04: failed close preserves the old handle and prevents a second connection",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D14-05: late creation after project cleans only its own original-project session",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D14-05: late creation after unmount cleans only its own original-project session",
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "group": "D04",
+      "layer": "frontend",
+      "total": 7,
+      "passed": 1,
+      "failed": 6,
+      "source": "d04-ui-before-valid.json",
+      "assertions": [
+        {
+          "name": "TC-P2R2-D04-01: an action filter never shrinks the options",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D04-02: metadata includes actions outside the current rows",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D04-03: an empty row query leaves the action collection intact",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D04-04: permission loss clears cached action names and rows",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D04-05: metadata failure exposes stale options without pretending they are fresh",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D04-05: delayed metadata cannot overwrite a newer selection",
+          "status": "failed"
+        },
+        {
+          "name": "TC-P2R2-D04-06: row requests retain their original limit",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "D15",
+      "layer": "frontend",
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "source": "d15-before.json",
+      "assertions": [
+        {
+          "name": "TC-P2R2-D15-02: advanced navigation carries full runtime auth in memory with no Web Storage write",
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "group": "D18",
+      "layer": "frontend",
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "source": "d18-ui-before.json",
+      "assertions": [
+        {
+          "name": "TC-P2R2-D18-05: object tab says queue-time resolution and does not promise save-time freezing",
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "group": "D04",
+      "layer": "backend",
+      "total": 5,
+      "passed": 0,
+      "failed": 5,
+      "errors": 0,
+      "source": "d04-backend-before.log",
+      "cause": "new metadata endpoint absent (404)"
+    },
+    {
+      "group": "D18",
+      "layer": "backend",
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "source": "d18-backend-initial.log",
+      "cause": "queue-time behavior already correct; only copy needed correction"
+    }
+  ],
+  "invalidFixtureAttemptsExcluded": true,
+  "formalDenominatorUnchanged": true
+}

@@ -78,7 +78,7 @@ public class ApiAutomationScenarioController {
 
     public record ScenarioRequest(@NotBlank @Size(max = 160) String name, @Size(max = 1200) String description,
                                   @Size(max = 64) String environmentCode, @Size(max = 24) String failureStrategy,
-                                  @NotEmpty @Size(max = 300) List<@Valid StepRequest> steps,
+                                  @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps,
                                   @Size(max = 100) Map<@NotBlank @Size(max = 64) String, @Size(max = 10_000) String> variables,
                                   @Size(max = ApiAutomationScriptPolicy.MAX_SOURCE_LENGTH) String preRequestScript,
                                   @Size(max = ApiAutomationScriptPolicy.MAX_SOURCE_LENGTH) String postResponseScript) {
@@ -86,6 +86,6 @@ public class ApiAutomationScenarioController {
     public record ScenarioUpdateRequest(@NotNull @Valid ScenarioRequest scenario, @Min(1) Integer expectedVersion) {
     }
     public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 24) String type,
-                              @NotBlank @Size(max = 160) String name, @Size(max = 50) Map<String, Object> config) {
+                              @NotBlank @Size(max = 160) String name, @Size(max = 50) @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Config.class) Map<String, Object> config) {
     }
 }

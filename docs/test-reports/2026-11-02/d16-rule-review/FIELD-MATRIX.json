@@ -1,0 +1,251 @@
+{
+  "date": "2026-11-02",
+  "rows": [
+    {
+      "module": "接口自动化",
+      "field": "steps[type=WAIT].config.delayMillis",
+      "kind": "INTEGER",
+      "range": "0..600000毫秒",
+      "missingOrNull": "必填，缺失/null拒绝",
+      "sources": [
+        "C01",
+        "C02",
+        "C03"
+      ]
+    },
+    {
+      "module": "Mock",
+      "field": "priority",
+      "kind": "INTEGER",
+      "range": "0..1000",
+      "missingOrNull": "省略/null为0",
+      "sources": [
+        "C04",
+        "C05"
+      ]
+    },
+    {
+      "module": "Mock",
+      "field": "expiresInDays",
+      "kind": "INTEGER",
+      "range": "1..365天",
+      "missingOrNull": "省略/null为永久有效",
+      "sources": [
+        "C04",
+        "C05"
+      ]
+    },
+    {
+      "module": "Mock",
+      "field": "responseStatus",
+      "kind": "INTEGER",
+      "range": "200..599",
+      "missingOrNull": "省略/null为200",
+      "sources": [
+        "C04",
+        "C05"
+      ]
+    },
+    {
+      "module": "Mock",
+      "field": "requestQuery.* / requestHeaders.* / responseHeaders.* / requestBody / responseBody",
+      "kind": "STRING",
+      "range": "保留原长度、Header和正文匹配规则",
+      "missingOrNull": "保持各字段原空值语义；不把null字符串化",
+      "sources": [
+        "C04",
+        "C05"
+      ]
+    },
+    {
+      "module": "性能测试",
+      "field": "threadGroups[].threadCount",
+      "kind": "INTEGER",
+      "range": "1..100000",
+      "missingOrNull": "必填",
+      "sources": [
+        "C06",
+        "C07"
+      ]
+    },
+    {
+      "module": "性能测试",
+      "field": "threadGroups[].rampUpSeconds",
+      "kind": "INTEGER",
+      "range": "0..86400秒",
+      "missingOrNull": "必填；STEPPED_RAMP要求0",
+      "sources": [
+        "C06",
+        "C07"
+      ]
+    },
+    {
+      "module": "性能测试",
+      "field": "threadGroups[].durationSeconds",
+      "kind": "INTEGER",
+      "range": "10..86400秒",
+      "missingOrNull": "必填",
+      "sources": [
+        "C06",
+        "C07"
+      ]
+    },
+    {
+      "module": "性能测试",
+      "field": "threadGroups[].stepCount / stepIntervalSeconds",
+      "kind": "INTEGER",
+      "range": "阶段2..min(threadCount,20)，间隔1..86400；总时长<=86400",
+      "missingOrNull": "仅STEPPED_RAMP必填；其他模型不允许配置",
+      "sources": [
+        "C06",
+        "C07"
+      ]
+    },
+    {
+      "module": "性能测试",
+      "field": "threadGroups[].targetTps / p95ThresholdMillis / expectedStatusCode / rendezvousUsers",
+      "kind": "INTEGER",
+      "range": "TPS 1..1000000且阶梯TPS>=阶段；P95 1..600000；状态100..599；集合点2..threadCount且阶梯不支持",
+      "missingOrNull": "省略/null无对应设置，既有关联约束保持",
+      "sources": [
+        "C06",
+        "C07"
+      ]
+    },
+    {
+      "module": "性能测试",
+      "field": "threadGroups[].errorThresholdPercent",
+      "kind": "DECIMAL",
+      "range": "0..100，最多两位小数；不得改为整数、不得静默四舍五入",
+      "missingOrNull": "省略/null无阈值",
+      "sources": [
+        "C06",
+        "C07"
+      ]
+    },
+    {
+      "module": "性能测试",
+      "field": "threadGroups[].requestHeaders.* / queryParameters.* / requestBody / responseContains / dataSetCsv",
+      "kind": "STRING",
+      "range": "保留原大小/模板/CSV及方法正文限制",
+      "missingOrNull": "保持原空值语义",
+      "sources": [
+        "C06",
+        "C07"
+      ]
+    },
+    {
+      "module": "Web UI自动化",
+      "field": "viewportWidth / viewportHeight",
+      "kind": "INTEGER",
+      "range": "宽320..3840，高320..2160",
+      "missingOrNull": "省略/null分别1440/900",
+      "sources": [
+        "C08",
+        "C09"
+      ]
+    },
+    {
+      "module": "Web UI自动化",
+      "field": "steps[].timeoutMillis",
+      "kind": "INTEGER",
+      "range": "WAIT 1..60000；其他100..60000毫秒",
+      "missingOrNull": "WAIT必填；其他省略/null沿用Runner默认30000毫秒",
+      "sources": [
+        "C08",
+        "C09",
+        "C18"
+      ]
+    },
+    {
+      "module": "Web UI自动化",
+      "field": "execute.timeoutSeconds",
+      "kind": "INTEGER",
+      "range": "10..3600秒",
+      "missingOrNull": "省略/null为300",
+      "sources": [
+        "C08",
+        "C09"
+      ]
+    },
+    {
+      "module": "Web UI自动化",
+      "field": "variables.* / steps[].value / steps[].expectedText",
+      "kind": "STRING",
+      "range": "保持变量名、大小、换行和步骤所需值规则",
+      "missingOrNull": "沿用既有：变量null可归空串；步骤必填按类型判断",
+      "sources": [
+        "C08",
+        "C09"
+      ]
+    },
+    {
+      "module": "移动端自动化",
+      "field": "steps[].timeoutMillis",
+      "kind": "INTEGER",
+      "range": "1..60000毫秒",
+      "missingOrNull": "省略/null为30000",
+      "sources": [
+        "C10",
+        "C11"
+      ]
+    },
+    {
+      "module": "移动端自动化",
+      "field": "execute.timeoutSeconds",
+      "kind": "INTEGER",
+      "range": "10..3600秒",
+      "missingOrNull": "省略/null为300",
+      "sources": [
+        "C10",
+        "C11"
+      ]
+    },
+    {
+      "module": "移动端自动化",
+      "field": "variables.* / steps[].value / steps[].expectedText",
+      "kind": "STRING",
+      "range": "保持变量名、大小及步骤语义",
+      "missingOrNull": "变量null拒绝；步骤值沿用原规则",
+      "sources": [
+        "C10",
+        "C11"
+      ]
+    },
+    {
+      "module": "质量报告与任务",
+      "field": "taskUpdate.progress",
+      "kind": "INTEGER",
+      "range": "0..100；合法输入后QUEUED归0、SUCCEEDED归100",
+      "missingOrNull": "推荐改为必填；需确认D16-NULL",
+      "sources": [
+        "C12",
+        "C13"
+      ]
+    },
+    {
+      "module": "质量报告与任务",
+      "field": "qualitySchedule.periodDays",
+      "kind": "INTEGER",
+      "range": "1..90天",
+      "missingOrNull": "必填",
+      "sources": [
+        "C14",
+        "C15"
+      ]
+    }
+  ],
+  "scopeClosed": true,
+  "numberRows": 16,
+  "decimalRows": 1,
+  "stringRows": 4,
+  "allRulesPendingReview": true,
+  "excluded": [
+    "expectedVersion及既有428/409规则",
+    "未列String/Map字段及通用API步骤config多类型契约",
+    "Appium设备capabilities的类型扩展",
+    "D19跨平台定位策略",
+    "全局ObjectMapper/JSON转换开关",
+    "历史已存记录/快照/旧密文批量迁移"
+  ]
+}

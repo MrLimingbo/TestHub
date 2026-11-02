@@ -1,8 +1,29 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { Buffer } from 'node:buffer'
 import { executeHttpRequest } from '../src/http-executor.js'
 
 const deadlineAt = new Date(Date.now() + 60_000).toISOString()
+
+for (const method of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
+  test(`${method} transmits UTF-8 bodies with their byte length`, async t => {
+    const http = (await import('node:http')).default
+    const received = []
+    const target = http.createServer(async (request, response) => {
+      const chunks = []
+      for await (const chunk of request) chunks.push(chunk)
+      received.push({ method: request.method, body: Buffer.concat(chunks).toString('utf8'), length: request.headers['content-length'] })
+      response.end('ok')
+    })
+    await new Promise(resolve => target.listen(0, '127.0.0.1', resolve))
+    t.after(() => new Promise(resolve => target.close(resolve)))
+    const origin = `http://127.0.0.1:${target.address().port}`, body = '中文🌟'
+    assert.deepEqual(await executeHttpRequest({ method, url: origin, body, contentType: 'text/plain' }, {
+      allowedHttpOrigins: [origin], allowPrivateNetwork: true, deadlineAt: new Date(Date.now() + 10000).toISOString(),
+    }), { status: 200, ok: true })
+    assert.deepEqual(received, [{ method, body, length: String(Buffer.byteLength(body, 'utf8')) }])
+  })
+}
 
 test('rejects a non-whitelisted HTTP origin before any network request', async () => {
   await assert.rejects(() => executeHttpRequest({ method: 'GET', url: 'https://other.example.test/orders', body: '', contentType: '' }, {

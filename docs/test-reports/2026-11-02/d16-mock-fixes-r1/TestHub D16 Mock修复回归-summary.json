@@ -1,0 +1,104 @@
+{
+  "project": {
+    "name": "TestHub D16 Mock修复回归",
+    "version": "2026-11-02 五项A",
+    "scope": "仅OBS-09-E013；保留原完整迁移/同步及事务契约。其他四个D16模块及9项/12环境/升级退出调查不执行。",
+    "generated_at": "2026-11-02T00:00:00+08:00"
+  },
+  "coverage_definitions": {
+    "requirement_coverage_percent": "有至少一条正式用例引用的需求数 / 需求总数",
+    "acceptance_criteria_coverage_percent": "有至少一条正式用例引用的验收标准数 / 验收标准总数",
+    "design_coverage_percent": "有至少一条正式用例引用的测试设计覆盖项数 / 设计覆盖项总数"
+  },
+  "stats": {
+    "case_count": 40,
+    "requirement_count": 5,
+    "covered_requirement_count": 5,
+    "requirement_coverage_percent": 100.0,
+    "acceptance_criteria_count": 40,
+    "covered_acceptance_criteria_count": 40,
+    "acceptance_criteria_coverage_percent": 100.0,
+    "coverage_item_count": 40,
+    "covered_coverage_item_count": 40,
+    "design_coverage_percent": 100.0,
+    "positive_count": 21,
+    "negative_count": 19,
+    "polarity_counts": {
+      "negative": 19,
+      "positive": 21
+    },
+    "priority_counts": {
+      "P2": 40
+    },
+    "type_counts": {
+      "boundary": 6,
+      "compatibility": 6,
+      "negative": 12,
+      "permission": 1,
+      "positive": 8,
+      "recovery": 1,
+      "state": 2,
+      "usability": 4
+    },
+    "technique_counts": {
+      "acceptance-criteria": 4,
+      "boundary-value-2": 6,
+      "compatibility-configuration": 6,
+      "data-lifecycle": 6,
+      "equivalence-partitioning": 12,
+      "error-guessing": 2,
+      "recovery-idempotency": 1,
+      "role-permission": 1,
+      "state-transition": 2
+    },
+    "module_counts": {
+      "Mock / D16类型规则": 40
+    },
+    "document_review_count": 0,
+    "document_review_type_counts": {},
+    "document_review_severity_counts": {},
+    "evidence_bundle_verified": true,
+    "evidence_reference_count": 255,
+    "unique_evidence_reference_count": 4,
+    "invalid_evidence_reference_count": 0,
+    "verified_evidence_quote_count": 40,
+    "invalid_evidence_quote_count": 0,
+    "visual_observation_count": 0,
+    "confirmed_visual_evidence_count": 0,
+    "exact_duplicate_group_count": 0,
+    "near_duplicate_pair_count": 1,
+    "untraceable_case_count": 0,
+    "case_quality_score": 99.92,
+    "case_quality_gate": "pass",
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "error_count": 0,
+    "warning_count": 1
+  },
+  "quality": {
+    "case_quality_score": 99.92,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 99.5
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "warnings": [
+    "duplicates: near-duplicate cases TC-D16MOCK-02 and TC-D16MOCK-03 (similarity 0.955); consolidate unless coverage targets differ"
+  ],
+  "near_duplicates": [
+    {
+      "left": "TC-D16MOCK-02",
+      "right": "TC-D16MOCK-03",
+      "similarity": 0.955
+    }
+  ],
+  "document_review": []
+}

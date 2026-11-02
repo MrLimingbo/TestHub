@@ -153,6 +153,17 @@ describe('account management forms', () => {
 })
 
 describe('system parameter forms', () => {
+  it('saves an empty ordinary value without showing a required marker', async () => {
+    const { wrapper } = await setup(SystemSettingsPage)
+    button(wrapper, '编辑').vm.$emit('click'); await flushPromises()
+    modal(wrapper).findComponent(Textarea).vm.$emit('update:modelValue', ''); await flushPromises()
+    expect(modal(wrapper).findAll('.arco-form-item-label-required-symbol').length).toBe(1)
+    expect(wrapper.text()).toContain('普通参数可留空')
+    expect(await submit(wrapper)).toBe(true)
+    expect(JSON.parse(String(mutation()[0]![1]!.body))).toEqual({ key: 'qa.mode', value: '' })
+    expect(modal(wrapper).props('visible')).toBe(false)
+  })
+
   it('failed parameter save keeps editor open and pending submit is deduplicated', async () => {
     let release!: (value: unknown) => void
     const { wrapper } = await setup(SystemSettingsPage, (_, init) => init?.method === 'POST' ? new Promise(r => { release = r }) : undefined)

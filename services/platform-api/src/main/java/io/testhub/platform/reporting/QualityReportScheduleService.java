@@ -1,5 +1,6 @@
 package io.testhub.platform.reporting;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
@@ -87,14 +88,15 @@ public class QualityReportScheduleService {
         QualityReportSchedule existing = owned(principal, scheduleId, true);
         lockOrganization(existing.organizationId());
         existing = owned(principal, scheduleId, true);
+        long expectedVersion = expectedVersion(input);
         SchedulePayload payload = payload(principal, input);
         if (!existing.organizationId().equals(payload.organizationId())) {
             throw rejected("定时报告不可跨组织变更项目范围");
         }
         try {
-            if (schedules.update(scheduleId, existing.organizationId(), payload.name(), payload.projectIds(), payload.cronExpression(),
-                    payload.timezone(), payload.periodDays(), payload.enabled()) == 0) {
-                throw notFound("质量报告计划不存在");
+            if (schedules.updateVersioned(scheduleId, existing.organizationId(), payload.name(), payload.projectIds(), payload.cronExpression(),
+                    payload.timezone(), payload.periodDays(), payload.enabled(), expectedVersion) == 0) {
+                throw conflict("质量报告计划已被其他成员更新，请读取最新版本、核对草稿后再保存");
             }
         } catch (DataIntegrityViolationException exception) {
             throw conflict("当前组织已存在同名质量报告计划");
@@ -293,5 +295,20 @@ public class QualityReportScheduleService {
     record SchedulePayload(String organizationId, String name, List<String> projectIds, String cronExpression,
                                    String timezone, int periodDays, boolean enabled) { }
     public record ScheduleInput(String name, List<String> projectIds, String cronExpression, String timezone,
-                                Integer periodDays, Boolean enabled) { }
+                                Integer periodDays, Boolean enabled, JsonNode expectedVersion) {
+        public ScheduleInput(String name, List<String> projectIds, String cronExpression, String timezone,
+                             Integer periodDays, Boolean enabled) {
+            this(name, projectIds, cronExpression, timezone, periodDays, enabled, null);
+        }
+    }
+    private long expectedVersion(ScheduleInput input) {
+        JsonNode version = input == null ? null : input.expectedVersion();
+        if (version == null || version.isNull()) {
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_REQUIRED, "修改质量报告计划必须提供expectedVersion，请读取最新版本");
+        }
+        if (!version.isIntegralNumber() || !version.canConvertToLong() || version.longValue() < 0) {
+            throw rejected("expectedVersion必须为非负整数");
+        }
+        return version.longValue();
+    }
 }

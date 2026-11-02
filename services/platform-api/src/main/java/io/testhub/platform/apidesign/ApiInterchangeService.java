@@ -121,8 +121,9 @@ public class ApiInterchangeService {
                 requestBody.putObject("content").putObject("application/json")
                         .set("example", jsonOrText(version.requestBody()));
             }
-            ObjectNode response = operation.putObject("responses").putObject("200");
-            response.put("description", "Success");
+            int statusCode = responseStatus(version.exampleResponse());
+            ObjectNode response = operation.putObject("responses").putObject(Integer.toString(statusCode));
+            response.put("description", harStatusText(statusCode));
             response.putObject("content").putObject("application/json")
                     .set("example", jsonOrText(version.responseBody()));
         }
@@ -217,16 +218,19 @@ public class ApiInterchangeService {
         if (version == null) throw rejected("接口尚未创建版本");
 
         String url = normalizeBaseUrl(baseUrl) + definition.path() + queryString(parameters(version.requestQuery()));
-        StringBuilder command = new StringBuilder("curl -X ").append(definition.method()).append(" '").append(url).append("'");
+        StringBuilder command = new StringBuilder("curl -X ").append(definition.method()).append(" ").append(shellQuote(url));
         for (ApiDesignService.ParameterInput header : parameters(version.requestHeaders())) {
-            command.append(" \\\n  -H '").append(header.name()).append(":");
-            if (!header.example().isBlank()) command.append(" ").append(header.example());
-            command.append("'");
+            String value = header.name() + ":" + (header.example().isBlank() ? "" : " " + header.example());
+            command.append(" \\\n  -H ").append(shellQuote(value));
         }
         if (!version.requestBody().isBlank()) {
-            command.append(" \\\n  --data-raw '").append(version.requestBody().replace("'", "'\\\"'\\\"'")).append("'");
+            command.append(" \\\n  --data-raw ").append(shellQuote(version.requestBody()));
         }
         return command.toString();
+    }
+
+    private String shellQuote(String value) {
+        return "'" + value.replace("'", "'\"'\"'") + "'";
     }
 
     private PostmanImportPlan postmanImportPlan(JsonNode collection, String catalogId) {
@@ -707,9 +711,10 @@ public class ApiInterchangeService {
             body.putObject("options").putObject("raw").put("language", version.requestBody().trim().startsWith("{") || version.requestBody().trim().startsWith("[") ? "json" : "text");
         }
         ObjectNode response = item.putArray("response").addObject();
-        response.put("name", "Success");
-        response.put("status", "OK");
-        response.put("code", 200);
+        int statusCode = responseStatus(version.exampleResponse());
+        response.put("name", harStatusText(statusCode));
+        response.put("status", harStatusText(statusCode));
+        response.put("code", statusCode);
         response.put("body", version.responseBody());
     }
 
@@ -764,11 +769,22 @@ public class ApiInterchangeService {
     }
 
     private int responseStatus(String exampleResponse) {
+        if (exampleResponse == null || exampleResponse.isBlank()) return 200;
         try {
-            int statusCode = json.readTree(exampleResponse).path("statusCode").asInt(200);
-            return statusCode >= 100 && statusCode <= 599 ? statusCode : 200;
-        } catch (JsonProcessingException exception) {
-            return 200;
+            JsonNode metadata = json.readTree(exampleResponse);
+            if (metadata == null || metadata.isNull() || metadata.isMissingNode()
+                    || metadata.isTextual() && metadata.asText().isBlank()) return 200;
+            if (!metadata.isObject()) throw rejected("响应状态元数据格式不合法，未导出，请修正后重试");
+            JsonNode value = metadata.get("statusCode");
+            if (value == null || value.isNull()) return 200;
+            int status;
+            if (value.isIntegralNumber() && value.canConvertToInt()) status = value.intValue();
+            else if (value.isTextual() && value.asText().trim().matches("[0-9]+")) status = Integer.parseInt(value.asText().trim());
+            else throw rejected("响应状态码必须为100至599的整数，未导出，请修正后重试");
+            if (status < 100 || status > 599) throw rejected("响应状态码必须为100至599的整数，未导出，请修正后重试");
+            return status;
+        } catch (JsonProcessingException | NumberFormatException exception) {
+            throw rejected("响应状态元数据不合法，未导出，请修正后重试");
         }
     }
 
@@ -782,6 +798,7 @@ public class ApiInterchangeService {
 
     private String harStatusText(int statusCode) {
         return switch (statusCode) {
+            case 200 -> "OK";
             case 201 -> "Created";
             case 202 -> "Accepted";
             case 204 -> "No Content";
@@ -791,13 +808,17 @@ public class ApiInterchangeService {
             case 404 -> "Not Found";
             case 409 -> "Conflict";
             case 500 -> "Internal Server Error";
-            default -> "OK";
+            default -> "HTTP " + statusCode;
         };
     }
 
     private List<ApiDesignService.DefinitionInput> openApiDefinitions(JsonNode document, String catalogId) {
-        boolean swagger2 = document.has("swagger") && document.path("swagger").asText().startsWith("2.");
-        if (!swagger2 && !document.has("openapi")) throw rejected("仅支持 OpenAPI 3.x 或 Swagger 2.0 文档");
+        boolean swagger2 = document.path("swagger").isTextual() && document.path("swagger").asText().equals("2.0");
+        boolean openApi3 = document.path("openapi").isTextual()
+                && document.path("openapi").asText().matches("3\\.(?:0|1)\\.[0-9]+");
+        if (document.has("swagger") && document.has("openapi") || !swagger2 && !openApi3) {
+            throw rejected("仅支持 OpenAPI 3.0/3.1 或 Swagger 2.0 文档");
+        }
         JsonNode paths = document.path("paths");
         if (!paths.isObject()) throw rejected("OpenAPI 文档缺少 paths 节点");
 
@@ -825,7 +846,7 @@ public class ApiInterchangeService {
                 String name = summary.isBlank() ? method.toUpperCase(Locale.ROOT) + " " + path : summary;
                 result.add(new ApiDesignService.DefinitionInput(catalogId, method.toUpperCase(Locale.ROOT), path, name, version,
                         summary, operation.path("description").asText(""), headers, query, pathParameters,
-                        requestBody, responseBody, Map.of("statusCode", 200)));
+                        requestBody, responseBody, Map.of("statusCode", openApiResponseStatus(operation.path("responses")))));
             });
         });
         return result;
@@ -836,6 +857,8 @@ public class ApiInterchangeService {
         if (tokens.isEmpty() || !tokens.getFirst().equals("curl")) throw rejected("cURL 命令必须以 curl 开头");
 
         String method = "GET";
+        boolean explicitMethod = false;
+        boolean hasData = false;
         String url = null;
         String data = "";
         List<ApiDesignService.ParameterInput> headers = new ArrayList<>();
@@ -843,15 +866,17 @@ public class ApiInterchangeService {
             String token = tokens.get(index);
             if ((token.equals("-X") || token.equals("--request")) && index + 1 < tokens.size()) {
                 method = tokens.get(++index).toUpperCase(Locale.ROOT);
+                explicitMethod = true;
             } else if ((token.equals("-H") || token.equals("--header")) && index + 1 < tokens.size()) {
                 headers.add(header(tokens.get(++index)));
             } else if ((token.equals("-d") || token.equals("--data") || token.equals("--data-raw") || token.equals("--data-binary")) && index + 1 < tokens.size()) {
                 data = tokens.get(++index);
-                if (method.equals("GET")) method = "POST";
+                hasData = true;
             } else if (!token.startsWith("-") && url == null) {
                 url = token;
             }
         }
+        if (!explicitMethod && hasData) method = "POST";
         if (url == null) throw rejected("cURL 命令缺少请求 URL");
 
         URI uri;
@@ -920,11 +945,27 @@ public class ApiInterchangeService {
 
     private String responseBody(JsonNode responses) {
         if (!responses.isObject()) return "{}";
-        JsonNode response = responses.has("200") ? responses.path("200")
-                : responses.has("201") ? responses.path("201") : responses.path("default");
+        JsonNode response = responses.path(primaryResponseKey(responses));
         JsonNode media = response.path("content").path("application/json");
         return printable(media.has("example") ? media.path("example")
                 : media.isMissingNode() ? response.path("schema") : media.path("schema"));
+    }
+
+    private String primaryResponseKey(JsonNode responses) {
+        if (responses.has("200")) return "200";
+        if (responses.has("201")) return "201";
+        if (responses.has("default")) return "default";
+        var keys = responses.fieldNames();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            if (key.matches("[1-5][0-9]{2}")) return key;
+        }
+        return "default";
+    }
+
+    private int openApiResponseStatus(JsonNode responses) {
+        String key = primaryResponseKey(responses);
+        return key.equals("default") ? 200 : Integer.parseInt(key);
     }
 
     private void appendParameters(ArrayNode target, String source, String location) {

@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-30",
+  "status": "PASS",
+  "decisionGroupCount": 6,
+  "distinctCoveredObservations": 8,
+  "acceptanceGroupCount": 43,
+  "ledgerCounts": {
+    "APPROVED": 16,
+    "PROPOSED_PENDING_RULE_REVIEW": 8,
+    "DEFERRED_NOT_IMPLEMENTED": 23
+  },
+  "sourceFilesUnchanged": 1216,
+  "sourceFileSetUnchanged": true,
+  "allLocalMarkdownLinksResolve": true,
+  "priorP1FrozenIndexUnchanged": true,
+  "applicationTestsExecuted": false,
+  "note": "仅文档结构、覆盖、哈希、引用和范围一致性核验，不是新的功能测试通过。",
+  "markdownMatchesStructuredDecisionCards": true,
+  "gitDiffCheck": "PASS"
+}

@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useSessionStore } from '@/stores/session'
+import { useRouter } from 'vue-router'
 
 interface ApiEnvelope<T> { data: T }
 interface Account {
@@ -22,6 +23,7 @@ interface AccountPage {
 }
 
 const session = useSessionStore()
+const router = useRouter()
 const accounts = ref<Account[]>([])
 const loading = ref(false)
 const loadError = ref('')
@@ -174,7 +176,11 @@ async function savePassword(): Promise<boolean> {
     if (disposed || sequence !== passwordSequence) return false
     passwordDialogVisible.value = false
     passwordForm.password = ''; passwordForm.confirmPassword = ''
-    Message.success(`账号“${account.account}”的密码已修改`)
+    if (account.id === session.profile?.id) {
+      session.clearSession()
+      Message.success('密码已修改，旧登录会话已失效，请重新登录')
+      await router.replace('/login')
+    } else Message.success(`账号“${account.account}”的密码已修改，原登录会话已失效`)
     return true
   } catch (error) {
     if (!disposed && sequence === passwordSequence) Message.error(error instanceof Error ? error.message : '修改密码失败')
@@ -275,7 +281,7 @@ onBeforeUnmount(() => { disposed = true; requestSequence++; formSequence++; canc
             <a-input v-model="form.account" :max-length="160" placeholder="例如：tester01" />
           </a-form-item>
           <a-form-item label="姓名">
-            <a-input v-model="form.displayName" :max-length="80" placeholder="未填写时使用账号" />
+            <a-input v-model="form.displayName" :max-length="80" placeholder="留空时从账号生成（最多80字符）" />
           </a-form-item>
           <a-form-item label="邮箱">
             <a-input v-model="form.email" :max-length="190" placeholder="未填写时自动生成系统邮箱" />
@@ -296,7 +302,7 @@ onBeforeUnmount(() => { disposed = true; requestSequence++; formSequence++; canc
       :on-before-ok="savePassword"
       @cancel="cancelPassword"
     >
-      <a-alert type="warning" class="password-alert">修改后原密码立即失效，请将新密码安全地告知对应账号使用人。</a-alert>
+      <a-alert type="warning" class="password-alert">修改后原密码和该账号的旧登录会话立即失效；修改自己的密码后需重新登录。现有PAT按原规则保留。</a-alert>
       <a-form :model="passwordForm" layout="vertical">
         <a-form-item label="新密码" required extra="密码长度为 5 到 72 个字符，且不能超过 72 字节。">
           <a-input-password v-model="passwordForm.password" :max-length="72" placeholder="请输入新密码" />

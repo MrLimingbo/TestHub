@@ -141,7 +141,7 @@ public class FunctionalTestExecutionService {
         FunctionalTestPlan plan = requirePlan(projectId, planId);
         List<FunctionalTestPlanCase> planCases = executions.findPlanCases(projectId, planId);
         if (planCases.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "测试计划至少需要包含一个用例");
-        String runName = name == null || name.isBlank() ? plan.name() + " · 执行批次" : required(name, 200, "执行批次名称");
+        String runName = name == null || name.isBlank() ? defaultRunName(plan.name()) : required(name, 200, "执行批次名称");
         String runId = UlidCreator.getUlid().toString();
         executions.insertRun(runId, project.organizationId(), projectId, planId, runName, "NOT_STARTED", principal.userId());
         for (FunctionalTestPlanCase planCase : planCases) {
@@ -278,6 +278,13 @@ public class FunctionalTestExecutionService {
         String normalized = value == null ? "NOT_RUN" : value.trim().toUpperCase(Locale.ROOT);
         if (!STEP_STATUSES.contains(normalized)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "步骤结果不合法");
         return normalized;
+    }
+
+    private String defaultRunName(String planName) {
+        String suffix = " · 执行批次";
+        int end = Math.min(planName.length(), 200 - suffix.length());
+        if (end < planName.length() && Character.isHighSurrogate(planName.charAt(end - 1))) end--;
+        return planName.substring(0, end) + suffix;
     }
 
     private String required(String value, int max, String label) {

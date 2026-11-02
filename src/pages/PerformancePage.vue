@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import PerformanceExecutionChart from '@/components/PerformanceExecutionChart.vue'
@@ -195,6 +195,10 @@ let detailRequest = 0
 let plansRequest = 0
 let operationalRequest = 0
 let reportRequest = 0
+let disposed = false
+let projectRevision = 0
+let editorRevision = 0
+let editingTarget: { id: string; version: number } | undefined
 const planForm = reactive<{ name: string; description: string; status: Plan['status']; threadGroups: ThreadGroupInput[] }>({
   name: '', description: '', status: 'DRAFT', threadGroups: [],
 })
@@ -295,7 +299,7 @@ function groupPayload(group: ThreadGroupInput) {
     p95ThresholdMillis: group.p95ThresholdMillis, errorThresholdPercent: group.errorThresholdPercent,
     requestMethod: group.requestMethod, requestHeaders: requestHeaders(group.requestHeadersText),
     queryParameters: queryParameters(group.queryParametersText),
-    requestBody: group.requestBody?.trim() || undefined, expectedStatusCode: group.expectedStatusCode,
+    requestBody: group.requestBody?.trim() ? group.requestBody : undefined, expectedStatusCode: group.expectedStatusCode,
     responseContains: group.responseContains?.trim() || undefined, dataSetCsv: group.dataSetCsv || undefined,
     rendezvousUsers: group.rendezvousUsers,
   }
@@ -331,54 +335,92 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
   if (!response.ok) throw new Error(body.message ?? '请求失败，请稍后重试')
   return body.data
 }
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, current?: () => boolean): Promise<T> {
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (current && !current()) throw new Error('操作已取消，请重新打开计划。')
   return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) })
 }
+function projectGuard() {
+  const project = projectId.value, revision = projectRevision
+  return () => !disposed && project === projectId.value && revision === projectRevision
+}
+function invalidateEditor() {
+  editorRevision++
+  saving.value = false
+}
+watch(planDialog, visible => { if (!visible) invalidateEditor() }, { flush: 'sync' })
+watch(projectId, () => {
+  projectRevision++
+  invalidateEditor()
+  planDialog.value = false
+  detailRequest++
+  plansRequest++
+  operationalRequest++
+  closeReport()
+}, { flush: 'sync' })
 async function loadDetail() {
+  if (disposed) return
   const request = ++detailRequest
   const project = projectId.value
   const plan = selectedPlanId.value
+  const sameProject = projectGuard()
+  const current = () => sameProject() && request === detailRequest && plan === selectedPlanId.value
   selectedDetail.value = null
-  const detail = plan ? await read<PlanDetail>(`/api/v1/projects/${project}/performance/plans/${plan}`) : null
-  if (request === detailRequest && project === projectId.value && plan === selectedPlanId.value) selectedDetail.value = detail
+  try {
+    const detail = plan ? await read<PlanDetail>(`/api/v1/projects/${project}/performance/plans/${plan}`) : null
+    if (current()) selectedDetail.value = detail
+  } catch (error) { if (current()) throw error }
 }
-async function loadPlans() {
+async function loadPlans(owner: () => boolean = () => true) {
+  if (disposed || !owner()) return
   const request = ++plansRequest
   const project = projectId.value
-  const data = await read<Plan[]>(`/api/v1/projects/${project}/performance/plans`)
-  if (request !== plansRequest || project !== projectId.value) return
-  plans.value = data
-  if (selectedPlanId.value && !plans.value.some((plan) => plan.id === selectedPlanId.value)) selectedPlanId.value = ''
-  if (!selectedPlanId.value && plans.value[0]) selectedPlanId.value = plans.value[0].id
-  await loadDetail()
+  const sameProject = projectGuard()
+  const current = () => sameProject() && request === plansRequest && owner()
+  try {
+    const data = await read<Plan[]>(`/api/v1/projects/${project}/performance/plans`)
+    if (!current()) return
+    plans.value = data
+    if (selectedPlanId.value && !plans.value.some((plan) => plan.id === selectedPlanId.value)) selectedPlanId.value = ''
+    if (!selectedPlanId.value && plans.value[0]) selectedPlanId.value = plans.value[0].id
+    await loadDetail()
+  } catch (error) { if (current()) throw error }
 }
 async function loadOperationalData() {
-  if (!projectId.value) return
+  if (disposed || !projectId.value) return
   const request = ++operationalRequest
   const project = projectId.value
-  const [executionData, runnerData] = await Promise.all([
-    read<PerformanceExecution[]>(`/api/v1/projects/${projectId.value}/performance/executions`),
-    read<RunnerStatus[]>(`/api/v1/projects/${projectId.value}/performance/runner-status`),
-  ])
-  if (request !== operationalRequest || project !== projectId.value) return
-  executions.value = executionData
-  runners.value = runnerData
-  operationalError.value = ''
+  const sameProject = projectGuard()
+  const current = () => sameProject() && request === operationalRequest
+  try {
+    const [executionData, runnerData] = await Promise.all([
+      read<PerformanceExecution[]>(`/api/v1/projects/${project}/performance/executions`),
+      read<RunnerStatus[]>(`/api/v1/projects/${project}/performance/runner-status`),
+    ])
+    if (!current()) return
+    executions.value = executionData
+    runners.value = runnerData
+    operationalError.value = ''
+  } catch (error) { if (current()) throw error }
 }
 async function load() {
+  let current = projectGuard()
   loading.value = true
   try {
-    context.value = await read<Context>('/api/v1/access/context')
+    const data = await read<Context>('/api/v1/access/context')
+    if (!current()) return
+    context.value = data
     projectId.value = session.resolveProjectId(projects.value)
-    if (projectId.value) { await loadPlans(); await loadOperationalData() }
+    current = projectGuard()
+    if (projectId.value) { await loadPlans(); if (current()) await loadOperationalData() }
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载压测计划失败')
+    if (current()) Message.error(error instanceof Error ? error.message : '加载压测计划失败')
   } finally {
-    loading.value = false
+    if (current()) loading.value = false
   }
 }
 async function changeProject() {
+  const current = projectGuard()
   closeReport()
   planDialog.value = false
   plans.value = []
@@ -386,19 +428,23 @@ async function changeProject() {
   runners.value = []
   selectedPlanId.value = ''
   selectedDetail.value = null
-  try { await loadPlans(); await loadOperationalData() } catch (error) { Message.error(error instanceof Error ? error.message : '切换项目失败') }
+  try { await loadPlans(); if (current()) await loadOperationalData() } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '切换项目失败') }
 }
 async function selectPlan(id: string) {
   selectedPlanId.value = id
   try { await loadDetail() } catch (error) { Message.error(error instanceof Error ? error.message : '加载计划详情失败') }
 }
 function openCreate() {
+  invalidateEditor()
+  editingTarget = undefined
   editing.value = false
   resetForm()
   planDialog.value = true
 }
 function openEdit() {
   if (!selectedDetail.value) return
+  invalidateEditor()
+  editingTarget = { id: selectedDetail.value.id, version: selectedDetail.value.version }
   editing.value = true
   Object.assign(planForm, { name: selectedDetail.value.name, description: selectedDetail.value.description, status: selectedDetail.value.status, threadGroups: selectedDetail.value.threadGroups.map(copyGroup) })
   planDialog.value = true
@@ -410,33 +456,40 @@ function removeThreadGroup(index: number) {
   if (planForm.threadGroups.length > 1) planForm.threadGroups.splice(index, 1)
 }
 async function savePlan() {
+  if (saving.value || !planDialog.value || disposed) return false
+  const project = projectId.value, revision = editorRevision, target = editingTarget
+  const sameProject = projectGuard()
+  const current = () => sameProject() && revision === editorRevision && planDialog.value
   saving.value = true
   try {
     const payload = { name: planForm.name, description: planForm.description, status: planForm.status, threadGroups: planForm.threadGroups.map(groupPayload) }
-    const detail = editing.value && selectedDetail.value
-      ? await mutate<PlanDetail>(`/api/v1/projects/${projectId.value}/performance/plans/${selectedDetail.value.id}`, 'PUT', { expectedVersion: selectedDetail.value.version, plan: payload })
-      : await mutate<PlanDetail>(`/api/v1/projects/${projectId.value}/performance/plans`, 'POST', payload)
-    planDialog.value = false
+    const detail = target
+      ? await mutate<PlanDetail>(`/api/v1/projects/${project}/performance/plans/${target.id}`, 'PUT', { expectedVersion: target.version, plan: payload }, current)
+      : await mutate<PlanDetail>(`/api/v1/projects/${project}/performance/plans`, 'POST', payload, current)
+    if (!current()) return false
     selectedPlanId.value = detail.id
-    await loadPlans()
-    Message.success(editing.value ? '压测计划已更新' : '压测计划已创建')
-    return true
+    await loadPlans(current)
+    if (!current()) return false
+    Message.success(target ? '压测计划已更新' : '压测计划已创建')
+    planDialog.value = false
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '保存压测计划失败')
-    return false
+    if (current()) Message.error(error instanceof Error ? error.message : '保存压测计划失败')
   } finally {
-    saving.value = false
+    if (current()) saving.value = false
   }
+  // Close only the owning dialog above; Arco must not close a later replacement.
+  return false
 }
 async function deletePlan() {
   if (!selectedDetail.value) return
+  const project = projectId.value, plan = selectedDetail.value.id, current = projectGuard()
   try {
-    await mutate<void>(`/api/v1/projects/${projectId.value}/performance/plans/${selectedDetail.value.id}`, 'DELETE')
-    selectedPlanId.value = ''
+    await mutate<void>(`/api/v1/projects/${project}/performance/plans/${plan}`, 'DELETE', undefined, current)
+    if (!current()) return
     await loadPlans()
-    Message.success('压测计划已删除')
+    if (current()) Message.success('压测计划已删除')
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '删除压测计划失败')
+    if (current()) Message.error(error instanceof Error ? error.message : '删除压测计划失败')
   }
 }
 async function submitExecution() {
@@ -520,6 +573,8 @@ onMounted(() => {
   operationalTimer = window.setInterval(() => { if (projectId.value) void loadOperationalData().catch(error => { operationalError.value = error instanceof Error ? error.message : '刷新执行状态失败' }) }, 2000)
 })
 onBeforeUnmount(() => {
+  disposed = true
+  invalidateEditor()
   if (preparingEngine.value && localDesktop) void cancelEnginePreparation()
   if (engineTimer !== undefined) window.clearInterval(engineTimer)
   if (operationalTimer !== undefined) window.clearInterval(operationalTimer)

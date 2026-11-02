@@ -1,0 +1,293 @@
+{
+  "baselineFileCount": 1328,
+  "unchangedPriorSourceFiles": 1303,
+  "modifiedPriorSourceFiles": 25,
+  "changes": [
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/account/UserAccount.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "56d78a5c68c4aee28bc8973343faff55bd2c30e3bfbf6a8fd0e8de59ff9ac4c5",
+      "afterSha256": "420b2043fdd52e7dfed30a9a4c2f25f261b94b712fab01537050c1669decfd03"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/account/UserAccountRepository.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "eab451d88f3abf39f91cab631f88e307f24a6b8f0fe361682b73f0e1e7c2e444",
+      "afterSha256": "6e51864f00e9825c170826f0fd43fb574c33ab95a027e49e19e7be40582eb185"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationExecutionService.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "f20ac90461e2d1554fb4ecdede2ecf010c4110fecc45be1509a8a6807e605402",
+      "afterSha256": "9d2c501f2281a03ca01d0005760e94caa5b3f677055f332fa5f59e37bc46f6e6"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScheduleService.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "403f9d285d7c4557f1fb8ee554694fe19b754fef364c1dd7c90a242669d76352",
+      "afterSha256": "db8178c082b7b3a1ca5ee3cc1b96f6a189a10af2001b7a0f85370ad6d171cfd8"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugHistory.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "d92e1c3cefc01ad6018c6e64e29c767a1eee15de441d5a95bbc31b3740e10b48",
+      "afterSha256": "67af6668093950eb40dd6af61ccff49dafed895ba5e491a68f7b858989b8ac99"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugHistoryRepository.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "9b3d10a9e99de9e146ab9bd58210f89cdbe6d643ac6a95694a1f7a74ca1bc9e2",
+      "afterSha256": "b547f797bc1dff59789b1018c141392f6978c76f7d99460e1c5da3853bd9db73"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugService.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "79f7ede4766a15862376977e0f7e1fc4b39eb8d827b95b4f22016040bffd2fec",
+      "afterSha256": "fa6c446e51f0ec2fc4ca6bbc38f4e050960e51e8da1e9e316b416d64af39e45e"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/apidebug/GrpcDebugService.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "ee2c6c49a456a263a5801e625b607a5899ed7a5705ed1538fc4693d5a35051bd",
+      "afterSha256": "b21d9dfffe86f2a408571fa50dfcbe9aae2b50a8c1f7bd64a1b179f9d6f12f0b"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterRepository.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "b887469c2c8a99ecd22f2b376444b19d89805ca7830c9cc43277f6a39cc2804e",
+      "afterSha256": "67f5e880184a772eb97868b80f4ced7739e3b4274ad5f1b66ee86bb3bd7f9736"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/security/SecurityConfiguration.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "3db2792a097597a05bd5d1b0b508873863c7e60fa6c6c6ee3eff18e95139fce9",
+      "afterSha256": "5158691cc09a072b6b00f8a8d062b8adc0c7b0eb7aba732b402a38c70b51a803"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/shared/api/ApiExceptionHandler.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "eb553e7be3807b09d12b7d4d58fc05922ec084400f04148254d342c2441942f6",
+      "afterSha256": "ea3ca8600b91bd4c5652d5584df5e84e55709227314ae4304ad632476c605060"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/storage/MinioConfiguration.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "7d2d7b7ce55d3ca620dbc6a5b9e1fd7734b559296eb541b652d65e58e5a06956",
+      "afterSha256": "67ef2bf03f4727e400b6560110a539860e3b5eb936f4d83bf3051d53150604ce"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/storage/MinioObjectStorage.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "69ea42bbb273145906c212e6acab5059778cf97108cd90a02958ed3be55e9ff4",
+      "afterSha256": "b09522efd5af7b4af6cea91bf42b43d1d9b1a48408ab043ed305d92a74499e1c"
+    },
+    {
+      "file": "services/platform-api/src/main/resources/application-desktop.yml",
+      "kind": "MODIFIED",
+      "beforeSha256": "2eb111ee108025c5b5169c1a9e44ce2b7f2998ce222f97fdd6b231e0e8e903b9",
+      "afterSha256": "32e235fe848827ac76e645d3ccca10c4e3c747f6bcecb74092fd1789491f783c"
+    },
+    {
+      "file": "services/platform-api/src/main/resources/application.yml",
+      "kind": "MODIFIED",
+      "beforeSha256": "74709bcad46fc53f976b2a460264388dbbf290308a5bb37395b6292dc2707448",
+      "afterSha256": "9a8e12e20e2c7ff787dfad2d700b9dc16991c04056c58036a8418695e8d6cff6"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/ApiTransferFlowTests.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "5db0d570e04ad79daf6e4bad8c167ba2087cf1091ff63bdf666bce70f51a1479",
+      "afterSha256": "76efe4a4386a4e15a18ea698b3b8d5074359b485cdbc98f1c1d0725556c4da2b"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/ProjectSettingsSyncFlowTests.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "8ce401ba419e128ecb0d09058f394c3a2eae8b3b6d604197a4e69c3ef440792c",
+      "afterSha256": "ccdba0210c1141af591dbe86af1b0816ca951e1d475e72ce45c2ecce209ea15b"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/UiAutomationFlowTests.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "c613b36387ad6b33850e0b5e7328a318a95782f210b8c3f7dd98b54e77e8b83e",
+      "afterSha256": "0bcac73e4a33367479c3de0d0eb1b3f486949038a4c8a596841226f5cd79815e"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/desktop/DesktopBackupToolTests.java",
+      "kind": "MODIFIED",
+      "beforeSha256": "eb0c03dfdb384b76108daca0a1f2432c2c0b7921cb18459e46a521519afa190a",
+      "afterSha256": "45726d72189bd4bfcc788c1d5a014b183fa4596114f00bcc8d894bd846b91e00"
+    },
+    {
+      "file": "src/pages/AccountManagementPage.vue",
+      "kind": "MODIFIED",
+      "beforeSha256": "9882ee917ebf6125869e9a556a5163734ea7e02a1b9e967ab142bf21ce4d71aa",
+      "afterSha256": "a9aae48b97b9b26cd71d901e794ceac7dfa05614aea52523c2974e13149d0349"
+    },
+    {
+      "file": "src/pages/ApiDebugPage.vue",
+      "kind": "MODIFIED",
+      "beforeSha256": "703eec27fb243a8c78e23f057b779259170564b7e37bd33cbd272c2e65f95c4c",
+      "afterSha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8"
+    },
+    {
+      "file": "src/pages/ApiDesignPage.vue",
+      "kind": "MODIFIED",
+      "beforeSha256": "9b74925e76540d63e67be279fdb0f784dd20cda11edd7739e68eae623b875c62",
+      "afterSha256": "e6afc3bbf3bbdc99968beb054348c5ac72f1a59337ad229773a2292fe23b7753"
+    },
+    {
+      "file": "src/test/apiDebugDraft.test.ts",
+      "kind": "MODIFIED",
+      "beforeSha256": "71b2c05de14208fd1fe2f9ae5259abee33f20cf93ec97a4d08d249840271bed5",
+      "afterSha256": "5fae5738fe65c01fad0d4a76c0fa0fb08fb77153b7c70a0ede8d3031a4130cd1"
+    },
+    {
+      "file": "src/test/apiDebugFixes.test.ts",
+      "kind": "MODIFIED",
+      "beforeSha256": "8e249534a1c62fb77ca1181b8dab6cb7961dd4f67a377142fb0fae70961aa13f",
+      "afterSha256": "5beea7eba847805aea8f64345e7e6ba761dfe06bd8200f0e255b8a3dd9759b29"
+    },
+    {
+      "file": "src/utils/apiDebugDraft.ts",
+      "kind": "MODIFIED",
+      "beforeSha256": "13f698ac8b825a8ed0f1bb605599786b336bd13ee1d33cee0e7f7bee93a70106",
+      "afterSha256": "055de9fd8aa56c0f0b2204b82ee2d745de803eb5e7dea87668d5884319ecbf8d"
+    },
+    {
+      "file": "scripts/qa/p1-desktop-http.mjs",
+      "kind": "ADDED",
+      "afterSha256": "e4de35e179d12dd863c01590e7857e398dc52bfa65fe2fb619b1cf7544e4708a"
+    },
+    {
+      "file": "scripts/qa/p1-observation-ui.mjs",
+      "kind": "ADDED",
+      "afterSha256": "5a54bb160f6f06735b512e2c0d2f45a276a7774a964492f7580a44eb346fd40f"
+    },
+    {
+      "file": "scripts/qa/test-p1-backend.mjs",
+      "kind": "ADDED",
+      "afterSha256": "c27d954a0141231a0818b2971c7e6125f501e35564d81070fa7fdc899dfba95c"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugReplayPolicy.java",
+      "kind": "ADDED",
+      "afterSha256": "4c2b0077c2b6bdda9522393b89cb4fda2dc5118137158d99216bf83ff742a946"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugReplayRetention.java",
+      "kind": "ADDED",
+      "afterSha256": "8a0d72393d4efe0de0f80116287574f90e869119e4bf9db3fc8fac095e3c05bd"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/security/AccountSessionValidationFilter.java",
+      "kind": "ADDED",
+      "afterSha256": "82a36995efbe23eab84720b84e63e60ab448439489ec1f79c3ceb375926403c8"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/shared/api/DependencyFailures.java",
+      "kind": "ADDED",
+      "afterSha256": "1eeebb4623ccba8cd43fcfa0e73a1e54f14bae1c73bfacf3fedb382834d4cc4e"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/shared/api/DependencyUnavailableFilter.java",
+      "kind": "ADDED",
+      "afterSha256": "51e5efbfc8941bb94935d1224d0b3669bc1093ca8c814389e1137ed8e9d3fb99"
+    },
+    {
+      "file": "services/platform-api/src/main/java/io/testhub/platform/shared/api/HealthProbeFilter.java",
+      "kind": "ADDED",
+      "afterSha256": "b7acaa613c1d5d5fbd4c02888f768a2371a431fc179dab6155a45f9816e2bbca"
+    },
+    {
+      "file": "services/platform-api/src/main/resources/db/desktop/V54__account_security_version.sql",
+      "kind": "ADDED",
+      "afterSha256": "c1f25cfa38355502f5430d875468465e12078708c220e5376b7785650dd2bf60"
+    },
+    {
+      "file": "services/platform-api/src/main/resources/db/desktop/V55__api_debug_replay_retention.sql",
+      "kind": "ADDED",
+      "afterSha256": "ba9c78cb068f7120e64e41cdacc8dcf6224d0cfca1b49c2dc709a096b22ffa9a"
+    },
+    {
+      "file": "services/platform-api/src/main/resources/db/migration/V110__account_security_version.sql",
+      "kind": "ADDED",
+      "afterSha256": "c1f25cfa38355502f5430d875468465e12078708c220e5376b7785650dd2bf60"
+    },
+    {
+      "file": "services/platform-api/src/main/resources/db/migration/V111__api_debug_replay_retention.sql",
+      "kind": "ADDED",
+      "afterSha256": "ba9c78cb068f7120e64e41cdacc8dcf6224d0cfca1b49c2dc709a096b22ffa9a"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/p1fixtures/P1HealthFixtureConfiguration.java",
+      "kind": "ADDED",
+      "afterSha256": "a5f83758728769f303a24a35a7bdf4e83c5239b99f6f5ded3bc4d3232ebb31f6"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1CompatibilityTests.java",
+      "kind": "ADDED",
+      "afterSha256": "f337310badeca9291872251e77e5f2655496b95fdde57c0145b3b4b46221a95b"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1DisabledEnvironmentFlowTests.java",
+      "kind": "ADDED",
+      "afterSha256": "57acf07bd5835d81080940d6fdb8ba89c662e20964029b98e75db07f7f0f369b"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1FlowTestSupport.java",
+      "kind": "ADDED",
+      "afterSha256": "51ca5c9ce3f93fbce33a1dd6bb803898117e149ae27f05763de8f389886f084d"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1HealthDeadlineFlowTests.java",
+      "kind": "ADDED",
+      "afterSha256": "40f4a76dc0e2be80c9bc8c576e496f5a9605b905f6eace2139c86b7ed255d997"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1HistoryPermissionFlowTests.java",
+      "kind": "ADDED",
+      "afterSha256": "5c2320a770546b0423bc29a3a897b4e82e4b46afbf09a29b31c206ca089e6128"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1ParameterRulesFlowTests.java",
+      "kind": "ADDED",
+      "afterSha256": "8e8b22ee4ba00f263381ebd38cb6c5e41b7b22bdfcc5f59f9cafc169acffffce"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1RedisHttpFlowTests.java",
+      "kind": "ADDED",
+      "afterSha256": "5ab549a9b8a5162d6b717acec4edcee7dba2da7ea9fa1b799df699038db44b04"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1ReplayRulesFlowTests.java",
+      "kind": "ADDED",
+      "afterSha256": "3ef9e7d43aa0808d998aad877c48f60c8a4f8ece74b57b631de26adddf5602c5"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/P1SessionRulesFlowTests.java",
+      "kind": "ADDED",
+      "afterSha256": "bcc5a3821fc0765b26a820425df408d3c61170935055e5e51b3766647cc47f5d"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/apidebug/P1ReplayFailureTests.java",
+      "kind": "ADDED",
+      "afterSha256": "00bb29a2109aff734f80917bb40689e90f7f0b78a33388d72ce6523266829569"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/shared/api/P1DependencyFailureTests.java",
+      "kind": "ADDED",
+      "afterSha256": "1d3086e344d4d50bc341938985958a1a1dbc21e8cfa583d77b209988bbd37b6b"
+    },
+    {
+      "file": "services/platform-api/src/test/java/io/testhub/platform/storage/P1StorageProbeTests.java",
+      "kind": "ADDED",
+      "afterSha256": "039089f69799ce1f29f363c077c07d48b926a55b74bf4d8fe7522f25f54deea1"
+    },
+    {
+      "file": "src/test/p1AccountSessionUi.test.ts",
+      "kind": "ADDED",
+      "afterSha256": "9bb80257251d5c264b860c9607e37389006498e3be7bc00348cd152a92b41f75"
+    }
+  ],
+  "note": "Compared against the source snapshot taken before this batch. Prior unrelated working-tree changes were preserved; no commit, branch or deployment performed."
+}

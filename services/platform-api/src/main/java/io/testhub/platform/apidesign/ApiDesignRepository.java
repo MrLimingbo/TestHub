@@ -20,6 +20,11 @@ public class ApiDesignRepository {
         this.objectMapper = objectMapper;
     }
 
+    public void lockProject(String projectId) {
+        jdbc.sql("SELECT id FROM project WHERE id=:projectId FOR UPDATE")
+                .param("projectId", projectId).query(String.class).single();
+    }
+
     public List<ApiCatalog> findCatalogs(String projectId) {
         return jdbc.sql("""
                 SELECT id, organization_id, project_id, parent_id, name, sort_order, created_by, created_at

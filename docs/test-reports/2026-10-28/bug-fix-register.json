@@ -1,0 +1,2071 @@
+[
+  {
+    "id": "QA-AUTH-001",
+    "module": "01",
+    "moduleName": "登录、注册与会话",
+    "title": "合法长邮箱登录触发会话字段溢出",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-01-auth/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-01-auth/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "01",
+    "verificationEvidence": "output/qa-20261023/module-01-auth/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-AUTH-002",
+    "module": "01",
+    "moduleName": "登录、注册与会话",
+    "title": "退出失败仍清空客户端身份",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-01-auth/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-01-auth/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "01",
+    "verificationEvidence": "output/qa-20261023/module-01-auth/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-AUTH-003",
+    "module": "01",
+    "moduleName": "登录、注册与会话",
+    "title": "初始化失败导致登录页不可用",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-01-auth/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-01-auth/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "01",
+    "verificationEvidence": "output/qa-20261023/module-01-auth/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-AUTH-004",
+    "module": "01",
+    "moduleName": "登录、注册与会话",
+    "title": "缓存认证状态阻止失效会话重新登录",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-01-auth/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-01-auth/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "01",
+    "verificationEvidence": "output/qa-20261023/module-01-auth/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-DASH-001",
+    "module": "02",
+    "moduleName": "工作台",
+    "title": "UTC 下汇总有执行，趋势却漏计",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-02-dashboard/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-02-dashboard/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "02",
+    "verificationEvidence": "output/qa-20261023/module-02-dashboard/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-DASH-002",
+    "module": "02",
+    "moduleName": "工作台",
+    "title": "旧30天请求晚到，覆盖当前7天数据",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-02-dashboard/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-02-dashboard/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "02",
+    "verificationEvidence": "output/qa-20261023/module-02-dashboard/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-DASH-003",
+    "module": "02",
+    "moduleName": "工作台",
+    "title": "非法周期参数被错误归类为500",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-02-dashboard/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-02-dashboard/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "02",
+    "verificationEvidence": "output/qa-20261023/module-02-dashboard/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-DASH-004",
+    "module": "02",
+    "moduleName": "工作台",
+    "title": "图表绘图区宽度不随容器变化",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-02-dashboard/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-02-dashboard/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "02",
+    "verificationEvidence": "output/qa-20261023/module-02-dashboard/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-PROJ-001",
+    "module": "03A",
+    "moduleName": "项目管理与成员权限",
+    "title": "撤销或停用不能使PAT派生会话立即失效",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-03a-projects/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-03a-projects/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "03A",
+    "verificationEvidence": "output/qa-20261023/module-03a-projects/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-PROJ-002",
+    "module": "03A",
+    "moduleName": "项目管理与成员权限",
+    "title": "新成员账号长度与姓名上限冲突",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-03a-projects/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-03a-projects/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "03A",
+    "verificationEvidence": "output/qa-20261023/module-03a-projects/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-PROJ-003",
+    "module": "03A",
+    "moduleName": "项目管理与成员权限",
+    "title": "scope数组含null时返回500",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-03a-projects/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-03a-projects/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "03A",
+    "verificationEvidence": "output/qa-20261023/module-03a-projects/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-PROJ-004",
+    "module": "03A",
+    "moduleName": "项目管理与成员权限",
+    "title": "同标识并发创建项目返回内部错误",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-03a-projects/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-03a-projects/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "03A",
+    "verificationEvidence": "output/qa-20261023/module-03a-projects/BUGS.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-ENV-001",
+    "module": "03B",
+    "moduleName": "项目环境、参数与密钥",
+    "title": "合法名称长度触发500",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-03b-environments/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-03b-environments/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "16",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verificationCases": [
+      "16/K001"
+    ]
+  },
+  {
+    "id": "QA-ENV-002",
+    "module": "03B",
+    "moduleName": "项目环境、参数与密钥",
+    "title": "参数删除可移除环境派生BASE_URL",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-03b-environments/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-03b-environments/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "16",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verificationCases": [
+      "16/K002"
+    ]
+  },
+  {
+    "id": "QA-ENV-003",
+    "module": "03B",
+    "moduleName": "项目环境、参数与密钥",
+    "title": "同名密钥可替换派生BASE_URL",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261023/module-03b-environments/BUGS.md",
+    "sourceExecution": "output/qa-20261023/module-03b-environments/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "16",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verificationCases": [
+      "16/K003"
+    ]
+  },
+  {
+    "id": "QA-AUDIT-001",
+    "module": "03C",
+    "moduleName": "文件管理与操作日志",
+    "title": "迟到请求覆盖当前筛选",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03c-files-audit/BUGS.md",
+    "sourceExecution": "output/qa-20261024/module-03c-files-audit/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "16",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verificationCases": [
+      "16/K008"
+    ]
+  },
+  {
+    "id": "QA-FILE-001",
+    "module": "03C",
+    "moduleName": "文件管理与操作日志",
+    "title": "上传请求结构错误被归为500",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03c-files-audit/BUGS.md",
+    "sourceExecution": "output/qa-20261024/module-03c-files-audit/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "16",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verificationCases": [
+      "16/K004"
+    ]
+  },
+  {
+    "id": "QA-FILE-002",
+    "module": "03C",
+    "moduleName": "文件管理与操作日志",
+    "title": "保存成功的文件随后无法下载",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03c-files-audit/BUGS.md",
+    "sourceExecution": "output/qa-20261024/module-03c-files-audit/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "16",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verificationCases": [
+      "16/K005"
+    ]
+  },
+  {
+    "id": "QA-FILE-003",
+    "module": "03C",
+    "moduleName": "文件管理与操作日志",
+    "title": "上传审计失败后保留文件",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03c-files-audit/BUGS.md",
+    "sourceExecution": "output/qa-20261024/module-03c-files-audit/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "16",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verificationCases": [
+      "16/K006"
+    ]
+  },
+  {
+    "id": "QA-FILE-004",
+    "module": "03C",
+    "moduleName": "文件管理与操作日志",
+    "title": "删除失败后元数据仍在、原字节已失",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03c-files-audit/BUGS.md",
+    "sourceExecution": "output/qa-20261024/module-03c-files-audit/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "16",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verificationCases": [
+      "16/K007"
+    ]
+  },
+  {
+    "id": "QA-ACCOUNT-001",
+    "module": "03D",
+    "moduleName": "账号管理与系统参数",
+    "title": "账号邮箱交叉重名与歧义登录",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-03d-accounts-config/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "03D",
+    "verificationEvidence": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-ACCOUNT-002",
+    "module": "03D",
+    "moduleName": "账号管理与系统参数",
+    "title": "长账号生成默认姓名超出80字符",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-03d-accounts-config/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "03D",
+    "verificationEvidence": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-ACCOUNT-003",
+    "module": "03D",
+    "moduleName": "账号管理与系统参数",
+    "title": "停用账号登录返回内部错误",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-03d-accounts-config/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "03D",
+    "verificationEvidence": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-CONFIG-001",
+    "module": "03D",
+    "moduleName": "账号管理与系统参数",
+    "title": "普通配置空值无法保存",
+    "severity": "见来源报告",
+    "caseIds": [],
+    "sourceBugReport": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-03d-accounts-config/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "03D",
+    "verificationEvidence": "output/qa-20261024/module-03d-accounts-config/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": []
+  },
+  {
+    "id": "QA-FUNC-001",
+    "module": "04",
+    "moduleName": "功能测试资产与治理",
+    "title": "同项目同Tab根目录允许同名新增、重命名及并发创建",
+    "severity": "P2",
+    "caseIds": [
+      "A003",
+      "A012"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-04-functional-assets/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "04",
+    "verificationEvidence": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "04/A003",
+      "04/A012"
+    ]
+  },
+  {
+    "id": "QA-FUNC-002",
+    "module": "04",
+    "moduleName": "功能测试资产与治理",
+    "title": "删除被用例引用的需求返回500",
+    "severity": "P2",
+    "caseIds": [
+      "E001"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-04-functional-assets/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "04",
+    "verificationEvidence": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "04/E001"
+    ]
+  },
+  {
+    "id": "QA-FUNC-003",
+    "module": "04",
+    "moduleName": "功能测试资产与治理",
+    "title": "标签绑定查询缺少必填参数被归类为500",
+    "severity": "P3",
+    "caseIds": [
+      "E002"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-04-functional-assets/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "04",
+    "verificationEvidence": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "04/E002"
+    ]
+  },
+  {
+    "id": "QA-FUNC-004",
+    "module": "04",
+    "moduleName": "功能测试资产与治理",
+    "title": "迟到的需求保存关闭后来打开的新草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E006"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-04-functional-assets/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "04",
+    "verificationEvidence": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "04/E006"
+    ]
+  },
+  {
+    "id": "QA-FUNC-005",
+    "module": "04",
+    "moduleName": "功能测试资产与治理",
+    "title": "下拉字段切换为文本后隐藏选项仍提交，导致无法保存",
+    "severity": "P2",
+    "caseIds": [
+      "E007"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-04-functional-assets/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "04",
+    "verificationEvidence": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "04/E007"
+    ]
+  },
+  {
+    "id": "QA-FUNC-006",
+    "module": "04",
+    "moduleName": "功能测试资产与治理",
+    "title": "部分批删失败后保留已删除行与选择，重试重复删除",
+    "severity": "P2",
+    "caseIds": [
+      "E008"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-04-functional-assets/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "04",
+    "verificationEvidence": "output/qa-20261024/module-04-functional-assets/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "04/E008"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-001",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "合法长计划名生成默认批次返回500",
+    "severity": "P2",
+    "caseIds": [
+      "E001"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E001"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-002",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "Excel导入缺少file返回500",
+    "severity": "P3",
+    "caseIds": [
+      "X023"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/X023"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-003",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "Excel导入绕过需求说明20000字符约束",
+    "severity": "P2",
+    "caseIds": [
+      "E004"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E004"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-004",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "迟到计划详情覆盖当前选中计划的用例范围",
+    "severity": "P1",
+    "caseIds": [
+      "E006"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E006"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-005",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "迟到步骤响应覆盖新选执行用例",
+    "severity": "P1",
+    "caseIds": [
+      "E007"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E007"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-006",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "迟到缺陷关联覆盖另一缺陷的详情抽屉",
+    "severity": "P2",
+    "caseIds": [
+      "E008"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E008"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-007",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "旧计划保存回调关闭新草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E009"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E009"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-008",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "旧缺陷保存回调关闭新草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E010"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E010"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-009",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "旧版本保存回调关闭新草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E011"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E011"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-010",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "测试计划部分批删失败后仍显示已删除记录",
+    "severity": "P2",
+    "caseIds": [
+      "E012"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E012"
+    ]
+  },
+  {
+    "id": "QA-DELIVERY-011",
+    "module": "05",
+    "moduleName": "测试计划与交付",
+    "title": "缺陷部分批删失败后仍显示已删除记录",
+    "severity": "P2",
+    "caseIds": [
+      "E013"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-05-plans-delivery/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "05",
+    "verificationEvidence": "output/qa-20261024/module-05-plans-delivery/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "05/E013"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-001",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "请求参数数组含null项返回500",
+    "severity": "P2",
+    "caseIds": [
+      "D055"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/D055"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-002",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "并发创建同名根目录产生重复记录",
+    "severity": "P2",
+    "caseIds": [
+      "E001"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/E001"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-003",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "OpenAPI4.0被当作支持格式导入",
+    "severity": "P2",
+    "caseIds": [
+      "E002"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/E002"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-004",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "导出cURL对单引号转义错误，无法往返导入",
+    "severity": "P2",
+    "caseIds": [
+      "I028",
+      "E004"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/I028",
+      "06/E004"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-005",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "显式GET加data时被错误改为POST，且结果依赖选项顺序",
+    "severity": "P2",
+    "caseIds": [
+      "E005"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/E005"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-006",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "旧目录保存回调关闭新目录草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E008"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/E008"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-007",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "旧接口保存回调关闭新接口草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E009"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/E009"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-008",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "旧版本保存回调关闭新版本快照草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E010"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/E010"
+    ]
+  },
+  {
+    "id": "QA-DESIGN-009",
+    "module": "06",
+    "moduleName": "接口设计与导入",
+    "title": "旧导入结果覆盖新导入会话，未提交却显示导入完成",
+    "severity": "P2",
+    "caseIds": [
+      "E011"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-06-api-design/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "06",
+    "verificationEvidence": "output/qa-20261024/module-06-api-design/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "06/E011"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-001",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "Query API Key重复编码，改变查询值和已有编码路径",
+    "severity": "P2",
+    "caseIds": [
+      "E001"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/E001"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-002",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "WebSocket仍允许使用停用环境建立真实连接",
+    "severity": "P2",
+    "caseIds": [
+      "E004"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/E004"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-003",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "gRPC Unary仍允许使用停用环境执行",
+    "severity": "P2",
+    "caseIds": [
+      "E005"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/E005"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-004",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "客户端流/双向流发送上限行为与“自动取消”声明不一致",
+    "severity": "P2",
+    "caseIds": [
+      "T012",
+      "T013",
+      "T019",
+      "T020"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/T012",
+      "07/T013",
+      "07/T019",
+      "07/T020"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-005",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "载入非默认环境历史后，变量列表仍显示默认环境数据",
+    "severity": "P2",
+    "caseIds": [
+      "U007"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/U007"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-006",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "旧“保存为接口”响应关闭新接口草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E008"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/E008"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-007",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "旧在线反射结果覆盖新离线描述符的成功发现结果",
+    "severity": "P2",
+    "caseIds": [
+      "E009"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/E009"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-008",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "旧WS连接完成后跨项目读取错误会话并误报已连接",
+    "severity": "P2",
+    "caseIds": [
+      "E010"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/E010"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-009",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "gRPC历史回放把Metadata key丢失为“: trace”",
+    "severity": "P2",
+    "caseIds": [
+      "E011"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/E011"
+    ]
+  },
+  {
+    "id": "QA-DEBUG-010",
+    "module": "07",
+    "moduleName": "接口调试",
+    "title": "正式接口必填Query/Header为空仍发送且被静默省略",
+    "severity": "P2",
+    "caseIds": [
+      "F002"
+    ],
+    "sourceBugReport": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261024/module-07-api-debug/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "07",
+    "verificationEvidence": "output/qa-20261024/module-07-api-debug/regression-r1/BUG-REGRESSION.md",
+    "verificationCases": [
+      "07/F002"
+    ]
+  },
+  {
+    "id": "QA-AUTO-001",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "场景步骤数组包含null时返回500",
+    "severity": "P2",
+    "caseIds": [
+      "S007"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/S007"
+    ]
+  },
+  {
+    "id": "QA-AUTO-002",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "未引用的环境密钥也会阻断合法HTTP执行",
+    "severity": "P1",
+    "caseIds": [
+      "D012"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/D012"
+    ]
+  },
+  {
+    "id": "QA-AUTO-003",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "Runner发送DELETE/OPTIONS正文缺少消息长度边界",
+    "severity": "P1",
+    "caseIds": [
+      "X002"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/X002"
+    ]
+  },
+  {
+    "id": "QA-AUTO-004",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "条件跳过请求后丢失最近HTTP状态，后续合法条件失败",
+    "severity": "P2",
+    "caseIds": [
+      "X006"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/X006"
+    ]
+  },
+  {
+    "id": "QA-AUTO-005",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "旧新建场景响应清空重新打开的场景草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E001"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/E001"
+    ]
+  },
+  {
+    "id": "QA-AUTO-006",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "旧场景保存响应覆盖后来选中的场景B",
+    "severity": "P2",
+    "caseIds": [
+      "E002"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/E002"
+    ]
+  },
+  {
+    "id": "QA-AUTO-007",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "较早的场景A详情覆盖已经加载完成的B",
+    "severity": "P2",
+    "caseIds": [
+      "E003"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/E003"
+    ]
+  },
+  {
+    "id": "QA-AUTO-008",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "旧数据集保存响应关闭新数据集草稿并打开旧预览",
+    "severity": "P1",
+    "caseIds": [
+      "E004"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/E004"
+    ]
+  },
+  {
+    "id": "QA-AUTO-009",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "旧运行配置创建响应关闭新配置草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E005"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/E005"
+    ]
+  },
+  {
+    "id": "QA-AUTO-010",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "旧计划保存响应关闭重新打开的新计划草稿",
+    "severity": "P1",
+    "caseIds": [
+      "E006"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/E006"
+    ]
+  },
+  {
+    "id": "QA-AUTO-011",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "切换项目后旧列表回调用新项目路径读取旧场景",
+    "severity": "P2",
+    "caseIds": [
+      "E008"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/E008"
+    ]
+  },
+  {
+    "id": "QA-AUTO-012",
+    "module": "08",
+    "moduleName": "接口自动化",
+    "title": "变量覆盖修改后迟到的旧来源预览重新出现",
+    "severity": "P2",
+    "caseIds": [
+      "E009"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-08-api-automation/regression-r1/execution-results.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "08",
+    "verificationEvidence": "output/qa-20261026/module-08-api-automation/regression-r1/BUGS.md",
+    "verificationCases": [
+      "08/E009"
+    ]
+  },
+  {
+    "id": "QA-MOCK-001",
+    "module": "09",
+    "moduleName": "Mock",
+    "title": "JSON子集接受尾随垃圾或多个根，非法JSON仍可命中",
+    "severity": "P1",
+    "caseIds": [
+      "R006",
+      "M012"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "09",
+    "verificationEvidence": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "09/R006",
+      "09/M012"
+    ]
+  },
+  {
+    "id": "QA-MOCK-002",
+    "module": "09",
+    "moduleName": "Mock",
+    "title": "条件或响应头map包含null值时触发500",
+    "severity": "P2",
+    "caseIds": [
+      "E009",
+      "E010",
+      "E011"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "09",
+    "verificationEvidence": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "09/E009",
+      "09/E010",
+      "09/E011"
+    ]
+  },
+  {
+    "id": "QA-MOCK-003",
+    "module": "09",
+    "moduleName": "Mock",
+    "title": "同项目重复创建同名服务返回内部500",
+    "severity": "P2",
+    "caseIds": [
+      "E014"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "09",
+    "verificationEvidence": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "09/E014"
+    ]
+  },
+  {
+    "id": "QA-MOCK-004",
+    "module": "09",
+    "moduleName": "Mock",
+    "title": "旧新建服务响应关闭新草稿，切项目后仍读取旧服务",
+    "severity": "P1",
+    "caseIds": [
+      "E001",
+      "E004"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "09",
+    "verificationEvidence": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "09/E001",
+      "09/E004"
+    ]
+  },
+  {
+    "id": "QA-MOCK-005",
+    "module": "09",
+    "moduleName": "Mock",
+    "title": "旧分享创建响应关闭新草稿或混入后来选中的服务",
+    "severity": "P1",
+    "caseIds": [
+      "E002",
+      "E003"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "09",
+    "verificationEvidence": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "09/E002",
+      "09/E003"
+    ]
+  },
+  {
+    "id": "QA-MOCK-006",
+    "module": "09",
+    "moduleName": "Mock",
+    "title": "A/B/A切换后，较早的规则列表覆盖新规则",
+    "severity": "P2",
+    "caseIds": [
+      "E006"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "09",
+    "verificationEvidence": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "09/E006"
+    ]
+  },
+  {
+    "id": "QA-MOCK-007",
+    "module": "09",
+    "moduleName": "Mock",
+    "title": "A/B/A切换后，较早的智能来源覆盖新发布接口",
+    "severity": "P2",
+    "caseIds": [
+      "E007"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "09",
+    "verificationEvidence": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "09/E007"
+    ]
+  },
+  {
+    "id": "QA-MOCK-008",
+    "module": "09",
+    "moduleName": "Mock",
+    "title": "A/B/A切换后，较早的分享列表覆盖新分享",
+    "severity": "P2",
+    "caseIds": [
+      "E008"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261026/module-09-mock-regression/execution-regression.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "09",
+    "verificationEvidence": "output/qa-20261026/module-09-mock-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "09/E008"
+    ]
+  },
+  {
+    "id": "QA-PERF-001",
+    "module": "10",
+    "moduleName": "性能测试",
+    "title": "计划保存缺少会话与生命周期校验，取消或切换后的旧操作仍生效",
+    "severity": "P1",
+    "caseIds": [
+      "E001",
+      "E002",
+      "E003",
+      "E004",
+      "E005",
+      "E009"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-10-performance-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "10",
+    "verificationEvidence": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+    "verificationCases": [
+      "10/E001",
+      "10/E002",
+      "10/E003",
+      "10/E004",
+      "10/E005",
+      "10/E009"
+    ]
+  },
+  {
+    "id": "QA-PERF-002",
+    "module": "10",
+    "moduleName": "性能测试",
+    "title": "旧删除响应重置后来选中的计划",
+    "severity": "P2",
+    "caseIds": [
+      "E006"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-10-performance-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "10",
+    "verificationEvidence": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+    "verificationCases": [
+      "10/E006"
+    ]
+  },
+  {
+    "id": "QA-PERF-003",
+    "module": "10",
+    "moduleName": "性能测试",
+    "title": "旧计划详情失败在新选择上弹出过期错误",
+    "severity": "P2",
+    "caseIds": [
+      "E007"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-10-performance-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "10",
+    "verificationEvidence": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+    "verificationCases": [
+      "10/E007"
+    ]
+  },
+  {
+    "id": "QA-PERF-004",
+    "module": "10",
+    "moduleName": "性能测试",
+    "title": "页面保存时裁剪原始请求正文首尾空白",
+    "severity": "P2",
+    "caseIds": [
+      "U018"
+    ],
+    "sourceBugReport": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261026/module-10-performance-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "10",
+    "verificationEvidence": "output/qa-20261026/module-10-performance-regression/BUGS.md",
+    "verificationCases": [
+      "10/U018"
+    ]
+  },
+  {
+    "id": "QA-UI-001",
+    "module": "11",
+    "moduleName": "Web UI自动化",
+    "title": "浏览器项目保存缺少会话归属，取消后的旧操作影响新草稿或继续加载资源",
+    "severity": "P2",
+    "caseIds": [
+      "E001",
+      "E002",
+      "E003",
+      "E015",
+      "E016"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-11-web-ui-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "11",
+    "verificationEvidence": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "verificationCases": [
+      "11/E001",
+      "11/E002",
+      "11/E003",
+      "11/E015",
+      "11/E016"
+    ]
+  },
+  {
+    "id": "QA-UI-002",
+    "module": "11",
+    "moduleName": "Web UI自动化",
+    "title": "页面对象取消保存后仍写入，迟到成功还会关闭新草稿",
+    "severity": "P2",
+    "caseIds": [
+      "E004",
+      "E005",
+      "E006"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-11-web-ui-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "11",
+    "verificationEvidence": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "verificationCases": [
+      "11/E004",
+      "11/E005",
+      "11/E006"
+    ]
+  },
+  {
+    "id": "QA-UI-003",
+    "module": "11",
+    "moduleName": "Web UI自动化",
+    "title": "场景新建和编辑的旧保存回调关闭新草稿，CSRF取消仍创建场景",
+    "severity": "P2",
+    "caseIds": [
+      "E007",
+      "E008",
+      "E009"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-11-web-ui-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "11",
+    "verificationEvidence": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "verificationCases": [
+      "11/E007",
+      "11/E008",
+      "11/E009"
+    ]
+  },
+  {
+    "id": "QA-UI-004",
+    "module": "11",
+    "moduleName": "Web UI自动化",
+    "title": "定时计划取消后的旧保存仍生效并关闭后来打开的计划表单",
+    "severity": "P2",
+    "caseIds": [
+      "E010",
+      "E011",
+      "E012"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-11-web-ui-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "11",
+    "verificationEvidence": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "verificationCases": [
+      "11/E010",
+      "11/E011",
+      "11/E012"
+    ]
+  },
+  {
+    "id": "QA-UI-005",
+    "module": "11",
+    "moduleName": "Web UI自动化",
+    "title": "取消执行弹窗后仍在CSRF返回时补发场景排队",
+    "severity": "P1",
+    "caseIds": [
+      "E013"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-11-web-ui-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "11",
+    "verificationEvidence": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "verificationCases": [
+      "11/E013"
+    ]
+  },
+  {
+    "id": "QA-UI-006",
+    "module": "11",
+    "moduleName": "Web UI自动化",
+    "title": "首次加载尚未完成时离页，旧组件仍重新加载七类资产",
+    "severity": "P3",
+    "caseIds": [
+      "E018"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-11-web-ui-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "11",
+    "verificationEvidence": "output/qa-20261027/module-11-web-ui-regression/BUGS.md",
+    "verificationCases": [
+      "11/E018"
+    ]
+  },
+  {
+    "id": "QA-MOB-001",
+    "module": "12",
+    "moduleName": "移动端自动化",
+    "title": "设备保存缺少操作归属：取消后仍提交，旧响应关闭新草稿",
+    "severity": "P2",
+    "caseIds": [
+      "E001",
+      "E002",
+      "E003",
+      "E015",
+      "E016"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "12",
+    "verificationEvidence": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "verificationCases": [
+      "12/E001",
+      "12/E002",
+      "12/E003",
+      "12/E015",
+      "12/E016"
+    ]
+  },
+  {
+    "id": "QA-MOB-002",
+    "module": "12",
+    "moduleName": "移动端自动化",
+    "title": "应用保存缺少操作归属：取消后仍提交，旧响应关闭新草稿",
+    "severity": "P2",
+    "caseIds": [
+      "E004",
+      "E005",
+      "E006"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "12",
+    "verificationEvidence": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "verificationCases": [
+      "12/E004",
+      "12/E005",
+      "12/E006"
+    ]
+  },
+  {
+    "id": "QA-MOB-003",
+    "module": "12",
+    "moduleName": "移动端自动化",
+    "title": "元素对象保存缺少操作归属：取消后仍提交，旧响应关闭新草稿",
+    "severity": "P2",
+    "caseIds": [
+      "E007",
+      "E008",
+      "E009"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "12",
+    "verificationEvidence": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "verificationCases": [
+      "12/E007",
+      "12/E008",
+      "12/E009"
+    ]
+  },
+  {
+    "id": "QA-MOB-004",
+    "module": "12",
+    "moduleName": "移动端自动化",
+    "title": "场景保存缺少操作归属：取消后仍提交，旧响应关闭新草稿",
+    "severity": "P2",
+    "caseIds": [
+      "E010",
+      "E011",
+      "E012"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "12",
+    "verificationEvidence": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "verificationCases": [
+      "12/E010",
+      "12/E011",
+      "12/E012"
+    ]
+  },
+  {
+    "id": "QA-MOB-005",
+    "module": "12",
+    "moduleName": "移动端自动化",
+    "title": "取消执行后等待中的CSRF仍触发入队，旧执行响应关闭新执行窗口",
+    "severity": "P1",
+    "caseIds": [
+      "E013",
+      "E014"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "12",
+    "verificationEvidence": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "verificationCases": [
+      "12/E013",
+      "12/E014"
+    ]
+  },
+  {
+    "id": "QA-MOB-006",
+    "module": "12",
+    "moduleName": "移动端自动化",
+    "title": "离开移动端页面后，初始context迟到响应仍触发资产请求",
+    "severity": "P3",
+    "caseIds": [
+      "E018"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "12",
+    "verificationEvidence": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "verificationCases": [
+      "12/E018"
+    ]
+  },
+  {
+    "id": "QA-MOB-007",
+    "module": "12",
+    "moduleName": "移动端自动化",
+    "title": "切换项目后，旧项目轮询失败仍显示全局错误",
+    "severity": "P3",
+    "caseIds": [
+      "E017"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "12",
+    "verificationEvidence": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "verificationCases": [
+      "12/E017"
+    ]
+  },
+  {
+    "id": "QA-MOB-008",
+    "module": "12",
+    "moduleName": "移动端自动化",
+    "title": "引擎首尾空白绕过Android/iOS平台不匹配校验",
+    "severity": "P2",
+    "caseIds": [
+      "E021"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "sourceExecution": "output/qa-20261027/module-12-mobile-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "12",
+    "verificationEvidence": "output/qa-20261027/module-12-mobile-regression/BUGS.md",
+    "verificationCases": [
+      "12/E021"
+    ]
+  },
+  {
+    "id": "QA-QT-001",
+    "module": "13",
+    "moduleName": "质量报告与任务",
+    "title": "报告计划保存等待CSRF时取消，旧草稿仍被创建",
+    "severity": "P2",
+    "caseIds": [
+      "E001",
+      "E002"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-13-quality-tasks-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "13",
+    "verificationEvidence": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "13/E001",
+      "13/E002"
+    ]
+  },
+  {
+    "id": "QA-QT-002",
+    "module": "13",
+    "moduleName": "质量报告与任务",
+    "title": "旧计划保存后的列表刷新回调关闭新草稿",
+    "severity": "P2",
+    "caseIds": [
+      "E004"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-13-quality-tasks-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "13",
+    "verificationEvidence": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "13/E004"
+    ]
+  },
+  {
+    "id": "QA-QT-003",
+    "module": "13",
+    "moduleName": "质量报告与任务",
+    "title": "手工任务保存等待CSRF时取消，旧登记仍被创建",
+    "severity": "P2",
+    "caseIds": [
+      "E006",
+      "E007"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-13-quality-tasks-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "13",
+    "verificationEvidence": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "13/E006",
+      "13/E007"
+    ]
+  },
+  {
+    "id": "QA-QT-004",
+    "module": "13",
+    "moduleName": "质量报告与任务",
+    "title": "报告计划运行或删除的迟到回调在离页后继续刷新并提示",
+    "severity": "P3",
+    "caseIds": [
+      "E011",
+      "E012"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-13-quality-tasks-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "13",
+    "verificationEvidence": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "13/E011",
+      "13/E012"
+    ]
+  },
+  {
+    "id": "QA-QT-005",
+    "module": "13",
+    "moduleName": "质量报告与任务",
+    "title": "CSV导出失败在离页后仍显示旧错误提示",
+    "severity": "P3",
+    "caseIds": [
+      "E013"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-13-quality-tasks-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "13",
+    "verificationEvidence": "output/qa-20261027/module-13-quality-tasks-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "13/E013"
+    ]
+  },
+  {
+    "id": "QA-NIO-001",
+    "module": "14",
+    "moduleName": "通知、集成、插件与运维",
+    "title": "通知模板取消保存后仍提交旧草稿",
+    "severity": "P2",
+    "caseIds": [
+      "E001",
+      "E002",
+      "E021"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-14-notifications-extensions-operations-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "14",
+    "verificationEvidence": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "14/E001",
+      "14/E002",
+      "14/E021"
+    ]
+  },
+  {
+    "id": "QA-NIO-002",
+    "module": "14",
+    "moduleName": "通知、集成、插件与运维",
+    "title": "取消可信签名密钥登记后仍建立信任记录",
+    "severity": "P2",
+    "caseIds": [
+      "E006",
+      "E007"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-14-notifications-extensions-operations-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "14",
+    "verificationEvidence": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "14/E006",
+      "14/E007"
+    ]
+  },
+  {
+    "id": "QA-NIO-003",
+    "module": "14",
+    "moduleName": "通知、集成、插件与运维",
+    "title": "取消插件清单安装后仍登记插件及版本",
+    "severity": "P2",
+    "caseIds": [
+      "E011",
+      "E012"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-14-notifications-extensions-operations-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "14",
+    "verificationEvidence": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "14/E011",
+      "14/E012"
+    ]
+  },
+  {
+    "id": "QA-NIO-004",
+    "module": "14",
+    "moduleName": "通知、集成、插件与运维",
+    "title": "取消适配器保存后仍保存旧加密配置",
+    "severity": "P2",
+    "caseIds": [
+      "E016",
+      "E017"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-14-notifications-extensions-operations-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "14",
+    "verificationEvidence": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "14/E016",
+      "14/E017"
+    ]
+  },
+  {
+    "id": "QA-NIO-005",
+    "module": "14",
+    "moduleName": "通知、集成、插件与运维",
+    "title": "存储不可用时readiness仍返回UP",
+    "severity": "P2",
+    "caseIds": [
+      "O004"
+    ],
+    "sourceBugReport": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "sourceExecution": "output/qa-20261027/module-14-notifications-extensions-operations-regression/execution-final.json",
+    "finalStatus": "FIXED_VERIFIED",
+    "type": "PRODUCT_BUG",
+    "closedInModule": "14",
+    "verificationEvidence": "output/qa-20261027/module-14-notifications-extensions-operations-regression/BUG-REGRESSION.md",
+    "verificationCases": [
+      "14/O004"
+    ]
+  },
+  {
+    "id": "QA-XREG-TEST-001",
+    "type": "TEST_ASSET",
+    "module": "16",
+    "title": "Mock重名测试仍断言旧数据库异常",
+    "finalStatus": "FIXED_VERIFIED",
+    "verificationEvidence": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/BUGS.md",
+    "verification": "改为公开409和原快照保持；MockSyncFlowTests 9/9通过，同方法后续断言执行，独立HTTP409且原记录唯一。"
+  }
+]

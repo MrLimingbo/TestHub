@@ -1,0 +1,29 @@
+{
+  "headless": true,
+  "realPackagedJvm": true,
+  "desktopProfile": true,
+  "electronUpgradeTest": false,
+  "cases": [
+    {
+      "id": "TC-P2-D01-03",
+      "title": "真实HTTP拒绝未定义环境普通参数",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2-D10-07",
+      "title": "真实JVM重启后同Key返回已持久化回执且不再复制",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2-D09-08",
+      "title": "真实HTTP导出保留当前201响应",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-P2-D22-02",
+      "title": "真实HTTP版本0可保存、缺失428、旧版409",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": true
+}

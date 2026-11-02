@@ -43,9 +43,13 @@ public class EnvironmentSecretService {
         parameters.lockProject(projectId);
         String normalizedEnvironment = ProjectParameterService.normalizeEnvironment(environmentCode);
         String normalizedKey = ProjectParameterService.normalizeKey(key);
+        if ("BASE_URL".equalsIgnoreCase(normalizedKey)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BASE_URL 由环境基础地址维护，不能保存为密钥");
+        }
         if (value == null || value.isEmpty() || value.length() > 20_000) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "密钥值不能为空且不能超过 20000 字符");
         }
+        parameters.requireDefinedEnvironment(projectId, normalizedEnvironment);
         parameters.upsertSecret(UlidCreator.getUlid().toString(), project.organizationId(), project.id(),
                 normalizedEnvironment, normalizedKey, cipher.encrypt(value), principal.userId());
         audit.record(principal, project.organizationId(), project.id(), "ENVIRONMENT_SECRET_UPSERTED", "ENVIRONMENT_SECRET",

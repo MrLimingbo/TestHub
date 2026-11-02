@@ -12,6 +12,8 @@ interface TrendPoint {
 const props = defineProps<{ points: TrendPoint[] }>()
 const chartRef = ref<HTMLDivElement>()
 let chart: echarts.ECharts | undefined
+let resizeObserver: ResizeObserver | undefined
+const resize = () => chart?.resize()
 
 function render() {
   if (!chartRef.value) return
@@ -51,9 +53,14 @@ function render() {
   }, { notMerge: true })
 }
 
-onMounted(() => { render(); window.addEventListener('resize', render) })
+onMounted(() => {
+  render()
+  resizeObserver = new ResizeObserver(resize)
+  if (chartRef.value) resizeObserver.observe(chartRef.value)
+  window.addEventListener('resize', resize)
+})
 watch(() => props.points, render, { deep: true })
-onBeforeUnmount(() => { window.removeEventListener('resize', render); chart?.dispose() })
+onBeforeUnmount(() => { resizeObserver?.disconnect(); window.removeEventListener('resize', resize); chart?.dispose() })
 </script>
 
 <template><div ref="chartRef" class="chart-panel" role="img" aria-label="项目质量执行趋势图"></div></template>

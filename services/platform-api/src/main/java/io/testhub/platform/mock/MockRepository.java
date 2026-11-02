@@ -64,6 +64,11 @@ public class MockRepository {
         return count == null ? 0 : count;
     }
 
+    public boolean serverNameExists(String projectId, String name) {
+        return jdbc.sql("SELECT COUNT(*) FROM mock_server WHERE project_id = :projectId AND name = :name")
+                .param("projectId", projectId).param("name", name).query(Integer.class).single() > 0;
+    }
+
     public void insertServer(String id, String organizationId, String projectId, String publicKey, String name, String userId) {
         jdbc.sql("""
                 INSERT INTO mock_server (id, organization_id, project_id, public_key, name, enabled, created_by)

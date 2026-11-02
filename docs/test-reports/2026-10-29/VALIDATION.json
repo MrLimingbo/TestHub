@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-29",
+  "status": "PASS",
+  "scope": "审核文件完整性、计数、追溯、链接及本轮代码未变校验；不是产品功能回归",
+  "observationRecordsPreserved": 47,
+  "priorityCounts": {
+    "P1": 6,
+    "P2": 30,
+    "P3": 11
+  },
+  "directCandidates": 10,
+  "unselectedDecisionCards": 26,
+  "ruleAndSpecificationObservationsCoveredOnce": 37,
+  "blockedRecordsPreserved": 12,
+  "environmentGroups": 7,
+  "independentUnconfirmedRiskPreserved": true,
+  "sourceHashChecks": 27,
+  "codeBaselineFilesUnchanged": 1326,
+  "localLinksChecked": 67,
+  "gitDiffCheckPassed": true,
+  "productTestsRunThisTurn": 0,
+  "environmentPreparationRunThisTurn": 0,
+  "executionAuthorized": false
+}

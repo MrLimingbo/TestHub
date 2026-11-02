@@ -1,0 +1,4884 @@
+{
+  "numTotalTests": 891,
+  "numPassedTests": 891,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "success": true,
+  "testResults": [
+    {
+      "name": "src/test/apiAutomation.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation imports parses a multiline cURL command into a request step",
+          "status": "passed",
+          "duration": 1.702791999999988
+        },
+        {
+          "fullName": "API automation imports externalizes common credential fields instead of persisting literals",
+          "status": "passed",
+          "duration": 0.8268749999999727
+        },
+        {
+          "fullName": "API automation imports rejects non-cURL input and unsupported methods",
+          "status": "passed",
+          "duration": 0.5613329999999905
+        },
+        {
+          "fullName": "cURL request fidelity preserves HEAD, GET query data and repeated form fields",
+          "status": "passed",
+          "duration": 0.6245419999999626
+        },
+        {
+          "fullName": "cURL request fidelity redacts literal query secrets in templated base URLs",
+          "status": "passed",
+          "duration": 0.16575000000000273
+        },
+        {
+          "fullName": "cURL request fidelity rejects file-backed data instead of sending a filename as the body",
+          "status": "passed",
+          "duration": 0.15008299999999508
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationAssetSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation native asset sync entry opens binding in local mode without creating an execution",
+          "status": "passed",
+          "duration": 99.66604200000006
+        },
+        {
+          "fullName": "API automation native asset sync entry opens binding in account mode without creating an execution",
+          "status": "passed",
+          "duration": 62.738042000000064
+        },
+        {
+          "fullName": "API automation native asset sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 71.92662500000006
+        },
+        {
+          "fullName": "API automation native asset sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 49.59779100000003
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[DF-N01][POS][OBS-08-E012] the run panel describes a page-local submission hint without persistence or delivery",
+          "status": "passed",
+          "duration": 139.861625
+        },
+        {
+          "fullName": "[DF-N02][POS][OBS-08-E012] enabling the hint keeps it local and resets on page remount",
+          "status": "passed",
+          "duration": 166.47779100000002
+        },
+        {
+          "fullName": "[DF-N03][POS][OBS-08-E012] hint=true only controls the existing local message",
+          "status": "passed",
+          "duration": 97.40387500000008
+        },
+        {
+          "fullName": "[DF-N04][NEG][OBS-08-E012] hint=false only controls the existing local message",
+          "status": "passed",
+          "duration": 92.34033299999987
+        },
+        {
+          "fullName": "scenario: late 200 leaves replacement draft and messages intact",
+          "status": "passed",
+          "duration": 104.10508400000003
+        },
+        {
+          "fullName": "scenario: late 503 leaves replacement draft and messages intact",
+          "status": "passed",
+          "duration": 105.31458300000008
+        },
+        {
+          "fullName": "scenario: old completion cannot stop a newer save",
+          "status": "passed",
+          "duration": 141.38695899999993
+        },
+        {
+          "fullName": "scenario: cancel while CSRF is pending prevents stale write",
+          "status": "passed",
+          "duration": 88.85454100000015
+        },
+        {
+          "fullName": "scenario: project while CSRF is pending prevents stale write",
+          "status": "passed",
+          "duration": 86.95866699999988
+        },
+        {
+          "fullName": "scenario: current failure keeps the draft and allows retry",
+          "status": "passed",
+          "duration": 122.43791699999997
+        },
+        {
+          "fullName": "dataset: late 200 leaves replacement draft and messages intact",
+          "status": "passed",
+          "duration": 100.88512500000002
+        },
+        {
+          "fullName": "dataset: late 503 leaves replacement draft and messages intact",
+          "status": "passed",
+          "duration": 104.22445799999991
+        },
+        {
+          "fullName": "dataset: old completion cannot stop a newer save",
+          "status": "passed",
+          "duration": 126.2958329999999
+        },
+        {
+          "fullName": "dataset: cancel while CSRF is pending prevents stale write",
+          "status": "passed",
+          "duration": 89.84000000000015
+        },
+        {
+          "fullName": "dataset: project while CSRF is pending prevents stale write",
+          "status": "passed",
+          "duration": 88.6007910000003
+        },
+        {
+          "fullName": "dataset: current failure keeps the draft and allows retry",
+          "status": "passed",
+          "duration": 142.70958400000018
+        },
+        {
+          "fullName": "profile: late 200 leaves replacement draft and messages intact",
+          "status": "passed",
+          "duration": 96.35266699999966
+        },
+        {
+          "fullName": "profile: late 503 leaves replacement draft and messages intact",
+          "status": "passed",
+          "duration": 98.89858300000014
+        },
+        {
+          "fullName": "profile: old completion cannot stop a newer save",
+          "status": "passed",
+          "duration": 116.89125000000013
+        },
+        {
+          "fullName": "profile: cancel while CSRF is pending prevents stale write",
+          "status": "passed",
+          "duration": 80.64975000000004
+        },
+        {
+          "fullName": "profile: project while CSRF is pending prevents stale write",
+          "status": "passed",
+          "duration": 80.6850000000004
+        },
+        {
+          "fullName": "profile: current failure keeps the draft and allows retry",
+          "status": "passed",
+          "duration": 107.8137499999998
+        },
+        {
+          "fullName": "schedule: late 200 leaves replacement draft and messages intact",
+          "status": "passed",
+          "duration": 103.69770800000015
+        },
+        {
+          "fullName": "schedule: late 503 leaves replacement draft and messages intact",
+          "status": "passed",
+          "duration": 115.92500000000018
+        },
+        {
+          "fullName": "schedule: old completion cannot stop a newer save",
+          "status": "passed",
+          "duration": 129.3689159999999
+        },
+        {
+          "fullName": "schedule: cancel while CSRF is pending prevents stale write",
+          "status": "passed",
+          "duration": 97.18758400000024
+        },
+        {
+          "fullName": "schedule: project while CSRF is pending prevents stale write",
+          "status": "passed",
+          "duration": 98.76220799999965
+        },
+        {
+          "fullName": "schedule: current failure keeps the draft and allows retry",
+          "status": "passed",
+          "duration": 131.30120799999986
+        },
+        {
+          "fullName": "late detail 200 cannot replace scenario B",
+          "status": "passed",
+          "duration": 76.17608400000017
+        },
+        {
+          "fullName": "late save 200 cannot replace scenario B",
+          "status": "passed",
+          "duration": 94.41354200000023
+        },
+        {
+          "fullName": "late detail 503 cannot replace scenario B",
+          "status": "passed",
+          "duration": 82.97583299999997
+        },
+        {
+          "fullName": "late save 503 cannot replace scenario B",
+          "status": "passed",
+          "duration": 110.98962500000016
+        },
+        {
+          "fullName": "old scenario list after project-return causes no follow-up requests",
+          "status": "passed",
+          "duration": 69.16845799999965
+        },
+        {
+          "fullName": "old scenario list after unmount causes no follow-up requests",
+          "status": "passed",
+          "duration": 64.92329100000006
+        },
+        {
+          "fullName": "unmounting during initial load cannot restart the old page poller",
+          "status": "passed",
+          "duration": 37.234291999999186
+        },
+        {
+          "fullName": "preview 200 after input changes is discarded",
+          "status": "passed",
+          "duration": 74.29162499999984
+        },
+        {
+          "fullName": "preview 503 after input changes is discarded",
+          "status": "passed",
+          "duration": 73.19433300000037
+        },
+        {
+          "fullName": "old preview cannot stop a newer preview spinner",
+          "status": "passed",
+          "duration": 76.77375000000029
+        },
+        {
+          "fullName": "closing preview during CSRF prevents its obsolete submission",
+          "status": "passed",
+          "duration": 80.4627500000006
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationHistorySyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation native history sync entry opens binding in local mode without creating an execution",
+          "status": "passed",
+          "duration": 94.90133400000002
+        },
+        {
+          "fullName": "API automation native history sync entry opens binding in account mode without creating an execution",
+          "status": "passed",
+          "duration": 57.25887499999999
+        },
+        {
+          "fullName": "API automation native history sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 77.47783300000003
+        },
+        {
+          "fullName": "API automation native history sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 55.94429100000002
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationScenarioSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation native scenario sync entry opens binding in local mode without creating an execution",
+          "status": "passed",
+          "duration": 89.34716600000002
+        },
+        {
+          "fullName": "API automation native scenario sync entry opens binding in account mode without creating an execution",
+          "status": "passed",
+          "duration": 54.18570799999998
+        },
+        {
+          "fullName": "API automation native scenario sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 68.24487499999998
+        },
+        {
+          "fullName": "API automation native scenario sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 46.33320800000001
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationTriggerSettings.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "marks copied webhook pending local key and disables its enable action while existing keys remain usable",
+          "status": "passed",
+          "duration": 183.47858300000007
+        },
+        {
+          "fullName": "generates a copied webhook key only through the explicit confirmed local action",
+          "status": "passed",
+          "duration": 120.71699999999998
+        },
+        {
+          "fullName": "a late local key cannot appear in a different project after context replacement",
+          "status": "passed",
+          "duration": 98.61962500000004
+        },
+        {
+          "fullName": "editing existing webhook sends only definition fields without replacing its secret or enabling it",
+          "status": "passed",
+          "duration": 126.15100000000007
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationTriggerSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation native trigger sync entry opens binding in local mode without creating an execution",
+          "status": "passed",
+          "duration": 86.47854200000006
+        },
+        {
+          "fullName": "API automation native trigger sync entry opens binding in account mode without creating an execution",
+          "status": "passed",
+          "duration": 58.72350000000006
+        },
+        {
+          "fullName": "API automation native trigger sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 79.19829100000004
+        },
+        {
+          "fullName": "API automation native trigger sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 53.07245799999998
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDebugDraft.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API debug route draft [P1-U12-01][NEG] EXPIRED cannot fall back to an automatic historical replay",
+          "status": "passed",
+          "duration": 0.7625830000000065
+        },
+        {
+          "fullName": "API debug route draft [P1-U12-02][NEG] UNKNOWN_CREATED_AT cannot fall back to an automatic historical replay",
+          "status": "passed",
+          "duration": 0.08537499999999909
+        },
+        {
+          "fullName": "API debug route draft [P1-U12-03][NEG] UNREADABLE cannot fall back to an automatic historical replay",
+          "status": "passed",
+          "duration": 0.06208300000002964
+        },
+        {
+          "fullName": "API debug route draft [P1-U12-04][POS] legacy history without retention metadata keeps its existing behavior",
+          "status": "passed",
+          "duration": 0.422916999999984
+        },
+        {
+          "fullName": "API debug route draft normalizes a direct HTTP request draft",
+          "status": "passed",
+          "duration": 0.18475000000000819
+        },
+        {
+          "fullName": "API debug route draft normalizes and reloads a custom quick request name",
+          "status": "passed",
+          "duration": 0.25120899999996027
+        },
+        {
+          "fullName": "API debug route draft builds a URL from an environment base URL and interface path",
+          "status": "passed",
+          "duration": 0.41758299999997917
+        },
+        {
+          "fullName": "API debug route draft accepts structured header arrays and maps parameter examples to values",
+          "status": "passed",
+          "duration": 0.15333299999997507
+        },
+        {
+          "fullName": "API debug route draft accepts header objects and ignores unsupported method and protocol values",
+          "status": "passed",
+          "duration": 0.14987500000000864
+        },
+        {
+          "fullName": "API debug route draft uses the first value when Vue Router supplies repeated query parameters",
+          "status": "passed",
+          "duration": 0.15454199999999219
+        },
+        {
+          "fullName": "API debug route draft transfers a sensitive draft through one-time session storage",
+          "status": "passed",
+          "duration": 0.7669579999999883
+        },
+        {
+          "fullName": "API debug route draft keeps a stored draft until the destination explicitly removes it",
+          "status": "passed",
+          "duration": 0.1738330000000019
+        },
+        {
+          "fullName": "API debug route draft builds a cURL import command without persisting literal credentials",
+          "status": "passed",
+          "duration": 1.326833000000022
+        },
+        {
+          "fullName": "API debug route draft preserves variable references when building a cURL import command",
+          "status": "passed",
+          "duration": 0.10316599999998743
+        },
+        {
+          "fullName": "API debug route draft redacts custom API key names and credentials in template URLs",
+          "status": "passed",
+          "duration": 0.28750000000002274
+        },
+        {
+          "fullName": "API debug route draft maps only HTTP history summaries into replay drafts",
+          "status": "passed",
+          "duration": 0.09795900000000302
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDebugFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[P1-U12-05][POS] replay disclosure names encrypted fields, permissions, retention and legacy exceptions",
+          "status": "passed",
+          "duration": 156.94158300000004
+        },
+        {
+          "fullName": "[P1-U12-06][NEG] expired history is explicitly labeled and cannot be loaded or resent",
+          "status": "passed",
+          "duration": 116.63541699999996
+        },
+        {
+          "fullName": "[DF-D01][POS][OBS-07-E006] current HTTP completion identifies its project and execution",
+          "status": "passed",
+          "duration": 143.07470799999987
+        },
+        {
+          "fullName": "[DF-D02][NEG][OBS-07-E006] old HTTP 200 is attributed to its origin without altering a newer response",
+          "status": "passed",
+          "duration": 134.36179100000004
+        },
+        {
+          "fullName": "[DF-D03][NEG][OBS-07-E006] old HTTP 503 is attributed to its origin without altering a newer response",
+          "status": "passed",
+          "duration": 126.59066699999994
+        },
+        {
+          "fullName": "[DF-D04][NEG][OBS-07-E006] an A/B/A round trip does not let the original completion stop a new send",
+          "status": "passed",
+          "duration": 132.80437500000016
+        },
+        {
+          "fullName": "[DF-D05][NEG][OBS-07-E006] an unmounted HTTP completion preserves the existing notification with its original scope",
+          "status": "passed",
+          "duration": 88.06541700000002
+        },
+        {
+          "fullName": "late save 200 preserves replacement dialog and name",
+          "status": "passed",
+          "duration": 110.42841700000031
+        },
+        {
+          "fullName": "late save 503 preserves replacement dialog and name",
+          "status": "passed",
+          "duration": 103.3332919999998
+        },
+        {
+          "fullName": "late save cannot stop a newer save spinner",
+          "status": "passed",
+          "duration": 121.7350419999998
+        },
+        {
+          "fullName": "save cancel during CSRF prevents stale POST",
+          "status": "passed",
+          "duration": 96.86583400000018
+        },
+        {
+          "fullName": "save unmount during CSRF prevents stale POST",
+          "status": "passed",
+          "duration": 88.63137499999993
+        },
+        {
+          "fullName": "save project during CSRF prevents stale POST",
+          "status": "passed",
+          "duration": 104.94320799999969
+        },
+        {
+          "fullName": "current save failure releases spinner and supports retry",
+          "status": "passed",
+          "duration": 97.03279199999997
+        },
+        {
+          "fullName": "late reflection 200 cannot overwrite newer offline discovery",
+          "status": "passed",
+          "duration": 99.06229200000007
+        },
+        {
+          "fullName": "late reflection 503 cannot overwrite newer offline discovery",
+          "status": "passed",
+          "duration": 86.83562500000016
+        },
+        {
+          "fullName": "late WS connection after project closes its owned session without reading or reporting connected",
+          "status": "passed",
+          "duration": 94.08041700000012
+        },
+        {
+          "fullName": "late WS connection after unmount closes its owned session without reading or reporting connected",
+          "status": "passed",
+          "duration": 86.33754200000021
+        },
+        {
+          "fullName": "failed initial WS session read does not report connected",
+          "status": "passed",
+          "duration": 95.13299999999981
+        },
+        {
+          "fullName": "restored qa environment immediately filters parameters and secret labels",
+          "status": "passed",
+          "duration": 93.46849999999995
+        },
+        {
+          "fullName": "gRPC replay restores metadata key/value and can resend unchanged",
+          "status": "passed",
+          "duration": 86.72691600000007
+        },
+        {
+          "fullName": "required query rejects empty \"\" before building request",
+          "status": "passed",
+          "duration": 0.7926659999998265
+        },
+        {
+          "fullName": "required query rejects empty \"  \" before building request",
+          "status": "passed",
+          "duration": 0.16829199999983757
+        },
+        {
+          "fullName": "required header rejects empty \"\" before building request",
+          "status": "passed",
+          "duration": 0.16558299999996962
+        },
+        {
+          "fullName": "required header rejects empty \"  \" before building request",
+          "status": "passed",
+          "duration": 0.13433299999996962
+        },
+        {
+          "fullName": "optional empty parameters remain omitted and required populated values remain encoded",
+          "status": "passed",
+          "duration": 0.3037920000001577
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDebugSyncArchive.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "lists only imported summaries and reads scoped immutable detail without POST",
+          "status": "passed",
+          "duration": 67.87491699999998
+        },
+        {
+          "fullName": "templates require a manual load action and emit no network dispatch",
+          "status": "passed",
+          "duration": 32.33783399999999
+        },
+        {
+          "fullName": "project change discards a late detail response and closes the drawer",
+          "status": "passed",
+          "duration": 18.02408300000002
+        },
+        {
+          "fullName": "range errors are actionable and no history write is attempted",
+          "status": "passed",
+          "duration": 10.950083000000006
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDesignFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "catalog: late 200 preserves replacement draft and errors",
+          "status": "passed",
+          "duration": 564.6490830000002
+        },
+        {
+          "fullName": "catalog: late 503 preserves replacement draft and errors",
+          "status": "passed",
+          "duration": 394.02466599999934
+        },
+        {
+          "fullName": "catalog: old completion cannot stop a newer save spinner",
+          "status": "passed",
+          "duration": 420.29212499999994
+        },
+        {
+          "fullName": "catalog: cancel during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 212.3033749999995
+        },
+        {
+          "fullName": "catalog: unmount during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 162.82533299999977
+        },
+        {
+          "fullName": "catalog: project during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 240.897833
+        },
+        {
+          "fullName": "catalog: current failure keeps draft available for retry",
+          "status": "passed",
+          "duration": 257.8892079999996
+        },
+        {
+          "fullName": "definition: late 200 preserves replacement draft and errors",
+          "status": "passed",
+          "duration": 367.2460830000009
+        },
+        {
+          "fullName": "definition: late 503 preserves replacement draft and errors",
+          "status": "passed",
+          "duration": 318.28029199999946
+        },
+        {
+          "fullName": "definition: old completion cannot stop a newer save spinner",
+          "status": "passed",
+          "duration": 413.5565830000014
+        },
+        {
+          "fullName": "definition: cancel during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 487.1593749999993
+        },
+        {
+          "fullName": "definition: unmount during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 194.43595800000003
+        },
+        {
+          "fullName": "definition: project during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 206.99595899999986
+        },
+        {
+          "fullName": "definition: current failure keeps draft available for retry",
+          "status": "passed",
+          "duration": 253.9692500000001
+        },
+        {
+          "fullName": "version: late 200 preserves replacement draft and errors",
+          "status": "passed",
+          "duration": 320.8418330000004
+        },
+        {
+          "fullName": "version: late 503 preserves replacement draft and errors",
+          "status": "passed",
+          "duration": 339.93566699999974
+        },
+        {
+          "fullName": "version: old completion cannot stop a newer save spinner",
+          "status": "passed",
+          "duration": 273.9929580000007
+        },
+        {
+          "fullName": "version: cancel during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 168.0920419999984
+        },
+        {
+          "fullName": "version: unmount during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 140.0398750000004
+        },
+        {
+          "fullName": "version: project during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 195.46108300000014
+        },
+        {
+          "fullName": "version: current failure keeps draft available for retry",
+          "status": "passed",
+          "duration": 244.60262500000135
+        },
+        {
+          "fullName": "replacement version draft retains its original base after an old save refreshes versions",
+          "status": "passed",
+          "duration": 319.09266599999864
+        },
+        {
+          "fullName": "OPENAPI: late import 200 cannot decorate a replacement draft",
+          "status": "passed",
+          "duration": 259.11204199999884
+        },
+        {
+          "fullName": "OPENAPI: late import 503 cannot decorate a replacement draft",
+          "status": "passed",
+          "duration": 233.13270900000134
+        },
+        {
+          "fullName": "OPENAPI: an old import cannot clear a newer spinner or result",
+          "status": "passed",
+          "duration": 397.3925419999996
+        },
+        {
+          "fullName": "POSTMAN: late import 200 cannot decorate a replacement draft",
+          "status": "passed",
+          "duration": 298.8536670000012
+        },
+        {
+          "fullName": "POSTMAN: late import 503 cannot decorate a replacement draft",
+          "status": "passed",
+          "duration": 238.0370409999996
+        },
+        {
+          "fullName": "POSTMAN: an old import cannot clear a newer spinner or result",
+          "status": "passed",
+          "duration": 248.5175420000014
+        },
+        {
+          "fullName": "HAR: late import 200 cannot decorate a replacement draft",
+          "status": "passed",
+          "duration": 228.19979199999943
+        },
+        {
+          "fullName": "HAR: late import 503 cannot decorate a replacement draft",
+          "status": "passed",
+          "duration": 174.67483299999913
+        },
+        {
+          "fullName": "HAR: an old import cannot clear a newer spinner or result",
+          "status": "passed",
+          "duration": 202.99133299999994
+        },
+        {
+          "fullName": "CURL: late import 200 cannot decorate a replacement draft",
+          "status": "passed",
+          "duration": 184.03312499999993
+        },
+        {
+          "fullName": "CURL: late import 503 cannot decorate a replacement draft",
+          "status": "passed",
+          "duration": 162.41020800000115
+        },
+        {
+          "fullName": "CURL: an old import cannot clear a newer spinner or result",
+          "status": "passed",
+          "duration": 194.10620800000106
+        },
+        {
+          "fullName": "import: cancel during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 129.88462499999878
+        },
+        {
+          "fullName": "import: unmount during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 124.76862500000061
+        },
+        {
+          "fullName": "import: project during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 148.0779590000002
+        },
+        {
+          "fullName": "import: edit during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 121.84620800000084
+        },
+        {
+          "fullName": "import: format during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 123.74654199999895
+        },
+        {
+          "fullName": "current import failure releases its spinner and permits retry",
+          "status": "passed",
+          "duration": 143.32783299999937
+        },
+        {
+          "fullName": "late file read cannot overwrite a newer file",
+          "status": "passed",
+          "duration": 121.50545799999963
+        },
+        {
+          "fullName": "late file read cannot overwrite a newer reopen",
+          "status": "passed",
+          "duration": 158.54462500000045
+        },
+        {
+          "fullName": "late file read cannot overwrite a newer edit",
+          "status": "passed",
+          "duration": 124.54050000000097
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDesignPreferences.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API design preferences state transitions queues saves after load and uses each acknowledged revision and state",
+          "status": "passed",
+          "duration": 2.998041999999998
+        },
+        {
+          "fullName": "API design preferences state transitions serializes delayed writes while allowing another project to save independently",
+          "status": "passed",
+          "duration": 0.6954579999999737
+        },
+        {
+          "fullName": "API design preferences state transitions does not advance saved state on failure and permits a retry with the original revision",
+          "status": "passed",
+          "duration": 1.8920830000000137
+        },
+        {
+          "fullName": "API design preferences state transitions blocks queued and later saves after 409 until an explicit fresh load",
+          "status": "passed",
+          "duration": 0.7160410000000184
+        },
+        {
+          "fullName": "API design preferences state transitions serializes a reload behind a pending save",
+          "status": "passed",
+          "duration": 0.2825000000000273
+        },
+        {
+          "fullName": "API design preferences state transitions imports current-origin legacy data only at revision zero and leaves all old values intact",
+          "status": "passed",
+          "duration": 1.0898750000000064
+        },
+        {
+          "fullName": "API design preferences state transitions reports migration races without retrying or overwriting the other session",
+          "status": "passed",
+          "duration": 0.3295410000000061
+        },
+        {
+          "fullName": "API design preferences state transitions never calls transport for empty projects or save-before-load",
+          "status": "passed",
+          "duration": 0.3407500000000141
+        },
+        {
+          "fullName": "API design preferences state transitions invalidates queued work on identity change, including automatic legacy migration",
+          "status": "passed",
+          "duration": 0.6386249999999905
+        },
+        {
+          "fullName": "API design preferences state transitions does not accept malformed or unacknowledged server responses as success",
+          "status": "passed",
+          "duration": 0.5952499999999645
+        },
+        {
+          "fullName": "API design preferences state transitions isolates consumer mutations from acknowledged state and strips non-tree properties",
+          "status": "passed",
+          "duration": 0.22570799999999736
+        },
+        {
+          "fullName": "preferences bounds checks UTF-16 lengths, hierarchy integrity, depth and counts before a request",
+          "status": "passed",
+          "duration": 17.884916999999973
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiInterchange.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API interchange document limits counts ASCII content as one UTF-8 byte per character",
+          "status": "passed",
+          "duration": 0.9026669999999513
+        },
+        {
+          "fullName": "API interchange document limits counts Chinese content by its UTF-8 representation",
+          "status": "passed",
+          "duration": 0.12783300000000963
+        },
+        {
+          "fullName": "API interchange document limits accepts the 10 MiB boundary and rejects one byte beyond it",
+          "status": "passed",
+          "duration": 0.17108400000000756
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiManagementTree.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "api management tree mixes nested catalogs and interfaces while honoring expansion state",
+          "status": "passed",
+          "duration": 16.95420899999999
+        },
+        {
+          "fullName": "api management tree keeps ancestor catalogs visible and expanded when searching an interface",
+          "status": "passed",
+          "duration": 0.5475000000000136
+        },
+        {
+          "fullName": "api management tree supports published and draft filters",
+          "status": "passed",
+          "duration": 0.5450410000000261
+        },
+        {
+          "fullName": "workspace tabs selects the neighboring tab when the active tab closes",
+          "status": "passed",
+          "duration": 0.27462500000001455
+        },
+        {
+          "fullName": "workspace tabs removes quick-request state while preserving interface route signals",
+          "status": "passed",
+          "duration": 0.233791999999994
+        },
+        {
+          "fullName": "api tree actions switches interface labels between name and URL",
+          "status": "passed",
+          "duration": 0.18462500000003956
+        },
+        {
+          "fullName": "api tree actions excludes the current catalog and its descendants from move targets",
+          "status": "passed",
+          "duration": 0.18837500000000773
+        },
+        {
+          "fullName": "api tree actions generates a conflict-free path for copied interfaces",
+          "status": "passed",
+          "duration": 0.2721250000000168
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiQuickRequest.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API quick request editor restores multipart text fields, including repeated names and multiline values",
+          "status": "passed",
+          "duration": 2.326832999999965
+        },
+        {
+          "fullName": "API quick request editor keeps unsupported or incomplete multipart content available for raw replay",
+          "status": "passed",
+          "duration": 0.2530830000000037
+        },
+        {
+          "fullName": "API quick request editor preserves runtime variables while encoding surrounding query text",
+          "status": "passed",
+          "duration": 0.3363340000000221
+        },
+        {
+          "fullName": "API quick request editor does not interpret a question mark inside a fragment as a query",
+          "status": "passed",
+          "duration": 0.2619579999999928
+        },
+        {
+          "fullName": "API quick request editor round-trips repeated query parameters without changing URL fragments",
+          "status": "passed",
+          "duration": 0.3769580000000019
+        },
+        {
+          "fullName": "API quick request editor supports template URLs and safely encodes edited parameter values",
+          "status": "passed",
+          "duration": 0.12858400000004622
+        },
+        {
+          "fullName": "API quick request editor separates Cookie from regular headers and serializes enabled rows only",
+          "status": "passed",
+          "duration": 0.33637499999997544
+        },
+        {
+          "fullName": "API quick request editor serializes urlencoded and text-only multipart request bodies",
+          "status": "passed",
+          "duration": 0.2635839999999803
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiTesting.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API testing request mapping preserves runtime variables in path and query values",
+          "status": "passed",
+          "duration": 1.1000000000000227
+        },
+        {
+          "fullName": "API testing request mapping maps an API definition into an isolated request snapshot",
+          "status": "passed",
+          "duration": 0.14370800000000372
+        },
+        {
+          "fullName": "API testing request mapping serializes a Vue reactive snapshot before persistence",
+          "status": "passed",
+          "duration": 1.1841660000000047
+        },
+        {
+          "fullName": "API testing request mapping removes literal credentials while preserving environment references",
+          "status": "passed",
+          "duration": 0.863290999999947
+        },
+        {
+          "fullName": "API testing request mapping removes embedded credentials even when a base URL contains variables",
+          "status": "passed",
+          "duration": 0.1705840000000194
+        },
+        {
+          "fullName": "API testing request mapping merges saved values with parameters added by the current interface version",
+          "status": "passed",
+          "duration": 0.3792500000000132
+        },
+        {
+          "fullName": "API testing request mapping round-trips parameter examples and descriptions containing colons",
+          "status": "passed",
+          "duration": 0.2575840000000085
+        },
+        {
+          "fullName": "API testing request mapping repairs malformed legacy snapshots before applying them",
+          "status": "passed",
+          "duration": 0.4536249999999882
+        },
+        {
+          "fullName": "API testing request mapping builds an encoded URL without changing the API definition",
+          "status": "passed",
+          "duration": 0.16979199999997263
+        },
+        {
+          "fullName": "API testing request mapping rejects a missing required path value",
+          "status": "passed",
+          "duration": 0.5364579999999819
+        },
+        {
+          "fullName": "API testing request mapping validates status and basic JSON response shape",
+          "status": "passed",
+          "duration": 0.2676660000000197
+        },
+        {
+          "fullName": "API testing request mapping uses the saved case expectation when rerunning a debug case",
+          "status": "passed",
+          "duration": 0.12299999999999045
+        },
+        {
+          "fullName": "API testing request mapping maps Apifox-style debug and test cases to the persisted case contract",
+          "status": "passed",
+          "duration": 0.21787499999999227
+        },
+        {
+          "fullName": "API testing request mapping ignores malformed parameter payloads safely",
+          "status": "passed",
+          "duration": 0.079166999999984
+        }
+      ]
+    },
+    {
+      "name": "src/test/auditLogPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "global audit request ordering keeps the cleared-filter result when an older filtered response arrives last",
+          "status": "passed",
+          "duration": 85.29091600000004
+        },
+        {
+          "fullName": "global audit request ordering ignores an obsolete error after the latest response succeeded",
+          "status": "passed",
+          "duration": 33.276707999999985
+        },
+        {
+          "fullName": "global audit request ordering does not clear a newer loading state when old success=true finishes",
+          "status": "passed",
+          "duration": 28.568624999999997
+        },
+        {
+          "fullName": "global audit request ordering does not clear a newer loading state when old success=false finishes",
+          "status": "passed",
+          "duration": 30.618749999999977
+        },
+        {
+          "fullName": "global audit request ordering reports the current error and allows a successful refresh",
+          "status": "passed",
+          "duration": 19.88499999999999
+        },
+        {
+          "fullName": "global audit request ordering ignores a pending error after the page unmounts",
+          "status": "passed",
+          "duration": 8.16395799999998
+        },
+        {
+          "fullName": "[DF-A01][POS][OBS-03C-E007] shows the successful load time and clears stale feedback after retry",
+          "status": "passed",
+          "duration": 24.688499999999976
+        },
+        {
+          "fullName": "[DF-A02][NEG][OBS-03C-E007] first-load failure does not invent a last successful result",
+          "status": "passed",
+          "duration": 13.178916999999956
+        },
+        {
+          "fullName": "[DF-A03][NEG][OBS-03C-E007] a successful empty result remains distinguishable from never loaded",
+          "status": "passed",
+          "duration": 15.39995799999997
+        },
+        {
+          "fullName": "[DF-A04][NEG][OBS-03C-E007] a failed filter change identifies the retained result scope",
+          "status": "passed",
+          "duration": 24.010625000000005
+        },
+        {
+          "fullName": "[DF-A05][NEG][OBS-03C-E007] obsolete success cannot replace the current stale state",
+          "status": "passed",
+          "duration": 18.11775
+        },
+        {
+          "fullName": "[DF-A06][NEG][OBS-03C-E007] obsolete failure cannot replace the current stale state",
+          "status": "passed",
+          "duration": 18.73300000000006
+        }
+      ]
+    },
+    {
+      "name": "src/test/automationHistoryPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "shows archived origins without requiring a current scenario and excludes duplicate native records",
+          "status": "passed",
+          "duration": 61.402874999999995
+        },
+        {
+          "fullName": "opens a read-only report with original version and a scoped export link",
+          "status": "passed",
+          "duration": 35.723041999999964
+        },
+        {
+          "fullName": "late inventory from the previous project does not replace the selected project",
+          "status": "passed",
+          "duration": 19.821500000000015
+        },
+        {
+          "fullName": "project change closes the old history drawer and discards a late detail response",
+          "status": "passed",
+          "duration": 26.021499999999946
+        },
+        {
+          "fullName": "shows an actionable load failure and clears stale records without writes",
+          "status": "passed",
+          "duration": 11.488624999999956
+        }
+      ]
+    },
+    {
+      "name": "src/test/automationPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Automation execution editor imports version path/query examples and content type into the saved step",
+          "status": "passed",
+          "duration": 179.718542
+        },
+        {
+          "fullName": "Automation execution editor saves editor changes before execution (dataset=false)",
+          "status": "passed",
+          "duration": 159.1891250000001
+        },
+        {
+          "fullName": "Automation execution editor saves editor changes before execution (dataset=true)",
+          "status": "passed",
+          "duration": 160.56733300000008
+        },
+        {
+          "fullName": "Automation execution editor does not submit execution when saving fails",
+          "status": "passed",
+          "duration": 131.1539170000001
+        },
+        {
+          "fullName": "Automation execution editor does not create an extra revision when nothing changed",
+          "status": "passed",
+          "duration": 100.40816700000005
+        },
+        {
+          "fullName": "Automation execution editor keeps the create dialog open after required field validation fails",
+          "status": "passed",
+          "duration": 79.65554199999997
+        }
+      ]
+    },
+    {
+      "name": "src/test/codeEditor.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "CodeEditor applies external values but does not reset the editor for its own v-model update",
+          "status": "passed",
+          "duration": 15.41862500000002
+        },
+        {
+          "fullName": "CodeEditor updates the Monaco model language when the language prop changes",
+          "status": "passed",
+          "duration": 3.9986249999999472
+        }
+      ]
+    },
+    {
+      "name": "src/test/dashboardPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Dashboard current query ignores a stale success after the selected period has loaded",
+          "status": "passed",
+          "duration": 72.94425000000001
+        },
+        {
+          "fullName": "Dashboard current query keeps the current request loading when a stale success completes",
+          "status": "passed",
+          "duration": 22.341207999999938
+        },
+        {
+          "fullName": "Dashboard current query ignores a stale failure after the selected period has loaded",
+          "status": "passed",
+          "duration": 18.979791999999975
+        },
+        {
+          "fullName": "Dashboard current query keeps the current request loading when a stale failure completes",
+          "status": "passed",
+          "duration": 16.50649999999996
+        },
+        {
+          "fullName": "Dashboard current query ignores a dashboard failure after leaving the page",
+          "status": "passed",
+          "duration": 14.382624999999962
+        },
+        {
+          "fullName": "Dashboard current query does not start a dashboard request after its context resolves on an unmounted page",
+          "status": "passed",
+          "duration": 5.857499999999959
+        }
+      ]
+    },
+    {
+      "name": "src/test/dashboardTrendChart.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Dashboard trend chart resizes for container and window changes and releases both listeners on unmount",
+          "status": "passed",
+          "duration": 11.55645800000002
+        }
+      ]
+    },
+    {
+      "name": "src/test/desktopApiDebug.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "desktop API debug request preparation resolves an intranet base URL selected from the project environment",
+          "status": "passed",
+          "duration": 1.6056670000000395
+        },
+        {
+          "fullName": "desktop API debug request preparation materializes GraphQL and bearer authentication before local execution",
+          "status": "passed",
+          "duration": 0.5820830000000115
+        },
+        {
+          "fullName": "desktop API debug request preparation does not expose or silently ignore an unavailable project secret",
+          "status": "passed",
+          "duration": 0.6119160000000079
+        }
+      ]
+    },
+    {
+      "name": "src/test/directObservationForms.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[DF-R01][POS][OBS-13-E015] fifty accessible projects retain the existing initial report",
+          "status": "passed",
+          "duration": 207.47612500000014
+        },
+        {
+          "fullName": "[DF-R02][NEG][OBS-13-E015] fifty-one projects wait for explicit selection without an implicit all-project request",
+          "status": "passed",
+          "duration": 147.765083
+        },
+        {
+          "fullName": "[DF-R03][POS][OBS-13-E015] explicit 1-project selection queries and exports exactly that scope",
+          "status": "passed",
+          "duration": 130.7264160000002
+        },
+        {
+          "fullName": "[DF-R04][POS][OBS-13-E015] explicit 50-project selection queries and exports exactly that scope",
+          "status": "passed",
+          "duration": 131.136125
+        },
+        {
+          "fullName": "[DF-R05][NEG][OBS-13-E015] clearing a large scope gates refresh and export as well as automatic querying",
+          "status": "passed",
+          "duration": 190.566333
+        },
+        {
+          "fullName": "[DF-R06][NEG][OBS-13-E015] an injected oversized selection cannot bypass request guards",
+          "status": "passed",
+          "duration": 169.2254170000001
+        },
+        {
+          "fullName": "[DF-R07][NEG][OBS-13-E015] selecting a fifty-first project gives an explicit limit explanation",
+          "status": "passed",
+          "duration": 92.82358299999987
+        },
+        {
+          "fullName": "[DF-R08][NEG][OBS-13-E015] a late report cannot repopulate a cleared large-project scope",
+          "status": "passed",
+          "duration": 127.66583400000013
+        },
+        {
+          "fullName": "[DF-R09][POS][OBS-13-E015] clearing a scope of fifty or fewer retains the existing all-project semantics",
+          "status": "passed",
+          "duration": 47.62562500000013
+        },
+        {
+          "fullName": "[DF-R10][NEG][OBS-13-E015] empty and oversized schedule selections do not send invalid writes",
+          "status": "passed",
+          "duration": 129.89124999999967
+        },
+        {
+          "fullName": "[DF-T01][POS][OBS-13-E009] refreshing the task list does not disable opening a fresh draft",
+          "status": "passed",
+          "duration": 41.20316700000012
+        },
+        {
+          "fullName": "[DF-T02][NEG][OBS-13-E009] late task refresh 200 preserves a new draft",
+          "status": "passed",
+          "duration": 31.359792000000198
+        },
+        {
+          "fullName": "[DF-T03][NEG][OBS-13-E009] late task refresh 503 preserves a new draft",
+          "status": "passed",
+          "duration": 35.86799999999994
+        },
+        {
+          "fullName": "[DF-T04][NEG][OBS-13-E009] a project round trip still cancels a draft opened while refreshing",
+          "status": "passed",
+          "duration": 33.2026249999999
+        },
+        {
+          "fullName": "[DF-S01][NEG][OBS-13-E017] old csrf 200 cannot lock or unlock a replacement save",
+          "status": "passed",
+          "duration": 51.11866599999985
+        },
+        {
+          "fullName": "[DF-S02][NEG][OBS-13-E017] old csrf 503 cannot lock or unlock a replacement save",
+          "status": "passed",
+          "duration": 49.795250000000124
+        },
+        {
+          "fullName": "[DF-S11][NEG][OBS-13-E017] old business 200 cannot lock or unlock a replacement save",
+          "status": "passed",
+          "duration": 43.522915999999896
+        },
+        {
+          "fullName": "[DF-S12][NEG][OBS-13-E017] old business 503 cannot lock or unlock a replacement save",
+          "status": "passed",
+          "duration": 49.09683300000006
+        },
+        {
+          "fullName": "[DF-S21][NEG][OBS-13-E017] old reload 200 cannot lock or unlock a replacement save",
+          "status": "passed",
+          "duration": 52.27241700000013
+        },
+        {
+          "fullName": "[DF-S22][NEG][OBS-13-E017] old reload 503 cannot lock or unlock a replacement save",
+          "status": "passed",
+          "duration": 57.373375000000124
+        },
+        {
+          "fullName": "[DF-S07][POS][OBS-13-E017] current task failure releases its own save state and supports retry",
+          "status": "passed",
+          "duration": 47.526124999999865
+        },
+        {
+          "fullName": "[DF-F01][POS][OBS-14-E004] a pending list refresh permits a new authorized draft without a write",
+          "status": "passed",
+          "duration": 59.4796250000004
+        },
+        {
+          "fullName": "[DF-F02][NEG][OBS-14-E004] list 200 cannot overwrite a draft opened during refresh",
+          "status": "passed",
+          "duration": 49.03575000000001
+        },
+        {
+          "fullName": "[DF-F03][NEG][OBS-14-E004] list 503 cannot overwrite a draft opened during refresh",
+          "status": "passed",
+          "duration": 41.693874999999935
+        },
+        {
+          "fullName": "[DF-F11][POS][OBS-14-E014] a pending list refresh permits a new authorized draft without a write",
+          "status": "passed",
+          "duration": 68.83041599999979
+        },
+        {
+          "fullName": "[DF-F12][NEG][OBS-14-E014] list 200 cannot overwrite a draft opened during refresh",
+          "status": "passed",
+          "duration": 63.703708000000006
+        },
+        {
+          "fullName": "[DF-F13][NEG][OBS-14-E014] list 503 cannot overwrite a draft opened during refresh",
+          "status": "passed",
+          "duration": 53.87512499999957
+        },
+        {
+          "fullName": "[DF-F21][POS][OBS-14-E019] a pending list refresh permits a new authorized draft without a write",
+          "status": "passed",
+          "duration": 64.4016660000002
+        },
+        {
+          "fullName": "[DF-F22][NEG][OBS-14-E019] list 200 cannot overwrite a draft opened during refresh",
+          "status": "passed",
+          "duration": 61.15441600000031
+        },
+        {
+          "fullName": "[DF-F23][NEG][OBS-14-E019] list 503 cannot overwrite a draft opened during refresh",
+          "status": "passed",
+          "duration": 53.03262500000028
+        },
+        {
+          "fullName": "[DF-F04][NEG][OBS-14-E004] switching projects invalidates a template draft opened during refresh",
+          "status": "passed",
+          "duration": 45.80695800000012
+        },
+        {
+          "fullName": "[DF-P01][NEG][OBS-14-E014] read-only users cannot open or submit administrative drafts",
+          "status": "passed",
+          "duration": 14.527708000000075
+        },
+        {
+          "fullName": "[DF-P02][NEG][OBS-14-E014] a confirmed permission revocation invalidates the pending draft",
+          "status": "passed",
+          "duration": 46.81195800000023
+        },
+        {
+          "fullName": "[DF-P11][NEG][OBS-14-E019] read-only users cannot open or submit administrative drafts",
+          "status": "passed",
+          "duration": 8.006249999999909
+        },
+        {
+          "fullName": "[DF-P12][NEG][OBS-14-E019] a confirmed permission revocation invalidates the pending draft",
+          "status": "passed",
+          "duration": 55.97916600000008
+        }
+      ]
+    },
+    {
+      "name": "src/test/extensionsOperationsPages.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "extensions capability and forms ordinary account reads definitions but never requests signing keys or mounts mutation forms",
+          "status": "passed",
+          "duration": 79.36095899999998
+        },
+        {
+          "fullName": "extensions capability and forms capability failure is visible with retry and does not read registry",
+          "status": "passed",
+          "duration": 123.00420800000006
+        },
+        {
+          "fullName": "extensions capability and forms failed refresh clears registry and signing key network failure is distinct from no permission",
+          "status": "passed",
+          "duration": 102.51308299999994
+        },
+        {
+          "fullName": "extensions capability and forms adapter edit submits null to preserve encrypted configuration without re-entering credentials",
+          "status": "passed",
+          "duration": 102.11562500000002
+        },
+        {
+          "fullName": "extensions capability and forms adapter failure retains secret draft and pending saves are deduplicated",
+          "status": "passed",
+          "duration": 91.294083
+        },
+        {
+          "fullName": "extensions capability and forms adapter cancellation during CSRF prevents the old write and preserves replacement",
+          "status": "passed",
+          "duration": 80.14133399999992
+        },
+        {
+          "fullName": "extensions capability and forms package failure retains exact signed characters and cancel clears manifest/signature",
+          "status": "passed",
+          "duration": 70.11029200000007
+        },
+        {
+          "fullName": "extensions capability and forms key registration cancellation invalidates a pending success",
+          "status": "passed",
+          "duration": 63.94945800000005
+        },
+        {
+          "fullName": "extensions capability and forms plugin/key trust changes require confirmation and repeated actions are deduplicated",
+          "status": "passed",
+          "duration": 72.25254199999995
+        },
+        {
+          "fullName": "extensions capability and forms unmount suppresses late adapter completion",
+          "status": "passed",
+          "duration": 56.32899999999995
+        },
+        {
+          "fullName": "operations permission and projection ordinary account reads only permission and never fetches management overview",
+          "status": "passed",
+          "duration": 12.29162499999984
+        },
+        {
+          "fullName": "operations permission and projection local shows actual dependency labels, attention item count and native backup action",
+          "status": "passed",
+          "duration": 7.616792000000032
+        },
+        {
+          "fullName": "operations permission and projection failed refresh clears old health and exposes retry",
+          "status": "passed",
+          "duration": 6.340290999999979
+        },
+        {
+          "fullName": "operations permission and projection late overview cannot overwrite a newer refresh",
+          "status": "passed",
+          "duration": 5.037000000000035
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalAssetFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "requirements: late 200 cannot close, clear or show errors on the replacement draft",
+          "status": "passed",
+          "duration": 132.95683299999996
+        },
+        {
+          "fullName": "requirements: late 503 cannot close, clear or show errors on the replacement draft",
+          "status": "passed",
+          "duration": 88.53600000000006
+        },
+        {
+          "fullName": "cases: late 200 cannot close, clear or show errors on the replacement draft",
+          "status": "passed",
+          "duration": 120.51862499999993
+        },
+        {
+          "fullName": "cases: late 503 cannot close, clear or show errors on the replacement draft",
+          "status": "passed",
+          "duration": 95.22891599999991
+        },
+        {
+          "fullName": "an old save completing while a new save is pending does not stop its spinner",
+          "status": "passed",
+          "duration": 84.49004100000002
+        },
+        {
+          "fullName": "cancel during CSRF does not send the old draft",
+          "status": "passed",
+          "duration": 59.524
+        },
+        {
+          "fullName": "unmount during CSRF does not send the old draft",
+          "status": "passed",
+          "duration": 44.122082999999975
+        },
+        {
+          "fullName": "partial batch failure reconciles committed rows and retries only failed IDs (refresh failure=false)",
+          "status": "passed",
+          "duration": 59.35633300000018
+        },
+        {
+          "fullName": "partial batch failure reconciles committed rows and retries only failed IDs (refresh failure=true)",
+          "status": "passed",
+          "duration": 71.39979199999993
+        },
+        {
+          "fullName": "waits for the late successful deletion before reconciling a fast failure",
+          "status": "passed",
+          "duration": 60.73033299999997
+        },
+        {
+          "fullName": "SELECT to TEXT sends empty options while preserving the field identity",
+          "status": "passed",
+          "duration": 85.86370899999997
+        },
+        {
+          "fullName": "SELECT to NUMBER sends empty options while preserving the field identity",
+          "status": "passed",
+          "duration": 79.38995799999998
+        },
+        {
+          "fullName": "SELECT to DATE sends empty options while preserving the field identity",
+          "status": "passed",
+          "duration": 97.56825000000003
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalAssetTags.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "reads without writing and saves a deliberate empty set with CSRF",
+          "status": "passed",
+          "duration": 25.574000000000012
+        },
+        {
+          "fullName": "isolates REQUIREMENT asset selection and saves to the matching route",
+          "status": "passed",
+          "duration": 6.558290999999997
+        },
+        {
+          "fullName": "isolates PLAN asset selection and saves to the matching route",
+          "status": "passed",
+          "duration": 5.203000000000088
+        },
+        {
+          "fullName": "failed association reads prevent accidental clearing or saving",
+          "status": "passed",
+          "duration": 3.2170409999999947
+        },
+        {
+          "fullName": "write failures preserve the selection and remain retryable",
+          "status": "passed",
+          "duration": 4.75266600000009
+        },
+        {
+          "fullName": "a late association read cannot populate a changed project",
+          "status": "passed",
+          "duration": 3.8540409999999383
+        },
+        {
+          "fullName": "project change during CSRF acquisition prevents sending the captured write",
+          "status": "passed",
+          "duration": 4.105750000000057
+        },
+        {
+          "fullName": "unmount during CSRF acquisition prevents sending a write after navigation",
+          "status": "passed",
+          "duration": 3.30920900000001
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectExecutionSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect execution desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed",
+          "duration": 31.077916000000073
+        },
+        {
+          "fullName": "Functional defect execution desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed",
+          "duration": 10.058875000000057
+        },
+        {
+          "fullName": "Functional defect execution desktop sync entry hides the entry in a browser",
+          "status": "passed",
+          "duration": 8.556250000000091
+        },
+        {
+          "fullName": "Functional defect execution desktop sync entry reports native open errors without mutating assets",
+          "status": "passed",
+          "duration": 9.813958999999954
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectLinkSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect link desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed",
+          "duration": 28.75566699999996
+        },
+        {
+          "fullName": "Functional defect link desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed",
+          "duration": 9.516415999999992
+        },
+        {
+          "fullName": "Functional defect link desktop sync entry hides the entry in a browser",
+          "status": "passed",
+          "duration": 7.9450840000000085
+        },
+        {
+          "fullName": "Functional defect link desktop sync entry reports native open errors without mutating assets",
+          "status": "passed",
+          "duration": 8.413833000000011
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectPeopleSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect people desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed",
+          "duration": 25.00720799999999
+        },
+        {
+          "fullName": "Functional defect people desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed",
+          "duration": 7.736166999999966
+        },
+        {
+          "fullName": "Functional defect people desktop sync entry hides the entry in a browser",
+          "status": "passed",
+          "duration": 5.8775830000000155
+        },
+        {
+          "fullName": "Functional defect people desktop sync entry reports native open errors without mutating assets",
+          "status": "passed",
+          "duration": 6.881457999999952
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed",
+          "duration": 24.819874999999968
+        },
+        {
+          "fullName": "Functional defect desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed",
+          "duration": 8.372250000000008
+        },
+        {
+          "fullName": "Functional defect desktop sync entry hides the entry in a browser",
+          "status": "passed",
+          "duration": 6.612833000000023
+        },
+        {
+          "fullName": "Functional defect desktop sync entry reports native open errors without mutating assets",
+          "status": "passed",
+          "duration": 7.388374999999996
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectWorkflowSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect workflow desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed",
+          "duration": 23.743916999999954
+        },
+        {
+          "fullName": "Functional defect workflow desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed",
+          "duration": 8.183249999999987
+        },
+        {
+          "fullName": "Functional defect workflow desktop sync entry hides the entry in a browser",
+          "status": "passed",
+          "duration": 5.691750000000013
+        },
+        {
+          "fullName": "Functional defect workflow desktop sync entry reports native open errors without mutating assets",
+          "status": "passed",
+          "duration": 7.387125000000026
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDeliveryFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "plan: late 200 preserves replacement draft and its errors",
+          "status": "passed",
+          "duration": 192.18558400000006
+        },
+        {
+          "fullName": "plan: late 503 preserves replacement draft and its errors",
+          "status": "passed",
+          "duration": 87.89379199999996
+        },
+        {
+          "fullName": "plan: old completion cannot stop a newer save spinner",
+          "status": "passed",
+          "duration": 138.419625
+        },
+        {
+          "fullName": "plan: cancel during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 67.15562499999999
+        },
+        {
+          "fullName": "plan: unmount during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 58.63862500000005
+        },
+        {
+          "fullName": "plan: project during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 88.66883400000006
+        },
+        {
+          "fullName": "defect: late 200 preserves replacement draft and its errors",
+          "status": "passed",
+          "duration": 221.43000000000006
+        },
+        {
+          "fullName": "defect: late 503 preserves replacement draft and its errors",
+          "status": "passed",
+          "duration": 218.717709
+        },
+        {
+          "fullName": "defect: old completion cannot stop a newer save spinner",
+          "status": "passed",
+          "duration": 274.0708749999999
+        },
+        {
+          "fullName": "defect: cancel during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 147.30475
+        },
+        {
+          "fullName": "defect: unmount during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 111.04533399999991
+        },
+        {
+          "fullName": "defect: project during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 168.04445799999985
+        },
+        {
+          "fullName": "version: late 200 preserves replacement draft and its errors",
+          "status": "passed",
+          "duration": 84.57516699999996
+        },
+        {
+          "fullName": "version: late 503 preserves replacement draft and its errors",
+          "status": "passed",
+          "duration": 74.47812499999964
+        },
+        {
+          "fullName": "version: old completion cannot stop a newer save spinner",
+          "status": "passed",
+          "duration": 94.9304589999997
+        },
+        {
+          "fullName": "version: cancel during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 60.69704199999978
+        },
+        {
+          "fullName": "version: unmount during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 48.74191699999983
+        },
+        {
+          "fullName": "version: project during CSRF prevents stale submission",
+          "status": "passed",
+          "duration": 60.68404199999986
+        },
+        {
+          "fullName": "late plan 200 cannot replace the current plan scope",
+          "status": "passed",
+          "duration": 47.93437500000027
+        },
+        {
+          "fullName": "late step 200 cannot replace current case steps",
+          "status": "passed",
+          "duration": 43.945582999999715
+        },
+        {
+          "fullName": "late defect links 200 cannot replace a reopened drawer",
+          "status": "passed",
+          "duration": 100.3788340000001
+        },
+        {
+          "fullName": "late plan 503 cannot replace the current plan scope",
+          "status": "passed",
+          "duration": 51.296166000000085
+        },
+        {
+          "fullName": "late step 503 cannot replace current case steps",
+          "status": "passed",
+          "duration": 35.452999999999975
+        },
+        {
+          "fullName": "late defect links 503 cannot replace a reopened drawer",
+          "status": "passed",
+          "duration": 93.33291599999984
+        },
+        {
+          "fullName": "plan: partial deletion reconciles and retries only failures (refreshFails=false, slowSuccess=false)",
+          "status": "passed",
+          "duration": 67.18337499999961
+        },
+        {
+          "fullName": "plan: partial deletion reconciles and retries only failures (refreshFails=false, slowSuccess=true)",
+          "status": "passed",
+          "duration": 63.30983300000025
+        },
+        {
+          "fullName": "plan: partial deletion reconciles and retries only failures (refreshFails=true, slowSuccess=false)",
+          "status": "passed",
+          "duration": 51.29266600000028
+        },
+        {
+          "fullName": "plan: partial deletion reconciles and retries only failures (refreshFails=true, slowSuccess=true)",
+          "status": "passed",
+          "duration": 42.798041999999896
+        },
+        {
+          "fullName": "defect: partial deletion reconciles and retries only failures (refreshFails=false, slowSuccess=false)",
+          "status": "passed",
+          "duration": 117.25941600000033
+        },
+        {
+          "fullName": "defect: partial deletion reconciles and retries only failures (refreshFails=false, slowSuccess=true)",
+          "status": "passed",
+          "duration": 101.1284999999998
+        },
+        {
+          "fullName": "defect: partial deletion reconciles and retries only failures (refreshFails=true, slowSuccess=false)",
+          "status": "passed",
+          "duration": 105.1752919999999
+        },
+        {
+          "fullName": "defect: partial deletion reconciles and retries only failures (refreshFails=true, slowSuccess=true)",
+          "status": "passed",
+          "duration": 96.36995799999977
+        },
+        {
+          "fullName": "long plan name gives a valid Unicode-safe default in the run editor",
+          "status": "passed",
+          "duration": 41.64783299999999
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalGovernanceSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Governance native entry and tag editing opens definitions sync in local desktop mode",
+          "status": "passed",
+          "duration": 57.545500000000004
+        },
+        {
+          "fullName": "Governance native entry and tag editing opens definitions sync in local desktop mode",
+          "status": "passed",
+          "duration": 17.338917000000038
+        },
+        {
+          "fullName": "Governance native entry and tag editing opens definitions sync in account desktop mode",
+          "status": "passed",
+          "duration": 19.857666999999992
+        },
+        {
+          "fullName": "Governance native entry and tag editing opens definitions sync in account desktop mode",
+          "status": "passed",
+          "duration": 12.720166999999947
+        },
+        {
+          "fullName": "Governance native entry and tag editing hides native binding entry in the browser",
+          "status": "passed",
+          "duration": 12.921707999999967
+        },
+        {
+          "fullName": "Governance native entry and tag editing shows native errors without submitting definitions",
+          "status": "passed",
+          "duration": 21.70166699999993
+        },
+        {
+          "fullName": "Governance native entry and tag editing edits the same tag ID and preserves existing assignments",
+          "status": "passed",
+          "duration": 36.47833400000002
+        },
+        {
+          "fullName": "Governance native entry and tag editing edits the same tag ID and keeps failures editable",
+          "status": "passed",
+          "duration": 18.543333000000075
+        },
+        {
+          "fullName": "Governance native entry and tag editing rejects blank tag edits without a write",
+          "status": "passed",
+          "duration": 13.633832999999981
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalHistorySync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional history desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed",
+          "duration": 33.48145899999997
+        },
+        {
+          "fullName": "Functional history desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed",
+          "duration": 9.883916999999997
+        },
+        {
+          "fullName": "Functional history desktop sync entry hides the entry in a browser",
+          "status": "passed",
+          "duration": 8.083499999999958
+        },
+        {
+          "fullName": "Functional history desktop sync entry reports native open errors without mutating assets",
+          "status": "passed",
+          "duration": 8.556249999999977
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed",
+          "duration": 46.84224999999992
+        },
+        {
+          "fullName": "Functional desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed",
+          "duration": 29.759208000000058
+        },
+        {
+          "fullName": "Functional desktop sync entry hides the entry in a browser",
+          "status": "passed",
+          "duration": 35.553
+        },
+        {
+          "fullName": "Functional desktop sync entry reports native open errors without mutating assets",
+          "status": "passed",
+          "duration": 10.91758399999992
+        }
+      ]
+    },
+    {
+      "name": "src/test/grpcDescriptorSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "gRPC descriptor sync desktop entry opens native descriptor binding in local mode without executing a request",
+          "status": "passed",
+          "duration": 80.90312500000005
+        },
+        {
+          "fullName": "gRPC descriptor sync desktop entry opens native descriptor binding in account mode without executing a request",
+          "status": "passed",
+          "duration": 34.06854199999998
+        },
+        {
+          "fullName": "gRPC descriptor sync desktop entry does not expose native operations in a normal browser",
+          "status": "passed",
+          "duration": 30.310500000000047
+        },
+        {
+          "fullName": "gRPC descriptor sync desktop entry reports opening failures without writing data",
+          "status": "passed",
+          "duration": 43.31433300000003
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileApplicationFileSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "移动端 application file association sync entry opens 应用文件关联同步 in local mode without creating an execution",
+          "status": "passed",
+          "duration": 50.30983400000002
+        },
+        {
+          "fullName": "移动端 application file association sync entry opens 应用文件关联同步 in account mode without creating an execution",
+          "status": "passed",
+          "duration": 27.73766599999999
+        },
+        {
+          "fullName": "移动端 application file association sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 29.348250000000064
+        },
+        {
+          "fullName": "移动端 application file association sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 21.64291700000001
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "device: late create 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 271.86633300000005
+        },
+        {
+          "fullName": "device: late edit 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 192.34470799999997
+        },
+        {
+          "fullName": "device: late create 503 preserves a replacement draft",
+          "status": "passed",
+          "duration": 164.3571669999999
+        },
+        {
+          "fullName": "device: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 153.52229199999988
+        },
+        {
+          "fullName": "device: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 141.363333
+        },
+        {
+          "fullName": "device: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 120.57520799999998
+        },
+        {
+          "fullName": "device: an old completion cannot clear the new save spinner",
+          "status": "passed",
+          "duration": 218.62462500000015
+        },
+        {
+          "fullName": "device: a current failure retains input and permits retry",
+          "status": "passed",
+          "duration": 202.090459
+        },
+        {
+          "fullName": "app: late create 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 161.60462499999994
+        },
+        {
+          "fullName": "app: late edit 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 128.33008299999983
+        },
+        {
+          "fullName": "app: late create 503 preserves a replacement draft",
+          "status": "passed",
+          "duration": 151.09333400000014
+        },
+        {
+          "fullName": "app: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 148.45195799999965
+        },
+        {
+          "fullName": "app: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 130.4401670000002
+        },
+        {
+          "fullName": "app: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 121.77591600000005
+        },
+        {
+          "fullName": "app: an old completion cannot clear the new save spinner",
+          "status": "passed",
+          "duration": 175.78499999999985
+        },
+        {
+          "fullName": "app: a current failure retains input and permits retry",
+          "status": "passed",
+          "duration": 167.70775000000003
+        },
+        {
+          "fullName": "element: late create 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 144.52187500000036
+        },
+        {
+          "fullName": "element: late edit 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 122.03595900000028
+        },
+        {
+          "fullName": "element: late create 503 preserves a replacement draft",
+          "status": "passed",
+          "duration": 153.17608299999984
+        },
+        {
+          "fullName": "element: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 141.3340420000004
+        },
+        {
+          "fullName": "element: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 132.51741700000002
+        },
+        {
+          "fullName": "element: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 114.44000000000005
+        },
+        {
+          "fullName": "element: an old completion cannot clear the new save spinner",
+          "status": "passed",
+          "duration": 176.79770800000006
+        },
+        {
+          "fullName": "element: a current failure retains input and permits retry",
+          "status": "passed",
+          "duration": 228.4318749999993
+        },
+        {
+          "fullName": "scenario: late create 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 165.68470800000068
+        },
+        {
+          "fullName": "scenario: late edit 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 166.0206250000001
+        },
+        {
+          "fullName": "scenario: late create 503 preserves a replacement draft",
+          "status": "passed",
+          "duration": 178.76949999999943
+        },
+        {
+          "fullName": "scenario: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 237.33979099999942
+        },
+        {
+          "fullName": "scenario: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 175.37533299999996
+        },
+        {
+          "fullName": "scenario: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 144.8504579999999
+        },
+        {
+          "fullName": "scenario: an old completion cannot clear the new save spinner",
+          "status": "passed",
+          "duration": 221.24049999999988
+        },
+        {
+          "fullName": "scenario: a current failure retains input and permits retry",
+          "status": "passed",
+          "duration": 196.21295800000007
+        },
+        {
+          "fullName": "execute: cancel during CSRF cannot queue a task",
+          "status": "passed",
+          "duration": 130.460959
+        },
+        {
+          "fullName": "execute: project-return during CSRF cannot queue a task",
+          "status": "passed",
+          "duration": 129.64316700000018
+        },
+        {
+          "fullName": "execute: unmount during CSRF cannot queue a task",
+          "status": "passed",
+          "duration": 104.81266700000015
+        },
+        {
+          "fullName": "execute: a late 200 after cancellation has no toast or follow-up",
+          "status": "passed",
+          "duration": 133.28541699999914
+        },
+        {
+          "fullName": "execute: a late 503 after cancellation has no toast or follow-up",
+          "status": "passed",
+          "duration": 130.38999999999942
+        },
+        {
+          "fullName": "initial context 200 after unmount cannot reload assets or show errors",
+          "status": "passed",
+          "duration": 86.79816699999992
+        },
+        {
+          "fullName": "initial context 503 after unmount cannot reload assets or show errors",
+          "status": "passed",
+          "duration": 82.01608299999953
+        },
+        {
+          "fullName": "initial assets after unmount cannot revive the old page",
+          "status": "passed",
+          "duration": 81.6967080000004
+        },
+        {
+          "fullName": "initial assets after project-return cannot revive the old page",
+          "status": "passed",
+          "duration": 83.39479200000005
+        },
+        {
+          "fullName": "duplicate element save callbacks only send one write",
+          "status": "passed",
+          "duration": 158.9946660000005
+        },
+        {
+          "fullName": "element save captures the submitted form before awaiting CSRF",
+          "status": "passed",
+          "duration": 166.09862499999963
+        },
+        {
+          "fullName": "asset refresh 200 after project-return has no stale feedback",
+          "status": "passed",
+          "duration": 104.04166600000008
+        },
+        {
+          "fullName": "asset refresh 503 after project-return has no stale feedback",
+          "status": "passed",
+          "duration": 101.74237499999981
+        },
+        {
+          "fullName": "asset refresh 200 after unmount has no stale feedback",
+          "status": "passed",
+          "duration": 101.88008400000035
+        },
+        {
+          "fullName": "asset refresh 503 after unmount has no stale feedback",
+          "status": "passed",
+          "duration": 91.0325840000005
+        },
+        {
+          "fullName": "a current refresh failure remains visible to the user",
+          "status": "passed",
+          "duration": 93.410167
+        },
+        {
+          "fullName": "execute: old 200 keeps a replacement execution dialog open",
+          "status": "passed",
+          "duration": 133.87370900000042
+        },
+        {
+          "fullName": "execute: old 503 keeps a replacement execution dialog open",
+          "status": "passed",
+          "duration": 128.60620800000015
+        },
+        {
+          "fullName": "old native preparation cannot queue after cancel and reopening the same scenario",
+          "status": "passed",
+          "duration": 132.34958300000017
+        },
+        {
+          "fullName": "old native preparation cannot release a newer preparation spinner",
+          "status": "passed",
+          "duration": 173.45499999999902
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationHistoryArtifacts.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "provides scoped read-only downloads, including empty screenshots, with size and digest",
+          "status": "passed",
+          "duration": 37.27641599999998
+        },
+        {
+          "fullName": "late files from an old project cannot appear after a switch",
+          "status": "passed",
+          "duration": 4.509874999999965
+        },
+        {
+          "fullName": "history changes immediately discard the previous download link",
+          "status": "passed",
+          "duration": 4.586291999999958
+        },
+        {
+          "fullName": "failed refresh clears prior files and exposes an actionable error",
+          "status": "passed",
+          "duration": 7.916541999999993
+        },
+        {
+          "fullName": "files attributed to a different origin are rejected without links",
+          "status": "passed",
+          "duration": 2.654666999999961
+        },
+        {
+          "fullName": "loads previews only after explicit selection and keeps multiple screenshots distinct",
+          "status": "passed",
+          "duration": 7.772458000000029
+        },
+        {
+          "fullName": "unsupported report artifact types cannot produce download or preview links",
+          "status": "passed",
+          "duration": 2.678833999999995
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationHistoryPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "shows archived origins without requiring a current plan and excludes duplicate native records",
+          "status": "passed",
+          "duration": 56.111333
+        },
+        {
+          "fullName": "opens a read-only report with original version and a scoped export link",
+          "status": "passed",
+          "duration": 33.324749999999995
+        },
+        {
+          "fullName": "late inventory from the previous project does not replace the selected project",
+          "status": "passed",
+          "duration": 16.999874999999975
+        },
+        {
+          "fullName": "project change closes the old history drawer and discards a late detail response",
+          "status": "passed",
+          "duration": 19.93908399999998
+        },
+        {
+          "fullName": "shows an actionable load failure and clears stale records without writes",
+          "status": "passed",
+          "duration": 8.252999999999929
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationHistorySyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "移动端 native history sync entry opens 历史同步 in local mode without creating an execution",
+          "status": "passed",
+          "duration": 47.670792000000006
+        },
+        {
+          "fullName": "移动端 native history sync entry opens 报告产物同步 in local mode without creating an execution",
+          "status": "passed",
+          "duration": 27.547207999999955
+        },
+        {
+          "fullName": "移动端 native history sync entry opens 历史同步 in account mode without creating an execution",
+          "status": "passed",
+          "duration": 30.18087500000007
+        },
+        {
+          "fullName": "移动端 native history sync entry opens 报告产物同步 in account mode without creating an execution",
+          "status": "passed",
+          "duration": 33.86145799999997
+        },
+        {
+          "fullName": "移动端 native history sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 17.65383399999996
+        },
+        {
+          "fullName": "移动端 native history sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 19.517125000000078
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Mobile automation page opens native synchronization in local mode without submitting execution",
+          "status": "passed",
+          "duration": 49.52283299999999
+        },
+        {
+          "fullName": "Mobile automation page opens native synchronization in server mode without submitting execution",
+          "status": "passed",
+          "duration": 27.657375000000002
+        },
+        {
+          "fullName": "Mobile automation page hides native synchronization in an ordinary browser",
+          "status": "passed",
+          "duration": 32.532583999999986
+        },
+        {
+          "fullName": "Mobile automation page keeps 新建设备 open when saving fails",
+          "status": "passed",
+          "duration": 36.815624999999955
+        },
+        {
+          "fullName": "Mobile automation page keeps 新建移动应用 open when saving fails",
+          "status": "passed",
+          "duration": 60.11095799999998
+        },
+        {
+          "fullName": "Mobile automation page keeps 新建元素对象 open when saving fails",
+          "status": "passed",
+          "duration": 38.33070799999996
+        },
+        {
+          "fullName": "Mobile automation page keeps 新建移动端场景 open when saving fails",
+          "status": "passed",
+          "duration": 27.966542000000004
+        },
+        {
+          "fullName": "Mobile automation page ignores stale assets after switching projects",
+          "status": "passed",
+          "duration": 39.957583
+        },
+        {
+          "fullName": "Mobile automation page refreshes an open report and discards its response after closing",
+          "status": "passed",
+          "duration": 303.83345800000006
+        },
+        {
+          "fullName": "Mobile automation page sends scene edits with the current version and preserves the form on conflict",
+          "status": "passed",
+          "duration": 221.50145800000018
+        },
+        {
+          "fullName": "Mobile automation page does not queue a mobile task after native preparation cancel",
+          "status": "passed",
+          "duration": 207.78616699999998
+        },
+        {
+          "fullName": "Mobile automation page does not queue a mobile task after native preparation project",
+          "status": "passed",
+          "duration": 182.88574999999992
+        },
+        {
+          "fullName": "Mobile automation page does not queue a mobile task after native preparation failure",
+          "status": "passed",
+          "duration": 198.66554199999996
+        }
+      ]
+    },
+    {
+      "name": "src/test/mockServicePage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Mock service editor explains the reachability limit of local desktop Mock links",
+          "status": "passed",
+          "duration": 91.12491599999998
+        },
+        {
+          "fullName": "Mock service editor keeps a required-field error visible in the create dialog",
+          "status": "passed",
+          "duration": 57.38454200000001
+        },
+        {
+          "fullName": "Mock service editor keeps rule input after invalid JSON instead of closing the dialog",
+          "status": "passed",
+          "duration": 42.152000000000044
+        },
+        {
+          "fullName": "Mock service editor sends no stale body condition when switching back to ANY",
+          "status": "passed",
+          "duration": 62.09183299999995
+        },
+        {
+          "fullName": "Mock service editor loads existing smart examples for a newly created server",
+          "status": "passed",
+          "duration": 54.146958999999924
+        },
+        {
+          "fullName": "Mock service editor excludes expired and revoked shares from the active count",
+          "status": "passed",
+          "duration": 40.80233399999997
+        },
+        {
+          "fullName": "Mock service editor ignores old server responses after switching to another server",
+          "status": "passed",
+          "duration": 49.56129099999998
+        },
+        {
+          "fullName": "Mock sync and rule editing opens native sync in both desktop modes and hides it on ordinary web",
+          "status": "passed",
+          "duration": 99.18045899999993
+        },
+        {
+          "fullName": "Mock sync and rule editing loads existing conditions and uses the scoped PUT without incrementing rule count or enablement",
+          "status": "passed",
+          "duration": 47.908750000000055
+        },
+        {
+          "fullName": "Mock sync and rule editing invalid JSON preserves the edit dialog and original conditions without sending",
+          "status": "passed",
+          "duration": 37.57133300000032
+        },
+        {
+          "fullName": "Mock sync and rule editing a project change while waiting for CSRF closes the old editor and prevents outgoing save",
+          "status": "passed",
+          "duration": 55.00195799999983
+        },
+        {
+          "fullName": "Mock editor cancellation cancel before CSRF returns prevents the old outgoing edit",
+          "status": "passed",
+          "duration": 35.72987499999999
+        },
+        {
+          "fullName": "Mock editor cancellation a late save completion cannot close a subsequently opened rule editor",
+          "status": "passed",
+          "duration": 39.96729099999993
+        },
+        {
+          "fullName": "Mock creation response ownership ignores a late server creation after a replacement dialog opens",
+          "status": "passed",
+          "duration": 37.27674999999999
+        },
+        {
+          "fullName": "Mock creation response ownership ignores a late share creation after a replacement dialog opens",
+          "status": "passed",
+          "duration": 39.03324999999995
+        },
+        {
+          "fullName": "Mock creation response ownership does not read an old created server through a new project path",
+          "status": "passed",
+          "duration": 42.965834000000086
+        },
+        {
+          "fullName": "Mock creation response ownership does not display an old service share after switching services",
+          "status": "passed",
+          "duration": 44.03816599999982
+        },
+        {
+          "fullName": "Mock creation response ownership cancelling server before CSRF returns prevents the outgoing creation",
+          "status": "passed",
+          "duration": 32.65870799999993
+        },
+        {
+          "fullName": "Mock creation response ownership cancelling share before CSRF returns prevents the outgoing creation",
+          "status": "passed",
+          "duration": 37.21370799999977
+        },
+        {
+          "fullName": "Mock creation response ownership does not let an old server completion unlock a newer pending save",
+          "status": "passed",
+          "duration": 49.24891600000001
+        },
+        {
+          "fullName": "Mock creation response ownership does not let an old share completion unlock a newer pending save",
+          "status": "passed",
+          "duration": 197.63716599999998
+        },
+        {
+          "fullName": "Mock creation response ownership ignores an old server failure after a replacement dialog opens",
+          "status": "passed",
+          "duration": 43.67591700000003
+        },
+        {
+          "fullName": "Mock creation response ownership ignores an old share failure after a replacement dialog opens",
+          "status": "passed",
+          "duration": 42.591249999999945
+        },
+        {
+          "fullName": "Mock creation response ownership does not create a server after unmounting while CSRF is pending",
+          "status": "passed",
+          "duration": 33.072083999999904
+        },
+        {
+          "fullName": "Mock creation response ownership does not create a share after unmounting while CSRF is pending",
+          "status": "passed",
+          "duration": 29.66037499999993
+        },
+        {
+          "fullName": "Mock detail request ordering preserves the newer rules list after A/B/A switching",
+          "status": "passed",
+          "duration": 57.2856670000001
+        },
+        {
+          "fullName": "Mock detail request ordering preserves the newer smart-examples list after A/B/A switching",
+          "status": "passed",
+          "duration": 50.8547080000003
+        },
+        {
+          "fullName": "Mock detail request ordering preserves the newer shares list after A/B/A switching",
+          "status": "passed",
+          "duration": 50.16062499999998
+        },
+        {
+          "fullName": "Mock detail request ordering ignores a late rules error after a newer successful refresh",
+          "status": "passed",
+          "duration": 44.58512500000006
+        },
+        {
+          "fullName": "Mock detail request ordering ignores a late smart-examples error after a newer successful refresh",
+          "status": "passed",
+          "duration": 51.713874999999916
+        },
+        {
+          "fullName": "Mock detail request ordering ignores a late shares error after a newer successful refresh",
+          "status": "passed",
+          "duration": 46.42283299999963
+        }
+      ]
+    },
+    {
+      "name": "src/test/mockSharePage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Public Mock share navigation keeps the current document when an earlier link returns late",
+          "status": "passed",
+          "duration": 17.13299999999998
+        },
+        {
+          "fullName": "Public Mock share navigation keeps an invalid current link unavailable when an older valid link returns",
+          "status": "passed",
+          "duration": 2.256458000000009
+        },
+        {
+          "fullName": "[DF-M01][POS][OBS-09-E012] copies the complete runtime URL through an isolated clipboard double",
+          "status": "passed",
+          "duration": 6.181250000000034
+        },
+        {
+          "fullName": "[DF-M02][NEG][OBS-09-E012] rejected clipboard gives manual-copy feedback without false success",
+          "status": "passed",
+          "duration": 4.56658299999998
+        },
+        {
+          "fullName": "[DF-M03][NEG][OBS-09-E012] missing clipboard gives manual-copy feedback without false success",
+          "status": "passed",
+          "duration": 3.3974580000000287
+        },
+        {
+          "fullName": "[DF-M04][NEG][OBS-09-E012] throws clipboard gives manual-copy feedback without false success",
+          "status": "passed",
+          "duration": 3.944500000000005
+        },
+        {
+          "fullName": "[DF-M05][POS][OBS-09-E012] a rejected copy can be retried successfully",
+          "status": "passed",
+          "duration": 4.730624999999975
+        },
+        {
+          "fullName": "[DF-M06][NEG][OBS-09-E012] copy completion for a previous share cannot label a new share as copied",
+          "status": "passed",
+          "duration": 4.321583999999973
+        }
+      ]
+    },
+    {
+      "name": "src/test/modules.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "module catalogue provides usable high-fidelity data for every generic module",
+          "status": "passed",
+          "duration": 3.802583000000027
+        }
+      ]
+    },
+    {
+      "name": "src/test/notificationExtensionsFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "notification create: cancel during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 151.43833300000006
+        },
+        {
+          "fullName": "notification create: unmount during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 52.73066700000004
+        },
+        {
+          "fullName": "notification create: late 200 preserves the replacement draft",
+          "status": "passed",
+          "duration": 66.929666
+        },
+        {
+          "fullName": "notification create: late 503 preserves the replacement draft",
+          "status": "passed",
+          "duration": 66.86070800000005
+        },
+        {
+          "fullName": "notification create: current failures retain input and permit retry",
+          "status": "passed",
+          "duration": 75.23558300000002
+        },
+        {
+          "fullName": "notification create: submission freezes input and deduplicates pending callbacks",
+          "status": "passed",
+          "duration": 65.64270800000008
+        },
+        {
+          "fullName": "notification edit: cancel during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 64.68120800000008
+        },
+        {
+          "fullName": "notification edit: unmount during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 58.36900000000003
+        },
+        {
+          "fullName": "notification edit: late 200 preserves the replacement draft",
+          "status": "passed",
+          "duration": 55.812625000000025
+        },
+        {
+          "fullName": "notification edit: late 503 preserves the replacement draft",
+          "status": "passed",
+          "duration": 64.95637499999998
+        },
+        {
+          "fullName": "notification edit: current failures retain input and permit retry",
+          "status": "passed",
+          "duration": 70.42508300000009
+        },
+        {
+          "fullName": "notification edit: submission freezes input and deduplicates pending callbacks",
+          "status": "passed",
+          "duration": 66.34466599999996
+        },
+        {
+          "fullName": "key create: cancel during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 68.88799999999992
+        },
+        {
+          "fullName": "key create: unmount during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 74.62041700000009
+        },
+        {
+          "fullName": "key create: late 200 preserves the replacement draft",
+          "status": "passed",
+          "duration": 96.850459
+        },
+        {
+          "fullName": "key create: late 503 preserves the replacement draft",
+          "status": "passed",
+          "duration": 67.46350000000007
+        },
+        {
+          "fullName": "key create: current failures retain input and permit retry",
+          "status": "passed",
+          "duration": 77.49841700000002
+        },
+        {
+          "fullName": "key create: submission freezes input and deduplicates pending callbacks",
+          "status": "passed",
+          "duration": 72.47533399999998
+        },
+        {
+          "fullName": "package create: cancel during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 71.65695900000014
+        },
+        {
+          "fullName": "package create: unmount during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 51.96350000000007
+        },
+        {
+          "fullName": "package create: late 200 preserves the replacement draft",
+          "status": "passed",
+          "duration": 68.219875
+        },
+        {
+          "fullName": "package create: late 503 preserves the replacement draft",
+          "status": "passed",
+          "duration": 69.222667
+        },
+        {
+          "fullName": "package create: current failures retain input and permit retry",
+          "status": "passed",
+          "duration": 85.98437499999977
+        },
+        {
+          "fullName": "package create: submission freezes input and deduplicates pending callbacks",
+          "status": "passed",
+          "duration": 73.78737499999988
+        },
+        {
+          "fullName": "adapter create: cancel during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 63.3311249999997
+        },
+        {
+          "fullName": "adapter create: unmount during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 54.06229200000007
+        },
+        {
+          "fullName": "adapter create: late 200 preserves the replacement draft",
+          "status": "passed",
+          "duration": 72.84566599999971
+        },
+        {
+          "fullName": "adapter create: late 503 preserves the replacement draft",
+          "status": "passed",
+          "duration": 69.08941700000014
+        },
+        {
+          "fullName": "adapter create: current failures retain input and permit retry",
+          "status": "passed",
+          "duration": 77.48170900000014
+        },
+        {
+          "fullName": "adapter create: submission freezes input and deduplicates pending callbacks",
+          "status": "passed",
+          "duration": 72.65862499999957
+        },
+        {
+          "fullName": "adapter edit: cancel during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 62.166291999999885
+        },
+        {
+          "fullName": "adapter edit: unmount during CSRF prevents obsolete writes",
+          "status": "passed",
+          "duration": 53.47545899999977
+        },
+        {
+          "fullName": "adapter edit: late 200 preserves the replacement draft",
+          "status": "passed",
+          "duration": 62.73854200000005
+        },
+        {
+          "fullName": "adapter edit: late 503 preserves the replacement draft",
+          "status": "passed",
+          "duration": 62.893583000000035
+        },
+        {
+          "fullName": "adapter edit: current failures retain input and permit retry",
+          "status": "passed",
+          "duration": 75.66895799999975
+        },
+        {
+          "fullName": "adapter edit: submission freezes input and deduplicates pending callbacks",
+          "status": "passed",
+          "duration": 122.07845799999996
+        },
+        {
+          "fullName": "notification create: project switch and return cancels the pending form",
+          "status": "passed",
+          "duration": 136.34370799999988
+        },
+        {
+          "fullName": "notification edit: project switch and return cancels the pending form",
+          "status": "passed",
+          "duration": 76.00995899999998
+        }
+      ]
+    },
+    {
+      "name": "src/test/notificationsPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "notification project and form boundaries top project selection reloads templates and deliveries and closes old forms",
+          "status": "passed",
+          "duration": 287.9086249999999
+        },
+        {
+          "fullName": "notification project and form boundaries late response from original project cannot overwrite the current project",
+          "status": "passed",
+          "duration": 97.62758400000007
+        },
+        {
+          "fullName": "notification project and form boundaries failed project reads clear old rows and show retry",
+          "status": "passed",
+          "duration": 118.26225
+        },
+        {
+          "fullName": "notification project and form boundaries failed save retains input and pending submits are deduplicated",
+          "status": "passed",
+          "duration": 117.73904200000015
+        },
+        {
+          "fullName": "notification project and form boundaries cancels the obsolete form during csrf and leaves the new project draft open",
+          "status": "passed",
+          "duration": 123.44516699999986
+        },
+        {
+          "fullName": "notification project and form boundaries cancel clears signing plaintext and invalidates a pending completion",
+          "status": "passed",
+          "duration": 93.26666600000021
+        },
+        {
+          "fullName": "notification project and form boundaries cancelling during refresh prevents a late successful modal-close callback",
+          "status": "passed",
+          "duration": 105.07541600000013
+        },
+        {
+          "fullName": "notification project and form boundaries manual resend is explicitly confirmed and pending resend cannot be duplicated",
+          "status": "passed",
+          "duration": 71.61816700000008
+        },
+        {
+          "fullName": "notification project and form boundaries delete requires confirmation and cancels before dispatch after project switch",
+          "status": "passed",
+          "duration": 82.41612499999997
+        },
+        {
+          "fullName": "notification project and form boundaries inactive channel definition makes actual delivery limitation visible",
+          "status": "passed",
+          "duration": 78.44004199999972
+        },
+        {
+          "fullName": "notification project and form boundaries local workflow connects the account service rather than attempting an authenticated migration directly",
+          "status": "passed",
+          "duration": 49.651374999999916
+        },
+        {
+          "fullName": "notification project and form boundaries unmounted notification view ignores delayed resources",
+          "status": "passed",
+          "duration": 57.72445800000014
+        },
+        {
+          "fullName": "notification sync desktop entry opens native sync in local and account modes without issuing business writes",
+          "status": "passed",
+          "duration": 141.34725000000026
+        },
+        {
+          "fullName": "notification sync desktop entry ordinary web view does not show the native sync action",
+          "status": "passed",
+          "duration": 52.24945800000023
+        }
+      ]
+    },
+    {
+      "name": "src/test/p1AccountSessionUi.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[P1-U05-01][POS] self password reset clears the old client identity and asks for login",
+          "status": "passed",
+          "duration": 134.46133299999997
+        },
+        {
+          "fullName": "[P1-U05-02][POS] resetting another account keeps the current administrator signed in",
+          "status": "passed",
+          "duration": 59.113707999999974
+        },
+        {
+          "fullName": "[P1-U05-03][NEG] failed self reset does not falsely log out or close the password draft",
+          "status": "passed",
+          "duration": 67.61374999999998
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2CatalogCopyUi.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2-D10-13: ambiguous failure reuses the durable request key and digest",
+          "status": "passed",
+          "duration": 278.86470800000006
+        },
+        {
+          "fullName": "TC-P2-D10-13: project switch during CSRF prevents a copy to the new project",
+          "status": "passed",
+          "duration": 175.254459
+        },
+        {
+          "fullName": "TC-P2-D10-13: late successful copy cannot refresh the current project",
+          "status": "passed",
+          "duration": 160.48058400000014
+        },
+        {
+          "fullName": "TC-P2-D10-13: leaving and returning during CSRF cancels the original submission",
+          "status": "passed",
+          "duration": 149.04229099999998
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2EnvironmentUi.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[TC-P2-D01-06][POS][UI] orphan rows remain visible with a missing-definition label",
+          "status": "passed",
+          "duration": 133.43166599999995
+        },
+        {
+          "fullName": "[TC-P2-D03-CFG-02][POS][UI] disabled definitions are selectable for maintenance with an execution warning",
+          "status": "passed",
+          "duration": 65.66762499999993
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2ScheduleVersionUi.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2-D22-07: stale update keeps draft and original version without an automatic retry",
+          "status": "passed",
+          "duration": 181.752291
+        },
+        {
+          "fullName": "TC-P2-D22-08: explicit version refresh keeps draft and requires a separate save",
+          "status": "passed",
+          "duration": 115.85083399999996
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2AuditOptions.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D04-01: an action filter never shrinks the options",
+          "status": "passed",
+          "duration": 76.30320799999998
+        },
+        {
+          "fullName": "TC-P2R2-D04-02: metadata includes actions outside the current rows",
+          "status": "passed",
+          "duration": 16.869124999999997
+        },
+        {
+          "fullName": "TC-P2R2-D04-03: an empty row query leaves the action collection intact",
+          "status": "passed",
+          "duration": 17.61533400000002
+        },
+        {
+          "fullName": "TC-P2R2-D04-04: permission loss clears cached action names and rows",
+          "status": "passed",
+          "duration": 18.181709000000012
+        },
+        {
+          "fullName": "TC-P2R2-D04-05: metadata failure exposes stale options without pretending they are fresh",
+          "status": "passed",
+          "duration": 20.540209000000004
+        },
+        {
+          "fullName": "TC-P2R2-D04-05: delayed metadata cannot overwrite a newer selection",
+          "status": "passed",
+          "duration": 28.18987500000003
+        },
+        {
+          "fullName": "TC-P2R2-D04-06: row requests retain their original limit",
+          "status": "passed",
+          "duration": 10.419667000000004
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2DebugHandoff.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D15-01: all supported auth configurations preserve the full runtime request",
+          "status": "passed",
+          "duration": 4.828542000000027
+        },
+        {
+          "fullName": "TC-P2R2-D15-02: a complete handoff never writes credentials to Web Storage",
+          "status": "passed",
+          "duration": 1.3949590000000285
+        },
+        {
+          "fullName": "TC-P2R2-D15-03: project A/B/A and same-account reauthentication invalidate pending packets",
+          "status": "passed",
+          "duration": 3.148707999999999
+        },
+        {
+          "fullName": "TC-P2R2-D15-04: single use, another window/store and missing keys cannot restore old auth",
+          "status": "passed",
+          "duration": 1.3818749999999795
+        },
+        {
+          "fullName": "TC-P2R2-D15-05: creating and consuming a handoff perform no request or history write",
+          "status": "passed",
+          "duration": 0.48158300000000054
+        },
+        {
+          "fullName": "TC-P2R2-D15-06: header/query placement and variable references are never resolved during navigation",
+          "status": "passed",
+          "duration": 0.405208000000016
+        },
+        {
+          "fullName": "TC-P2R2-D15-07: unknown auth and malformed fields are rejected before creating a packet",
+          "status": "passed",
+          "duration": 0.33541700000000674
+        },
+        {
+          "fullName": "TC-P2R2-D15-08: discard invalidates only the selected packet and legacy route storage stays compatible",
+          "status": "passed",
+          "duration": 0.5670840000000226
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2FreezeWording.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D18-05: object tab says queue-time resolution and does not promise save-time freezing",
+          "status": "passed",
+          "duration": 194.31120800000002
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2HandoffPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime NONE/HEADER reaches manual execution unchanged",
+          "status": "passed",
+          "duration": 342.56562499999995
+        },
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime BEARER/HEADER reaches manual execution unchanged",
+          "status": "passed",
+          "duration": 177.97654199999988
+        },
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime BASIC/HEADER reaches manual execution unchanged",
+          "status": "passed",
+          "duration": 171.55333399999995
+        },
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime API_KEY/HEADER reaches manual execution unchanged",
+          "status": "passed",
+          "duration": 136.50808400000005
+        },
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime API_KEY/QUERY reaches manual execution unchanged",
+          "status": "passed",
+          "duration": 141.61591599999997
+        },
+        {
+          "fullName": "TC-P2R2-D15-04: missing packet starts blank and warns instead of restoring another draft",
+          "status": "passed",
+          "duration": 90.36083400000007
+        },
+        {
+          "fullName": "TC-P2R2-D15-03: a scope round-trip or source-ID mismatch rejects the handoff",
+          "status": "passed",
+          "duration": 162.370042
+        },
+        {
+          "fullName": "TC-P2R2-D15-03/06: a consumed runtime request cannot survive a project round-trip",
+          "status": "passed",
+          "duration": 138.01683300000013
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2HistorySend.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D13-01: legacy summary clears unrelated credentials without auto execution",
+          "status": "passed",
+          "duration": 259.4738749999999
+        },
+        {
+          "fullName": "TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=false",
+          "status": "passed",
+          "duration": 158.46600000000012
+        },
+        {
+          "fullName": "TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=true",
+          "status": "passed",
+          "duration": 104.15358400000014
+        },
+        {
+          "fullName": "TC-P2R2-D13-03: an ordinary wildcard request is not a historical placeholder",
+          "status": "passed",
+          "duration": 144.19733300000007
+        },
+        {
+          "fullName": "TC-P2R2-D13-04: reconstructed and explicitly reviewed history can be manually sent",
+          "status": "passed",
+          "duration": 168.42129099999988
+        },
+        {
+          "fullName": "TC-P2R2-D13-05: valid encrypted replay does not reject its redacted summary URL",
+          "status": "passed",
+          "duration": 157.020708
+        },
+        {
+          "fullName": "TC-P2R2-D13-06: P1 unavailable states remain disabled",
+          "status": "passed",
+          "duration": 361.74974999999995
+        },
+        {
+          "fullName": "TC-P2R2-D13-07: A/B/A invalidates historical reconstruction approval",
+          "status": "passed",
+          "duration": 129.56879100000015
+        },
+        {
+          "fullName": "TC-P2R2-D13-08: new ordinary drafts keep the original API payload without a star blacklist",
+          "status": "passed",
+          "duration": 152.6157919999996
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2OwnedWebSocket.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D14-02: unchanged page configuration reuses only its own active session",
+          "status": "passed",
+          "duration": 2.149000000000001
+        },
+        {
+          "fullName": "TC-P2R2-D14-06: manual close is terminal, repeat close does not reopen or resubscribe",
+          "status": "passed",
+          "duration": 0.9688330000000178
+        },
+        {
+          "fullName": "TC-P2R2-D14-07: foreign session updates cannot change which owned session gets closed",
+          "status": "passed",
+          "duration": 0.8262080000000083
+        },
+        {
+          "fullName": "TC-P2R2-D14-04: a failed close retains the exact old owner for explicit retry",
+          "status": "passed",
+          "duration": 1.3710419999999885
+        },
+        {
+          "fullName": "TC-P2R2-D14-08: invalid or failed creation never takes ownership of a foreign handle",
+          "status": "passed",
+          "duration": 0.38387500000004593
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2RowActions.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D20-01: scope invalidation before dispatch cancels task",
+          "status": "passed",
+          "duration": 107.258083
+        },
+        {
+          "fullName": "TC-P2R2-D20-02: scope invalidation before dispatch cancels notification",
+          "status": "passed",
+          "duration": 83.35833300000002
+        },
+        {
+          "fullName": "TC-P2R2-D20-03: plugin leave cancels precommit action",
+          "status": "passed",
+          "duration": 52.68516699999998
+        },
+        {
+          "fullName": "TC-P2R2-D20-03: a project selection alone does not cancel a global action",
+          "status": "passed",
+          "duration": 69.19299999999998
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: A/B/A invalidates task",
+          "status": "passed",
+          "duration": 50.23470800000007
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: A/B/A invalidates notification",
+          "status": "passed",
+          "duration": 79.75408300000004
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: same-account reauthentication invalidates task",
+          "status": "passed",
+          "duration": 46.51024999999993
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: same-account reauthentication invalidates notification",
+          "status": "passed",
+          "duration": 60.280250000000024
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: same-account reauthentication invalidates plugin",
+          "status": "passed",
+          "duration": 90.38449999999989
+        },
+        {
+          "fullName": "TC-P2R2-D20-05: dispatched work keeps its original URL and payload",
+          "status": "passed",
+          "duration": 37.613624999999956
+        },
+        {
+          "fullName": "TC-P2R2-D20-06: late completion after A/B/A cannot decorate the replacement view",
+          "status": "passed",
+          "duration": 45.12266700000009
+        },
+        {
+          "fullName": "TC-P2R2-D20-07: a cancelled token cannot clear a newer pending action",
+          "status": "passed",
+          "duration": 41.35154199999988
+        },
+        {
+          "fullName": "TC-P2R2-D20-08: CSRF authorization refusal never produces a business write",
+          "status": "passed",
+          "duration": 34.447124999999915
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2WebSocketPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D14-01: read-only history load keeps old session but prevents sending new draft to it",
+          "status": "passed",
+          "duration": 231.85512500000004
+        },
+        {
+          "fullName": "TC-P2R2-D14-03: explicit replacement closes the owned old session before new connect",
+          "status": "passed",
+          "duration": 160.05995899999994
+        },
+        {
+          "fullName": "TC-P2R2-D14-04: failed close preserves the old handle and prevents a second connection",
+          "status": "passed",
+          "duration": 132.91804100000013
+        },
+        {
+          "fullName": "TC-P2R2-D14-05: late creation after project cleans only its own original-project session",
+          "status": "passed",
+          "duration": 92.17883300000017
+        },
+        {
+          "fullName": "TC-P2R2-D14-05: late creation after unmount cleans only its own original-project session",
+          "status": "passed",
+          "duration": 89.32483400000001
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2WorkbenchHandoff.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D15-02: advanced navigation carries full runtime auth in memory with no Web Storage write",
+          "status": "passed",
+          "duration": 187.93320799999992
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceArtifactSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "performance native raw artifact sync entry opens binding in local mode without creating an execution",
+          "status": "passed",
+          "duration": 47.942249999999945
+        },
+        {
+          "fullName": "performance native raw artifact sync entry opens binding in account mode without creating an execution",
+          "status": "passed",
+          "duration": 10.17349999999999
+        },
+        {
+          "fullName": "performance native raw artifact sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 7.412459000000013
+        },
+        {
+          "fullName": "performance native raw artifact sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 8.848291000000017
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceCharts.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Performance charts resizes PerformanceExecutionChart when its drawer expands and disconnects on unmount",
+          "status": "passed",
+          "duration": 13.487041999999974
+        },
+        {
+          "fullName": "Performance charts resizes PerformanceResourceChart when its drawer expands and disconnects on unmount",
+          "status": "passed",
+          "duration": 2.3999999999999773
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "create: late 200 leaves replacement draft intact",
+          "status": "passed",
+          "duration": 81.68487500000003
+        },
+        {
+          "fullName": "create: late 503 leaves replacement draft intact",
+          "status": "passed",
+          "duration": 31.796832999999992
+        },
+        {
+          "fullName": "create: cancel during CSRF prevents obsolete write",
+          "status": "passed",
+          "duration": 32.98583299999996
+        },
+        {
+          "fullName": "create: project-return during CSRF prevents obsolete write",
+          "status": "passed",
+          "duration": 24.74716699999999
+        },
+        {
+          "fullName": "create: unmount during CSRF prevents obsolete write",
+          "status": "passed",
+          "duration": 24.949707999999987
+        },
+        {
+          "fullName": "edit: late 200 leaves replacement draft intact",
+          "status": "passed",
+          "duration": 28.112500000000068
+        },
+        {
+          "fullName": "edit: late 503 leaves replacement draft intact",
+          "status": "passed",
+          "duration": 32.948792000000026
+        },
+        {
+          "fullName": "edit: cancel during CSRF prevents obsolete write",
+          "status": "passed",
+          "duration": 28.713250000000016
+        },
+        {
+          "fullName": "edit: project-return during CSRF prevents obsolete write",
+          "status": "passed",
+          "duration": 27.829583000000184
+        },
+        {
+          "fullName": "edit: unmount during CSRF prevents obsolete write",
+          "status": "passed",
+          "duration": 19.165959000000157
+        },
+        {
+          "fullName": "an old save cannot clear a newer save spinner or close its editor",
+          "status": "passed",
+          "duration": 40.618041000000176
+        },
+        {
+          "fullName": "duplicate save callbacks only submit once",
+          "status": "passed",
+          "duration": 24.023042000000032
+        },
+        {
+          "fullName": "editing keeps the original plan id and version after a later selection",
+          "status": "passed",
+          "duration": 31.45925000000011
+        },
+        {
+          "fullName": "a current save failure preserves inputs and permits a successful retry",
+          "status": "passed",
+          "duration": 37.33349999999996
+        },
+        {
+          "fullName": "save completion after project-return cannot start follow-up requests",
+          "status": "passed",
+          "duration": 21.56179199999997
+        },
+        {
+          "fullName": "save completion after unmount cannot start follow-up requests",
+          "status": "passed",
+          "duration": 23.686874999999873
+        },
+        {
+          "fullName": "unmounting during the initial list request prevents detail and operational follow-up requests",
+          "status": "passed",
+          "duration": 4.774000000000115
+        },
+        {
+          "fullName": "a delete completion preserves a later selected plan",
+          "status": "passed",
+          "duration": 14.492874999999913
+        },
+        {
+          "fullName": "a stale detail 404 cannot show an error over the new selection",
+          "status": "passed",
+          "duration": 10.00737499999991
+        },
+        {
+          "fullName": "a stale detail 503 cannot show an error over the new selection",
+          "status": "passed",
+          "duration": 10.130916999999954
+        },
+        {
+          "fullName": "detail A-B-A rejects the first A failure while keeping the latest A",
+          "status": "passed",
+          "duration": 17.80749999999989
+        },
+        {
+          "fullName": "a detail failure after unmount produces no global error",
+          "status": "passed",
+          "duration": 8.052165999999943
+        },
+        {
+          "fullName": "a current detail failure is shown and reselecting allows retry",
+          "status": "passed",
+          "duration": 9.466667000000143
+        },
+        {
+          "fullName": "request body \" \\nQA body \\n\" keeps its raw-content contract",
+          "status": "passed",
+          "duration": 24.06904099999997
+        },
+        {
+          "fullName": "request body \"\" keeps its raw-content contract",
+          "status": "passed",
+          "duration": 34.32379100000003
+        },
+        {
+          "fullName": "request body \" \\n \" keeps its raw-content contract",
+          "status": "passed",
+          "duration": 24.05408299999999
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceHistoryArtifacts.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "provides scoped read-only downloads, including empty logs, with size and digest",
+          "status": "passed",
+          "duration": 33.499374999999986
+        },
+        {
+          "fullName": "late files from an old project cannot appear after a switch",
+          "status": "passed",
+          "duration": 3.710667000000001
+        },
+        {
+          "fullName": "history changes immediately discard the previous download link",
+          "status": "passed",
+          "duration": 3.9885419999999954
+        },
+        {
+          "fullName": "failed refresh clears prior files and exposes an actionable error",
+          "status": "passed",
+          "duration": 6.220708000000002
+        },
+        {
+          "fullName": "files attributed to a different origin are rejected without links",
+          "status": "passed",
+          "duration": 2.6474999999999795
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceHistoryPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "shows archived origins without requiring a current plan and excludes duplicate native records",
+          "status": "passed",
+          "duration": 51.27116700000005
+        },
+        {
+          "fullName": "opens a read-only report with original version and a scoped export link",
+          "status": "passed",
+          "duration": 33.22708399999999
+        },
+        {
+          "fullName": "late inventory from the previous project does not replace the selected project",
+          "status": "passed",
+          "duration": 16.535792000000015
+        },
+        {
+          "fullName": "project change closes the old history drawer and discards a late detail response",
+          "status": "passed",
+          "duration": 20.245124999999973
+        },
+        {
+          "fullName": "shows an actionable load failure and clears stale records without writes",
+          "status": "passed",
+          "duration": 8.365042000000017
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceHistorySyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "performance native history sync entry opens binding in local mode without creating an execution",
+          "status": "passed",
+          "duration": 47.4564170000001
+        },
+        {
+          "fullName": "performance native history sync entry opens binding in account mode without creating an execution",
+          "status": "passed",
+          "duration": 10.993832999999995
+        },
+        {
+          "fullName": "performance native history sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 8.898333999999977
+        },
+        {
+          "fullName": "performance native history sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 9.008500000000026
+        }
+      ]
+    },
+    {
+      "name": "src/test/performancePage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Performance page opens native definition sync from local and account desktop without enqueueing an execution",
+          "status": "passed",
+          "duration": 71.81270900000004
+        },
+        {
+          "fullName": "Performance page does not show the native sync entry in an ordinary browser",
+          "status": "passed",
+          "duration": 16.42279199999996
+        },
+        {
+          "fullName": "Performance page preserves the plan dialog and entered name after a rejected save",
+          "status": "passed",
+          "duration": 48.49233300000003
+        },
+        {
+          "fullName": "Performance page ignores a slow detail response after selecting another plan",
+          "status": "passed",
+          "duration": 16.96620900000005
+        },
+        {
+          "fullName": "Performance page keeps the thread name input mounted as the user types",
+          "status": "passed",
+          "duration": 26.536415999999917
+        },
+        {
+          "fullName": "Performance page retains invalid JSON and does not submit it",
+          "status": "passed",
+          "duration": 22.432083000000034
+        },
+        {
+          "fullName": "Performance page discards old project plans and closes its editor on project change",
+          "status": "passed",
+          "duration": 31.240415999999982
+        },
+        {
+          "fullName": "Performance page ignores a report response after the drawer is closed",
+          "status": "passed",
+          "duration": 111.34291699999994
+        },
+        {
+          "fullName": "Performance page waits for the native engine before posting a local execution",
+          "status": "passed",
+          "duration": 67.96687500000007
+        },
+        {
+          "fullName": "Performance page cancelling preparation does not enqueue a task even if native startup finishes",
+          "status": "passed",
+          "duration": 52.66145800000004
+        },
+        {
+          "fullName": "Performance page failed engine preparation and plan changes cannot queue a stale execution",
+          "status": "passed",
+          "duration": 74.25987499999997
+        }
+      ]
+    },
+    {
+      "name": "src/test/projectSettingsPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Project settings workspace boundaries opens native configuration sync in both desktop modes without submitting page data",
+          "status": "passed",
+          "duration": 208.18604200000004
+        },
+        {
+          "fullName": "Project settings workspace boundaries does not display desktop synchronization on the web",
+          "status": "passed",
+          "duration": 73.68795799999998
+        },
+        {
+          "fullName": "Project settings workspace boundaries opens native file synchronization from the file tab in both desktop modes",
+          "status": "passed",
+          "duration": 83.47662500000001
+        },
+        {
+          "fullName": "Project settings workspace boundaries project selection reloads resources and closes old forms",
+          "status": "passed",
+          "duration": 81.67612500000007
+        },
+        {
+          "fullName": "Project settings workspace boundaries late previous project resources cannot overwrite the selected project",
+          "status": "passed",
+          "duration": 50.193457999999964
+        },
+        {
+          "fullName": "Project settings workspace boundaries failed parameter save keeps entered form open and deduplicates pending submits",
+          "status": "passed",
+          "duration": 72.83733300000006
+        },
+        {
+          "fullName": "Project settings workspace boundaries captures the project and fields before CSRF and cannot close a replacement form",
+          "status": "passed",
+          "duration": 88.73454199999992
+        },
+        {
+          "fullName": "Project settings workspace boundaries failed new project load clears old data and exposes retry",
+          "status": "passed",
+          "duration": 58.81100000000015
+        },
+        {
+          "fullName": "Project settings workspace boundaries route change loads audit records and discards obsolete log responses",
+          "status": "passed",
+          "duration": 82.11966699999994
+        },
+        {
+          "fullName": "Project settings workspace boundaries project creation failures retain the dialog",
+          "status": "passed",
+          "duration": 66.17712499999993
+        },
+        {
+          "fullName": "Project settings workspace boundaries file upload captures the originating project before waiting for CSRF",
+          "status": "passed",
+          "duration": 42.18658299999993
+        },
+        {
+          "fullName": "Project settings workspace boundaries completion after resource refresh cannot close a newly opened project form",
+          "status": "passed",
+          "duration": 74.40374999999995
+        },
+        {
+          "fullName": "Project settings workspace boundaries unmounted view ignores delayed settings responses",
+          "status": "passed",
+          "duration": 40.58058300000016
+        }
+      ]
+    },
+    {
+      "name": "src/test/projectVersionSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Project version desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed",
+          "duration": 31.51979199999994
+        },
+        {
+          "fullName": "Project version desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed",
+          "duration": 8.589791999999989
+        },
+        {
+          "fullName": "Project version desktop sync entry hides the entry in a browser",
+          "status": "passed",
+          "duration": 8.530834000000027
+        },
+        {
+          "fullName": "Project version desktop sync entry reports native open errors without mutating assets",
+          "status": "passed",
+          "duration": 7.528500000000008
+        }
+      ]
+    },
+    {
+      "name": "src/test/qualityReportSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "opens plan sync in local desktop mode without sending a report",
+          "status": "passed",
+          "duration": 69.84716700000001
+        },
+        {
+          "fullName": "opens plan sync in account desktop mode without sending a report",
+          "status": "passed",
+          "duration": 16.161207999999988
+        },
+        {
+          "fullName": "keeps ordinary browser report controls without exposing native synchronization",
+          "status": "passed",
+          "duration": 12.583582999999976
+        },
+        {
+          "fullName": "shows an actionable native-opening failure without modifying a plan",
+          "status": "passed",
+          "duration": 14.74691699999994
+        }
+      ]
+    },
+    {
+      "name": "src/test/qualityReportTaskFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "report create: cancel during CSRF prevents an obsolete write",
+          "status": "passed",
+          "duration": 180.65837499999998
+        },
+        {
+          "fullName": "report create: unmount during CSRF prevents an obsolete write",
+          "status": "passed",
+          "duration": 76.36783300000002
+        },
+        {
+          "fullName": "report edit: cancel during CSRF prevents an obsolete write",
+          "status": "passed",
+          "duration": 85.62649999999985
+        },
+        {
+          "fullName": "report edit: unmount during CSRF prevents an obsolete write",
+          "status": "passed",
+          "duration": 67.12725
+        },
+        {
+          "fullName": "task create: cancel during CSRF prevents an obsolete write",
+          "status": "passed",
+          "duration": 42.72287499999993
+        },
+        {
+          "fullName": "task create: unmount during CSRF prevents an obsolete write",
+          "status": "passed",
+          "duration": 40.00499999999988
+        },
+        {
+          "fullName": "task edit: cancel during CSRF prevents an obsolete write",
+          "status": "passed",
+          "duration": 48.32129199999986
+        },
+        {
+          "fullName": "task edit: unmount during CSRF prevents an obsolete write",
+          "status": "passed",
+          "duration": 45.89837499999999
+        },
+        {
+          "fullName": "task create: project switch and return during CSRF invalidates the old form",
+          "status": "passed",
+          "duration": 41.071541000000025
+        },
+        {
+          "fullName": "task edit: project switch and return during CSRF invalidates the old form",
+          "status": "passed",
+          "duration": 51.85570899999993
+        },
+        {
+          "fullName": "report create: reopen during the post-save reload cannot receive an old completion",
+          "status": "passed",
+          "duration": 79.05354199999988
+        },
+        {
+          "fullName": "report create: unmount during the post-save reload cannot receive an old completion",
+          "status": "passed",
+          "duration": 74.85837500000002
+        },
+        {
+          "fullName": "report edit: reopen during the post-save reload cannot receive an old completion",
+          "status": "passed",
+          "duration": 112.99025000000006
+        },
+        {
+          "fullName": "report edit: unmount during the post-save reload cannot receive an old completion",
+          "status": "passed",
+          "duration": 63.918249999999944
+        },
+        {
+          "fullName": "report run: unmount during CSRF cannot send an obsolete operation",
+          "status": "passed",
+          "duration": 48.81966699999998
+        },
+        {
+          "fullName": "report run: business 200 after unmount has no follow-up request or feedback",
+          "status": "passed",
+          "duration": 43.7634579999999
+        },
+        {
+          "fullName": "report run: business 503 after unmount has no follow-up request or feedback",
+          "status": "passed",
+          "duration": 53.76033400000006
+        },
+        {
+          "fullName": "report run: reload 200 after unmount has no follow-up request or feedback",
+          "status": "passed",
+          "duration": 49.34433400000012
+        },
+        {
+          "fullName": "report run: reload 503 after unmount has no follow-up request or feedback",
+          "status": "passed",
+          "duration": 46.69879200000014
+        },
+        {
+          "fullName": "report run: a current 200 still gives feedback",
+          "status": "passed",
+          "duration": 53.915750000000116
+        },
+        {
+          "fullName": "report run: a current 503 still gives feedback",
+          "status": "passed",
+          "duration": 45.32737499999985
+        },
+        {
+          "fullName": "report delete: unmount during CSRF cannot send an obsolete operation",
+          "status": "passed",
+          "duration": 53.13237499999968
+        },
+        {
+          "fullName": "report delete: business 200 after unmount has no follow-up request or feedback",
+          "status": "passed",
+          "duration": 40.765249999999924
+        },
+        {
+          "fullName": "report delete: business 503 after unmount has no follow-up request or feedback",
+          "status": "passed",
+          "duration": 51.58283399999982
+        },
+        {
+          "fullName": "report delete: reload 200 after unmount has no follow-up request or feedback",
+          "status": "passed",
+          "duration": 46.90908300000001
+        },
+        {
+          "fullName": "report delete: reload 503 after unmount has no follow-up request or feedback",
+          "status": "passed",
+          "duration": 41.49037500000031
+        },
+        {
+          "fullName": "report delete: a current 200 still gives feedback",
+          "status": "passed",
+          "duration": 48.373333
+        },
+        {
+          "fullName": "report delete: a current 503 still gives feedback",
+          "status": "passed",
+          "duration": 38.95408300000008
+        },
+        {
+          "fullName": "CSV 200 after unmount neither downloads nor displays a message",
+          "status": "passed",
+          "duration": 49.724249999999756
+        },
+        {
+          "fullName": "CSV 503 after unmount neither downloads nor displays a message",
+          "status": "passed",
+          "duration": 40.27762500000017
+        },
+        {
+          "fullName": "a current CSV failure is still visible",
+          "status": "passed",
+          "duration": 48.584166000000096
+        },
+        {
+          "fullName": "report: a current save failure retains input and permits retry",
+          "status": "passed",
+          "duration": 75.65104099999962
+        },
+        {
+          "fullName": "report: save captures the submitted input and rejects duplicate pending callbacks",
+          "status": "passed",
+          "duration": 64.92900000000009
+        },
+        {
+          "fullName": "task: a current save failure retains input and permits retry",
+          "status": "passed",
+          "duration": 46.71779199999992
+        },
+        {
+          "fullName": "task: save captures the submitted input and rejects duplicate pending callbacks",
+          "status": "passed",
+          "duration": 38.303457999999864
+        }
+      ]
+    },
+    {
+      "name": "src/test/reportsPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Reports page keeps failed schedule edits open with entered content",
+          "status": "passed",
+          "duration": 162.2147920000001
+        },
+        {
+          "fullName": "Reports page ignores old report responses after filter changes",
+          "status": "passed",
+          "duration": 84.22704199999987
+        },
+        {
+          "fullName": "Reports page invalid dates invalidate an earlier request and display an actionable error",
+          "status": "passed",
+          "duration": 67.05362500000001
+        },
+        {
+          "fullName": "Reports page closing run records discards a delayed response",
+          "status": "passed",
+          "duration": 52.20004199999994
+        },
+        {
+          "fullName": "Reports page does not offer running disabled schedules",
+          "status": "passed",
+          "duration": 60.65774999999985
+        },
+        {
+          "fullName": "Reports page uses Shanghai reporting dates around UTC midnight",
+          "status": "passed",
+          "duration": 60.2862090000001
+        },
+        {
+          "fullName": "Reports page exports the clicked date range and keeps its filename when filters change during download",
+          "status": "passed",
+          "duration": 60.013749999999845
+        },
+        {
+          "fullName": "Reports page surfaces a failed report instead of retaining old statistics",
+          "status": "passed",
+          "duration": 56.30645799999979
+        }
+      ]
+    },
+    {
+      "name": "src/test/richText.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "rich text helpers keeps supported formatting and removes unsafe markup",
+          "status": "passed",
+          "duration": 7.098792000000003
+        },
+        {
+          "fullName": "rich text helpers converts legacy plain text into editable paragraphs",
+          "status": "passed",
+          "duration": 1.529833999999994
+        },
+        {
+          "fullName": "rich text helpers detects visually empty content and keeps the default reproduction labels",
+          "status": "passed",
+          "duration": 2.0504999999999995
+        }
+      ]
+    },
+    {
+      "name": "src/test/router.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "router access redirects anonymous users to login",
+          "status": "passed",
+          "duration": 160.97816700000004
+        },
+        {
+          "fullName": "router access allows anonymous users to open a Mock share link",
+          "status": "passed",
+          "duration": 16.230999999999995
+        },
+        {
+          "fullName": "router access renders the public login route when the initial session request fails",
+          "status": "passed",
+          "duration": 0.9512499999999591
+        },
+        {
+          "fullName": "router access allows reauthentication when the server has invalidated a cached session",
+          "status": "passed",
+          "duration": 380.48854099999994
+        },
+        {
+          "fullName": "router access allows signed-in users to open every product module",
+          "status": "passed",
+          "duration": 822.0621669999999
+        }
+      ]
+    },
+    {
+      "name": "src/test/session.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "session login recovery guidance renews an expired local session through the native bridge before loading its workspace",
+          "status": "passed",
+          "duration": 4.620874999999955
+        },
+        {
+          "fullName": "session login recovery guidance does not renew online sessions using local workspace credentials",
+          "status": "passed",
+          "duration": 0.7026249999998981
+        },
+        {
+          "fullName": "session login recovery guidance explains how to recover when Platform API cannot be reached",
+          "status": "passed",
+          "duration": 1.1734589999999798
+        },
+        {
+          "fullName": "session login recovery guidance includes the HTTP status when CSRF bootstrap fails",
+          "status": "passed",
+          "duration": 0.4397909999999001
+        },
+        {
+          "fullName": "session login recovery guidance rejects malformed CSRF responses with recovery guidance",
+          "status": "passed",
+          "duration": 0.45862499999998363
+        },
+        {
+          "fullName": "session login recovery guidance registers with CSRF and loads only the new account workspace",
+          "status": "passed",
+          "duration": 1.66212500000006
+        },
+        {
+          "fullName": "session login recovery guidance shows duplicate registration error without marking the user signed in",
+          "status": "passed",
+          "duration": 0.8522499999999127
+        },
+        {
+          "fullName": "session login recovery guidance keeps the login page available and reports an initial session network failure",
+          "status": "passed",
+          "duration": 0.668292000000065
+        },
+        {
+          "fullName": "session login recovery guidance clears initialization errors after the user retries authentication",
+          "status": "passed",
+          "duration": 0.6106670000000349
+        },
+        {
+          "fullName": "session login recovery guidance reports an HTTP session lookup failure instead of treating it as a valid identity",
+          "status": "passed",
+          "duration": 0.32275000000004184
+        },
+        {
+          "fullName": "session login recovery guidance rejects a malformed current-user response without authenticating",
+          "status": "passed",
+          "duration": 0.28462499999989177
+        },
+        {
+          "fullName": "session login recovery guidance revalidates cached authentication and clears expired identity and project data on 401",
+          "status": "passed",
+          "duration": 0.4426250000000209
+        },
+        {
+          "fullName": "session login recovery guidance preserves a valid cached project when revalidation confirms the same user",
+          "status": "passed",
+          "duration": 0.29829099999994924
+        },
+        {
+          "fullName": "session login recovery guidance retains identity on a transient revalidation failure and can retry the check",
+          "status": "passed",
+          "duration": 0.31254200000000765
+        },
+        {
+          "fullName": "session login recovery guidance retains the authenticated workspace when logout returns HTTP 403",
+          "status": "passed",
+          "duration": 0.561458000000016
+        },
+        {
+          "fullName": "session login recovery guidance retains the authenticated workspace when logout returns HTTP 500",
+          "status": "passed",
+          "duration": 0.3943329999999605
+        },
+        {
+          "fullName": "session login recovery guidance retains the authenticated workspace when the logout request is interrupted",
+          "status": "passed",
+          "duration": 0.5425419999999122
+        },
+        {
+          "fullName": "session login recovery guidance does not submit logout after an unusable CSRF response with status 503",
+          "status": "passed",
+          "duration": 0.4039589999999862
+        },
+        {
+          "fullName": "session login recovery guidance does not submit logout after an unusable CSRF response with status 200",
+          "status": "passed",
+          "duration": 0.34787500000004457
+        },
+        {
+          "fullName": "session login recovery guidance clears local identity only when logout succeeds or confirms an expired session (204)",
+          "status": "passed",
+          "duration": 0.3446670000000722
+        },
+        {
+          "fullName": "session login recovery guidance clears local identity only when logout succeeds or confirms an expired session (401)",
+          "status": "passed",
+          "duration": 0.29816599999992377
+        }
+      ]
+    },
+    {
+      "name": "src/test/systemSettings.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "system settings capability gate ordinary root defaults to environments and hides privileged menus",
+          "status": "passed",
+          "duration": 21.065458999999976
+        },
+        {
+          "fullName": "system settings capability gate direct privileged route never mounts its child for ordinary accounts",
+          "status": "passed",
+          "duration": 12.81533300000001
+        },
+        {
+          "fullName": "system settings capability gate admin can mount accounts with all navigation choices",
+          "status": "passed",
+          "duration": 2.7226670000000013
+        },
+        {
+          "fullName": "system settings capability gate capability failure exposes retry and mounts no management page",
+          "status": "passed",
+          "duration": 5.237459000000001
+        },
+        {
+          "fullName": "project environment forms project switch closes forms and reloads without previous rows",
+          "status": "passed",
+          "duration": 128.17816699999997
+        },
+        {
+          "fullName": "project environment forms obsolete environment response cannot overwrite selected project",
+          "status": "passed",
+          "duration": 44.19320800000003
+        },
+        {
+          "fullName": "project environment forms failed environment save retains inputs and suppresses duplicate submit",
+          "status": "passed",
+          "duration": 58.20170899999994
+        },
+        {
+          "fullName": "project environment forms environment save captures original project and cannot close a replacement",
+          "status": "passed",
+          "duration": 73.35370799999998
+        },
+        {
+          "fullName": "project environment forms failed project load clears old environments and offers retry",
+          "status": "passed",
+          "duration": 43.68741699999998
+        },
+        {
+          "fullName": "account management forms latest account search wins over earlier delayed response",
+          "status": "passed",
+          "duration": 50.124874999999975
+        },
+        {
+          "fullName": "account management forms account save captures immutable fields before csrf",
+          "status": "passed",
+          "duration": 53.58275000000003
+        },
+        {
+          "fullName": "account management forms account create failure retains modal and entered fields",
+          "status": "passed",
+          "duration": 49.51758300000006
+        },
+        {
+          "fullName": "account management forms password request captures target and cannot close a replacement password form",
+          "status": "passed",
+          "duration": 46.365749999999935
+        },
+        {
+          "fullName": "account management forms password cancellation clears plaintext and a failed account reload clears old rows",
+          "status": "passed",
+          "duration": 35.92083300000013
+        },
+        {
+          "fullName": "system parameter forms saves an empty ordinary value without showing a required marker",
+          "status": "passed",
+          "duration": 23.52729199999999
+        },
+        {
+          "fullName": "system parameter forms failed parameter save keeps editor open and pending submit is deduplicated",
+          "status": "passed",
+          "duration": 25.12483300000008
+        },
+        {
+          "fullName": "system parameter forms captures config before csrf and does not close a newly opened form",
+          "status": "passed",
+          "duration": 17.26366699999994
+        },
+        {
+          "fullName": "system parameter forms shows local policy and opens the existing native authorization window",
+          "status": "passed",
+          "duration": 11.741999999999962
+        },
+        {
+          "fullName": "system parameter forms online policy retains restrictions without showing a local authorization action",
+          "status": "passed",
+          "duration": 14.51558399999999
+        }
+      ]
+    },
+    {
+      "name": "src/test/tasksPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Task registration page opens native sync management in the local desktop without writing registrations",
+          "status": "passed",
+          "duration": 146.72762500000005
+        },
+        {
+          "fullName": "Task registration page ordinary web clients do not show a native-only sync action",
+          "status": "passed",
+          "duration": 76.36129199999993
+        },
+        {
+          "fullName": "Task registration page keeps failed edits open and submits the displayed version",
+          "status": "passed",
+          "duration": 104.44891700000005
+        },
+        {
+          "fullName": "Task registration page global project selection closes old forms and rejects a delayed list response",
+          "status": "passed",
+          "duration": 122.64629100000002
+        },
+        {
+          "fullName": "Task registration page cancels the obsolete edited form during CSRF and leaves the new project intact",
+          "status": "passed",
+          "duration": 112.45454199999995
+        },
+        {
+          "fullName": "Task registration page a failed new-project load clears old rows and displays the failure",
+          "status": "passed",
+          "duration": 97.10362499999997
+        },
+        {
+          "fullName": "Task registration page deduplicates pending cancellation and sends the record version",
+          "status": "passed",
+          "duration": 86.52233299999989
+        },
+        {
+          "fullName": "Task registration page shows immutable source status and version for imported registrations",
+          "status": "passed",
+          "duration": 75.78649999999993
+        },
+        {
+          "fullName": "Task registration page does not load or create tasks with no accessible project",
+          "status": "passed",
+          "duration": 52.73266699999999
+        },
+        {
+          "fullName": "Task registration page unmounting invalidates a pending list request",
+          "status": "passed",
+          "duration": 74.907917
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "profile: late create 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 276.1273340000001
+        },
+        {
+          "fullName": "profile: late edit 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 187.99358300000006
+        },
+        {
+          "fullName": "profile: late create 503 preserves a replacement draft",
+          "status": "passed",
+          "duration": 168.68404199999998
+        },
+        {
+          "fullName": "profile: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 161.8984170000001
+        },
+        {
+          "fullName": "profile: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 140.1349160000002
+        },
+        {
+          "fullName": "profile: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 131.71541700000012
+        },
+        {
+          "fullName": "profile: an old completion cannot clear the new save spinner",
+          "status": "passed",
+          "duration": 225.98775
+        },
+        {
+          "fullName": "profile: a current failure retains input and permits retry",
+          "status": "passed",
+          "duration": 192.346583
+        },
+        {
+          "fullName": "object: late create 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 160.66162500000019
+        },
+        {
+          "fullName": "object: late edit 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 132.8510000000001
+        },
+        {
+          "fullName": "object: late create 503 preserves a replacement draft",
+          "status": "passed",
+          "duration": 168.50587499999983
+        },
+        {
+          "fullName": "object: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 174.68049999999994
+        },
+        {
+          "fullName": "object: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 160.9515409999999
+        },
+        {
+          "fullName": "object: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 144.30904199999986
+        },
+        {
+          "fullName": "object: an old completion cannot clear the new save spinner",
+          "status": "passed",
+          "duration": 191.31254199999967
+        },
+        {
+          "fullName": "object: a current failure retains input and permits retry",
+          "status": "passed",
+          "duration": 192.41366600000038
+        },
+        {
+          "fullName": "scenario: late create 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 187.97804199999973
+        },
+        {
+          "fullName": "scenario: late edit 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 185.99862499999972
+        },
+        {
+          "fullName": "scenario: late create 503 preserves a replacement draft",
+          "status": "passed",
+          "duration": 177.51150000000007
+        },
+        {
+          "fullName": "scenario: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 185.15787500000033
+        },
+        {
+          "fullName": "scenario: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 163.3374170000002
+        },
+        {
+          "fullName": "scenario: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 137.17450000000008
+        },
+        {
+          "fullName": "scenario: an old completion cannot clear the new save spinner",
+          "status": "passed",
+          "duration": 232.49104199999965
+        },
+        {
+          "fullName": "scenario: a current failure retains input and permits retry",
+          "status": "passed",
+          "duration": 230.9391250000008
+        },
+        {
+          "fullName": "schedule: late create 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 179.97254200000043
+        },
+        {
+          "fullName": "schedule: late edit 200 preserves a replacement draft",
+          "status": "passed",
+          "duration": 155.37454100000014
+        },
+        {
+          "fullName": "schedule: late create 503 preserves a replacement draft",
+          "status": "passed",
+          "duration": 295.88475000000017
+        },
+        {
+          "fullName": "schedule: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 222.20424999999977
+        },
+        {
+          "fullName": "schedule: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 172.68345800000043
+        },
+        {
+          "fullName": "schedule: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed",
+          "duration": 149.02929200000017
+        },
+        {
+          "fullName": "schedule: an old completion cannot clear the new save spinner",
+          "status": "passed",
+          "duration": 216.52520800000002
+        },
+        {
+          "fullName": "schedule: a current failure retains input and permits retry",
+          "status": "passed",
+          "duration": 198.855458
+        },
+        {
+          "fullName": "execute: cancel during CSRF cannot queue a task",
+          "status": "passed",
+          "duration": 147.70808399999987
+        },
+        {
+          "fullName": "execute: project-return during CSRF cannot queue a task",
+          "status": "passed",
+          "duration": 135.65750000000025
+        },
+        {
+          "fullName": "execute: unmount during CSRF cannot queue a task",
+          "status": "passed",
+          "duration": 139.45816600000035
+        },
+        {
+          "fullName": "execute: a late 200 after cancellation has no toast or follow-up",
+          "status": "passed",
+          "duration": 142.1600840000001
+        },
+        {
+          "fullName": "execute: a late 503 after cancellation has no toast or follow-up",
+          "status": "passed",
+          "duration": 136.04004199999963
+        },
+        {
+          "fullName": "initial context 200 after unmount cannot reload assets or show errors",
+          "status": "passed",
+          "duration": 68.71879200000058
+        },
+        {
+          "fullName": "initial context 503 after unmount cannot reload assets or show errors",
+          "status": "passed",
+          "duration": 74.00758299999961
+        },
+        {
+          "fullName": "initial assets after unmount cannot revive the old page",
+          "status": "passed",
+          "duration": 84.87850000000071
+        },
+        {
+          "fullName": "initial assets after project-return cannot revive the old page",
+          "status": "passed",
+          "duration": 100.7573339999999
+        },
+        {
+          "fullName": "duplicate object save callbacks only send one write",
+          "status": "passed",
+          "duration": 187.72904199999994
+        },
+        {
+          "fullName": "object save captures the submitted form before awaiting CSRF",
+          "status": "passed",
+          "duration": 221.4984170000007
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationHistoryArtifacts.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "provides scoped read-only downloads, including empty logs, with size and digest",
+          "status": "passed",
+          "duration": 30.49116600000002
+        },
+        {
+          "fullName": "late files from an old project cannot appear after a switch",
+          "status": "passed",
+          "duration": 3.2387089999999716
+        },
+        {
+          "fullName": "history changes immediately discard the previous download link",
+          "status": "passed",
+          "duration": 3.58562500000005
+        },
+        {
+          "fullName": "failed refresh clears prior files and exposes an actionable error",
+          "status": "passed",
+          "duration": 5.305124999999975
+        },
+        {
+          "fullName": "files attributed to a different origin are rejected without links",
+          "status": "passed",
+          "duration": 2.3683750000000146
+        },
+        {
+          "fullName": "loads screenshot and video previews only after explicit selection and allows multiple screenshots",
+          "status": "passed",
+          "duration": 4.694874999999968
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationHistoryPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "shows archived origins without requiring a current plan and excludes duplicate native records",
+          "status": "passed",
+          "duration": 55.31679100000002
+        },
+        {
+          "fullName": "opens a read-only report with original version and a scoped export link",
+          "status": "passed",
+          "duration": 34.774625000000015
+        },
+        {
+          "fullName": "late inventory from the previous project does not replace the selected project",
+          "status": "passed",
+          "duration": 17.608833000000004
+        },
+        {
+          "fullName": "project change closes the old history drawer and discards a late detail response",
+          "status": "passed",
+          "duration": 21.143374999999992
+        },
+        {
+          "fullName": "shows an actionable load failure and clears stale records without writes",
+          "status": "passed",
+          "duration": 8.636832999999967
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationHistorySyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Web UI native history sync entry opens 历史同步 in local mode without creating an execution",
+          "status": "passed",
+          "duration": 57.27362499999998
+        },
+        {
+          "fullName": "Web UI native history sync entry opens 报告产物同步 in local mode without creating an execution",
+          "status": "passed",
+          "duration": 30.730707999999936
+        },
+        {
+          "fullName": "Web UI native history sync entry opens 历史同步 in account mode without creating an execution",
+          "status": "passed",
+          "duration": 31.102792000000022
+        },
+        {
+          "fullName": "Web UI native history sync entry opens 报告产物同步 in account mode without creating an execution",
+          "status": "passed",
+          "duration": 31.97404199999994
+        },
+        {
+          "fullName": "Web UI native history sync entry hides native binding in an ordinary browser",
+          "status": "passed",
+          "duration": 20.67404099999999
+        },
+        {
+          "fullName": "Web UI native history sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed",
+          "duration": 23.347792000000027
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Web UI automation page opens native synchronization in local mode without queuing a test",
+          "status": "passed",
+          "duration": 57.634334000000024
+        },
+        {
+          "fullName": "Web UI automation page opens native synchronization in server mode without queuing a test",
+          "status": "passed",
+          "duration": 29.784875
+        },
+        {
+          "fullName": "Web UI automation page does not show a native synchronization entry in ordinary browsers",
+          "status": "passed",
+          "duration": 22.078709000000003
+        },
+        {
+          "fullName": "Web UI automation page keeps 新建浏览器项目 open when saving fails",
+          "status": "passed",
+          "duration": 32.31270799999993
+        },
+        {
+          "fullName": "Web UI automation page keeps 新建页面对象 open when saving fails",
+          "status": "passed",
+          "duration": 22.3259579999999
+        },
+        {
+          "fullName": "Web UI automation page keeps 新建 Web UI 场景 open when saving fails",
+          "status": "passed",
+          "duration": 22.225667000000044
+        },
+        {
+          "fullName": "Web UI automation page keeps 新建定时计划 open when saving fails",
+          "status": "passed",
+          "duration": 29.14429199999995
+        },
+        {
+          "fullName": "Web UI automation page selects an enabled browser profile for a new scenario",
+          "status": "passed",
+          "duration": 27.475332999999978
+        },
+        {
+          "fullName": "Web UI automation page ignores a stale asset response from a previous project",
+          "status": "passed",
+          "duration": 35.802374999999984
+        },
+        {
+          "fullName": "Web UI automation page does not restore a closed report after its request completes",
+          "status": "passed",
+          "duration": 210.64037499999995
+        },
+        {
+          "fullName": "Web UI automation page submits the selected scenario and keeps the execute dialog open on rejection",
+          "status": "passed",
+          "duration": 182.25208299999997
+        },
+        {
+          "fullName": "Web UI automation page refreshes an open running report until it reaches a terminal state",
+          "status": "passed",
+          "duration": 152.254416
+        },
+        {
+          "fullName": "Web UI automation page does not queue a local scenario after preparation cancel",
+          "status": "passed",
+          "duration": 174.00333299999988
+        },
+        {
+          "fullName": "Web UI automation page does not queue a local scenario after preparation project",
+          "status": "passed",
+          "duration": 168.82970899999987
+        },
+        {
+          "fullName": "Web UI automation page does not queue a local scenario after preparation failure",
+          "status": "passed",
+          "duration": 254.69291699999985
+        },
+        {
+          "fullName": "Web UI automation page closing a schedule while preparing its browser cannot save the cancelled schedule",
+          "status": "passed",
+          "duration": 182.3840419999999
+        }
+      ]
+    },
+    {
+      "name": "src/test/unifiedExecutionsPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Unified execution list links imported mobile histories separately from local Runner executions",
+          "status": "passed",
+          "duration": 85.19516599999997
+        },
+        {
+          "fullName": "Unified execution list separately identifies Web UI imported history and links to its read-only section",
+          "status": "passed",
+          "duration": 45.58495800000003
+        },
+        {
+          "fullName": "Unified execution list shows real modules with composite keys, no hand-written progress or mutation actions",
+          "status": "passed",
+          "duration": 34.593124999999986
+        },
+        {
+          "fullName": "Unified execution list completed functional batches retain failures and are not labelled as successful",
+          "status": "passed",
+          "duration": 35.77558399999998
+        },
+        {
+          "fullName": "Unified execution list filters the explicitly bounded range by module, native state and case-insensitive name",
+          "status": "passed",
+          "duration": 40.647959000000014
+        },
+        {
+          "fullName": "Unified execution list project changes clear filters and ignore a previous project response",
+          "status": "passed",
+          "duration": 46.22649999999999
+        },
+        {
+          "fullName": "Unified execution list failed refresh clears old successes, displays retryable errors and recovers",
+          "status": "passed",
+          "duration": 40.85454099999993
+        },
+        {
+          "fullName": "Unified execution list empty project issues no request and removes the previous project records",
+          "status": "passed",
+          "duration": 36.922624999999925
+        },
+        {
+          "fullName": "Unified execution list polls visible pages without overlapping requests and stops on unmount",
+          "status": "passed",
+          "duration": 32.016500000000065
+        },
+        {
+          "fullName": "Unified execution list suspends polling on hidden pages and after failures until explicit retry",
+          "status": "passed",
+          "duration": 42.760332999999946
+        },
+        {
+          "fullName": "Unified execution list late response after unmount has no visible effect",
+          "status": "passed",
+          "duration": 26.195749999999975
+        }
+      ]
+    }
+  ]
+}

@@ -3,7 +3,8 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRouter } from 'vue-router'
 import CodeEditor from '@/components/CodeEditor.vue'
-import { storeApiDebugRouteDraft } from '@/utils/apiDebugDraft'
+import { createApiDebugHandoff, discardApiDebugHandoff } from '@/utils/apiDebugHandoff'
+import { useSessionStore } from '@/stores/session'
 import { executeDesktopHttpRequest, isDesktopHttpDebugAvailable } from '@/utils/desktopApiDebug'
 import {
   apiCaseName,
@@ -121,6 +122,7 @@ const emit = defineEmits<{
   debugCaseOpened: []
 }>()
 const router = useRouter()
+const session = useSessionStore()
 
 const tab = ref('document')
 const requestTab = ref('params')
@@ -437,20 +439,18 @@ async function copyMockUrl() {
 }
 
 async function openAdvancedDebug() {
+  let handoff = ''
   try {
-    const draft = storeApiDebugRouteDraft(window.sessionStorage, {
-      method: props.api.method,
-      url: safeRequestUrl(),
-      body: snapshot.body,
-      headers: requestHeaders(snapshot).map((item) => `${item.name}: ${item.value}`).join('\n'),
-      environment: environment.value,
-      protocol: 'HTTP',
+    handoff = createApiDebugHandoff(session, props.projectId, props.api.id, {
+      method: props.api.method, url: safeRequestUrl(), body: snapshot.body,
+      headers: requestHeaders(snapshot), environmentCode: environment.value || null, auth: { ...snapshot.auth },
     })
-    await router.push({
-      path: '/api-testing/quick-request',
-      query: { draft, sourceApiId: props.api.id },
+    const cancelled = await router.push({
+      path: '/api-testing/quick-request', query: { handoff, sourceApiId: props.api.id },
     })
+    if (cancelled) { discardApiDebugHandoff(session, handoff); Message.warning('导航已取消，请从源接口重新打开高级调试') }
   } catch (error) {
+    if (handoff) discardApiDebugHandoff(session, handoff)
     Message.error(error instanceof Error ? error.message : '无法打开高级调试')
   }
 }

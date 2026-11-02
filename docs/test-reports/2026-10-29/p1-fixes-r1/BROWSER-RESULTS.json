@@ -1,0 +1,54 @@
+{
+  "headless": true,
+  "isolatedHttpFixtures": true,
+  "realBackendAcceptance": false,
+  "cases": [
+    {
+      "id": "P1-UI-01",
+      "title": "加密字段、项目写者、30天及旧密文例外告知",
+      "status": "PASS",
+      "durationMs": 547
+    },
+    {
+      "id": "P1-UI-EXPIRED",
+      "title": "快捷树拒绝不可用回放：EXPIRED",
+      "status": "PASS",
+      "durationMs": 629
+    },
+    {
+      "id": "P1-UI-UNKNOWN_CREATED_AT",
+      "title": "快捷树拒绝不可用回放：UNKNOWN_CREATED_AT",
+      "status": "PASS",
+      "durationMs": 607
+    },
+    {
+      "id": "P1-UI-UNREADABLE",
+      "title": "快捷树拒绝不可用回放：UNREADABLE",
+      "status": "PASS",
+      "durationMs": 635
+    },
+    {
+      "id": "P1-UI-RESET-self",
+      "title": "账号改密交互：self",
+      "status": "PASS",
+      "durationMs": 1283
+    },
+    {
+      "id": "P1-UI-RESET-other",
+      "title": "账号改密交互：other",
+      "status": "PASS",
+      "durationMs": 1805
+    },
+    {
+      "id": "P1-UI-RESET-failure",
+      "title": "账号改密交互：failure",
+      "status": "PASS",
+      "durationMs": 632
+    }
+  ],
+  "cleanup": true,
+  "browserVersion": "156.0.8078.49",
+  "passed": 7,
+  "failed": 0,
+  "status": "PASS"
+}

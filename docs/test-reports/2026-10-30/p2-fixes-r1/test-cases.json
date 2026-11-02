@@ -1,0 +1,6076 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "name": "TestHub 六组P2修复回归",
+    "version": "2026-10-30 A组合",
+    "scope": "D01/D03-CFG/D09/D10/D17/D22，8项观察；不含其余23项、12项环境补齐及升级关闭调查",
+    "generated_at": "2026-10-30T00:00:00+08:00"
+  },
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "DECISIONS.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-rule-review/DECISIONS.json",
+      "type": "requirement",
+      "sha256": "3238b44eacba48310874c539c78031b428ff07902ccbee2cc75018aceec7c245"
+    },
+    {
+      "id": "SRC-002",
+      "name": "P2-RULES-AND-ACCEPTANCE.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-rule-review/P2-RULES-AND-ACCEPTANCE.md",
+      "type": "requirement",
+      "sha256": "a96c58ff4cfaf20271d2cd619101797474ad456cd7f1932e936ea324a2bf4638"
+    },
+    {
+      "id": "SRC-003",
+      "name": "USER-REVIEW.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-rule-review/USER-REVIEW.md",
+      "type": "requirement",
+      "sha256": "c136ff54dde0ea1889563050cedd970720056b1965e6437ac20c37fab6528f58"
+    },
+    {
+      "id": "SRC-004",
+      "name": "APPROVED-SCOPE.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-fixes-r1/APPROVED-SCOPE.json",
+      "type": "requirement",
+      "sha256": "96c1daa984fa23e66de5ba2ba60827ab028c45cab44c26c3a6ef595dea1c2f46"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-D01",
+      "title": "环境定义与孤立配置",
+      "description": "新增和更新普通参数/密钥均须引用同项目已定义环境；缺失定义400且不写入。旧孤立配置保持可读，不自动补环境、绑定、迁移或删除。",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2-D01-01",
+          "text": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。",
+          "source_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ]
+        },
+        {
+          "id": "AC-P2-D01-02",
+          "text": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。",
+          "source_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ]
+        },
+        {
+          "id": "AC-P2-D01-03",
+          "text": "其他项目有同名定义不满足当前项目检查；无越权查看/写入。",
+          "source_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ]
+        },
+        {
+          "id": "AC-P2-D01-04",
+          "text": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。",
+          "source_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ]
+        },
+        {
+          "id": "AC-P2-D01-05",
+          "text": "按D03-CFG选定维护规则处理，不错误返回未定义；P1执行限制仍生效。",
+          "source_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ]
+        },
+        {
+          "id": "AC-P2-D01-06",
+          "text": "提交边界一致：环境删除成功后不遗留此次新增孤立行；已有保护性删除/引用规则保持，不扩大强制删除。",
+          "source_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ]
+        },
+        {
+          "id": "AC-P2-D01-07",
+          "text": "新调用方先建环境可成功；旧调用方未定义写入400并有提示；已定义环境的跨类型409、BASE_URL400、未授权401/403保持。",
+          "source_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D03-CFG",
+      "title": "停用环境的配置维护一致性",
+      "description": "已定义但停用的环境允许授权配置维护；UI可选择并标记已停用/不可执行，API维持合法204。",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+        "SRC-004#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2-D03CFG-01",
+          "text": "UI/API合法新建、编辑及现有显式删除维持原能力。",
+          "source_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ]
+        },
+        {
+          "id": "AC-P2-D03CFG-02",
+          "text": "选A时授权UI可维护且API204，显示不可执行；选B则需另拆冻结写入用例，不能用A的204作为标准。",
+          "source_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ]
+        },
+        {
+          "id": "AC-P2-D03CFG-03",
+          "text": "选A时启停本身不丢失已提交合法配置；请求归属项目固定，失败不报成功。",
+          "source_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ]
+        },
+        {
+          "id": "AC-P2-D03CFG-04",
+          "text": "无权账号不能借停用维护写入或读取密钥原文；BASE_URL及类型保护保持。",
+          "source_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ]
+        },
+        {
+          "id": "AC-P2-D03CFG-05",
+          "text": "停用环境的新执行仍409，Quartz仍跳过；已接受manifest不变，修改配置不改写已有快照。",
+          "source_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ]
+        },
+        {
+          "id": "AC-P2-D03CFG-06",
+          "text": "D01拒绝未定义环境；无可维护环境时给出明确空状态，禁止偷偷选其他项目环境。",
+          "source_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D09",
+      "title": "导出保留已存响应状态码",
+      "description": "OpenAPI、Postman、HAR按当前单响应模型统一保留已存合法状态码；仅缺失时默认200，明确非法时400且不产生可误用的导出文件。",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2-D09-01",
+          "text": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。",
+          "source_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ]
+        },
+        {
+          "id": "AC-P2-D09-02",
+          "text": "确实未提供时默认200，可重新导入；不把其他字段缺失误判为响应码。",
+          "source_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ]
+        },
+        {
+          "id": "AC-P2-D09-03",
+          "text": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。",
+          "source_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ]
+        },
+        {
+          "id": "AC-P2-D09-04",
+          "text": "从既有支持格式导入单响应后导出，检查存储与各出口码一致；正文及描述字段保持。",
+          "source_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ]
+        },
+        {
+          "id": "AC-P2-D09-05",
+          "text": "已发布/草稿选择沿用原规则；不能为了保留码而导出错误版本或混合两个版本。",
+          "source_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ]
+        },
+        {
+          "id": "AC-P2-D09-06",
+          "text": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。",
+          "source_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ]
+        },
+        {
+          "id": "AC-P2-D09-07",
+          "text": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。",
+          "source_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D10",
+      "title": "目录复制原子性与同请求重试",
+      "description": "以服务端单次批量操作完成原子复制，失败整批回滚；使用同请求Key幂等，避免响应丢失后的重复副本。",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2-D10-01",
+          "text": "根/子目录、空目录、当前版本接口和路径避让一致；源分支无改写。",
+          "source_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ]
+        },
+        {
+          "id": "AC-P2-D10-02",
+          "text": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。",
+          "source_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ]
+        },
+        {
+          "id": "AC-P2-D10-03",
+          "text": "同Key重试返回原副本ID，不再新增目录、接口或版本。",
+          "source_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ]
+        },
+        {
+          "id": "AC-P2-D10-04",
+          "text": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。",
+          "source_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ]
+        },
+        {
+          "id": "AC-P2-D10-05",
+          "text": "源摘要不符受控409；快照一致不混版本；目标不可用或路径冲突不能遗留半批。",
+          "source_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ]
+        },
+        {
+          "id": "AC-P2-D10-06",
+          "text": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。",
+          "source_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ]
+        },
+        {
+          "id": "AC-P2-D10-07",
+          "text": "仅使用隔离旧夹具验证仍存在；无自动扫描、合并、覆盖或删除真实旧半成品。",
+          "source_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ]
+        },
+        {
+          "id": "AC-P2-D10-08",
+          "text": "失败保留原范围和重试Key；提交状态未知不能假报已回滚；切项目不误选或覆盖当前分支。",
+          "source_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D17",
+      "title": "键trim后的冲突",
+      "description": "同一目标Map中，不同原键trim后相同则在合并/加密/落库前400，原值保持；禁止静默后值覆盖。",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2-D17-01",
+          "text": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。",
+          "source_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ]
+        },
+        {
+          "id": "AC-P2-D17-02",
+          "text": "调换键顺序、前后值相同/不同均拒绝，不能只检查值不同的冲突。",
+          "source_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ]
+        },
+        {
+          "id": "AC-P2-D17-03",
+          "text": "不同项目/独立Map同名允许；大小写不同沿用原约定，不新增大小写不敏感规则。",
+          "source_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ]
+        },
+        {
+          "id": "AC-P2-D17-04",
+          "text": "冲突校验先于put覆盖、落库和加密替换；原版本/值/密文及其他合法字段均保持。",
+          "source_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ]
+        },
+        {
+          "id": "AC-P2-D17-05",
+          "text": "数量、长度、空键、字符校验和无权访问保持原受控反馈；数值转换不借机扩修。",
+          "source_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ]
+        },
+        {
+          "id": "AC-P2-D17-06",
+          "text": "configuration不提供时仍按原规则保留密文；提交冲突配置不会在错误、摘要和日志回显值。",
+          "source_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ]
+        },
+        {
+          "id": "AC-P2-D17-07",
+          "text": "普通URL重复query不被拒绝；原始完全同名JSON及跨来源覆盖不冒充本批通过，单列兼容界限。",
+          "source_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D22",
+      "title": "质量报告计划编辑的版本前置条件",
+      "description": "复用现有config_version，对外返回版本，更新必须带expectedVersion；缺失/未提供428，过期409，成功原子递增一次。",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2-D22-01",
+          "text": "GET返回现有版本0/非0；新建合法成功，能取得用于后续编辑的版本。",
+          "source_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ]
+        },
+        {
+          "id": "AC-P2-D22-02",
+          "text": "带当前版本更新成功；数据与配置版本在同一提交中变化一次，按最终配置更新调度。",
+          "source_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ]
+        },
+        {
+          "id": "AC-P2-D22-03",
+          "text": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。",
+          "source_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ]
+        },
+        {
+          "id": "AC-P2-D22-04",
+          "text": "缺失/null428，负数/小数/非法类型400；均不改配置、调度或成功审计，不受D16其他字段宽松转换影响。",
+          "source_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ]
+        },
+        {
+          "id": "AC-P2-D22-05",
+          "text": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。",
+          "source_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ]
+        },
+        {
+          "id": "AC-P2-D22-06",
+          "text": "Quartz完成run或更新last_run期间，配置未改则原有效版本仍可编辑，不制造无关409。",
+          "source_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ]
+        },
+        {
+          "id": "AC-P2-D22-07",
+          "text": "既有同步revision保护保持；跨组织/无权账号仍先拒绝，不用版本返回泄漏配置；原D05失效会话不能写。",
+          "source_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ]
+        },
+        {
+          "id": "AC-P2-D22-08",
+          "text": "持久化冲突/失败不假报成功，不改历史运行和执行快照；调度沿用现有提交后同步/恢复契约，单列协同证据，不冒称跨资源原子回滚。",
+          "source_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ]
+        }
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "id": "COV-D01-01",
+      "title": "定义存在的配置新增与更新",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-02",
+      "title": "环境代码规范化保持",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-03",
+      "title": "未定义环境普通参数拒写",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-04",
+      "title": "未定义环境密钥拒写",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-05",
+      "title": "其他项目定义不能替代本项目",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-06",
+      "title": "旧孤立配置只读可见",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-07",
+      "title": "旧孤立配置更新拒绝且原值保留",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-08",
+      "title": "已定义停用环境仍可维护",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-09",
+      "title": "删除与写入不产生孤立行",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D01-10",
+      "title": "旧调用方和原保护的兼容边界",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置"
+      ]
+    },
+    {
+      "id": "COV-D03-CFG-01",
+      "title": "启用环境配置维护保持",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+      ]
+    },
+    {
+      "id": "COV-D03-CFG-02",
+      "title": "停用环境界面与API维护一致",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+      ]
+    },
+    {
+      "id": "COV-D03-CFG-03",
+      "title": "启停与编辑提交归属一致",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+      ]
+    },
+    {
+      "id": "COV-D03-CFG-04",
+      "title": "停用维护不扩大权限与秘密读取",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+      ]
+    },
+    {
+      "id": "COV-D03-CFG-05",
+      "title": "维护不放宽P1执行限制",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+      ]
+    },
+    {
+      "id": "COV-D03-CFG-06",
+      "title": "缺失定义和空环境不误选",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+      ]
+    },
+    {
+      "id": "COV-D09-01",
+      "title": "OpenAPI非200状态码保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-02",
+      "title": "Postman非200状态码保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-03",
+      "title": "HAR非200状态码保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-04",
+      "title": "缺失状态元数据默认200",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-05",
+      "title": "小数类型状态码拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-06",
+      "title": "状态码范围外拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-07",
+      "title": "非数字与损坏元数据拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-08",
+      "title": "单响应导入导出闭环",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-09",
+      "title": "导出当前版本选择保持",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-10",
+      "title": "导出目录过滤保持",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-11",
+      "title": "无权范围不能导出",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-12",
+      "title": "数字字符串兼容",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D09-13",
+      "title": "原200格式继续可消费",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码"
+      ]
+    },
+    {
+      "id": "COV-D10-01",
+      "title": "完整目录树及当前版本复制",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-02",
+      "title": "中间写入失败整批回滚",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-03",
+      "title": "回执前失败不遗留副本",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-04",
+      "title": "响应丢失同请求返回原结果",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-05",
+      "title": "同请求Key不同载荷拒绝",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-06",
+      "title": "并发同请求只提交一份",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-07",
+      "title": "重启后持久回执判重",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-08",
+      "title": "新请求Key可明确再复制",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-09",
+      "title": "源摘要变化拒绝且无半批",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-10",
+      "title": "201项超过复制上限拒绝",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-11",
+      "title": "200项复制上限可提交",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-12",
+      "title": "旧半成品不自动清理",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D10-13",
+      "title": "复制失败和切项目保持原归属",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+      ]
+    },
+    {
+      "id": "COV-D17-01",
+      "title": "性能query归一重名拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-02",
+      "title": "Web变量归一重名拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-03",
+      "title": "适配器配置归一重名拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-04",
+      "title": "顺序和同值不能绕过冲突",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-05",
+      "title": "独立范围允许同名",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-06",
+      "title": "合法大小写边界保持",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-07",
+      "title": "冲突整批不改原值或密文",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-08",
+      "title": "原有格式和权限校验保持",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-09",
+      "title": "省略适配器配置保留密文",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D17-10",
+      "title": "合法URL重复query不受影响",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突"
+      ]
+    },
+    {
+      "id": "COV-D22-01",
+      "title": "现有零版本与新建版本可读取",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-02",
+      "title": "当前版本编辑原子递增一次",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-03",
+      "title": "陈旧编辑不覆盖新配置",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-04",
+      "title": "并发编辑仅一方提交",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-05",
+      "title": "缺失与null前置版本428",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-06",
+      "title": "非法版本类型400",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-07",
+      "title": "冲突保留界面草稿",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-08",
+      "title": "显式取得新版本后重新提交",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-09",
+      "title": "运行元数据不制造配置冲突",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-10",
+      "title": "同步保护和权限边界保持",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    },
+    {
+      "id": "COV-D22-11",
+      "title": "事务失败不改历史运行",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "document_review": [],
+  "cases": [
+    {
+      "id": "TC-P2-D01-01",
+      "module": "D01 环境定义与孤立配置",
+      "title": "定义存在的配置新增与更新",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D01-01"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建同项目环境定义",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "分别新增普通参数和密钥",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "使用同类型同名键各更新一次",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。"
+            }
+          ]
+        },
+        {
+          "no": 4,
+          "action": "读取原行与审计",
+          "expected": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-02",
+      "module": "D01 环境定义与孤立配置",
+      "title": "环境代码规范化保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D01-02"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建小写环境编码",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "使用首尾空白与大写编码提交配置",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "读取归一化后的编码和键",
+          "expected": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "同项目已定义环境的新建/更新成功；trim/小写行为保持；不意外创建另一环境。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-03",
+      "module": "D01 环境定义与孤立配置",
+      "title": "未定义环境普通参数拒写",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D01-03"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "确认项目缺少目标环境定义",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "提交合法普通参数",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "比较参数行数与成功审计",
+          "expected": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-02",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-04",
+      "module": "D01 环境定义与孤立配置",
+      "title": "未定义环境密钥拒写",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D01-04"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "确认项目缺少目标环境定义",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "提交合法密钥",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "比较参数行数、密文与成功审计",
+          "expected": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "普通参数、密钥均400；原行、密文、记录数不变，无成功审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-02",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-05",
+      "module": "D01 环境定义与孤立配置",
+      "title": "其他项目定义不能替代本项目",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "依据批准标准中的权限域与拒绝规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D01-05"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "仅在另一项目定义环境",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "其他项目有同名定义不满足当前项目检查；无越权查看/写入。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "向当前项目同编码保存",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "其他项目有同名定义不满足当前项目检查；无越权查看/写入。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对两项目记录",
+          "expected": "其他项目有同名定义不满足当前项目检查；无越权查看/写入。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "其他项目有同名定义不满足当前项目检查；无越权查看/写入。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-06",
+      "module": "D01 环境定义与孤立配置",
+      "title": "旧孤立配置只读可见",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "依据批准标准中的旧数据读取和更新限制设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D01-06"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "直接在隔离数据库构造旧孤立普通参数和密钥",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "打开列表与环境筛选",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对值可见、标签及编辑禁用",
+          "expected": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-07",
+      "module": "D01 环境定义与孤立配置",
+      "title": "旧孤立配置更新拒绝且原值保留",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "依据批准标准中的旧数据读取和更新限制设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D01-07"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "构造旧孤立参数",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "分别尝试普通参数与密钥更新",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "比较原值、密文、更新时间和审计",
+          "expected": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "授权API和页面只读可见并标记缺失定义；拒绝新增/更新不删除旧值，不自动补环境；密钥列表无明文。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-08",
+      "module": "D01 环境定义与孤立配置",
+      "title": "已定义停用环境仍可维护",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D01-08"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建已定义且停用的环境",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "按D03-CFG选定维护规则处理，不错误返回未定义；P1执行限制仍生效。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "新增与更新两种配置",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "按D03-CFG选定维护规则处理，不错误返回未定义；P1执行限制仍生效。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "读取归属环境和原行",
+          "expected": "按D03-CFG选定维护规则处理，不错误返回未定义；P1执行限制仍生效。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "按D03-CFG选定维护规则处理，不错误返回未定义；P1执行限制仍生效。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-05",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-09",
+      "module": "D01 环境定义与孤立配置",
+      "title": "删除与写入不产生孤立行",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D01-09"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "并发提交环境删除与配置写入",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "提交边界一致：环境删除成功后不遗留此次新增孤立行；已有保护性删除/引用规则保持，不扩大强制删除。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "等待两事务结束",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "提交边界一致：环境删除成功后不遗留此次新增孤立行；已有保护性删除/引用规则保持，不扩大强制删除。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查不存在新建的孤立参数",
+          "expected": "提交边界一致：环境删除成功后不遗留此次新增孤立行；已有保护性删除/引用规则保持，不扩大强制删除。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "提交边界一致：环境删除成功后不遗留此次新增孤立行；已有保护性删除/引用规则保持，不扩大强制删除。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-06",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D01-10",
+      "module": "D01 环境定义与孤立配置",
+      "title": "旧调用方和原保护的兼容边界",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D01-10"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别尝试越权、非法键、保留BASE_URL键与定义存在时的跨类型覆盖",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "新调用方先建环境可成功；旧调用方未定义写入400并有提示；已定义环境的跨类型409、BASE_URL400、未授权401/403保持。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对原拒绝规则和原行",
+          "expected": "新调用方先建环境可成功；旧调用方未定义写入400并有提示；已定义环境的跨类型409、BASE_URL400、未授权401/403保持。",
+          "evidence_refs": [
+            "SRC-002#heading/D01-·-环境定义与孤立配置"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D01-·-环境定义与孤立配置",
+              "quote": "新调用方先建环境可成功；旧调用方未定义写入400并有提示；已定义环境的跨类型409、BASE_URL400、未授权401/403保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D01-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D01-·-环境定义与孤立配置",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D01",
+        "P2-D01-07",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D03-CFG-01",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "启用环境配置维护保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D03-CFG-01"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "定义启用环境",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "UI/API合法新建、编辑及现有显式删除维持原能力。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "创建、修改、读取并显式删除普通参数与密钥",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "UI/API合法新建、编辑及现有显式删除维持原能力。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对全生命周期",
+          "expected": "UI/API合法新建、编辑及现有显式删除维持原能力。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "UI/API合法新建、编辑及现有显式删除维持原能力。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D03-CFG",
+        "P2-D03CFG-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D03-CFG-02",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "停用环境界面与API维护一致",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D03-CFG-02"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "定义停用环境",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "选A时授权UI可维护且API204，显示不可执行；选B则需另拆冻结写入用例，不能用A的204作为标准。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "在新建参数/密钥弹窗选择该环境",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "选A时授权UI可维护且API204，显示不可执行；选B则需另拆冻结写入用例，不能用A的204作为标准。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "提交并核对API、停用标签与不可执行提示",
+          "expected": "选A时授权UI可维护且API204，显示不可执行；选B则需另拆冻结写入用例，不能用A的204作为标准。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "选A时授权UI可维护且API204，显示不可执行；选B则需另拆冻结写入用例，不能用A的204作为标准。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D03-CFG",
+        "P2-D03CFG-02",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D03-CFG-03",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "启停与编辑提交归属一致",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D03-CFG-03"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存配置后切换环境启停状态",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "选A时启停本身不丢失已提交合法配置；请求归属项目固定，失败不报成功。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "再次读取原行",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "选A时启停本身不丢失已提交合法配置；请求归属项目固定，失败不报成功。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "确认维护入口和配置值一致",
+          "expected": "选A时启停本身不丢失已提交合法配置；请求归属项目固定，失败不报成功。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "选A时启停本身不丢失已提交合法配置；请求归属项目固定，失败不报成功。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D03-CFG",
+        "P2-D03CFG-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D03-CFG-04",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "停用维护不扩大权限与秘密读取",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "依据批准标准中的权限域与拒绝规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D03-CFG-04"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以无项目写权限账号提交停用环境配置",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "无权账号不能借停用维护写入或读取密钥原文；BASE_URL及类型保护保持。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "检查服务端拒绝与列表中密钥脱敏",
+          "expected": "无权账号不能借停用维护写入或读取密钥原文；BASE_URL及类型保护保持。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "无权账号不能借停用维护写入或读取密钥原文；BASE_URL及类型保护保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D03-CFG",
+        "P2-D03CFG-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D03-CFG-05",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "维护不放宽P1执行限制",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D03-CFG-05"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "构造停用环境自动化场景",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "停用环境的新执行仍409，Quartz仍跳过；已接受manifest不变，修改配置不改写已有快照。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "提交执行并调用既有Quartz验收",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "停用环境的新执行仍409，Quartz仍跳过；已接受manifest不变，修改配置不改写已有快照。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对409、跳过和原执行快照",
+          "expected": "停用环境的新执行仍409，Quartz仍跳过；已接受manifest不变，修改配置不改写已有快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "停用环境的新执行仍409，Quartz仍跳过；已接受manifest不变，修改配置不改写已有快照。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D03-CFG",
+        "P2-D03CFG-05",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D03-CFG-06",
+      "module": "D03-CFG 停用环境的配置维护一致性",
+      "title": "缺失定义和空环境不误选",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D03-CFG-06"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "使用缺失环境、空环境或合法已定义环境分别提交",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "D01拒绝未定义环境；无可维护环境时给出明确空状态，禁止偷偷选其他项目环境。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对定义缺失与已停用含义没有混淆",
+          "expected": "D01拒绝未定义环境；无可维护环境时给出明确空状态，禁止偷偷选其他项目环境。",
+          "evidence_refs": [
+            "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+              "quote": "D01拒绝未定义环境；无可维护环境时给出明确空状态，禁止偷偷选其他项目环境。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D03-CFG"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D03CFG-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D03-CFG-·-停用环境的配置维护一致性",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D03-CFG",
+        "P2-D03CFG-06",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-01",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "OpenAPI非200状态码保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "依据批准标准中的明确导出格式及兼容字段规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D09-01"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "将当前单响应状态分别设为100/201/204/301/400/404/500/599",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "逐项导出OpenAPI",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查responses键和正文",
+          "expected": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-02",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "Postman非200状态码保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "依据批准标准中的明确导出格式及兼容字段规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D09-02"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对同一合法状态码矩阵逐项导出Postman",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "检查首个response.code、说明与正文",
+          "expected": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-03",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "HAR非200状态码保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "依据批准标准中的明确导出格式及兼容字段规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D09-03"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对同一合法状态码矩阵逐项导出HAR",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "检查response.status、说明与正文",
+          "expected": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "201、204、301、400、404、500及合法边界在三种输出对应字段保持，未误改200。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-04",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "缺失状态元数据默认200",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D09-04"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "依次准备缺失字段、null和空元数据",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "确实未提供时默认200，可重新导入；不把其他字段缺失误判为响应码。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "分别导出三格式",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "确实未提供时默认200，可重新导入；不把其他字段缺失误判为响应码。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查默认状态",
+          "expected": "确实未提供时默认200，可重新导入；不把其他字段缺失误判为响应码。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "确实未提供时默认200，可重新导入；不把其他字段缺失误判为响应码。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-02",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-05",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "小数类型状态码拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D09-05"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "准备200.0及其他浮点JSON状态码",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "分别导出三格式",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查400及无下载文件",
+          "expected": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-06",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "状态码范围外拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D09-06"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "准备小于100、大于599和数值溢出的状态码",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "分别导出三格式",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对拒绝",
+          "expected": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-07",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "非数字与损坏元数据拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D09-07"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "准备非数字字符串、非空非对象或损坏元数据",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "导出三格式",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对受控错误不泄漏原内容",
+          "expected": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "小数、99/600、非数字及非空坏JSON受控400；无部分文件或成功导出反馈，不改源资产。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-08",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "单响应导入导出闭环",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D09-08"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "导入仅有201响应的OpenAPI",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "从既有支持格式导入单响应后导出，检查存储与各出口码一致；正文及描述字段保持。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "再导出",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "从既有支持格式导入单响应后导出，检查存储与各出口码一致；正文及描述字段保持。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对该响应码与正文保留",
+          "expected": "从既有支持格式导入单响应后导出，检查存储与各出口码一致；正文及描述字段保持。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "从既有支持格式导入单响应后导出，检查存储与各出口码一致；正文及描述字段保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-09",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "导出当前版本选择保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D09-09"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "同接口创建旧版200和当前新版201",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "已发布/草稿选择沿用原规则；不能为了保留码而导出错误版本或混合两个版本。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "分别导出三格式",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "已发布/草稿选择沿用原规则；不能为了保留码而导出错误版本或混合两个版本。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "确认读取当前版本",
+          "expected": "已发布/草稿选择沿用原规则；不能为了保留码而导出错误版本或混合两个版本。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "已发布/草稿选择沿用原规则；不能为了保留码而导出错误版本或混合两个版本。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-05",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-10",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "导出目录过滤保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D09-10"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "建立两个目录各含不同响应码接口",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "指定一个目录导出",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查过滤结果",
+          "expected": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-06",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-11",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "无权范围不能导出",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "依据批准标准中的权限域与拒绝规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D09-11"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以无权账号导出另一项目",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "检查权限拒绝，未提供文件",
+          "expected": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "目录过滤、跨项目拒绝、只读导出权限和原敏感字段清理保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-06",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-12",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "数字字符串兼容",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "依据批准标准中的明确导出格式及兼容字段规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D09-12"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存首尾有空白的合法十进制数字字符串",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "分别导出三格式",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查整数状态保留",
+          "expected": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-07",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D09-13",
+      "module": "D09 导出保留已存响应状态码",
+      "title": "原200格式继续可消费",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "依据批准标准中的明确导出格式及兼容字段规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D09-13"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "准备旧版200、空正文和现有元数据",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "导出三格式",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查兼容结果和原数据不被修改",
+          "expected": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。",
+          "evidence_refs": [
+            "SRC-002#heading/D09-·-导出保留已存响应状态码"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+              "quote": "原200导出仍可消费；数字字符串兼容符合规则；既有HAR合法码路径不倒退，不扩展多响应。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D09"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D09-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D09-·-导出保留已存响应状态码",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D09",
+        "P2-D09-07",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-01",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "完整目录树及当前版本复制",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D10-01"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建源目录、子目录及有多个版本的接口",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "根/子目录、空目录、当前版本接口和路径避让一致；源分支无改写。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "预检后提交复制",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "根/子目录、空目录、当前版本接口和路径避让一致；源分支无改写。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对同父级、当前版本、命名避让与数量",
+          "expected": "根/子目录、空目录、当前版本接口和路径避让一致；源分支无改写。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "根/子目录、空目录、当前版本接口和路径避让一致；源分支无改写。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-02",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "中间写入失败整批回滚",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "依据批准标准中的失败、幂等与恢复边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-02"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "预检后在第二个接口插入时注入失败",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "调用复制",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "对比目录、接口、版本、审计及回执行数",
+          "expected": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-02",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-03",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "回执前失败不遗留副本",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "依据批准标准中的失败、幂等与恢复边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-03"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "让资产写入成功而回执插入受控失败",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "调用复制",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对整事务无部分分支和成功审计",
+          "expected": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "在首、中、末个写入以及回执提交前注入失败，全批业务行和成功回执/审计回滚。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-02",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-04",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "响应丢失同请求返回原结果",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "依据批准标准中的失败、幂等与恢复边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-04"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "成功提交但模拟调用方丢失响应",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key重试返回原副本ID，不再新增目录、接口或版本。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "保持原UUIDKey与摘要重试",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key重试返回原副本ID，不再新增目录、接口或版本。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "比较原回执及资产数量",
+          "expected": "同Key重试返回原副本ID，不再新增目录、接口或版本。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key重试返回原副本ID，不再新增目录、接口或版本。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-05",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "同请求Key不同载荷拒绝",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "依据批准标准中的失败、幂等与恢复边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-05"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "已成功的UUIDKey改变摘要或源目录",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "再次提交",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查409且不新增记录",
+          "expected": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-06",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "并发同请求只提交一份",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "依据批准标准中的失败、幂等与恢复边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-06"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "两个请求使用同一UUIDKey和摘要并发提交",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "比较两回执、分支数量和审计",
+          "expected": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-07",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "重启后持久回执判重",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "依据批准标准中的失败、幂等与恢复边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-07"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建复制回执",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "停止独立QA JAR并在同一QA工作区重启",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "原会话同Key重试",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        },
+        {
+          "no": 4,
+          "action": "核对持久回执与零新增",
+          "expected": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-08",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "新请求Key可明确再复制",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "依据批准标准中的失败、幂等与恢复边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-08"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "同源同摘要明确使用新UUIDKey再提交",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对生成另一份完整副本且避让冲突",
+          "expected": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "同Key异载荷409；并发同Key只提交一份；重启后仍判重，新Key明确复制可产生另一份。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-09",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "源摘要变化拒绝且无半批",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D10-09"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "预检后修改源子树或当前版本",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "源摘要不符受控409；快照一致不混版本；目标不可用或路径冲突不能遗留半批。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "使用旧摘要复制",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "源摘要不符受控409；快照一致不混版本；目标不可用或路径冲突不能遗留半批。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查409和零新增",
+          "expected": "源摘要不符受控409；快照一致不混版本；目标不可用或路径冲突不能遗留半批。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "源摘要不符受控409；快照一致不混版本；目标不可用或路径冲突不能遗留半批。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-05",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-10",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "201项超过复制上限拒绝",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "依据批准标准中的200/201数量边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-10"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "准备合计201项的源树",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "预检并提交",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对400及所有记录不变",
+          "expected": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-06",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-11",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "200项复制上限可提交",
+      "type": "boundary",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "依据批准标准中的200/201数量边界设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D10-11"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "准备合计200项含根目录的源树",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "预检并提交",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对完整复制200项",
+          "expected": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "200项成功、201项400无写入；跨项目/无写权限先拒绝，不通过回执泄漏资产。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-06",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-12",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "旧半成品不自动清理",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D10-12"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "预先放置旧部分副本分支",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "仅使用隔离旧夹具验证仍存在；无自动扫描、合并、覆盖或删除真实旧半成品。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "触发本轮受控失败",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "仅使用隔离旧夹具验证仍存在；无自动扫描、合并、覆盖或删除真实旧半成品。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对旧分支保持且本轮无残留",
+          "expected": "仅使用隔离旧夹具验证仍存在；无自动扫描、合并、覆盖或删除真实旧半成品。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "仅使用隔离旧夹具验证仍存在；无自动扫描、合并、覆盖或删除真实旧半成品。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-07",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D10-13",
+      "module": "D10 目录复制原子性与同请求重试",
+      "title": "复制失败和切项目保持原归属",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D10-13"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "界面模拟断线失败后重试并检查同Key",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "失败保留原范围和重试Key；提交状态未知不能假报已回滚；切项目不误选或覆盖当前分支。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "在CSRF阶段切换项目",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "失败保留原范围和重试Key；提交状态未知不能假报已回滚；切项目不误选或覆盖当前分支。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "再验证迟到成功不会刷新新项目",
+          "expected": "失败保留原范围和重试Key；提交状态未知不能假报已回滚；切项目不误选或覆盖当前分支。",
+          "evidence_refs": [
+            "SRC-002#heading/D10-·-目录复制原子性与同请求重试"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+              "quote": "失败保留原范围和重试Key；提交状态未知不能假报已回滚；切项目不误选或覆盖当前分支。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D10"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D10-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D10-·-目录复制原子性与同请求重试",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D10",
+        "P2-D10-08",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-01",
+      "module": "D17 键trim后的冲突",
+      "title": "性能query归一重名拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-01"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "合法压测计划同一queryParameters对象提交key与首尾空白key",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对400和无新行",
+          "expected": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-02",
+      "module": "D17 键trim后的冲突",
+      "title": "Web变量归一重名拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-02"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "合法浏览器配置的同一variables对象提交归一化冲突键",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对400和无新场景",
+          "expected": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-03",
+      "module": "D17 键trim后的冲突",
+      "title": "适配器配置归一重名拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-03"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "系统管理员在同一适配器configuration提交冲突键",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对加密和落库之前拒绝",
+          "expected": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "使用不同原键如K和空白K，在三处分别400；无成功写入或成功审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-04",
+      "module": "D17 键trim后的冲突",
+      "title": "顺序和同值不能绕过冲突",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-04"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对三个入口分别组合相同值/不同值与正向/反向键顺序",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "调换键顺序、前后值相同/不同均拒绝，不能只检查值不同的冲突。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "逐次提交并检查拒绝",
+          "expected": "调换键顺序、前后值相同/不同均拒绝，不能只检查值不同的冲突。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "调换键顺序、前后值相同/不同均拒绝，不能只检查值不同的冲突。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-02",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-05",
+      "module": "D17 键trim后的冲突",
+      "title": "独立范围允许同名",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-05"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在两个独立计划/场景/对象中分别使用相同键",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "不同项目/独立Map同名允许；大小写不同沿用原约定，不新增大小写不敏感规则。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对相互独立的合法保存",
+          "expected": "不同项目/独立Map同名允许；大小写不同沿用原约定，不新增大小写不敏感规则。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "不同项目/独立Map同名允许；大小写不同沿用原约定，不新增大小写不敏感规则。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-06",
+      "module": "D17 键trim后的冲突",
+      "title": "合法大小写边界保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-06"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在三个入口使用大小写不同且符合各自原格式的键",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "不同项目/独立Map同名允许；大小写不同沿用原约定，不新增大小写不敏感规则。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "读取归一化结果，核对原大小写语义",
+          "expected": "不同项目/独立Map同名允许；大小写不同沿用原约定，不新增大小写不敏感规则。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "不同项目/独立Map同名允许；大小写不同沿用原约定，不新增大小写不敏感规则。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-07",
+      "module": "D17 键trim后的冲突",
+      "title": "冲突整批不改原值或密文",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-07"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "先保存三处合法配置",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "冲突校验先于put覆盖、落库和加密替换；原版本/值/密文及其他合法字段均保持。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "再提交冲突编辑",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "冲突校验先于put覆盖、落库和加密替换；原版本/值/密文及其他合法字段均保持。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "比较原行、版本、密文字节与成功审计",
+          "expected": "冲突校验先于put覆盖、落库和加密替换；原版本/值/密文及其他合法字段均保持。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "冲突校验先于put覆盖、落库和加密替换；原版本/值/密文及其他合法字段均保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-08",
+      "module": "D17 键trim后的冲突",
+      "title": "原有格式和权限校验保持",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-08"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交原非法键、非法字段值与无权限账号请求",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "数量、长度、空键、字符校验和无权访问保持原受控反馈；数值转换不借机扩修。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "检查原校验和权限结果",
+          "expected": "数量、长度、空键、字符校验和无权访问保持原受控反馈；数值转换不借机扩修。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "数量、长度、空键、字符校验和无权访问保持原受控反馈；数值转换不借机扩修。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-05",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-09",
+      "module": "D17 键trim后的冲突",
+      "title": "省略适配器配置保留密文",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-09"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "适配器保存完整配置后，省略configuration编辑元信息",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "configuration不提供时仍按原规则保留密文；提交冲突配置不会在错误、摘要和日志回显值。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "检查原密文字节保持",
+          "expected": "configuration不提供时仍按原规则保留密文；提交冲突配置不会在错误、摘要和日志回显值。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "configuration不提供时仍按原规则保留密文；提交冲突配置不会在错误、摘要和日志回显值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-06",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D17-10",
+      "module": "D17 键trim后的冲突",
+      "title": "合法URL重复query不受影响",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D17-10"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "使用既有cURL导入链路提交含重复查询名的普通URL",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "普通URL重复query不被拒绝；原始完全同名JSON及跨来源覆盖不冒充本批通过，单列兼容界限。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "读取查询列表确认两项均保留",
+          "expected": "普通URL重复query不被拒绝；原始完全同名JSON及跨来源覆盖不冒充本批通过，单列兼容界限。",
+          "evidence_refs": [
+            "SRC-002#heading/D17-·-键trim后的冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D17-·-键trim后的冲突",
+              "quote": "普通URL重复query不被拒绝；原始完全同名JSON及跨来源覆盖不冒充本批通过，单列兼容界限。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D17"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D17-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D17-·-键trim后的冲突",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D17",
+        "P2-D17-07",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-01",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "现有零版本与新建版本可读取",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D22-01"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建新计划读取version0",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "GET返回现有版本0/非0；新建合法成功，能取得用于后续编辑的版本。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "准备历史非0版本",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "GET返回现有版本0/非0；新建合法成功，能取得用于后续编辑的版本。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "通过列表读取并核对版本值",
+          "expected": "GET返回现有版本0/非0；新建合法成功，能取得用于后续编辑的版本。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "GET返回现有版本0/非0；新建合法成功，能取得用于后续编辑的版本。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-01",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-02",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "当前版本编辑原子递增一次",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "依据批准标准中的版本条件与状态码对应关系设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D22-02"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "携带当前expectedVersion编辑",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "带当前版本更新成功；数据与配置版本在同一提交中变化一次，按最终配置更新调度。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "读取新配置和版本",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "带当前版本更新成功；数据与配置版本在同一提交中变化一次，按最终配置更新调度。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "再用新版本编辑一次确认各递增一次",
+          "expected": "带当前版本更新成功；数据与配置版本在同一提交中变化一次，按最终配置更新调度。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "带当前版本更新成功；数据与配置版本在同一提交中变化一次，按最终配置更新调度。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-02",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-03",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "陈旧编辑不覆盖新配置",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "依据批准标准中的版本条件与状态码对应关系设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D22-03"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "两客户端读取同版本",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "A保存后B提交旧草稿",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "比较配置、调度与成功审计不被B改变",
+          "expected": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-04",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "并发编辑仅一方提交",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "依据批准标准中的版本条件与状态码对应关系设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D22-04"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "两个客户端同时用相同版本提交不同编辑",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "等待结束",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对一成功一409且仅一次递增",
+          "expected": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "两客户端持同版本时只一方成功，另一409；新名称、范围、Cron等不被旧草稿覆盖。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-03",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-05",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "缺失与null前置版本428",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "依据批准标准中的版本条件与状态码对应关系设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D22-05"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别省略expectedVersion与传null更新",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "缺失/null428，负数/小数/非法类型400；均不改配置、调度或成功审计，不受D16其他字段宽松转换影响。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对428及配置、审计不变",
+          "expected": "缺失/null428，负数/小数/非法类型400；均不改配置、调度或成功审计，不受D16其他字段宽松转换影响。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "缺失/null428，负数/小数/非法类型400；均不改配置、调度或成功审计，不受D16其他字段宽松转换影响。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-06",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "非法版本类型400",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "依据批准标准中的版本条件与状态码对应关系设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D22-06"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别传负数、小数、数值字符串、布尔、对象、数组及超出整数范围值",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "缺失/null428，负数/小数/非法类型400；均不改配置、调度或成功审计，不受D16其他字段宽松转换影响。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对400",
+          "expected": "缺失/null428，负数/小数/非法类型400；均不改配置、调度或成功审计，不受D16其他字段宽松转换影响。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "缺失/null428，负数/小数/非法类型400；均不改配置、调度或成功审计，不受D16其他字段宽松转换影响。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-04",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-07",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "冲突保留界面草稿",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D22-07"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "界面编辑并触发409",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对弹窗和输入保留、旧expectedVersion不被自动刷新、无自动重试",
+          "expected": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-05",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-08",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "显式取得新版本后重新提交",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D22-08"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "冲突后主动读取最新版本",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对最新配置展示和原草稿保留",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "用户另行点击保存并核对新版本",
+          "expected": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "冲突时保留草稿并提示重新读取；无自动合并/重试覆盖；用户取得新版本后可明确再提交。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-05",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-09",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "运行元数据不制造配置冲突",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D22-09"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "运行已启用计划，生成last_run记录",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "Quartz完成run或更新last_run期间，配置未改则原有效版本仍可编辑，不制造无关409。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "保持原配置版本编辑",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "Quartz完成run或更新last_run期间，配置未改则原有效版本仍可编辑，不制造无关409。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "检查运行元数据不递增配置版本",
+          "expected": "Quartz完成run或更新last_run期间，配置未改则原有效版本仍可编辑，不制造无关409。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "Quartz完成run或更新last_run期间，配置未改则原有效版本仍可编辑，不制造无关409。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-06",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-10",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "同步保护和权限边界保持",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "依据批准标准中的权限域与拒绝规则设计，保留独立COV目标。",
+      "coverage_item_refs": [
+        "COV-D22-10"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以无权账号和过期同步revision尝试更新",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "既有同步revision保护保持；跨组织/无权账号仍先拒绝，不用版本返回泄漏配置；原D05失效会话不能写。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "核对原权限、组织和同步保护仍有效",
+          "expected": "既有同步revision保护保持；跨组织/无权账号仍先拒绝，不用版本返回泄漏配置；原D05失效会话不能写。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "既有同步revision保护保持；跨组织/无权账号仍先拒绝，不用版本返回泄漏配置；原D05失效会话不能写。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-07",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    },
+    {
+      "id": "TC-P2-D22-11",
+      "module": "D22 质量报告计划编辑的版本前置条件",
+      "title": "事务失败不改历史运行",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "从已批准A分支拆出独立验证目标；源检查组的关联不变量作为同一业务动作的观察，不另造未规定响应。",
+      "coverage_item_refs": [
+        "COV-D22-11"
+      ],
+      "preconditions": [
+        "新建的隔离QA项目与合成数据，使用本用例要求的有权/无权账号。",
+        "按本用例准备定义、版本、源树或旧数据；不操作用户工作区。"
+      ],
+      "test_data": "执行数据和夹具见对应P2专项测试及本目录复现说明；边界和错误预期仅取自所引已批准验收规则。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "触发重名等数据库保存失败",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "持久化冲突/失败不假报成功，不改历史运行和执行快照；调度沿用现有提交后同步/恢复契约，单列协同证据，不冒称跨资源原子回滚。"
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "action": "比较配置版本和历史运行记录",
+          "expected": "完成本步骤的隔离前置或受测操作，记录对应响应与持久化快照。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "持久化冲突/失败不假报成功，不改历史运行和执行快照；调度沿用现有提交后同步/恢复契约，单列协同证据，不冒称跨资源原子回滚。"
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "action": "核对无成功审计",
+          "expected": "持久化冲突/失败不假报成功，不改历史运行和执行快照；调度沿用现有提交后同步/恢复契约，单列协同证据，不冒称跨资源原子回滚。",
+          "evidence_refs": [
+            "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+              "quote": "持久化冲突/失败不假报成功，不改历史运行和执行快照；调度沿用现有提交后同步/恢复契约，单列协同证据，不冒称跨资源原子回滚。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D22"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2-D22-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D22-·-质量报告计划编辑的版本前置条件",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D22",
+        "P2-D22-08",
+        "后台隔离回归"
+      ],
+      "notes": "采用acceptance-criteria作为基础方法；等价类/边界/并发/恢复在具体可执行数据中展开；不同目标引用同一复合标准时保留不同COV记录，不按数据变体重复计数。 原先行设计ID和覆盖范围保持；执行后补全人工可操作步骤，实际结果独立存放，不混入设计模型。"
+    }
+  ]
+}

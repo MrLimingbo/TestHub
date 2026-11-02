@@ -1,0 +1,510 @@
+{
+  "records": [
+    {
+      "id": "BLOCK-12-D001",
+      "module": "12",
+      "moduleName": "移动端自动化",
+      "caseId": "D001",
+      "title": "Android设备七种步骤及PNG",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": {
+        "reason": "No adb/Appium; xcrun simctl unavailable",
+        "realDeviceExecutions": 0
+      },
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/execution-final.json",
+      "environmentGroups": [
+        "ENV-ANDROID"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-12-D002",
+      "module": "12",
+      "moduleName": "移动端自动化",
+      "caseId": "D002",
+      "title": "iOS设备七种步骤及PNG",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": {
+        "reason": "No adb/Appium; xcrun simctl unavailable",
+        "realDeviceExecutions": 0
+      },
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/execution-final.json",
+      "environmentGroups": [
+        "ENV-IOS"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-12-D003",
+      "module": "12",
+      "moduleName": "移动端自动化",
+      "caseId": "D003",
+      "title": "真实设备断开与授权错误",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": {
+        "reason": "No adb/Appium; xcrun simctl unavailable",
+        "realDeviceExecutions": 0
+      },
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/execution-final.json",
+      "environmentGroups": [
+        "ENV-ANDROID",
+        "ENV-IOS"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-12-D004",
+      "module": "12",
+      "moduleName": "移动端自动化",
+      "caseId": "D004",
+      "title": "真实设备超时取消与会话释放",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": {
+        "reason": "No adb/Appium; xcrun simctl unavailable",
+        "realDeviceExecutions": 0
+      },
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/execution-final.json",
+      "environmentGroups": [
+        "ENV-ANDROID",
+        "ENV-IOS"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-15-F016",
+      "module": "15",
+      "moduleName": "桌面工作区与跨端",
+      "caseId": "F016",
+      "title": "大小写重名拒绝",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": {
+        "blocked": true,
+        "reason": "Owned filesystem is case insensitive; cross-platform duplicate authenticated-manifest variants covered separately by existing archive tests"
+      },
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json",
+      "environmentGroups": [
+        "ENV-CASE-FS"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-15-X001",
+      "module": "15",
+      "moduleName": "桌面工作区与跨端",
+      "caseId": "X001",
+      "title": "Intel Mac原生运行",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": {
+        "os": "Darwin",
+        "architecture": "arm64",
+        "reason": "本机仅提供Mac arm64原生环境，不能替代Intel原生运行。"
+      },
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json",
+      "environmentGroups": [
+        "ENV-INTEL"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-15-X002",
+      "module": "15",
+      "moduleName": "桌面工作区与跨端",
+      "caseId": "X002",
+      "title": "Windows原生运行与恢复",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": {
+        "os": "Darwin",
+        "architecture": "arm64",
+        "reason": "没有Windows原生环境，不能替代Windows首启、PowerShell与跨系统恢复。"
+      },
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json",
+      "environmentGroups": [
+        "ENV-WINDOWS"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-15-X003",
+      "module": "15",
+      "moduleName": "桌面工作区与跨端",
+      "caseId": "X003",
+      "title": "正式安装及Gatekeeper首启",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": {
+        "os": "Darwin",
+        "architecture": "arm64",
+        "reason": "本轮后台源码验收，不更换已安装应用；正式安装、Finder/Gatekeeper首启未执行。"
+      },
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/execution-final.json",
+      "environmentGroups": [
+        "ENV-CLEAN-INSTALL"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-16-Z001",
+      "module": "16",
+      "moduleName": "横向回归",
+      "caseId": "Z001",
+      "title": "Intel Mac原生包及运行",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": "缺少Intel原生系统时记阻塞，不冒充通过",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/execution-final.json",
+      "environmentGroups": [
+        "ENV-INTEL"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-16-Z002",
+      "module": "16",
+      "moduleName": "横向回归",
+      "caseId": "Z002",
+      "title": "Windows原生安装与运行",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": "缺少Windows原生系统时记阻塞，不冒充通过",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/execution-final.json",
+      "environmentGroups": [
+        "ENV-WINDOWS"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-16-Z003",
+      "module": "16",
+      "moduleName": "横向回归",
+      "caseId": "Z003",
+      "title": "发行者签名与公证",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": "本轮仅ad-hoc预览，无发行者证书/公证凭据时记阻塞，不冒充通过",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/execution-final.json",
+      "environmentGroups": [
+        "ENV-SIGNING"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    },
+    {
+      "id": "BLOCK-16-Z004",
+      "module": "16",
+      "moduleName": "横向回归",
+      "caseId": "Z004",
+      "title": "Finder/Gatekeeper干净机器安装首启",
+      "status": "ENVIRONMENT_BLOCKED",
+      "reason": "本轮后台隔离启动，不替换用户已安装应用时记阻塞，不冒充通过",
+      "sourceExecution": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/execution-final.json",
+      "environmentGroups": [
+        "ENV-CLEAN-INSTALL"
+      ],
+      "planningStatus": "PENDING_ENVIRONMENT_REVIEW",
+      "preparationExecuted": false,
+      "evidenceRequired": [
+        "原生平台与工具/驱动版本",
+        "同一批准构建输入及组件摘要",
+        "原用例真实执行证据和预期对照",
+        "故障恢复与自有数据清理"
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "ENV-ANDROID",
+      "name": "Android设备或模拟器",
+      "priority": "P1（发行包含移动执行时）",
+      "dependsOn": [],
+      "requirements": [
+        "独占或授权的Android设备/模拟器，记录系统版本、ABI、设备授权状态和QA标识。",
+        "可用Android SDK/platform-tools、adb及兼容的Appium服务和Android驱动；外部版本先形成矩阵，不自动用最新版。",
+        "自有测试APK或已授权预装App、包名/入口、稳定测试元素、测试账号和可恢复测试数据。",
+        "TestHub、Runner与Appium之间的批准网络可达，原有目标约束和TLS不放宽。"
+      ],
+      "userInputs": [
+        "是否将Android执行纳入本次发行；使用真机、模拟器或两者。",
+        "可用设备/远端测试资源与授权范围、App资料；不在文档中提供密码。"
+      ],
+      "preflight": "审核后先只读确认工具、驱动、设备授权、网络与应用状态，再决定缺项安装；本轮未探测当前设备。",
+      "acceptance": "D001实际完成LAUNCH、TAP、INPUT、ASSERT_VISIBLE、ASSERT_TEXT、WAIT、SCREENSHOT；D003/D004按获批平台执行真实断开/授权错误、超时/取消及会话释放。",
+      "evidence": [
+        "平台/工具/驱动版本和受控设备标识",
+        "真实Appium会话与步骤结果",
+        "实际PNG字节/类型/SHA及报告关联",
+        "故障后新会话恢复、已取消后无后续步骤、无自有会话残留"
+      ],
+      "cleanup": "只清理自有会话、测试数据和经授权的QA应用；不重置个人设备或卸载用户App。",
+      "cases": [
+        "12/D001",
+        "12/D003",
+        "12/D004"
+      ],
+      "status": "PREPARATION_PROPOSED_NOT_EXECUTED",
+      "selectedResource": null,
+      "preflightExecuted": false
+    },
+    {
+      "id": "ENV-IOS",
+      "name": "iOS真机或模拟器",
+      "priority": "P1（发行包含移动执行时）",
+      "dependsOn": [],
+      "requirements": [
+        "可用macOS测试主机、Xcode/命令行工具及simctl或已授权真机。",
+        "兼容的Appium服务与iOS驱动，真机所需签名、设备授权和自动化辅助组件已准备。",
+        "自有测试App的bundleId和平台适配安装产物；真机与模拟器包不可混用，当前接口不支持的产物形式不得临时扩展后冒充验收。",
+        "隔离测试账号、可恢复数据和批准网络。"
+      ],
+      "userInputs": [
+        "iOS真机、模拟器或两者的验收范围及可用资源。",
+        "现有App、签名/授权配置入口；无需发送私钥或凭据正文。"
+      ],
+      "preflight": "审核后只读核验Xcode、simctl/设备、驱动和App匹配；缺少条件时保持阻塞。",
+      "acceptance": "D002实际七步与PNG；D003/D004在iOS范围验证断开/授权、超时/取消及设备会话释放。",
+      "evidence": [
+        "原生系统/驱动/设备版本",
+        "真实iOS会话及步骤与PNG摘要",
+        "授权/断开真实错误和恢复",
+        "取消/超时后的会话释放结果"
+      ],
+      "cleanup": "只回收自有会话及授权QA数据；不修改用户设备信任、生产签名或个人应用。",
+      "cases": [
+        "12/D002",
+        "12/D003",
+        "12/D004"
+      ],
+      "status": "PREPARATION_PROPOSED_NOT_EXECUTED",
+      "selectedResource": null,
+      "preflightExecuted": false
+    },
+    {
+      "id": "ENV-CASE-FS",
+      "name": "大小写敏感文件系统",
+      "priority": "P2（可优先补齐的低依赖验证）",
+      "dependsOn": [],
+      "requirements": [
+        "新建专用临时大小写敏感卷/磁盘映像及唯一QA挂载点。",
+        "自有认证清单、大小写重名文件和正常对照归档；使用原样校验流程。"
+      ],
+      "userInputs": [
+        "批准使用自有临时映像的空间和存放位置。"
+      ],
+      "preflight": "审核后先确认新卷确实区分大小写；不格式化、重分区或接管既有磁盘。",
+      "acceptance": "15/F016在真实大小写敏感文件系统拒绝冲突清单；正常导出/恢复、完整性校验不受影响。",
+      "evidence": [
+        "卷类型及大小写特性实测",
+        "冲突真实拒绝与原数据不变",
+        "正常对照和摘要",
+        "卸载及自有映像清理"
+      ],
+      "cleanup": "无自有进程/句柄后卸载并移除本轮映像和临时包；不删除用户卷。",
+      "cases": [
+        "15/F016"
+      ],
+      "status": "PREPARATION_PROPOSED_NOT_EXECUTED",
+      "selectedResource": null,
+      "preflightExecuted": false
+    },
+    {
+      "id": "ENV-INTEL",
+      "name": "Intel Mac原生环境",
+      "priority": "P1（发行包含macOS x64时）",
+      "dependsOn": [],
+      "requirements": [
+        "可用自有Intel Mac或原生Intel执行环境，不能由arm64/Rosetta替代。",
+        "原生Java21、符合仓库要求的Node和锁定依赖、原生x64运行时及完整许可/库存。",
+        "同一批准源码输入、独占缓存和新QA工作区；复用现有构建/离屏验收脚本。"
+      ],
+      "userInputs": [
+        "是否支持macOS x64及目标系统范围。",
+        "可用主机或CI权限、批准的源码ref和执行窗口；不自动创建标签或Release。"
+      ],
+      "preflight": "先确认实际CPU架构和运行组件依赖；CI标签存在于仓库不等于资源当前可用。",
+      "acceptance": "15/X001、16/Z001原生首启/重启、身份与记录保持、备份恢复及相应包级链路；正式签名另走签名组。",
+      "evidence": [
+        "OS/架构、源码和后端/ASAR/运行时摘要",
+        "严格资源封装与库存",
+        "真实包离屏运行及重启持久化",
+        "自有进程/数据清理"
+      ],
+      "cleanup": "保留脱敏摘要及需要的当前运行时，删除自有测试应用和临时工作区；不替换用户安装。",
+      "cases": [
+        "15/X001",
+        "16/Z001"
+      ],
+      "status": "PREPARATION_PROPOSED_NOT_EXECUTED",
+      "selectedResource": null,
+      "preflightExecuted": false
+    },
+    {
+      "id": "ENV-WINDOWS",
+      "name": "Windows x64原生环境",
+      "priority": "P1（发行包含Windows时）",
+      "dependsOn": [],
+      "requirements": [
+        "独占干净Windows x64主机/虚拟机或授权原生CI，能够执行真实NSIS安装与PowerShell。",
+        "原生Java21、受支持Node、锁定Electron/依赖及完整win32-x64运行时。",
+        "隔离安装目录、用户配置、注册项和快捷方式范围，执行前确认无既有用户实例/数据。",
+        "自有恢复/升级夹具及需要的组件缓存，网络和摘要校验保持。"
+      ],
+      "userInputs": [
+        "Windows目标版本、预览或正式发行范围。",
+        "现有主机/CI权限及专属快照；安装和清理范围。"
+      ],
+      "preflight": "审核后只读核验架构、工具、权限、空安装状态和目标路径，再按批准范围安装。",
+      "acceptance": "15/X002、16/Z002实际默认目录首启、重启、PowerShell、恢复与跨系统工作区验证；依赖符号链接的平台跳过项继续单列。",
+      "evidence": [
+        "原生架构、PE/运行时/安装器摘要",
+        "真实安装、目录、快捷方式和卸载注册项",
+        "重启/恢复后的身份、记录、字节与权限",
+        "若正式发行则真实Authenticode证据另关联"
+      ],
+      "cleanup": "只回滚自有安装、QA注册项/快捷方式和工作区；不卸载既有TestHub或清理用户配置。",
+      "cases": [
+        "15/X002",
+        "16/Z002"
+      ],
+      "status": "PREPARATION_PROPOSED_NOT_EXECUTED",
+      "selectedResource": null,
+      "preflightExecuted": false
+    },
+    {
+      "id": "ENV-SIGNING",
+      "name": "发行者签名与公证",
+      "priority": "P1（正式对外分发前）",
+      "dependsOn": [],
+      "requirements": [
+        "macOS目标的现有Developer ID、预期Team ID和公证配置；按现有Secret/安全配置入口使用，不把凭据写入文档。",
+        "Windows若纳入正式发行，准备相应代码签名和时间戳条件；与Windows原生证据分别留存。",
+        "批准的正式构建输入及分发门槛路径；不能手改distributionReady代替验证。",
+        "在签名后的最终应用和安装器上重新进行原生、库存与启动检查。"
+      ],
+      "userInputs": [
+        "本次是内部预览还是正式分发，涉及的平台。",
+        "现成签名/公证配置是否可用、授权入口及发行门槛负责人；缺少时不擅自申请或采购。"
+      ],
+      "preflight": "确认已有配置和工具是否满足仓库签名门槛；发现门槛路径未具备时另列阻塞，不使用预览绕过。",
+      "acceptance": "16/Z003至少覆盖macOS发行者身份、严格封装、Hardened Runtime、公证及stapler/spctl；Windows正式分发另依仓库脚本验证嵌入式Authenticode和时间戳。",
+      "evidence": [
+        "源码/安装器/ASAR/运行时摘要",
+        "脱敏的真实签名与公证校验结论",
+        "最终DMG内应用再次核验及字节一致",
+        "签名后真实启动与持久化"
+      ],
+      "cleanup": "仅清理自有临时签名副本和日志；保留安全配置入口，不导出私钥/原始系统凭据。",
+      "cases": [
+        "16/Z003"
+      ],
+      "status": "PREPARATION_PROPOSED_NOT_EXECUTED",
+      "selectedResource": null,
+      "preflightExecuted": false
+    },
+    {
+      "id": "ENV-CLEAN-INSTALL",
+      "name": "干净机器Finder/Gatekeeper首启",
+      "priority": "P1（正式对外分发前）",
+      "dependsOn": [
+        "ENV-SIGNING"
+      ],
+      "requirements": [
+        "独占干净原生macOS测试会话及已核验的最终发行DMG，保留正常隔离/Gatekeeper链路。",
+        "允许在该专属会话中进行真实可见Finder首启及录证；不使用用户当前前台桌面。",
+        "确认空默认应用/数据目录、授权测试账号和可回滚基线。",
+        "签名/公证通过在先；不能禁用Gatekeeper或移除隔离标记来伪装通过。"
+      ],
+      "userInputs": [
+        "可用的独占原生GUI会话、目标系统与安装范围。",
+        "批准专属测试会话中的真实可见首启；若要求绝对全程离屏，这两项继续阻塞。"
+      ],
+      "preflight": "只读确认干净状态、最终包摘要和前置签名结果，未满足不执行安装。",
+      "acceptance": "15/X003、16/Z004真实Finder/Gatekeeper安装首启、默认路径、退出/重启及数据保持；离屏smoke不能代替。",
+      "evidence": [
+        "干净状态、系统版本及最终DMG摘要",
+        "真实Gatekeeper和Finder首启记录",
+        "默认目录及重启持久化",
+        "自有安装与数据回滚"
+      ],
+      "cleanup": "只回滚专属测试环境，不替换用户已有安装或接管个人工作区。",
+      "cases": [
+        "15/X003",
+        "16/Z004"
+      ],
+      "status": "PREPARATION_PROPOSED_NOT_EXECUTED",
+      "selectedResource": null,
+      "preflightExecuted": false
+    }
+  ],
+  "status": "AWAITING_USER_REVIEW"
+}

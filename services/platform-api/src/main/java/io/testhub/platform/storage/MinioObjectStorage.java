@@ -10,19 +10,22 @@ import java.io.InputStream;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class MinioObjectStorage implements ObjectStorage {
+public final class MinioObjectStorage implements ObjectStorage, AutoCloseable {
     private final MinioClient client;
+    private final MinioClient probeClient;
     private final Set<String> ready = ConcurrentHashMap.newKeySet();
 
-    public MinioObjectStorage(MinioClient client) { this.client = client; }
+    public MinioObjectStorage(MinioClient client) { this(client, client); }
+    public MinioObjectStorage(MinioClient client, MinioClient probeClient) { this.client = client; this.probeClient = probeClient; }
 
     @Override public boolean bucketExists(String bucket) throws Exception {
-        return client.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
+        return probeClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
     }
 
     @Override public synchronized void ensureBucket(String bucket) throws Exception {
         if (ready.contains(bucket)) return;
-        if (!bucketExists(bucket)) client.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
+        // Business initialization retains its original client/timeouts; probe failures must not change file-operation behavior.
+        if (!client.bucketExists(BucketExistsArgs.builder().bucket(bucket).build())) client.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
         ready.add(bucket);
     }
 
@@ -41,4 +44,5 @@ public final class MinioObjectStorage implements ObjectStorage {
     }
 
     @Override public String label() { return "MinIO 对象存储"; }
+    @Override public void close() throws Exception { if (probeClient != client) probeClient.close(); }
 }

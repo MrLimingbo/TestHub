@@ -1,0 +1,330 @@
+[
+  {
+    "observation": "OBS-03B-E002",
+    "decision": "D02",
+    "scenario": "密钥K已存在，再用普通参数保存同名K",
+    "expected": "409；旧ID、类型、密文和值不变；普通列表不出现该密钥明文；无成功写入审计。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D02-01"
+  },
+  {
+    "observation": "OBS-03B-E002",
+    "decision": "D02",
+    "scenario": "普通参数K已存在，再用密钥保存同名K",
+    "expected": "409；原普通参数不被加密或改为密钥。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D02-02"
+  },
+  {
+    "observation": "OBS-03B-E002",
+    "decision": "D02",
+    "scenario": "同类型新增/更新和不同项目、不同环境",
+    "expected": "合法操作维持现有成功状态码；隔离域内允许独立同名；原权限、格式、长度校验保持。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D02-03"
+  },
+  {
+    "observation": "OBS-03B-E002",
+    "decision": "D02",
+    "scenario": "同项目环境的并发普通/密钥同名创建",
+    "expected": "只提交一种类型，另一请求409；无500、混合状态或丢失更新；查重条件与唯一约束一致。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D02-04"
+  },
+  {
+    "observation": "OBS-03B-E002",
+    "decision": "D02",
+    "scenario": "无权限、非法Key、BASE_URL及大小写/空白边界",
+    "expected": "鉴权先于敏感内容处理；401/403、现有400规则保持；不能利用规范化差异绕过已被唯一键认定的同名冲突。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D02-05"
+  },
+  {
+    "observation": "OBS-03B-E002",
+    "decision": "D02",
+    "scenario": "失败响应、审计与日志",
+    "expected": "使用共享错误封装；不包含参数值、密钥值或密文；不删除或猜测恢复存量。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D02-06"
+  },
+  {
+    "observation": "OBS-03D-E006",
+    "decision": "D05",
+    "scenario": "目标账号在两浏览器登录后被停用/删除",
+    "expected": "安全事件提交成功后，两个旧Cookie访问me及代表性受保护读取均401；写入用新鲜CSRF证明仍不能执行。CSRF自身不合法时可先返回现有403，不能造成写入。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D05-01"
+  },
+  {
+    "observation": "OBS-03D-E006",
+    "decision": "D05",
+    "scenario": "管理员重置另一账号密码",
+    "expected": "目标的全部旧Session失效；旧密码新登录失败，新密码可登录；执行重置的其他管理员会话保持。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D05-02"
+  },
+  {
+    "observation": "OBS-03D-E006",
+    "decision": "D05",
+    "scenario": "管理员通过现有入口重置自己密码",
+    "expected": "成功响应后当前及其他旧Session不能继续认证，提示重新登录；不绕开当前账号不可停用/删除保护。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D05-03"
+  },
+  {
+    "observation": "OBS-03D-E006",
+    "decision": "D05",
+    "scenario": "重新启用账号或应用重启/多实例",
+    "expected": "旧Cookie不能复活；新登录正常。服务端共享会话与桌面持久会话分别覆盖，不能只清一个浏览器Cookie。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D05-04"
+  },
+  {
+    "observation": "OBS-03D-E006",
+    "decision": "D05",
+    "scenario": "安全事件提交与并发请求的边界",
+    "expected": "提交之后发起的新请求不得凭旧身份通过；提交之前已进入执行的操作单独记录，不承诺服务端回滚。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D05-05"
+  },
+  {
+    "observation": "OBS-03D-E006",
+    "decision": "D05",
+    "scenario": "普通资料更新和其他用户",
+    "expected": "仅改姓名/邮箱等非安全资料不导致无关注销；其他账号与项目身份不受影响。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D05-06"
+  },
+  {
+    "observation": "OBS-03D-E006",
+    "decision": "D05",
+    "scenario": "PAT选择与故障分支",
+    "expected": "P0维持现有改密后的PAT行为；P1则实际吊销并验证CI失败为预期。停用/删除、手工撤销、过期均不得通过PAT认证。无法完成安全判定不能假报成功或放行。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D05-07"
+  },
+  {
+    "observation": "OBS-07-S005",
+    "decision": "D11",
+    "scenario": "project:read、project:write、read+write、run:execute矩阵",
+    "expected": "同一合法项目角色下，read只读描述符但原history403；write可读原history但描述符403；read+write两者可读；run:execute单独访问两者403。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D11-01"
+  },
+  {
+    "observation": "OBS-07-S005",
+    "decision": "D11",
+    "scenario": "历史有/无草稿、过期草稿与导入脱敏历史",
+    "expected": "权限不能随当前行是否含草稿而放宽；D12到期后可返回摘要及空草稿，但原history入口仍按同一scope契约。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D11-02"
+  },
+  {
+    "observation": "OBS-07-S005",
+    "decision": "D11",
+    "scenario": "PAT绑定项目与项目成员权限变化",
+    "expected": "存在的其他项目403；不存在项目沿用404；即使scope够，账号无相应允许角色也不能获取明文。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D11-03"
+  },
+  {
+    "observation": "OBS-07-S005",
+    "decision": "D11",
+    "scenario": "失效Bearer和有效浏览器Cookie同时存在",
+    "expected": "无效、过期、撤销的Bearer仍401，不回退到Cookie冒充成功；令牌不得写进浏览器Session。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D11-04"
+  },
+  {
+    "observation": "OBS-07-S005",
+    "decision": "D11",
+    "scenario": "B新增只读摘要入口（仅选B时）",
+    "expected": "read和read+write返回200白名单；缺read返回403；无解密动作或额外网络执行；任何请求/响应原文均不在摘要。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D11-05"
+  },
+  {
+    "observation": "OBS-07-S005",
+    "decision": "D11",
+    "scenario": "浏览器角色与协议能力回归",
+    "expected": "SYSTEM_ADMIN、ORG_ADMIN、PROJECT_ADMIN、TEST_LEAD、TESTER按现有写角色规则处理；只读角色无完整回放。HTTP/gRPC描述符原能力不倒置。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D11-06"
+  },
+  {
+    "observation": "OBS-07-E013",
+    "decision": "D12",
+    "scenario": "A字段保存白名单和B摘要模式",
+    "expected": "A仅按白名单保存加密配置；禁用Auth隐藏值不入草稿；B新记录replay字段为空且界面不承诺保存草稿成功。HTTP与gRPC Unary分别验证。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D12-01"
+  },
+  {
+    "observation": "OBS-07-E013",
+    "decision": "D12",
+    "scenario": "可识别测试敏感标记",
+    "expected": "原始数据库草稿列中无明文字面标记；未授权响应、摘要、审计和日志不含该标记。授权回放仅返回策略允许字段。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D12-02"
+  },
+  {
+    "observation": "OBS-07-E013",
+    "decision": "D12",
+    "scenario": "权限与告知",
+    "expected": "页面、帮助和相关代码注释明确加密保存、项目写者可解密、有效期及旧数据例外；D11缺scope/跨项目不能取明文。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D12-03"
+  },
+  {
+    "observation": "OBS-07-E013",
+    "decision": "D12",
+    "scenario": "TTL前后及边界时刻",
+    "expected": "使用可控时钟验证到期前可回放，恰好到期及之后立即不可回放；摘要仍可见并明确到期；重启、读取及导入不续期。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D12-04"
+  },
+  {
+    "observation": "OBS-07-E013",
+    "decision": "D12",
+    "scenario": "新策略密文回收G0",
+    "expected": "仅清新策略到期草稿密文；合法未到期记录不受影响；正常运行最长24小时清理周期及启动补偿可验证；清理失败可见、重试不删错行。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D12-05"
+  },
+  {
+    "observation": "OBS-07-E013",
+    "decision": "D12",
+    "scenario": "G1物理保留例外",
+    "expected": "若选G1，过期也禁止明文回放但密文继续保留；文案不得声称已删除或保证物理30天保留。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D12-06"
+  },
+  {
+    "observation": "OBS-07-E013",
+    "decision": "D12",
+    "scenario": "存量L0/L1",
+    "expected": "L0按原时间限制回放且不改写/删除旧密文；L1明确保留例外。未知时间不伪造；原摘要、记录数及旧备份不因本项批量清理。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D12-07"
+  },
+  {
+    "observation": "OBS-07-E013",
+    "decision": "D12",
+    "scenario": "失败与兼容",
+    "expected": "加密失败不得落明文或假报草稿保存成功；解密失败只给脱敏错误，不能返回密文、栈或越权回退；旧客户端缺新增字段时保持可解析。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D12-08"
+  },
+  {
+    "observation": "OBS-08-E011",
+    "decision": "D03",
+    "scenario": "普通提交、API/CLI及入站Webhook",
+    "expected": "权限/签名合法但有效环境停用时409，共享错误封装且明确环境停用；不产生新任务、manifest、outbox或Runner目标访问。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D03-01"
+  },
+  {
+    "observation": "OBS-08-E011",
+    "decision": "D03",
+    "scenario": "数据驱动执行",
+    "expected": "同一停用环境的整批新执行受控拒绝，不留下部分已入队行；不把被拒绝记录当成功执行。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D03-02"
+  },
+  {
+    "observation": "OBS-08-E011",
+    "decision": "D03",
+    "scenario": "定时触发",
+    "expected": "明确记录本次因环境停用跳过；不生成Runner执行，不计Runner连续执行失败，不自动停用计划；恢复后从后续合法触发继续，不默认补跑跳过批次。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D03-03"
+  },
+  {
+    "observation": "OBS-08-E011",
+    "decision": "D03",
+    "scenario": "运行配置覆盖与并发停用",
+    "expected": "以覆盖后有效环境而非场景默认值判断；提交与停用串行化边界明确，提交成功的有完整快照，拒绝的无半成品。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D03-04"
+  },
+  {
+    "observation": "OBS-08-E011",
+    "decision": "D03",
+    "scenario": "已接受队列/运行任务（A）",
+    "expected": "停用后仍按原manifest快照继续，既有手动取消能力保持；不重新解析当前参数或偷偷取消。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D03-05"
+  },
+  {
+    "observation": "OBS-08-E011",
+    "decision": "D03",
+    "scenario": "配置预览与执行预览",
+    "expected": "纯只读配置预览维持授权访问且无任务/网络副作用；实际执行预览受同一停用校验，不可绕过。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D03-06"
+  },
+  {
+    "observation": "OBS-08-E011",
+    "decision": "D03",
+    "scenario": "重新启用与回归",
+    "expected": "重新启用后合法新提交可正常接受；其他项目/环境和原PAT run:execute、Webhook验签、幂等及超时保护保持。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D03-07"
+  },
+  {
+    "observation": "OBS-16-E003",
+    "decision": "D25",
+    "scenario": "服务端Redis断开/拒绝连接/超时",
+    "expected": "readiness503，总health按关键依赖聚合503；liveness在进程正常时200；依赖Redis会话的me返回脱敏503，不出现未处理500或身份绕过。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D25-01"
+  },
+  {
+    "observation": "OBS-16-E003",
+    "decision": "D25",
+    "scenario": "数据库或现有存储检查失败",
+    "expected": "按关键依赖readiness503并给出不含凭据/端点详情的反馈；保留现有空存储桶懒创建的正常就绪语义。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D25-02"
+  },
+  {
+    "observation": "OBS-16-E003",
+    "decision": "D25",
+    "scenario": "桌面无Redis正常启动",
+    "expected": "只检查实际使用的本地数据库/文件存储，Redis未配置不使其失败；不检查或探测用户未启用的外部服务。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D25-03"
+  },
+  {
+    "observation": "OBS-16-E003",
+    "decision": "D25",
+    "scenario": "鉴权与错误分类",
+    "expected": "能判定的无认证401和无权限403保持；不能判断身份时受控503，不借机开放接口；普通程序缺陷仍按既有500处理。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D25-04"
+  },
+  {
+    "observation": "OBS-16-E003",
+    "decision": "D25",
+    "scenario": "探针超时与资源释放",
+    "expected": "按选定5s/10s/自定义截止返回，不无限等待；探测为只读，有界连接/线程，失败不造成重启风暴或泄露连接。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D25-05"
+  },
+  {
+    "observation": "OBS-16-E003",
+    "decision": "D25",
+    "scenario": "依赖恢复与会话状态",
+    "expected": "恢复后就绪和合法业务恢复；若隔离Redis重建丢失了会话，旧会话应401并允许重新登录，不冒称旧Cookie自动恢复。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D25-06"
+  },
+  {
+    "observation": "OBS-16-E003",
+    "decision": "D25",
+    "scenario": "公开探针、可选Runner与现有契约",
+    "expected": "公开探针仍隐藏详情；可选Runner离线不单独拖垮控制面readiness；不放宽网络名单、权限或发行distributionReady门槛。",
+    "status": "PROPOSED_NOT_EXECUTED",
+    "id": "P1-D25-07"
+  }
+]

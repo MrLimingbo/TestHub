@@ -1,0 +1,207 @@
+{
+  "tests": 50,
+  "passed": 50,
+  "failed": 0,
+  "cases": [
+    {
+      "name": "requires a heartbeat signing key before a Runner can call the control plane",
+      "status": "PASS"
+    },
+    {
+      "name": "requires explicit network origins before bounded HTTP execution can be enabled",
+      "status": "PASS"
+    },
+    {
+      "name": "private network access is opt-in and requires desktop transport credentials",
+      "status": "PASS"
+    },
+    {
+      "name": "TC-D16API-22: Runner precheck accepts bounded integral WAIT without target traffic",
+      "status": "PASS"
+    },
+    {
+      "name": "TC-D16API-23: Runner rejects invalid WAIT before any target call",
+      "status": "PASS"
+    },
+    {
+      "name": "POST transmits UTF-8 bodies with their byte length",
+      "status": "PASS"
+    },
+    {
+      "name": "PUT transmits UTF-8 bodies with their byte length",
+      "status": "PASS"
+    },
+    {
+      "name": "PATCH transmits UTF-8 bodies with their byte length",
+      "status": "PASS"
+    },
+    {
+      "name": "DELETE transmits UTF-8 bodies with their byte length",
+      "status": "PASS"
+    },
+    {
+      "name": "OPTIONS transmits UTF-8 bodies with their byte length",
+      "status": "PASS"
+    },
+    {
+      "name": "rejects a non-whitelisted HTTP origin before any network request",
+      "status": "PASS"
+    },
+    {
+      "name": "rejects a loopback target even if it is listed as an allowed origin",
+      "status": "PASS"
+    },
+    {
+      "name": "supplies the validated address in the shape requested by Node DNS lookup",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop authorization reaches only approved loopback origins and never follows redirects",
+      "status": "PASS"
+    },
+    {
+      "name": "enterprise mode blocks private IPv4-mapped IPv6 and link-local representations",
+      "status": "PASS"
+    },
+    {
+      "name": "decodes a bounded task that contains no credential-bearing fields",
+      "status": "PASS"
+    },
+    {
+      "name": "rejects additional secret or script fields before a task reaches an executor",
+      "status": "PASS"
+    },
+    {
+      "name": "decodes a fixed cancellation command without user-controlled content",
+      "status": "PASS"
+    },
+    {
+      "name": "uses a stable heartbeat payload and event envelope",
+      "status": "PASS"
+    },
+    {
+      "name": "creates a redacted HTTP result without URL, body or response content",
+      "status": "PASS"
+    },
+    {
+      "name": "creates a fixed status-code assertion result without values or response content",
+      "status": "PASS"
+    },
+    {
+      "name": "creates only aggregate script assertion counts without names, values or response content",
+      "status": "PASS"
+    },
+    {
+      "name": "signs only the bounded heartbeat fields when a runtime signing key is configured",
+      "status": "PASS"
+    },
+    {
+      "name": "signs a fixed, nonce-bound capability discovery request without task or secret content",
+      "status": "PASS"
+    },
+    {
+      "name": "binds a runtime lease request to exactly one task and execution without adding configuration content",
+      "status": "PASS"
+    },
+    {
+      "name": "binds lease inspection to a lease fingerprint while sending no variable or secret data",
+      "status": "PASS"
+    },
+    {
+      "name": "binds a runtime configuration request to the task, execution and lease fingerprint",
+      "status": "PASS"
+    },
+    {
+      "name": "preserves stream entry boundaries and rejects duplicate fields",
+      "status": "PASS"
+    },
+    {
+      "name": "valid work is acknowledged only after an execution-disabled event is emitted",
+      "status": "PASS"
+    },
+    {
+      "name": "a cancellation command emits one cancellation event and prevents precheck rejection",
+      "status": "PASS"
+    },
+    {
+      "name": "malformed work is dead-lettered without persisting untrusted field values",
+      "status": "PASS"
+    },
+    {
+      "name": "capability discovery accepts only a trusted, configuration-disabled response",
+      "status": "PASS"
+    },
+    {
+      "name": "an enabled Runner receives and executes only a bounded HTTP artifact",
+      "status": "PASS"
+    },
+    {
+      "name": "a non-success HTTP result is reported as a fixed failure without response content",
+      "status": "PASS"
+    },
+    {
+      "name": "a transient GET response is retried with a stable request sequence and redacted attempt number",
+      "status": "PASS"
+    },
+    {
+      "name": "a CONTINUE scenario records a failed assertion and runs later bounded requests before failing the execution",
+      "status": "PASS"
+    },
+    {
+      "name": "a CONTINUE scenario runs later requests after a failed post-response script and still fails safely",
+      "status": "PASS"
+    },
+    {
+      "name": "an extracted status can be used by a later request and an exact assertion is reported without values",
+      "status": "PASS"
+    },
+    {
+      "name": "a bounded flow artifact waits, controls one request and repeats only its preceding request",
+      "status": "PASS"
+    },
+    {
+      "name": "a false fixed condition skips exactly its following request without persisting it",
+      "status": "PASS"
+    },
+    {
+      "name": "a skipped request preserves the last real response for subsequent conditions and extraction",
+      "status": "PASS"
+    },
+    {
+      "name": "scripts mutate only the ephemeral Runner variable map and publish redacted aggregate assertion counts",
+      "status": "PASS"
+    },
+    {
+      "name": "a failed pm test publishes aggregate counts before the fixed execution failure",
+      "status": "PASS"
+    },
+    {
+      "name": "a bounded parallel request group starts independent branches together and publishes only parent-step results",
+      "status": "PASS"
+    },
+    {
+      "name": "a parallel request group rejects scripts and dependent assertion steps before it can execute",
+      "status": "PASS"
+    },
+    {
+      "name": "recovers capability discovery on the next task after control-plane startup failure",
+      "status": "PASS"
+    },
+    {
+      "name": "isolated script can update string variables from the bounded response metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "supports the bounded Postman-style pm variable and response assertion APIs",
+      "status": "PASS"
+    },
+    {
+      "name": "returns only aggregate counts for bounded pm test assertions and rejects unsupported pm APIs",
+      "status": "PASS"
+    },
+    {
+      "name": "isolated script rejects access to host capabilities and does not expose a host object",
+      "status": "PASS"
+    }
+  ]
+}

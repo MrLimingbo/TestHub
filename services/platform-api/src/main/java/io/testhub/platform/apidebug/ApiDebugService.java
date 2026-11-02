@@ -44,10 +44,19 @@ public class ApiDebugService {
     private final ObjectMapper json;
     private final ProjectEnvironmentRepository environments;
     private final ApiDebugTargetPolicy targetPolicy;
+    private final ApiDebugReplayPolicy replayPolicy;
 
     public ApiDebugService(ApiDebugHistoryRepository history, ApiDebugTransport transport, AccessService access, AuditService audit,
                            ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json,
                            ProjectEnvironmentRepository environments, ApiDebugTargetPolicy targetPolicy) {
+        this(history, transport, access, audit, parameters, cipher, json, environments, targetPolicy,
+                new ApiDebugReplayPolicy(java.time.Clock.systemUTC()));
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ApiDebugService(ApiDebugHistoryRepository history, ApiDebugTransport transport, AccessService access, AuditService audit,
+                           ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json,
+                           ProjectEnvironmentRepository environments, ApiDebugTargetPolicy targetPolicy, ApiDebugReplayPolicy replayPolicy) {
         this.history = history;
         this.transport = transport;
         this.access = access;
@@ -57,6 +66,7 @@ public class ApiDebugService {
         this.json = json;
         this.environments = environments;
         this.targetPolicy = targetPolicy;
+        this.replayPolicy = replayPolicy;
     }
 
     public List<ApiDebugHistory> history(AuthenticatedPrincipal principal, String projectId, int limit) {
@@ -133,21 +143,38 @@ public class ApiDebugService {
     private ApiDebugHistory saved(ProjectSummary project, AuthenticatedPrincipal principal, ValidatedRequest request, DebugRequest input,
                                   Integer status, int durationMs, int responseSize, String result, String error) {
         return new ApiDebugHistory(UlidCreator.getUlid().toString(), project.organizationId(), project.id(), request.method(), request.protocol(),
-                request.historyUrl(), status, durationMs, responseSize, result, error, encryptedReplayDraft(request.protocol(), input), principal.userId(), null);
+                request.historyUrl(), status, durationMs, responseSize, result, error, encryptedReplayDraft(request.protocol(), input), principal.userId(), replayPolicy.now());
     }
 
     private ApiDebugHistory withReplayDraft(ApiDebugHistory entry) {
-        String draft = entry.replayDraft() == null ? null : cipher.decrypt(entry.replayDraft());
-        return new ApiDebugHistory(entry.id(), entry.organizationId(), entry.projectId(), entry.method(), entry.protocol(), entry.requestUrl(),
-                entry.responseStatus(), entry.durationMs(), entry.responseSize(), entry.result(), entry.errorMessage(), draft, entry.createdBy(), entry.createdAt(), entry.importSourceProjectId(), entry.importSourceId());
+        entry = replayPolicy.forRead(entry);
+        if (entry.replayDraft() == null) return entry;
+        try {
+            return ApiDebugReplayPolicy.copy(entry, cipher.decrypt(entry.replayDraft()), entry.replayExpiresAt(), "AVAILABLE");
+        } catch (IllegalStateException error) {
+            org.slf4j.LoggerFactory.getLogger(ApiDebugService.class).warn("Debug replay unavailable for history {}", entry.id());
+            return ApiDebugReplayPolicy.copy(entry, null, entry.replayExpiresAt(), "UNREADABLE");
+        }
     }
 
     private String encryptedReplayDraft(String protocol, DebugRequest input) {
         try {
-            return cipher.encrypt(json.writeValueAsString(Map.of("protocol", protocol, "request", input)));
+            var request = new DebugRequest(input.method(), input.url(), input.headers(), input.body(), input.timeoutMs(),
+                    input.environmentCode(), replayAuth(input.auth()), input.protocol(), input.name());
+            return cipher.encrypt(json.writeValueAsString(Map.of("protocol", protocol, "request", request)));
         } catch (JsonProcessingException exception) {
             throw new IllegalStateException("无法加密保存快捷请求回放草稿", exception);
         }
+    }
+
+    private AuthInput replayAuth(AuthInput input) {
+        if (input == null) return null;
+        return switch (input.type() == null ? "NONE" : input.type().trim().toUpperCase(java.util.Locale.ROOT)) {
+            case "BEARER" -> new AuthInput("BEARER", input.token(), null, null, null, null, null);
+            case "BASIC" -> new AuthInput("BASIC", null, input.username(), input.password(), null, null, null);
+            case "API_KEY" -> new AuthInput("API_KEY", null, null, null, input.key(), input.value(), input.placement());
+            default -> new AuthInput("NONE", null, null, null, null, null, null);
+        };
     }
 
     private ValidatedRequest resolveAndValidate(String projectId, DebugRequest input, boolean enforceNetworkPolicy) {
@@ -293,8 +320,11 @@ public class ApiDebugService {
         String query = url.getRawQuery();
         String item = URLEncoder.encode(key, StandardCharsets.UTF_8) + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8);
         try {
-            return new URI(url.getScheme(), null, url.getHost(), url.getPort(), url.getRawPath(),
-                    query == null || query.isBlank() ? item : query + "&" + item, null);
+            String target = url.toASCIIString();
+            int fragment = target.indexOf('#');
+            if (fragment >= 0) target = target.substring(0, fragment);
+            // The URI already contains escaped path/query components; do not quote them again.
+            return URI.create(target + (query == null ? "?" : query.isEmpty() ? "" : "&") + item);
         } catch (Exception exception) {
             throw rejected("API Key 查询参数格式不合法");
         }

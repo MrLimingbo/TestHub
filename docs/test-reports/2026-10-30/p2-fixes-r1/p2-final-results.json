@@ -1,0 +1,309 @@
+{
+  "cases": [
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "performanceRejectsTrimCollision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "adapterRejectsTrimCollision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "separateObjectsMayReuseKeys",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "failedEditsKeepRowsCipherAndAudits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "omittedConfigurationKeepsCipher",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "caseRulesRemainDistinct",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "webRejectsTrimCollision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "validationAndAuthorizationStillApply",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "repeatedUrlQueryRemainsLegal",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "collisionIsIndependentOfOrderAndValue",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "concurrentEditorsProduceOneSuccess",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "invalidTypeRangeAndFractionReturn400",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "failedPersistenceDoesNotBumpVersionOrEraseHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "runMetadataDoesNotChangeConfigVersion",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "staleEditorHasNoSideEffects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "missingOrNullPreconditionReturns428",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "initialZeroAndExistingVersionsAreVisible",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "unauthorizedRequestCannotEditConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "matchingVersionIncrementsExactlyOnce",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "normalization",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "disabledDefined",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "definedWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "undefinedOrdinary",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "undefinedSecret",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "toggle",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "missingStillRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "legacyRead",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "disabledLifecycle",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "disabledPermissions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "projectScope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "enabledLifecycle",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "executionStillDisabled",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "deleteRace",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "compatibility",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "legacyWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "malformed",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "openApi",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "currentVersion",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "catalogScope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "postman",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "roundTrip",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "har",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "stringStatus",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "range",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "missing",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "permissions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "original",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "decimal",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "concurrentRetry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "successfulTree",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "lostResponse",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "receiptFailure",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "differentPayload",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "durableReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "overLimit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "atLimit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "oldPartialRetained",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "middleFailure",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "staleSource",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "explicitNewCopy",
+      "status": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 60,
+    "FAIL": 0,
+    "SKIP": 0
+  }
+}

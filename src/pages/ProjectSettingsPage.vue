@@ -89,6 +89,13 @@ const activeTab = computed(() => {
 const currentProject = computed(() => session.currentProject)
 const availableProjects = computed(() => session.projects)
 const environmentNames = computed(() => projectEnvironments.value.map((item) => item.environmentCode))
+const orphanEnvironmentCodes = computed(() => Array.from(new Set([...parameters.value, ...secrets.value].map(item => item.environmentCode)))
+  .filter(code => !environmentNames.value.includes(code)))
+function hasEnvironment(code: string) { return environmentNames.value.includes(code) }
+function environmentLabel(code: string) {
+  const item = projectEnvironments.value.find(environment => environment.environmentCode === code)
+  return item ? `${item.name} · ${code}${item.enabled ? '' : ' · 已停用（不可执行）'}` : `${code} · 缺失定义（只读）`
+}
 const visibleParameters = computed(() => environmentFilter.value
   ? parameters.value.filter((item) => item.environmentCode === environmentFilter.value && item.key !== 'BASE_URL')
   : parameters.value.filter((item) => item.key !== 'BASE_URL'))
@@ -287,6 +294,7 @@ async function removeMember(member: Member) {
 
 function openEnvironment(kind: 'parameter' | 'secret', item?: Parameter) {
   if (loading.value || !session.projectId) return
+  if (item && !hasEnvironment(item.environmentCode)) { Message.warning('该配置的环境定义缺失，仅可读取或显式删除；请先创建环境定义'); return }
   if (!projectEnvironments.value.length) {
     Message.warning('请先在系统设置中创建项目环境')
     void router.push('/system-settings/environments')
@@ -296,9 +304,9 @@ function openEnvironment(kind: 'parameter' | 'secret', item?: Parameter) {
   environmentKind.value = kind
   editingParameterId.value = item?.id ?? null
   environmentForm.environmentCode = item?.environmentCode ?? (
-    environmentFilter.value
+    (hasEnvironment(environmentFilter.value) ? environmentFilter.value : '')
     || projectEnvironments.value.find((environment) => environment.defaultEnvironment)?.environmentCode
-    || projectEnvironments.value.find((environment) => environment.enabled)?.environmentCode
+    || projectEnvironments.value[0]?.environmentCode
     || ''
   )
   environmentForm.key = item?.key ?? ''
@@ -310,6 +318,7 @@ async function saveEnvironmentItem(): Promise<boolean> {
   const projectId = formProjectId, view = viewSequence, form = formSequence, kind = environmentKind.value
   if (!projectId || saving.value || disposed) return false
   const input = { ...environmentForm }
+  if (!hasEnvironment(input.environmentCode)) { Message.warning('请先创建并选择项目环境定义'); return false }
   saving.value = true
   try {
     const endpoint = kind === 'secret' ? 'secrets' : 'parameters'
@@ -535,7 +544,8 @@ onMounted(load)
           </div>
           <div class="environment-toolbar">
             <a-select v-model="environmentFilter" allow-clear placeholder="全部环境" :style="{ width: '200px' }">
-              <a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode">{{ environment.name }} · {{ environment.environmentCode }}</a-option>
+              <a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode">{{ environmentLabel(environment.environmentCode) }}</a-option>
+              <a-option v-for="code in orphanEnvironmentCodes" :key="code" :value="code">{{ environmentLabel(code) }}</a-option>
             </a-select>
             <a-radio-group v-model="environmentView" type="button">
               <a-radio value="parameters">环境参数（{{ visibleParameters.length }}）</a-radio>
@@ -544,16 +554,16 @@ onMounted(load)
           </div>
           <a-table v-if="environmentView === 'parameters'" :data="visibleParameters" :pagination="false" row-key="id">
             <template #columns>
-              <a-table-column title="环境"><template #cell="{ record }"><a-tag color="arcoblue">{{ record.environmentCode }}</a-tag></template></a-table-column>
+              <a-table-column title="环境"><template #cell="{ record }"><a-tag :color="hasEnvironment(record.environmentCode) ? 'arcoblue' : 'orange'">{{ environmentLabel(record.environmentCode) }}</a-tag></template></a-table-column>
               <a-table-column title="参数名称"><template #cell="{ record }"><strong>{{ record.key }}</strong></template></a-table-column>
               <a-table-column title="参数值"><template #cell="{ record }"><code class="value-code">{{ record.value }}</code></template></a-table-column>
               <a-table-column title="更新时间"><template #cell="{ record }">{{ formatDate(record.updatedAt) }}</template></a-table-column>
-              <a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" @click="openEnvironment('parameter', record)">编辑</a-button><a-popconfirm content="确定删除该参数吗？" @ok="removeEnvironmentItem('parameters', record.id)"><a-button type="text" status="danger" :loading="pending.has('parameters:' + record.id)">删除</a-button></a-popconfirm></a-space></template></a-table-column>
+              <a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" :disabled="!hasEnvironment(record.environmentCode)" @click="openEnvironment('parameter', record)">编辑</a-button><a-popconfirm content="确定删除该参数吗？" @ok="removeEnvironmentItem('parameters', record.id)"><a-button type="text" status="danger" :loading="pending.has('parameters:' + record.id)">删除</a-button></a-popconfirm></a-space></template></a-table-column>
             </template>
           </a-table>
           <a-table v-else :data="visibleSecrets" :pagination="false" row-key="id">
             <template #columns>
-              <a-table-column title="环境"><template #cell="{ record }"><a-tag color="purple">{{ record.environmentCode }}</a-tag></template></a-table-column>
+              <a-table-column title="环境"><template #cell="{ record }"><a-tag :color="hasEnvironment(record.environmentCode) ? 'purple' : 'orange'">{{ environmentLabel(record.environmentCode) }}</a-tag></template></a-table-column>
               <a-table-column title="密钥名称"><template #cell="{ record }"><strong>{{ record.key }}</strong><small class="masked">•••••••• · 已加密</small></template></a-table-column>
               <a-table-column title="更新时间"><template #cell="{ record }">{{ formatDate(record.updatedAt) }}</template></a-table-column>
               <a-table-column title="操作"><template #cell="{ record }"><a-popconfirm content="确定删除该密钥吗？" @ok="removeEnvironmentItem('secrets', record.id)"><a-button type="text" status="danger" :loading="pending.has('secrets:' + record.id)">删除</a-button></a-popconfirm></template></a-table-column>
@@ -642,7 +652,8 @@ onMounted(load)
     <a-modal v-model:visible="environmentDialog" :title="environmentKind === 'secret' ? '新建环境密钥' : (editingParameterId ? '编辑环境参数' : '新建环境参数')" :ok-loading="saving" width="580px" :on-before-ok="saveEnvironmentItem">
       <a-alert v-if="environmentKind === 'secret'" type="warning">密钥值仅在传输时可见，保存后会加密且无法再次回显。</a-alert>
       <a-form :model="environmentForm" layout="vertical">
-        <a-form-item label="所属环境" required><a-select v-model="environmentForm.environmentCode" :disabled="!!editingParameterId" placeholder="请选择项目环境"><a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode" :disabled="!environment.enabled">{{ environment.name }} · {{ environment.environmentCode }}</a-option></a-select></a-form-item>
+        <a-form-item label="所属环境" required><a-select v-model="environmentForm.environmentCode" :disabled="!!editingParameterId" placeholder="请选择项目环境"><a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode">{{ environmentLabel(environment.environmentCode) }}</a-option></a-select></a-form-item>
+        <a-alert type="info">已停用环境仍可维护配置，但不可执行；缺失环境定义的旧配置仅可读取或显式删除。</a-alert>
         <a-form-item :label="environmentKind === 'secret' ? '密钥名称' : '参数名称'" required><a-input v-model="environmentForm.key" :disabled="!!editingParameterId" placeholder="API_BASE_URL" /></a-form-item>
         <a-form-item :label="environmentKind === 'secret' ? '密钥值' : '参数值'" required>
           <a-input-password v-if="environmentKind === 'secret'" v-model="environmentForm.value" placeholder="输入需要加密保存的值" />

@@ -1,0 +1,507 @@
+{
+  "environment": "isolated MySQL/Redis/S3",
+  "selectedTests": "P2D16ApiWaitFlowTests,ApiAutomation*Tests,ApiRunner*Tests",
+  "totals": {
+    "tests": 95,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+    "io.testhub.platform.ApiAutomationExecutionFlowTests",
+    "io.testhub.platform.ApiRunnerStatusFlowTests",
+    "io.testhub.platform.ApiRunnerRuntimeLeaseFlowTests",
+    "io.testhub.platform.ApiRunnerInternalAuthenticationFlowTests",
+    "io.testhub.platform.ApiAutomationExecutionProfileFlowTests",
+    "io.testhub.platform.ApiAutomationScenarioFlowTests",
+    "io.testhub.platform.ApiAutomationExternalTriggerFlowTests",
+    "io.testhub.platform.ApiAutomationScenarioReuseFlowTests",
+    "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+    "io.testhub.platform.ApiRunnerTrustFlowTests",
+    "io.testhub.platform.ApiRunnerRuntimeConfigurationFlowTests",
+    "io.testhub.platform.ApiAutomationDataSetFlowTests",
+    "io.testhub.platform.P2D16ApiWaitFlowTests",
+    "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+    "io.testhub.platform.ApiAutomationScheduleFlowTests",
+    "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+    "io.testhub.platform.ApiAutomationTransferFlowTests"
+  ],
+  "cases": [
+    {
+      "suite": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "copiesSafeTerminalReportWithoutCurrentScenarioOrRunnerSideEffectsAndPreservesOrigin",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "ignoresActiveTasksAndIncludesMoreThanLegacyHundredWithoutTruncation",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "rejectsSameSourceRevisionWithDifferentContentAndRollsBackEarlierInsert",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "lateHttpStepAndScriptResultsUpdateArchiveOnceWithoutChangingNativeIdentity",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "accountPermissionCsrfReplayAndExportIntegrityAreProjectScoped",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "rejectsActiveReportsBadDigestUnknownFieldsAndNativeOverwrite",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "aggregatesBoundedParallelRequestsInTheExportSafeReport",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "rejectsExecutionWhenScenarioReferencesAnUnavailableVariableWithoutCreatingQueueRecords",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "addsOnlyTheFixedContinuationCountToTheExportSafeReport",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "freezesOnlyStructureAndVariableReferenceMetadataForEachExecution",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "ignoresUnreferencedEnvironmentSecretsInRuntimeSnapshot",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "persistsOnlyFixedExtractAndAssertionResultsForKnownFrozenSteps",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "queuesAScopedExecutionAndAppliesRunnerRejectionWithoutLeakingCredentials",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "persistsOnlyRedactedHttpStepResultsForTheFrozenRequestDefinition",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "timesOutExpiredWorkAndStopsAfterTheConfiguredDeliveryBudget",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "freezesReferencedNonSecretValuesInternallyAndWithholdsEveryEnvironmentSecretValue",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "recordsStatusExtractionAsRunnerLocalWithoutPersistingItsFutureValue",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "cancelsPendingWorkOrReliablyRequestsRunnerCancellationWithoutSecrets",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "persistsOnlyAggregatePmScriptAssertionsAndAddsThemToTheExportSafeReport",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiRunnerStatusFlowTests",
+      "name": "exposesOnlyValidOnlineApiRunnerHeartbeatsToAuthorizedProjectMembers",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiRunnerRuntimeLeaseFlowTests",
+      "name": "issuesOneShortLeaseForOnlyASentNonExpiredTaskAndNeverPersistsTheLeaseValue",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiRunnerInternalAuthenticationFlowTests",
+      "name": "acceptsOneRecentSignedRequestFromAHeartbeatVerifiedRunnerAndRejectsReplayOrTampering",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionProfileFlowTests",
+      "name": "previewsFrozenConfigurationAndEditsProfilesWithoutCreatingAnExecution",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExecutionProfileFlowTests",
+      "name": "freezesProfileEnvironmentAndExecutionOverridesWithoutReturningValues",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "acceptsOnlyIndependentBoundedParallelRequests",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "rejectsNullStepsOnCreateAndUpdateWithoutChangingRevisions",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "acceptsOnlyTheBoundedFlowControlGrammar",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "createsVersionedScenarioAndRejectsStaleOrUnsupportedSteps",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "storesScriptSourcesWithoutExecutingThemInTheControlPlane",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExternalTriggerFlowTests",
+      "name": "signedWebhookIsOneTimeEncryptedAtRestAndCanBeDisabled",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationExternalTriggerFlowTests",
+      "name": "scopedPatCanTriggerAndReadOnlyPatCannotTriggerWhileReportStaysRedacted",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioReuseFlowTests",
+      "name": "rejectsAChildScenarioThatContainsAnotherReference",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioReuseFlowTests",
+      "name": "freezesProjectLocalSourcesAndExpandsOnlyPrimitiveStepsForAnExecution",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "copiesCurrentAssetsAndFullRowsThenEditsReturnWithStableIds",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "reusableUpdateAppendsAndPinnedScenarioStillExpandsOriginalRevision",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "invalidEnvironmentAndLateFileFailureRollBackEntireBatch",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "staleRevisionWrongActorExtraFieldsAndCsrfFailWithoutWrites",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "sourceFileAssociationCanMapAndChangeWithoutTouchingExistingFile",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiRunnerTrustFlowTests",
+      "name": "marksOnlyHmacVerifiedRunnerHeartbeatsAsTrusted",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiRunnerRuntimeConfigurationFlowTests",
+      "name": "issuesAnEphemeralScriptReadyArtifactOnlyToAnEnabledVerifiedRunner",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationDataSetFlowTests",
+      "name": "createsProjectScopedJsonDataSetAndFreezesOneRedactedExecutionPerRow",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationDataSetFlowTests",
+      "name": "acceptsCsvWithQuotedFieldsAndRejectsMalformedRowsBeforePersisting",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationDataSetFlowTests",
+      "name": "importsUtf8CsvIntoMinioAndOnlyReturnsProjectScopedSourceFileMetadata",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "transferValid",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "strings",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "projectDenied",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "oldManifestUnchanged",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "transferInvalid",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "rawNonFinite",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "updateValid",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "invalidReferencesBlocked",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "reusableInvalid",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "preciseFraction",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "reusableValid",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "explicitLegacyRepair",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "wrongTypes",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "fractions",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "syncInvalid",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "lowerBoundary",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "exactIntegralSpellings",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "updateInvalid",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "syncValid",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "overflow",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "missingAndNull",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "legacyReadable",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "nonWaitUntouched",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "upperBoundary",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "staleVersion",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.P2D16ApiWaitFlowTests",
+      "name": "legacyQueueRejected",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "lateSqlFailureRollsBackDatabaseAndLeavesQuartzJobUntouched",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "unchangedAndReceiptReplayKeepManualEnablementAndExistingWebhookCiphertext",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "staleUiEnableOrSaveCannotBypassAChangedConfiguration",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "missingReferencesAndUnknownSecretOrActivationFieldsFailBeforeWrite",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "localSecretPreparationIsOneTimeAndOldSourceSignatureCannotActivateCopy",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "changedWebhookDefinitionPausesAndPreservesLocalKey",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "managerScopeCsrfActorAndRequestIdentityAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "incomingPlanEditKeepsOwnHistoryAndFailuresAndLateOutcomeNeverReenablesIt",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "copiesDefinitionsWithMappedIdsPausedPlanAndWebhookDraftWithoutSecretOrExecution",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "duplicateWebhookNamesBlockOnlyRelatedDefinitions",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+      "name": "persistsProjectScopedCronScheduleAndAutoDisablesAfterConfiguredFailures",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+      "name": "manualAndQuartzTriggersUseTheSelectedExecutionProfile",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+      "name": "rejectsInvalidQuartzCronBeforePersistingSchedule",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+      "name": "preservesDisabledStateWhenCreatingSchedule",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "lateInvalidPrimitiveRollsBackReservedRowsImportedHistoryAndHeadVersions",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "missingSourceRevisionBlocksOnlyRelatedScenarioInProjection",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "mapsExistingMatchingContentAtDifferentVersionNumbersWithoutAppendingToSources",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "copiesParentBeforeMissingChildAndAllCommittedVersionSlotsHaveRealContent",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "legalMutualCurrentReferencesMapToPrimitiveHistoricalVersionsInOneBatch",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "importsMissingHistoryAndRestoresExistingHeadsWithoutChangingOldPins",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "historicalNameSurvivesWhileCurrentReferenceSourceNameIsMatched",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "actorRevisionPermissionsCsrfAndChangedRequestKeyAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTransferFlowTests",
+      "name": "rejectsWrongActorAndForeignProjectOverHttp",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTransferFlowTests",
+      "name": "duplicateScheduleNameRollsBackEveryAssetAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTransferFlowTests",
+      "name": "importsCompleteRevisionsAndReferencesWithDisabledScheduleAndIdempotentReceipt",
+      "status": "PASS"
+    },
+    {
+      "suite": "io.testhub.platform.ApiAutomationTransferFlowTests",
+      "name": "copiesAndVerifiesDataSetSourceFileWithinTheSameTransaction",
+      "status": "PASS"
+    }
+  ]
+}

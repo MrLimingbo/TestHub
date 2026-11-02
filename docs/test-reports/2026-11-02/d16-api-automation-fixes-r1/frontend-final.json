@@ -1,0 +1,4019 @@
+{
+  "numTotalTests": 895,
+  "numPassedTests": 895,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "success": true,
+  "testResults": [
+    {
+      "name": "src/test/apiAutomation.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation imports parses a multiline cURL command into a request step",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation imports externalizes common credential fields instead of persisting literals",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation imports rejects non-cURL input and unsupported methods",
+          "status": "passed"
+        },
+        {
+          "fullName": "cURL request fidelity preserves HEAD, GET query data and repeated form fields",
+          "status": "passed"
+        },
+        {
+          "fullName": "cURL request fidelity redacts literal query secrets in templated base URLs",
+          "status": "passed"
+        },
+        {
+          "fullName": "cURL request fidelity rejects file-backed data instead of sending a filename as the body",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationAssetSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation native asset sync entry opens binding in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native asset sync entry opens binding in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native asset sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native asset sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[DF-N01][POS][OBS-08-E012] the run panel describes a page-local submission hint without persistence or delivery",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-N02][POS][OBS-08-E012] enabling the hint keeps it local and resets on page remount",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-N03][POS][OBS-08-E012] hint=true only controls the existing local message",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-N04][NEG][OBS-08-E012] hint=false only controls the existing local message",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: late 200 leaves replacement draft and messages intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: late 503 leaves replacement draft and messages intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: old completion cannot stop a newer save",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: cancel while CSRF is pending prevents stale write",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: project while CSRF is pending prevents stale write",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: current failure keeps the draft and allows retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "dataset: late 200 leaves replacement draft and messages intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "dataset: late 503 leaves replacement draft and messages intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "dataset: old completion cannot stop a newer save",
+          "status": "passed"
+        },
+        {
+          "fullName": "dataset: cancel while CSRF is pending prevents stale write",
+          "status": "passed"
+        },
+        {
+          "fullName": "dataset: project while CSRF is pending prevents stale write",
+          "status": "passed"
+        },
+        {
+          "fullName": "dataset: current failure keeps the draft and allows retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: late 200 leaves replacement draft and messages intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: late 503 leaves replacement draft and messages intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: old completion cannot stop a newer save",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: cancel while CSRF is pending prevents stale write",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: project while CSRF is pending prevents stale write",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: current failure keeps the draft and allows retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: late 200 leaves replacement draft and messages intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: late 503 leaves replacement draft and messages intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: old completion cannot stop a newer save",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: cancel while CSRF is pending prevents stale write",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: project while CSRF is pending prevents stale write",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: current failure keeps the draft and allows retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "late detail 200 cannot replace scenario B",
+          "status": "passed"
+        },
+        {
+          "fullName": "late save 200 cannot replace scenario B",
+          "status": "passed"
+        },
+        {
+          "fullName": "late detail 503 cannot replace scenario B",
+          "status": "passed"
+        },
+        {
+          "fullName": "late save 503 cannot replace scenario B",
+          "status": "passed"
+        },
+        {
+          "fullName": "old scenario list after project-return causes no follow-up requests",
+          "status": "passed"
+        },
+        {
+          "fullName": "old scenario list after unmount causes no follow-up requests",
+          "status": "passed"
+        },
+        {
+          "fullName": "unmounting during initial load cannot restart the old page poller",
+          "status": "passed"
+        },
+        {
+          "fullName": "preview 200 after input changes is discarded",
+          "status": "passed"
+        },
+        {
+          "fullName": "preview 503 after input changes is discarded",
+          "status": "passed"
+        },
+        {
+          "fullName": "old preview cannot stop a newer preview spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "closing preview during CSRF prevents its obsolete submission",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationHistorySyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation native history sync entry opens binding in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native history sync entry opens binding in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native history sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native history sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationScenarioSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation native scenario sync entry opens binding in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native scenario sync entry opens binding in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native scenario sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native scenario sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationTriggerSettings.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "marks copied webhook pending local key and disables its enable action while existing keys remain usable",
+          "status": "passed"
+        },
+        {
+          "fullName": "generates a copied webhook key only through the explicit confirmed local action",
+          "status": "passed"
+        },
+        {
+          "fullName": "a late local key cannot appear in a different project after context replacement",
+          "status": "passed"
+        },
+        {
+          "fullName": "editing existing webhook sends only definition fields without replacing its secret or enabling it",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiAutomationTriggerSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API automation native trigger sync entry opens binding in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native trigger sync entry opens binding in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native trigger sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "API automation native trigger sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDebugDraft.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API debug route draft [P1-U12-01][NEG] EXPIRED cannot fall back to an automatic historical replay",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft [P1-U12-02][NEG] UNKNOWN_CREATED_AT cannot fall back to an automatic historical replay",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft [P1-U12-03][NEG] UNREADABLE cannot fall back to an automatic historical replay",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft [P1-U12-04][POS] legacy history without retention metadata keeps its existing behavior",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft normalizes a direct HTTP request draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft normalizes and reloads a custom quick request name",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft builds a URL from an environment base URL and interface path",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft accepts structured header arrays and maps parameter examples to values",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft accepts header objects and ignores unsupported method and protocol values",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft uses the first value when Vue Router supplies repeated query parameters",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft transfers a sensitive draft through one-time session storage",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft keeps a stored draft until the destination explicitly removes it",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft builds a cURL import command without persisting literal credentials",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft preserves variable references when building a cURL import command",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft redacts custom API key names and credentials in template URLs",
+          "status": "passed"
+        },
+        {
+          "fullName": "API debug route draft maps only HTTP history summaries into replay drafts",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDebugFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[P1-U12-05][POS] replay disclosure names encrypted fields, permissions, retention and legacy exceptions",
+          "status": "passed"
+        },
+        {
+          "fullName": "[P1-U12-06][NEG] expired history is explicitly labeled and cannot be loaded or resent",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-D01][POS][OBS-07-E006] current HTTP completion identifies its project and execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-D02][NEG][OBS-07-E006] old HTTP 200 is attributed to its origin without altering a newer response",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-D03][NEG][OBS-07-E006] old HTTP 503 is attributed to its origin without altering a newer response",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-D04][NEG][OBS-07-E006] an A/B/A round trip does not let the original completion stop a new send",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-D05][NEG][OBS-07-E006] an unmounted HTTP completion preserves the existing notification with its original scope",
+          "status": "passed"
+        },
+        {
+          "fullName": "late save 200 preserves replacement dialog and name",
+          "status": "passed"
+        },
+        {
+          "fullName": "late save 503 preserves replacement dialog and name",
+          "status": "passed"
+        },
+        {
+          "fullName": "late save cannot stop a newer save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "save cancel during CSRF prevents stale POST",
+          "status": "passed"
+        },
+        {
+          "fullName": "save unmount during CSRF prevents stale POST",
+          "status": "passed"
+        },
+        {
+          "fullName": "save project during CSRF prevents stale POST",
+          "status": "passed"
+        },
+        {
+          "fullName": "current save failure releases spinner and supports retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "late reflection 200 cannot overwrite newer offline discovery",
+          "status": "passed"
+        },
+        {
+          "fullName": "late reflection 503 cannot overwrite newer offline discovery",
+          "status": "passed"
+        },
+        {
+          "fullName": "late WS connection after project closes its owned session without reading or reporting connected",
+          "status": "passed"
+        },
+        {
+          "fullName": "late WS connection after unmount closes its owned session without reading or reporting connected",
+          "status": "passed"
+        },
+        {
+          "fullName": "failed initial WS session read does not report connected",
+          "status": "passed"
+        },
+        {
+          "fullName": "restored qa environment immediately filters parameters and secret labels",
+          "status": "passed"
+        },
+        {
+          "fullName": "gRPC replay restores metadata key/value and can resend unchanged",
+          "status": "passed"
+        },
+        {
+          "fullName": "required query rejects empty \"\" before building request",
+          "status": "passed"
+        },
+        {
+          "fullName": "required query rejects empty \"  \" before building request",
+          "status": "passed"
+        },
+        {
+          "fullName": "required header rejects empty \"\" before building request",
+          "status": "passed"
+        },
+        {
+          "fullName": "required header rejects empty \"  \" before building request",
+          "status": "passed"
+        },
+        {
+          "fullName": "optional empty parameters remain omitted and required populated values remain encoded",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDebugSyncArchive.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "lists only imported summaries and reads scoped immutable detail without POST",
+          "status": "passed"
+        },
+        {
+          "fullName": "templates require a manual load action and emit no network dispatch",
+          "status": "passed"
+        },
+        {
+          "fullName": "project change discards a late detail response and closes the drawer",
+          "status": "passed"
+        },
+        {
+          "fullName": "range errors are actionable and no history write is attempted",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDesignFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "catalog: late 200 preserves replacement draft and errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "catalog: late 503 preserves replacement draft and errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "catalog: old completion cannot stop a newer save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "catalog: cancel during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "catalog: unmount during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "catalog: project during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "catalog: current failure keeps draft available for retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "definition: late 200 preserves replacement draft and errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "definition: late 503 preserves replacement draft and errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "definition: old completion cannot stop a newer save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "definition: cancel during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "definition: unmount during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "definition: project during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "definition: current failure keeps draft available for retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: late 200 preserves replacement draft and errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: late 503 preserves replacement draft and errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: old completion cannot stop a newer save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: cancel during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: unmount during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: project during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: current failure keeps draft available for retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "replacement version draft retains its original base after an old save refreshes versions",
+          "status": "passed"
+        },
+        {
+          "fullName": "OPENAPI: late import 200 cannot decorate a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "OPENAPI: late import 503 cannot decorate a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "OPENAPI: an old import cannot clear a newer spinner or result",
+          "status": "passed"
+        },
+        {
+          "fullName": "POSTMAN: late import 200 cannot decorate a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "POSTMAN: late import 503 cannot decorate a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "POSTMAN: an old import cannot clear a newer spinner or result",
+          "status": "passed"
+        },
+        {
+          "fullName": "HAR: late import 200 cannot decorate a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "HAR: late import 503 cannot decorate a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "HAR: an old import cannot clear a newer spinner or result",
+          "status": "passed"
+        },
+        {
+          "fullName": "CURL: late import 200 cannot decorate a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "CURL: late import 503 cannot decorate a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "CURL: an old import cannot clear a newer spinner or result",
+          "status": "passed"
+        },
+        {
+          "fullName": "import: cancel during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "import: unmount during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "import: project during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "import: edit during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "import: format during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "current import failure releases its spinner and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "late file read cannot overwrite a newer file",
+          "status": "passed"
+        },
+        {
+          "fullName": "late file read cannot overwrite a newer reopen",
+          "status": "passed"
+        },
+        {
+          "fullName": "late file read cannot overwrite a newer edit",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiDesignPreferences.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API design preferences state transitions queues saves after load and uses each acknowledged revision and state",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions serializes delayed writes while allowing another project to save independently",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions does not advance saved state on failure and permits a retry with the original revision",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions blocks queued and later saves after 409 until an explicit fresh load",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions serializes a reload behind a pending save",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions imports current-origin legacy data only at revision zero and leaves all old values intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions reports migration races without retrying or overwriting the other session",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions never calls transport for empty projects or save-before-load",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions invalidates queued work on identity change, including automatic legacy migration",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions does not accept malformed or unacknowledged server responses as success",
+          "status": "passed"
+        },
+        {
+          "fullName": "API design preferences state transitions isolates consumer mutations from acknowledged state and strips non-tree properties",
+          "status": "passed"
+        },
+        {
+          "fullName": "preferences bounds checks UTF-16 lengths, hierarchy integrity, depth and counts before a request",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiInterchange.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API interchange document limits counts ASCII content as one UTF-8 byte per character",
+          "status": "passed"
+        },
+        {
+          "fullName": "API interchange document limits counts Chinese content by its UTF-8 representation",
+          "status": "passed"
+        },
+        {
+          "fullName": "API interchange document limits accepts the 10 MiB boundary and rejects one byte beyond it",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiManagementTree.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "api management tree mixes nested catalogs and interfaces while honoring expansion state",
+          "status": "passed"
+        },
+        {
+          "fullName": "api management tree keeps ancestor catalogs visible and expanded when searching an interface",
+          "status": "passed"
+        },
+        {
+          "fullName": "api management tree supports published and draft filters",
+          "status": "passed"
+        },
+        {
+          "fullName": "workspace tabs selects the neighboring tab when the active tab closes",
+          "status": "passed"
+        },
+        {
+          "fullName": "workspace tabs removes quick-request state while preserving interface route signals",
+          "status": "passed"
+        },
+        {
+          "fullName": "api tree actions switches interface labels between name and URL",
+          "status": "passed"
+        },
+        {
+          "fullName": "api tree actions excludes the current catalog and its descendants from move targets",
+          "status": "passed"
+        },
+        {
+          "fullName": "api tree actions generates a conflict-free path for copied interfaces",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiQuickRequest.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API quick request editor restores multipart text fields, including repeated names and multiline values",
+          "status": "passed"
+        },
+        {
+          "fullName": "API quick request editor keeps unsupported or incomplete multipart content available for raw replay",
+          "status": "passed"
+        },
+        {
+          "fullName": "API quick request editor preserves runtime variables while encoding surrounding query text",
+          "status": "passed"
+        },
+        {
+          "fullName": "API quick request editor does not interpret a question mark inside a fragment as a query",
+          "status": "passed"
+        },
+        {
+          "fullName": "API quick request editor round-trips repeated query parameters without changing URL fragments",
+          "status": "passed"
+        },
+        {
+          "fullName": "API quick request editor supports template URLs and safely encodes edited parameter values",
+          "status": "passed"
+        },
+        {
+          "fullName": "API quick request editor separates Cookie from regular headers and serializes enabled rows only",
+          "status": "passed"
+        },
+        {
+          "fullName": "API quick request editor serializes urlencoded and text-only multipart request bodies",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/apiTesting.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "API testing request mapping preserves runtime variables in path and query values",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping maps an API definition into an isolated request snapshot",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping serializes a Vue reactive snapshot before persistence",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping removes literal credentials while preserving environment references",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping removes embedded credentials even when a base URL contains variables",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping merges saved values with parameters added by the current interface version",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping round-trips parameter examples and descriptions containing colons",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping repairs malformed legacy snapshots before applying them",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping builds an encoded URL without changing the API definition",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping rejects a missing required path value",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping validates status and basic JSON response shape",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping uses the saved case expectation when rerunning a debug case",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping maps Apifox-style debug and test cases to the persisted case contract",
+          "status": "passed"
+        },
+        {
+          "fullName": "API testing request mapping ignores malformed parameter payloads safely",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/auditLogPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "global audit request ordering keeps the cleared-filter result when an older filtered response arrives last",
+          "status": "passed"
+        },
+        {
+          "fullName": "global audit request ordering ignores an obsolete error after the latest response succeeded",
+          "status": "passed"
+        },
+        {
+          "fullName": "global audit request ordering does not clear a newer loading state when old success=true finishes",
+          "status": "passed"
+        },
+        {
+          "fullName": "global audit request ordering does not clear a newer loading state when old success=false finishes",
+          "status": "passed"
+        },
+        {
+          "fullName": "global audit request ordering reports the current error and allows a successful refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "global audit request ordering ignores a pending error after the page unmounts",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-A01][POS][OBS-03C-E007] shows the successful load time and clears stale feedback after retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-A02][NEG][OBS-03C-E007] first-load failure does not invent a last successful result",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-A03][NEG][OBS-03C-E007] a successful empty result remains distinguishable from never loaded",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-A04][NEG][OBS-03C-E007] a failed filter change identifies the retained result scope",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-A05][NEG][OBS-03C-E007] obsolete success cannot replace the current stale state",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-A06][NEG][OBS-03C-E007] obsolete failure cannot replace the current stale state",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/automationHistoryPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "shows archived origins without requiring a current scenario and excludes duplicate native records",
+          "status": "passed"
+        },
+        {
+          "fullName": "opens a read-only report with original version and a scoped export link",
+          "status": "passed"
+        },
+        {
+          "fullName": "late inventory from the previous project does not replace the selected project",
+          "status": "passed"
+        },
+        {
+          "fullName": "project change closes the old history drawer and discards a late detail response",
+          "status": "passed"
+        },
+        {
+          "fullName": "shows an actionable load failure and clears stale records without writes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/automationPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Automation execution editor imports version path/query examples and content type into the saved step",
+          "status": "passed"
+        },
+        {
+          "fullName": "Automation execution editor saves editor changes before execution (dataset=false)",
+          "status": "passed"
+        },
+        {
+          "fullName": "Automation execution editor saves editor changes before execution (dataset=true)",
+          "status": "passed"
+        },
+        {
+          "fullName": "Automation execution editor does not submit execution when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Automation execution editor does not create an extra revision when nothing changed",
+          "status": "passed"
+        },
+        {
+          "fullName": "Automation execution editor keeps the create dialog open after required field validation fails",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/codeEditor.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "CodeEditor applies external values but does not reset the editor for its own v-model update",
+          "status": "passed"
+        },
+        {
+          "fullName": "CodeEditor updates the Monaco model language when the language prop changes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/d16ApiWaitPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-D16API-24: explicit integral input is sent as a bounded JSON number",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-D16API-25: fractional or lossy WAIT input cannot trigger a business save",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/d16WaitDelay.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-D16API-24: decimal and exponent input keeps exact bounded integer semantics",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-D16API-25: tiny fractions, range errors and legacy string values are never rounded away",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/dashboardPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Dashboard current query ignores a stale success after the selected period has loaded",
+          "status": "passed"
+        },
+        {
+          "fullName": "Dashboard current query keeps the current request loading when a stale success completes",
+          "status": "passed"
+        },
+        {
+          "fullName": "Dashboard current query ignores a stale failure after the selected period has loaded",
+          "status": "passed"
+        },
+        {
+          "fullName": "Dashboard current query keeps the current request loading when a stale failure completes",
+          "status": "passed"
+        },
+        {
+          "fullName": "Dashboard current query ignores a dashboard failure after leaving the page",
+          "status": "passed"
+        },
+        {
+          "fullName": "Dashboard current query does not start a dashboard request after its context resolves on an unmounted page",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/dashboardTrendChart.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Dashboard trend chart resizes for container and window changes and releases both listeners on unmount",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/desktopApiDebug.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "desktop API debug request preparation resolves an intranet base URL selected from the project environment",
+          "status": "passed"
+        },
+        {
+          "fullName": "desktop API debug request preparation materializes GraphQL and bearer authentication before local execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "desktop API debug request preparation does not expose or silently ignore an unavailable project secret",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/directObservationForms.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[DF-R01][POS][OBS-13-E015] fifty accessible projects retain the existing initial report",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R02][NEG][OBS-13-E015] fifty-one projects wait for explicit selection without an implicit all-project request",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R03][POS][OBS-13-E015] explicit 1-project selection queries and exports exactly that scope",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R04][POS][OBS-13-E015] explicit 50-project selection queries and exports exactly that scope",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R05][NEG][OBS-13-E015] clearing a large scope gates refresh and export as well as automatic querying",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R06][NEG][OBS-13-E015] an injected oversized selection cannot bypass request guards",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R07][NEG][OBS-13-E015] selecting a fifty-first project gives an explicit limit explanation",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R08][NEG][OBS-13-E015] a late report cannot repopulate a cleared large-project scope",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R09][POS][OBS-13-E015] clearing a scope of fifty or fewer retains the existing all-project semantics",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-R10][NEG][OBS-13-E015] empty and oversized schedule selections do not send invalid writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-T01][POS][OBS-13-E009] refreshing the task list does not disable opening a fresh draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-T02][NEG][OBS-13-E009] late task refresh 200 preserves a new draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-T03][NEG][OBS-13-E009] late task refresh 503 preserves a new draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-T04][NEG][OBS-13-E009] a project round trip still cancels a draft opened while refreshing",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-S01][NEG][OBS-13-E017] old csrf 200 cannot lock or unlock a replacement save",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-S02][NEG][OBS-13-E017] old csrf 503 cannot lock or unlock a replacement save",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-S11][NEG][OBS-13-E017] old business 200 cannot lock or unlock a replacement save",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-S12][NEG][OBS-13-E017] old business 503 cannot lock or unlock a replacement save",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-S21][NEG][OBS-13-E017] old reload 200 cannot lock or unlock a replacement save",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-S22][NEG][OBS-13-E017] old reload 503 cannot lock or unlock a replacement save",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-S07][POS][OBS-13-E017] current task failure releases its own save state and supports retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F01][POS][OBS-14-E004] a pending list refresh permits a new authorized draft without a write",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F02][NEG][OBS-14-E004] list 200 cannot overwrite a draft opened during refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F03][NEG][OBS-14-E004] list 503 cannot overwrite a draft opened during refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F11][POS][OBS-14-E014] a pending list refresh permits a new authorized draft without a write",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F12][NEG][OBS-14-E014] list 200 cannot overwrite a draft opened during refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F13][NEG][OBS-14-E014] list 503 cannot overwrite a draft opened during refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F21][POS][OBS-14-E019] a pending list refresh permits a new authorized draft without a write",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F22][NEG][OBS-14-E019] list 200 cannot overwrite a draft opened during refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F23][NEG][OBS-14-E019] list 503 cannot overwrite a draft opened during refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-F04][NEG][OBS-14-E004] switching projects invalidates a template draft opened during refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-P01][NEG][OBS-14-E014] read-only users cannot open or submit administrative drafts",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-P02][NEG][OBS-14-E014] a confirmed permission revocation invalidates the pending draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-P11][NEG][OBS-14-E019] read-only users cannot open or submit administrative drafts",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-P12][NEG][OBS-14-E019] a confirmed permission revocation invalidates the pending draft",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/extensionsOperationsPages.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "extensions capability and forms ordinary account reads definitions but never requests signing keys or mounts mutation forms",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms capability failure is visible with retry and does not read registry",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms failed refresh clears registry and signing key network failure is distinct from no permission",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms adapter edit submits null to preserve encrypted configuration without re-entering credentials",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms adapter failure retains secret draft and pending saves are deduplicated",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms adapter cancellation during CSRF prevents the old write and preserves replacement",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms package failure retains exact signed characters and cancel clears manifest/signature",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms key registration cancellation invalidates a pending success",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms plugin/key trust changes require confirmation and repeated actions are deduplicated",
+          "status": "passed"
+        },
+        {
+          "fullName": "extensions capability and forms unmount suppresses late adapter completion",
+          "status": "passed"
+        },
+        {
+          "fullName": "operations permission and projection ordinary account reads only permission and never fetches management overview",
+          "status": "passed"
+        },
+        {
+          "fullName": "operations permission and projection local shows actual dependency labels, attention item count and native backup action",
+          "status": "passed"
+        },
+        {
+          "fullName": "operations permission and projection failed refresh clears old health and exposes retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "operations permission and projection late overview cannot overwrite a newer refresh",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalAssetFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "requirements: late 200 cannot close, clear or show errors on the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "requirements: late 503 cannot close, clear or show errors on the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "cases: late 200 cannot close, clear or show errors on the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "cases: late 503 cannot close, clear or show errors on the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "an old save completing while a new save is pending does not stop its spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "cancel during CSRF does not send the old draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "unmount during CSRF does not send the old draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "partial batch failure reconciles committed rows and retries only failed IDs (refresh failure=false)",
+          "status": "passed"
+        },
+        {
+          "fullName": "partial batch failure reconciles committed rows and retries only failed IDs (refresh failure=true)",
+          "status": "passed"
+        },
+        {
+          "fullName": "waits for the late successful deletion before reconciling a fast failure",
+          "status": "passed"
+        },
+        {
+          "fullName": "SELECT to TEXT sends empty options while preserving the field identity",
+          "status": "passed"
+        },
+        {
+          "fullName": "SELECT to NUMBER sends empty options while preserving the field identity",
+          "status": "passed"
+        },
+        {
+          "fullName": "SELECT to DATE sends empty options while preserving the field identity",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalAssetTags.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "reads without writing and saves a deliberate empty set with CSRF",
+          "status": "passed"
+        },
+        {
+          "fullName": "isolates REQUIREMENT asset selection and saves to the matching route",
+          "status": "passed"
+        },
+        {
+          "fullName": "isolates PLAN asset selection and saves to the matching route",
+          "status": "passed"
+        },
+        {
+          "fullName": "failed association reads prevent accidental clearing or saving",
+          "status": "passed"
+        },
+        {
+          "fullName": "write failures preserve the selection and remain retryable",
+          "status": "passed"
+        },
+        {
+          "fullName": "a late association read cannot populate a changed project",
+          "status": "passed"
+        },
+        {
+          "fullName": "project change during CSRF acquisition prevents sending the captured write",
+          "status": "passed"
+        },
+        {
+          "fullName": "unmount during CSRF acquisition prevents sending a write after navigation",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectExecutionSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect execution desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect execution desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect execution desktop sync entry hides the entry in a browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect execution desktop sync entry reports native open errors without mutating assets",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectLinkSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect link desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect link desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect link desktop sync entry hides the entry in a browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect link desktop sync entry reports native open errors without mutating assets",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectPeopleSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect people desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect people desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect people desktop sync entry hides the entry in a browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect people desktop sync entry reports native open errors without mutating assets",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect desktop sync entry hides the entry in a browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect desktop sync entry reports native open errors without mutating assets",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDefectWorkflowSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional defect workflow desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect workflow desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect workflow desktop sync entry hides the entry in a browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional defect workflow desktop sync entry reports native open errors without mutating assets",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalDeliveryFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "plan: late 200 preserves replacement draft and its errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: late 503 preserves replacement draft and its errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: old completion cannot stop a newer save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: cancel during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: unmount during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: project during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: late 200 preserves replacement draft and its errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: late 503 preserves replacement draft and its errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: old completion cannot stop a newer save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: cancel during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: unmount during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: project during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: late 200 preserves replacement draft and its errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: late 503 preserves replacement draft and its errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: old completion cannot stop a newer save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: cancel during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: unmount during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "version: project during CSRF prevents stale submission",
+          "status": "passed"
+        },
+        {
+          "fullName": "late plan 200 cannot replace the current plan scope",
+          "status": "passed"
+        },
+        {
+          "fullName": "late step 200 cannot replace current case steps",
+          "status": "passed"
+        },
+        {
+          "fullName": "late defect links 200 cannot replace a reopened drawer",
+          "status": "passed"
+        },
+        {
+          "fullName": "late plan 503 cannot replace the current plan scope",
+          "status": "passed"
+        },
+        {
+          "fullName": "late step 503 cannot replace current case steps",
+          "status": "passed"
+        },
+        {
+          "fullName": "late defect links 503 cannot replace a reopened drawer",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: partial deletion reconciles and retries only failures (refreshFails=false, slowSuccess=false)",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: partial deletion reconciles and retries only failures (refreshFails=false, slowSuccess=true)",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: partial deletion reconciles and retries only failures (refreshFails=true, slowSuccess=false)",
+          "status": "passed"
+        },
+        {
+          "fullName": "plan: partial deletion reconciles and retries only failures (refreshFails=true, slowSuccess=true)",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: partial deletion reconciles and retries only failures (refreshFails=false, slowSuccess=false)",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: partial deletion reconciles and retries only failures (refreshFails=false, slowSuccess=true)",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: partial deletion reconciles and retries only failures (refreshFails=true, slowSuccess=false)",
+          "status": "passed"
+        },
+        {
+          "fullName": "defect: partial deletion reconciles and retries only failures (refreshFails=true, slowSuccess=true)",
+          "status": "passed"
+        },
+        {
+          "fullName": "long plan name gives a valid Unicode-safe default in the run editor",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalGovernanceSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Governance native entry and tag editing opens definitions sync in local desktop mode",
+          "status": "passed"
+        },
+        {
+          "fullName": "Governance native entry and tag editing opens definitions sync in local desktop mode",
+          "status": "passed"
+        },
+        {
+          "fullName": "Governance native entry and tag editing opens definitions sync in account desktop mode",
+          "status": "passed"
+        },
+        {
+          "fullName": "Governance native entry and tag editing opens definitions sync in account desktop mode",
+          "status": "passed"
+        },
+        {
+          "fullName": "Governance native entry and tag editing hides native binding entry in the browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Governance native entry and tag editing shows native errors without submitting definitions",
+          "status": "passed"
+        },
+        {
+          "fullName": "Governance native entry and tag editing edits the same tag ID and preserves existing assignments",
+          "status": "passed"
+        },
+        {
+          "fullName": "Governance native entry and tag editing edits the same tag ID and keeps failures editable",
+          "status": "passed"
+        },
+        {
+          "fullName": "Governance native entry and tag editing rejects blank tag edits without a write",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalHistorySync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional history desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional history desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional history desktop sync entry hides the entry in a browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional history desktop sync entry reports native open errors without mutating assets",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/functionalSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Functional desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional desktop sync entry hides the entry in a browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Functional desktop sync entry reports native open errors without mutating assets",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/grpcDescriptorSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "gRPC descriptor sync desktop entry opens native descriptor binding in local mode without executing a request",
+          "status": "passed"
+        },
+        {
+          "fullName": "gRPC descriptor sync desktop entry opens native descriptor binding in account mode without executing a request",
+          "status": "passed"
+        },
+        {
+          "fullName": "gRPC descriptor sync desktop entry does not expose native operations in a normal browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "gRPC descriptor sync desktop entry reports opening failures without writing data",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileApplicationFileSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "移动端 application file association sync entry opens 应用文件关联同步 in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "移动端 application file association sync entry opens 应用文件关联同步 in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "移动端 application file association sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "移动端 application file association sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "device: late create 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "device: late edit 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "device: late create 503 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "device: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "device: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "device: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "device: an old completion cannot clear the new save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "device: a current failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "app: late create 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "app: late edit 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "app: late create 503 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "app: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "app: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "app: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "app: an old completion cannot clear the new save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "app: a current failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "element: late create 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "element: late edit 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "element: late create 503 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "element: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "element: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "element: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "element: an old completion cannot clear the new save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "element: a current failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: late create 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: late edit 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: late create 503 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: an old completion cannot clear the new save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: a current failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: cancel during CSRF cannot queue a task",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: project-return during CSRF cannot queue a task",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: unmount during CSRF cannot queue a task",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: a late 200 after cancellation has no toast or follow-up",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: a late 503 after cancellation has no toast or follow-up",
+          "status": "passed"
+        },
+        {
+          "fullName": "initial context 200 after unmount cannot reload assets or show errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "initial context 503 after unmount cannot reload assets or show errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "initial assets after unmount cannot revive the old page",
+          "status": "passed"
+        },
+        {
+          "fullName": "initial assets after project-return cannot revive the old page",
+          "status": "passed"
+        },
+        {
+          "fullName": "duplicate element save callbacks only send one write",
+          "status": "passed"
+        },
+        {
+          "fullName": "element save captures the submitted form before awaiting CSRF",
+          "status": "passed"
+        },
+        {
+          "fullName": "asset refresh 200 after project-return has no stale feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "asset refresh 503 after project-return has no stale feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "asset refresh 200 after unmount has no stale feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "asset refresh 503 after unmount has no stale feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "a current refresh failure remains visible to the user",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: old 200 keeps a replacement execution dialog open",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: old 503 keeps a replacement execution dialog open",
+          "status": "passed"
+        },
+        {
+          "fullName": "old native preparation cannot queue after cancel and reopening the same scenario",
+          "status": "passed"
+        },
+        {
+          "fullName": "old native preparation cannot release a newer preparation spinner",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationHistoryArtifacts.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "provides scoped read-only downloads, including empty screenshots, with size and digest",
+          "status": "passed"
+        },
+        {
+          "fullName": "late files from an old project cannot appear after a switch",
+          "status": "passed"
+        },
+        {
+          "fullName": "history changes immediately discard the previous download link",
+          "status": "passed"
+        },
+        {
+          "fullName": "failed refresh clears prior files and exposes an actionable error",
+          "status": "passed"
+        },
+        {
+          "fullName": "files attributed to a different origin are rejected without links",
+          "status": "passed"
+        },
+        {
+          "fullName": "loads previews only after explicit selection and keeps multiple screenshots distinct",
+          "status": "passed"
+        },
+        {
+          "fullName": "unsupported report artifact types cannot produce download or preview links",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationHistoryPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "shows archived origins without requiring a current plan and excludes duplicate native records",
+          "status": "passed"
+        },
+        {
+          "fullName": "opens a read-only report with original version and a scoped export link",
+          "status": "passed"
+        },
+        {
+          "fullName": "late inventory from the previous project does not replace the selected project",
+          "status": "passed"
+        },
+        {
+          "fullName": "project change closes the old history drawer and discards a late detail response",
+          "status": "passed"
+        },
+        {
+          "fullName": "shows an actionable load failure and clears stale records without writes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationHistorySyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "移动端 native history sync entry opens 历史同步 in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "移动端 native history sync entry opens 报告产物同步 in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "移动端 native history sync entry opens 历史同步 in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "移动端 native history sync entry opens 报告产物同步 in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "移动端 native history sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "移动端 native history sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/mobileAutomationPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Mobile automation page opens native synchronization in local mode without submitting execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page opens native synchronization in server mode without submitting execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page hides native synchronization in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page keeps 新建设备 open when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page keeps 新建移动应用 open when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page keeps 新建元素对象 open when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page keeps 新建移动端场景 open when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page ignores stale assets after switching projects",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page refreshes an open report and discards its response after closing",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page sends scene edits with the current version and preserves the form on conflict",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page does not queue a mobile task after native preparation cancel",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page does not queue a mobile task after native preparation project",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mobile automation page does not queue a mobile task after native preparation failure",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/mockServicePage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Mock service editor explains the reachability limit of local desktop Mock links",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock service editor keeps a required-field error visible in the create dialog",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock service editor keeps rule input after invalid JSON instead of closing the dialog",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock service editor sends no stale body condition when switching back to ANY",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock service editor loads existing smart examples for a newly created server",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock service editor excludes expired and revoked shares from the active count",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock service editor ignores old server responses after switching to another server",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock sync and rule editing opens native sync in both desktop modes and hides it on ordinary web",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock sync and rule editing loads existing conditions and uses the scoped PUT without incrementing rule count or enablement",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock sync and rule editing invalid JSON preserves the edit dialog and original conditions without sending",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock sync and rule editing a project change while waiting for CSRF closes the old editor and prevents outgoing save",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock editor cancellation cancel before CSRF returns prevents the old outgoing edit",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock editor cancellation a late save completion cannot close a subsequently opened rule editor",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership ignores a late server creation after a replacement dialog opens",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership ignores a late share creation after a replacement dialog opens",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership does not read an old created server through a new project path",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership does not display an old service share after switching services",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership cancelling server before CSRF returns prevents the outgoing creation",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership cancelling share before CSRF returns prevents the outgoing creation",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership does not let an old server completion unlock a newer pending save",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership does not let an old share completion unlock a newer pending save",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership ignores an old server failure after a replacement dialog opens",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership ignores an old share failure after a replacement dialog opens",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership does not create a server after unmounting while CSRF is pending",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock creation response ownership does not create a share after unmounting while CSRF is pending",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock detail request ordering preserves the newer rules list after A/B/A switching",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock detail request ordering preserves the newer smart-examples list after A/B/A switching",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock detail request ordering preserves the newer shares list after A/B/A switching",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock detail request ordering ignores a late rules error after a newer successful refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock detail request ordering ignores a late smart-examples error after a newer successful refresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "Mock detail request ordering ignores a late shares error after a newer successful refresh",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/mockSharePage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Public Mock share navigation keeps the current document when an earlier link returns late",
+          "status": "passed"
+        },
+        {
+          "fullName": "Public Mock share navigation keeps an invalid current link unavailable when an older valid link returns",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-M01][POS][OBS-09-E012] copies the complete runtime URL through an isolated clipboard double",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-M02][NEG][OBS-09-E012] rejected clipboard gives manual-copy feedback without false success",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-M03][NEG][OBS-09-E012] missing clipboard gives manual-copy feedback without false success",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-M04][NEG][OBS-09-E012] throws clipboard gives manual-copy feedback without false success",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-M05][POS][OBS-09-E012] a rejected copy can be retried successfully",
+          "status": "passed"
+        },
+        {
+          "fullName": "[DF-M06][NEG][OBS-09-E012] copy completion for a previous share cannot label a new share as copied",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/modules.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "module catalogue provides usable high-fidelity data for every generic module",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/notificationExtensionsFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "notification create: cancel during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification create: unmount during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification create: late 200 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification create: late 503 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification create: current failures retain input and permit retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification create: submission freezes input and deduplicates pending callbacks",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification edit: cancel during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification edit: unmount during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification edit: late 200 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification edit: late 503 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification edit: current failures retain input and permit retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification edit: submission freezes input and deduplicates pending callbacks",
+          "status": "passed"
+        },
+        {
+          "fullName": "key create: cancel during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "key create: unmount during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "key create: late 200 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "key create: late 503 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "key create: current failures retain input and permit retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "key create: submission freezes input and deduplicates pending callbacks",
+          "status": "passed"
+        },
+        {
+          "fullName": "package create: cancel during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "package create: unmount during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "package create: late 200 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "package create: late 503 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "package create: current failures retain input and permit retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "package create: submission freezes input and deduplicates pending callbacks",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter create: cancel during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter create: unmount during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter create: late 200 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter create: late 503 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter create: current failures retain input and permit retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter create: submission freezes input and deduplicates pending callbacks",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter edit: cancel during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter edit: unmount during CSRF prevents obsolete writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter edit: late 200 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter edit: late 503 preserves the replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter edit: current failures retain input and permit retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "adapter edit: submission freezes input and deduplicates pending callbacks",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification create: project switch and return cancels the pending form",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification edit: project switch and return cancels the pending form",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/notificationsPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "notification project and form boundaries top project selection reloads templates and deliveries and closes old forms",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries late response from original project cannot overwrite the current project",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries failed project reads clear old rows and show retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries failed save retains input and pending submits are deduplicated",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries cancels the obsolete form during csrf and leaves the new project draft open",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries cancel clears signing plaintext and invalidates a pending completion",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries cancelling during refresh prevents a late successful modal-close callback",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries manual resend is explicitly confirmed and pending resend cannot be duplicated",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries delete requires confirmation and cancels before dispatch after project switch",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries inactive channel definition makes actual delivery limitation visible",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries local workflow connects the account service rather than attempting an authenticated migration directly",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification project and form boundaries unmounted notification view ignores delayed resources",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification sync desktop entry opens native sync in local and account modes without issuing business writes",
+          "status": "passed"
+        },
+        {
+          "fullName": "notification sync desktop entry ordinary web view does not show the native sync action",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p1AccountSessionUi.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[P1-U05-01][POS] self password reset clears the old client identity and asks for login",
+          "status": "passed"
+        },
+        {
+          "fullName": "[P1-U05-02][POS] resetting another account keeps the current administrator signed in",
+          "status": "passed"
+        },
+        {
+          "fullName": "[P1-U05-03][NEG] failed self reset does not falsely log out or close the password draft",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2CatalogCopyUi.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2-D10-13: ambiguous failure reuses the durable request key and digest",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2-D10-13: project switch during CSRF prevents a copy to the new project",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2-D10-13: late successful copy cannot refresh the current project",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2-D10-13: leaving and returning during CSRF cancels the original submission",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2EnvironmentUi.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "[TC-P2-D01-06][POS][UI] orphan rows remain visible with a missing-definition label",
+          "status": "passed"
+        },
+        {
+          "fullName": "[TC-P2-D03-CFG-02][POS][UI] disabled definitions are selectable for maintenance with an execution warning",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2ScheduleVersionUi.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2-D22-07: stale update keeps draft and original version without an automatic retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2-D22-08: explicit version refresh keeps draft and requires a separate save",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2AuditOptions.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D04-01: an action filter never shrinks the options",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D04-02: metadata includes actions outside the current rows",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D04-03: an empty row query leaves the action collection intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D04-04: permission loss clears cached action names and rows",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D04-05: metadata failure exposes stale options without pretending they are fresh",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D04-05: delayed metadata cannot overwrite a newer selection",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D04-06: row requests retain their original limit",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2DebugHandoff.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D15-01: all supported auth configurations preserve the full runtime request",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-02: a complete handoff never writes credentials to Web Storage",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-03: project A/B/A and same-account reauthentication invalidate pending packets",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-04: single use, another window/store and missing keys cannot restore old auth",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-05: creating and consuming a handoff perform no request or history write",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-06: header/query placement and variable references are never resolved during navigation",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-07: unknown auth and malformed fields are rejected before creating a packet",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-08: discard invalidates only the selected packet and legacy route storage stays compatible",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2FreezeWording.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D18-05: object tab says queue-time resolution and does not promise save-time freezing",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2HandoffPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime NONE/HEADER reaches manual execution unchanged",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime BEARER/HEADER reaches manual execution unchanged",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime BASIC/HEADER reaches manual execution unchanged",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime API_KEY/HEADER reaches manual execution unchanged",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-01/06: runtime API_KEY/QUERY reaches manual execution unchanged",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-04: missing packet starts blank and warns instead of restoring another draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-03: a scope round-trip or source-ID mismatch rejects the handoff",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D15-03/06: a consumed runtime request cannot survive a project round-trip",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2HistorySend.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D13-01: legacy summary clears unrelated credentials without auto execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=false",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=true",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D13-03: an ordinary wildcard request is not a historical placeholder",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D13-04: reconstructed and explicitly reviewed history can be manually sent",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D13-05: valid encrypted replay does not reject its redacted summary URL",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D13-06: P1 unavailable states remain disabled",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D13-07: A/B/A invalidates historical reconstruction approval",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D13-08: new ordinary drafts keep the original API payload without a star blacklist",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2OwnedWebSocket.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D14-02: unchanged page configuration reuses only its own active session",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D14-06: manual close is terminal, repeat close does not reopen or resubscribe",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D14-07: foreign session updates cannot change which owned session gets closed",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D14-04: a failed close retains the exact old owner for explicit retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D14-08: invalid or failed creation never takes ownership of a foreign handle",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2RowActions.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D20-01: scope invalidation before dispatch cancels task",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-02: scope invalidation before dispatch cancels notification",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-03: plugin leave cancels precommit action",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-03: a project selection alone does not cancel a global action",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: A/B/A invalidates task",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: A/B/A invalidates notification",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: same-account reauthentication invalidates task",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: same-account reauthentication invalidates notification",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-04: same-account reauthentication invalidates plugin",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-05: dispatched work keeps its original URL and payload",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-06: late completion after A/B/A cannot decorate the replacement view",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-07: a cancelled token cannot clear a newer pending action",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D20-08: CSRF authorization refusal never produces a business write",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2WebSocketPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D14-01: read-only history load keeps old session but prevents sending new draft to it",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D14-03: explicit replacement closes the owned old session before new connect",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D14-04: failed close preserves the old handle and prevents a second connection",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D14-05: late creation after project cleans only its own original-project session",
+          "status": "passed"
+        },
+        {
+          "fullName": "TC-P2R2-D14-05: late creation after unmount cleans only its own original-project session",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/p2r2WorkbenchHandoff.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "TC-P2R2-D15-02: advanced navigation carries full runtime auth in memory with no Web Storage write",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceArtifactSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "performance native raw artifact sync entry opens binding in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "performance native raw artifact sync entry opens binding in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "performance native raw artifact sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "performance native raw artifact sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceCharts.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Performance charts resizes PerformanceExecutionChart when its drawer expands and disconnects on unmount",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance charts resizes PerformanceResourceChart when its drawer expands and disconnects on unmount",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "create: late 200 leaves replacement draft intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "create: late 503 leaves replacement draft intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "create: cancel during CSRF prevents obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "create: project-return during CSRF prevents obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "create: unmount during CSRF prevents obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "edit: late 200 leaves replacement draft intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "edit: late 503 leaves replacement draft intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "edit: cancel during CSRF prevents obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "edit: project-return during CSRF prevents obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "edit: unmount during CSRF prevents obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "an old save cannot clear a newer save spinner or close its editor",
+          "status": "passed"
+        },
+        {
+          "fullName": "duplicate save callbacks only submit once",
+          "status": "passed"
+        },
+        {
+          "fullName": "editing keeps the original plan id and version after a later selection",
+          "status": "passed"
+        },
+        {
+          "fullName": "a current save failure preserves inputs and permits a successful retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "save completion after project-return cannot start follow-up requests",
+          "status": "passed"
+        },
+        {
+          "fullName": "save completion after unmount cannot start follow-up requests",
+          "status": "passed"
+        },
+        {
+          "fullName": "unmounting during the initial list request prevents detail and operational follow-up requests",
+          "status": "passed"
+        },
+        {
+          "fullName": "a delete completion preserves a later selected plan",
+          "status": "passed"
+        },
+        {
+          "fullName": "a stale detail 404 cannot show an error over the new selection",
+          "status": "passed"
+        },
+        {
+          "fullName": "a stale detail 503 cannot show an error over the new selection",
+          "status": "passed"
+        },
+        {
+          "fullName": "detail A-B-A rejects the first A failure while keeping the latest A",
+          "status": "passed"
+        },
+        {
+          "fullName": "a detail failure after unmount produces no global error",
+          "status": "passed"
+        },
+        {
+          "fullName": "a current detail failure is shown and reselecting allows retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "request body \" \\nQA body \\n\" keeps its raw-content contract",
+          "status": "passed"
+        },
+        {
+          "fullName": "request body \"\" keeps its raw-content contract",
+          "status": "passed"
+        },
+        {
+          "fullName": "request body \" \\n \" keeps its raw-content contract",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceHistoryArtifacts.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "provides scoped read-only downloads, including empty logs, with size and digest",
+          "status": "passed"
+        },
+        {
+          "fullName": "late files from an old project cannot appear after a switch",
+          "status": "passed"
+        },
+        {
+          "fullName": "history changes immediately discard the previous download link",
+          "status": "passed"
+        },
+        {
+          "fullName": "failed refresh clears prior files and exposes an actionable error",
+          "status": "passed"
+        },
+        {
+          "fullName": "files attributed to a different origin are rejected without links",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceHistoryPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "shows archived origins without requiring a current plan and excludes duplicate native records",
+          "status": "passed"
+        },
+        {
+          "fullName": "opens a read-only report with original version and a scoped export link",
+          "status": "passed"
+        },
+        {
+          "fullName": "late inventory from the previous project does not replace the selected project",
+          "status": "passed"
+        },
+        {
+          "fullName": "project change closes the old history drawer and discards a late detail response",
+          "status": "passed"
+        },
+        {
+          "fullName": "shows an actionable load failure and clears stale records without writes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/performanceHistorySyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "performance native history sync entry opens binding in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "performance native history sync entry opens binding in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "performance native history sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "performance native history sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/performancePage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Performance page opens native definition sync from local and account desktop without enqueueing an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page does not show the native sync entry in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page preserves the plan dialog and entered name after a rejected save",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page ignores a slow detail response after selecting another plan",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page keeps the thread name input mounted as the user types",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page retains invalid JSON and does not submit it",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page discards old project plans and closes its editor on project change",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page ignores a report response after the drawer is closed",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page waits for the native engine before posting a local execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page cancelling preparation does not enqueue a task even if native startup finishes",
+          "status": "passed"
+        },
+        {
+          "fullName": "Performance page failed engine preparation and plan changes cannot queue a stale execution",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/projectSettingsPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Project settings workspace boundaries opens native configuration sync in both desktop modes without submitting page data",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries does not display desktop synchronization on the web",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries opens native file synchronization from the file tab in both desktop modes",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries project selection reloads resources and closes old forms",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries late previous project resources cannot overwrite the selected project",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries failed parameter save keeps entered form open and deduplicates pending submits",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries captures the project and fields before CSRF and cannot close a replacement form",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries failed new project load clears old data and exposes retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries route change loads audit records and discards obsolete log responses",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries project creation failures retain the dialog",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries file upload captures the originating project before waiting for CSRF",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries completion after resource refresh cannot close a newly opened project form",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project settings workspace boundaries unmounted view ignores delayed settings responses",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/projectVersionSync.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Project version desktop sync entry opens the native binding page in local mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project version desktop sync entry opens the native binding page in account mode without modifying assets",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project version desktop sync entry hides the entry in a browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Project version desktop sync entry reports native open errors without mutating assets",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/qualityReportSyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "opens plan sync in local desktop mode without sending a report",
+          "status": "passed"
+        },
+        {
+          "fullName": "opens plan sync in account desktop mode without sending a report",
+          "status": "passed"
+        },
+        {
+          "fullName": "keeps ordinary browser report controls without exposing native synchronization",
+          "status": "passed"
+        },
+        {
+          "fullName": "shows an actionable native-opening failure without modifying a plan",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/qualityReportTaskFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "report create: cancel during CSRF prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "report create: unmount during CSRF prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "report edit: cancel during CSRF prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "report edit: unmount during CSRF prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "task create: cancel during CSRF prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "task create: unmount during CSRF prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "task edit: cancel during CSRF prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "task edit: unmount during CSRF prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "task create: project switch and return during CSRF invalidates the old form",
+          "status": "passed"
+        },
+        {
+          "fullName": "task edit: project switch and return during CSRF invalidates the old form",
+          "status": "passed"
+        },
+        {
+          "fullName": "report create: reopen during the post-save reload cannot receive an old completion",
+          "status": "passed"
+        },
+        {
+          "fullName": "report create: unmount during the post-save reload cannot receive an old completion",
+          "status": "passed"
+        },
+        {
+          "fullName": "report edit: reopen during the post-save reload cannot receive an old completion",
+          "status": "passed"
+        },
+        {
+          "fullName": "report edit: unmount during the post-save reload cannot receive an old completion",
+          "status": "passed"
+        },
+        {
+          "fullName": "report run: unmount during CSRF cannot send an obsolete operation",
+          "status": "passed"
+        },
+        {
+          "fullName": "report run: business 200 after unmount has no follow-up request or feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report run: business 503 after unmount has no follow-up request or feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report run: reload 200 after unmount has no follow-up request or feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report run: reload 503 after unmount has no follow-up request or feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report run: a current 200 still gives feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report run: a current 503 still gives feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report delete: unmount during CSRF cannot send an obsolete operation",
+          "status": "passed"
+        },
+        {
+          "fullName": "report delete: business 200 after unmount has no follow-up request or feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report delete: business 503 after unmount has no follow-up request or feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report delete: reload 200 after unmount has no follow-up request or feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report delete: reload 503 after unmount has no follow-up request or feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report delete: a current 200 still gives feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "report delete: a current 503 still gives feedback",
+          "status": "passed"
+        },
+        {
+          "fullName": "CSV 200 after unmount neither downloads nor displays a message",
+          "status": "passed"
+        },
+        {
+          "fullName": "CSV 503 after unmount neither downloads nor displays a message",
+          "status": "passed"
+        },
+        {
+          "fullName": "a current CSV failure is still visible",
+          "status": "passed"
+        },
+        {
+          "fullName": "report: a current save failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "report: save captures the submitted input and rejects duplicate pending callbacks",
+          "status": "passed"
+        },
+        {
+          "fullName": "task: a current save failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "task: save captures the submitted input and rejects duplicate pending callbacks",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/reportsPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Reports page keeps failed schedule edits open with entered content",
+          "status": "passed"
+        },
+        {
+          "fullName": "Reports page ignores old report responses after filter changes",
+          "status": "passed"
+        },
+        {
+          "fullName": "Reports page invalid dates invalidate an earlier request and display an actionable error",
+          "status": "passed"
+        },
+        {
+          "fullName": "Reports page closing run records discards a delayed response",
+          "status": "passed"
+        },
+        {
+          "fullName": "Reports page does not offer running disabled schedules",
+          "status": "passed"
+        },
+        {
+          "fullName": "Reports page uses Shanghai reporting dates around UTC midnight",
+          "status": "passed"
+        },
+        {
+          "fullName": "Reports page exports the clicked date range and keeps its filename when filters change during download",
+          "status": "passed"
+        },
+        {
+          "fullName": "Reports page surfaces a failed report instead of retaining old statistics",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/richText.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "rich text helpers keeps supported formatting and removes unsafe markup",
+          "status": "passed"
+        },
+        {
+          "fullName": "rich text helpers converts legacy plain text into editable paragraphs",
+          "status": "passed"
+        },
+        {
+          "fullName": "rich text helpers detects visually empty content and keeps the default reproduction labels",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/router.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "router access redirects anonymous users to login",
+          "status": "passed"
+        },
+        {
+          "fullName": "router access allows anonymous users to open a Mock share link",
+          "status": "passed"
+        },
+        {
+          "fullName": "router access renders the public login route when the initial session request fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "router access allows reauthentication when the server has invalidated a cached session",
+          "status": "passed"
+        },
+        {
+          "fullName": "router access allows signed-in users to open every product module",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/session.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "session login recovery guidance renews an expired local session through the native bridge before loading its workspace",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance does not renew online sessions using local workspace credentials",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance explains how to recover when Platform API cannot be reached",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance includes the HTTP status when CSRF bootstrap fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance rejects malformed CSRF responses with recovery guidance",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance registers with CSRF and loads only the new account workspace",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance shows duplicate registration error without marking the user signed in",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance keeps the login page available and reports an initial session network failure",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance clears initialization errors after the user retries authentication",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance reports an HTTP session lookup failure instead of treating it as a valid identity",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance rejects a malformed current-user response without authenticating",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance revalidates cached authentication and clears expired identity and project data on 401",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance preserves a valid cached project when revalidation confirms the same user",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance retains identity on a transient revalidation failure and can retry the check",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance retains the authenticated workspace when logout returns HTTP 403",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance retains the authenticated workspace when logout returns HTTP 500",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance retains the authenticated workspace when the logout request is interrupted",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance does not submit logout after an unusable CSRF response with status 503",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance does not submit logout after an unusable CSRF response with status 200",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance clears local identity only when logout succeeds or confirms an expired session (204)",
+          "status": "passed"
+        },
+        {
+          "fullName": "session login recovery guidance clears local identity only when logout succeeds or confirms an expired session (401)",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/systemSettings.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "system settings capability gate ordinary root defaults to environments and hides privileged menus",
+          "status": "passed"
+        },
+        {
+          "fullName": "system settings capability gate direct privileged route never mounts its child for ordinary accounts",
+          "status": "passed"
+        },
+        {
+          "fullName": "system settings capability gate admin can mount accounts with all navigation choices",
+          "status": "passed"
+        },
+        {
+          "fullName": "system settings capability gate capability failure exposes retry and mounts no management page",
+          "status": "passed"
+        },
+        {
+          "fullName": "project environment forms project switch closes forms and reloads without previous rows",
+          "status": "passed"
+        },
+        {
+          "fullName": "project environment forms obsolete environment response cannot overwrite selected project",
+          "status": "passed"
+        },
+        {
+          "fullName": "project environment forms failed environment save retains inputs and suppresses duplicate submit",
+          "status": "passed"
+        },
+        {
+          "fullName": "project environment forms environment save captures original project and cannot close a replacement",
+          "status": "passed"
+        },
+        {
+          "fullName": "project environment forms failed project load clears old environments and offers retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "account management forms latest account search wins over earlier delayed response",
+          "status": "passed"
+        },
+        {
+          "fullName": "account management forms account save captures immutable fields before csrf",
+          "status": "passed"
+        },
+        {
+          "fullName": "account management forms account create failure retains modal and entered fields",
+          "status": "passed"
+        },
+        {
+          "fullName": "account management forms password request captures target and cannot close a replacement password form",
+          "status": "passed"
+        },
+        {
+          "fullName": "account management forms password cancellation clears plaintext and a failed account reload clears old rows",
+          "status": "passed"
+        },
+        {
+          "fullName": "system parameter forms saves an empty ordinary value without showing a required marker",
+          "status": "passed"
+        },
+        {
+          "fullName": "system parameter forms failed parameter save keeps editor open and pending submit is deduplicated",
+          "status": "passed"
+        },
+        {
+          "fullName": "system parameter forms captures config before csrf and does not close a newly opened form",
+          "status": "passed"
+        },
+        {
+          "fullName": "system parameter forms shows local policy and opens the existing native authorization window",
+          "status": "passed"
+        },
+        {
+          "fullName": "system parameter forms online policy retains restrictions without showing a local authorization action",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/tasksPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Task registration page opens native sync management in the local desktop without writing registrations",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page ordinary web clients do not show a native-only sync action",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page keeps failed edits open and submits the displayed version",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page global project selection closes old forms and rejects a delayed list response",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page cancels the obsolete edited form during CSRF and leaves the new project intact",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page a failed new-project load clears old rows and displays the failure",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page deduplicates pending cancellation and sends the record version",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page shows immutable source status and version for imported registrations",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page does not load or create tasks with no accessible project",
+          "status": "passed"
+        },
+        {
+          "fullName": "Task registration page unmounting invalidates a pending list request",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationFixes.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "profile: late create 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: late edit 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: late create 503 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: an old completion cannot clear the new save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "profile: a current failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "object: late create 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "object: late edit 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "object: late create 503 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "object: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "object: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "object: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "object: an old completion cannot clear the new save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "object: a current failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: late create 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: late edit 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: late create 503 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: an old completion cannot clear the new save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "scenario: a current failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: late create 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: late edit 200 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: late create 503 preserves a replacement draft",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: cancel while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: project-return while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: unmount while CSRF is pending prevents an obsolete write",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: an old completion cannot clear the new save spinner",
+          "status": "passed"
+        },
+        {
+          "fullName": "schedule: a current failure retains input and permits retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: cancel during CSRF cannot queue a task",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: project-return during CSRF cannot queue a task",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: unmount during CSRF cannot queue a task",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: a late 200 after cancellation has no toast or follow-up",
+          "status": "passed"
+        },
+        {
+          "fullName": "execute: a late 503 after cancellation has no toast or follow-up",
+          "status": "passed"
+        },
+        {
+          "fullName": "initial context 200 after unmount cannot reload assets or show errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "initial context 503 after unmount cannot reload assets or show errors",
+          "status": "passed"
+        },
+        {
+          "fullName": "initial assets after unmount cannot revive the old page",
+          "status": "passed"
+        },
+        {
+          "fullName": "initial assets after project-return cannot revive the old page",
+          "status": "passed"
+        },
+        {
+          "fullName": "duplicate object save callbacks only send one write",
+          "status": "passed"
+        },
+        {
+          "fullName": "object save captures the submitted form before awaiting CSRF",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationHistoryArtifacts.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "provides scoped read-only downloads, including empty logs, with size and digest",
+          "status": "passed"
+        },
+        {
+          "fullName": "late files from an old project cannot appear after a switch",
+          "status": "passed"
+        },
+        {
+          "fullName": "history changes immediately discard the previous download link",
+          "status": "passed"
+        },
+        {
+          "fullName": "failed refresh clears prior files and exposes an actionable error",
+          "status": "passed"
+        },
+        {
+          "fullName": "files attributed to a different origin are rejected without links",
+          "status": "passed"
+        },
+        {
+          "fullName": "loads screenshot and video previews only after explicit selection and allows multiple screenshots",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationHistoryPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "shows archived origins without requiring a current plan and excludes duplicate native records",
+          "status": "passed"
+        },
+        {
+          "fullName": "opens a read-only report with original version and a scoped export link",
+          "status": "passed"
+        },
+        {
+          "fullName": "late inventory from the previous project does not replace the selected project",
+          "status": "passed"
+        },
+        {
+          "fullName": "project change closes the old history drawer and discards a late detail response",
+          "status": "passed"
+        },
+        {
+          "fullName": "shows an actionable load failure and clears stale records without writes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationHistorySyncEntry.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Web UI native history sync entry opens 历史同步 in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI native history sync entry opens 报告产物同步 in local mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI native history sync entry opens 历史同步 in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI native history sync entry opens 报告产物同步 in account mode without creating an execution",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI native history sync entry hides native binding in an ordinary browser",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI native history sync entry reports native open errors and leaves business data unchanged",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/uiAutomationPage.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Web UI automation page opens native synchronization in local mode without queuing a test",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page opens native synchronization in server mode without queuing a test",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page does not show a native synchronization entry in ordinary browsers",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page keeps 新建浏览器项目 open when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page keeps 新建页面对象 open when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page keeps 新建 Web UI 场景 open when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page keeps 新建定时计划 open when saving fails",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page selects an enabled browser profile for a new scenario",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page ignores a stale asset response from a previous project",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page does not restore a closed report after its request completes",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page submits the selected scenario and keeps the execute dialog open on rejection",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page refreshes an open running report until it reaches a terminal state",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page does not queue a local scenario after preparation cancel",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page does not queue a local scenario after preparation project",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page does not queue a local scenario after preparation failure",
+          "status": "passed"
+        },
+        {
+          "fullName": "Web UI automation page closing a schedule while preparing its browser cannot save the cancelled schedule",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "src/test/unifiedExecutionsPanel.test.ts",
+      "assertionResults": [
+        {
+          "fullName": "Unified execution list links imported mobile histories separately from local Runner executions",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list separately identifies Web UI imported history and links to its read-only section",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list shows real modules with composite keys, no hand-written progress or mutation actions",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list completed functional batches retain failures and are not labelled as successful",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list filters the explicitly bounded range by module, native state and case-insensitive name",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list project changes clear filters and ignore a previous project response",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list failed refresh clears old successes, displays retryable errors and recovers",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list empty project issues no request and removes the previous project records",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list polls visible pages without overlapping requests and stops on unmount",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list suspends polling on hidden pages and after failures until explicit retry",
+          "status": "passed"
+        },
+        {
+          "fullName": "Unified execution list late response after unmount has no visible effect",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

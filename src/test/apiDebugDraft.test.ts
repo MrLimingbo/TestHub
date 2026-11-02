@@ -14,6 +14,12 @@ import {
 } from '@/utils/apiDebugDraft'
 
 describe('API debug route draft', () => {
+  for (const [index, replayStatus] of ['EXPIRED', 'UNKNOWN_CREATED_AT', 'UNREADABLE'].entries()) it(`[P1-U12-0${index + 1}][NEG] ${replayStatus} cannot fall back to an automatic historical replay`, () => {
+    expect(apiDebugDraftFromHistory({ method: 'GET', requestUrl: 'https://example.test', replayDraft: '{"protocol":"HTTP"}', replayStatus })).toBeNull()
+  })
+  it('[P1-U12-04][POS] legacy history without retention metadata keeps its existing behavior', () => {
+    expect(apiDebugDraftFromHistory({ method: 'GET', requestUrl: 'https://example.test' })).toEqual({ method: 'GET', url: 'https://example.test', protocol: 'HTTP', legacyHistory: true })
+  })
   it('normalizes a direct HTTP request draft', () => {
     expect(apiDebugDraftFromQuery({
       method: 'post',
@@ -203,6 +209,7 @@ describe('API debug route draft', () => {
       method: 'PATCH',
       url: 'https://api.example.com/orders/1',
       protocol: 'HTTP',
+      legacyHistory: true,
     })
     expect(apiDebugDraftFromHistory({ method: 'GRPC', requestUrl: 'grpc.example.com:443' })).toBeNull()
     expect(isRedactedApiDebugUrl('https://api.example.com/orders?token=***')).toBe(true)

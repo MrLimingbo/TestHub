@@ -1,0 +1,23 @@
+{
+  "inputCount": 6,
+  "allExtracted": true,
+  "requirements": 5,
+  "acceptanceCriteria": 40,
+  "coverageItems": 40,
+  "requirementsCovered": 5,
+  "acceptanceCriteriaCovered": 40,
+  "coverageItemsCovered": 40,
+  "exactDuplicates": 0,
+  "nearDuplicatePairs": 1,
+  "unresolvedDuplicatePairs": 0,
+  "caseQualityScore": 99.92,
+  "specificationReadinessScore": 100,
+  "documentFindings": 0,
+  "invalidAnchors": 0,
+  "unsupportedOrUntraceableCases": 0,
+  "previousBatchCases": 30,
+  "comparisonRemovedCaseCount": 30,
+  "comparisonReviewRequiredCount": 40,
+  "comparisonStaleCandidates": 0,
+  "disposition": "独立模块范围切换，原接口自动化30条用例及ID未删除或改写；40条新用例逐项核对六个输入。相似02/03分别覆盖0/-1和1000/1001，独立COV保留。"
+}

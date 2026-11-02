@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { parseWaitDelayInput, validateWaitSteps } from '@/utils/waitDelay'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
@@ -112,6 +113,7 @@ const selectedRunDataSetId = ref('')
 const notificationEnabled = ref(false)
 const loading = ref(true)
 const saving = ref(false)
+const creatingScenario = ref(false)
 const submittingExecution = ref(false)
 const cancellingExecutionId = ref('')
 const executionDetailVisible = ref(false)
@@ -158,12 +160,54 @@ const executionProfileForm = reactive({ name: '', environmentCode: '', variables
 const executionOptionsForm = reactive({ executionProfileId: '', overrides: '{}', timeoutSeconds: 300 })
 const importForm = reactive({ baseUrl: '{{BASE_URL}}', curl: "curl -X GET '{{BASE_URL}}/health'" })
 
+let pageDisposed = false
+let projectSequence = 0
+let scenarioListSequence = 0
+let scenarioSelectionSequence = 0
+let scenarioSaveSequence = 0
+let createDialogSequence = 0
+let dataSetDialogSequence = 0
+let profileDialogSequence = 0
+let scheduleDialogSequence = 0
+let previewSequence = 0
+
+function projectContext() {
+  const project = projectId.value, sequence = projectSequence
+  return { project, current: () => !pageDisposed && project === projectId.value && sequence === projectSequence }
+}
+
+watch(createVisible, () => { createDialogSequence++; creatingScenario.value = false }, { flush: 'sync' })
+watch(dataSetVisible, () => { dataSetDialogSequence++; savingDataSet.value = false }, { flush: 'sync' })
+watch(executionProfileVisible, () => { profileDialogSequence++; savingExecutionProfile.value = false }, { flush: 'sync' })
+watch(scheduleVisible, () => { scheduleDialogSequence++; savingSchedule.value = false }, { flush: 'sync' })
+watch(executionOptionsVisible, clearExecutionConfigurationPreview, { flush: 'sync' })
+watch(projectId, () => {
+  projectSequence++
+  createVisible.value = false; dataSetVisible.value = false
+  executionProfileVisible.value = false; scheduleVisible.value = false
+  executionOptionsVisible.value = false
+  clearExecutionConfigurationPreview()
+}, { flush: 'sync' })
+
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
 const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value))
 const defaultEnvironmentCode = computed(() => environments.value.find((item) => item.enabled && item.defaultEnvironment)?.environmentCode
   ?? environments.value.find((item) => item.enabled)?.environmentCode
   ?? '')
 const selectedStep = computed(() => detail.value?.steps.find((step) => step.id === selectedStepId.value) ?? null)
+const waitDelayText = ref('')
+watch(selectedStep, step => { waitDelayText.value = step?.type === 'WAIT' ? String(step.config.delayMillis ?? '') : '' }, { immediate: true })
+const waitDelayError = computed(() => {
+  if (selectedStep.value?.type !== 'WAIT') return ''
+  const parsed = parseWaitDelayInput(waitDelayText.value)
+  return parsed.error || (typeof selectedStep.value.config.delayMillis !== 'number' ? 'config.delayMillis 原值不是 JSON 数值，请明确重新输入合法整数' : '')
+})
+function setWaitDelayInput(raw: string) {
+  waitDelayText.value = raw
+  const parsed = parseWaitDelayInput(raw)
+  setConfig('delayMillis', parsed.error ? raw : parsed.value)
+}
+
 const onlineRunner = computed(() => runners.value[0] ?? null)
 const runnerTrusted = computed(() => onlineRunner.value?.trusted === true)
 const runnerHttpExecutionEnabled = computed(() => runnerTrusted.value && onlineRunner.value?.executionEnabled === true)
@@ -225,13 +269,15 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
   return body.data
 }
 
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, current = () => true): Promise<T> {
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (!current()) throw new Error('操作上下文已结束')
   return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) })
 }
 
-async function mutateForm<T>(url: string, form: FormData): Promise<T> {
+async function mutateForm<T>(url: string, form: FormData, current = () => true): Promise<T> {
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (!current()) throw new Error('操作上下文已结束')
   const response = await fetch(url, { method: 'POST', credentials: 'include', headers: { [csrf.headerName]: csrf.token }, body: form })
   const body = await response.json().catch(() => ({})) as ApiEnvelope<T> & { message?: string }
   if (!response.ok) throw new Error(body.message ?? '请求失败，请稍后重试')
@@ -274,11 +320,16 @@ async function readExecutionReportIntegrity(executionId: string): Promise<Automa
   return read<AutomationExecutionReportIntegrity>(`/api/v1/projects/${projectId.value}/api-automation/executions/${executionId}/report/integrity`)
 }
 
-async function loadScenarios() {
-  if (!projectId.value) { scenarios.value = []; detail.value = null; return }
-  scenarios.value = await read<Scenario[]>(`/api/v1/projects/${projectId.value}/api-automation/scenarios`)
-  const target = scenarios.value.some((scenario) => scenario.id === detail.value?.id) ? detail.value?.id : scenarios.value[0]?.id
-  if (target) await selectScenario(target)
+async function loadScenarios(preferredScenarioId?: string, accept = () => true) {
+  const scope = projectContext(), token = ++scenarioListSequence, selection = scenarioSelectionSequence
+  if (!scope.project) { scenarios.value = []; detail.value = null; return }
+  const items = await read<Scenario[]>(`/api/v1/projects/${scope.project}/api-automation/scenarios`)
+  if (!scope.current() || token !== scenarioListSequence || !accept()) return
+  scenarios.value = items
+  if (selection !== scenarioSelectionSequence) return
+  const preferred = preferredScenarioId ?? detail.value?.id
+  const target = items.some((scenario) => scenario.id === preferred) ? preferred : items[0]?.id
+  if (target) await selectScenario(target, accept)
   else { detail.value = null; revisions.value = []; variableRows.value = [] }
 }
 
@@ -297,9 +348,11 @@ async function loadExecutions() {
   executions.value = await read<AutomationExecution[]>(`/api/v1/projects/${projectId.value}/api-automation/executions`)
 }
 
-async function loadDataSets() {
-  if (!projectId.value) { dataSets.value = []; dataSetDetail.value = null; return }
-  dataSets.value = await read<AutomationDataSet[]>(`/api/v1/projects/${projectId.value}/api-automation/data-sets`)
+async function loadDataSets(accept = () => true) {
+  const scope = projectContext()
+  if (!scope.project) { dataSets.value = []; dataSetDetail.value = null; return }
+  const items = await read<AutomationDataSet[]>(`/api/v1/projects/${scope.project}/api-automation/data-sets`)
+  if (scope.current() && accept()) dataSets.value = items
 }
 
 async function loadReusableSteps() {
@@ -307,9 +360,11 @@ async function loadReusableSteps() {
   reusableSteps.value = await read<AutomationReusableStep[]>(`/api/v1/projects/${projectId.value}/api-automation/reusable-steps`)
 }
 
-async function loadExecutionProfiles() {
-  if (!projectId.value) { executionProfiles.value = []; return }
-  executionProfiles.value = await read<AutomationExecutionProfile[]>(`/api/v1/projects/${projectId.value}/api-automation/execution-profiles`)
+async function loadExecutionProfiles(accept = () => true) {
+  const scope = projectContext()
+  if (!scope.project) { executionProfiles.value = []; return }
+  const items = await read<AutomationExecutionProfile[]>(`/api/v1/projects/${scope.project}/api-automation/execution-profiles`)
+  if (scope.current() && accept()) executionProfiles.value = items
 }
 
 async function loadWebhooks() {
@@ -317,9 +372,11 @@ async function loadWebhooks() {
   webhooks.value = await read<AutomationWebhook[]>(`/api/v1/projects/${projectId.value}/api-automation/webhook-triggers`)
 }
 
-async function loadSchedules() {
-  if (!projectId.value) { schedules.value = []; return }
-  schedules.value = await read<AutomationSchedule[]>(`/api/v1/projects/${projectId.value}/api-automation/schedules`)
+async function loadSchedules(accept = () => true) {
+  const scope = projectContext()
+  if (!scope.project) { schedules.value = []; return }
+  const items = await read<AutomationSchedule[]>(`/api/v1/projects/${scope.project}/api-automation/schedules`)
+  if (scope.current() && accept()) schedules.value = items
 }
 
 async function loadImportSources() {
@@ -360,19 +417,23 @@ async function loadExecutionDetail() {
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载任务详情失败') } finally { executionDetailLoading.value = false }
 }
 
-async function selectScenario(scenarioId: string) {
-  if (!projectId.value) return
+async function selectScenario(scenarioId: string, accept = () => true) {
+  const scope = projectContext(), token = ++scenarioSelectionSequence
+  if (!scope.project || !scope.current()) return
+  const current = () => scope.current() && token === scenarioSelectionSequence && accept()
+  clearExecutionConfigurationPreview()
   try {
     const [scenario, history] = await Promise.all([
-      read<ScenarioDetail>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${scenarioId}`),
-      read<Revision[]>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${scenarioId}/revisions`),
+      read<ScenarioDetail>(`/api/v1/projects/${scope.project}/api-automation/scenarios/${scenarioId}`),
+      read<Revision[]>(`/api/v1/projects/${scope.project}/api-automation/scenarios/${scenarioId}/revisions`),
     ])
+    if (!current()) return
     detail.value = scenario
     savedScenarioContent.value = JSON.stringify(scenarioContent(scenario, scenario.variables))
     revisions.value = history
     variableRows.value = Object.entries(scenario.variables).map(([key, value]) => ({ key, value }))
     selectedStepId.value = scenario.steps[0]?.id ?? ''
-  } catch (error) { Message.error(error instanceof Error ? error.message : '加载场景失败') }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '加载场景失败') }
 }
 
 async function deleteScenario(scenarioId: string) {
@@ -393,13 +454,18 @@ async function deleteScenario(scenarioId: string) {
 }
 
 async function load() {
+  let current = projectContext().current
   loading.value = true
   try {
-    context.value = await read<Context>('/api/v1/access/context')
+    const access = await read<Context>('/api/v1/access/context')
+    if (!current()) return
+    context.value = access
     projectId.value = session.resolveProjectId(projects.value)
+    current = projectContext().current
     await Promise.all([loadEnvironments(), loadScenarios(), loadRunnerStatus(), loadExecutions(), loadDataSets(), loadReusableSteps(), loadExecutionProfiles(), loadWebhooks(), loadSchedules(), loadImportSources()])
+    if (!current()) return
     createForm.environmentCode = defaultEnvironmentCode.value
-  } catch (error) { Message.error(error instanceof Error ? error.message : '加载接口自动化场景失败') } finally { loading.value = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '加载接口自动化场景失败') } finally { if (current()) loading.value = false }
 }
 
 function defaultStep(type: StepType): AutomationStep {
@@ -419,17 +485,20 @@ function defaultStep(type: StepType): AutomationStep {
 
 async function createScenario() {
   if (!projectId.value || !createForm.name.trim() || !createForm.environmentCode) { Message.warning('请填写场景名称并选择运行环境'); return }
-  saving.value = true
+  const scope = projectContext(), token = createDialogSequence
+  const current = () => scope.current() && token === createDialogSequence && createVisible.value
+  creatingScenario.value = true
   try {
-    const scenario = await mutate<ScenarioDetail>(`/api/v1/projects/${projectId.value}/api-automation/scenarios`, 'POST', {
+    const scenario = await mutate<ScenarioDetail>(`/api/v1/projects/${scope.project}/api-automation/scenarios`, 'POST', {
       ...createForm, steps: [defaultStep('REQUEST')], variables: {},
-    })
+    }, current)
+    if (!current()) return
+    await loadScenarios(scenario.id, current)
+    if (!current()) return
     createVisible.value = false
     createForm.name = ''; createForm.description = ''; createForm.environmentCode = defaultEnvironmentCode.value; createForm.failureStrategy = 'STOP'
-    await loadScenarios()
-    await selectScenario(scenario.id)
     Message.success('接口自动化场景已创建')
-  } catch (error) { Message.error(error instanceof Error ? error.message : '创建场景失败') } finally { saving.value = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '创建场景失败') } finally { if (current()) creatingScenario.value = false }
 }
 
 function addStep(type: StepType) {
@@ -606,6 +675,7 @@ async function createReusableStep() {
   }
   savingReusableStep.value = true
   try {
+    validateWaitSteps([selectedStep.value])
     const copied = { id: selectedStep.value.id, type: selectedStep.value.type, name: selectedStep.value.name,
       config: { ...selectedStep.value.config } }
     const created = await mutate<AutomationReusableStepDetail>(`/api/v1/projects/${projectId.value}/api-automation/reusable-steps`, 'POST', {
@@ -640,6 +710,7 @@ function scenarioContent(current: ScenarioDetail, currentVariables: Record<strin
 async function saveBeforeExecution(): Promise<boolean> {
   if (!detail.value) return false
   try {
+    validateWaitSteps(detail.value.steps)
     if (JSON.stringify(scenarioContent(detail.value, variables())) === savedScenarioContent.value) return true
     return await saveScenario()
   } catch (error) {
@@ -656,13 +727,19 @@ async function submitDialog(action: () => Promise<void>): Promise<boolean> {
 
 async function saveScenario(): Promise<boolean> {
   if (!detail.value || !projectId.value) return false
+  const scope = projectContext(), selection = scenarioSelectionSequence, token = ++scenarioSaveSequence
+  const current = () => scope.current() && selection === scenarioSelectionSequence && token === scenarioSaveSequence
   saving.value = true
   try {
-    const current = detail.value
-    const result = await mutate<ScenarioDetail>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${current.id}`, 'PUT', {
-      expectedVersion: current.version,
-      scenario: scenarioContent(current, variables()),
-    })
+    const scenario = detail.value
+    validateWaitSteps(scenario.steps)
+    const result = await mutate<ScenarioDetail>(`/api/v1/projects/${scope.project}/api-automation/scenarios/${scenario.id}`, 'PUT', {
+      expectedVersion: scenario.version,
+      scenario: scenarioContent(scenario, variables()),
+    }, current)
+    if (!current()) return false
+    const history = await read<Revision[]>(`/api/v1/projects/${scope.project}/api-automation/scenarios/${result.id}/revisions`)
+    if (!current()) return false
     detail.value = result
     savedScenarioContent.value = JSON.stringify(scenarioContent(result, result.variables))
     variableRows.value = Object.entries(result.variables).map(([key, value]) => ({ key, value }))
@@ -670,10 +747,10 @@ async function saveScenario(): Promise<boolean> {
       ? { ...scenario, name: result.name, description: result.description, environmentCode: result.environmentCode,
         failureStrategy: result.failureStrategy, version: result.version, stepCount: result.steps.length, updatedAt: result.updatedAt }
       : scenario)
-    revisions.value = await read<Revision[]>(`/api/v1/projects/${projectId.value}/api-automation/scenarios/${result.id}/revisions`)
+    revisions.value = history
     Message.success(`场景已保存为 v${result.version}`)
     return true
-  } catch (error) { Message.error(error instanceof Error ? error.message : '保存场景失败'); return false } finally { saving.value = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '保存场景失败'); return false } finally { if (scope.current() && token === scenarioSaveSequence) saving.value = false }
 }
 
 function openExecutionOptions(preserveSelections = false) {
@@ -683,7 +760,7 @@ function openExecutionOptions(preserveSelections = false) {
     executionOptionsForm.overrides = '{}'
     executionOptionsForm.timeoutSeconds = 300
   }
-  executionConfigurationPreview.value = null
+  clearExecutionConfigurationPreview()
   executionOptionsVisible.value = true
 }
 
@@ -697,7 +774,7 @@ async function runCurrentScenario() {
   } else {
     await submitExecution()
   }
-  if (notificationEnabled.value) Message.info('已开启本页执行提醒，可在“测试报告”中持续查看最新状态')
+  if (notificationEnabled.value) Message.info('本页提交提示：执行状态请在“测试报告”中查看；此开关刷新后重置，不发送外部通知。')
 }
 
 function executionOverrides(): Record<string, string> {
@@ -728,22 +805,28 @@ async function submitExecution() {
 }
 
 function clearExecutionConfigurationPreview() {
+  previewSequence++
+  previewingExecutionConfiguration.value = false
   executionConfigurationPreview.value = null
 }
 
 async function previewExecutionConfiguration() {
   if (!detail.value || !projectId.value) { Message.warning('请先选择一个场景'); return }
+  const scope = projectContext(), scenarioId = detail.value.id, token = ++previewSequence, selection = scenarioSelectionSequence
+  const current = () => scope.current() && token === previewSequence && selection === scenarioSelectionSequence && executionOptionsVisible.value
   previewingExecutionConfiguration.value = true
   try {
-    executionConfigurationPreview.value = await mutate<AutomationExecutionConfigurationPreview>(
-      `/api/v1/projects/${projectId.value}/api-automation/scenarios/${detail.value.id}/execution-configuration-preview`, 'POST', {
+    const preview = await mutate<AutomationExecutionConfigurationPreview>(
+      `/api/v1/projects/${scope.project}/api-automation/scenarios/${scenarioId}/execution-configuration-preview`, 'POST', {
         executionProfileId: executionOptionsForm.executionProfileId || null, overrides: executionOverrides(),
-      },
+      }, current,
     )
+    if (current()) executionConfigurationPreview.value = preview
   } catch (error) {
+    if (!current()) return
     executionConfigurationPreview.value = null
     Message.error(error instanceof Error ? error.message : '预览变量来源失败')
-  } finally { previewingExecutionConfiguration.value = false }
+  } finally { if (current()) previewingExecutionConfiguration.value = false }
 }
 
 function openCreateExecutionProfile() {
@@ -772,18 +855,22 @@ async function createExecutionProfile() {
   if (!projectId.value || !executionProfileForm.name.trim() || !executionProfileForm.environmentCode.trim()) { Message.warning('请填写配置集名称和环境标识'); return }
   let variables: Record<string, string>
   try { variables = executionOverridesFrom(executionProfileForm.variables, '配置集变量') } catch (error) { Message.error(error instanceof Error ? error.message : '配置集变量格式不正确'); return }
+  const scope = projectContext(), token = profileDialogSequence, editingId = editingExecutionProfileId.value
+  const current = () => scope.current() && token === profileDialogSequence && executionProfileVisible.value
   savingExecutionProfile.value = true
   try {
     const profile = { name: executionProfileForm.name.trim(), environmentCode: executionProfileForm.environmentCode.trim(), variables }
-    const created = editingExecutionProfileId.value
-      ? await mutate<AutomationExecutionProfileDetail>(`/api/v1/projects/${projectId.value}/api-automation/execution-profiles/${editingExecutionProfileId.value}`, 'PUT', {
+    const created = editingId
+      ? await mutate<AutomationExecutionProfileDetail>(`/api/v1/projects/${scope.project}/api-automation/execution-profiles/${editingId}`, 'PUT', {
           expectedVersion: executionProfileExpectedVersion.value, profile,
-        })
-      : await mutate<AutomationExecutionProfileDetail>(`/api/v1/projects/${projectId.value}/api-automation/execution-profiles`, 'POST', profile)
+        }, current)
+      : await mutate<AutomationExecutionProfileDetail>(`/api/v1/projects/${scope.project}/api-automation/execution-profiles`, 'POST', profile, current)
+    if (!current()) return
+    await loadExecutionProfiles(current)
+    if (!current()) return
     executionProfileVisible.value = false
-    await loadExecutionProfiles()
-    Message.success(editingExecutionProfileId.value ? `执行配置集已更新为 v${created.version}` : `执行配置集已创建：${created.name} v${created.version}`)
-  } catch (error) { Message.error(error instanceof Error ? error.message : '创建执行配置集失败') } finally { savingExecutionProfile.value = false }
+    Message.success(editingId ? `执行配置集已更新为 v${created.version}` : `执行配置集已创建：${created.name} v${created.version}`)
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '创建执行配置集失败') } finally { if (current()) savingExecutionProfile.value = false }
 }
 
 function executionOverridesFrom(source: string, label: string): Record<string, string> {
@@ -841,29 +928,33 @@ async function createDataSet() {
   }
   if (dataSetForm.sourceMode === 'TEXT' && !dataSetForm.content.trim()) { Message.warning('请填写 CSV/JSON 内容'); return }
   if (dataSetForm.sourceMode === 'FILE' && !dataSetForm.file) { Message.warning('请选择 CSV 或 JSON 文件'); return }
+  const scope = projectContext(), token = dataSetDialogSequence
+  const current = () => scope.current() && token === dataSetDialogSequence && dataSetVisible.value
   savingDataSet.value = true
   try {
     const created = dataSetForm.sourceMode === 'FILE'
-      ? await importDataSetFile()
-      : await mutate<AutomationDataSetDetail>(`/api/v1/projects/${projectId.value}/api-automation/data-sets`, 'POST', {
+      ? await importDataSetFile(scope.project, current)
+      : await mutate<AutomationDataSetDetail>(`/api/v1/projects/${scope.project}/api-automation/data-sets`, 'POST', {
           name: dataSetForm.name.trim(), sourceFormat: dataSetForm.sourceFormat, content: dataSetForm.content,
-        })
+        }, current)
+    if (!current()) return
+    await loadDataSets(current)
+    if (!current()) return
     dataSetDetail.value = created
     dataSetVisible.value = false
     dataSetPreviewVisible.value = true
-    await loadDataSets()
     Message.success(created.dataSet.sourceFile
       ? `数据集已从原始文件导入并存档：${created.dataSet.rowCount} 行将生成独立执行任务`
       : `数据集已保存：${created.dataSet.rowCount} 行将生成独立执行任务`)
-  } catch (error) { Message.error(error instanceof Error ? error.message : '保存数据集失败') } finally { savingDataSet.value = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '保存数据集失败') } finally { if (current()) savingDataSet.value = false }
 }
 
-async function importDataSetFile(): Promise<AutomationDataSetDetail> {
+async function importDataSetFile(project: string, current: () => boolean): Promise<AutomationDataSetDetail> {
   const form = new FormData()
   form.set('name', dataSetForm.name.trim())
   form.set('sourceFormat', dataSetForm.sourceFormat)
   form.set('file', dataSetForm.file as File)
-  return mutateForm<AutomationDataSetDetail>(`/api/v1/projects/${projectId.value}/api-automation/data-sets/import`, form)
+  return mutateForm<AutomationDataSetDetail>(`/api/v1/projects/${project}/api-automation/data-sets/import`, form, current)
 }
 
 function sourceFileDownloadUrl(dataSet: AutomationDataSet) {
@@ -1014,14 +1105,18 @@ function schedulePayload() {
 
 async function saveSchedule() {
   if (!projectId.value || !scheduleForm.name.trim() || !scheduleForm.scenarioId || !scheduleForm.cronExpression.trim() || !scheduleForm.timezone.trim()) { Message.warning('请填写计划名称、场景、Cron 表达式和时区'); return }
+  const scope = projectContext(), token = scheduleDialogSequence, editingId = editingScheduleId.value
+  const current = () => scope.current() && token === scheduleDialogSequence && scheduleVisible.value
   savingSchedule.value = true
   try {
-    if (editingScheduleId.value) await mutate<AutomationSchedule>(`/api/v1/projects/${projectId.value}/api-automation/schedules/${editingScheduleId.value}`, 'PUT', schedulePayload())
-    else await mutate<AutomationSchedule>(`/api/v1/projects/${projectId.value}/api-automation/schedules`, 'POST', schedulePayload())
+    if (editingId) await mutate<AutomationSchedule>(`/api/v1/projects/${scope.project}/api-automation/schedules/${editingId}`, 'PUT', schedulePayload(), current)
+    else await mutate<AutomationSchedule>(`/api/v1/projects/${scope.project}/api-automation/schedules`, 'POST', schedulePayload(), current)
+    if (!current()) return
+    await loadSchedules(current)
+    if (!current()) return
     scheduleVisible.value = false
-    await loadSchedules()
-    Message.success(editingScheduleId.value ? '定时计划已更新' : '定时计划已创建')
-  } catch (error) { Message.error(error instanceof Error ? error.message : '保存定时计划失败') } finally { savingSchedule.value = false }
+    Message.success(editingId ? '定时计划已更新' : '定时计划已创建')
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '保存定时计划失败') } finally { if (current()) savingSchedule.value = false }
 }
 
 async function runSchedule(schedule: AutomationSchedule) {
@@ -1065,12 +1160,13 @@ watch(projectId, () => {
 })
 onMounted(async () => {
   await load()
+  if (pageDisposed) return
   executionPoller = window.setInterval(() => {
     void loadExecutions().catch(() => undefined)
     if (executionDetailVisible.value) void loadExecutionDetail()
   }, 1500)
 })
-onUnmounted(() => { webhookDialogSequence++; createdWebhookSecret.value = ''; if (executionPoller) window.clearInterval(executionPoller) })
+onUnmounted(() => { pageDisposed = true; projectSequence++; webhookDialogSequence++; createdWebhookSecret.value = ''; if (executionPoller) window.clearInterval(executionPoller) })
 </script>
 
 <template>
@@ -1304,7 +1400,7 @@ onUnmounted(() => { webhookDialogSequence++; createdWebhookSecret.value = ''; if
           <template v-else-if="selectedStep.type === 'ASSERT'"><a-form-item label="期望状态码"><a-input-number :model-value="Number(configValue('expectedStatus', 200))" :min="100" :max="599" :style="{ width: '100%' }" @change="setConfig('expectedStatus', Number($event))" /></a-form-item></template>
           <template v-else-if="selectedStep.type === 'CONDITION'"><a-form-item label="条件"><a-select :model-value="String(configValue('operator', 'EQUALS'))" @change="setConfig('operator', String($event))"><a-option value="EQUALS">状态码等于</a-option><a-option value="NOT_EQUALS">状态码不等于</a-option></a-select></a-form-item><a-form-item label="状态码"><a-input-number :model-value="Number(configValue('expectedStatus', 200))" :min="100" :max="599" :style="{ width: '100%' }" @change="setConfig('expectedStatus', Number($event))" /></a-form-item></template>
           <template v-else-if="selectedStep.type === 'LOOP'"><a-form-item label="总执行次数"><a-input-number :model-value="Number(configValue('totalRuns', 2))" :min="1" :max="10" :style="{ width: '100%' }" @change="setConfig('totalRuns', Number($event))" /></a-form-item></template>
-          <template v-else-if="selectedStep.type === 'WAIT'"><a-form-item label="等待时间"><a-input-number :model-value="Number(configValue('delayMillis', 300))" :min="0" :max="600000" :style="{ width: '100%' }" @change="setConfig('delayMillis', Number($event))"><template #suffix>ms</template></a-input-number></a-form-item></template>
+          <template v-else-if="selectedStep.type === 'WAIT'"><a-form-item label="等待时间" :validate-status="waitDelayError ? 'error' : undefined" :help="waitDelayError || '0–600000 毫秒；支持精确整数写法，如 10、10.0、1e1。'"><a-input :model-value="waitDelayText" aria-label="WAIT 延迟（毫秒）" inputmode="decimal" @input="setWaitDelayInput"><template #suffix>ms</template></a-input></a-form-item></template>
           <template v-else-if="selectedStep.type === 'REUSABLE_STEP'"><a-form-item label="公共步骤"><a-select :model-value="String(configValue('reusableStepId', ''))" @change="selectReusableStep(String($event))"><a-option v-for="item in reusableSteps" :key="item.id" :value="item.id">{{ item.name }} · v{{ item.version }}</a-option></a-select></a-form-item></template>
           <template v-else-if="selectedStep.type === 'SUB_SCENARIO'"><a-form-item label="其他场景"><a-select :model-value="String(configValue('scenarioId', ''))" @change="selectSubScenario(String($event))"><a-option v-for="item in scenarios.filter((scenario) => scenario.id !== detail?.id)" :key="item.id" :value="item.id">{{ item.name }} · v{{ item.version }}</a-option></a-select></a-form-item></template>
         </a-form>
@@ -1335,7 +1431,7 @@ onUnmounted(() => { webhookDialogSequence++; createdWebhookSecret.value = ''; if
       </a-form>
     </a-modal>
 
-    <a-modal v-model:visible="createVisible" title="新建接口自动化场景" width="600px" :ok-loading="saving" :on-before-ok="() => submitDialog(createScenario)">
+    <a-modal v-model:visible="createVisible" title="新建接口自动化场景" width="600px" :ok-loading="creatingScenario" :on-before-ok="() => submitDialog(createScenario)">
       <a-form :model="createForm" layout="vertical">
         <a-form-item label="场景名称" required>
           <a-input v-model="createForm.name" :max-length="160" placeholder="例如：订单核心链路回归" />

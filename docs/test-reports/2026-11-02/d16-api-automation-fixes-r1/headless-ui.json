@@ -1,0 +1,19 @@
+{
+  "headless": true,
+  "isolatedHttpFixtures": true,
+  "realBackendAcceptance": false,
+  "cases": [
+    {
+      "id": "TC-D16API-24",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16API-25",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": true,
+  "browserVersion": "156.0.8078.76",
+  "passed": 2,
+  "failed": 0
+}

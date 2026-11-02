@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { reactive } from 'vue'
-import ArcoVue, { Modal, Input, Select } from '@arco-design/web-vue'
+import ArcoVue, { Modal, Input, Select, Message } from '@arco-design/web-vue'
 import MockServicePage from '@/pages/MockServicePage.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import CodeEditor from '@/components/CodeEditor.vue'
@@ -9,7 +9,7 @@ import CodeEditor from '@/components/CodeEditor.vue'
 const state = reactive({ projectId: 'p1', selectProject(id: string) { this.projectId = id }, resolveProjectId: () => 'p1' })
 vi.mock('@/stores/session', () => ({ useSessionStore: () => state }))
 const wrappers: ReturnType<typeof shallowMount>[] = []
-afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.useRealTimers(); state.projectId = 'p1' })
+afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.useRealTimers(); state.projectId = 'p1' })
 const server = (id: string) => ({ id, name: id, publicKey: id, projectId: 'p1', enabled: true, smartExampleEnabled: false, ruleCount: 0, createdAt: '2026-09-01T00:00:00Z' })
 const share = (id: string, expiresAt: string | null, revokedAt: string | null = null) => ({ id, shareKey: id, name: id, expiresAt, revokedAt, createdAt: '2026-09-01T00:00:00Z' })
 const shares = [share('expired', '2020-01-01T00:00:00Z'), share('forever', null), share('revoked', null, '2026-09-01T00:00:00Z')]
@@ -159,5 +159,168 @@ describe('Mock editor cancellation',()=>{
     editor(wrapper).editRule(editableRule);await flushPromises();const dialog=modal(wrapper,'编辑 Mock 规则'),pending=dialog.props('onBeforeOk')!(vi.fn());await flushPromises()
     dialog.vm.$emit('cancel');editor(wrapper).editRule({...editableRule,id:'r2',name:'Another'});await flushPromises();release({...editableRule,responseBody:'late'});await pending;await flushPromises()
     expect(modal(wrapper,'编辑 Mock 规则').props('visible')).toBe(true);expect(modal(wrapper,'编辑 Mock 规则').findAllComponents(Input)[0].props('modelValue')).toBe('Another')
+  })
+})
+
+describe('Mock creation response ownership', () => {
+  it.each(['server', 'share'] as const)('ignores a late %s creation after a replacement dialog opens', async (kind) => {
+    let release!: (value: unknown) => void
+    const endpoint = kind === 'server' ? '/servers' : '/s1/shares'
+    const { wrapper } = await setup((url, method) => url.endsWith(endpoint) && method === 'POST'
+      ? new Promise(resolve => { release = resolve }) : undefined)
+    const title = kind === 'server' ? '新建 Mock 服务' : '创建只读 Mock 分享'
+    const open = () => kind === 'server' ? wrapper.findComponent(PageHeader).vm.$emit('action')
+      : wrapper.findAllComponents({ name: 'Button' }).find(b => b.text().includes('创建只读分享'))!.vm.$emit('click')
+    open(); await flushPromises()
+    const dialog = modal(wrapper, title)
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'First'); await flushPromises()
+    const pending = dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    dialog.vm.$emit('cancel'); dialog.vm.$emit('update:visible', false); await flushPromises()
+    open(); await flushPromises()
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'Replacement'); await flushPromises()
+    release(kind === 'server' ? server('old-server') : share('old-share', null))
+    await pending; await flushPromises()
+    expect(dialog.props('visible')).toBe(true)
+    expect(dialog.findComponent(Input).props('modelValue')).toBe('Replacement')
+    expect(dialog.props('okLoading')).toBe(false)
+  })
+
+  it('does not read an old created server through a new project path', async () => {
+    let release!: (value: unknown) => void
+    const { wrapper } = await setup((url, method) => url.endsWith('/servers') && method === 'POST'
+      ? new Promise(resolve => { release = resolve }) : undefined)
+    wrapper.findComponent(PageHeader).vm.$emit('action'); await flushPromises()
+    const dialog = modal(wrapper, '新建 Mock 服务')
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'Old'); await flushPromises()
+    const pending = dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    state.projectId = 'p2'; await flushPromises()
+    release(server('old-server')); await pending; await flushPromises()
+    expect(wrapper.findAll('.server-row').map(row => row.text()).join()).not.toContain('old-server')
+    expect(vi.mocked(fetch).mock.calls.some(([url]) => String(url).includes('/projects/p2/mock/servers/old-server/'))).toBe(false)
+  })
+
+  it('does not display an old service share after switching services', async () => {
+    let release!: (value: unknown) => void
+    const { wrapper } = await setup((url, method) => url.endsWith('/s1/shares') && method === 'POST'
+      ? new Promise(resolve => { release = resolve }) : undefined)
+    wrapper.findAllComponents({ name: 'Button' }).find(b => b.text().includes('创建只读分享'))!.vm.$emit('click'); await flushPromises()
+    const dialog = modal(wrapper, '创建只读 Mock 分享')
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'Old share'); await flushPromises()
+    const pending = dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    await wrapper.findAll('.server-row')[1].trigger('click'); await flushPromises()
+    release(share('old-share', null)); await pending; await flushPromises()
+    expect(wrapper.findAllComponents({ name: 'Table' })[2].props('data')).not.toContainEqual(expect.objectContaining({ id: 'old-share' }))
+  })
+
+  it.each(['server', 'share'] as const)('cancelling %s before CSRF returns prevents the outgoing creation', async (kind) => {
+    let release!: (value: unknown) => void
+    const { wrapper, writes } = await setup(url => url.endsWith('/auth/csrf') ? new Promise(resolve => { release = resolve }) : undefined)
+    if (kind === 'server') wrapper.findComponent(PageHeader).vm.$emit('action')
+    else wrapper.findAllComponents({ name: 'Button' }).find(b => b.text().includes('创建只读分享'))!.vm.$emit('click')
+    await flushPromises()
+    const dialog = modal(wrapper, kind === 'server' ? '新建 Mock 服务' : '创建只读 Mock 分享')
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'Cancelled'); await flushPromises()
+    const pending = dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    dialog.vm.$emit('cancel'); dialog.vm.$emit('update:visible', false); await flushPromises()
+    release({ token: 'test', headerName: 'X-CSRF' }); await pending; await flushPromises()
+    expect(writes).toHaveLength(0)
+  })
+
+  it.each(['server', 'share'] as const)('does not let an old %s completion unlock a newer pending save', async (kind) => {
+    const releases: Array<(value: unknown) => void> = []
+    const endpoint = kind === 'server' ? '/servers' : '/s1/shares'
+    const { wrapper, writes } = await setup((url, method) => url.endsWith(endpoint) && method === 'POST'
+      ? new Promise(resolve => { releases.push(resolve) }) : undefined)
+    const open = () => kind === 'server' ? wrapper.findComponent(PageHeader).vm.$emit('action')
+      : wrapper.findAllComponents({ name: 'Button' }).find(b => b.text().includes('创建只读分享'))!.vm.$emit('click')
+    open(); await flushPromises()
+    const dialog = modal(wrapper, kind === 'server' ? '新建 Mock 服务' : '创建只读 Mock 分享')
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'Old'); await flushPromises()
+    const first = dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    dialog.vm.$emit('cancel'); dialog.vm.$emit('update:visible', false); await flushPromises()
+    open(); await flushPromises()
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'New'); await flushPromises()
+    const second = dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    const result = (id: string) => kind === 'server' ? server(id) : share(id, null)
+    releases[0](result('old')); await first; await flushPromises()
+    expect(dialog.props('okLoading')).toBe(true)
+    await dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    expect(writes).toHaveLength(2)
+    releases[1](result('new')); await second; await flushPromises()
+    expect(dialog.props('visible')).toBe(false)
+    expect(dialog.props('okLoading')).toBe(false)
+  })
+
+  it.each(['server', 'share'] as const)('ignores an old %s failure after a replacement dialog opens', async (kind) => {
+    let reject!: (reason: Error) => void
+    const error = vi.spyOn(Message, 'error')
+    const endpoint = kind === 'server' ? '/servers' : '/s1/shares'
+    const { wrapper } = await setup((url, method) => url.endsWith(endpoint) && method === 'POST'
+      ? new Promise((_resolve, rejectPromise) => { reject = rejectPromise }) : undefined)
+    const open = () => kind === 'server' ? wrapper.findComponent(PageHeader).vm.$emit('action')
+      : wrapper.findAllComponents({ name: 'Button' }).find(b => b.text().includes('创建只读分享'))!.vm.$emit('click')
+    open(); await flushPromises()
+    const dialog = modal(wrapper, kind === 'server' ? '新建 Mock 服务' : '创建只读 Mock 分享')
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'Old'); await flushPromises()
+    const pending = dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    dialog.vm.$emit('cancel'); dialog.vm.$emit('update:visible', false); await flushPromises()
+    open(); await flushPromises()
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'Replacement'); await flushPromises()
+    reject(new Error('old failure')); await pending; await flushPromises()
+    expect(error).not.toHaveBeenCalled()
+    expect(dialog.props('visible')).toBe(true)
+    expect(dialog.findComponent(Input).props('modelValue')).toBe('Replacement')
+  })
+
+  it.each(['server', 'share'] as const)('does not create a %s after unmounting while CSRF is pending', async (kind) => {
+    let release!: (value: unknown) => void
+    const { wrapper, writes } = await setup(url => url.endsWith('/auth/csrf') ? new Promise(resolve => { release = resolve }) : undefined)
+    const dialog = modal(wrapper, kind === 'server' ? '新建 Mock 服务' : '创建只读 Mock 分享')
+    dialog.findComponent(Input).vm.$emit('update:modelValue', 'Old'); await flushPromises()
+    const pending = dialog.props('onBeforeOk')!(vi.fn()); await flushPromises()
+    wrapper.unmount(); wrappers.splice(wrappers.indexOf(wrapper), 1)
+    release({ token: 'test', headerName: 'X-CSRF' }); await pending; await flushPromises()
+    expect(writes).toHaveLength(0)
+  })
+})
+
+describe('Mock detail request ordering', () => {
+  it.each([
+    ['rules', 1, { id: 'new-rule', name: 'New rule' }],
+    ['smart-examples', 0, { apiId: 'new-api', name: 'New API' }],
+    ['shares', 2, share('new-share', null)],
+  ] as const)('preserves the newer %s list after A/B/A switching', async (suffix, tableIndex, fresh) => {
+    let release!: (value: unknown) => void
+    let armed = false, held = false
+    const { wrapper } = await setup((url, method) => {
+      if (armed && method === 'GET' && url.endsWith('/s1/' + suffix)) {
+        if (!held) { held = true; return new Promise(resolve => { release = resolve }) }
+        return [fresh]
+      }
+    })
+    armed = true
+    await wrapper.findAll('.server-row')[0].trigger('click'); await flushPromises()
+    await wrapper.findAll('.server-row')[1].trigger('click'); await flushPromises()
+    await wrapper.findAll('.server-row')[0].trigger('click'); await flushPromises()
+    expect(wrapper.findAllComponents({ name: 'Table' })[tableIndex].props('data')).toEqual([fresh])
+    release([]); await flushPromises()
+    expect(wrapper.findAllComponents({ name: 'Table' })[tableIndex].props('data')).toEqual([fresh])
+  })
+
+  it.each(['rules', 'smart-examples', 'shares'])('ignores a late %s error after a newer successful refresh', async (suffix) => {
+    let reject!: (reason: Error) => void
+    let armed = false, held = false
+    const error = vi.spyOn(Message, 'error')
+    const { wrapper } = await setup((url, method) => {
+      if (armed && method === 'GET' && url.endsWith('/s1/' + suffix) && !held) {
+        held = true; return new Promise((_resolve, rejectPromise) => { reject = rejectPromise })
+      }
+    })
+    armed = true
+    await wrapper.findAll('.server-row')[0].trigger('click'); await flushPromises()
+    await wrapper.findAll('.server-row')[1].trigger('click'); await flushPromises()
+    await wrapper.findAll('.server-row')[0].trigger('click'); await flushPromises()
+    reject(new Error('stale list failure')); await flushPromises()
+    expect(error).not.toHaveBeenCalled()
   })
 })

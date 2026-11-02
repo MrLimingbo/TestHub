@@ -43,6 +43,7 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, DaoAuthenticationProvider provider,
                                             SecurityApiErrorHandler errorHandler,
+                                            io.testhub.platform.account.UserAccountRepository accountsForSessions,
                                             PersonalAccessTokenAuthenticationFilter tokenAuthenticationFilter,
                                             org.springframework.core.env.Environment environment,
                                             @Value("${testhub.security.cors.allowed-origins}") List<String> allowedOrigins) throws Exception {
@@ -76,6 +77,7 @@ public class SecurityConfiguration {
                 .requestCache(requestCache -> requestCache.disable())
                 .authenticationProvider(provider)
                 .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new AccountSessionValidationFilter(accountsForSessions, errorHandler), PersonalAccessTokenAuthenticationFilter.class)
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint(errorHandler)
                         .accessDeniedHandler(errorHandler))

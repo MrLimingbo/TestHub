@@ -1,0 +1,83 @@
+{
+  "formalCases": 40,
+  "countsNotAdditive": true,
+  "before": {
+    "backend": {
+      "total": 35,
+      "passed": 24,
+      "failed": 11,
+      "errors": 0
+    },
+    "page": {
+      "total": 5,
+      "passed": 3,
+      "failed": 2
+    },
+    "note": "有效业务复现；夹具编译、选择器调试不计产品Bug；循环首失败后未运行的后续变体不冒称修复前已动态执行。"
+  },
+  "after": {
+    "frontend": {
+      "total": 902,
+      "passed": 902,
+      "failed": 0
+    },
+    "frontendTypeFixtureFollowup": {
+      "total": 7,
+      "passed": 7
+    },
+    "H2": {
+      "total": 1167,
+      "passed": 1164,
+      "failed": 0,
+      "skipped": 3
+    },
+    "MySQLAffected": {
+      "suites": 6,
+      "total": 61,
+      "passed": 61,
+      "failed": 0,
+      "skipped": 0
+    },
+    "exchangeVariantsH2": {
+      "total": 35,
+      "passed": 35,
+      "failed": 0
+    },
+    "exchangeVariantsMySQL": {
+      "total": 35,
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "groups": 4,
+      "passed": 4,
+      "headless": true,
+      "realBackend": false
+    },
+    "realJarHttp": {
+      "groups": 5,
+      "passed": 5,
+      "electronUpgradeTest": false
+    },
+    "static": {
+      "lint": true,
+      "typecheck": true,
+      "build": true,
+      "diffCheck": true
+    }
+  },
+  "variantNote": "最终审阅补齐迁移/同步的全部三类条件Map、两类正文、两类数值；每入口26个拒绝资料变体，合法priority/status三组配对等值写法。只扩充既有27–30用例，不增加正式分母。生产代码未在补验期间改变。",
+  "warnings": [
+    "既有apiDesignFixes.test.ts两条vue/require-prop-types警告",
+    "Monaco依赖缺少source map提示",
+    "Vite大块体积建议"
+  ],
+  "productBugAccounting": {
+    "observationAddressed": 1,
+    "id": "OBS-09-E013",
+    "newConfirmedProductBugs": 0,
+    "historical108ProductBugsFrozen": true,
+    "historical1AssetIssueFrozen": true
+  }
+}

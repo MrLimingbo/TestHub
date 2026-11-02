@@ -36,6 +36,10 @@ public class AuditService {
                 resourceType, resourceId, "SUCCESS", "system", null, detail == null ? Map.of() : Map.copyOf(detail), null));
     }
 
+    public List<String> actions(String projectId) {
+        return repository.findActions(projectId);
+    }
+
     public List<AuditLogEntry> recent(String projectId, String action, int limit) {
         return repository.findRecent(projectId, action, Math.min(Math.max(limit, 1), 200));
     }

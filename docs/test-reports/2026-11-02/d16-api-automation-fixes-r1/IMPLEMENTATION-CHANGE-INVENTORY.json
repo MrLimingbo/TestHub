@@ -1,0 +1,94 @@
+{
+  "baselineFiles": 1386,
+  "unmodifiedBaselineFiles": 1376,
+  "modified": [
+    {
+      "path": "src/pages/AutomationPage.vue",
+      "beforeSha256": "3c878e795d66a4a7b492d55727ec664d3cddc3b981a62adc281d44472f62bb8d",
+      "afterSha256": "44c8309972a7422513061480103c33e1c9af1b1c137c9a33530c6097e0d5182e"
+    },
+    {
+      "path": "scripts/desktop/test-mysql-backend.mjs",
+      "beforeSha256": "cae8978f7bf21ba28178b489386d2cef0960241f0f51356611cd31a3a575ab46",
+      "afterSha256": "649d411c65480fc5614af2ccf8e1b22d01c02ad0c9a8791b8d58feb1b5c36e3c"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/AutomationStep.java",
+      "beforeSha256": "26fb911ca350911f884fcbf7eaab8ec78044469b2c2c1a572a22685a2b8eee25",
+      "afterSha256": "1f316cd37e3f5239f784695ccf60299393a776b7aebbef03667844a3464a8a58"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioController.java",
+      "beforeSha256": "d9ab80b8b03dd6e528110610ba59ee29f678242247ea781b03b982c37eb36bdf",
+      "afterSha256": "45b7b470b210ebe33892928f14e9e3987d0ef4428c08838c9c32653c30786a84"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioExpansionService.java",
+      "beforeSha256": "d68ce15b04b9c04f0c3a597cb3af65a929dc712cf7114e22ea3964d6ac223973",
+      "afterSha256": "ba3f612cdd0277e85cbe7a2e45103d1fe4c7f8629ea9a05db80a06b6a432125f"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioSyncProjection.java",
+      "beforeSha256": "287ad1591f0f8bde64e551699aa0088e06f30d80faae9da60a1c161eeacb7528",
+      "afterSha256": "220c86f1ac038b50229a0aac300b2c2f18942b993916a5624984c6d2de83c8e2"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationReusableStepController.java",
+      "beforeSha256": "8228986e347fa9121f3ba5a71028b7e9290ae33fc4389111564c09b2afb1dd14",
+      "afterSha256": "263bbba6c570776636a6cb6362ee0e1af899373602c11344917b7d3f7d2bb6e7"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationScenarioService.java",
+      "beforeSha256": "e65d0cfeee7f59e21c99ea311229bfb756dfaa08224eb31bb0948e6415781f59",
+      "afterSha256": "14d1c85ac5ab2b8d1ed080cd3f1fb4263a0216ea9ba9a16b3de3f8658895276e"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiAutomationAssetSyncService.java",
+      "beforeSha256": "10a9fed50909bb4b74bf2607a561f91457e3926302b7fb49a7b71114e296e4e8",
+      "afterSha256": "abdc69ae005f5e71bf04bd6f331dad4e677ab0d885b209b07c0edb6fcb022c12"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/ApiRunnerRuntimeLeaseService.java",
+      "beforeSha256": "6191f52d086c21eee23e4a1289c8b4ac8b38a09a1b24078b24bf04ef1c4cd1d4",
+      "afterSha256": "2cfaef0d732176ba9d03c29b4135716b7e6fdff84698dac14837c456a245405b"
+    }
+  ],
+  "added": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/WaitDelayMillis.java",
+      "sha256": "0dcfa9c64e8f1e0b50b8c48308ab930a525dcd47625f142d3565e64e85bc2cce"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apiautomation/WaitStepJson.java",
+      "sha256": "805b8c50882cd394d72a8c3265bb48cf65812f9300449fc50283e5fed2b1aeba"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D16ApiWaitFlowTests.java",
+      "sha256": "20ccd50a65fb0a38fef7a232d4f367f806be906e3541d80340f581f6d3a4bd46"
+    },
+    {
+      "path": "services/api-runner/test/d16-wait.test.js",
+      "sha256": "44d44d446029c57589fc4606786679a9f409701fbc5ab0550e70ea7b338b6a58"
+    },
+    {
+      "path": "src/utils/waitDelay.ts",
+      "sha256": "701aa14e6c4a3b21218b8321e51af156d5c71396f1bb45ee527b4acb663f8213"
+    },
+    {
+      "path": "src/test/d16ApiWaitPage.test.ts",
+      "sha256": "9d6ae542f9f03842d9652254410e8aa90164d5ebc036ac10f51dd0ed52f32acb"
+    },
+    {
+      "path": "src/test/d16WaitDelay.test.ts",
+      "sha256": "d927563d4038a13d495327106ce73e539e5a9c9cabac20829b92bca76de0cac6"
+    },
+    {
+      "path": "scripts/qa/d16-api-wait-http.mjs",
+      "sha256": "1337b4ecff1389057f68f4b1f907d49f04951c53dfed5c6fc7fbe60b064da636"
+    },
+    {
+      "path": "scripts/qa/d16-api-wait-ui.mjs",
+      "sha256": "ba9755a8753de8b617afe4987cf64778c6dec5767d308fecda6673db30c23fc9"
+    }
+  ]
+}

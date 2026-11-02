@@ -1,0 +1,150 @@
+{
+  "total": 35,
+  "passed": 35,
+  "failed": 0,
+  "cases": [
+    {
+      "name": "transferValid",
+      "status": "PASS"
+    },
+    {
+      "name": "errorLocationAndPrivacy",
+      "status": "PASS"
+    },
+    {
+      "name": "editValid",
+      "status": "PASS"
+    },
+    {
+      "name": "statusExact",
+      "status": "PASS"
+    },
+    {
+      "name": "statusRange",
+      "status": "PASS"
+    },
+    {
+      "name": "statusUpper",
+      "status": "PASS"
+    },
+    {
+      "name": "transferInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "numericStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "receipts",
+      "status": "PASS"
+    },
+    {
+      "name": "revisionConflict",
+      "status": "PASS"
+    },
+    {
+      "name": "runtimeMatching",
+      "status": "PASS"
+    },
+    {
+      "name": "permission",
+      "status": "PASS"
+    },
+    {
+      "name": "bodyStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "statusFractions",
+      "status": "PASS"
+    },
+    {
+      "name": "editInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "shareAtomic",
+      "status": "PASS"
+    },
+    {
+      "name": "queryStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "overflowAndRawNonFinite",
+      "status": "PASS"
+    },
+    {
+      "name": "nullTextPolicy",
+      "status": "PASS"
+    },
+    {
+      "name": "expiryInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "mapTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "syncInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "expiryExact",
+      "status": "PASS"
+    },
+    {
+      "name": "expiryUpper",
+      "status": "PASS"
+    },
+    {
+      "name": "syncValid",
+      "status": "PASS"
+    },
+    {
+      "name": "priorityExact",
+      "status": "PASS"
+    },
+    {
+      "name": "priorityLower",
+      "status": "PASS"
+    },
+    {
+      "name": "priorityUpper",
+      "status": "PASS"
+    },
+    {
+      "name": "ruleDefaults",
+      "status": "PASS"
+    },
+    {
+      "name": "expiryPermanent",
+      "status": "PASS"
+    },
+    {
+      "name": "bodyTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "oldReadOnly",
+      "status": "PASS"
+    },
+    {
+      "name": "priorityFractions",
+      "status": "PASS"
+    },
+    {
+      "name": "headerStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "numericTypes",
+      "status": "PASS"
+    }
+  ],
+  "scope": "Existing formal 27/28/29/30 expanded variants; 26 invalid payloads per transfer/sync, 3 paired exact priority/status representations; same formal denominator40",
+  "command": "JAVA_HOME=<JDK21> node scripts/qa/test-p2-backend.mjs P2D16MockFlowTests",
+  "buildSuccess": true
+}

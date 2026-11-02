@@ -8,6 +8,7 @@ import io.grpc.Status;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
 import io.testhub.platform.audit.AuditService;
+import io.testhub.platform.parameter.ProjectEnvironmentRepository;
 import io.testhub.platform.parameter.ProjectParameterRepository;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.security.SecretCipher;
@@ -38,7 +39,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Project-scoped gRPC Unary debugger. Raw protobuf descriptors and request/response
- * JSON stay in process memory and are never added to debug history or audit details.
+ * Response JSON and raw descriptors are not persisted in history. Unary request configuration
+ * is encrypted for authorized replay under the shared 30-day policy; audit details exclude its values.
  */
 @Service
 public class GrpcDebugService {
@@ -72,18 +74,20 @@ public class GrpcDebugService {
     private final AccessService access;
     private final AuditService audit;
     private final ProjectParameterRepository parameters;
+    private final ProjectEnvironmentRepository environments;
     private final SecretCipher cipher;
     private final ObjectMapper json;
     private final GrpcDescriptorService descriptors;
     private final DesktopApiDebugTargetPolicy desktopTargets;
 
     public GrpcDebugService(GrpcDebugTransport transport, ApiDebugHistoryRepository history, AccessService access, AuditService audit,
-                            ProjectParameterRepository parameters, SecretCipher cipher, ObjectMapper json, GrpcDescriptorService descriptors, DesktopApiDebugTargetPolicy desktopTargets) {
+                            ProjectParameterRepository parameters, ProjectEnvironmentRepository environments, SecretCipher cipher, ObjectMapper json, GrpcDescriptorService descriptors, DesktopApiDebugTargetPolicy desktopTargets) {
         this.transport = transport;
         this.history = history;
         this.access = access;
         this.audit = audit;
         this.parameters = parameters;
+        this.environments = environments;
         this.cipher = cipher;
         this.json = json;
         this.descriptors = descriptors;
@@ -275,7 +279,7 @@ public class GrpcDebugService {
     }
 
     public ClientStreamSessionSummary sendClientStreamMessage(AuthenticatedPrincipal principal, String projectId, String sessionId, ClientStreamMessageInput input) {
-        access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
         if (input == null || input.requestJson() == null) throw rejected("gRPC 客户端流消息不能为空");
         ClientStreamSessionState session = ownedClientStream(principal, projectId, sessionId);
         String requestJson = variables(projectId, session.environmentCode()).resolve(input.requestJson());
@@ -284,6 +288,7 @@ public class GrpcDebugService {
         try {
             return session.send(requestJson);
         } catch (GrpcDebugTransport.TransportException exception) {
+            if ("CLIENT_STREAM_LIMIT".equals(exception.status())) auditClientStreamFinished(principal, project, session);
             throw new ResponseStatusException(HttpStatus.CONFLICT, safeMessage(exception.status()));
         }
     }
@@ -375,7 +380,7 @@ public class GrpcDebugService {
     }
 
     public BidiStreamSessionSummary sendBidiStreamMessage(AuthenticatedPrincipal principal, String projectId, String sessionId, BidiStreamMessageInput input) {
-        access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
         if (input == null || input.requestJson() == null) throw rejected("gRPC 双向流消息不能为空");
         BidiStreamSessionState session = ownedBidiStream(principal, projectId, sessionId);
         String requestJson = variables(projectId, session.environmentCode()).resolve(input.requestJson());
@@ -384,6 +389,7 @@ public class GrpcDebugService {
         try {
             return session.send(requestJson);
         } catch (GrpcDebugTransport.TransportException exception) {
+            if ("BIDI_STREAM_LIMIT".equals(exception.status())) auditBidiStreamFinished(principal, project, session);
             throw new ResponseStatusException(HttpStatus.CONFLICT, safeMessage(exception.status()));
         }
     }
@@ -507,7 +513,16 @@ public class GrpcDebugService {
 
     private String encryptedReplayDraft(UnaryRequest input) {
         try {
-            return cipher.encrypt(json.writeValueAsString(Map.of("protocol", "GRPC", "request", input)));
+            AuthInput auth = input.auth();
+            AuthInput savedAuth = auth == null ? null : switch (auth.type() == null ? "NONE" : auth.type().trim().toUpperCase(Locale.ROOT)) {
+                case "BEARER" -> new AuthInput("BEARER", auth.token(), null, null, null, null);
+                case "BASIC" -> new AuthInput("BASIC", null, auth.username(), auth.password(), null, null);
+                case "API_KEY" -> new AuthInput("API_KEY", null, null, null, auth.key(), auth.value());
+                default -> new AuthInput("NONE", null, null, null, null, null);
+            };
+            var request = new UnaryRequest(input.endpoint(), input.tls(), input.service(), input.method(), input.requestJson(),
+                    input.timeoutMs(), input.environmentCode(), input.metadata(), savedAuth, input.descriptorId());
+            return cipher.encrypt(json.writeValueAsString(Map.of("protocol", "GRPC", "request", request)));
         } catch (JsonProcessingException exception) {
             throw new IllegalStateException("无法加密保存 gRPC 回放草稿", exception);
         }
@@ -733,6 +748,9 @@ public class GrpcDebugService {
     private ResolutionContext variables(String projectId, String environmentCode) {
         Map<String, VariableValue> values = new HashMap<>();
         if (environmentCode != null) {
+            var selectedEnvironment = environments.findByCode(projectId, environmentCode)
+                    .orElseThrow(() -> rejected("请选择当前项目中已存在的运行环境"));
+            if (!selectedEnvironment.enabled()) throw rejected("所选运行环境已停用");
             for (ProjectParameterRepository.DebugParameter parameter : parameters.findForDebug(projectId, environmentCode)) {
                 try {
                     values.put(parameter.key(), new VariableValue(parameter.secret() ? cipher.decrypt(parameter.value()) : parameter.value(), parameter.secret()));
@@ -1107,6 +1125,7 @@ public class GrpcDebugService {
         }
 
         private ClientStreamSessionSummary send(String payload) throws GrpcDebugTransport.TransportException {
+            GrpcDebugTransport.ClientStreamSubscription cancel;
             synchronized (monitor) {
                 if (!"OPEN".equals(status) || subscription == null) throw new GrpcDebugTransport.TransportException("CLIENT_STREAM_CLOSED");
                 byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
@@ -1114,13 +1133,16 @@ public class GrpcDebugService {
                     throw new GrpcDebugTransport.TransportException("CLIENT_STREAM_MESSAGE_TOO_LARGE");
                 }
                 if (sentMessageCount >= MAX_CLIENT_STREAM_MESSAGES || sentBytes + bytes.length > MAX_CLIENT_STREAM_REQUEST_BYTES) {
-                    throw new GrpcDebugTransport.TransportException("CLIENT_STREAM_LIMIT");
+                    cancel = limitReached("已达到客户端流发送 100 条消息或 512 KB 上限");
+                } else {
+                    subscription.send(payload);
+                    sentMessageCount++;
+                    sentBytes += bytes.length;
+                    return summary();
                 }
-                subscription.send(payload);
-                sentMessageCount++;
-                sentBytes += bytes.length;
-                return summary();
             }
+            if (cancel != null) cancel.cancel("TestHub client stream request limit reached");
+            throw new GrpcDebugTransport.TransportException("CLIENT_STREAM_LIMIT");
         }
 
         private void complete() {
@@ -1284,6 +1306,7 @@ public class GrpcDebugService {
         }
 
         private BidiStreamSessionSummary send(String payload) throws GrpcDebugTransport.TransportException {
+            GrpcDebugTransport.BidiStreamSubscription cancel;
             synchronized (monitor) {
                 if (!"OPEN".equals(status) || subscription == null) throw new GrpcDebugTransport.TransportException("BIDI_STREAM_CLOSED");
                 byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
@@ -1291,13 +1314,16 @@ public class GrpcDebugService {
                     throw new GrpcDebugTransport.TransportException("BIDI_STREAM_MESSAGE_TOO_LARGE");
                 }
                 if (sentMessageCount >= MAX_BIDI_STREAM_MESSAGES || sentBytes + bytes.length > MAX_BIDI_STREAM_REQUEST_BYTES) {
-                    throw new GrpcDebugTransport.TransportException("BIDI_STREAM_LIMIT");
+                    cancel = limitReached("已达到双向流发送 100 条消息或 512 KB 上限");
+                } else {
+                    subscription.send(payload);
+                    sentMessageCount++;
+                    sentBytes += bytes.length;
+                    return summary();
                 }
-                subscription.send(payload);
-                sentMessageCount++;
-                sentBytes += bytes.length;
-                return summary();
             }
+            if (cancel != null) cancel.cancel("TestHub bidirectional stream request limit reached");
+            throw new GrpcDebugTransport.TransportException("BIDI_STREAM_LIMIT");
         }
 
         private GrpcDebugTransport.BidiStreamSubscription received(String payload) {

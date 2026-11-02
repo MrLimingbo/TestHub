@@ -1,0 +1,250 @@
+{
+  "model_name": "批准单响应码跨格式完整矩阵",
+  "mode": "full",
+  "parameters": [
+    {
+      "name": "format",
+      "values": [
+        {
+          "value": "OpenAPI",
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "OpenAPI、Postman、HAR"
+        },
+        {
+          "value": "Postman",
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "OpenAPI、Postman、HAR"
+        },
+        {
+          "value": "HAR",
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "OpenAPI、Postman、HAR"
+        }
+      ]
+    },
+    {
+      "name": "statusCode",
+      "values": [
+        {
+          "value": 100,
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "100至599"
+        },
+        {
+          "value": 201,
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "201、204、301、400、404、500"
+        },
+        {
+          "value": 204,
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "201、204、301、400、404、500"
+        },
+        {
+          "value": 301,
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "201、204、301、400、404、500"
+        },
+        {
+          "value": 400,
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "201、204、301、400、404、500"
+        },
+        {
+          "value": 404,
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "201、204、301、400、404、500"
+        },
+        {
+          "value": 500,
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "201、204、301、400、404、500"
+        },
+        {
+          "value": 599,
+          "source_ref": "SRC-002#heading/D09-·-导出保留已存响应状态码",
+          "quote": "100至599"
+        }
+      ]
+    }
+  ],
+  "exclusions": [],
+  "combinations": [
+    {
+      "id": "COMB-001",
+      "values": {
+        "format": "OpenAPI",
+        "statusCode": 100
+      }
+    },
+    {
+      "id": "COMB-002",
+      "values": {
+        "format": "OpenAPI",
+        "statusCode": 201
+      }
+    },
+    {
+      "id": "COMB-003",
+      "values": {
+        "format": "OpenAPI",
+        "statusCode": 204
+      }
+    },
+    {
+      "id": "COMB-004",
+      "values": {
+        "format": "OpenAPI",
+        "statusCode": 301
+      }
+    },
+    {
+      "id": "COMB-005",
+      "values": {
+        "format": "OpenAPI",
+        "statusCode": 400
+      }
+    },
+    {
+      "id": "COMB-006",
+      "values": {
+        "format": "OpenAPI",
+        "statusCode": 404
+      }
+    },
+    {
+      "id": "COMB-007",
+      "values": {
+        "format": "OpenAPI",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "COMB-008",
+      "values": {
+        "format": "OpenAPI",
+        "statusCode": 599
+      }
+    },
+    {
+      "id": "COMB-009",
+      "values": {
+        "format": "Postman",
+        "statusCode": 100
+      }
+    },
+    {
+      "id": "COMB-010",
+      "values": {
+        "format": "Postman",
+        "statusCode": 201
+      }
+    },
+    {
+      "id": "COMB-011",
+      "values": {
+        "format": "Postman",
+        "statusCode": 204
+      }
+    },
+    {
+      "id": "COMB-012",
+      "values": {
+        "format": "Postman",
+        "statusCode": 301
+      }
+    },
+    {
+      "id": "COMB-013",
+      "values": {
+        "format": "Postman",
+        "statusCode": 400
+      }
+    },
+    {
+      "id": "COMB-014",
+      "values": {
+        "format": "Postman",
+        "statusCode": 404
+      }
+    },
+    {
+      "id": "COMB-015",
+      "values": {
+        "format": "Postman",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "COMB-016",
+      "values": {
+        "format": "Postman",
+        "statusCode": 599
+      }
+    },
+    {
+      "id": "COMB-017",
+      "values": {
+        "format": "HAR",
+        "statusCode": 100
+      }
+    },
+    {
+      "id": "COMB-018",
+      "values": {
+        "format": "HAR",
+        "statusCode": 201
+      }
+    },
+    {
+      "id": "COMB-019",
+      "values": {
+        "format": "HAR",
+        "statusCode": 204
+      }
+    },
+    {
+      "id": "COMB-020",
+      "values": {
+        "format": "HAR",
+        "statusCode": 301
+      }
+    },
+    {
+      "id": "COMB-021",
+      "values": {
+        "format": "HAR",
+        "statusCode": 400
+      }
+    },
+    {
+      "id": "COMB-022",
+      "values": {
+        "format": "HAR",
+        "statusCode": 404
+      }
+    },
+    {
+      "id": "COMB-023",
+      "values": {
+        "format": "HAR",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "COMB-024",
+      "values": {
+        "format": "HAR",
+        "statusCode": 599
+      }
+    }
+  ],
+  "stats": {
+    "parameter_count": 2,
+    "cartesian_candidate_count": 24,
+    "feasible_candidate_count": 24,
+    "generated_combination_count": 24,
+    "feasible_pair_count": 24,
+    "pair_coverage_percent": null
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "numTotalTests": 7,
+  "numPassedTests": 7,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "success": true,
+  "suites": [
+    {
+      "name": "src/test/d16MockIntegerInput.test.ts",
+      "cases": [
+        {
+          "title": "TC-D16MOCK-37: exact decimals and exponents respect each Mock integer range",
+          "status": "PASSED"
+        },
+        {
+          "title": "TC-D16MOCK-35/36: invalid text is rejected before numeric rounding or bounds clipping",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "name": "src/test/d16MockPage.test.ts",
+      "cases": [
+        {
+          "title": "TC-D16MOCK-35: invalid rule numbers remain visible and never submit",
+          "status": "PASSED"
+        },
+        {
+          "title": "TC-D16MOCK-36: invalid expiry never creates a share",
+          "status": "PASSED"
+        },
+        {
+          "title": "TC-D16MOCK-37: explicit integral spellings submit JSON numbers",
+          "status": "PASSED"
+        },
+        {
+          "title": "TC-D16MOCK-38: existing string-only JSON editor guard remains",
+          "status": "PASSED"
+        },
+        {
+          "title": "TC-D16MOCK-40: never-expiring share ignores the disabled expiry input",
+          "status": "PASSED"
+        }
+      ]
+    }
+  ]
+}

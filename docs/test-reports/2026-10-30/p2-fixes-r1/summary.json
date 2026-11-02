@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-30",
+  "status": "IMPLEMENTED_REGRESSION_PASSED_PENDING_USER_REVIEW",
+  "ruleGroups": 6,
+  "observations": 8,
+  "formalCases": 63,
+  "positive": 30,
+  "negative": 33,
+  "passed": 63,
+  "failed": 0,
+  "blocked": 0,
+  "deferredObservations": 23,
+  "environmentBlockers": 12,
+  "upgradeShutdownRisk": "UNCONFIRMED_RETAINED",
+  "historicalCountsUnchanged": true
+}

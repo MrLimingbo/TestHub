@@ -1,5 +1,7 @@
 package io.testhub.platform.mock;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -77,7 +79,7 @@ public class MockTransferService {
             if (request == null || request.snapshot() == null) throw invalid("Mock 迁移资料不能为空");
             return request;
         } catch (java.io.IOException error) {
-            throw invalid("Mock 迁移请求 JSON 格式不合法或包含不支持的字段");
+            throw MockJson.rejected(error, "Mock 迁移请求 JSON 格式不合法或包含不支持的字段");
         }
     }
 
@@ -202,10 +204,10 @@ public class MockTransferService {
     public record Snapshot(int version, String sourceProjectId, List<Server> servers) { }
     public record Server(String id, String name, boolean enabled, boolean smartExampleEnabled,
                          List<Rule> rules, List<Share> shares) { }
-    public record Rule(String id, String name, String httpMethod, String path, int priority,
-                       Map<String, String> requestQuery, Map<String, String> requestHeaders, String requestBodyMatch,
-                       String requestBody, int responseStatus, Map<String, String> responseHeaders,
-                       String responseBody, boolean enabled) { }
+    public record Rule(String id, String name, String httpMethod, String path, @JsonDeserialize(using = MockJson.TransferPriority.class) int priority,
+                       @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> requestQuery, @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> requestHeaders, String requestBodyMatch,
+                       @JsonDeserialize(using = MockJson.Text.class) String requestBody, @JsonDeserialize(using = MockJson.TransferStatus.class) int responseStatus, @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> responseHeaders,
+                       @JsonDeserialize(using = MockJson.Text.class) String responseBody, boolean enabled) { }
     public record Share(String id, String name, Instant expiresAt, Instant revokedAt) { }
     public record ImportRequest(String requestKey, String expectedUserId, Snapshot snapshot) { }
     public record Receipt(String id, int servers, int rules, int shares) { }

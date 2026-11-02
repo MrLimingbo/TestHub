@@ -253,6 +253,7 @@ public class PerformanceTestPlanService {
             if (value.length() > 1_024 || value.indexOf('\r') >= 0 || value.indexOf('\n') >= 0) {
                 throw rejected("查询参数值不合法或过长");
             }
+            if (result.containsKey(name)) throw rejected("查询参数名称去除首尾空白后不能重复");
             result.put(name, value);
         }
         return Map.copyOf(result);

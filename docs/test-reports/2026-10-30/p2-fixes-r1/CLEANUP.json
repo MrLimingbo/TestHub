@@ -1,0 +1,16 @@
+{
+  "complete": true,
+  "nativeHTTPWorkspacesRemoved": true,
+  "H2WrapperWorkspacesRemoved": true,
+  "mysqlComposeContainersNetworkVolumesRemoved": true,
+  "mysqlWrapperWorkspacesRemoved": true,
+  "ownedWorkspaceLeftovers": [],
+  "rawReportFilesRemoved": 298,
+  "temporaryWorkItemsRemoved": 62,
+  "retained": "脱敏逐条结果、测试设计、批准依据、变更指纹及增量代码差异；可复用脚本保留scripts/qa/p2-*和test-p2-backend.mjs。",
+  "userWorkspacesOrSharedServicesRemoved": false,
+  "installedRuntimeReplaced": false,
+  "upgradeInvestigationExecuted": false,
+  "ownedQaProcessesRemaining": [],
+  "additionalFocusedChecksCleaned": true
+}

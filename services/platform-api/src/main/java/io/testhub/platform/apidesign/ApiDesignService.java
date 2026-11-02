@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -55,9 +56,10 @@ public class ApiDesignService {
         return repository.findCatalogs(projectId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ApiCatalog createCatalog(AuthenticatedPrincipal principal, String projectId, CatalogInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "接口目录参数不能为空");
         String name = required(input.name(), 160, "目录名称");
         String parentId = blankToNull(input.parentId());
@@ -75,9 +77,10 @@ public class ApiDesignService {
         return repository.findCatalog(projectId, id).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ApiCatalog updateCatalog(AuthenticatedPrincipal principal, String projectId, String catalogId, CatalogInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         requireCatalogResource(projectId, catalogId);
         if (input == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "接口目录参数不能为空");
         String name = required(input.name(), 160, "目录名称");
@@ -98,9 +101,10 @@ public class ApiDesignService {
         return repository.findCatalog(projectId, catalogId).orElseThrow();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteCatalog(AuthenticatedPrincipal principal, String projectId, String catalogId) {
         ProjectSummary project = writeAccess(principal, projectId);
+        repository.lockProject(projectId);
         ApiCatalog catalog = requireCatalogResource(projectId, catalogId);
         if (repository.catalogHasChildren(projectId, catalogId) || repository.catalogHasDefinitions(projectId, catalogId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "接口目录非空，请先移动或删除其中的目录与接口");
@@ -382,7 +386,10 @@ public class ApiDesignService {
     }
 
     private ProjectSummary writeAccess(AuthenticatedPrincipal principal, String projectId) {
-        return access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
+        // Normal edits and atomic directory copies coordinate on the same project lock.
+        repository.lockProject(projectId);
+        return project;
     }
     private void validateCatalogParent(String projectId, String catalogId, String parentId) {
         String candidate = parentId;

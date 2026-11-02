@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-30",
+  "status": "PENDING_USER_RULE_REVIEW",
+  "previousP1ExecutionReview": "APPROVED",
+  "approvedObservationsTotal": 16,
+  "remaining": {
+    "unimplemented": 31,
+    "priorityP2": 27,
+    "priorityP3": 4,
+    "proposedDecisionGroups": 6,
+    "proposedObservations": 8,
+    "otherDeferred": 23,
+    "environmentBlockersDeferred": 12
+  },
+  "acceptanceDesign": {
+    "groups": 43,
+    "executed": 0,
+    "passed": null,
+    "failed": null
+  },
+  "recommendedCombination": {
+    "D01": "A",
+    "D03-CFG": "A",
+    "D09": "A",
+    "D10": "A",
+    "D17": "A",
+    "D22": "A"
+  },
+  "selectedOptions": {
+    "D01": null,
+    "D03-CFG": null,
+    "D09": null,
+    "D10": null,
+    "D17": null,
+    "D22": null
+  },
+  "sourceChanges": 0,
+  "sourceFilesChecked": 1216,
+  "servicesStarted": 0,
+  "newTestExecutions": 0,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "shutdownRootCauseConfirmed": false,
+  "frozenPriorIndexedArtifactsUnchanged": 28
+}

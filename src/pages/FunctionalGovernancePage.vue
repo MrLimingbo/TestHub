@@ -129,7 +129,9 @@ async function saveField(): Promise<boolean> {
   if (!fieldForm.name.trim()) fieldErrors.name = '请填写字段名称'
   if (!fieldForm.fieldKey.trim()) fieldErrors.fieldKey = '请填写字段标识'
   if (Object.keys(fieldErrors).length > 0) return false
-  const options = fieldForm.optionsText.split(/[，,]/).map((item) => item.trim()).filter(Boolean)
+  const options = fieldForm.fieldType === 'SELECT'
+    ? fieldForm.optionsText.split(/[，,]/).map((item) => item.trim()).filter(Boolean)
+    : []
   saving.value = true
   try {
     const payload = { assetType: fieldForm.assetType, name: fieldForm.name, fieldKey: fieldForm.fieldKey, fieldType: fieldForm.fieldType, required: fieldForm.required, options }

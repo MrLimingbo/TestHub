@@ -113,11 +113,19 @@ public class AccountManagementService {
                                                        String account) {
         String normalized = normalizeAccount(account);
         return accounts.findByAccountOrEmail(normalized).orElseGet(() -> {
-            UserAccount created = createAccount(normalized, normalized, null, null, true);
+            UserAccount created = createAccount(normalized, null, null, null, true);
             audit.record(principal, project.organizationId(), project.id(), "ACCOUNT_CREATED", "USER_ACCOUNT",
                     created.id(), java.util.Map.of("account", created.account(), "source", "PROJECT_MEMBER"));
             return created;
         });
+    }
+
+    private String generatedDisplayName(String account) {
+        if (account.length() <= 80) return account;
+        int end = 80;
+        // Only shorten the generated label; keep the full account and avoid splitting a surrogate pair.
+        if (Character.isHighSurrogate(account.charAt(end - 1)) && Character.isLowSurrogate(account.charAt(end))) end--;
+        return account.substring(0, end);
     }
 
     private UserAccount createAccount(String account, String displayName, String email, String phone, boolean enabled) {
@@ -152,7 +160,7 @@ public class AccountManagementService {
     }
 
     private String normalizeDisplayName(String value, String account) {
-        String normalized = value == null || value.isBlank() ? account : value.trim();
+        String normalized = value == null || value.isBlank() ? generatedDisplayName(account) : value.trim();
         if (normalized.length() > 80) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "姓名最多 80 个字符");
         }

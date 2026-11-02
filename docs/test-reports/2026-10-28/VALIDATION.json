@@ -1,0 +1,26 @@
+{
+  "valid": true,
+  "validatedAt": "2026-10-28T11:04:06.603567+00:00",
+  "moduleScopes": 19,
+  "caseOccurrences": 3090,
+  "productBugs": 108,
+  "testAssetIssues": 1,
+  "observations": 47,
+  "blockedCases": 12,
+  "environmentGroups": 7,
+  "unconfirmedRisks": 1,
+  "sourceFilesChecked": 68,
+  "sourceTreeFilesUnchanged": 1326,
+  "localLinksChecked": 216,
+  "checks": [
+    "19 final sources selected",
+    "Mock 155+7 counted once",
+    "11 historical failures retain explicit followup provenance",
+    "No engineering-suite double count",
+    "108 product IDs deduplicated",
+    "47 observations and 12 blockers excluded from pass",
+    "Shutdown root cause remains unconfirmed",
+    "Sources and links verified",
+    "No product source changes"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "inputCount": 5,
+  "allExtracted": true,
+  "requirements": 5,
+  "acceptanceCriteria": 30,
+  "coverageItems": 30,
+  "requirementsCovered": 5,
+  "acceptanceCriteriaCovered": 30,
+  "coverageItemsCovered": 30,
+  "exactDuplicates": 0,
+  "nearDuplicatePairs": 1,
+  "unresolvedDuplicatePairs": 0,
+  "caseQualityScore": 99.9,
+  "specificationReadinessScore": 100,
+  "documentFindings": 0,
+  "invalidAnchors": 0,
+  "unsupportedOrUntraceableCases": 0,
+  "previousBatchCases": 45,
+  "comparisonRemovedCaseCount": 45,
+  "comparisonReviewRequiredCount": 30,
+  "comparisonStaleCandidates": 0,
+  "disposition": "This is a new independently approved module scope, not a revision replacing the prior 45 cases. Old files/IDs remain frozen. All 30 new cases reviewed against the 5 current sources. Distinct lower/upper boundaries retained with independent COV IDs."
+}

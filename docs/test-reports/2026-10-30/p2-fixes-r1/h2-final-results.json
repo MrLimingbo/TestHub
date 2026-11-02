@@ -1,0 +1,5484 @@
+{
+  "cases": [
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceFlowTests",
+      "name": "projectGovernanceMaintainsTagsFieldsAndCaseBindings",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "unorderedDefinitionsRemapReferencesWithoutExecutionOrActivation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "existingIdentityEnabledStateAndQueuedManifestStayLocal",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "perKindCountMergeAndFinalBytesHaveAtomicBounds",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "activeProfileTargetUpdatesRequireExistingAuthorityAndRollbackEveryKind",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "functionalPlanNamesMustExistAndUseTargetIdentity",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "parallelAndLostResponseReplayNeverDuplicatesOrOverwritesLaterEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "staleSnapshotsCaseAndDatabaseCollationsRejectWholeBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "auditRollbackCannotChangeQuartzOrPartialVersionsAndReceipts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "roleProjectActorCsrfAndTransferBodyLimitAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "unknownFieldsScriptStepsInvalidCronAndForeignReferencesNeverWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "name": "derivedObjectSelectorIsNotASeparateScenarioEdit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "performanceRejectsTrimCollision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "adapterRejectsTrimCollision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "separateObjectsMayReuseKeys",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "failedEditsKeepRowsCipherAndAudits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "omittedConfigurationKeepsCipher",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "caseRulesRemainDistinct",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "webRejectsTrimCollision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "validationAndAuthorizationStillApply",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "repeatedUrlQueryRemainsLegal",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2NormalizedKeysFlowTests",
+      "name": "collisionIsIndependentOfOrderAndValue",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[6]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[7]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[8]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardTimezoneTests",
+      "name": "groupsEverySourceByShanghaiBoundariesRegardlessOfJvmTimezone(String, int)[9]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "auditFailureRollsBackUpdatesNewTemplatesAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "snapshotByteLimitAndThousandTemplateLimitRejectWholeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "concurrentRetriesAndLostResponseReplayReturnOriginalReceiptWithoutDuplicateOrLaterOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "writerScopeActorAndCsrfRequiredBeforeReadingOrApplyingEvenOldReceipts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "channelAndCaseDifferencesRejectWholeBatchAndPreserveLocalDelivery",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "duplicateExistingNamesAreReportedWithoutPickingAnArbitraryRow",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "updatesPreserveIdentityDeliveryConfigurationCiphertextEnabledAndQueueHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "existingCrudAndDeletionRecreationInvalidateWholeBatchWithoutPartialWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationSyncFlowTests",
+      "name": "strictJsonInvalidDefinitionsAndDuplicateOperationsCannotWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+      "name": "recovery",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+      "name": "failedDependency",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+      "name": "saturation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+      "name": "deadline",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+      "name": "healthy",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+      "name": "permissionStatus",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+      "name": "profileReadiness",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HealthDeadlineFlowTests",
+      "name": "businessErrors",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "sendsAndReceivesBidirectionalStreamingCallsWithoutPersistingOutboundMessages",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "sendsCompletesAndReadsClientStreamingCallsWithoutPersistingMessages",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "rejectsLoopbackTargetsBeforeOpeningGrpcTransport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "importsProtocDescriptorSetForOfflineDiscovery",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "rejectsInvalidProtoBeforeSavingDescriptor",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "executesUnaryCallWithEnvironmentValuesAndStoresOnlySafeSummary",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "allowsUserToCancelAnOpenServerStream",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "importsProtoAndUsesItForOfflineDiscoveryAndUnaryCalls",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "rejectsReservedMetadataBeforeOpeningDiscoveryTransport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "discoversServicesWithExecutionOnlyMetadataAndAuthentication",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "startsCancelsAndBoundsServerStreamingCallsWithoutPersistingTraffic",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDebugFlowTests",
+      "name": "rejectsReservedGrpcMetadataBeforeOpeningTransport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "idempotentCleanup",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "summaryOnly",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "transferCannotBypass",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "unexpiredNotCleared",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "beforeCutoff",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "exactCutoff",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "activeRoundTrip",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "legacyCutoff",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "futureTime",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "unreadable",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "managedCleanup",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "inactiveFields",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "importedRetention",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "noRenewal",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ReplayRulesFlowTests",
+      "name": "activeAuth",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardFlowTests",
+      "name": "aggregatesProjectScopedAssetsOutcomesAndAuditActivity",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardFlowTests",
+      "name": "rejectsMalformedDashboardPeriodsAsClientErrors(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardFlowTests",
+      "name": "rejectsMalformedDashboardPeriodsAsClientErrors(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardFlowTests",
+      "name": "rejectsMalformedDashboardPeriodsAsClientErrors(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardFlowTests",
+      "name": "rejectsMalformedDashboardPeriodsAsClientErrors(String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectDashboardFlowTests",
+      "name": "rejectsUnsupportedDashboardPeriods",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTransferFlowTests",
+      "name": "rejectsWrongActorAndForeignProjectOverHttp",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTransferFlowTests",
+      "name": "duplicateScheduleNameRollsBackEveryAssetAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTransferFlowTests",
+      "name": "importsCompleteRevisionsAndReferencesWithDisabledScheduleAndIdempotentReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTransferFlowTests",
+      "name": "copiesAndVerifiesDataSetSourceFileWithinTheSameTransaction",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "concurrentEditorsProduceOneSuccess",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "invalidTypeRangeAndFractionReturn400",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "failedPersistenceDoesNotBumpVersionOrEraseHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "runMetadataDoesNotChangeConfigVersion",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "staleEditorHasNoSideEffects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "missingOrNullPreconditionReturns428",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "initialZeroAndExistingVersionsAreVisible",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "unauthorizedRequestCannotEditConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ScheduleVersionFlowTests",
+      "name": "matchingVersionIncrementsExactlyOnce",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "missingWorkbookReturns400EnvelopeAndDoesNotWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[6]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[7]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[8]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[9]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[10]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[11]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "importPreflightHonorsEveryBodyBoundaryAndIsAtomic(String, int)[12]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "defaultRunNameFitsStorageAndKeepsSuffixWithoutBreakingUnicode(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "defaultRunNameFitsStorageAndKeepsSuffixWithoutBreakingUnicode(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "defaultRunNameFitsStorageAndKeepsSuffixWithoutBreakingUnicode(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "defaultRunNameFitsStorageAndKeepsSuffixWithoutBreakingUnicode(String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+      "name": "defaultRunNameFitsStorageAndKeepsSuffixWithoutBreakingUnicode(String)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationFlowTests",
+      "name": "createsProjectScopedBrowserAssetsAndProducesStepReportFromRunnerEvents",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationFlowTests",
+      "name": "schedulesRetriesAndCancelsUiAutomationWithFunctionalPlanTraceability",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1CompatibilityTests",
+      "name": "h2UpgradePreservesLegacyCiphertextAndDefaultsSecurityVersion",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1CompatibilityTests",
+      "name": "previouslySerializedAccountDefaultsItsMissingSecurityVersionToZero",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1CompatibilityTests",
+      "name": "mysqlUpgradePreservesLegacyCiphertextAndDefaultsSecurityVersion",
+      "status": "SKIP"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestPlanFlowTests",
+      "name": "managesProjectScopedPlanAndThreadGroups",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestPlanFlowTests",
+      "name": "rejectsSensitiveHeadersAndBodiesForSafeMethods",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestPlanFlowTests",
+      "name": "rejectsUnsafeSteppedRampConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestPlanFlowTests",
+      "name": "rejectsRendezvousAboveThreadCount",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestPlanFlowTests",
+      "name": "rejectsUnsafeQueryParameterConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestPlanFlowTests",
+      "name": "rejectsUndeclaredDataSetVariables",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "concurrentRequestsSerializeCasAndExactUuidReplay",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "lateOccupiedNameRollsBackChangesReceiptVersionAndKeepsOldQuartzJob",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "strictProtocolRejectsUnknownActivationHistoryAndInvalidRules",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "copiesExplicitOrderedProjectsDisabledWithoutRunsNotificationsOrDuplicateReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "receiptReplayNeverRedisablesManuallyEnabledOrRecreatedTarget",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "crossOrganizationMissingAnchorUnknownProjectsAndDuplicateScopesNeverWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "explicitTransactionRollbackDoesNotRemoveQuartzJob",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "boundedBatchAndOrganizationCapacityRejectWithoutTruncation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "validationCsrfActorProjectAndReadOnlyRolesAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "committedUuidCannotChangePayloadAndDeletedCopyCannotBeRebuilt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "changedDestinationDisablesQuartzAndPreservesLocalRunsCreatorAndLastResult",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "unchangedConfigurationKeepsNativeActivationAndManualEnableStillRunsLocalReports",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "scalarCoercionsNullFieldsAndDuplicateJsonKeysCannotChangePlan",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportSyncFlowTests",
+      "name": "nativeConfigurationVersionProtectsConcurrentActivationAndCrossAnchorEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "transactionRollbackRestoresOnlyTheAssociationAndItsReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "requestKeyCannotBeReusedForAnotherFileAndAFileAssociationCannotBeCleared",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "snapshotRejectsApplicationOverflowAndKeepsAllRecords",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "changingAnApplicationFileCannotRewriteAnAlreadyQueuedExecutionManifest",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "targetAppOrFileRevisionChangeRejectsTheWholeAssociation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "legacyMobileDefinitionSyncPreservesTheNewFileAssociation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "csrfActorProjectAndViewerPermissionsAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "multipartAcceptsExactTwentyMiBButRejectsOneExtraFileByte",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "cachedDigestCannotAuthorizeCorruptedPhysicalBytes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "missingAppsOrFilesAreNeverRecreatedAndReceiptReplayCannotRecreateAFile",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "rejectsUnknownFieldsOversizedBodiesAndForeignPhysicalFileIdentities",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "name": "mappedTargetIdentityAttachesWithoutInstallingDispatchingOrChangingApplicationConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "malformedRuntimeJsonNeverMatchesAValidSubset",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "matchesRawFormBodiesAndKeepsFormFieldsOutOfQueryConditions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "requiresExplicitEnabledForBothSwitchesAndPreservesExistingState",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "hidesExpiredSharesWithoutChangingTheRuntimeService",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "serializesConcurrentDuplicateServerCreation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "preservesValidScalarArrayAndNullJsonMatching",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "matchesUtf8PathsAndPreservesPlusInPath",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "rejectsDuplicateAndTrimmedServerNamesWithActionableConflict",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "enforcesRequestBodyLimitInBytesBeforeDecodingUtf8",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "normalizesNullMapValuesOnCreateAndUpdate",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "name": "rejectsIncompleteOrTrailingJsonOnCreateAndUpdateWithoutChangingTheRule",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcReflectionDebugTransportTests",
+      "name": "sendsAndReceivesBidirectionalMethodWithOfflineDescriptor",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcReflectionDebugTransportTests",
+      "name": "receivesServerStreamingMethodWithBoundedDemand",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcReflectionDebugTransportTests",
+      "name": "discoversServicesAndMethodsWithMetadata",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcReflectionDebugTransportTests",
+      "name": "invokesUnaryMethodFromReflectionDescriptors",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcReflectionDebugTransportTests",
+      "name": "sendsClientStreamingMethodWithOfflineDescriptor",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcReflectionDebugTransportTests",
+      "name": "invokesUnaryMethodFromOfflineDescriptorWithoutReflectionService",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "appliesNewEnvironmentBeforeDependentParametersRegardlessOfOperationOrder",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "scopeWriterRoleAccountAndCsrfAreRequiredForSnapshotsAndWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "strictBodyInvalidDefinitionsAndOrphanParameterNeverWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "deleteRecreateAndDefaultChangesAlsoInvalidateEarlierRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "auditFailureRollsBackDefinitionsParametersAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "preservesExistingEnvironmentIdsReferencesPreferencesAndDerivedBaseUrl",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "maximumOrdinaryAndSecretCountsAllowDerivedBaseUrlsAndFurtherCreatesRollback",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "concurrentRetryReturnsSameReceiptAndChangedPayloadCannotReuseRequestKey",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "concurrentOrdinaryEditAndExplicitSecretReplacementInvalidateWholeBatchWithoutLostWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+      "name": "secretValuesNeverAppearAndSecretCollisionsRollBackEntireBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AuditResourceMysqlMigrationTests",
+      "name": "upgradesOwnedMysql108To109WithoutChangingOldAuditValues",
+      "status": "SKIP"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionFlowTests",
+      "name": "projectMemberCanMaintainMultipleProjectVersions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "historyDependenciesAndLateFailureLeaveNoImportedHistoryOrAssets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "preservesAllPublishedVersionsAndNonLatestCurrentPointerAndSanitizesCases",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "grpcV2RejectsCorruptBytesAndMissingReferencesAtomically",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "historyV3TransfersMoreThanRecentLimitAndReencryptsWithProvenanceAndRetrySafety",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "retriesReturnOriginalReceiptAndChangedPayloadConflicts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "copiesFileBytesAndRewritesNestedSnapshotReferences",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "rejectsMissingEnvironmentVariablesAndGrpcReferencesWithoutWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "historyExportRetainsWriterPermissionAndFailsClosedOnCorruptCiphertext",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "rejectsUnselectedReferencedFilesAndCorruptFileBytesBeforeWriting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "rejectsCatalogCyclesAndCrossApiCurrentPointersAtomically",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "rejectsUnknownProtocolFieldsAndUnsupportedVersions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "malformedReferencesDuplicateNamesAndDomainBoundsLeaveNoRows",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "cardinalityDepthDomainAndWireSizeLimitsRejectBeforeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "existingRouteConflictDoesNotCreateAnExtraImportRoot",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "disabledAndMissingEnvironmentsAndVariablesFailUntilDependenciesExist",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "viewerAuthenticationCsrfCapabilitiesAndDefaultFileSelection",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "historyRejectsStoredBudgetBeforeDecryptionAndMalformedReplayBeforeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "rejectsForeignProjectAndChangedActorWithoutWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "historyRewritesSelectedFileAndDescriptorReferencesBeforeReencrypting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "storageAndLateReceiptFailuresRollbackFilesAssetsVersionsAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "grpcV2TransfersCompiledDescriptorsAndRemapsReferencesWithV1Preserved",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "fileLinksRewriteEveryVersionNestedJsonEscapedBodiesAndCaseFields",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "realSourceExportKeepsAllVersionsHistoricalTimesEmptyDirectoriesAndOwnership",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiTransferFlowTests",
+      "name": "concurrentSamePayloadReturnsOneReceiptAndObjectKeyOrderIsImmaterial",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.AuditResourceIdentifierMigrationTests",
+      "name": "widensVersion52AuditIdentifiersWithoutChangingExistingEntries",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "normalization",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "disabledDefined",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "definedWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "undefinedOrdinary",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "undefinedSecret",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "toggle",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "missingStillRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "legacyRead",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "disabledLifecycle",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "disabledPermissions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "projectScope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "enabledLifecycle",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "executionStillDisabled",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "deleteRace",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "compatibility",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+      "name": "legacyWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExchangeRoundTripTests",
+      "name": "exportedCasesPreserveEveryTypeAndRebindRequirementsAcrossProjects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExchangeRoundTripTests",
+      "name": "repeatedCodesMissingCatalogAndRequirementRejectWithoutPartialWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExchangeRoundTripTests",
+      "name": "blankAndLowerCaseNewTypeCellsAreNormalizedWithoutBreakingTemplates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExchangeRoundTripTests",
+      "name": "legacyNineColumnWorkbookStillImportsAsFunctionalCases",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExchangeRoundTripTests",
+      "name": "invalidTypeRejectsWholeWorkbookBeforeAnyCaseIsInserted",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExchangeRoundTripTests",
+      "name": "exchangeHonorsProjectBoundariesAndRejectsMistypedOptionalHeader",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiRunnerRuntimeConfigurationFlowTests",
+      "name": "issuesAnEphemeralScriptReadyArtifactOnlyToAnEnabledVerifiedRunner",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationDataSetFlowTests",
+      "name": "createsProjectScopedJsonDataSetAndFreezesOneRedactedExecutionPerRow",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationDataSetFlowTests",
+      "name": "acceptsCsvWithQuotedFieldsAndRejectsMalformedRowsBeforePersisting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationDataSetFlowTests",
+      "name": "importsUtf8CsvIntoMinioAndOnlyReturnsProjectScopedSourceFileMetadata",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskSyncFlowTests",
+      "name": "viewerCannotEnableSyncAndCrossProjectTaskIdsAreRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskSyncFlowTests",
+      "name": "strictPayloadValidationCsrfAndByteLimitRejectWithoutMutations",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskSyncFlowTests",
+      "name": "actorChangesAndOtherProjectsCannotReadOrWriteBoundData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskSyncFlowTests",
+      "name": "staleVersionsAndMissingIdsRollBackTheWholeBatchIncludingCreates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskSyncFlowTests",
+      "name": "preservesAllRegistrationStatesAndSameNamesWithoutInvokingRunners",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskSyncFlowTests",
+      "name": "updatedTaskUsesExactExpectedVersionAndBoundProjectOwnsReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskSyncFlowTests",
+      "name": "identicalConcurrentRetryReturnsTheSameIdsAndChangedPayloadIsRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiRunnerTrustFlowTests",
+      "name": "marksOnlyHmacVerifiedRunnerHeartbeatsAsTrusted",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RegistrationFlowTests",
+      "name": "registrationCreatesIsolatedWorkspaceAndSecondClientSeesSameData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RegistrationFlowTests",
+      "name": "csrfIsRequiredForRegistration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RegistrationFlowTests",
+      "name": "repeatedAttemptsAreRateLimitedEvenIfClientSpoofsForwardingHeader",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RegistrationFlowTests",
+      "name": "validationRejectsInvalidEmailAccountAndBcryptOverflow",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RegistrationFlowTests",
+      "name": "duplicateRegistrationCannotCreateAnotherWorkspace",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiRunnerRuntimeLeaseFlowTests",
+      "name": "issuesOneShortLeaseForOnlyASentNonExpiredTaskAndNeverPersistsTheLeaseValue",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "lateInvalidPrimitiveRollsBackReservedRowsImportedHistoryAndHeadVersions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "missingSourceRevisionBlocksOnlyRelatedScenarioInProjection",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "mapsExistingMatchingContentAtDifferentVersionNumbersWithoutAppendingToSources",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "copiesParentBeforeMissingChildAndAllCommittedVersionSlotsHaveRealContent",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "legalMutualCurrentReferencesMapToPrimitiveHistoricalVersionsInOneBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "importsMissingHistoryAndRestoresExistingHeadsWithoutChangingOldPins",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "historicalNameSurvivesWhileCurrentReferenceSourceNameIsMatched",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+      "name": "actorRevisionPermissionsCsrfAndChangedRequestKeyAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UnifiedExecutionFlowTests",
+      "name": "limitsEachModuleIndependentlyWithDeterministicTies",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UnifiedExecutionFlowTests",
+      "name": "reflectsExecutionUpdatesAndRetainsSnapshotNamesWhenSourceAssetIsRenamed",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UnifiedExecutionFlowTests",
+      "name": "combinesFiveModulesWithStableOrderingAndNoManualOrSensitiveFields",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UnifiedExecutionFlowTests",
+      "name": "completedFunctionalBatchRetainsFailuresAndBlockedCounts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UnifiedExecutionFlowTests",
+      "name": "preservesNativeAcceptedCancellingAndTerminalStatesWithoutInventedProgress",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UnifiedExecutionFlowTests",
+      "name": "permissionsReadOnlyScopeAndNoQueueOrAuditSideEffects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "mapsCodesToTargetIdsAndPreservesWorkflowPeopleAssetsAndRunLinks",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "retainedLinksKeepActorTimeAndIdentityWhileActiveClearPreservesRunLinks",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "auditFailureRollsBackLinkChangesAndReceiptTogether",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "strictJsonRejectsWorkflowRunLinksDuplicateOperationsAndUnsortedCodes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "projectLockSerializesManualLinkChangesAndSyncRechecksAfterWaiting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "missingDefinitionsAndReferencesRejectWholeBatchWithoutCreatingAssets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "legacyDanglingReferencesBlockOnlyAffectedDefectAndSnapshotNeverDeletesThem",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "rolesProjectActorCsrfAndWireLimitGuardBothDirections",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "staleAssociationAndRecreatedAssetIdentityRejectPendingWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "assetCountAndPerDefectReferenceBoundsRejectBeforeChangingExistingData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "durableParallelReplayReturnsCommittedReferenceIdsAndDoesNotUndoLaterEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+      "name": "sameContentAssociationRecreationChangesRevisionWithoutModifyingDefect",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExecutionLifecycleTests",
+      "name": "concurrentCaseResultsProduceCompletedRunWithConsistentCounts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExecutionLifecycleTests",
+      "name": "preservesFirstStartAndCompletionTimeAcrossEditsAndReopening",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExecutionLifecycleTests",
+      "name": "foreignProjectAndViewerCannotChangeCaseOrStep",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExecutionLifecycleTests",
+      "name": "concurrentStepAndCaseResultsCannotLeavePassedCaseWithFailedStep",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskRegistrationFlowTests",
+      "name": "strictInvalidPayloadAndActorChangeWriteNothing",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskRegistrationFlowTests",
+      "name": "auditFailureRollsBackInsertedTasksAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskRegistrationFlowTests",
+      "name": "optimisticVersionAndLegacyUpdatesPreserveNormalizationAndImportedOrigin",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskRegistrationFlowTests",
+      "name": "httpScopePermissionsCsrfAndVersionValidationAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskRegistrationFlowTests",
+      "name": "concurrentIdenticalRetryReturnsOneReceiptAndChangedPayloadConflicts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskRegistrationFlowTests",
+      "name": "completionAndCancellationRaceCannotOverwriteTheWinner",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TaskRegistrationFlowTests",
+      "name": "copiesAllTypesStatesAndProvenanceWithActiveRecordsCancelledWithoutExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignSyncFlowTests",
+      "name": "historicalVersionContentCanOverwriteWithoutChangingPhysicalIdAndReplayIsStable",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignSyncFlowTests",
+      "name": "readRequiresSameActorAndPostRequiresCsrf",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignSyncFlowTests",
+      "name": "missingParentDescriptorAndStaleRevisionDoNotWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignSyncFlowTests",
+      "name": "publishingAExistingDraftPropagatesWithoutOverwritingVersionContent",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignSyncFlowTests",
+      "name": "nestedCatalogDefinitionsVersionsAndCasesCopyWithoutPhysicalIds",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockTransferFlowTests",
+      "name": "malformedRuleRollsBackWholeBatchAndForeignProjectIsForbidden",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockTransferFlowTests",
+      "name": "copiesRulesWithNewKeysAndRevokedSharesThenAllowsManualActivation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockTransferFlowTests",
+      "name": "twentyImportedRevokedSharesDoNotPreventCreatingNewTargetShares",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockTransferFlowTests",
+      "name": "receiptIsIdempotentAndConflictsRollback",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "metadataDeleteFailurePreservesObjectAndRetryCompletes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "enclosingRollbackReclaimsUploadButPreservesDeletedFile",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "committedDeleteWithUnavailableCleanupRetainsIntentForRetry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "validAndLegacyMediaTypesBothDownloadOriginalBytes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "reservedBaseUrlCannotBeWrittenAsOrdinaryParameterOrSecret(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "reservedBaseUrlCannotBeWrittenAsOrdinaryParameterOrSecret(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "reservedBaseUrlCannotBeWrittenAsOrdinaryParameterOrSecret(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "missingFileAndEmptyFileRemainClientErrors",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "failedUploadCleanupKeepsDurableIntentAndCanRecover",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "baseUrlDeletionIsProtectedWhileOrdinaryDeleteAndEnvironmentClearStillWork",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[6]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[7]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[8]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[9]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[10]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[11]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int, int, boolean)[12]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "invalidMediaTypeIsRejectedBeforeStorage(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "invalidMediaTypeIsRejectedBeforeStorage(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "invalidMediaTypeIsRejectedBeforeStorage(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "invalidMediaTypeIsRejectedBeforeStorage(String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "invalidMediaTypeIsRejectedBeforeStorage(String)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "wrongUploadBodyTypeReturns415WithoutSideEffects(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "wrongUploadBodyTypeReturns415WithoutSideEffects(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "wrongUploadBodyTypeReturns415WithoutSideEffects(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "absentMediaTypeDefaultsToBinary",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "auditConstraintFailureRollsBackUploadMetadataAndReclaimsObject",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.CrossRegressionFixesFlowTests",
+      "name": "deleteAuditFailureAlsoPreservesMetadataAndBytes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+      "name": "persistsProjectScopedCronScheduleAndAutoDisablesAfterConfiguredFailures",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+      "name": "manualAndQuartzTriggersUseTheSelectedExecutionProfile",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+      "name": "rejectsInvalidQuartzCronBeforePersistingSchedule",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+      "name": "preservesDisabledStateWhenCreatingSchedule",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PlatformFoundationAcceptanceTests",
+      "name": "projectDataCannotCrossOrganizationBoundary",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PlatformFoundationAcceptanceTests",
+      "name": "projectFileLifecycleStoresBytesInMinioAndAuditMetadataInMySql",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PlatformFoundationAcceptanceTests",
+      "name": "unauthenticatedRequestReturnsStandardApiError",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.SmartExampleMockFlowTests",
+      "name": "servesPublishedApiExampleAfterManualRulesAndSupportsPathParameters",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopBackupToolTests",
+      "name": "unknownFutureMigrationAndWrongPasswordFailBeforeRestore",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopBackupToolTests",
+      "name": "olderCandidateMigratesWithoutLosingBusinessSecrets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopBackupToolTests",
+      "name": "inspectionPreservesStateAndRestoreClearsEphemeralData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopBackupToolTests",
+      "name": "restoreDisablesTriggersAndCancelsPendingExecutionWithoutDeletingHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDeliveryFlowTests",
+      "name": "defectLinkAndExcelExchangeFormAuditableDeliveryFlow",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AuthenticationFlowTests",
+      "name": "registrationRemainsDisabledByDefault",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AuthenticationFlowTests",
+      "name": "invalidPasswordIsRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AuthenticationFlowTests",
+      "name": "localAccountCanLoginReadProfileAndLogout",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "legacyV1ToV7NeverIncludeGovernanceCatalogsOrNewReceiptField",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "aReadOnlyProjectMemberCanExportButCannotImport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "enforcesPlanAssociationBudgetBeforeWritingAnyAssets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "historyPreservesSnapshotsTimesNewScopesAndIdempotenceThenAllowsContinuation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "versionDescriptionsRewriteOnlySelectedFilesAndRejectMissingReferences",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "conflictAndLateValidationFailureLeaveNoPartialAssetsOrReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "lateFieldValidationRollsBackTagsDefinitionsAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "legacyV5ShapeAndReceiptRemainUnchangedAfterHistoryUpgrade",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "legacyV4SerializationAndReceiptsStillExcludeFiles",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "historyRemapsDefectExecutionLinksAndFileReferencesInSavedResults",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "httpV6SelectionAndNestedHistoryValidationUseExistingAuthentication",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "historyRejectsBrokenGraphStatusesTimesAndScopeWithoutPartialWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "governanceTransferRemapsSharedTagsPreservesDefinitionsAndRetriesWithoutDuplicates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "versionsAndFilesRollBackIfLaterDefectCreationFails",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "governanceCatalogGraphScopeAndCountRejectInvalidDataBeforeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "unselectedPlansExcludePlanFieldsAndBindingsAndMetadataOnlyProjectsWork",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "twentyMiBFileUsesHttpBinaryDecoderAndRejectsOversizedRequest",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "emptyGovernanceCatalogsTransferIndependentlyWithHierarchyOwnershipAndRetry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "rejectsForeignDuplicatePlanReferencesAndVersionDowngrades",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "httpRequiresLoginCsrfAndValidNestedPayload",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "legacyV2SerializationAndReceiptsStillMatchAfterGovernanceUpgrade",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "fileOnlyProjectsWorkAndV5ScopesRemainIndependent",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "defaultV1ExportExcludesPlansAndRetainsLegacyReceiptBytes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "editingTransferredClosedDefectDoesNotInventHistoricalActorsButReopeningResetsState",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "governanceCatalogsRespectExplicitVersionFlagsAndActorPermissions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "defectsOnlyAndIndependentV4ScopesWorkWithoutLeakingUnselectedDefinitions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "defectCodeConflictAndLateInvalidContentRollBackEntireTransfer",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "rejectsCyclesForeignReferencesAndReusedKeyWithDifferentPayload",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "filesCopyBytesRewriteRelativeLinksKeepExternalLinksAndRetryWithoutDuplicates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "recoveryWaitsForActiveFileTransactionAndPreservesItsCommittedObject",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "defectsPreserveDefinitionsRemapLinksClearPeopleAndRetryExactly",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "tagOrFieldConflictsDoNotOverwriteTargetsOrLeavePartialAssets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "historyHonorsProjectAndReadOnlyBoundaries",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "transfersPlansWithOrderedRemappedCasesAndDirectoriesButNotRuns",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "defectAssociationAndTotalAssetBudgetsApplyBeforeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "legacyV6ExactShapeAndReceiptRemainStableAndNeverCopyVersions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "historyLimitsRejectOversizeRunsCasesAndStepsBeforeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "invalidPlanAfterCreatingDefinitionsRollsBackEveryAsset",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "fileDigestSizeMissingReferencesAndOldVersionsRejectBeforeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "defectsRejectForeignDuplicateAndExecutionLinksAndOldProtocolPayloads",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "rejectsOutOfScopeTagsAssetsDuplicateBindingsAndProtocolDowngrade",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "rollbackRemovesFileMetadataAndPhysicalObjectsAfterLateBusinessFailure",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "governanceCatalogsRollBackTogetherWithFilesHistoryAndVersionsOnLateFailure",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "preservesHierarchyAssociationsAndTypeUsingNewScopedIdsAndIdempotentReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "httpV7IndependentSelectionAndPermissionsRemainEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "versionsRejectConflictsInvalidDefinitionsAndBudgetsWithoutPartialWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "failedPhysicalCleanupKeepsDurableIntentAndRetriesWithoutDeletingCommittedFiles",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "versionOnlyTransferPreservesReleaseDefinitionsWithNewOwnershipAndIdempotence",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "deniesOtherAccountReadWriteAndChangedActor",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "legacyV3BytesAndReceiptsRemainCompatibleAndExportNeverIncludesDefects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "historyAndFilesRollBackWhenLaterDefectValidationFails",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "concurrentRetriesCommitExactlyOneCopy",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalTransferFlowTests",
+      "name": "planOnlySnapshotWorksAndPlanCodeConflictDoesNotImportDefinitions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.AccountIdentityGuardMigrationTests",
+      "name": "version52AddsOnlyTheGuardAndPreservesExistingAccountIdentity",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "nativeCapacityAndAggregateStoredBytesFailBeforeTruncation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "actorProjectViewerCsrfAndStrictBodyLimitsAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "repeatedCookieValuesProjectKeysAndNullAuthAreSafe",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "realSavedDraftWithNullableDtoFieldsRemainsIdempotentAndLoadable",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "historySummaryCopiesWithoutPayloadCredentialsPathOrExecutionSideEffects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "transactionsRollBackArchiveAndReceiptAndCipherCorruptionPausesRead",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "receiptCannotRecreateDeletedRowsAndUuidCannotChangeBody",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "projectSecretAndOpaquePayloadsAreRemovedWhileVariablesStayTemplates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "templateRequiresMatchingHistoryAndCannotBeUsedToRewriteOriginals",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "nestedEncodedBodiesAndIpv6SummariesAreHandledWithoutStackOverflow",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "invalidSummaryTypesImmutableChangesAndBatchLimitsRollBack",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "migratedOriginIsRetainedAndDuplicateSourceIsNeverSilentlyCollapsed",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+      "name": "redactedTemplatesCoverAllProtocolsKeepNativeCiphertextAndEncryptCopies",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiInterchangeFlowTests",
+      "name": "importsOpenApiAndSwaggerThenExportsOpenApiAndCurl",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RunnerRegistryFlowTests",
+      "name": "renewedExpiredHeartbeatSurvivesCleanupBasedOnTheOldMissingRead",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RunnerRegistryFlowTests",
+      "name": "expiredMemberCanBeCleanedWithoutRemovingOtherLiveMembers",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RunnerRegistryFlowTests",
+      "name": "staleMissingReadDoesNotRemoveANewlyPublishedHeartbeatOrItsMembership",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.RunnerRegistryFlowTests",
+      "name": "explicitRemovalAndShutdownStillRemoveLiveMembers",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "ordinaryAssignmentAndSameCodeRecreationInvalidateStaleRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "manualEditAndSyncShareProjectLockAndRecheckAfterWaiting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "explicitClearClearsAssignmentAttributionButPreservesTerminalHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "auditFailureRollsBackPeopleAndReceiptAtomically",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "snapshotExposesOnlyProjectActiveMembersAndNoCredentials",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "rolesProjectActorCsrfAndPayloadLimitGuardBothDirections",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "explicitTargetMemberIdsReplacePeopleWithoutChangingWorkflowLinksOrHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "strictProtocolRejectsHistoryStatusTextMalformedIdsAndNonCanonicalCc",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "durableParallelReceiptKeepsCommittedIdentityAndNeverUndoesLaterManualAssignment",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "unchangedPeopleDoNotChurnMetadataAndCcOnlyPreservesOriginalAssigner",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "accountDisableRaceWaitsForRowLockAndRechecksEligibility",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "missingDefectOrInvalidMemberRejectsWholeBatchWithoutCreatingAccounts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "countLimitRejectsSnapshotBeforeReadingUnboundedBodies",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+      "name": "removedDisabledDeletedMembersAndAccountRenameInvalidateRevisionAndNeverAutoClear",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.ApiRequestBodyTests",
+      "name": "invalidBodiesReturnClientErrorsWithoutInvokingBusinessLogic(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.ApiRequestBodyTests",
+      "name": "invalidBodiesReturnClientErrorsWithoutInvokingBusinessLogic(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.ApiRequestBodyTests",
+      "name": "invalidBodiesReturnClientErrorsWithoutInvokingBusinessLogic(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.ApiRequestBodyTests",
+      "name": "validBodyStillInvokesTheController",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "copiesCurrentAssetsAndFullRowsThenEditsReturnWithStableIds",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "reusableUpdateAppendsAndPinnedScenarioStillExpandsOriginalRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "invalidEnvironmentAndLateFileFailureRollBackEntireBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "staleRevisionWrongActorExtraFieldsAndCsrfFailWithoutWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+      "name": "sourceFileAssociationCanMapAndChangeWithoutTouchingExistingFile",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopEngineArchiveToolTests",
+      "name": "rejectsTraversalAndWrongRoots",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopEngineArchiveToolTests",
+      "name": "neverOverwritesAnExistingDestination",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopEngineArchiveToolTests",
+      "name": "rejectsTruncatedArchives",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopEngineArchiveToolTests",
+      "name": "extractsIntoANewDirectoryWithUnicodeAndSpaces",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "elementUpdateUsesMonotonicTokenWithoutChangingPortableScenario",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "unknownFilesScriptsCapabilitiesAndReferencesRejectBeforeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "platformMismatchAndDuplicateUdidsRollbackEveryKind",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "parallelReplayAndLostResponsesNeverDuplicateOrUndoLaterEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "perKindAndMergedByteBoundsLeaveNoPartialData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "projectActorRoleCsrfAndRequestLimitsAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "manualEditWaitsForSyncProjectLockAndThenRejectsStaleVersion",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "staleSnapshotsCaseAndMysqlCollationsRejectWholeBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "auditFailureRollsBackVersionsDefinitionsAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "existingIdsFilesEnabledFlagsAndQueuedManifestSurviveSync",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "name": "bothPlatformsRemapUnorderedGraphWithoutFilesActivationOrExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.HarArchiveFlowTests",
+      "name": "importsHar12AndExportsReimportableArchive",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "concurrentUncertainRetryKeepsSameReceiptAndDoesNotDuplicateOrOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "actualHttpsTransportReceivesValidSignatureAndRenderedPayloadThenRetriesSameDelivery",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "strictUnknownFieldsInvalidCountsAndAuditFailureNeverWriteOrExposeSecrets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "definitionsMigrateWithNewIdentityDisabledWithoutTargetsSecretsQueuesOrSourceChanges",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "oversizedRenderedSubjectFailsVisiblyInsteadOfSilentlyDroppingNotification",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "projectReadersCannotWriteTransferOrRetryAndHttpRequiresCsrf",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "lateNameConflictRollsBackEarlierTemplatesAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "interruptedDesktopDispatchBecomesManualFailureAndExistingPendingQueueIsNotReplayedByRecovery",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "renderedPayloadSignedDispatchAndRetryUseOriginalSnapshotWithoutExposingSecret",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationTransferFlowTests",
+      "name": "editedWebhookRetainsSecretWhileTemplateChannelChangesClearItAndPolicyIsStillEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationFlowTests",
+      "name": "createsProjectScopedMobileAssetsAndProducesReportFromAppiumEvents",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "name": "inventoryIncludesBeyondLegacyHundredAndRejectsThousandAndOne",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "name": "copiesSafeTerminalStepsWithoutCurrentScenarioOrRunnerSideEffects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "name": "invalidSourceDigestUnknownFieldsAndSummaryMismatchAreRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "name": "downloadHasVerifiedDigestAndOriginalSourceAndNoRawFields",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "name": "lateStepUpsertsChangeSourceRevisionEvenAtIdenticalTimestamp",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "name": "accountCsrfProjectAndViewerPermissionsAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "name": "ignoresActiveTasksAndRetainsOriginalVersionAfterScenarioEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "name": "nativeRecordsStaleRevisionsAndReusedRequestKeysCannotBeOverwritten",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "concurrentTypes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "secretToOrdinary",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "normalization",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "isolatedScopes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "reserved",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "validation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "ordinaryToSecret",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "ordinaryUpdate",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "secretUpdate",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1ParameterRulesFlowTests",
+      "name": "permissions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests",
+      "name": "expiredRunnerMayBeReclaimedButLiveRunnerCannotAndOldOwnerCannotAck",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests",
+      "name": "keepsPreStartupBacklogAndPendingAcknowledgementsAcrossRestarts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests",
+      "name": "heartbeatExpiryAndRemovalSurviveReopen",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests",
+      "name": "serializesConcurrentWritersAndKeepsIndependentGroupCursors",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests",
+      "name": "retentionNeverDeletesPendingOrUnreadMessagesIncludingLateStartingGroups",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests",
+      "name": "readinessMissingReadCannotEraseANewHeartbeatBeforeSignedCapabilityDiscovery",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests",
+      "name": "recoversBackendPendingAndRetriesOnlyAfterIdleWindow",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionProfileFlowTests",
+      "name": "previewsFrozenConfigurationAndEditsProfilesWithoutCreatingAnExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionProfileFlowTests",
+      "name": "freezesProfileEnvironmentAndExecutionOverridesWithoutReturningValues",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.FilesystemObjectStorageTests",
+      "name": "persistsBinaryContentAcrossStorageInstancesAndDeletesIdempotently",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.FilesystemObjectStorageTests",
+      "name": "rejectsBucketAndObjectSymlinks",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.FilesystemObjectStorageTests",
+      "name": "failedOrOversizedUploadPreservesPreviousContentAndLeavesNoTemporaryFile",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.FilesystemObjectStorageTests",
+      "name": "killedWriterLeavesRecoverablePartialWithoutAffectingOtherObjects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.FilesystemObjectStorageTests",
+      "name": "neverInterpretsKeysAsPathsAndSeparatesBuckets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopBrokerControllerTests",
+      "name": "acceptsOnlyLoopbackNativeRequestsWithMatchingEngineAndRunnerCredential",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopBrokerControllerTests",
+      "name": "engineCannotPublishTasksOrReadOtherEngineOrWrongGroup",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopBrokerControllerTests",
+      "name": "rejectsInvalidBoundsAndFailsClosedWhenKeyMissing",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests",
+      "name": "publicTargetsRemainAllowedAndPrivateTargetsRequireAnExactConfiguredOrigin",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests",
+      "name": "administratorCanAllowAnyConfiguredPrivateIpWhilePrivateDnsStillFailsClosed",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests",
+      "name": "invalidAdministratorConfigurationFailsClosed",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests",
+      "name": "everyDnsAnswerIsValidatedSoMixedAnswersCannotReachABlockedAddress",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests",
+      "name": "loopbackMetadataMulticastUnspecifiedAndReservedTargetsCanNeverBeAllowed",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests",
+      "name": "arbitraryPrivateTargetSettingFailsClosedForInvalidBooleanValues",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests",
+      "name": "acceptsCommaOrLineSeparatedPrivateIpOriginsButNeverPrivateDnsNames",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockShareFlowTests",
+      "name": "sharesOnlySafeMockCallingGuideAndRevocationImmediatelyHidesIt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectEnvironmentFlowTests",
+      "name": "managesProjectScopedEnvironmentAndProtectsExecutionReferences",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "reenabled",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "enabledQueue",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "disabledQueue",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "signedWebhook",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "readonlyPreview",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "pat",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "race",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "acceptedContinues",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "profileOverride",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "undefinedStillLegacy",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "quartzSkip",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+      "name": "dataSet",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.OperationsFlowTests",
+      "name": "exposesDetailFreeProbesMetricsAndAdministratorOperationsOverview",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "corruptStorageCannotBeDownloadedAndOriginalMetadataIsRetained",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "confirmationAccountCsrfAndProjectPermissionsAreRequired",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "rejectsUnknownFieldsBadBytesStaleRevisionsAndNativeOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "copiesExactOriginalBytesAndMetadataWithoutCreatingRunnerRecords",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "twentyFiveMiBBase64BodyDecodesAndPersistsWhileLargerFilesAndBodiesFail",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "failedObjectWriteIsRecoveredBeforeAnotherRetry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "emptyArtifactIsPreservedAndDifferentContentCanNeverOverwriteIt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "receiptKeyCannotBeReusedAndMissingCommittedMetadataIsNotRecreated",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "multipleScreenshotsPreserveIndependentIdsAndOnlyPngIsAccepted",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "runningArtifactsRemainAtOriginAndMissingHistoryBlocksImport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "staleIntentRecoversOrphansAndNeverDeletesCommittedBytes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "name": "databaseRollbackRemovesOnlyNewObjectAndLeavesRetrySafe",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "corruptStorageCannotBeDownloadedAndOriginalMetadataIsRetained",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "emptyLogIsPreservedAndDifferentContentCanNeverOverwriteIt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "twentyMiBBase64BodyDecodesAndPersistsWhileLargerFilesAndBodiesFail",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "confirmationAccountCsrfAndProjectPermissionsAreRequired",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "rejectsUnknownFieldsBadBytesStaleRevisionsAndNativeOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "copiesExactOriginalBytesAndMetadataWithoutCreatingRunnerRecords",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "failedObjectWriteIsRecoveredBeforeAnotherRetry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "receiptKeyCannotBeReusedAndMissingCommittedMetadataIsNotRecreated",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "runningArtifactsRemainAtOriginAndMissingHistoryBlocksImport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "staleIntentRecoversOrphansAndNeverDeletesCommittedBytes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "name": "databaseRollbackRemovesOnlyNewObjectAndLeavesRetrySafe",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "parallelDurableReplayDoesNotDuplicateOrUndoLaterEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "projectRoleActorCsrfAndByteLimitsRemainMandatory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "releaseWritesSerializeWithRevisionComparison",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "explicitClearsAndIdenticalDefinitionsPreserveRowsAndRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "fileLinksStayReadableButCannotBeAutomaticallyCopied",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "portableOrderedBuildsAndDateUseNewIdsWithoutCopyingReleaseState",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "auditFailureRollsBackDefinitionsAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "countBytesAndCollationBoundsAreAtomic",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "existingReleaseStateActualDateCreationAndIdentitySurviveDefinitionUpdates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "renameAndSameNumberRecreationInvalidateOldRevisions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectVersionSyncFlowTests",
+      "name": "invalidProtectedFieldsDatesAndBuildsRejectTheEntireBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopSessionPersistenceTests",
+      "name": "installsBrokerWithoutInvalidatingExistingSessionsOrSecurityState",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopSessionPersistenceTests",
+      "name": "widensPrincipalNamesWithoutInvalidatingVersionFiftySessions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopSessionPersistenceTests",
+      "name": "sessionsSurviveReopenAndHonorRotationInvalidationAndExpiry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopSessionPersistenceTests",
+      "name": "upgradesVersionOneWithoutRebuildingTheWorkspace",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "inventoryIncludesBeyondLegacyHundredAndRejectsThousandAndOne",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "copiesSafeTerminalStepsWithoutCurrentScenarioOrRunnerSideEffects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "invalidSourceDigestUnknownFieldsAndSummaryMismatchAreRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "downloadHasVerifiedDigestAndOriginalSourceAndNoRawFields",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "lateStepUpsertsChangeSourceRevisionEvenAtIdenticalTimestamp",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "accountCsrfProjectAndViewerPermissionsAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "ignoresActiveTasksAndRetainsOriginalVersionAfterScenarioEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "iosFrozenNamesAndUnicodeStepIdentifiersRoundTripWithoutDeviceConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "name": "nativeRecordsStaleRevisionsAndReusedRequestKeysCannotBeOverwritten",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetFlowTests",
+      "name": "projectMemberCanMaintainCatalogRequirementAndCase",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetFlowTests",
+      "name": "catalogsAreIsolatedAcrossEveryFunctionalTab",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTransferFlowTests",
+      "name": "httpEnforcesProjectAccountAndStrictPayloadScope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTransferFlowTests",
+      "name": "repeatedRequestReturnsSameReceiptAndNameConflictDoesNotOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTransferFlowTests",
+      "name": "invalidSecondPlanRollsBackEarlierPlanAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTransferFlowTests",
+      "name": "copiesAllLoadModelsAndInlineCsvAsEditableDraftWithoutExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportScheduleFlowTests",
+      "name": "runsPersistedQualityScheduleAndQueuesOneIdempotentWebhookDelivery",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportScheduleFlowTests",
+      "name": "quartzWorkerRecordsSuccessfulReportAndActorWithoutServletRequest",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugFlowTests",
+      "name": "recordsDesktopLocalExecutionWithoutUsingTheServerTransport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugFlowTests",
+      "name": "allowsOnlyTheExactPrivateOriginMaintainedByTheSystemAdministrator",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugFlowTests",
+      "name": "constructsGraphqlAndSoapProtocolBodiesWithRequiredHeaders",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugFlowTests",
+      "name": "executesPublicHttpRequestStoresRedactedHistoryAndRejectsLoopback",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugFlowTests",
+      "name": "resolvesEnvironmentSecretsDynamicValuesAndBearerAuthenticationWithoutPersistingSecrets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugFlowTests",
+      "name": "savesEncryptedQuickRequestDraftWithoutExecutingTransport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDebugFlowTests",
+      "name": "onlineDebugAllowsAnyConfiguredPrivateIpFromAnEnvironmentWhenAdministratorEnablesIt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.P1StorageProbeTests",
+      "name": "lazyCreationAndItsCacheUseOnlyTheExistingBusinessClient",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.P1StorageProbeTests",
+      "name": "readinessUsesItsBoundedClientWithoutTouchingTheFileClient",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.P1StorageProbeTests",
+      "name": "destroyingTheStorageClosesOnlyItsOwnedProbeClient",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.P1StorageProbeTests",
+      "name": "failedProbeCannotChangeBusinessBucketInitialization",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationTransferFlowTests",
+      "name": "preservesVersionsStepsReferencesAndDisabledSchedules",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationTransferFlowTests",
+      "name": "inactiveImportedLocalTargetsNeverGrantAuthorization",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationTransferFlowTests",
+      "name": "strictHttpProjectAndAccountChecks",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationTransferFlowTests",
+      "name": "idempotencyNameConflictsAndPayloadChangesDoNotOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationTransferFlowTests",
+      "name": "lateMalformedScheduleAndDanglingReferencesRollbackWholeBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationTransferFlowTests",
+      "name": "requiresTargetFunctionalPlanCodeAndRemapsToItsOwnIdentity",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "copiesSafeTerminalReportWithoutCurrentScenarioOrRunnerSideEffectsAndPreservesOrigin",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "ignoresActiveTasksAndIncludesMoreThanLegacyHundredWithoutTruncation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "rejectsSameSourceRevisionWithDifferentContentAndRollsBackEarlierInsert",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "lateHttpStepAndScriptResultsUpdateArchiveOnceWithoutChangingNativeIdentity",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "accountPermissionCsrfReplayAndExportIntegrityAreProjectScoped",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+      "name": "rejectsActiveReportsBadDigestUnknownFieldsAndNativeOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "exactWhitespaceSignedManifestInstallsAndChecksumMatchesOriginalCharacters",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "administratorWritesRequireCsrfAndAuditFailureRollsBackAdapterChanges",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "adapterMetadataEditPreservesEncryptedConfigAndReplacementDoesNotExposePlaintext",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "revokedSignerBlocksNewInstallsWithoutChangingRegisteredPluginStatus",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "runtimeProjectionReflectsProfileAndRedactsStorageFailures",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "nullOrIncompleteConfigurationCannotCreateOrChangeAdapterType",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "largeSemanticVersionsUpgradeWithoutIntegerOverflowAndRemainDisabled",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "ordinaryRegisteredUsersReadProjectionsButCannotManageGlobalExtensionsOrOperations",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "name": "concurrentMetadataEditCannotOverwriteAReplacementSecret",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[6]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[7]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[8]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "nullParameterElementsReturn400BeforeAnyWrite(String, String)[9]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "supportedOpenApiVersionsStillImport(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "supportedOpenApiVersionsStillImport(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "supportedOpenApiVersionsStillImport(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "supportedOpenApiVersionsStillImport(String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[6]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[7]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[8]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[9]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[10]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[11]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[12]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[13]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "explicitMethodSurvivesDataInEitherOrder(String, boolean)[14]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[6]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[7]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[8]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "invalidOpenApiVersionsAreRejectedAtomically(String)[9]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "concurrentRootCreatesCommitOneAndPermitDifferentScopes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "concurrentRootRenamesCommitOneTargetName",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "omittedOrEmptyParametersRemainSupported(boolean)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "omittedOrEmptyParametersRemainSupported(boolean)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "curlExportQuotesUrlHeadersAndBodyAndRoundTrips(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "curlExportQuotesUrlHeadersAndBodyAndRoundTrips(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "curlExportQuotesUrlHeadersAndBodyAndRoundTrips(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "curlExportQuotesUrlHeadersAndBodyAndRoundTrips(String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "implicitCurlMethodStillDefaultsToPostOnlyWithData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "concurrentMovesToRootCommitOneAndKeepTheOtherChild",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "swaggerRequires20AndRejectsMixedFormatDeclarations",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFixesFlowTests",
+      "name": "concurrentCreateAndRenameShareTheSameRootGuard",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.uiautomation.UiAutomationTargetPolicyTests",
+      "name": "enterpriseStillRequiresSystemConfigurationAndRejectsIpLiterals",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.uiautomation.UiAutomationTargetPolicyTests",
+      "name": "desktopUsesOnlyNativeApprovedExactOriginsIncludingLocalIpTargets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "aggregatesBoundedParallelRequestsInTheExportSafeReport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "rejectsExecutionWhenScenarioReferencesAnUnavailableVariableWithoutCreatingQueueRecords",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "addsOnlyTheFixedContinuationCountToTheExportSafeReport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "freezesOnlyStructureAndVariableReferenceMetadataForEachExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "ignoresUnreferencedEnvironmentSecretsInRuntimeSnapshot",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "persistsOnlyFixedExtractAndAssertionResultsForKnownFrozenSteps",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "queuesAScopedExecutionAndAppliesRunnerRejectionWithoutLeakingCredentials",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "persistsOnlyRedactedHttpStepResultsForTheFrozenRequestDefinition",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "timesOutExpiredWorkAndStopsAfterTheConfiguredDeliveryBudget",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "freezesReferencedNonSecretValuesInternallyAndWithholdsEveryEnvironmentSecretValue",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "recordsStatusExtractionAsRunnerLocalWithoutPersistingItsFutureValue",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "cancelsPendingWorkOrReliablyRequestsRunnerCancellationWithoutSecrets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+      "name": "persistsOnlyAggregatePmScriptAssertionsAndAddsThemToTheExportSafeReport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "existingIdentityWorkflowHistoryPeopleAndAllAssetLinksSurviveUpdates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "invalidReferencesAndProtectedFieldsRollBackEntireBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "durableParallelReplayNeverDuplicatesOrUndoesLaterEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "countDepthByteAndDatabaseCollationGuardsAreAtomic",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "actorProjectRoleCsrfAndStrictByteLimitsRemainMandatory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "auditFailureRollsBackPortableFieldsAndDurableReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "identicalOperationsAndReadOnlySnapshotPreserveOriginalRowsAndRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "identityChangesInvalidateOldRevisionsEvenWithTheSameCodeAndDefinition",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "portableGraphRemapsIdsWithoutCopyingWorkflowPeopleOrCreatingExecutions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "explicitNullableClearsDoNotReuseOldCatalogDateOrExternalLink",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "projectLinksRemainReadableButAreNeverAutomaticallyCopied",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+      "name": "manualLifecycleWritesSerializeWithSnapshotComparison",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "taskSyncHasItsOwnOneMiBLimitForDeclaredAndChunkedBodies",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "grpcDescriptorSyncRejectsBodyAboveTwoMiBBeforeJsonDecoding",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "exactLimitSucceedsAndUnrelatedRoutesAreUntouched",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "projectVersionSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalGovernanceSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalDefectExecutionSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "mobileApplicationFileAssociationBoundsDeclaredAndChunkedBodies",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "webUiHistoryAndArtifactRoutesUseTheirDeclaredAndStreamedLimits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "performanceArtifactsBoundDeclaredAndChunkedBodiesAtTwentyNineMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "performanceHistorySyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "settingsSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalDefectPeopleSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalDefectSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "apiAutomationHistorySyncUsesDeclaredAndChunkedFourMiBLimit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "automationScenarioSyncBoundsDeclaredAndChunkedBodiesAtTenMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "performanceSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "mobileHistoryAndArtifactRoutesUseTheirDeclaredAndStreamedLimits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "declaredOversizeUsesSharedErrorEnvelopeWithoutConsumingBody",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "uiAutomationSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "chunkedOversizeStopsReadingAndRemainsRejectedOnRetry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "apiTransferUsesSameDeclaredAndChunkedLimitsWithoutAffectingOtherApiRoutes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalAssetTagSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "mockSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "notificationSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalDefectWorkflowSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "automationAssetSyncBoundsDeclaredAndChunkedBodiesAtTenMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalDefectLinkSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "apiAutomationTriggerSyncUsesDeclaredAndChunkedFourMiBLimit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "mobileAutomationSyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.TransferPayloadLimitFilterTests",
+      "name": "functionalHistorySyncBoundsDeclaredAndChunkedBodiesAtFourMiB",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationOperationsFixesFlowTests",
+      "name": "aMissingLazyBucketRemainsReady",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationOperationsFixesFlowTests",
+      "name": "readinessRecoversWhenStorageReturns",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationOperationsFixesFlowTests",
+      "name": "unavailableStorageFailsReadinessWithoutExposingDetailsOrFailingLiveness",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.NotificationOperationsFixesFlowTests",
+      "name": "anExistingBucketRemainsReady",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "corruptStorageCannotBeDownloadedAndOriginalMetadataIsRetained",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "confirmationAccountCsrfAndProjectPermissionsAreRequired",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "rejectsUnknownFieldsBadBytesStaleRevisionsAndNativeOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "copiesExactOriginalBytesAndMetadataWithoutCreatingRunnerRecords",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "twentyFiveMiBBase64BodyDecodesAndPersistsWhileLargerFilesAndBodiesFail",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "failedObjectWriteIsRecoveredBeforeAnotherRetry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "emptyArtifactIsPreservedAndDifferentContentCanNeverOverwriteIt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "receiptKeyCannotBeReusedAndMissingCommittedMetadataIsNotRecreated",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "runningArtifactsRemainAtOriginAndMissingHistoryBlocksImport",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "staleIntentRecoversOrphansAndNeverDeletesCommittedBytes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "databaseRollbackRemovesOnlyNewObjectAndLeavesRetrySafe",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "name": "multipleScreenshotsAndAllThreeKindsPreserveIndependentIdsAndViewPolicy",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationFixesFlowTests",
+      "name": "transferRejectsMismatchWithoutPartialImports",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationFixesFlowTests",
+      "name": "rejectedEditPreservesVersionAndOriginalEngine",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationFixesFlowTests",
+      "name": "paddedKnownMismatchIsRejectedByHttpWithoutCreatingRecords",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationFixesFlowTests",
+      "name": "syncRejectsMismatchAndRollsBackTheWholeBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationFixesFlowTests",
+      "name": "legalPaddedAndCustomEnginesKeepExistingNormalization",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "writerWaitsForProjectLockThenRechecksAssociations",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "referencesRemapAcrossEndpointsWithoutChangingAssetsOrOrderedHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "staleManualAssociationAndDictionaryChangesRejectPendingBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "countAndUtf8MergedByteLimitsRejectWithoutChangingExistingData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "identicalOperationKeepsJoinIdentifiersAndDeletedAssetsAreNotRecreated",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "strictJsonRejectsUnknownFieldsDuplicateOperationsUnsortedNamesAndUnsafeCodes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "missingAndWrongCaseReferencesRejectAllWritesWithoutCreatingDefinitions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "concurrentDurableReplayDoesNotRepeatReplacementOrUndoLaterEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "auditFailureRollsBackAssociationsAndReceiptTogether",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "replacingAndClearingCompleteTagSetsPreservesDictionaryAndOtherAssetTypes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+      "name": "projectRoleActorAndCsrfGuardsApplyToBothProtocolDirections",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "twentyDescriptorLimitDoesNotTruncateInventory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "exactOneMiBCompiledBytesAndFourMiBTotalArePreservedWhileOverflowIsRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "receiptCannotRecreateDeletedTargetOrReuseUuidForOtherContents",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "caseSyncAcceptsOnlyValidTargetProjectDescriptorIdsAndPreservesOtherFields",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "existingIdenticalDescriptorIsKeptAndDifferentContentCannotOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "contentDownloadHasDigestAndAttachmentHeaders",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "corruptStoredBytesAndCountsCannotPassIndexContentOrCaseReference",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "actorScopeWriterAndCsrfAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "copyPreservesBytesAndDiscoveryWithNewIdentityAndDurableExactReplay",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "staleInventoryRejectsCopyAndTransactionRollbackLeavesNoRowsOrReceipts",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+      "name": "invalidDigestDependenciesEmptyContentAndUnknownJsonAreRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalExecutionFlowTests",
+      "name": "planRunAndStepReportFormTraceableExecutionChain",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetFixesFlowTests",
+      "name": "concurrentRootCreatesCommitExactlyOneCatalog",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetFixesFlowTests",
+      "name": "missingAssetTagQueryParametersUse400Envelope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetFixesFlowTests",
+      "name": "concurrentRootRenamesCommitExactlyOneTargetName",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetFixesFlowTests",
+      "name": "rejectsRootCreateRenameAndMoveConflictsWithoutAuditOrDataChanges",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalAssetFixesFlowTests",
+      "name": "referencedRequirementDeleteIs409AndUnlinkAllowsDelete",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "confirmedTargetFileReferencesCanBeWrittenWithoutAcceptingExternalLinks",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "countByteDepthAndDatabaseCollationLimitsAreAtomic",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "existingIdsHistorySnapshotsUsersAndGovernanceLinksSurviveUpdates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "manualWritesSerializeWithSnapshotComparisonAndRejectStaleSync",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "nullCatalogPathsReturnBadRequestWithoutWriting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "unorderedPortableGraphRemapsIdsNestedPathsAndOrderedCases",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "staleRevisionUnknownFieldsDuplicateCasesAndDanglingReferencesRollBack",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "durableParallelReplayNeverDuplicatesOrUndoesLaterChanges",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "actorProjectRoleAndCsrfProtectionRemainMandatory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "projectFileLinksRemainReadableButNeverCopiedAutomatically",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalSyncFlowTests",
+      "name": "auditFailureRollsBackDefinitionsOrderAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestExecutionArtifactFlowTests",
+      "name": "archivesSignedRunnerOutputInMinioAndAllowsOnlyProjectScopedDownloads",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportFlowTests",
+      "name": "reportsSelectedProjectsAndExportsFormulaSafeCsv",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportFlowTests",
+      "name": "enforcesDateRangeAndProjectAccess",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "disabledNewLoginIs401WithNoAuthenticatedSessionForCorrectOrWrongPassword(boolean)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "disabledNewLoginIs401WithNoAuthenticatedSessionForCorrectOrWrongPassword(boolean)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentCreateCannotReserveTheSameIdentifierAcrossDifferentColumns()[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentCreateCannotReserveTheSameIdentifierAcrossDifferentColumns()[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentCreateCannotReserveTheSameIdentifierAcrossDifferentColumns()[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "nullMissingOversizedConfigAndEmptyNetworkBooleanAreStillRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "emptyGeneratedNameNeverShortensTheAccount(int)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "emptyGeneratedNameNeverShortensTheAccount(int)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "emptyGeneratedNameNeverShortensTheAccount(int)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "ownIdentifiersMayMatchOrSwapAndDeletedIdentifiersCanBeReused",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentRegistrationAndAdministrationShareTheSameIdentityGuard()[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentRegistrationAndAdministrationShareTheSameIdentityGuard()[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentRegistrationAndAdministrationShareTheSameIdentityGuard()[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentUpdatesCannotReserveTheSameIdentifierAcrossDifferentColumns()[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentUpdatesCannotReserveTheSameIdentifierAcrossDifferentColumns()[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "concurrentUpdatesCannotReserveTheSameIdentifierAcrossDifferentColumns()[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "disabledIdentifiersRemainReservedAndRegistrationCannotIntroduceCrossFieldCollision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "legacyAmbiguityFailsClosedWithoutBreakingTheUnambiguousAccountLogin",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "automaticNameDoesNotSplitASurrogatePairAndExplicitOverlengthNameStillFails",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "name": "rejectsBothCrossFieldDirectionsOnCreateAndUpdateWithoutChangingAccountsOrAudit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "tagDuplicateEditingAndFieldIdentityChangesPreserveOriginalDefinitions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "utf8ByteBudgetRejectsLargeMergedDefinitionsAndOversizeStoredOptionsBeforeCopying",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "projectLinksRemainReadableButCannotBeSentAutomatically",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "durableParallelReplayNeverDuplicatesOrUndoesLaterChanges",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "manualTagWritesSerializeWithSnapshotComparisonAndRejectStaleSync",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "actorProjectRoleAndCsrfProtectionRemainMandatoryForSyncAndTagEditing",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "auditFailureRollsBackDefinitionsAndDurableReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "updatesAndTagRenamePreserveIdsCreationAndExistingAssetAssignments",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "portableDefinitionsRemapIdsAndPreserveAssetTypeAndOptionOrder",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "countOptionDepthAndDatabaseCollationLimitsAreAtomic",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+      "name": "staleUnknownOrNoncanonicalDefinitionsAndDanglingParentsRejectEntireBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+      "name": "concurrentInitialAndExistingWritesHaveExactlyOneWinner",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+      "name": "enforcesStringCollectionAndUtf8BodyBounds",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+      "name": "isolatesUsersAndProjectsAndAllowsViewerOwnPreferences",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+      "name": "rejectsStaleRevisionWithoutChangingState",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+      "name": "rejectsInvalidGraphsAtomically",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+      "name": "rejectsUnknownFieldsDraftsCopiesUserIdsAndInvalidTypes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+      "name": "defaultsRoundTripAndFullReplacementPersistWithScope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+      "name": "readOnlyProjectTokensCannotChangePreferences",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "lateSqlFailureRollsBackDatabaseAndLeavesQuartzJobUntouched",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "unchangedAndReceiptReplayKeepManualEnablementAndExistingWebhookCiphertext",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "staleUiEnableOrSaveCannotBypassAChangedConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "missingReferencesAndUnknownSecretOrActivationFieldsFailBeforeWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "localSecretPreparationIsOneTimeAndOldSourceSignatureCannotActivateCopy",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "changedWebhookDefinitionPausesAndPreservesLocalKey",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "managerScopeCsrfActorAndRequestIdentityAreEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "incomingPlanEditKeepsOwnHistoryAndFailuresAndLateOutcomeNeverReenablesIt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "copiesDefinitionsWithMappedIdsPausedPlanAndWebhookDraftWithoutSecretOrExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+      "name": "duplicateWebhookNamesBlockOnlyRelatedDefinitions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFlowTests",
+      "name": "batchDeleteDefinitionsIsAtomicAndReturnsDeletedCount",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFlowTests",
+      "name": "catalogDefinitionVersionAndPublicationFormApiContractFlow",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiDesignFlowTests",
+      "name": "updatesCatalogAndDefinitionAndManagesCasesWithSafeCleanupOrder",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "manualWorkflowAndSyncShareProjectLockAndRecheckAfterWaiting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "unchangedWorkflowIsNoOpAndConfirmationOnlyKeepsGenuineLocalHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "rolesProjectActorCsrfAndPayloadLimitGuardBothDirections",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "missingDefinitionsRejectWholeBatchAndSyncNeverCreatesDefects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "portableWorkflowMapsCodesButNeverCopiesSourcePeopleOrHistoricalTimes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "auditFailureRollsBackWorkflowHistoryAndReceiptAtomically",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "reopeningClearsObsoleteHistoryAndDoesNotChangeAssignmentsOrDefinitionLinks",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "countLimitRejectsSnapshotBeforeReadingUnboundedDefectBodies",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "compatibleResolutionHistorySurvivesClosureButChangedResolutionLosesOldAttribution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "durableParallelReceiptReplayKeepsCommittedIdentityAndDoesNotUndoLaterEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "staleManualTransitionAndSameCodeRecreationInvalidateRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+      "name": "strictProtocolRejectsProtectedFieldsInvalidStateResolutionAndDuplicates",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "missingProjectMemberAccountIsCreatedWithDefaultPasswordAndAddedToProject",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "projectMemberCanCreateUpdateAndCancelExecutionTask",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "projectAdministratorCanManageNotificationTemplate",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "systemAdministratorCanCreateUpdateAndSoftDeleteProject",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "testerCannotReadSystemConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "systemAdministratorCanMaintainConfigurationAndReviewAuditTrail",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "projectAdministratorCanCreateRevocableProjectToken",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "testerCannotChangeProjectMembers",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "testerCannotModifyProjectParameters",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "projectAdministratorStoresEncryptedEnvironmentSecretAndReceivesOnlyMetadata",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "projectAdministratorCanMaintainNonSecretProjectParameters",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.AccessControlFlowTests",
+      "name": "systemAdministratorCanCreateUpdateAndDeleteAccount",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationTransferFlowTests",
+      "name": "rejectsCrossProjectFilesAndPlatformChanges",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationTransferFlowTests",
+      "name": "editableImportsUseOptimisticVersionsAndNeverChangeFrozenManifest",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationTransferFlowTests",
+      "name": "lateInvalidScenarioRollsBackAllAssetsAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationTransferFlowTests",
+      "name": "strictScopeActorProjectAndUnknownFieldsAreRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationTransferFlowTests",
+      "name": "retryAndNameOrUdidConflictsNeverOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MobileAutomationTransferFlowTests",
+      "name": "copiesBothPlatformsCurrentVersionsOrderedStepsAndRemapsReferencesWithoutFilesOrExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.PendingExecutionCancellationTests",
+      "name": "cancellationLocksOutboxUntilCommitAndPreventsDispatchClaim",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.PendingExecutionCancellationTests",
+      "name": "rollbackRestoresBothRowsAndWrongScopeCannotCancel",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ExtensionRegistryFlowTests",
+      "name": "verifiesSignedPluginPackagesAndKeepsCredentialsEncrypted",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsTransferFlowTests",
+      "name": "concurrentDefaultChangesLeaveExactlyOneEnabledDefaultAndInvalidatePreviousVersion",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsTransferFlowTests",
+      "name": "copiesDefinitionsDerivedBaseUrlAndOrdinaryParametersWithoutSecretsIdentitiesOrDefaultChanges",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsTransferFlowTests",
+      "name": "projectReadDoesNotGrantTransferWritesAndHttpRequiresCsrf",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsTransferFlowTests",
+      "name": "conflictingEnvironmentOrdinaryValueAndSecretCollisionRollBackEntireImportWithoutOverwriting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsTransferFlowTests",
+      "name": "accountProjectLogsAreScopedSummariesAndDoNotGrantGlobalAuditPermission",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsTransferFlowTests",
+      "name": "strictPayloadAndAccountValidationAndAuditFailureLeaveNoWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectSettingsTransferFlowTests",
+      "name": "concurrentRetryIsIdempotentAndIdenticalNewRequestsReuseWithoutWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.ObjectStorageConfigurationTests",
+      "name": "enterpriseModeKeepsMinioByDefault",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.storage.ObjectStorageConfigurationTests",
+      "name": "filesystemModeCreatesNoMinioClientAndNeedsNoMinioConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "queryApiKeyPreservesExistingEscapesAndDecodesOnce(String, String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "queryApiKeyPreservesExistingEscapesAndDecodesOnce(String, String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "queryApiKeyPreservesExistingEscapesAndDecodesOnce(String, String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "queryApiKeyPreservesExistingEscapesAndDecodesOnce(String, String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "queryApiKeyPreservesExistingEscapesAndDecodesOnce(String, String)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "queryApiKeyPreservesExistingEscapesAndDecodesOnce(String, String)[6]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "queryApiKeyPreservesExistingEscapesAndDecodesOnce(String, String)[7]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "queryApiKeyPreservesExistingEscapesAndDecodesOnce(String, String)[8]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[6]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[7]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[8]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[9]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[10]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[11]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[12]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[13]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "rejectsMissingOrDisabledEnvironmentBeforeSecretsTransportHistoryAndAudit(String, boolean)[14]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "sendQuotaCancelsExactlyOnceAndCannotBeOverwrittenByLateCallbacks(String, String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "sendQuotaCancelsExactlyOnceAndCannotBeOverwrittenByLateCallbacks(String, String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "sendQuotaCancelsExactlyOnceAndCannotBeOverwrittenByLateCallbacks(String, String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+      "name": "sendQuotaCancelsExactlyOnceAndCannotBeOverwrittenByLateCallbacks(String, String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopWorkspaceFlowTests",
+      "name": "refusesAnonymousBrowserRemoteAndInvalidNativeRequests",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopWorkspaceFlowTests",
+      "name": "readinessRequiresNativeAuthorizationAndAValidCurrentRunnerHeartbeat",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopWorkspaceFlowTests",
+      "name": "reusesTheLocalOwnerAndProjectAndRotatesTheSessionWithoutRegistration",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopWorkspaceFlowTests",
+      "name": "servesLocalEntryAndDeepLinksWithoutExposingBusinessData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "auditFailureRollsBackLinksAndReceiptAtomically",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "replaceOnlyRunCaseLinksKeepsProtectedDefectAndExecutionRows",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "planDeletionAndSyncShareLockAndRecheckAfterWaiting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "rolesProjectActorCsrfAndPayloadLimitGuardBothDirections",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "executionResultEditsDoNotInvalidateAssociationIdentityOrGetOverwritten",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "missingDefectAndForeignExecutionRejectWholeBatchWithoutCreatingHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "strictProtocolRejectsExtraHistoryFieldsMalformedIdsAndUnsortedSets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "explicitClearRemovesOnlyExecutionAssociations",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "snapshotExposesScopedExecutionIdentityWithoutActorsNotesOrResults",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "deletedPlanLeavesUnavailableLegacyLinkAndNeverSilentlyClearsIt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "ordinaryUnlinkAndSameCodeDefectRecreationInvalidateRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "countLimitRejectsUnboundedProjectSnapshot",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "durableParallelReceiptRetainsCommittedIdentityAndLaterManualEdit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "name": "noOpAndRetainedAssociationsKeepOriginalIdsTimesAndActors",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopExpiringStateStoreTests",
+      "name": "businessRollbackCannotUndoNonceAdmission",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopExpiringStateStoreTests",
+      "name": "admitsOneConcurrentNonceAndRetainsItAfterAllConnectionsClose",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopExpiringStateStoreTests",
+      "name": "countsConcurrentAttemptsWithoutExtendingTheOriginalWindow",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopExpiringStateStoreTests",
+      "name": "cleansExpiredEntriesAndRejectsInvalidLifetimeWithoutWriting",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopDatabaseTests",
+      "name": "storesJsonDocumentsWithoutDoubleEncodingAndQueriesTheirShape",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopDatabaseTests",
+      "name": "translatesTimestampPrecisionAndPreservesSqlLiterals",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "copiedHistoryRemainsEditableThroughOrdinaryExecutionApi",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "planDeletionAndHistorySyncShareProjectLock",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "projectFileLinksAndDuplicateTargetsRejectBeforeWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "accessActorCsrfAndBodyLimitEnforced",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "exactNoOpRetainsAllOrdinaryRowsAndMetadata",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "ordinaryEditInvalidatesExpectedRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "snapshotScopesPortableResultsAndPhysicalLayoutWithoutForeignActors",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "layoutMismatchNeverReplacesCasesStepsOrDefectAssociations",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "newCopyPreservesSourceOriginAndTimesWithActualTargetCreatorAndNewIds",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "auditFailureRollsBackAllRowsAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "invalidLifecyclePassedStepsTimePrecisionAndProtectedFieldsAreRejected",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "durableReceiptReplaysCommittedLayoutAfterLaterEditAndRejectsReusedPayload",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "existingUpdateRetainsIdsCreationAndDefectLinksClearsOnlyChangedActors",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "sourceClockAheadNeverBreaksOrdinaryEditingOrExistingHistoryTransfer",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "missingDependenciesRejectWholeBatchWithoutPartialCreation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "name": "projectHistoryCountIsBounded",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "concurrentProjectCreationReturnsOneConflictAndOneCompleteProject()[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "concurrentProjectCreationReturnsOneConflictAndOneCompleteProject()[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "concurrentProjectCreationReturnsOneConflictAndOneCompleteProject()[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "generatedMemberNameDoesNotSplitSupplementaryUnicode",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "memberCreationKeepsFullAccountAndBoundsGeneratedDisplayName(int)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "memberCreationKeepsFullAccountAndBoundsGeneratedDisplayName(int)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "memberCreationKeepsFullAccountAndBoundsGeneratedDisplayName(int)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "memberCreationKeepsFullAccountAndBoundsGeneratedDisplayName(int)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "memberCreationKeepsFullAccountAndBoundsGeneratedDisplayName(int)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "legacyTokenSessionAloneIsRejectedWhileFreshTokenStillWorks",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "invalidScopeElementsReturnClientErrorsWithoutCreatingTokens(List)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "invalidScopeElementsReturnClientErrorsWithoutCreatingTokens(List)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "invalidScopeElementsReturnClientErrorsWithoutCreatingTokens(List)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "invalidScopeElementsReturnClientErrorsWithoutCreatingTokens(List)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "invalidScopeElementsReturnClientErrorsWithoutCreatingTokens(List)[5]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "concurrentProjectRenamesPreserveLosingProjectAndProduceOneConflict()[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "concurrentProjectRenamesPreserveLosingProjectAndProduceOneConflict()[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "concurrentProjectRenamesPreserveLosingProjectAndProduceOneConflict()[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "bearerIsRequestScopedAndInvalidatedEvenWithLegacySession(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "bearerIsRequestScopedAndInvalidatedEvenWithLegacySession(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "bearerIsRequestScopedAndInvalidatedEvenWithLegacySession(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "invalidAuthorizationCannotFallBackToBrowserSession(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "invalidAuthorizationCannotFallBackToBrowserSession(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "invalidAuthorizationCannotFallBackToBrowserSession(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectAccessFixesFlowTests",
+      "name": "bearerTakesPrecedenceWithoutReplacingBrowserIdentity",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiRunnerInternalAuthenticationFlowTests",
+      "name": "acceptsOneRecentSignedRequestFromAHeartbeatVerifiedRunnerAndRejectsReplayOrTampering",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "malformed",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "openApi",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "currentVersion",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "catalogScope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "postman",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "roundTrip",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "har",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "stringStatus",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "range",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "missing",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "permissions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "original",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2ResponseCodeFlowTests",
+      "name": "decimal",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.WebSocketDebugFlowTests",
+      "name": "connectsSendsPollsMessagesClosesAndRejectsLoopbackTargets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.WebSocketDebugFlowTests",
+      "name": "appliesHandshakeAuthSendsSavedSubscriptionsAndReconnectsAfterRemoteClose",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportTransferFlowTests",
+      "name": "strictPayloadReferenceAndActorValidation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportTransferFlowTests",
+      "name": "copiesOrderedProjectScopeAndRulesDisabledWithoutRunsJobsOrNotifications",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportTransferFlowTests",
+      "name": "replayIsIdempotentAndNamesConflictWithoutOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportTransferFlowTests",
+      "name": "missingRelatedProjectFailsRatherThanNarrowingOrGuessingNames",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportTransferFlowTests",
+      "name": "projectAndReadOnlyRolesEnforcedAtHttpBoundary",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.QualityReportTransferFlowTests",
+      "name": "lateInvalidRuleRollsBackEntireImportAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiRunnerStatusFlowTests",
+      "name": "exposesOnlyValidOnlineApiRunnerHeartbeatsToAuthorizedProjectMembers",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopDatabaseConfigurationTests",
+      "name": "rejectsDatabaseSymlinksAndJdbcSeparatorsInResolvedParentPaths",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopDatabaseConfigurationTests",
+      "name": "rejectsUnsafeLocationsAndMissingPasswordBeforeCreatingData",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.desktop.DesktopDatabaseConfigurationTests",
+      "name": "ownsAFileDatabaseAndIgnoresAnEnterpriseJdbcUrl",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.security.SecretCipherTests",
+      "name": "usesKeyedCiphertextAndDecryptsFallbackAndLegacyPayloadsDuringRotation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "selfReset",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "deleteAccount",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "noResurrection",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "patDisabledOrDeleted",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "patSurvivesPasswordReset",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "normal",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "freshLogin",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "otherAccount",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "disable",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1SessionRulesFlowTests",
+      "name": "resetRejectsReadAndWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExternalTriggerFlowTests",
+      "name": "signedWebhookIsOneTimeEncryptedAtRestAndCanBeDisabled",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationExternalTriggerFlowTests",
+      "name": "scopedPatCanTriggerAndReadOnlyPatCannotTriggerWhileReportStaysRedacted",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+      "name": "failedCleanupRetainsDataAndRetriesOnTheNextInvocation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+      "name": "grpcUnaryRetainsOnlyActiveAuthenticationFields(String)[1]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+      "name": "grpcUnaryRetainsOnlyActiveAuthenticationFields(String)[2]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+      "name": "grpcUnaryRetainsOnlyActiveAuthenticationFields(String)[3]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+      "name": "grpcUnaryRetainsOnlyActiveAuthenticationFields(String)[4]",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+      "name": "encryptionFailureCannotPersistPlaintextOrReportDraftSuccess",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+      "name": "unknownCreationTimeFailsClosedWithoutDeletingOrInventingTime",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "auditFailureRollsBackDefinitionNewServerRulesAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "definitionsPreservePublicKeySharesRuntimeEnablementAndRuleIdentityNewCopiesDisabled",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "strictJsonInvalidHeadersAndUnnormalizedDefinitionsCannotWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "enabledRuleEditorChangesRuntimeAndInvalidEditKeepsOriginal",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "caseDifferencesMissingParentAndDuplicateExistingNamesNeverChooseArbitraryRows",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "writerScopeActorCsrfAndRuleScopeRequired",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "concurrentRetriesReturnOriginalReceiptWithoutDuplicateOrLaterOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "mergedLimitsAndFinalSnapshotSizeRollbackAllWrites",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockSyncFlowTests",
+      "name": "existingCrudEditAndEnablementInvalidateWholeBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.SystemSettingsFlowTests",
+      "name": "registeredWorkspaceCanManageOwnEnvironmentsWithoutGlobalPermissions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.SystemSettingsFlowTests",
+      "name": "capabilityIsAuthenticatedAndDoesNotGrantRegisteredUsersGlobalManagement",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.SystemSettingsFlowTests",
+      "name": "adminAccountLifecyclePreservesHashingSelfProtectionAndScopedOptions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.SystemSettingsFlowTests",
+      "name": "configLifecycleRequiresCsrfAndAuditContainsKeysWithoutValues",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.SystemSettingsFlowTests",
+      "name": "secretSystemConfigCannotBeReadOverwrittenOrDeletedViaOrdinaryConfigApi",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.SystemSettingsFlowTests",
+      "name": "accountMutationsRequireCsrfAndPasswordNeverAppearsInResponsesOrAudit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.SystemSettingsFlowTests",
+      "name": "networkPolicyRequiresStrictBooleanAndDoesNotGrantEnvironmentAdminGlobalRights",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PostmanCollectionFlowTests",
+      "name": "preflightsEveryRequestBeforeWritingAnyAssets",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PostmanCollectionFlowTests",
+      "name": "importsLargeBodiesGroupsDuplicateRoutesSkipsEmptyUrlAndSanitizesSensitiveHeaders",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PostmanCollectionFlowTests",
+      "name": "rejectsPostmanDocumentOverTenMebibytesByUtf8Bytes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PostmanCollectionFlowTests",
+      "name": "importsNestedPostmanCollectionAndExportsV21Collection",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectFileSyncFlowTests",
+      "name": "receiptReplayDoesNotDuplicateAfterLaterUploadAndPayloadReuseRejects",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectFileSyncFlowTests",
+      "name": "existingFilesGetStableHashesAndNewCopyPreservesBytesAndOrigin",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectFileSyncFlowTests",
+      "name": "staleRevisionInvalidDigestAndExistingOriginRejectWithoutExtraFiles",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectFileSyncFlowTests",
+      "name": "embeddedReferencesRequireCanonicalExistingFilesInTheTargetProject",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectFileSyncFlowTests",
+      "name": "actorProjectAccessCsrfAndBodyLimit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ProjectFileSyncFlowTests",
+      "name": "deletingImportedFileNeverDeletesSourceOrRecreatesItOnSnapshot",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.JdkApiDebugTransportTests",
+      "name": "revalidatesTheTargetImmediatelyBeforeSending",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.JdkApiDebugTransportTests",
+      "name": "returnsRedirectWithoutFollowingItsLocation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "concurrentRetry",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "successfulTree",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "lostResponse",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "receiptFailure",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "differentPayload",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "durableReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "overLimit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "atLimit",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "oldPartialRetained",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "middleFailure",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "staleSource",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P2CatalogCopyFlowTests",
+      "name": "explicitNewCopy",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.DesktopApiDebugTargetPolicyTests",
+      "name": "desktopRequiresMatchingSchemeHostPortAndLiteralOrLocalhost",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.apidebug.DesktopApiDebugTargetPolicyTests",
+      "name": "onlineAndUnsafeAddressesRemainBlocked",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "versionOrReadinessChangeAndDeleteInvalidateEntireOldBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "auditFailureRollsBackPlanVersionThreadsAndReceipt",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "allDefinitionsPreserveIdentityStatusAndFrozenExecutionWithoutQueueingCopies",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "writersExactActorProjectAndCsrfRequired",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "mergedCountAndFinalBytesAreBoundedBeforeAnyDefinitionWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "caseAndDatabaseCollationConflictsRollbackWholeBatch",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "archivedAndDraftStayIndependentAndVersionIncrementsOnlyOnWrittenTarget",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "concurrentAndLostResponseRetriesDoNotDuplicateIncrementOrOverwriteLaterEdits",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceSyncFlowTests",
+      "name": "unknownFieldsInvalidCsvTemplateHeaderAndDuplicateGroupsNeverWrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioReuseFlowTests",
+      "name": "rejectsAChildScenarioThatContainsAnotherReference",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioReuseFlowTests",
+      "name": "freezesProjectLocalSourcesAndExpandsOnlyPrimitiveStepsForAnExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+      "name": "browserRoleMatrix",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+      "name": "historyShapeDoesNotChangePermission",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+      "name": "readScope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+      "name": "scopesDoNotImplyOthers",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+      "name": "writeScope",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+      "name": "bothScopes",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+      "name": "roleRevocation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1HistoryPermissionFlowTests",
+      "name": "tokenBoundary",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.P1DependencyFailureTests",
+      "name": "sessionPhaseFailureReturnsSharedSanitized503WithoutForwardingTheBrokenSession",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.P1DependencyFailureTests",
+      "name": "redisProgrammingErrorsAreNotDisguisedAsOutages",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.P1DependencyFailureTests",
+      "name": "jdbcConnectionFailureIsUnavailable",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.P1DependencyFailureTests",
+      "name": "unrelatedSocketErrorsAreNotBroadlyReclassified",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.P1DependencyFailureTests",
+      "name": "wrappedRedisConnectionResetIsUnavailable",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.shared.api.P1DependencyFailureTests",
+      "name": "redisCommandTimeoutIsUnavailable",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestExecutionFlowTests",
+      "name": "queuesImmutablePlanSnapshotAndAcceptsCancellationEvents",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestExecutionFlowTests",
+      "name": "evaluatesFrozenThresholdsAndComparesWithThePreviousSuccessfulExecution",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceTestExecutionFlowTests",
+      "name": "acceptsOnlyBoundedRunnerErrorAttributionFields",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "acceptsOnlyIndependentBoundedParallelRequests",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "rejectsNullStepsOnCreateAndUpdateWithoutChangingRevisions",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "acceptsOnlyTheBoundedFlowControlGrammar",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "createsVersionedScenarioAndRejectsStaleOrUnsupportedSteps",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+      "name": "storesScriptSourcesWithoutExecutingThemInTheControlPlane",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.P1RedisHttpFlowTests",
+      "name": "realRedisRefusalStallRecoveryAndSessionInvalidationOverHttp",
+      "status": "SKIP"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceRunnerCapacityRecoveryFlowTests",
+      "name": "exposesVerifiedCapacityAndSafelyHandlesDeferralAndRunnerLoss",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.MockServiceFlowTests",
+      "name": "createsProjectScopedMockAndServesItsManualRuleWithoutAuthentication",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "copiesSafeTerminalReportWithoutCurrentPlanOrRunnerSideEffectsAndPreservesOrigin",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "ignoresActiveTasksAndIncludesMoreThanLegacyHundredWithoutTruncation",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "invalidResourceAndSummaryCountersRollBackWithoutAnArchive",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "rejectsSameSourceRevisionWithDifferentContentAndRollsBackEarlierInsert",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "lateMetricsAndResourcesUpdateArchiveOnceWithCanonicalDecimals",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "rejectsMissingNumericFieldsAndNullPrimitiveValuesInsteadOfDefaultingToZero",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "accountPermissionCsrfReplayAndExportIntegrityAreProjectScoped",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "rejectsActiveReportsBadDigestUnknownFieldsAndNativeOverwrite",
+      "status": "PASS"
+    },
+    {
+      "class": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "name": "preservesOneMillisecondTimestampRoundingButRejectsLargerReversals",
+      "status": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 1092,
+    "FAIL": 0,
+    "SKIP": 3
+  }
+}

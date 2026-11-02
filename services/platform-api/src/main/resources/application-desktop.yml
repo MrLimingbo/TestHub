@@ -18,6 +18,12 @@ spring:
     locations: classpath:db/desktop
 server:
   address: 127.0.0.1
+management:
+  endpoint:
+    health:
+      group:
+        readiness:
+          include: readinessState,db,minio
 testhub:
   desktop:
     allowed-origins: ${TESTHUB_DESKTOP_ALLOWED_ORIGINS:}

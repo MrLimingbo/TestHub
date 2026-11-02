@@ -1,0 +1,3404 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "name": "TestHub 第二批P2修复回归",
+    "version": "2026-10-30 A组合",
+    "scope": "D20/D13/D14/D15/D04/D18；8项观察。其余15项、12项环境补齐及升级关闭调查不执行。",
+    "generated_at": "2026-10-30T00:00:00+08:00"
+  },
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "DECISIONS.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-round2-rule-review/DECISIONS.json",
+      "type": "requirement",
+      "sha256": "14f99712bd900f4ba604e97d0c3ee4c83918bb48d43500e315c2e634f9284f68"
+    },
+    {
+      "id": "SRC-002",
+      "name": "P2-RULES-AND-ACCEPTANCE.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-round2-rule-review/P2-RULES-AND-ACCEPTANCE.md",
+      "type": "requirement",
+      "sha256": "ff680d157586c1f1e1c482f7a4a5efc524767e1fa594873fe789868a1c3d9007"
+    },
+    {
+      "id": "SRC-003",
+      "name": "USER-REVIEW.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-round2-rule-review/USER-REVIEW.md",
+      "type": "requirement",
+      "sha256": "16f3e19b3ff3359af3dc1b1b73de7e01bea629957ff9a313684d4e1e757173ca"
+    },
+    {
+      "id": "SRC-004",
+      "name": "APPROVED-SCOPE.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-30/p2-round2-fixes-r1/APPROVED-SCOPE.json",
+      "type": "requirement",
+      "sha256": "fc1d98df7cab4244ac9aba3702c1a4063e0637234d2b10f20edef3d4e0f6b357"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-D20",
+      "title": "行操作在CSRF等待期间失效的撤销边界",
+      "description": "业务请求发出前：账号登录会话、原页面实例或该操作的业务范围已失效，则取消提交；CSRF请求已完成不等于业务已经提交。；任务与通知按原项目+页面代次+登录会话绑定，A→B→A也使原操作失效；全局插件按登录会话+全局页面实例+管理权限绑定，单纯切换项目选择器不取消仍在当前全局页的操作。；业务请求已发出：保留捕获的原URL、资源ID和载荷，不假装服务端撤回，不自动追加取消/反向操作。；离开后返回的旧成功或错误不覆盖新视图、不触发新视图刷新、不清掉新操作的loading；结果可回原范围刷新查阅。重复点击和旧finally仅影响各自操作令牌。",
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2R2-D20-01",
+          "text": "等待CSRF时切A→B，业务写请求为0；返回A后可重新操作。",
+          "source_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D20-02",
+          "text": "旧通知操作不再提交；原表单保护和权限规则保持。",
+          "source_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D20-03",
+          "text": "离开全局页后未发业务请求取消；留在全局页仅切项目不会把全局操作误取消或归到项目。",
+          "source_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D20-04",
+          "text": "即使最终项目/账号ID相同，旧页面/登录会话代次也不能恢复有效；权限撤回不能继续提交。",
+          "source_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D20-05",
+          "text": "只发往原范围，禁止假报撤回或自动发补偿请求；服务端结果可原范围查阅。",
+          "source_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D20-06",
+          "text": "旧成功/失败不得关闭新弹窗、覆盖新数据、刷新新范围或清掉新操作loading。",
+          "source_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D20-07",
+          "text": "同一活动操作只提交一次；取消/失败后可明确重新触发，旧finally不影响新令牌。",
+          "source_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D20-08",
+          "text": "原鉴权/授权校验保持；取消与失败状态可区分，不在新视图泄漏原范围详情。",
+          "source_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ]
+        }
+      ],
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ]
+    },
+    {
+      "id": "REQ-D13",
+      "title": "脱敏历史的载入与所有UI发送入口",
+      "description": "旧摘要只载入可用的Method/URL，不自动发送；作为历史重建请求时清空无来源的旧Header/Auth/Body，Auth回到NONE，避免借用另一请求的凭据。；用历史来源和已知脱敏字段标记记录“待补齐”，在独立/嵌入/手动发送/专用重发及桌面分发前使用同一保护；未补齐的历史脱敏占位不得实际发送。；不按任意星号判定脱敏：用户新建请求中的合法***、通配路径等不因外形而拦截；只追踪已知历史脱敏来源，不猜测任意正文的业务含义。；明确补齐或重新配置后，经现有协议必填校验和用户主动发送方可执行；仅载入、保存或切路由绝不自动发送。；P1的EXPIRED/UNKNOWN_CREATED_AT/UNREADABLE继续拒绝回放；有效且有权的加密草稿保持。此项是UI来源校验，不承诺全局拒绝第三方API客户端任意字符串中的***。",
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2R2-D13-01",
+          "text": "Method/URL可载入，未来源认证/请求头/正文安全清空；无HTTP/WS/gRPC实际发送。",
+          "source_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D13-02",
+          "text": "独立、嵌入、普通发送、专用重发和桌面实际分发前一致拦截；网络调用数0。",
+          "source_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D13-03",
+          "text": "未标记为历史脱敏来源的新请求不会仅因***被拦；保留原协议校验。",
+          "source_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D13-04",
+          "text": "原占位已补齐/重建且验证通过，可经用户另行点击发送；载入、保存不触发发送。",
+          "source_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D13-05",
+          "text": "有权且有效的加密回放字段和现有隐私告知保持；不额外持久化重建秘密。",
+          "source_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D13-06",
+          "text": "过期、创建时间未知或不可解密不被此项旁路，不回退到使用其他请求的凭据。",
+          "source_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D13-07",
+          "text": "历史来源标记绑定原页面、项目及登录会话；切换不污染另一请求，既有业务草稿按原隔离规则处理。",
+          "source_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D13-08",
+          "text": "不新增全局***字符串黑名单；API原有认证、URL、协议校验保持，UI保护不能被某个UI发送分支漏掉。",
+          "source_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ]
+        }
+      ],
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ]
+    },
+    {
+      "id": "REQ-D14",
+      "title": "WS历史草稿与本页连接的替换",
+      "description": "采用本页单活动连接。历史载入只改变草稿，不自动连接、不发送订阅，也不因只读载入自动关闭旧连接。旧连接仍显示其实际目标及状态。；草稿连接配置与本页活动连接不一致时标明需替换，禁止把新草稿消息误发到旧会话；仅保持原配置时允许复用并刷新该会话。连接配置包括URL、环境、Headers/Auth、子协议、订阅及重连配置，不含待发文本消息。；用户主动连接新的配置时，先关闭本页拥有的旧会话，确认已结束后再连接新会话；关闭失败/超时不建新连接，不清空旧会话句柄或假报关闭成功。；手动关闭必须停止重连。离页/切范围后的迟到连接结果只能处理该操作创建的原项目会话，不扫描或关闭其他页面、账号、项目的会话。",
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2R2-D14-01",
+          "text": "不新连、不自动关闭、不发送订阅；旧会话标明实际目标，草稿变化时阻止误发送。",
+          "source_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D14-02",
+          "text": "同一页面/项目的配置未变且会话活动，允许刷新；不多建会话。",
+          "source_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D14-03",
+          "text": "用户主动连接后先关本页旧会话到终态，再新连；新Auth/目标确实来自新草稿。",
+          "source_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D14-04",
+          "text": "停止新连接，保留可核对的旧状态和重试入口；不假报已关闭。",
+          "source_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D14-05",
+          "text": "范围已失效的连接响应不得覆盖新视图，清理仅指向该请求创建的原范围sessionId。",
+          "source_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D14-06",
+          "text": "关闭后不继续自动重连或重发订阅；终态重复关闭保持原API语义。",
+          "source_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D14-07",
+          "text": "他页/他账号/他项目会话不被替换逻辑关闭；原权限拒绝仍有效。",
+          "source_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D14-08",
+          "text": "坏历史或无可用回放不会清空/接管其他连接；状态和实际归属一致。",
+          "source_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ]
+        }
+      ],
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ]
+    },
+    {
+      "id": "REQ-D15",
+      "title": "高级调试Auth的一次性交接",
+      "description": "同一登录会话、同项目、同窗口SPA导航中交接完整运行草稿，包含已支持的NONE、BEARER、BASIC、API_KEY（Header/Query），不解析变量或密钥引用为明文。；本次高级调试交接的完整运行草稿（包括可能含认证的Header/Body）改用内存一次性载体；URL仅放不可猜测标识及非秘密来源ID，敏感值不写URL、日志、localStorage或sessionStorage。其他来源草稿存储策略不借机扩改。；消费时校验原账号登录会话代次、项目与来源；一次消费后销毁，退出、范围失效或整页刷新后失效。失效明确提示返回源接口重开，不回退借用当前认证或不安全旧副本。；仅交接，不自动发送、不自动保存历史；真正用户发送后仍使用现有P1历史加密/保留与告知规则。未支持的Auth模式/坏结构必须明确提示补齐，不能声称完整保持。",
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2R2-D15-01",
+          "text": "NONE/BEARER/BASIC/API_KEY Header及Query交接结构、变量引用与原运行草稿保持。",
+          "source_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D15-02",
+          "text": "本次交接完整敏感草稿只驻内存；URL、浏览历史、日志和两种Web Storage无新Auth/认证头/正文秘密。",
+          "source_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D15-03",
+          "text": "错项目、A→B→A、退出再登录即使同账号ID也不能消费旧载体。",
+          "source_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D15-04",
+          "text": "重复消费、缺失key、整页刷新给出可恢复提示；不继承其他请求Auth。",
+          "source_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D15-05",
+          "text": "导航与载入不发目标请求、不保存历史；只有主动发送才执行和走原回放策略。",
+          "source_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D15-06",
+          "text": "Header/Query API Key位置和现有Auth优先级不变，凭据不重复注入；实际目标仅在隔离夹具验证。",
+          "source_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D15-07",
+          "text": "未知模式或结构无效明确告知，不静默当NONE并声称保持认证。",
+          "source_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D15-08",
+          "text": "其他来源路由草稿兼容不被全局改写；本次载体成功消费/失效后不可再读取。",
+          "source_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ]
+        }
+      ],
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ]
+    },
+    {
+      "id": "REQ-D04",
+      "title": "审计动作选项的完整权限范围",
+      "description": "选项来自当前全局审计接口的完整可见已存动作集合，按现有系统管理员权限和可选projectId范围取去重动作；不受当前action筛选或日志行数limit影响。；增加独立动作元数据查询，维持现有鉴权范围；不通过当前100/200条日志累计伪装完整，不扩大项目读者的全局审计权限。；选择A后仍能直接选B；选项稳定去重排序。无结果、选项获取失败与旧数据状态明确；401/403或退出不保留不再可见的动作名。；原日志行数、分页、详情脱敏和权限不变，不新增全文审计导出或未落库事件类型字典。",
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2R2-D04-01",
+          "text": "选动作A后动作B仍可直接选择，不必先清空。",
+          "source_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D04-02",
+          "text": "仅存在于首屏100/200条之外的合法可见动作仍出现在集合中。",
+          "source_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D04-03",
+          "text": "筛选无结果不导致全部选项消失；新数据刷新和稳定排序去重规则明确。",
+          "source_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D04-04",
+          "text": "元数据与原系统管理员权限、可选projectId一致；401/403不泄漏其他范围动作。",
+          "source_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D04-05",
+          "text": "选项/行查询失败可识别旧数据，迟到响应不覆盖新选择；权限失效清理旧可见项。",
+          "source_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D04-06",
+          "text": "原limit/分页/详情脱敏保持；元数据不返回原日志详情或客户端IP。",
+          "source_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ]
+        }
+      ],
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+        "SRC-004#json-root"
+      ]
+    },
+    {
+      "id": "REQ-D18",
+      "title": "页面对象在入队时冻结的统一语义",
+      "description": "保留当前入队解析并冻结的行为：保存场景保留页面对象引用；新执行在本次入队时解析当时的场景、浏览器配置与页面对象。；统一页面对象Tab、场景摘要、执行弹窗和相关说明；保存时不是永远冻结的执行定位器，历史执行以已存manifest及摘要/hash为准。；手动、定时、手动重试和自动重试新执行沿用当前重新入队规则；重试不是原manifest重放，保留retryOf关联。旧执行清单不可被新资产或本轮规则重写。；直接定位器仍随场景保存，引用对象在入队解析；对象缺失、权限错误或配置不可执行按原受控失败规则处理，不生成半个执行清单。",
+      "acceptance_criteria": [
+        {
+          "id": "AC-P2R2-D18-01",
+          "text": "新执行使用入队时的当前对象定位器，场景仍保留正确引用，不承诺保存时永久冻结。",
+          "source_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D18-02",
+          "text": "清单记录本次实际解析的场景/浏览器/定位器与hash，未成功形成清单不得产生可派发半批。",
+          "source_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D18-03",
+          "text": "旧manifest及hash、报告原始值不变；下一新执行才应用新对象值。",
+          "source_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D18-04",
+          "text": "无页面对象引用时使用场景已保存的直接定位器，不被对象编辑影响。",
+          "source_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D18-05",
+          "text": "页面对象Tab、场景步骤摘要、执行弹窗统一明确入队冻结，不再声称保存时冻结实际执行定位器。",
+          "source_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D18-06",
+          "text": "跨项目/缺失对象、停用配置等保持原拒绝与原数据；不伪造历史定位器或生成部分执行记录。",
+          "source_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ]
+        },
+        {
+          "id": "AC-P2R2-D18-07",
+          "text": "各新执行在本次入队解析当前数据，重试保留关联且旧manifest不改；不误宣传为原快照重放。",
+          "source_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ]
+        }
+      ],
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+        "SRC-004#json-root"
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "id": "COV-P2R2-D20-01",
+      "title": "任务行操作遇到切项目",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D20-02",
+      "title": "通知重试/删除遇到切项目",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D20-03",
+      "title": "全局插件操作离页与项目切换",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D20-04",
+      "title": "A→B→A与重新登录",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D20-05",
+      "title": "请求已经发出",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D20-06",
+      "title": "迟到响应与新视图",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D20-07",
+      "title": "重复点击与恢复",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D20-08",
+      "title": "401/403与错误信息",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D13-01",
+      "title": "仅载入旧摘要",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D13-02",
+      "title": "未补齐的历史占位",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D13-03",
+      "title": "合法普通星号",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D13-04",
+      "title": "明确补齐后主动发送",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D13-05",
+      "title": "有效加密草稿",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D13-06",
+      "title": "P1不可回放状态",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D13-07",
+      "title": "来源切换/退出",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D13-08",
+      "title": "直接API兼容边界",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D14-01",
+      "title": "只读载入",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D14-02",
+      "title": "相同配置复用",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D14-03",
+      "title": "新配置替换",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D14-04",
+      "title": "关闭失败或超时",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D14-05",
+      "title": "异步晚到连接",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D14-06",
+      "title": "手动关闭与重连",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D14-07",
+      "title": "权限与所有权",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D14-08",
+      "title": "载入失败及草稿回退",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D15-01",
+      "title": "支持的Auth矩阵",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D15-02",
+      "title": "导航与存储边界",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D15-03",
+      "title": "账号/登录会话/项目隔离",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D15-04",
+      "title": "一次消费与刷新",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D15-05",
+      "title": "仅交接不执行",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D15-06",
+      "title": "实际发送一致性",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D15-07",
+      "title": "不支持/损坏认证",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D15-08",
+      "title": "旧入口与内存清理",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D04-01",
+      "title": "筛选可达性",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D04-02",
+      "title": "旧于列表上限的动作",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D04-03",
+      "title": "空结果与刷新",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D04-04",
+      "title": "权限和范围",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D04-05",
+      "title": "失败与竞态",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D04-06",
+      "title": "原日志行为",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D18-01",
+      "title": "保存后、入队前修改对象",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D18-02",
+      "title": "入队快照一致",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D18-03",
+      "title": "入队后修改对象",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D18-04",
+      "title": "直接定位器",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D18-05",
+      "title": "界面和说明一致",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D18-06",
+      "title": "范围与失败",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+      ]
+    },
+    {
+      "id": "COV-P2R2-D18-07",
+      "title": "手动/定时/重试",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "document_review": [],
+  "cases": [
+    {
+      "id": "TC-P2R2-D20-01",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "任务行操作遇到切项目",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D20-01"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在原项目触发任务行操作并挂起CSRF；切项目后释放CSRF；再回原项目重新触发",
+          "expected": "等待CSRF时切A→B，业务写请求为0；返回A后可重新操作。",
+          "evidence_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+              "quote": "等待CSRF时切A→B，业务写请求为0；返回A后可重新操作。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D20",
+        "P2R2-D20-01",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D20-02",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "通知重试/删除遇到切项目",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D20-02"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别对通知重试和删除挂起CSRF，在切项目后释放；核对原范围资源和请求数",
+          "expected": "旧通知操作不再提交；原表单保护和权限规则保持。",
+          "evidence_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+              "quote": "旧通知操作不再提交；原表单保护和权限规则保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D20",
+        "P2R2-D20-02",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D20-03",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "全局插件操作离页与项目切换",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D20-03"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在全局插件页分别验证离页与仅切项目选择器两条分支，释放同一阶段的CSRF",
+          "expected": "离开全局页后未发业务请求取消；留在全局页仅切项目不会把全局操作误取消或归到项目。",
+          "evidence_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+              "quote": "离开全局页后未发业务请求取消；留在全局页仅切项目不会把全局操作误取消或归到项目。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D20",
+        "P2R2-D20-03",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D20-04",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "A→B→A与重新登录",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D20-04"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在CSRF挂起期间执行A→B→A、退出再登录或权限撤回；释放旧响应",
+          "expected": "即使最终项目/账号ID相同，旧页面/登录会话代次也不能恢复有效；权限撤回不能继续提交。",
+          "evidence_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+              "quote": "即使最终项目/账号ID相同，旧页面/登录会话代次也不能恢复有效；权限撤回不能继续提交。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D20",
+        "P2R2-D20-04",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D20-05",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "请求已经发出",
+      "type": "state",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D20-05"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "先让业务HTTP请求发出再切项目，返回原范围核对其结果和请求URL/载荷",
+          "expected": "只发往原范围，禁止假报撤回或自动发补偿请求；服务端结果可原范围查阅。",
+          "evidence_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+              "quote": "只发往原范围，禁止假报撤回或自动发补偿请求；服务端结果可原范围查阅。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D20",
+        "P2R2-D20-05",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D20-06",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "迟到响应与新视图",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D20-06"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "原业务响应延迟时离开并打开新视图/新操作；释放旧成功或失败",
+          "expected": "旧成功/失败不得关闭新弹窗、覆盖新数据、刷新新范围或清掉新操作loading。",
+          "evidence_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+              "quote": "旧成功/失败不得关闭新弹窗、覆盖新数据、刷新新范围或清掉新操作loading。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D20",
+        "P2R2-D20-06",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D20-07",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "重复点击与恢复",
+      "type": "state",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D20-07"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "重复点击同一资源行操作；待取消或失败后明确重新操作；再释放旧finally",
+          "expected": "同一活动操作只提交一次；取消/失败后可明确重新触发，旧finally不影响新令牌。",
+          "evidence_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+              "quote": "同一活动操作只提交一次；取消/失败后可明确重新触发，旧finally不影响新令牌。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D20",
+        "P2R2-D20-07",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D20-08",
+      "module": "D20 行操作在CSRF等待期间失效的撤销边界",
+      "title": "401/403与错误信息",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D20-08"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "令CSRF或业务请求返回401/403及受控错误；核对当前视图提示和原范围信息",
+          "expected": "原鉴权/授权校验保持；取消与失败状态可区分，不在新视图泄漏原范围详情。",
+          "evidence_refs": [
+            "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+              "quote": "原鉴权/授权校验保持；取消与失败状态可区分，不在新视图泄漏原范围详情。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D20"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D20-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D20-·-行操作在CSRF等待期间失效的撤销边界",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D20",
+        "P2R2-D20-08",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D13-01",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "仅载入旧摘要",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D13-01"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "从旧摘要载入Method/URL，预先给当前编辑器设置另一请求的认证/请求头/正文；观察载入行为",
+          "expected": "Method/URL可载入，未来源认证/请求头/正文安全清空；无HTTP/WS/gRPC实际发送。",
+          "evidence_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+              "quote": "Method/URL可载入，未来源认证/请求头/正文安全清空；无HTTP/WS/gRPC实际发送。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D13",
+        "P2R2-D13-01",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D13-02",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "未补齐的历史占位",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D13-02"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "载入含已知脱敏占位的历史；分别从独立页、嵌入页、普通发送、专用重发及桌面分发触发",
+          "expected": "独立、嵌入、普通发送、专用重发和桌面实际分发前一致拦截；网络调用数0。",
+          "evidence_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+              "quote": "独立、嵌入、普通发送、专用重发和桌面实际分发前一致拦截；网络调用数0。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D13",
+        "P2R2-D13-02",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D13-03",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "合法普通星号",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D13-03"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "新建非历史请求并填入合法星号或通配路径；以现有协议要求触发发送",
+          "expected": "未标记为历史脱敏来源的新请求不会仅因***被拦；保留原协议校验。",
+          "evidence_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+              "quote": "未标记为历史脱敏来源的新请求不会仅因***被拦；保留原协议校验。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D13",
+        "P2R2-D13-03",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D13-04",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "明确补齐后主动发送",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D13-04"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "载入待补齐历史后重新配置已知缺失字段；先保存/切路由，再主动发送",
+          "expected": "原占位已补齐/重建且验证通过，可经用户另行点击发送；载入、保存不触发发送。",
+          "evidence_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+              "quote": "原占位已补齐/重建且验证通过，可经用户另行点击发送；载入、保存不触发发送。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D13",
+        "P2R2-D13-04",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D13-05",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "有效加密草稿",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D13-05"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取有权有效的加密回放草稿，载入并在主动发送前检查字段及隐私告知",
+          "expected": "有权且有效的加密回放字段和现有隐私告知保持；不额外持久化重建秘密。",
+          "evidence_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+              "quote": "有权且有效的加密回放字段和现有隐私告知保持；不额外持久化重建秘密。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D13",
+        "P2R2-D13-05",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D13-06",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "P1不可回放状态",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D13-06"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "依次载入P1过期、创建时间未知、不可解密历史；尝试各UI回放/发送入口",
+          "expected": "过期、创建时间未知或不可解密不被此项旁路，不回退到使用其他请求的凭据。",
+          "evidence_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+              "quote": "过期、创建时间未知或不可解密不被此项旁路，不回退到使用其他请求的凭据。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D13",
+        "P2R2-D13-06",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D13-07",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "来源切换/退出",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D13-07"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "历史载入/发送等待期间更换项目、页面来源或登录会话；核对新请求状态",
+          "expected": "历史来源标记绑定原页面、项目及登录会话；切换不污染另一请求，既有业务草稿按原隔离规则处理。",
+          "evidence_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+              "quote": "历史来源标记绑定原页面、项目及登录会话；切换不污染另一请求，既有业务草稿按原隔离规则处理。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D13",
+        "P2R2-D13-07",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D13-08",
+      "module": "D13 脱敏历史的载入与所有UI发送入口",
+      "title": "直接API兼容边界",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D13-08"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "通过普通API发送合法非历史字符串，并检查所有UI发网络请求前均经过来源校验",
+          "expected": "不新增全局***字符串黑名单；API原有认证、URL、协议校验保持，UI保护不能被某个UI发送分支漏掉。",
+          "evidence_refs": [
+            "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+              "quote": "不新增全局***字符串黑名单；API原有认证、URL、协议校验保持，UI保护不能被某个UI发送分支漏掉。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D13"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D13-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D13-·-脱敏历史的载入与所有UI发送入口",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D13",
+        "P2R2-D13-08",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D14-01",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "只读载入",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D14-01"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保持本页旧WS连接活动，载入不同历史草稿；观察连接、订阅与发送状态",
+          "expected": "不新连、不自动关闭、不发送订阅；旧会话标明实际目标，草稿变化时阻止误发送。",
+          "evidence_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+              "quote": "不新连、不自动关闭、不发送订阅；旧会话标明实际目标，草稿变化时阻止误发送。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D14",
+        "P2R2-D14-01",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D14-02",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "相同配置复用",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D14-02"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对本页活动会话使用未变化的连接配置再次点击连接/刷新",
+          "expected": "同一页面/项目的配置未变且会话活动，允许刷新；不多建会话。",
+          "evidence_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+              "quote": "同一页面/项目的配置未变且会话活动，允许刷新；不多建会话。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D14",
+        "P2R2-D14-02",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D14-03",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "新配置替换",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D14-03"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "修改连接配置后主动连接；记录旧关闭确认与新连接请求先后及新Auth/目标",
+          "expected": "用户主动连接后先关本页旧会话到终态，再新连；新Auth/目标确实来自新草稿。",
+          "evidence_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+              "quote": "用户主动连接后先关本页旧会话到终态，再新连；新Auth/目标确实来自新草稿。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D14",
+        "P2R2-D14-03",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D14-04",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "关闭失败或超时",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D14-04"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "使旧会话关闭返回错误或超时；再尝试连接新配置",
+          "expected": "停止新连接，保留可核对的旧状态和重试入口；不假报已关闭。",
+          "evidence_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+              "quote": "停止新连接，保留可核对的旧状态和重试入口；不假报已关闭。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D14",
+        "P2R2-D14-04",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D14-05",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "异步晚到连接",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D14-05"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "挂起创建连接的响应后切范围/离页；释放带新sessionId的旧响应",
+          "expected": "范围已失效的连接响应不得覆盖新视图，清理仅指向该请求创建的原范围sessionId。",
+          "evidence_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+              "quote": "范围已失效的连接响应不得覆盖新视图，清理仅指向该请求创建的原范围sessionId。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D14",
+        "P2R2-D14-05",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D14-06",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "手动关闭与重连",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D14-06"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "启用自动重连的本页会话手动关闭，再触发终态重复关闭",
+          "expected": "关闭后不继续自动重连或重发订阅；终态重复关闭保持原API语义。",
+          "evidence_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+              "quote": "关闭后不继续自动重连或重发订阅；终态重复关闭保持原API语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D14",
+        "P2R2-D14-06",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D14-07",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "权限与所有权",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D14-07"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "让其他页面、账号或项目拥有活动会话；替换本页会话并尝试越权访问",
+          "expected": "他页/他账号/他项目会话不被替换逻辑关闭；原权限拒绝仍有效。",
+          "evidence_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+              "quote": "他页/他账号/他项目会话不被替换逻辑关闭；原权限拒绝仍有效。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D14",
+        "P2R2-D14-07",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D14-08",
+      "module": "D14 WS历史草稿与本页连接的替换",
+      "title": "载入失败及草稿回退",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D14-08"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "先保持已有连接，再载入坏历史或没有可用回放的数据",
+          "expected": "坏历史或无可用回放不会清空/接管其他连接；状态和实际归属一致。",
+          "evidence_refs": [
+            "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+              "quote": "坏历史或无可用回放不会清空/接管其他连接；状态和实际归属一致。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D14"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D14-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D14-·-WS历史草稿与本页连接的替换",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D14",
+        "P2R2-D14-08",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D15-01",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "支持的Auth矩阵",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D15-01"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "逐种配置NONE、BEARER、BASIC、API_KEY Header/Query；从源接口进入高级调试",
+          "expected": "NONE/BEARER/BASIC/API_KEY Header及Query交接结构、变量引用与原运行草稿保持。",
+          "evidence_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+              "quote": "NONE/BEARER/BASIC/API_KEY Header及Query交接结构、变量引用与原运行草稿保持。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D15",
+        "P2R2-D15-01",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D15-02",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "导航与存储边界",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D15-02"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "将合成认证、认证头和正文放入当前运行草稿，执行高级调试导航并检查URL/日志/Web Storage",
+          "expected": "本次交接完整敏感草稿只驻内存；URL、浏览历史、日志和两种Web Storage无新Auth/认证头/正文秘密。",
+          "evidence_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+              "quote": "本次交接完整敏感草稿只驻内存；URL、浏览历史、日志和两种Web Storage无新Auth/认证头/正文秘密。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D15",
+        "P2R2-D15-02",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D15-03",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "账号/登录会话/项目隔离",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D15-03"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建交接载体后更换项目、A→B→A或退出后同账号重新登录；尝试消费",
+          "expected": "错项目、A→B→A、退出再登录即使同账号ID也不能消费旧载体。",
+          "evidence_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+              "quote": "错项目、A→B→A、退出再登录即使同账号ID也不能消费旧载体。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D15",
+        "P2R2-D15-03",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D15-04",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "一次消费与刷新",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D15-04"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "消费载体一次后再次消费，并分别模拟缺失key和整页刷新",
+          "expected": "重复消费、缺失key、整页刷新给出可恢复提示；不继承其他请求Auth。",
+          "evidence_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+              "quote": "重复消费、缺失key、整页刷新给出可恢复提示；不继承其他请求Auth。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D15",
+        "P2R2-D15-04",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D15-05",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "仅交接不执行",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D15-05"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "从源接口进入高级调试但不点击发送；观察网络和历史写入",
+          "expected": "导航与载入不发目标请求、不保存历史；只有主动发送才执行和走原回放策略。",
+          "evidence_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+              "quote": "导航与载入不发目标请求、不保存历史；只有主动发送才执行和走原回放策略。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D15",
+        "P2R2-D15-05",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D15-06",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "实际发送一致性",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D15-06"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对Header/Query API Key及原Auth优先级配置执行交接后主动发送到隔离目标",
+          "expected": "Header/Query API Key位置和现有Auth优先级不变，凭据不重复注入；实际目标仅在隔离夹具验证。",
+          "evidence_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+              "quote": "Header/Query API Key位置和现有Auth优先级不变，凭据不重复注入；实际目标仅在隔离夹具验证。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D15",
+        "P2R2-D15-06",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D15-07",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "不支持/损坏认证",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D15-07"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "向交接入口提供未支持认证模式或坏结构，检查导航与认证反馈",
+          "expected": "未知模式或结构无效明确告知，不静默当NONE并声称保持认证。",
+          "evidence_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+              "quote": "未知模式或结构无效明确告知，不静默当NONE并声称保持认证。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D15",
+        "P2R2-D15-07",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D15-08",
+      "module": "D15 高级调试Auth的一次性交接",
+      "title": "旧入口与内存清理",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D15-08"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "确认本次交接在消费/失效后清除，并使用原有其他来源路由草稿入口",
+          "expected": "其他来源路由草稿兼容不被全局改写；本次载体成功消费/失效后不可再读取。",
+          "evidence_refs": [
+            "SRC-002#heading/D15-·-高级调试Auth的一次性交接"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+              "quote": "其他来源路由草稿兼容不被全局改写；本次载体成功消费/失效后不可再读取。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D15"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D15-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D15-·-高级调试Auth的一次性交接",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D15",
+        "P2R2-D15-08",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D04-01",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "筛选可达性",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D04-01"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在全局审计页选动作A后直接改选B，观察下拉集合",
+          "expected": "选动作A后动作B仍可直接选择，不必先清空。",
+          "evidence_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+              "quote": "选动作A后动作B仍可直接选择，不必先清空。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D04",
+        "P2R2-D04-01",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D04-02",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "旧于列表上限的动作",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D04-02"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在可见范围中准备一个仅存在于最近100/200条之外的动作，再加载选项",
+          "expected": "仅存在于首屏100/200条之外的合法可见动作仍出现在集合中。",
+          "evidence_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+              "quote": "仅存在于首屏100/200条之外的合法可见动作仍出现在集合中。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D04",
+        "P2R2-D04-02",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D04-03",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "空结果与刷新",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D04-03"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "筛选到无结果后刷新，准备新增可见动作并核对排序去重",
+          "expected": "筛选无结果不导致全部选项消失；新数据刷新和稳定排序去重规则明确。",
+          "evidence_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+              "quote": "筛选无结果不导致全部选项消失；新数据刷新和稳定排序去重规则明确。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D04",
+        "P2R2-D04-03",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D04-04",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "权限和范围",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D04-04"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以无权账号调用动作元数据；以系统管理员切换可选项目范围",
+          "expected": "元数据与原系统管理员权限、可选projectId一致；401/403不泄漏其他范围动作。",
+          "evidence_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+              "quote": "元数据与原系统管理员权限、可选projectId一致；401/403不泄漏其他范围动作。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D04",
+        "P2R2-D04-04",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D04-05",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "失败与竞态",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D04-05"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别让选项/行查询失败或晚到；再改变筛选、权限或登录状态",
+          "expected": "选项/行查询失败可识别旧数据，迟到响应不覆盖新选择；权限失效清理旧可见项。",
+          "evidence_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+              "quote": "选项/行查询失败可识别旧数据，迟到响应不覆盖新选择；权限失效清理旧可见项。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D04",
+        "P2R2-D04-05",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D04-06",
+      "module": "D04 审计动作选项的完整权限范围",
+      "title": "原日志行为",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D04-06"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取元数据及原日志列表，核对列表limit、分页和详情字段边界",
+          "expected": "原limit/分页/详情脱敏保持；元数据不返回原日志详情或客户端IP。",
+          "evidence_refs": [
+            "SRC-002#heading/D04-·-审计动作选项的完整权限范围"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+              "quote": "原limit/分页/详情脱敏保持；元数据不返回原日志详情或客户端IP。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D04-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D04-·-审计动作选项的完整权限范围",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D04",
+        "P2R2-D04-06",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D18-01",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "保存后、入队前修改对象",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D18-01"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存引用页面对象的场景后修改该对象；再让新执行入队",
+          "expected": "新执行使用入队时的当前对象定位器，场景仍保留正确引用，不承诺保存时永久冻结。",
+          "evidence_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+              "quote": "新执行使用入队时的当前对象定位器，场景仍保留正确引用，不承诺保存时永久冻结。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D18",
+        "P2R2-D18-01",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D18-02",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "入队快照一致",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D18-02"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对含多个步骤的场景创建执行，读取本次清单/hash及派发记录",
+          "expected": "清单记录本次实际解析的场景/浏览器/定位器与hash，未成功形成清单不得产生可派发半批。",
+          "evidence_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+              "quote": "清单记录本次实际解析的场景/浏览器/定位器与hash，未成功形成清单不得产生可派发半批。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D18",
+        "P2R2-D18-02",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D18-03",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "入队后修改对象",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D18-03"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "执行入队后修改页面对象，再比较原清单/hash与下一执行",
+          "expected": "旧manifest及hash、报告原始值不变；下一新执行才应用新对象值。",
+          "evidence_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+              "quote": "旧manifest及hash、报告原始值不变；下一新执行才应用新对象值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D18",
+        "P2R2-D18-03",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D18-04",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "直接定位器",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D18-04"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存不引用页面对象的直接定位器，再编辑其他页面对象并入队",
+          "expected": "无页面对象引用时使用场景已保存的直接定位器，不被对象编辑影响。",
+          "evidence_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+              "quote": "无页面对象引用时使用场景已保存的直接定位器，不被对象编辑影响。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D18",
+        "P2R2-D18-04",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D18-05",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "界面和说明一致",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D18-05"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别打开页面对象Tab、场景步骤摘要和执行弹窗；核对冻结时点文字",
+          "expected": "页面对象Tab、场景步骤摘要、执行弹窗统一明确入队冻结，不再声称保存时冻结实际执行定位器。",
+          "evidence_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+              "quote": "页面对象Tab、场景步骤摘要、执行弹窗统一明确入队冻结，不再声称保存时冻结实际执行定位器。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D18",
+        "P2R2-D18-05",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D18-06",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "范围与失败",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D18-06"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以跨项目或缺失对象、停用浏览器配置尝试创建执行，检查失败及写入",
+          "expected": "跨项目/缺失对象、停用配置等保持原拒绝与原数据；不伪造历史定位器或生成部分执行记录。",
+          "evidence_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+              "quote": "跨项目/缺失对象、停用配置等保持原拒绝与原数据；不伪造历史定位器或生成部分执行记录。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D18",
+        "P2R2-D18-06",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    },
+    {
+      "id": "TC-P2R2-D18-07",
+      "module": "D18 页面对象在入队时冻结的统一语义",
+      "title": "手动/定时/重试",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按批准A的独立验收目标生成；多入口/状态变体作为本用例的数据，不重复计数。",
+      "coverage_item_refs": [
+        "COV-P2R2-D18-07"
+      ],
+      "preconditions": [
+        "新建隔离QA范围；按本用例配置有权/无权登录会话及所需原资产。",
+        "使用受控延迟、失败或合成认证夹具；不操作用户工作区和外部实际通知。"
+      ],
+      "test_data": "{所引验收规则规定的状态/范围/认证配置等价类}；具体受控夹具保留于可复用QA测试。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别经手动、定时、手动重试和自动重试创建新执行，比较新旧定位器和retryOf",
+          "expected": "各新执行在本次入队解析当前数据，重试保留关联且旧manifest不改；不误宣传为原快照重放。",
+          "evidence_refs": [
+            "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+              "quote": "各新执行在本次入队解析当前数据，重试保留关联且旧manifest不改；不误宣传为原快照重放。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D18"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-P2R2-D18-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D18-·-页面对象在入队时冻结的统一语义",
+        "SRC-004#json-root"
+      ],
+      "tags": [
+        "D18",
+        "P2R2-D18-07",
+        "后台隔离回归"
+      ],
+      "notes": "独立执行状态存放结果文件；此模型为先行设计，不含实际通过数。"
+    }
+  ]
+}

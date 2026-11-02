@@ -1,0 +1,228 @@
+{
+  "baselineFileCount": 1216,
+  "files": [
+    {
+      "path": "scripts/qa/p2-desktop-http.mjs",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "52d0b3c83ff01e1e8b671e58f7cf20aa4da4de88548646613f44ba9c7ca8cc24"
+    },
+    {
+      "path": "scripts/qa/p2-observation-ui.mjs",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "9a78715cf2279c2e4b7ef03e0d1e3d76c04327349c92b67234f104eb373f47d2"
+    },
+    {
+      "path": "scripts/qa/test-p2-backend.mjs",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "dd790a8f35af67e5fb258eacb2200383c3d2a29a9063230862e031b7b3c23356"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiCatalogCopyController.java",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "150f6b41099eed88164b6b93c149c67319c8d49bd55c72237d61dc2f3d13c165"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiCatalogCopyRepository.java",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "436ea7789e229dab01b7ae13ed1753b0a874b2d45f301d8b5f70f9d868dbc5a5"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiCatalogCopyService.java",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "f537574c0f65a3f33ba7ba37cf79d692b8d6d867cc9326a4a2b2a14792bae836"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiDesignService.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "545e939a64ba6a689861550280f95ce6ec80714a74e7f74e33133f0578e5ee78",
+      "afterSha256": "f9948002ca942ef5a91535bfe8c87daba7d7d42ba4395f848775bdf95c1c5aa0"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiInterchangeService.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "327abfd65b497362b30351a20ca4457071244c397e0965b6d00fffba6a2b926b",
+      "afterSha256": "38782a57fd225e26f7b46c3084cd94cf7c9227b879ab27e24be1104743301fe1"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/EnterpriseAdapterCatalog.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "6cbeb92d3eceb52fe2e62db001b63d4282970cdb074f45f4970b32a273228abb",
+      "afterSha256": "83633ac4f546ad814e6d618bf72d1c1e90f7d7d51172969e8d880b5a4802d0a1"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/parameter/EnvironmentSecretService.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "d46e167ec6dc0b024865f7bcb82c486a9acf4628ac7fa65afd83296546810043",
+      "afterSha256": "d5eeea230d2368ca71c4ddca09a6d3066b2c90303b378ec44d4c4a53e6dda80b"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterRepository.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "67f5e880184a772eb97868b80f4ced7739e3b4274ad5f1b66ee86bb3bd7f9736",
+      "afterSha256": "a67a9532bb09f42ef2506002b70c9de5f9e7b7e473ff16a24ff834bae74f0628"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterService.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "342174ad850731732d6137e23c0f89f91b52b6c2fb19b8374f32101ad7ca7d1c",
+      "afterSha256": "e32ce2c8de3723d419f125831a14a06e5d1558f5c001ae9c43f9eb4851be9e0f"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "b9ca6ea416441df72fca37467a3a41c7ea513fc9fb0d14b15a44bb9f5f7a8e1c",
+      "afterSha256": "a89d27aa046f573928dff7e167f0defe52b161504c8a6130bef57e521ad76af3"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportSchedule.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "343180f156e7c0f1d46f25c9a75f604d280b2624ae858934de87938dcdf7d100",
+      "afterSha256": "88101d131d55fdc54dffbb09e649cce81c56e4b7f1a4828ecbe1b4bd0c4fdd8c"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleController.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "4a64ae4e86e7051a89b71bd7295d0fa06debed440c141d374c6fe8e0ed3b16d4",
+      "afterSha256": "d76dc37bd8bffa46308ee430ba93817a64d847f63f9ab175d3264bd32ae84795"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleRepository.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "f432c3f926696a2e8fb6bcda7902c699b507c01d6f29d95c01f12abbe6dc5cb9",
+      "afterSha256": "d40574955a3fa63bc6bfed11b9807a5bda7dcf2c0ab2b7b241743e464168f0df"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleService.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "aa96b5975d5d6eaed2150d3efe67cd531b22ab6cd6c7abda27af1799bb8cfc8e",
+      "afterSha256": "e9568a1325d6cb70c23a7f190be2abf8648893c67445a80390b699c1f58a43f9"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "e48fb09bc361382bb19fdde780fcaeee824e18b16d8669406ac1730db2bac637",
+      "afterSha256": "b83d7409cf640402da1bd72fd598508271b3f51a92412b52ca7d1b45a6e65010"
+    },
+    {
+      "path": "services/platform-api/src/main/resources/db/desktop/V56__api_catalog_copy_receipt.sql",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "a551a4f7b620be2989523b5c2341cc1d6b190cc015c516cee451e43349d828c6"
+    },
+    {
+      "path": "services/platform-api/src/main/resources/db/migration/V112__api_catalog_copy_receipt.sql",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "a551a4f7b620be2989523b5c2341cc1d6b190cc015c516cee451e43349d828c6"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/CrossRegressionFixesFlowTests.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "e39df2812a5a687b488b12f1f4a7ffb52f42611d4fa33735c510f18920e8c20b",
+      "afterSha256": "6d7f7464bed8210f4c95908808ff097115c7fcf4c501d4be4dd26d2646a63774"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P1ParameterRulesFlowTests.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "8e8b22ee4ba00f263381ebd38cb6c5e41b7b22bdfcc5f59f9cafc169acffffce",
+      "afterSha256": "f647fd6e3ecc108f1c535bf6784c3ab32134809415e9b8fbf51fa2d2348e2a20"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2CatalogCopyFlowTests.java",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "1fbfa419374aa573066aab13b9a4145e15166b8195b76de4cb69aa52a071f223"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2EnvironmentRulesFlowTests.java",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "7b5b34dd36203e9e1a84a98c6c52a313aed84cfdd1c4b6ae47d939b63ba3d88b"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2NormalizedKeysFlowTests.java",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "4199c452fccac2ab9dc0c0e9eb538c413d0a5be5d4e82698a736ba0d8b157e2d"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2ResponseCodeFlowTests.java",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "6dcb960736943955aedfe5dd4efe8d329d658282c07417e50b2cb382dca2c963"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2ScheduleVersionFlowTests.java",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "c6205aa4e426d5a585fcf479ae89d881fc6b1184b2b3663ef3e913cf3182cf80"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/QualityReportSyncFlowTests.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "cc30badf1ff69afe596278df9f4375b2e502190243441559f1a3473b5ef0f211",
+      "afterSha256": "52904f99cdf0c48c7d4ffee7722f3c2d8edbc7dbb2f7b0d737c2d4ce31879c07"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/desktop/DesktopBackupToolTests.java",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "45726d72189bd4bfcc788c1d5a014b183fa4596114f00bcc8d894bd846b91e00",
+      "afterSha256": "50fc67bdf63ef48d37ff7e76c00fba1b6c88d830f39a82657c229dc1f6942f79"
+    },
+    {
+      "path": "src/pages/ApiDesignPage.vue",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "e6afc3bbf3bbdc99968beb054348c5ac72f1a59337ad229773a2292fe23b7753",
+      "afterSha256": "be021142f687afaaacf034ae73bf5f0980963cad842f1701652b2a35fa5dc763"
+    },
+    {
+      "path": "src/pages/ProjectSettingsPage.vue",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "834d0f1cb87d1e1c4b071c72c835831a1e71c4c2b3e0950852933818ca4714c9",
+      "afterSha256": "566061a330b9127a9ccb82198838942e5ab1de990eb22e55b7aca38652a694fc"
+    },
+    {
+      "path": "src/pages/ReportsPage.vue",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "b2e11eaedf3b12718cb4c698d1ba8c306ae49f19c8c4cda442836e9e6e6695b9",
+      "afterSha256": "cad69314596c6a2fd695df71ed2fbce6807af185ae3fcadb56eb27ea69941a0d"
+    },
+    {
+      "path": "src/test/p2CatalogCopyUi.test.ts",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "7027857968459ef9d62517016917c165e1f28c4fd79f0c404d6fc7188fd40bef"
+    },
+    {
+      "path": "src/test/p2EnvironmentUi.test.ts",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "ec7104570b0cf15af1a81f07edb9a5ab102cba5102d391a2c05f6c3280354687"
+    },
+    {
+      "path": "src/test/p2ScheduleVersionUi.test.ts",
+      "change": "ADDED_THIS_BATCH",
+      "beforeSha256": null,
+      "afterSha256": "de06ffe69ed22bf09670e5ad071b08ac1a1417f1b98b30503a508bc250779ab1"
+    },
+    {
+      "path": "src/test/qualityReportTaskFixes.test.ts",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "9fa0699b51f74800c42bcc4e83ab905a680b7992497d4d81e08d8d55c1bd97d7",
+      "afterSha256": "9187c67b44a0597a3ad66c3c8bc12a77b8e607f6a1d60903b106371ff828e56b"
+    },
+    {
+      "path": "src/test/reportsPage.test.ts",
+      "change": "MODIFIED_THIS_BATCH",
+      "beforeSha256": "ac1e4ff85f77abadef7ed524ccd3d9487d483f99428c576db1a2ca2bdabc4b41",
+      "afterSha256": "284199f3e30775f2959e2a3c34b96e9b09c9393c28575f7c6b6ed2caf21a4de3"
+    }
+  ],
+  "note": "只比较已记录本批基线的文件与本批明确新建的文件；其他缺少基线的仓库文件不推定为新建。此前未提交修改不计入本批。未提交Git、未发布或部署。"
+}

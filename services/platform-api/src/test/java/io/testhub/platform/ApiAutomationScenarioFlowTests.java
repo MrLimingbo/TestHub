@@ -33,6 +33,32 @@ class ApiAutomationScenarioFlowTests {
     }
 
     @Test
+    void rejectsNullStepsOnCreateAndUpdateWithoutChangingRevisions() throws Exception {
+        LoginSession administrator = login();
+        String projectId = projectId(administrator);
+        Csrf csrf = csrf(administrator);
+        String invalid = """
+                {"name":"自动化验收 null步骤","environmentCode":"test","variables":{},"steps":[null]}
+                """;
+        mvc.perform(post("/api/v1/projects/{projectId}/api-automation/scenarios", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content(invalid))
+                .andExpect(status().isBadRequest());
+        MvcResult created = mvc.perform(post("/api/v1/projects/{projectId}/api-automation/scenarios", projectId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content(invalid.replace("null]", "{\"id\":\"wait\",\"type\":\"WAIT\",\"name\":\"等待\",\"config\":{\"delayMillis\":1}}]")))
+                .andExpect(status().isOk()).andReturn();
+        String scenarioId = json(created).at("/data/id").asText();
+        mvc.perform(put("/api/v1/projects/{projectId}/api-automation/scenarios/{scenarioId}", projectId, scenarioId)
+                        .contentType(MediaType.APPLICATION_JSON).cookie(administrator.sessionCookie(), csrf.cookie())
+                        .header(csrf.headerName(), csrf.token()).content("{\"expectedVersion\":1,\"scenario\":" + invalid + "}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/projects/{projectId}/api-automation/scenarios/{scenarioId}/revisions", projectId, scenarioId)
+                        .cookie(administrator.sessionCookie()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1));
+    }
+
+    @Test
     void createsVersionedScenarioAndRejectsStaleOrUnsupportedSteps() throws Exception {
         LoginSession administrator = login();
         String projectId = projectId(administrator);

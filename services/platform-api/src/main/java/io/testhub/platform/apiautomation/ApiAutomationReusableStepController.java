@@ -67,5 +67,5 @@ public class ApiAutomationReusableStepController {
                                       @NotEmpty @Size(max = 300) List<@Valid StepRequest> steps) { }
     public record ReusableStepUpdateRequest(@NotNull @Valid ReusableStepRequest reusableStep, @Min(1) Integer expectedVersion) { }
     public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 24) String type,
-                              @NotBlank @Size(max = 160) String name, @Size(max = 50) Map<String, Object> config) { }
+                              @NotBlank @Size(max = 160) String name, @Size(max = 50) @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Config.class) Map<String, Object> config) { }
 }

@@ -1,0 +1,27 @@
+{
+  "headless": true,
+  "isolatedHttpFixtures": true,
+  "realBackendAcceptance": false,
+  "cases": [
+    {
+      "id": "TC-D16MOCK-35",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16MOCK-36",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16MOCK-37",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16MOCK-40",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": true,
+  "browserVersion": "156.0.8078.76",
+  "passed": 4,
+  "failed": 0
+}

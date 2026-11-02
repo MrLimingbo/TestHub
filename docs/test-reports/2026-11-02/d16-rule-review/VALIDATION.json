@@ -1,0 +1,26 @@
+{
+  "valid": true,
+  "date": "2026-11-02",
+  "documentChecksOnly": true,
+  "dynamicTestsExecuted": 0,
+  "implementationExecuted": false,
+  "ruleCards": 5,
+  "coveredObservations": 6,
+  "fieldGroups": 21,
+  "acceptanceGroups": 35,
+  "acceptanceGroupsExecuted": 0,
+  "codeFilesCompared": 1390,
+  "codeFilesChanged": 0,
+  "sourceAnchorsVerified": 44,
+  "priorSnapshotFilesUnchanged": 31,
+  "ledgerCounts": {
+    "APPROVED": 32,
+    "DEFERRED_NOT_IMPLEMENTED": 9,
+    "PROPOSED_PENDING_RULE_REVIEW": 6
+  },
+  "environmentBlockersUnchanged": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "localLinksValid": true,
+  "errors": [],
+  "warnings": []
+}

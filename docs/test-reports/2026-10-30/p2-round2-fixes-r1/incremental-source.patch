@@ -1,0 +1,1863 @@
+--- a/src/pages/TasksPage.vue
++++ b/src/pages/TasksPage.vue
+@@ -18,8 +18,8 @@
+ const context = ref<Context | null>(null), session = useSessionStore()
+ const projectId = computed({ get: () => session.projectId, set: (value: string) => session.selectProject(value) })
+ const tasks = ref<ExecutionTask[]>([]), loading = ref(true), saving = ref(false), loadError = ref('')
+-const visible = ref(false), editingId = ref<string | null>(null), keyword = ref(''), pendingTasks = ref(new Set<string>())
+-let taskRequest = 0, formRequest = 0, formProjectId = '', disposed = false
++const visible = ref(false), editingId = ref<string | null>(null), keyword = ref(''), pendingTasks = ref(new Map<string, symbol>())
++let taskRequest = 0, formRequest = 0, formProjectId = '', disposed = false, actionScope = 0
+ const form = reactive({ taskType: 'API', name: '', status: 'QUEUED', progress: 0, expectedVersion: null as number | null })
+ const taskTypes = ['API', 'FUNCTIONAL', 'PERFORMANCE', 'UI', 'MOBILE', 'OTHER']
+ const desktop = isLocalDesktop() || isAccountDesktop()
+@@ -61,14 +61,15 @@
+   } finally { if (!disposed && request === taskRequest && project === projectId.value) loading.value = false }
+ }
+ async function load() {
++  const scope = actionScope
+   try {
+     const value = await read<Context>('/api/v1/access/context')
+-    if (disposed) return
++    if (disposed || scope !== actionScope) return
+     context.value = value
+     const previous = projectId.value
+     session.resolveProjectId(projects.value)
+     if (previous === projectId.value) await loadTasks()
+-  } catch (error) { if (!disposed) { loading.value = false; loadError.value = error instanceof Error ? error.message : '加载项目失败' } }
++  } catch (error) { if (!disposed && scope === actionScope) { loading.value = false; loadError.value = error instanceof Error ? error.message : '加载项目失败' } }
+ }
+ function closeForm() { formRequest++; saving.value = false; visible.value = false }
+ function create() {
+@@ -104,16 +105,21 @@
+ }
+ async function act(task: ExecutionTask, method: 'POST' | 'PUT', suffix: string, input: unknown, message: string) {
+   if (disposed || task.projectId !== projectId.value || pendingTasks.value.has(task.id)) return
+-  pendingTasks.value.add(task.id)
++  const scope = actionScope, token = Symbol(task.id), project = task.projectId
++  const current = () => !disposed && scope === actionScope && project === projectId.value && pendingTasks.value.get(task.id) === token
++  pendingTasks.value.set(task.id, token)
+   try {
+-    await mutate(`/api/v1/projects/${task.projectId}/tasks/${task.id}${suffix}`, method, input)
+-    if (disposed || task.projectId !== projectId.value) return
++    await mutate(`/api/v1/projects/${project}/tasks/${task.id}${suffix}`, method, input, current)
++    if (!current()) return
+     await loadTasks()
+-    if (!disposed && task.projectId === projectId.value) Message.success(message)
+-  } catch (error) { if (!disposed && task.projectId === projectId.value) Message.error(error instanceof Error ? error.message : '操作失败') }
+-  finally { pendingTasks.value.delete(task.id) }
++    if (current()) Message.success(message)
++  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '操作失败') }
++  finally { if (pendingTasks.value.get(task.id) === token) pendingTasks.value.delete(task.id) }
+ }
+-watch(projectId, () => { closeForm(); keyword.value = ''; void loadTasks() }, { flush: 'sync' })
++watch(projectId, () => { actionScope++; pendingTasks.value.clear(); closeForm(); keyword.value = ''; void loadTasks() }, { flush: 'sync' })
++watch([() => session.authGeneration, () => session.profile?.id, () => session.profile?.authenticatedAt, () => session.signedIn], () => {
++  actionScope++; pendingTasks.value.clear(); closeForm(); taskRequest++; tasks.value = []; context.value = null; void load()
++}, { flush: 'sync' })
+ onMounted(load)
+ onBeforeUnmount(() => { disposed = true; taskRequest++; formRequest++ })
+ </script>
+--- a/src/pages/ApiDebugPage.vue
++++ b/src/pages/ApiDebugPage.vue
+@@ -8,6 +8,8 @@
+ import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
+ import { useSessionStore } from '@/stores/session'
+ import { isLocalDesktop, isAccountDesktop, openGrpcDescriptorSync } from '@/utils/desktopWorkspace'
++import { consumeApiDebugHandoff, discardApiDebugHandoff, type ApiDebugHandoffRequest } from '@/utils/apiDebugHandoff'
++import { OwnedWebSocketSessions } from '@/utils/ownedWebSocket'
+ import { executeDesktopHttpRequest, isDesktopHttpDebugAvailable } from '@/utils/desktopApiDebug'
+ import {
+   apiDebugDraftFromHistory,
+@@ -74,7 +76,16 @@
+ const context = ref<Context | null>(null)
+ const syncedTemplate = ref(false)
+ const syncedTemplateReviewed = ref(false)
++const legacyHistoryActive = ref(false), legacyHistoryReviewed = ref(false), legacyHistoryId = ref('')
++let legacyHistoryScope = -1
+ function canSendReviewedTemplate() {
++  if (legacyHistoryActive.value) {
++    if (legacyHistoryScope !== contextGeneration) { Message.warning('旧摘要来源已失效，请重新载入或新建空白请求'); return false }
++    const target = protocolType.value === 'HTTP' ? applyQuickRequestQuery(url.value, queryRows.value) : url.value
++    if (!legacyHistoryReviewed.value || isRedactedApiDebugUrl(target)) {
++      Message.warning('请补齐旧摘要中的脱敏字段并核对重建请求，再手动发送'); return false
++    }
++  }
+   if (syncedTemplate.value && !syncedTemplateReviewed.value) { Message.warning('请补齐脱敏模板并勾选核对后手动发送'); return false }
+   if (syncedTemplate.value) {
+     const activeAuth = (value: typeof auth) => value.type === 'BEARER' ? { type: value.type, token: value.token } : value.type === 'BASIC' ? { type: value.type, username: value.username, password: value.password } : value.type === 'API_KEY' ? { type: value.type, key: value.key, value: value.value, placement: value.placement } : { type: value.type }
+@@ -166,6 +177,11 @@
+ let webSocketGeneration = 0
+ let environmentGeneration = 0
+ let httpRequestSequence = 0
++let headerEditRevision = 0, bodyEditRevision = 0, urlEditRevision = 0
++let runtimeHandoff: { request: ApiDebugHandoffRequest; headers: number; body: number; url: number } | null = null
++watch([headerRows, cookieRows, quickBodyType, formBodyRows, injectRequestId], () => { headerEditRevision++ }, { deep: true, flush: 'sync' })
++watch([body, quickBodyType, formBodyRows], () => { bodyEditRevision++ }, { deep: true, flush: 'sync' })
++watch([url, queryRows], () => { urlEditRevision++ }, { deep: true, flush: 'sync' })
+ 
+ function requestContext() {
+   const generation = contextGeneration
+@@ -175,8 +191,14 @@
+     && activeProjectId === projectId.value && activeUserId === sessionStore.profile?.id }
+ }
+ 
+-watch([projectId, () => sessionStore.profile?.id], () => {
++watch([projectId, () => sessionStore.profile?.id, () => sessionStore.authGeneration, () => sessionStore.profile?.authenticatedAt, () => sessionStore.signedIn], () => {
+   contextGeneration++
++  if (legacyHistoryActive.value || runtimeHandoff) {
++    legacyHistoryReviewed.value = false
++    clearReconstructedRequest()
++    url.value = ''
++    hydrateQuickHttpEditor()
++  }
+   webSocketGeneration++
+   discoveryGeneration++
+   grpcDiscovery.loading = false
+@@ -185,6 +207,8 @@
+   sending.value = false
+   saveInterfaceDialog.value = false
+   stopWebSocketPolling()
++  cleanupOwnedWebSocket()
++  webSocket.session = null; webSocket.messages = []
+ }, { flush: 'sync' })
+ watch(protocolType, () => { webSocketGeneration++; stopWebSocketPolling() }, { flush: 'sync' })
+ watch(saveInterfaceDialog, (visible) => {
+@@ -327,7 +351,18 @@
+   else formBodyRows.value = [createQuickRequestRow()]
+ }
+ 
++function clearReconstructedRequest() {
++  runtimeHandoff = null
++  body.value = ''; headersText.value = ''; grpcMetadataText.value = ''
++  Object.assign(auth, { type: 'NONE', token: '', username: '', password: '', key: 'X-API-Key', value: '', placement: 'HEADER' })
++  Object.assign(grpcAuth, { type: 'NONE', token: '', username: '', password: '', key: 'X-API-Key', value: '' })
++  graphql.query = ''; graphql.variables = '{}'; graphql.operationName = ''
++  soap.envelope = ''; soap.action = ''; grpc.requestJson = '{}'
++  formBodyRows.value = [createQuickRequestRow()]
++}
+ function resetNewQuickRequest() {
++  legacyHistoryActive.value = false; legacyHistoryReviewed.value = false; legacyHistoryId.value = ''; legacyHistoryScope = -1
++  clearReconstructedRequest()
+   quickRequestName.value = '快捷请求'
+   quickRequestNameDraft.value = '快捷请求'
+   editingQuickRequestName.value = false
+@@ -340,6 +375,7 @@
+   requestTab.value = 'params'
+   result.value = null
+   responseBody.value = '发送请求后将在这里展示响应正文。'
++  hydrateQuickHttpEditor()
+ }
+ 
+ function syncQueryFromUrl() {
+@@ -361,6 +397,7 @@
+ }
+ 
+ function quickRequestBody() {
++  if (runtimeHandoff && runtimeHandoff.body === bodyEditRevision) return runtimeHandoff.request.body
+   if (quickBodyType.value === 'NONE') return ''
+   if (quickBodyType.value === 'URLENCODED') return serializeUrlEncodedRows(formBodyRows.value)
+   if (quickBodyType.value === 'FORM_DATA') return serializeMultipartRows(formBodyRows.value, '----TestHubQuickRequestBoundary')
+@@ -392,15 +429,17 @@
+ }
+ 
+ function headers() {
++  if (protocolType.value === 'HTTP' && runtimeHandoff && runtimeHandoff.headers === headerEditRevision) return runtimeHandoff.request.headers.map(header => ({ ...header }))
+   return protocolType.value === 'HTTP' ? quickRequestHeaders() : parseHeaderText()
+ }
+ 
+ function quickRequestPayload() {
+-  syncUrlFromQuery()
++  const originalUrl = runtimeHandoff && runtimeHandoff.url === urlEditRevision ? runtimeHandoff.request.url : null
++  if (originalUrl === null) syncUrlFromQuery()
+   return {
+     name: quickRequestName.value.trim() || '快捷请求',
+     method: method.value,
+-    url: url.value,
++    url: originalUrl ?? url.value,
+     headers: headers(),
+     body: quickRequestBody(),
+     timeoutMs: timeoutMs.value,
+@@ -439,7 +478,7 @@
+   catalogs.value = await read<Catalog[]>(`/api/v1/projects/${projectId.value}/api-design/catalogs`)
+ }
+ 
+-async function loadEnvironment(preferredEnvironment?: string) {
++async function loadEnvironment(preferredEnvironment?: string, chooseDefault = true) {
+   if (!projectId.value) return
+   const scope = requestContext()
+   const generation = ++environmentGeneration
+@@ -454,7 +493,7 @@
+   environments.value = environmentData.map((item) => item.environmentCode)
+   if (preferredEnvironment !== undefined) environment.value = preferredEnvironment.trim()
+   if (environment.value && !environments.value.includes(environment.value)) environment.value = ''
+-  if (!environment.value && environments.value.length) {
++  if (chooseDefault && !environment.value && environments.value.length) {
+     environment.value = environmentData.find((item) => item.enabled && item.defaultEnvironment)?.environmentCode
+       ?? environmentData.find((item) => item.enabled)?.environmentCode
+       ?? environments.value[0]
+@@ -472,14 +511,35 @@
+ async function load() {
+   loading.value = true
+   try {
+-    context.value = await read<Context>('/api/v1/access/context')
++    const loadedContext = await read<Context>('/api/v1/access/context')
++    if (disposed) return
++    context.value = loadedContext
+     projectId.value = sessionStore.resolveProjectId(projects.value)
+-    const routeDraft = readApiDebugRouteDraft(window.sessionStorage, route.query.draft)
+-      ?? apiDebugDraftFromQuery(route.query as Record<string, unknown>)
+-    if (!routeDraft && props.embedded) resetNewQuickRequest()
+-    else applyRouteDraft(routeDraft)
+-    await loadEnvironment(environment.value || routeDraft?.environment)
++    const loadScope = requestContext()
++    let routeDraft: ApiDebugRouteDraft | null = null
++    let handoffEnvironment: string | null = null
++    let handoffAccepted = false
++    if (route.query.handoff !== undefined) {
++      const packet = consumeApiDebugHandoff(sessionStore, route.query.handoff)
++      routeDraftApplied = true
++      if (packet && packet.sourceApiId === route.query.sourceApiId) {
++        applyStoredReplayDraft(JSON.stringify(packet)); handoffEnvironment = packet.request.environmentCode; handoffAccepted = true
++        runtimeHandoff = { request: packet.request, headers: -1, body: -1, url: -1 }
++      }
++      else { resetNewQuickRequest(); Message.warning('高级调试交接已失效，请返回源接口重新打开；未沿用其他请求认证') }
++    } else {
++      routeDraft = readApiDebugRouteDraft(window.sessionStorage, route.query.draft)
++        ?? apiDebugDraftFromQuery(route.query as Record<string, unknown>)
++      if (!routeDraft && props.embedded) resetNewQuickRequest()
++      else applyRouteDraft(routeDraft)
++    }
++    await loadEnvironment(environment.value || routeDraft?.environment, route.query.handoff === undefined)
++    if (!loadScope.current()) return
++    if (handoffAccepted && handoffEnvironment && environment.value !== handoffEnvironment) {
++      resetNewQuickRequest(); Message.warning('源运行环境已不可用，请返回源接口核对后重新打开高级调试')
++    }
+     if (protocolType.value === 'HTTP') hydrateQuickHttpEditor()
++    if (runtimeHandoff) runtimeHandoff = { ...runtimeHandoff, headers: headerEditRevision, body: bodyEditRevision, url: urlEditRevision }
+     removeApiDebugRouteDraft(window.sessionStorage, route.query.draft)
+     await Promise.all([loadHistory(), loadGrpcDescriptors(), loadCatalogs()])
+   } catch (error) { Message.error(error instanceof Error ? error.message : '加载快捷请求工作台失败') } finally { loading.value = false }
+@@ -490,6 +550,10 @@
+   routeDraftApplied = true
+   if (!draft) return
+   if (draft.replayDraft && applyStoredReplayDraft(draft.replayDraft)) return
++  if (draft.legacyHistory) {
++    resetNewQuickRequest()
++    legacyHistoryActive.value = true; legacyHistoryId.value = draft.legacyHistoryId ?? ''; legacyHistoryScope = contextGeneration
++  }
+   if (draft.name) quickRequestName.value = draft.name
+   if (draft.protocol) {
+     protocolType.value = draft.protocol
+@@ -985,6 +1049,7 @@
+       read<WebSocketMessage[]>(`/api/v1/projects/${scope.projectId}/api-debug/websocket/sessions/${sessionId}/messages`),
+     ])
+     if (!current()) return false
++    webSocketConnections.update(session)
+     webSocket.session = session
+     webSocket.messages = messages
+     if (session.status === 'CLOSED' || session.status === 'ERROR') stopWebSocketPolling()
+@@ -998,26 +1063,36 @@
+   }
+ }
+ 
++function webSocketPayload() {
++  return {
++    url: url.value, headers: headers(), environmentCode: environment.value || null, auth: { ...auth },
++    subprotocols: webSocket.subprotocolsText.split(',').map(item => item.trim()).filter(Boolean),
++    subscriptions: [...webSocket.subscriptions],
++    reconnect: { enabled: webSocket.autoReconnect, maxAttempts: webSocket.maxReconnectAttempts, delayMs: webSocket.reconnectDelayMs },
++  }
++}
++const webSocketConnections = new OwnedWebSocketSessions<WebSocketSession>({
++  connect: (project, payload, current) => mutate<WebSocketSession>(`/api/v1/projects/${project}/api-debug/websocket/connect`, payload, () => { if (!current()) throw new Error('连接上下文已改变') }),
++  close: (project, id) => mutate<WebSocketSession>(`/api/v1/projects/${project}/api-debug/websocket/sessions/${id}/close`, {}),
++})
++const webSocketScopeKey = () => `${contextGeneration}:${projectId.value}:${sessionStore.authGeneration}`
++const webSocketMatchesDraft = computed(() => !!webSocket.session && webSocketConnections.matches(webSocketScopeKey(), webSocketPayload()))
++function cleanupOwnedWebSocket() {
++  const owned = webSocketConnections.session
++  if (!owned) return
++  void webSocketConnections.close().catch(() => {
++    Message.warning(`本页原WebSocket会话 ${owned.id} 关闭未确认，请返回原范围核对`)
++  })
++}
+ async function connectWebSocket() {
+   if (!canSendReviewedTemplate() || !projectId.value || sending.value) return
+   const scope = requestContext(), generation = ++webSocketGeneration
+   const current = () => scope.current() && generation === webSocketGeneration
+-  if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '')) {
+-    if (await loadWebSocketMessages() && current()) Message.info(webSocket.session?.status === 'OPEN' ? 'WebSocket 已连接，已刷新消息' : 'WebSocket 正在连接或重连')
+-    return
+-  }
+   sending.value = true
+-  try {
+-    const session = await mutate<WebSocketSession>(`/api/v1/projects/${scope.projectId}/api-debug/websocket/connect`, {
+-      url: url.value,
+-      headers: headers(),
+-      environmentCode: environment.value || null,
+-      auth: { ...auth },
+-      subprotocols: webSocket.subprotocolsText.split(',').map((item) => item.trim()).filter(Boolean),
+-      subscriptions: [...webSocket.subscriptions],
+-      reconnect: { enabled: webSocket.autoReconnect, maxAttempts: webSocket.maxReconnectAttempts, delayMs: webSocket.reconnectDelayMs },
+-    }, () => { if (!current()) throw new Error('连接上下文已改变') })
+-    if (!current()) return
++  stopWebSocketPolling()
++  try {
++    const session = await webSocketConnections.connect({ projectId: scope.projectId, key: webSocketScopeKey(), current }, webSocketPayload())
++    if (!session || !current()) return
+     webSocket.session = session
+     if (!await loadWebSocketMessages() || !current()) return
+     await loadHistory()
+@@ -1025,13 +1100,17 @@
+     if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '')) startWebSocketPolling()
+     if (webSocket.session?.status === 'OPEN') Message.success('WebSocket 已连接')
+   } catch (error) {
+-    if (current()) Message.error(error instanceof Error ? error.message : '连接 WebSocket 失败')
++    if (current()) {
++      webSocket.session = webSocketConnections.session
++      Message.error(error instanceof Error ? error.message : '连接 WebSocket 失败')
++    }
+   } finally { if (current()) sending.value = false }
+ }
+ 
+ async function sendWebSocketMessage() {
+   if (!canSendReviewedTemplate() || !projectId.value || !webSocket.session || sending.value) return
+   if (webSocket.session.status !== 'OPEN') { Message.warning('请先建立 WebSocket 连接'); return }
++  if (!webSocketMatchesDraft.value) { Message.warning('草稿与当前连接不同，请先连接替换本页旧会话'); return }
+   const scope = requestContext(), generation = ++webSocketGeneration, sessionId = webSocket.session.id
+   const current = () => scope.current() && generation === webSocketGeneration
+   sending.value = true
+@@ -1045,17 +1124,17 @@
+ 
+ async function closeWebSocket() {
+   if (!projectId.value || !webSocket.session || sending.value) return
+-  const scope = requestContext(), generation = ++webSocketGeneration, sessionId = webSocket.session.id
++  const scope = requestContext(), generation = ++webSocketGeneration
+   const current = () => scope.current() && generation === webSocketGeneration
+   sending.value = true
+   try {
+-    const session = await mutate<WebSocketSession>(`/api/v1/projects/${scope.projectId}/api-debug/websocket/sessions/${sessionId}/close`, {}, () => { if (!current()) throw new Error('连接上下文已改变') })
++    const session = await webSocketConnections.close()
+     if (!current()) return
+-    webSocket.session = session
+-    if (!await loadWebSocketMessages() || !current()) return
++    if (session) webSocket.session = session
+     stopWebSocketPolling()
+     Message.success('WebSocket 已关闭')
+-  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '关闭 WebSocket 失败') } finally { if (current()) sending.value = false }
++  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '关闭 WebSocket 失败') }
++  finally { if (current()) sending.value = false }
+ }
+ 
+ function addSubscription() {
+@@ -1108,12 +1187,14 @@
+ }
+ 
+ function applyStoredReplayDraft(serialized: string): boolean {
+-  syncedTemplate.value = false; syncedTemplateReviewed.value = false
+   try {
+     const saved = asRecord(JSON.parse(serialized))
+     const request = saved && asRecord(saved.request)
+     const type = text(saved?.protocol).toUpperCase()
+     if (!request || !['HTTP', 'GRAPHQL', 'SOAP', 'WEBSOCKET', 'GRPC'].includes(type)) return false
++    runtimeHandoff = null
++    syncedTemplate.value = false; syncedTemplateReviewed.value = false
++    legacyHistoryActive.value = false; legacyHistoryReviewed.value = false; legacyHistoryId.value = ''; legacyHistoryScope = -1
+     quickRequestName.value = text(request.name, '快捷请求') || '快捷请求'
+     protocolType.value = type as typeof protocolType.value
+     method.value = text(request.method, type === 'HTTP' ? 'GET' : 'POST')
+@@ -1167,7 +1248,8 @@
+   const unavailable = apiDebugReplayUnavailableReason(item.replayStatus)
+   if (unavailable) { if (notify) Message.warning(unavailable); return false }
+   const draft = apiDebugDraftFromHistory(item)
+-  if (draft?.replayDraft && applyStoredReplayDraft(draft.replayDraft)) {
++  if (draft?.replayDraft) {
++    if (!applyStoredReplayDraft(draft.replayDraft)) { if (notify) Message.warning('回放草稿格式无效，原请求与连接保持'); return false }
+     result.value = null
+     responseBody.value = '已载入加密保存的请求配置，可检查参数后再次发送。'
+     if (notify) Message.success('已载入历史请求，可检查参数后再次发送')
+@@ -1177,6 +1259,8 @@
+     if (notify) Message.warning('该历史记录没有可回放的请求配置')
+     return false
+   }
++  clearReconstructedRequest()
++  legacyHistoryActive.value = true; legacyHistoryReviewed.value = false; legacyHistoryId.value = item.id; legacyHistoryScope = contextGeneration
+   protocolType.value = 'HTTP'
+   quickRequestName.value = '快捷请求'
+   changeProtocol()
+@@ -1185,18 +1269,14 @@
+   requestTab.value = 'body'
+   result.value = null
+   hydrateQuickHttpEditor()
+-  responseBody.value = '已载入历史请求。历史仅保存脱敏的 Method 与 URL，重发会沿用当前 Header、Auth 与 Body。'
++  responseBody.value = '已载入历史请求。旧摘要仅包含 Method 与 URL，原先的 Header、Auth 与 Body 已清空；请重建并核对后手动发送。'
+   if (notify) Message.success('已载入历史请求，可检查参数后再次发送')
+   return true
+ }
+ 
+ async function replayHistoryRequest(item: History) {
+-  if (!loadHistoryRequest(item, false)) {
++  if (!(legacyHistoryActive.value && legacyHistoryId.value === item.id && legacyHistoryScope === contextGeneration) && !loadHistoryRequest(item, false)) {
+     Message.warning(apiDebugReplayUnavailableReason(item.replayStatus) || '该历史记录没有可回放的请求配置')
+-    return
+-  }
+-  if (isRedactedApiDebugUrl(item.requestUrl)) {
+-    Message.warning('该历史 URL 含已脱敏参数，请补充真实参数后再发送')
+     return
+   }
+   replayingHistoryId.value = item.id
+@@ -1346,7 +1426,10 @@
+ onMounted(load)
+ onBeforeUnmount(() => {
+   disposed = true
++  runtimeHandoff = null
++  if (typeof route.query.handoff === 'string') discardApiDebugHandoff(sessionStore, route.query.handoff)
+   contextGeneration++
++  cleanupOwnedWebSocket()
+   stopWebSocketPolling()
+   stopGrpcStreamPolling()
+   stopGrpcClientStreamPolling()
+@@ -1434,6 +1517,7 @@
+             <a-button type="text" size="small" @click="router.push('/system-settings/environments')"><icon-settings /> 管理环境</a-button>
+             <a-button type="text" size="small" @click="Message.info('当前 gRPC 支持在线反射或离线 Proto/DescriptorSet 发现、Unary、服务端流、客户端流与双向流；流式调用仅保留当前内存会话，每个方向均受 100 条消息与 512 KB 上限约束。')">查看边界</a-button>
+           </div>
++          <a-alert v-if="legacyHistoryActive" type="warning" class="legacy-history-review">旧摘要只提供 Method 与 URL，其他请求的认证、请求头和正文已清空。请补齐脱敏字段并重新配置。<br /><a-checkbox v-model="legacyHistoryReviewed">我已核对重建请求，下一步由我手动发送</a-checkbox><a-button type="text" @click="resetNewQuickRequest">新建空白请求</a-button></a-alert>
+           <a-alert v-if="syncedTemplate" type="warning" class="synced-template-review">脱敏模板已载入。补齐 SYNC_REVIEW 占位符，重新选择环境、文件和 gRPC 描述符，确认目标及请求内容。<br /><a-checkbox v-model="syncedTemplateReviewed">我已补齐并核对模板，下一步由我手动发送</a-checkbox></a-alert>
+           <a-tabs v-if="protocolType === 'HTTP'" v-model:active-key="requestTab" class="request-tabs quick-http-tabs">
+             <a-tab-pane key="params" :title="`Params ${activeQueryCount || ''}`">
+@@ -1501,10 +1585,10 @@
+                 <div class="editor-caption">连接仅允许公开可访问的 <code>ws://</code> 或 <code>wss://</code> 目标。会话、认证值和文本消息仅保存在服务端内存，不会写入调试历史；连接前保存的订阅帧会在每次成功连接后自动发送。</div>
+                 <section class="websocket-panel">
+                   <div class="websocket-head"><div><strong>连接状态</strong><a-tag :color="webSocketStatusColor">{{ webSocket.session?.status ?? '未连接' }}</a-tag><small v-if="webSocket.session">{{ webSocket.session.target }} · {{ webSocket.session.messageCount }} 条消息<template v-if="webSocket.session.autoReconnect"> · 重连 {{ webSocket.session.reconnectAttempts }}/{{ webSocket.session.maxReconnectAttempts }}</template><template v-if="webSocket.session.selectedSubprotocol"> · {{ webSocket.session.selectedSubprotocol }}</template></small></div><div><a-button size="small" :loading="sending" @click="connectWebSocket">连接</a-button><a-button size="small" status="danger" :disabled="!webSocket.session || webSocket.session.status === 'CLOSED'" @click="closeWebSocket">关闭</a-button></div></div>
+-                  <div v-if="webSocket.session?.closeReason" class="websocket-close">{{ webSocket.session.closeReason }}</div>
++                  <a-alert v-if="webSocket.session && ['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session.status) && !webSocketMatchesDraft" type="warning">草稿与当前连接不同；当前连接仍属于原配置，请主动连接替换后再发送。</a-alert><div v-if="webSocket.session?.closeReason" class="websocket-close">{{ webSocket.session.closeReason }}</div>
+                   <div class="subscription-box"><div class="subscription-title"><strong>订阅帧</strong><small>保存到当前会话，首次连接和自动重连后均会发送；不会持久化。</small></div><a-textarea v-model="webSocket.subscriptionDraft" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" :auto-size="{ minRows: 2, maxRows: 5 }" placeholder="例如：{&quot;type&quot;:&quot;subscribe&quot;,&quot;topic&quot;:&quot;orders&quot;}" :max-length="32000" show-word-limit /><div class="subscription-actions"><a-button size="small" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" @click="addSubscription">保存订阅帧</a-button><span>{{ webSocket.subscriptions.length }}/12</span></div><div v-if="webSocket.subscriptions.length" class="subscription-list"><article v-for="(item, index) in webSocket.subscriptions" :key="`${index}-${item}`"><code>{{ item }}</code><a-button size="mini" status="danger" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" @click="removeSubscription(index)">移除</a-button></article></div></div>
+                   <a-textarea v-model="webSocket.message" :auto-size="{ minRows: 3, maxRows: 6 }" placeholder="输入要发送的文本消息" :max-length="32000" show-word-limit />
+-                  <div class="websocket-send"><a-button type="primary" :loading="sending" :disabled="webSocket.session?.status !== 'OPEN'" @click="sendWebSocketMessage">发送文本消息 <icon-send /></a-button><a-button size="small" @click="loadWebSocketMessages">刷新消息</a-button></div>
++                  <div class="websocket-send"><a-button type="primary" :loading="sending" :disabled="webSocket.session?.status !== 'OPEN' || !webSocketMatchesDraft" @click="sendWebSocketMessage">发送文本消息 <icon-send /></a-button><a-button size="small" @click="loadWebSocketMessages">刷新消息</a-button></div>
+                   <div v-if="webSocket.messages.length" class="websocket-messages"><article v-for="item in webSocket.messages" :key="item.id" class="websocket-message" :class="item.direction.toLowerCase()"><div><a-tag size="small" :color="item.direction === 'IN' ? 'green' : 'arcoblue'">{{ item.direction === 'IN' ? '收到' : '发送' }}</a-tag><small>{{ date(item.createdAt) }}<template v-if="item.truncated"> · 已截断</template></small></div><pre>{{ item.payload }}</pre></article></div>
+                   <a-empty v-else description="连接后即可查看实时文本消息" />
+                 </section>
+--- a/src/pages/NotificationTemplatesPage.vue
++++ b/src/pages/NotificationTemplatesPage.vue
+@@ -14,7 +14,7 @@
+ const templates = ref<NotificationTemplate[]>([]), deliveries = ref<NotificationDelivery[]>([])
+ const loading = ref(false), loadError = ref(''), saving = ref(false), visible = ref(false)
+ const editingId = ref<string | null>(null), existingSecret = ref(false)
+-const pending = reactive(new Set<string>())
++const pending = reactive(new Map<string, symbol>())
+ let disposed = false, requestSequence = 0, viewSequence = 0, formSequence = 0, formProjectId = ''
+ const current = (project: string, view: number) => !disposed && project === projectId.value && view === viewSequence
+ const channels = ['EMAIL', 'WEBHOOK', 'WECHAT', 'DINGTALK']
+@@ -93,14 +93,15 @@
+ async function action(key: string, url: string, method: 'POST' | 'DELETE', message: string) {
+   const project = projectId.value, view = viewSequence
+   if (disposed || !project || pending.has(key)) return
+-  pending.add(key)
++  const token = Symbol(key)
++  pending.set(key, token)
+   try {
+-    await mutate(url, method)
++    await mutate(url, method, undefined, () => current(project, view) && pending.get(key) === token)
+     if (!current(project, view)) return
+     await loadTemplates()
+     if (current(project, view)) Message.success(message)
+   } catch (error) { if (current(project, view)) Message.error(error instanceof Error ? error.message : '操作失败') }
+-  finally { pending.delete(key) }
++  finally { if (pending.get(key) === token) pending.delete(key) }
+ }
+ async function retry(delivery: NotificationDelivery) {
+   await action('retry:' + delivery.id, `/api/v1/projects/${projectId.value}/notification-deliveries/${delivery.id}/retry`, 'POST', '通知已重新进入投递队列')
+@@ -108,7 +109,7 @@
+ async function remove(template: NotificationTemplate) {
+   await action('delete:' + template.id, `/api/v1/projects/${projectId.value}/notification-templates/${template.id}`, 'DELETE', '通知模板已删除')
+ }
+-watch(() => projectId.value, () => { viewSequence++; requestSequence++; cancel(); visible.value = false; void loadTemplates() }, { flush: 'sync' })
++watch([projectId, () => session.authGeneration, () => session.profile?.id, () => session.profile?.authenticatedAt, () => session.signedIn], () => { viewSequence++; pending.clear(); requestSequence++; cancel(); visible.value = false; void loadTemplates() }, { flush: 'sync' })
+ watch(() => form.channel, value => { if (value !== 'WEBHOOK') form.signingSecret = '' }, { flush: 'sync' })
+ onBeforeUnmount(() => { disposed = true; requestSequence++; cancel() })
+ onMounted(loadTemplates)
+--- a/src/pages/AuditLogPage.vue
++++ b/src/pages/AuditLogPage.vue
+@@ -1,7 +1,8 @@
+ <script setup lang="ts">
+-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
++import { onBeforeUnmount, onMounted, ref } from 'vue'
+ import { Message } from '@arco-design/web-vue'
+ import PageHeader from '@/components/PageHeader.vue'
++import { ApiRequestError, toApiRequestError } from '@/composables/useApiFormErrors'
+ 
+ interface ApiEnvelope<T> { data: T }
+ interface Entry { id: string; userId: string | null; projectId: string | null; action: string; resourceType: string; resourceId: string | null; outcome: string; requestId: string; clientIp: string | null; detail: Record<string, unknown>; createdAt: string }
+@@ -10,41 +11,63 @@
+ const loading = ref(true)
+ const loadError = ref(''), lastLoadedAt = ref(''), loadedAction = ref('')
+ const action = ref('')
+-const actions = computed(() => [...new Set(entries.value.map((entry) => entry.action))])
++const actions = ref<string[]>([])
++const actionsError = ref(''), actionsLoaded = ref(false)
+ const date = (value: string) => new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'medium' }).format(new Date(value))
+ let requestVersion = 0
+ 
++async function read<T>(url: string): Promise<T> {
++  const response = await fetch(url, { credentials: 'include' })
++  const body = await response.json().catch(() => ({})) as ApiEnvelope<T> & { message?: string }
++  if (!response.ok) throw toApiRequestError(response, body)
++  return body.data
++}
+ async function load() {
+   const version = ++requestVersion
+   loading.value = true
+-  loadError.value = ''
++  loadError.value = ''; actionsError.value = ''
+   const requestedAction = action.value
+-  try {
+-    const query = action.value ? `?action=${encodeURIComponent(action.value)}&limit=100` : '?limit=100'
+-    const response = await fetch(`/api/v1/audit-logs${query}`, { credentials: 'include' })
+-    const body = await response.json().catch(() => ({})) as ApiEnvelope<Entry[]> & { message?: string }
+-    if (version !== requestVersion) return
+-    if (!response.ok) throw new Error(body.message ?? '请求失败，请稍后重试')
+-    entries.value = body.data
+-    lastLoadedAt.value = new Date().toISOString()
+-    loadedAction.value = requestedAction
+-  } catch (error) {
+-    if (version === requestVersion) {
+-      loadError.value = error instanceof Error ? error.message : '加载审计日志失败'
+-      Message.error(loadError.value)
+-    }
+-  } finally {
+-    if (version === requestVersion) loading.value = false
++  const query = requestedAction ? `?action=${encodeURIComponent(requestedAction)}&limit=100` : '?limit=100'
++  const [rows, metadata] = await Promise.allSettled([
++    read<Entry[]>(`/api/v1/audit-logs${query}`),
++    read<unknown>('/api/v1/audit-logs/actions').then(value => {
++      if (!Array.isArray(value) || !value.every(item => typeof item === 'string')) throw new Error('审计动作选项格式无效')
++      return [...new Set(value as string[])].sort()
++    }),
++  ])
++  if (version !== requestVersion) return
++  const denied = [rows, metadata].some(result => result.status === 'rejected' && result.reason instanceof ApiRequestError && [401, 403].includes(result.reason.status))
++  if (denied) {
++    entries.value = []; actions.value = []; action.value = ''; actionsLoaded.value = false
++    lastLoadedAt.value = ''; loadedAction.value = ''
++    loadError.value = '当前无权读取审计记录，请重新确认登录状态与权限'
++    loading.value = false
++    return
+   }
++  if (rows.status === 'fulfilled') {
++    entries.value = rows.value
++    lastLoadedAt.value = new Date().toISOString(); loadedAction.value = requestedAction
++  } else {
++    loadError.value = rows.reason instanceof Error ? rows.reason.message : '加载审计日志失败'
++    Message.error(loadError.value)
++  }
++  if (metadata.status === 'fulfilled') {
++    actions.value = metadata.value; actionsLoaded.value = true
++  } else {
++    const reason = metadata.reason instanceof Error ? metadata.reason.message : '请求失败'
++    actionsError.value = `动作选项读取失败：${reason}。${actionsLoaded.value ? '当前保留上次动作选项（旧数据）' : '尚无可用动作选项'}`
++  }
++  loading.value = false
+ }
+ onMounted(load)
+-onBeforeUnmount(() => { requestVersion++ })
++onBeforeUnmount(() => { requestVersion++; entries.value = []; actions.value = []; action.value = '' })
+ </script>
+ 
+ <template>
+   <div class="page">
+     <PageHeader eyebrow="SECURITY OBSERVABILITY" title="权限与审计" description="记录平台关键写操作；密钥原文、令牌原文与配置值不会进入审计详情。" />
+     <section class="panel audit-toolbar"><div><a-select v-model="action" allow-clear placeholder="全部动作" :style="{ width: '260px' }" @change="load"><a-option v-for="item in actions" :key="item" :value="item">{{ item }}</a-option></a-select></div><a-button @click="load"><icon-refresh /> 刷新</a-button></section>
++    <a-alert v-if="actionsError" type="warning" role="alert">{{ actionsError }}<a-button type="text" :loading="loading" @click="load">重试动作选项</a-button></a-alert>
+     <a-alert v-if="loadError" class="audit-load-error" type="warning" role="alert">
+       {{ loadError }}。{{ lastLoadedAt ? `当前显示旧数据，来自上次成功的“${loadedAction || '全部动作'}”结果。` : '尚无成功加载的数据。' }}
+       <a-button type="text" :loading="loading" @click="load">重试</a-button>
+--- a/src/pages/UiAutomationPage.vue
++++ b/src/pages/UiAutomationPage.vue
+@@ -280,10 +280,10 @@
+     <section class="summary panel"><div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配' }}</strong><small>{{ selectedProject?.code ?? '—' }}</small></div><a-select v-model="projectId" :style="{ width: '230px' }" @change="changeProject"><a-option v-for="item in projects" :key="item.id" :value="item.id">{{ item.name }}</a-option></a-select><div><span>浏览器配置</span><strong>{{ profiles.length }}</strong><small>{{ profiles.filter((item) => item.enabled).length }} 个已启用</small></div><div><span>页面对象</span><strong>{{ pageObjects.length }}</strong><small>项目级可复用</small></div><div><span>场景</span><strong>{{ scenarios.length }}</strong><small>版本冻结执行清单</small></div><div class="runner"><span>Playwright Runner</span><strong :class="{ ready: executable.length }">{{ executable.length ? `${executable.length} 个已就绪` : '执行禁用' }}</strong><small>{{ activeRunner ? `${activeRunner.runnerId} · ${activeRunner.trustStatus}` : '等待安全心跳' }}</small></div></section>
+     <a-alert v-if="!localDesktop" :type="executable.length ? 'success' : 'info'" :show-icon="true" class="safety-alert">{{ executable.length ? '可信 Runner 已启用。每个场景在独立浏览器上下文中运行，目标 Origin、时限、内存和写入工件均受边界约束。' : 'Runner 尚未启用执行。请先在系统配置中设置 ui-automation.allowed-origins，再为受限 Runner 注入控制面地址和同一目标 Origin 白名单；提交任务不会在当前状态访问任何网页。' }}</a-alert>
+     <section class="assets panel"><a-tabs default-active-key="profiles"><a-tab-pane key="profiles" title="浏览器项目"><template #title>浏览器项目 <a-badge :count="profiles.length" :max-count="99" /></template><div class="toolbar"><span>基准 URL 必须命中系统级 Origin 白名单。</span><a-button type="primary" size="small" @click="resetProfile(); profileVisible = true"><icon-plus /> 新建浏览器项目</a-button></div><a-table :data="profiles" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="名称" data-index="name" /><a-table-column title="浏览器"><template #cell="{ record }"><a-tag color="purple">{{ record.browser }}</a-tag></template></a-table-column><a-table-column title="基准 URL"><template #cell="{ record }"><code>{{ record.baseUrl }}</code></template></a-table-column><a-table-column title="视口"><template #cell="{ record }">{{ record.viewportWidth }} × {{ record.viewportHeight }}</template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="record.enabled ? 'green' : 'gray'">{{ record.enabled ? '已启用' : '已停用' }}</a-tag></template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="editProfile(record)">编辑</a-button></template></a-table-column></template></a-table><a-empty v-if="!loading && profiles.length === 0" description="尚未配置浏览器项目" /></a-tab-pane>
+-      <a-tab-pane key="objects" title="页面对象"><div class="toolbar"><span>用稳定的定位器抽离页面元素，场景保存时会冻结实际定位器。</span><a-button type="primary" size="small" @click="resetObject(); objectVisible = true"><icon-plus /> 新建页面对象</a-button></div><a-table :data="pageObjects" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="名称" data-index="name" /><a-table-column title="定位器"><template #cell="{ record }"><code>{{ record.selectorValue }}</code></template></a-table-column><a-table-column title="说明" data-index="description" /><a-table-column title="更新于"><template #cell="{ record }">{{ date(record.updatedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="editObject(record)">编辑</a-button></template></a-table-column></template></a-table><a-empty v-if="!loading && pageObjects.length === 0" description="可先创建登录按钮、搜索框等页面对象" /></a-tab-pane>
++      <a-tab-pane key="objects" title="页面对象"><div class="toolbar"><span>场景保存页面对象引用，执行清单在入队时解析并冻结实际定位器。</span><a-button type="primary" size="small" @click="resetObject(); objectVisible = true"><icon-plus /> 新建页面对象</a-button></div><a-table :data="pageObjects" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="名称" data-index="name" /><a-table-column title="定位器"><template #cell="{ record }"><code>{{ record.selectorValue }}</code></template></a-table-column><a-table-column title="说明" data-index="description" /><a-table-column title="更新于"><template #cell="{ record }">{{ date(record.updatedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="editObject(record)">编辑</a-button></template></a-table-column></template></a-table><a-empty v-if="!loading && pageObjects.length === 0" description="可先创建登录按钮、搜索框等页面对象" /></a-tab-pane>
+       <a-tab-pane key="schedules"><template #title>定时执行 <a-badge :count="schedules.length" :max-count="99" /></template><div class="toolbar"><span>Quartz 使用项目内固定场景；失败按配置退避重试，停止或取消不会自动重试。</span><a-button type="primary" size="small" @click="resetSchedule(); scheduleVisible = true"><icon-plus /> 新建定时计划</a-button></div><a-table :data="schedules" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="计划" data-index="name" /><a-table-column title="场景"><template #cell="{ record }">{{ scenarios.find((item) => item.id === record.scenarioId)?.name ?? '已删除' }}</template></a-table-column><a-table-column title="功能测试计划"><template #cell="{ record }">{{ record.functionalPlanName || '未关联' }}</template></a-table-column><a-table-column title="Cron"><template #cell="{ record }"><code>{{ record.cronExpression }}</code><small class="code">{{ record.timezone }}</small></template></a-table-column><a-table-column title="重试"><template #cell="{ record }">{{ record.maxRetryAttempts }} 次 · {{ record.retryBackoffSeconds }}s</template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="record.enabled ? 'green' : 'gray'">{{ record.enabled ? '已启用' : '已停用' }}</a-tag><small v-if="record.lastExecutionStatus" class="code">最近：{{ statusText(record.lastExecutionStatus) }}</small></template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button size="mini" :disabled="!record.enabled || (!localDesktop && !executable.length) || preparingBrowser" @click="runSchedule(record)">立即执行</a-button><a-button size="mini" @click="editSchedule(record)">编辑</a-button></a-space></template></a-table-column></template></a-table><a-empty v-if="!loading && schedules.length === 0" description="尚未配置定时执行计划" /></a-tab-pane></a-tabs></section>
+     <section class="workspace"><aside class="scenario-list panel"><div class="section-heading"><div><span class="eyebrow">SCENARIOS</span><h3>自动化场景</h3></div><a-button type="text" size="small" @click="resetScenario(); scenarioVisible = true"><icon-plus /></a-button></div><a-spin :loading="loading"><button v-for="item in scenarios" :key="item.id" class="scenario-item" :class="{ selected: selectedScenarioId === item.id }" @click="selectedScenarioId = item.id"><div><strong>{{ item.name }}</strong><small>{{ item.steps.length }} 步 · {{ item.failureStrategy === 'CONTINUE' ? '继续执行' : '失败停止' }}</small></div><a-tag size="small">v{{ item.version }}</a-tag></button><a-empty v-if="!loading && !scenarios.length" description="尚无场景" /></a-spin></aside>
+-      <main v-if="selectedScenario" class="scenario-detail"><section class="scenario-header panel"><div><span class="eyebrow">SCENARIO · V{{ selectedScenario.version }}</span><h2>{{ selectedScenario.name }}</h2><p>{{ selectedScenario.description || '暂未填写场景说明。' }}</p></div><a-space><a-button :disabled="(!localDesktop && !executable.length) || preparingBrowser" @click="openExecution(selectedScenario)"><icon-play-circle /> 执行场景</a-button><a-button type="primary" @click="editScenario(selectedScenario)"><icon-edit /> 编辑编排</a-button></a-space></section><section class="scenario-overview panel"><div><span>浏览器项目</span><strong>{{ profiles.find((item) => item.id === selectedScenario?.browserProfileId)?.name ?? '已删除' }}</strong></div><div><span>失败策略</span><strong>{{ selectedScenario.failureStrategy === 'CONTINUE' ? '继续后续步骤' : '首次失败停止' }}</strong></div><div><span>变量</span><strong>{{ Object.keys(selectedScenario.variables).length }}</strong></div><div><span>冻结步骤</span><strong>{{ selectedScenario.steps.length }}</strong></div></section><section class="step-panel panel"><div class="section-heading"><div><span class="eyebrow">DECLARATIVE FLOW</span><h3>步骤编排</h3></div><span class="step-boundary">无脚本 · 无任意网络 · 受控 Runner</span></div><ol class="step-list"><li v-for="(step, index) in selectedScenario.steps" :key="step.id"><span class="step-index">{{ index + 1 }}</span><article><header><a-tag color="arcoblue">{{ stepMeta[step.type] }}</a-tag><strong>{{ step.name }}</strong><small>{{ step.timeoutMillis ? `${step.timeoutMillis}ms` : '默认 30s' }}</small></header><code v-if="step.url">{{ step.url }}</code><code v-if="step.selector">{{ step.selector }}</code><p v-if="step.value">填写：{{ step.value }}</p><p v-if="step.expectedText">期望文本：{{ step.expectedText }}</p><p v-if="step.pageObjectId">页面对象：{{ pageObjects.find((item) => item.id === step.pageObjectId)?.name ?? '已解析到执行清单' }}</p></article></li></ol></section><section class="execution-panel panel"><div class="section-heading"><div><span class="eyebrow">RUN HISTORY</span><h3>执行记录</h3></div><a-button size="small" @click="loadAssets()"><icon-refresh /> 刷新</a-button></div><a-table :data="executions.filter((item) => item.scenarioId === selectedScenario?.id)" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="任务"><template #cell="{ record }"><strong>{{ record.taskId }}</strong><small v-if="record.retryAttempt" class="code">重试 #{{ record.retryAttempt }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusText(record.status) }}</a-tag><small class="code">{{ record.statusCode }}</small></template></a-table-column><a-table-column title="关联"><template #cell="{ record }"><span>{{ record.functionalPlanName || '未关联计划' }}</span><small v-if="record.scheduleId" class="code">定时计划</small></template></a-table-column><a-table-column title="Runner" data-index="runnerId" /><a-table-column title="提交时间"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button size="mini" @click="openReport(record)">报告</a-button><a-button v-if="['QUEUED','ACCEPTED','RUNNING','CANCELLING'].includes(record.status)" size="mini" status="warning" :disabled="record.status === 'CANCELLING'" @click="cancelExecution(record)">取消</a-button><a-button v-if="['FAILED','REJECTED','TIMED_OUT'].includes(record.status)" size="mini" @click="retryExecution(record)">重试</a-button></a-space></template></a-table-column></template></a-table><a-empty v-if="!executions.some((item) => item.scenarioId === selectedScenario?.id)" description="当前场景暂无执行记录" /></section></main>
++      <main v-if="selectedScenario" class="scenario-detail"><section class="scenario-header panel"><div><span class="eyebrow">SCENARIO · V{{ selectedScenario.version }}</span><h2>{{ selectedScenario.name }}</h2><p>{{ selectedScenario.description || '暂未填写场景说明。' }}</p></div><a-space><a-button :disabled="(!localDesktop && !executable.length) || preparingBrowser" @click="openExecution(selectedScenario)"><icon-play-circle /> 执行场景</a-button><a-button type="primary" @click="editScenario(selectedScenario)"><icon-edit /> 编辑编排</a-button></a-space></section><section class="scenario-overview panel"><div><span>浏览器项目</span><strong>{{ profiles.find((item) => item.id === selectedScenario?.browserProfileId)?.name ?? '已删除' }}</strong></div><div><span>失败策略</span><strong>{{ selectedScenario.failureStrategy === 'CONTINUE' ? '继续后续步骤' : '首次失败停止' }}</strong></div><div><span>变量</span><strong>{{ Object.keys(selectedScenario.variables).length }}</strong></div><div><span>已保存步骤</span><strong>{{ selectedScenario.steps.length }}</strong></div></section><section class="step-panel panel"><div class="section-heading"><div><span class="eyebrow">DECLARATIVE FLOW</span><h3>步骤编排</h3></div><span class="step-boundary">无脚本 · 无任意网络 · 受控 Runner</span></div><ol class="step-list"><li v-for="(step, index) in selectedScenario.steps" :key="step.id"><span class="step-index">{{ index + 1 }}</span><article><header><a-tag color="arcoblue">{{ stepMeta[step.type] }}</a-tag><strong>{{ step.name }}</strong><small>{{ step.timeoutMillis ? `${step.timeoutMillis}ms` : '默认 30s' }}</small></header><code v-if="step.url">{{ step.url }}</code><code v-if="step.selector">{{ step.selector }}</code><p v-if="step.value">填写：{{ step.value }}</p><p v-if="step.expectedText">期望文本：{{ step.expectedText }}</p><p v-if="step.pageObjectId">页面对象：{{ pageObjects.find((item) => item.id === step.pageObjectId)?.name ?? '已解析到执行清单' }}</p></article></li></ol></section><section class="execution-panel panel"><div class="section-heading"><div><span class="eyebrow">RUN HISTORY</span><h3>执行记录</h3></div><a-button size="small" @click="loadAssets()"><icon-refresh /> 刷新</a-button></div><a-table :data="executions.filter((item) => item.scenarioId === selectedScenario?.id)" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="任务"><template #cell="{ record }"><strong>{{ record.taskId }}</strong><small v-if="record.retryAttempt" class="code">重试 #{{ record.retryAttempt }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusText(record.status) }}</a-tag><small class="code">{{ record.statusCode }}</small></template></a-table-column><a-table-column title="关联"><template #cell="{ record }"><span>{{ record.functionalPlanName || '未关联计划' }}</span><small v-if="record.scheduleId" class="code">定时计划</small></template></a-table-column><a-table-column title="Runner" data-index="runnerId" /><a-table-column title="提交时间"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button size="mini" @click="openReport(record)">报告</a-button><a-button v-if="['QUEUED','ACCEPTED','RUNNING','CANCELLING'].includes(record.status)" size="mini" status="warning" :disabled="record.status === 'CANCELLING'" @click="cancelExecution(record)">取消</a-button><a-button v-if="['FAILED','REJECTED','TIMED_OUT'].includes(record.status)" size="mini" @click="retryExecution(record)">重试</a-button></a-space></template></a-table-column></template></a-table><a-empty v-if="!executions.some((item) => item.scenarioId === selectedScenario?.id)" description="当前场景暂无执行记录" /></section></main>
+       <main v-else class="panel empty"><a-empty description="选择或创建一个 Web UI 自动化场景"><template #extra><a-button type="primary" @click="resetScenario(); scenarioVisible = true">创建场景</a-button></template></a-empty></main></section>
+     <a-modal v-model:visible="profileVisible" :title="profileForm.id ? '编辑浏览器项目' : '新建浏览器项目'" :ok-loading="saving" :on-before-ok="saveProfile"><a-form :model="profileForm" layout="vertical"><a-form-item label="配置名称" required><a-input v-model="profileForm.name" placeholder="例如：订单 Web · Chromium" /></a-form-item><div class="two"><a-form-item label="浏览器"><a-select v-model="profileForm.browser"><a-option value="chromium">Chromium</a-option><a-option value="firefox">Firefox</a-option><a-option value="webkit">WebKit</a-option></a-select></a-form-item><a-form-item label="启用状态"><a-switch v-model="profileForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item></div><a-form-item label="基准 URL" required><a-input v-model="profileForm.baseUrl" placeholder="https://web.example.test" /><template #extra>只能使用系统配置 ui-automation.allowed-origins 中列出的 Origin。</template></a-form-item><div class="two"><a-form-item label="视口宽度"><a-input-number v-model="profileForm.viewportWidth" :min="320" :max="3840" /></a-form-item><a-form-item label="视口高度"><a-input-number v-model="profileForm.viewportHeight" :min="320" :max="2160" /></a-form-item></div></a-form></a-modal>
+     <a-modal v-model:visible="objectVisible" :title="objectForm.id ? '编辑页面对象' : '新建页面对象'" :ok-loading="saving" :on-before-ok="saveObject"><a-form :model="objectForm" layout="vertical"><a-form-item label="名称" required><a-input v-model="objectForm.name" placeholder="例如：登录按钮" /></a-form-item><a-form-item label="定位器" required><a-input v-model="objectForm.selectorValue" placeholder="例如：[data-testid='login-submit']" /></a-form-item><a-form-item label="说明"><a-textarea v-model="objectForm.description" :auto-size="{ minRows: 2, maxRows: 4 }" /></a-form-item></a-form></a-modal>
+--- a/src/pages/PluginsPage.vue
++++ b/src/pages/PluginsPage.vue
+@@ -1,7 +1,8 @@
+ <script setup lang="ts">
+-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
++import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+ import { Message } from '@arco-design/web-vue'
+ import PageHeader from '@/components/PageHeader.vue'
++import { useSessionStore } from '@/stores/session'
+ import { isLocalDesktop } from '@/utils/desktopWorkspace'
+ 
+ interface Envelope<T> { data: T }
+@@ -10,13 +11,14 @@
+ interface AdapterDefinition { type: string; displayName: string; category: string; requiredFields: string[]; description: string }
+ interface Adapter { id: string; adapterType: string; displayName: string; endpoint: string; configuredFields: string[]; enabled: boolean; createdAt: string; updatedAt: string }
+ 
++const session = useSessionStore()
+ const plugins = ref<Plugin[]>([]), signingKeys = ref<SigningKey[]>([]), adapters = ref<Adapter[]>([]), definitions = ref<AdapterDefinition[]>([])
+ const loading = ref(true), allowed = ref(false), loadError = ref(''), keyError = ref('')
+ const keyManagerVisible = ref(false), keyVisible = ref(false), packageVisible = ref(false), adapterVisible = ref(false)
+-const editingAdapterId = ref<string | null>(null), pending = reactive(new Set<string>())
++const editingAdapterId = ref<string | null>(null), pending = reactive(new Map<string, symbol>())
+ const saving = reactive({ key: false, package: false, adapter: false })
+ const sequences = { key: 0, package: 0, adapter: 0 }
+-let disposed = false, loadSequence = 0, keySequence = 0
++let disposed = false, loadSequence = 0, keySequence = 0, actionScope = 0
+ const formKey = reactive({ keyId: '', displayName: '', publicKeyBase64: '' })
+ const formPackage = reactive({ signerKeyId: '', manifestJson: '{\n  "pluginKey": "example.adapter",\n  "displayName": "示例扩展",\n  "pluginType": "INTEGRATION",\n  "version": "1.0.0",\n  "entrypoint": "adapter/index.js",\n  "permissions": ["integration:outbound"]\n}', signatureBase64: '' })
+ const formAdapter = reactive({ adapterType: 'OIDC', displayName: '', endpoint: '', configurationJson: '', enabled: false })
+@@ -70,6 +72,7 @@
+   if (kind === 'adapter') formAdapter.configurationJson = ''
+ }
+ function revokeForms() {
++  actionScope++; pending.clear()
+   allowed.value = false; signingKeys.value = []
+   keyManagerVisible.value = false; keyVisible.value = false; packageVisible.value = false; adapterVisible.value = false
+   cancel('key'); cancel('package'); cancel('adapter')
+@@ -98,11 +101,16 @@
+ async function openKeyManager() { if (!allowed.value) return; keyManagerVisible.value = true; await loadKeys() }
+ async function action(key: string, url: string, message: string, method: 'POST' | 'DELETE' = 'POST') {
+   if (disposed || !allowed.value || pending.has(key)) return
+-  pending.add(key)
+-  try { await mutate(url, method); if (disposed) return; await load(); if (!disposed) Message.success(message) }
+-  catch (error) { if (!disposed) Message.error(error instanceof Error ? error.message : '操作失败') }
+-  finally { pending.delete(key) }
++  const scope = actionScope, token = Symbol(key)
++  const current = () => !disposed && allowed.value && scope === actionScope && pending.get(key) === token
++  pending.set(key, token)
++  try { await mutate(url, method, undefined, current); if (!current()) return; await load(); if (current()) Message.success(message) }
++  catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '操作失败') }
++  finally { if (pending.get(key) === token) pending.delete(key) }
+ }
++watch([() => session.authGeneration, () => session.profile?.id, () => session.profile?.authenticatedAt, () => session.signedIn], () => {
++  revokeForms(); void load()
++}, { flush: 'sync' })
+ function changeSigningKey(key: SigningKey, enabled: boolean) { return action('key:' + key.id, `/api/v1/extensions/signing-keys/${key.id}/${enabled ? 'enable' : 'revoke'}`, enabled ? '签名密钥已启用' : '签名密钥已撤销') }
+ function openPackage() { if (!allowed.value) return; cancel('package'); formPackage.signerKeyId = signingKeys.value.find(item => item.enabled)?.keyId ?? ''; packageVisible.value = true }
+ function savePackage() { return save('package', '/api/v1/extensions/plugins/packages', 'POST', { ...formPackage }, '插件清单已校验并登记为停用状态') }
+--- a/src/test/apiDebugFixes.test.ts
++++ b/src/test/apiDebugFixes.test.ts
+@@ -8,7 +8,7 @@
+ import { buildApiRunUrl, createApiRunSnapshot, requestHeaders } from '@/utils/apiTesting'
+ 
+ const wrappers: VueWrapper[] = []
+-afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear(); sessionStorage.clear() })
++afterEach(async () => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; await flushPromises(); vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear(); sessionStorage.clear() })
+ const response = (data: unknown, status = 200) => new Response(JSON.stringify(status < 400 ? { data } : { message: String(data) }), { status })
+ function deferred<T = Response>() { let resolve!: (value: T) => void; const promise = new Promise<T>(release => { resolve = release }); return { promise, resolve } }
+ const CodeEditor = { name: 'QaCodeEditor', props: { modelValue: { type: String, default: '' } }, emits: ['update:modelValue'], template: '<textarea :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />' }
+@@ -28,7 +28,8 @@
+                 : url.endsWith('/descriptors') ? [{ id: 'offline-b', name: '离线B', serviceCount: 1, sourceFormat: 'PROTO3' }]
+                   : url.includes('/discovery') ? discovery('qa.Other')
+                     : url.endsWith('/unary') ? { success: true, status: 'OK', body: '{}', durationMs: 1 }
+-                      : url.endsWith('/connect') || url.endsWith('/sessions/ws-a') ? wsSession
++                      : url.endsWith('/close') ? { ...wsSession, status: 'CLOSED' }
++                        : url.endsWith('/connect') || url.endsWith('/sessions/ws-a') ? wsSession
+                         : url.endsWith('/curl/import') ? { importedCount: 1, items: ['已保存'] } : [])))
+   vi.stubGlobal('fetch', fetcher)
+   const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/debug', component: { template: '<div />' } }] })
+@@ -127,12 +128,13 @@
+   expect(w.text()).not.toContain('qa.Old')
+   expect(Message.error).not.toHaveBeenCalled()
+ })
+-for (const action of ['project', 'unmount']) it(`late WS connection after ${action} cannot read sessions or report connected`, async () => {
++for (const action of ['project', 'unmount']) it(`late WS connection after ${action} closes its owned session without reading or reporting connected`, async () => {
+   const old = deferred(); const { w, session, fetcher } = await setup('WEBSOCKET', url => url.endsWith('/connect') ? old.promise : undefined)
+   button(w, '连接').vm.$emit('click'); await flushPromises()
+   if (action === 'project') session.projectId = 'p2'; else w.unmount()
+   await flushPromises(); old.resolve(response(wsSession)); await flushPromises()
+-  expect(fetcher.mock.calls.some(([url]) => url.includes('/websocket/sessions/'))).toBe(false)
++  expect(fetcher.mock.calls.some(([url, init]) => url.includes('/websocket/sessions/') && (!init?.method || init.method === 'GET'))).toBe(false)
++  expect(fetcher.mock.calls.filter(([url, init]) => url.endsWith('/websocket/sessions/ws-a/close') && init?.method === 'POST')).toHaveLength(1)
+   expect(Message.success).not.toHaveBeenCalled(); expect(Message.error).not.toHaveBeenCalled()
+ })
+ it('failed initial WS session read does not report connected', async () => {
+--- a/src/test/apiDebugDraft.test.ts
++++ b/src/test/apiDebugDraft.test.ts
+@@ -18,7 +18,7 @@
+     expect(apiDebugDraftFromHistory({ method: 'GET', requestUrl: 'https://example.test', replayDraft: '{"protocol":"HTTP"}', replayStatus })).toBeNull()
+   })
+   it('[P1-U12-04][POS] legacy history without retention metadata keeps its existing behavior', () => {
+-    expect(apiDebugDraftFromHistory({ method: 'GET', requestUrl: 'https://example.test' })).toEqual({ method: 'GET', url: 'https://example.test', protocol: 'HTTP' })
++    expect(apiDebugDraftFromHistory({ method: 'GET', requestUrl: 'https://example.test' })).toEqual({ method: 'GET', url: 'https://example.test', protocol: 'HTTP', legacyHistory: true })
+   })
+   it('normalizes a direct HTTP request draft', () => {
+     expect(apiDebugDraftFromQuery({
+@@ -209,6 +209,7 @@
+       method: 'PATCH',
+       url: 'https://api.example.com/orders/1',
+       protocol: 'HTTP',
++      legacyHistory: true,
+     })
+     expect(apiDebugDraftFromHistory({ method: 'GRPC', requestUrl: 'grpc.example.com:443' })).toBeNull()
+     expect(isRedactedApiDebugUrl('https://api.example.com/orders?token=***')).toBe(true)
+--- a/src/test/extensionsOperationsPages.test.ts
++++ b/src/test/extensionsOperationsPages.test.ts
+@@ -1,3 +1,4 @@
++import { createPinia } from 'pinia'
+ import { afterEach, describe, expect, it, vi } from 'vitest'
+ import { flushPromises, mount } from '@vue/test-utils'
+ import ArcoVue, { Button, Input, Modal, Popconfirm, Textarea } from '@arco-design/web-vue'
+@@ -18,7 +19,7 @@
+     const data = custom ?? (url.endsWith('/capabilities') ? { systemAdministration: true } : url.endsWith('/csrf') ? { token: 'fixture', headerName: 'X-CSRF' } : url.endsWith('/overview') ? overview : url.endsWith('/plugins') ? [plugin] : url.endsWith('/adapters') ? [adapter] : url.endsWith('/signing-keys') ? [key] : url.endsWith('/adapter-definitions') ? [{ type: 'OIDC', displayName: 'OIDC', category: '身份', requiredFields: ['clientId', 'clientSecret'], description: 'QA' }] : {})
+     return { ok: true, json: async () => ({ data }) }
+   }))
+-  const wrapper = mount(component, { global: { plugins: [ArcoVue], stubs: { Modal: true, Drawer: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } })
++  const wrapper = mount(component, { global: { plugins: [createPinia(), ArcoVue], stubs: { Modal: true, Drawer: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } })
+   wrappers.push(wrapper); await flushPromises(); return wrapper
+ }
+ const button = (w: ReturnType<typeof mount>, text: string) => w.findAllComponents(Button).find(b => b.text() === text)!
+--- a/src/test/auditLogPage.test.ts
++++ b/src/test/auditLogPage.test.ts
+@@ -15,7 +15,7 @@
+ const wrappers: ReturnType<typeof mount>[] = []
+ afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.useRealTimers() })
+ async function setup(replies: Array<Reply | Promise<Reply>>) {
+-  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(replies.shift()!)))
++  vi.stubGlobal('fetch', vi.fn((url: string) => Promise.resolve(url.endsWith('/audit-logs/actions') ? { ok: true, json: async () => ({ data: ['A', 'B', 'KEPT', 'RECOVERED', 'OLD'] }) } : replies.shift()!)))
+   const error = vi.spyOn(Message, 'error').mockImplementation(() => ({ close: vi.fn() }))
+   const wrapper = mount(AuditLogPage, { global: { plugins: [ArcoVue], config: { warnHandler: () => {} } } })
+   wrappers.push(wrapper); await flushPromises()
+--- a/src/test/notificationsPage.test.ts
++++ b/src/test/notificationsPage.test.ts
+@@ -87,12 +87,12 @@
+     confirm.vm.$emit('ok'); confirm.vm.$emit('ok'); await flushPromises(); expect(mutations()).toHaveLength(1)
+     release({}); await flushPromises()
+   })
+-  it('delete requires confirmation and captures original route through project switch', async () => {
++  it('delete requires confirmation and cancels before dispatch after project switch', async () => {
+     let release!: (value: unknown) => void
+     const { wrapper, session } = await setup(url => url.endsWith('/csrf') ? new Promise(r => { release = r }) : undefined)
+     const confirm = wrapper.findAllComponents(Popconfirm).find(p => String(p.props('content')).includes('删除模板'))!
+     expect(confirm.exists()).toBe(true); confirm.vm.$emit('ok'); await flushPromises(); session.selectProject('p2'); await flushPromises()
+-    release({ token: 'fixture', headerName: 'X-CSRF' }); await flushPromises(); expect(mutations()[0]![0]).toBe('/api/v1/projects/p1/notification-templates/template-p1'); expect(wrapper.text()).toContain('模板二')
++    release({ token: 'fixture', headerName: 'X-CSRF' }); await flushPromises(); expect(mutations()).toHaveLength(0); expect(wrapper.text()).toContain('模板二')
+   })
+   it('inactive channel definition makes actual delivery limitation visible', async () => {
+     const { wrapper } = await setup(); button(wrapper, '编辑').vm.$emit('click'); await flushPromises()
+--- a/src/components/api-testing/ApiInterfaceWorkbench.vue
++++ b/src/components/api-testing/ApiInterfaceWorkbench.vue
+@@ -3,7 +3,8 @@
+ import { Message } from '@arco-design/web-vue'
+ import { useRouter } from 'vue-router'
+ import CodeEditor from '@/components/CodeEditor.vue'
+-import { storeApiDebugRouteDraft } from '@/utils/apiDebugDraft'
++import { createApiDebugHandoff, discardApiDebugHandoff } from '@/utils/apiDebugHandoff'
++import { useSessionStore } from '@/stores/session'
+ import { executeDesktopHttpRequest, isDesktopHttpDebugAvailable } from '@/utils/desktopApiDebug'
+ import {
+   apiCaseName,
+@@ -121,6 +122,7 @@
+   debugCaseOpened: []
+ }>()
+ const router = useRouter()
++const session = useSessionStore()
+ 
+ const tab = ref('document')
+ const requestTab = ref('params')
+@@ -437,20 +439,18 @@
+ }
+ 
+ async function openAdvancedDebug() {
++  let handoff = ''
+   try {
+-    const draft = storeApiDebugRouteDraft(window.sessionStorage, {
+-      method: props.api.method,
+-      url: safeRequestUrl(),
+-      body: snapshot.body,
+-      headers: requestHeaders(snapshot).map((item) => `${item.name}: ${item.value}`).join('\n'),
+-      environment: environment.value,
+-      protocol: 'HTTP',
++    handoff = createApiDebugHandoff(session, props.projectId, props.api.id, {
++      method: props.api.method, url: safeRequestUrl(), body: snapshot.body,
++      headers: requestHeaders(snapshot), environmentCode: environment.value || null, auth: { ...snapshot.auth },
+     })
+-    await router.push({
+-      path: '/api-testing/quick-request',
+-      query: { draft, sourceApiId: props.api.id },
++    const cancelled = await router.push({
++      path: '/api-testing/quick-request', query: { handoff, sourceApiId: props.api.id },
+     })
++    if (cancelled) { discardApiDebugHandoff(session, handoff); Message.warning('导航已取消，请从源接口重新打开高级调试') }
+   } catch (error) {
++    if (handoff) discardApiDebugHandoff(session, handoff)
+     Message.error(error instanceof Error ? error.message : '无法打开高级调试')
+   }
+ }
+--- a/src/utils/apiDebugDraft.ts
++++ b/src/utils/apiDebugDraft.ts
+@@ -9,6 +9,8 @@
+   environment?: string
+   protocol?: ApiDebugProtocol
+   replayDraft?: string
++  legacyHistory?: boolean
++  legacyHistoryId?: string
+ }
+ 
+ export interface ApiDebugRequestHeader {
+@@ -123,6 +125,9 @@
+   if (headers !== undefined) draft.headers = headers
+   if (environment !== undefined) draft.environment = environment.trim()
+   if (replayDraft !== undefined) draft.replayDraft = replayDraft
++  if (query.legacyHistory === true || query.legacyHistory === '1') draft.legacyHistory = true
++  const legacyHistoryId = nonBlankText(query.legacyHistoryId)
++  if (draft.legacyHistory && legacyHistoryId) draft.legacyHistoryId = legacyHistoryId
+ 
+   return Object.keys(draft).length ? draft : null
+ }
+@@ -319,14 +324,15 @@
+       : status === 'UNREADABLE' ? '回放草稿不可解密，请重新配置请求' : ''
+ }
+ 
+-export function apiDebugDraftFromHistory(value: { method?: unknown; requestUrl?: unknown; replayDraft?: unknown; replayStatus?: unknown }): ApiDebugRouteDraft | null {
++export function apiDebugDraftFromHistory(value: { id?: unknown; method?: unknown; requestUrl?: unknown; replayDraft?: unknown; replayStatus?: unknown }): ApiDebugRouteDraft | null {
+   if (apiDebugReplayUnavailableReason(value.replayStatus)) return null
+   const replayDraft = nonBlankText(value.replayDraft)
+   if (replayDraft) return { replayDraft }
+   const method = nonBlankText(value.method)?.toUpperCase()
+   const requestUrl = nonBlankText(value.requestUrl)
+   if (!method || !HTTP_METHODS.has(method) || !requestUrl) return null
+-  return { method, url: requestUrl, protocol: 'HTTP' }
++  const id = nonBlankText(value.id)
++  return { method, url: requestUrl, protocol: 'HTTP', legacyHistory: true, ...(id ? { legacyHistoryId: id } : {}) }
+ }
+ 
+ export function apiDebugRequestNameFromReplayDraft(value: unknown): string | undefined {
+--- a/src/stores/session.ts
++++ b/src/stores/session.ts
+@@ -63,6 +63,7 @@
+ export const useSessionStore = defineStore('session', {
+   state: () => ({
+     signedIn: false,
++    authGeneration: 0,
+     initialized: false,
+     initializationError: '',
+     profile: null as Profile | null,
+@@ -96,6 +97,7 @@
+         const payload = await response.json() as ApiEnvelope<Profile>
+         if (!payload.data?.id) throw new Error('登录状态响应无效，请刷新页面重试')
+         const sameUser = this.signedIn && this.profile?.id === payload.data.id
++        if (!sameUser || this.profile?.authenticatedAt !== payload.data.authenticatedAt) this.authGeneration++
+         this.profile = payload.data
+         this.signedIn = true
+         if (!sameUser) await this.loadAccessContext()
+@@ -125,6 +127,7 @@
+         throw new Error(error.message ?? (action === 'register' ? '注册失败，请稍后重试' : '登录失败，请稍后重试'))
+       }
+       const payload = await response.json() as ApiEnvelope<Profile>
++      this.authGeneration++
+       this.profile = payload.data
+       this.signedIn = true
+       this.initialized = true
+@@ -152,6 +155,7 @@
+       this.clearSession()
+     },
+     clearSession() {
++      this.authGeneration++
+       this.signedIn = false
+       this.profile = null
+       this.initialized = true
+--- a/services/platform-api/src/main/java/io/testhub/platform/audit/AuditService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/audit/AuditService.java
+@@ -36,6 +36,10 @@
+                 resourceType, resourceId, "SUCCESS", "system", null, detail == null ? Map.of() : Map.copyOf(detail), null));
+     }
+ 
++    public List<String> actions(String projectId) {
++        return repository.findActions(projectId);
++    }
++
+     public List<AuditLogEntry> recent(String projectId, String action, int limit) {
+         return repository.findRecent(projectId, action, Math.min(Math.max(limit, 1), 200));
+     }
+--- a/services/platform-api/src/main/java/io/testhub/platform/audit/AuditRepository.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/audit/AuditRepository.java
+@@ -30,6 +30,14 @@
+                 .param("projectId", entry.projectId()).param("action", entry.action()).param("resourceType", entry.resourceType())
+                 .param("resourceId", entry.resourceId()).param("outcome", entry.outcome()).param("requestId", entry.requestId())
+                 .param("clientIp", entry.clientIp()).param("detail", toJson(entry.detail())).update();
++    }
++
++    public List<String> findActions(String projectId) {
++        return jdbc.sql("""
++                SELECT DISTINCT action FROM audit_log
++                WHERE (:projectId IS NULL OR project_id = :projectId)
++                ORDER BY action
++                """).param("projectId", projectId).query(String.class).list();
+     }
+ 
+     public List<AuditLogEntry> findRecent(String projectId, String action, int limit) {
+--- a/services/platform-api/src/main/java/io/testhub/platform/administration/AdministrationController.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/administration/AdministrationController.java
+@@ -53,6 +53,13 @@
+         return ResponseEntity.noContent().build();
+     }
+ 
++    @GetMapping("/audit-logs/actions")
++    public ApiResponse<List<String>> auditActions(Authentication authentication,
++                                                  @RequestParam(required = false) String projectId) {
++        access.requireSystemAdmin(principal(authentication));
++        return ApiResponse.of(audit.actions(projectId));
++    }
++
+     @GetMapping("/audit-logs")
+     public ApiResponse<List<AuditLogEntry>> auditLogs(Authentication authentication,
+                                                         @RequestParam(required = false) String projectId,
+--- /dev/null
++++ b/src/utils/ownedWebSocket.ts
+@@ -0,0 +1,64 @@
++/** One page owns only sessions returned by its own connect operation. */
++export interface OwnedWebSocketSession { id: string; status: string }
++export interface OwnedWebSocketScope { projectId: string; key: string; current: () => boolean }
++interface Owner<T> { scope: OwnedWebSocketScope; configuration: string; session: T; closing?: Promise<T> }
++const active = (session: OwnedWebSocketSession) => ['OPEN', 'CONNECTING', 'RECONNECTING'].includes(session.status)
++
++export class OwnedWebSocketSessions<T extends OwnedWebSocketSession> {
++  private owner: Owner<T> | null = null
++  private connecting = false
++
++  constructor(private readonly transport: {
++    connect: (projectId: string, payload: Record<string, unknown>, current: () => boolean) => Promise<T>
++    close: (projectId: string, sessionId: string) => Promise<T>
++  }) {}
++
++  get session(): T | null { return this.owner?.session ?? null }
++
++  matches(scopeKey: string, payload: Record<string, unknown>): boolean {
++    return this.owner?.scope.key === scopeKey && active(this.owner.session)
++      && this.owner.configuration === JSON.stringify(payload)
++  }
++
++  update(session: T) {
++    if (this.owner?.session.id === session.id) this.owner.session = session
++  }
++
++  async connect(scope: OwnedWebSocketScope, payload: Record<string, unknown>): Promise<T | null> {
++    if (this.connecting) throw new Error('正在处理本页WebSocket连接，请等待当前操作结束')
++    this.connecting = true
++    const configuration = JSON.stringify(payload)
++    try {
++      if (this.owner && active(this.owner.session)) {
++        if (scope.current() && this.owner.scope.key === scope.key && this.owner.configuration === configuration) return this.owner.session
++        await this.closeOwner(this.owner)
++      }
++      if (!scope.current()) return null
++      const session = await this.transport.connect(scope.projectId, payload, scope.current)
++      if (!session || typeof session.id !== 'string' || !session.id || !['OPEN', 'CONNECTING', 'RECONNECTING', 'CLOSED', 'ERROR'].includes(session.status)) {
++        throw new Error('WebSocket连接回执无效，未确认已连接')
++      }
++      const owner = { scope, configuration, session }
++      this.owner = owner
++      if (!scope.current()) { await this.closeOwner(owner); return null }
++      return session
++    } finally { this.connecting = false }
++  }
++
++  async close(): Promise<T | null> {
++    const owner = this.owner
++    return owner && active(owner.session) ? this.closeOwner(owner) : owner?.session ?? null
++  }
++
++  private async closeOwner(owner: Owner<T>): Promise<T> {
++    if (owner.closing) return owner.closing
++    const closing = this.transport.close(owner.scope.projectId, owner.session.id).then(session => {
++      if (session?.id !== owner.session.id || !['CLOSED', 'ERROR'].includes(session.status)) throw new Error('旧WebSocket会话关闭尚未确认，请核对后重试')
++      owner.session = session
++      if (this.owner === owner) this.owner = null
++      return session
++    })
++    owner.closing = closing
++    try { return await closing } finally { owner.closing = undefined }
++  }
++}
+--- /dev/null
++++ b/src/utils/apiDebugHandoff.ts
+@@ -0,0 +1,63 @@
++import type { useSessionStore } from '@/stores/session'
++import type { ApiDebugRequestAuth, ApiDebugRequestHeader } from '@/utils/apiDebugDraft'
++
++type Session = ReturnType<typeof useSessionStore>
++export interface ApiDebugHandoffRequest {
++  name?: string
++  method: string
++  url: string
++  headers: ApiDebugRequestHeader[]
++  body: string
++  environmentCode: string | null
++  auth: ApiDebugRequestAuth
++}
++export interface ApiDebugHandoff { protocol: 'HTTP'; sourceApiId: string; request: ApiDebugHandoffRequest }
++interface Vault { identity: string; packet: { key: string; value: ApiDebugHandoff } | null }
++// Weak ownership and a single pending packet bound memory to the current SPA login session.
++const vaults = new WeakMap<Session, Vault>()
++const identity = (session: Session) => JSON.stringify([session.signedIn, session.profile?.id, session.profile?.authenticatedAt, session.authGeneration, session.projectId])
++function vault(session: Session): Vault {
++  let value = vaults.get(session)
++  if (!value) {
++    value = { identity: identity(session), packet: null }
++    const owned = value
++    session.$subscribe(() => {
++      const next = identity(session)
++      if (next !== owned.identity) { owned.packet = null; owned.identity = next }
++    }, { detached: true, flush: 'sync' })
++    vaults.set(session, owned)
++  }
++  return value
++}
++function clone<T>(value: T): T { return JSON.parse(JSON.stringify(value)) as T }
++function validate(request: ApiDebugHandoffRequest) {
++  const auth = request?.auth
++  if (!auth || !['NONE', 'BEARER', 'BASIC', 'API_KEY'].includes(auth.type)
++    || !['HEADER', 'QUERY'].includes(auth.placement)
++    || !['token', 'username', 'password', 'key', 'value'].every(field => typeof auth[field as keyof ApiDebugRequestAuth] === 'string')) {
++    throw new Error('当前认证模式或结构无法交接，请重新配置后继续')
++  }
++  if (!request || !['method', 'url', 'body'].every(field => typeof request[field as keyof ApiDebugHandoffRequest] === 'string')
++    || !Array.isArray(request.headers) || !request.headers.every(header => header && typeof header.name === 'string' && typeof header.value === 'string')
++    || (request.environmentCode !== null && typeof request.environmentCode !== 'string')) {
++    throw new Error('运行草稿结构无法交接，请返回源接口核对')
++  }
++}
++export function createApiDebugHandoff(session: Session, projectId: string, sourceApiId: string, request: ApiDebugHandoffRequest): string {
++  if (!session.signedIn || !session.profile?.id || !projectId || projectId !== session.projectId) throw new Error('登录会话或项目已变化，请返回源接口重新打开高级调试')
++  validate(request)
++  if (!globalThis.crypto?.randomUUID) throw new Error('当前环境无法生成安全交接标识，请检查浏览器安全上下文')
++  const key = crypto.randomUUID()
++  vault(session).packet = { key, value: { protocol: 'HTTP', sourceApiId, request: clone(request) } }
++  return key
++}
++export function consumeApiDebugHandoff(session: Session, key: unknown): ApiDebugHandoff | null {
++  const owner = vault(session), packet = owner.packet
++  if (!session.signedIn || !session.profile?.id || typeof key !== 'string' || packet?.key !== key || owner.identity !== identity(session)) return null
++  owner.packet = null
++  return clone(packet.value)
++}
++export function discardApiDebugHandoff(session: Session, key: string) {
++  const owner = vaults.get(session)
++  if (owner?.packet?.key === key) owner.packet = null
++}
+--- /dev/null
++++ b/src/test/p2r2AuditOptions.test.ts
+@@ -0,0 +1,32 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import AuditLogPage from '@/pages/AuditLogPage.vue'
++const wrappers: VueWrapper[] = []
++const Select = { name: 'QaSelect', props: { modelValue: { type: String, default: '' } }, emits: ['update:modelValue', 'change'], template: '<div><slot /></div>' }
++const Option = { name: 'QaOption', props: { value: { type: String, required: true } }, template: '<span>{{ value }}</span>' }
++const stamp = '2026-10-30T00:00:00Z'
++const row = (action: string) => ({ id: action, action, resourceType: 'QA', outcome: 'SUCCESS', requestId: 'fixture', createdAt: stamp })
++const response = (data: unknown, status = 200) => new Response(JSON.stringify(status < 400 ? { data } : { message: '受控加载失败' }), { status })
++function deferred() { let resolve!: (v: Response) => void; const promise = new Promise<Response>(r => { resolve = r }); return { resolve, promise } }
++afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks() })
++async function setup(override?: (url: string) => Promise<Response> | undefined) {
++  vi.spyOn(Message, 'error').mockImplementation(() => ({ close: vi.fn() }))
++  const fetcher = vi.fn((url: string) => override?.(url) ?? Promise.resolve(response(url.includes('/audit-logs/actions') ? ['A', 'B', 'OLDER'] : new URL(url, 'https://qa.invalid').searchParams.get('action') ? [row(new URL(url, 'https://qa.invalid').searchParams.get('action')!)] : [row('A'), row('B')])))
++  vi.stubGlobal('fetch', fetcher)
++  const w = mount(AuditLogPage, { global: { plugins: [ArcoVue], stubs: { teleport: true, 'a-select': Select, 'a-option': Option }, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises(); return { w, fetcher }
++}
++const options = async (w: VueWrapper) => w.findAllComponents({ name: 'QaOption' }).map(o => o.props('value'))
++const select = async (w: VueWrapper, value: string) => { const s = w.findComponent({ name: 'QaSelect' }); s.vm.$emit('update:modelValue', value); s.vm.$emit('change', value); await flushPromises() }
++const refresh = async (w: VueWrapper) => { w.findAllComponents({ name: 'Button' }).find(b => b.text().trim() === '刷新')!.vm.$emit('click'); await flushPromises() }
++it('TC-P2R2-D04-01: an action filter never shrinks the options', async () => { const { w } = await setup(); await select(w, 'A'); expect(await options(w)).toContain('B'); await select(w, 'B'); expect(await options(w)).toContain('A') })
++it('TC-P2R2-D04-02: metadata includes actions outside the current rows', async () => { const { w } = await setup(); expect(await options(w)).toContain('OLDER') })
++it('TC-P2R2-D04-03: an empty row query leaves the action collection intact', async () => { const { w } = await setup(url => url.includes('action=') ? Promise.resolve(response([])) : undefined); await select(w, 'A'); expect(await options(w)).toContain('B') })
++it('TC-P2R2-D04-04: permission loss clears cached action names and rows', async () => { let denied = false; const { w } = await setup(() => denied ? Promise.resolve(response({}, 403)) : undefined); denied = true; await refresh(w); expect(await options(w)).toEqual([]); expect(w.findComponent({ name: 'Table' }).props('data')).toEqual([]) })
++it('TC-P2R2-D04-05: metadata failure exposes stale options without pretending they are fresh', async () => { let fail = false; const { w } = await setup(url => fail && url.includes('/actions') ? Promise.resolve(response({}, 503)) : undefined); fail = true; await refresh(w); expect(await options(w)).toContain('A'); expect(w.text()).toContain('动作选项'); expect(w.text()).toContain('旧') })
++it('TC-P2R2-D04-05: delayed metadata cannot overwrite a newer selection', async () => {
++  const gate = deferred(); let mode = 0
++  const { w } = await setup(url => url.includes('/actions') && mode ? mode === 1 ? gate.promise : Promise.resolve(response(['NEW'])) : undefined)
++  mode = 1; await select(w, 'A'); mode = 2; await select(w, 'B'); gate.resolve(response(['OLD'])); await flushPromises(); expect(await options(w)).toEqual(['NEW'])
++})
++it('TC-P2R2-D04-06: row requests retain their original limit', async () => { const { fetcher } = await setup(); expect(fetcher.mock.calls.some(([url]) => url.includes('/audit-logs?limit=100'))).toBe(true) })
+--- /dev/null
++++ b/src/test/p2r2DebugHandoff.test.ts
+@@ -0,0 +1,45 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { createApiDebugHandoff, consumeApiDebugHandoff, discardApiDebugHandoff, type ApiDebugHandoffRequest } from '@/utils/apiDebugHandoff'
++import { storeApiDebugRouteDraft, readApiDebugRouteDraft } from '@/utils/apiDebugDraft'
++import { useSessionStore } from '@/stores/session'
++afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); sessionStorage.clear() })
++function setup() {
++  const session = useSessionStore(createPinia()); session.signedIn = true; session.profile = { id: 'qa', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: '2026-10-30T00:00:00Z' }; session.projectId = 'p1'; return session
++}
++function request(type: ApiDebugHandoffRequest['auth']['type'] = 'NONE', placement: 'HEADER' | 'QUERY' = 'HEADER'): ApiDebugHandoffRequest {
++  return { method: 'POST', url: 'https://fixture.test/path', headers: [{ name: 'Authorization', value: 'synthetic-header' }], body: 'synthetic-body', environmentCode: 'test', auth: { type, token: '{{TOKEN}}', username: 'synthetic-user', password: 'synthetic-password', key: 'X-API-Key', value: '{{KEY}}', placement } }
++}
++it('TC-P2R2-D15-01: all supported auth configurations preserve the full runtime request', () => {
++  const session = setup()
++  for (const [type, placement] of [['NONE', 'HEADER'], ['BEARER', 'HEADER'], ['BASIC', 'HEADER'], ['API_KEY', 'HEADER'], ['API_KEY', 'QUERY']] as const) {
++    const original = request(type, placement); const key = createApiDebugHandoff(session, 'p1', 'api', original); const result = consumeApiDebugHandoff(session, key)
++    expect(result).toEqual({ protocol: 'HTTP', sourceApiId: 'api', request: original }); original.body = 'modified later'; expect(result!.request.body).toBe('synthetic-body')
++  }
++})
++it('TC-P2R2-D15-02: a complete handoff never writes credentials to Web Storage', () => {
++  const session = setup(), spy = vi.spyOn(Storage.prototype, 'setItem'); spy.mockClear()
++  const key = createApiDebugHandoff(session, 'p1', 'api', request('BASIC')); expect(key).toMatch(/^[a-f0-9-]{36}$/); expect(spy).not.toHaveBeenCalled(); expect(key).not.toContain('synthetic'); expect(consumeApiDebugHandoff(session, key)).not.toBeNull()
++})
++it('TC-P2R2-D15-03: project A/B/A and same-account reauthentication invalidate pending packets', () => {
++  const session = setup(); let key = createApiDebugHandoff(session, 'p1', 'api', request()); session.projectId = 'p2'; session.projectId = 'p1'; expect(consumeApiDebugHandoff(session, key)).toBeNull()
++  key = createApiDebugHandoff(session, 'p1', 'api', request()); const profile = session.profile; session.profile = null; session.signedIn = false; session.profile = profile; session.signedIn = true; expect(consumeApiDebugHandoff(session, key)).toBeNull()
++  expect(() => createApiDebugHandoff(session, 'p2', 'api', request())).toThrow('项目已变化')
++})
++it('TC-P2R2-D15-04: single use, another window/store and missing keys cannot restore old auth', () => {
++  const session = setup(), key = createApiDebugHandoff(session, 'p1', 'api', request()); expect(consumeApiDebugHandoff(setup(), key)).toBeNull(); expect(consumeApiDebugHandoff(session, key)).not.toBeNull(); expect(consumeApiDebugHandoff(session, key)).toBeNull(); expect(consumeApiDebugHandoff(session, 'missing')).toBeNull()
++})
++it('TC-P2R2-D15-05: creating and consuming a handoff perform no request or history write', () => {
++  const session = setup(), network = vi.spyOn(globalThis, 'fetch'); const key = createApiDebugHandoff(session, 'p1', 'api', request()); consumeApiDebugHandoff(session, key); expect(network).not.toHaveBeenCalled()
++})
++it('TC-P2R2-D15-06: header/query placement and variable references are never resolved during navigation', () => {
++  const session = setup(); for (const placement of ['HEADER', 'QUERY'] as const) { const original = request('API_KEY', placement), key = createApiDebugHandoff(session, 'p1', 'api', original); expect(consumeApiDebugHandoff(session, key)!.request.auth).toEqual(original.auth) }
++})
++it('TC-P2R2-D15-07: unknown auth and malformed fields are rejected before creating a packet', () => {
++  const session = setup(), bad = request(); bad.auth.type = 'UNSUPPORTED' as never; expect(() => createApiDebugHandoff(session, 'p1', 'api', bad)).toThrow('认证模式')
++  const badBody = request(); badBody.body = 42 as never; expect(() => createApiDebugHandoff(session, 'p1', 'api', badBody)).toThrow('草稿结构')
++})
++it('TC-P2R2-D15-08: discard invalidates only the selected packet and legacy route storage stays compatible', () => {
++  const session = setup(), old = createApiDebugHandoff(session, 'p1', 'api', request()), key = createApiDebugHandoff(session, 'p1', 'api', request()); expect(consumeApiDebugHandoff(session, old)).toBeNull(); discardApiDebugHandoff(session, key); expect(consumeApiDebugHandoff(session, key)).toBeNull()
++  const legacy = { method: 'GET', url: 'https://fixture.test/legacy' }, stored = storeApiDebugRouteDraft(sessionStorage, legacy); expect(readApiDebugRouteDraft(sessionStorage, stored)).toEqual(legacy)
++})
+--- /dev/null
++++ b/src/test/p2r2FreezeWording.test.ts
+@@ -0,0 +1,15 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
++import ArcoVue from '@arco-design/web-vue'
++import UiAutomationPage from '@/pages/UiAutomationPage.vue'
++import { useSessionStore } from '@/stores/session'
++let wrapper: VueWrapper | undefined
++afterEach(() => { wrapper?.unmount(); wrapper = undefined; vi.unstubAllGlobals(); localStorage.clear() })
++it('TC-P2R2-D18-05: object tab says queue-time resolution and does not promise save-time freezing', async () => {
++  const pinia = createPinia(), session = useSessionStore(pinia); session.projectId = 'p1'
++  vi.stubGlobal('fetch', vi.fn(async (url: string) => new Response(JSON.stringify({ data: url.endsWith('/context') ? { organizations: [{ id: 'o', name: 'QA' }], projects: { o: [{ id: 'p1', name: 'QA', code: 'QA' }] } } : [] }))))
++  wrapper = mount(UiAutomationPage, { global: { plugins: [pinia, ArcoVue], stubs: { Modal: true, Drawer: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } }); await flushPromises()
++  wrapper.findComponent({ name: 'Tabs' }).vm.$emit('update:activeKey', 'objects'); await flushPromises()
++  expect(wrapper.text()).toContain('入队时解析并冻结'); expect(wrapper.text()).not.toContain('场景保存时会冻结实际定位器')
++})
+--- /dev/null
++++ b/src/test/p2r2HandoffPage.test.ts
+@@ -0,0 +1,46 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { createMemoryHistory, createRouter } from 'vue-router'
++import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import ApiDebugPage from '@/pages/ApiDebugPage.vue'
++import { useSessionStore } from '@/stores/session'
++import { createApiDebugHandoff, type ApiDebugHandoffRequest } from '@/utils/apiDebugHandoff'
++const wrappers: VueWrapper[] = []
++afterEach(async () => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; await flushPromises(); vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear(); sessionStorage.clear() })
++const CodeEditor = { name: 'QaCodeEditor', props: { modelValue: { type: String, default: '' } }, emits: ['update:modelValue'], template: '<textarea :value="modelValue" />' }
++const Select = { name: 'QaSelect', props: { modelValue: { type: [String, Number, Array], default: '' } }, emits: ['update:modelValue', 'change'], template: '<div><slot /></div>' }
++const request = (type: ApiDebugHandoffRequest['auth']['type'], placement: 'HEADER' | 'QUERY' = 'HEADER'): ApiDebugHandoffRequest => ({ method: 'POST', url: 'https://8.8.8.8/runtime', headers: [{ name: 'X-Run', value: 'synthetic-header' }], body: 'synthetic-body', environmentCode: null, auth: { type, token: '{{TOKEN}}', username: 'synthetic-user', password: 'synthetic-pass', key: 'X-API-Key', value: '{{KEY}}', placement } })
++async function setup(runtime: ApiDebugHandoffRequest | null, invalidate = false, wrongSource = false) {
++  for (const name of ['success', 'error', 'info', 'warning'] as const) vi.spyOn(Message, name).mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(), session = useSessionStore(pinia); session.projectId = 'p1'; session.signedIn = true; session.profile = { id: 'qa', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: '2026-10-30T00:00:00Z' }
++  const key = runtime ? createApiDebugHandoff(session, 'p1', 'source', runtime) : 'missing'
++  if (invalidate) { session.projectId = 'p2'; session.projectId = 'p1' }
++  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/debug', component: { template: '<div />' } }] }); await router.push({ path: '/debug', query: { handoff: key, sourceApiId: wrongSource ? 'other' : 'source' } })
++  const fetcher = vi.fn(async (url: string, init?: RequestInit) => { void init; return new Response(JSON.stringify({ data: url.endsWith('/context') ? { organizations: [{ id: 'o', name: 'QA' }], projects: { o: [{ id: 'p1', name: 'QA', code: 'QA' }, { id: 'p2', name: 'QA2', code: 'QA2' }] } } : url.endsWith('/csrf') ? { token: 'fixture', headerName: 'X-CSRF' } : url.endsWith('/environments') ? [{ name: '默认', environmentCode: 'test', enabled: true, defaultEnvironment: true }] : url.endsWith('/parameters') ? { environments: ['test'], parameters: [] } : url.endsWith('/secrets') ? { environments: ['test'], secrets: [] } : url.endsWith('/execute') ? { historyId: 'run', success: true, statusCode: 200, durationMs: 1, body: '{}', responseHeaders: [], truncated: false } : [] })) })
++  vi.stubGlobal('fetch', fetcher)
++  const w = mount(ApiDebugPage, { global: { plugins: [pinia, ArcoVue, router], stubs: { teleport: true, CodeEditor, Select, ApiDebugSyncArchive: true }, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises(); return { w, fetcher, session }
++}
++const writes = (q: Awaited<ReturnType<typeof setup>>) => q.fetcher.mock.calls.filter(call => (call[1] as RequestInit | undefined)?.method)
++const button = (w: VueWrapper, label: string) => w.findAllComponents({ name: 'Button' }).find(b => b.text().trim() === label)!
++for (const [type, placement] of [['NONE', 'HEADER'], ['BEARER', 'HEADER'], ['BASIC', 'HEADER'], ['API_KEY', 'HEADER'], ['API_KEY', 'QUERY']] as const) it(`TC-P2R2-D15-01/06: runtime ${type}/${placement} reaches manual execution unchanged`, async () => {
++  const original = request(type, placement), q = await setup(original); expect(writes(q)).toHaveLength(0)
++  button(q.w, '发送').vm.$emit('click'); await flushPromises(); const execute = q.fetcher.mock.calls.find(([url]) => url.endsWith('/execute'))!; const p = JSON.parse(String((execute[1] as RequestInit).body))
++  expect(p.auth).toEqual(original.auth); expect(p.url).toBe(original.url); expect(p.body).toBe(original.body); expect(p.headers).toEqual(original.headers); expect(p.environmentCode).toBeNull()
++})
++it('TC-P2R2-D15-04: missing packet starts blank and warns instead of restoring another draft', async () => {
++  const q = await setup(null); expect(writes(q)).toHaveLength(0); expect(Message.warning).toHaveBeenCalledWith(expect.stringContaining('交接已失效'))
++})
++it('TC-P2R2-D15-03: a scope round-trip or source-ID mismatch rejects the handoff', async () => {
++  for (const [invalidate, wrongSource] of [[true, false], [false, true]]) { const q = await setup(request('BEARER'), invalidate, wrongSource); expect(writes(q)).toHaveLength(0); expect(Message.warning).toHaveBeenCalledWith(expect.stringContaining('交接已失效')) }
++})
++it('TC-P2R2-D15-03/06: a consumed runtime request cannot survive a project round-trip', async () => {
++  const q = await setup(request('BEARER')); q.session.projectId = 'p2'; q.session.projectId = 'p1'; await flushPromises()
++  expect(writes(q)).toHaveLength(0)
++  button(q.w, '发送').vm.$emit('click'); await flushPromises()
++  const execute = q.fetcher.mock.calls.find(([url]) => url.endsWith('/execute'))!
++  const payload = JSON.parse(String((execute[1] as RequestInit).body))
++  expect(payload.auth.type).toBe('NONE'); expect(payload.auth.token).toBe('')
++  expect(payload.body).toBe(''); expect(payload.url).toBe(''); expect(payload.headers).not.toContainEqual({ name: 'X-Run', value: 'synthetic-header' })
++  expect(q.w.findAllComponents({ name: 'QaCodeEditor' }).every(editor => editor.props('modelValue') !== 'synthetic-body')).toBe(true)
++})
+--- /dev/null
++++ b/src/test/p2r2HistorySend.test.ts
+@@ -0,0 +1,81 @@
++import { createPinia } from 'pinia'
++import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
++import { createMemoryHistory, createRouter } from 'vue-router'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import { afterEach, expect, it, vi } from 'vitest'
++import ApiDebugPage from '@/pages/ApiDebugPage.vue'
++import { useSessionStore } from '@/stores/session'
++
++const wrappers: VueWrapper[] = []
++afterEach(async () => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; await flushPromises(); vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear(); sessionStorage.clear() })
++const response = (data: unknown, status = 200) => new Response(JSON.stringify(status < 400 ? { data } : { message: String(data) }), { status })
++const CodeEditor = { name: 'QaCodeEditor', props: { modelValue: { type: String, default: '' } }, emits: ['update:modelValue'], template: '<textarea :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />' }
++const Select = { name: 'QaSelect', props: { modelValue: { type: [String, Number, Array], default: '' }, placeholder: { type: String, default: '' } }, emits: ['update:modelValue', 'change'], template: '<div><slot /></div>' }
++const discovery = (service: string) => ({ services: [service], methods: [{ name: 'Unary', callType: 'UNARY' }], truncated: false })
++const wsSession = { id: 'ws-a', status: 'OPEN', target: 'wss://8.8.8.8/echo', messageCount: 0, connectedAt: '2026-10-24T00:00:00Z', autoReconnect: false }
++async function setup(protocol = 'HTTP', override?: (url: string, init?: RequestInit) => Promise<Response> | undefined, replay?: unknown, embedded = false, legacyUrl?: string) {
++  for (const name of ['success', 'error', 'info', 'warning'] as const) vi.spyOn(Message, name).mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(), session = useSessionStore(pinia); session.projectId = 'p1'
++  const fetcher = vi.fn((url: string, init?: RequestInit) => override?.(url, init) ?? Promise.resolve(response(
++    url.endsWith('/csrf') ? { headerName: 'X-CSRF', token: 'fixture' }
++      : url.endsWith('/context') ? { organizations: [{ id: 'o1' }], projects: { o1: [{ id: 'p1', organizationId: 'o1', name: 'QA', code: 'P1' }, { id: 'p2', organizationId: 'o1', name: 'QA2', code: 'P2' }] } }
++        : url.endsWith('/catalogs') ? [{ id: 'root', name: '根目录', parentId: null, sortOrder: 0 }]
++          : url.endsWith('/environments') ? [{ environmentCode: 'dev', name: '开发', enabled: true, defaultEnvironment: true }, { environmentCode: 'qa', name: 'QA', enabled: true }]
++            : url.endsWith('/parameters') ? { environments: ['dev', 'qa'], parameters: [{ key: 'DEV_VALUE', value: 'dev', environmentCode: 'dev' }, { key: 'QA_VALUE', value: 'qa', environmentCode: 'qa' }] }
++              : url.endsWith('/secrets') ? { environments: ['qa'], secrets: [{ key: 'QA_SECRET', environmentCode: 'qa' }] }
++                : url.endsWith('/descriptors') ? [{ id: 'offline-b', name: '离线B', serviceCount: 1, sourceFormat: 'PROTO3' }]
++                  : url.includes('/discovery') ? discovery('qa.Other')
++                    : url.endsWith('/unary') ? { success: true, status: 'OK', body: '{}', durationMs: 1 }
++                      : url.endsWith('/connect') || url.endsWith('/sessions/ws-a') ? wsSession
++                        : url.endsWith('/curl/import') ? { importedCount: 1, items: ['已保存'] } : [])))
++  vi.stubGlobal('fetch', fetcher)
++  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/debug', component: { template: '<div />' } }] })
++  await router.push({ path: '/debug', query: legacyUrl ? { method: 'GET', protocol: 'HTTP', url: legacyUrl, legacyHistory: '1' } : replay ? { replayDraft: JSON.stringify(replay) } : { protocol, url: protocol === 'GRPC' ? '8.8.8.8:443' : protocol === 'WEBSOCKET' ? 'wss://8.8.8.8/echo' : 'https://8.8.8.8/echo' } })
++  const w = mount(ApiDebugPage, { props: { embedded }, global: { plugins: [pinia, ArcoVue, router], stubs: { teleport: true, CodeEditor, Select, ApiDebugSyncArchive: true, Dropdown: { template: '<div><slot /><slot name="content" /></div>' } }, config: { warnHandler: () => {} } } })
++  wrappers.push(w); await flushPromises(); return { w, session, fetcher }
++}
++const button = (w: VueWrapper, label: string) => w.findAllComponents({ name: 'Button' }).find(item => item.text().trim() === label)!
++const legacy = (requestUrl = 'https://8.8.8.8/legacy?token=***', extra = {}) => ({ id: 'legacy', projectId: 'p1', method: 'GET', protocol: 'HTTP', requestUrl, replayDraft: null, createdAt: '2026-10-01T00:00:00Z', result: 'COMPLETED', responseStatus: 200, ...extra })
++const executed = (q: Awaited<ReturnType<typeof setup>>) => q.fetcher.mock.calls.filter(([url, init]) => url.endsWith('/execute') && init?.method === 'POST')
++const result = { historyId: 'h', success: true, statusCode: 200, durationMs: 1, responseHeaders: [], body: '{}', truncated: false }
++async function historySetup(item = legacy(), replay?: unknown, embedded = false) {
++  return setup('HTTP', url => url.includes('/api-debug/history') ? Promise.resolve(response([item])) : url.endsWith('/execute') ? Promise.resolve(response(result)) : undefined, replay, embedded, embedded ? item.requestUrl : undefined)
++}
++async function loadLegacy(q: Awaited<ReturnType<typeof setup>>) { const load = button(q.w, '载入'); if (load) load.vm.$emit('click'); await flushPromises() }
++const review = async (w: VueWrapper) => { w.findAllComponents({ name: 'Checkbox' }).find(c => c.text().includes('核对重建请求'))!.vm.$emit('update:modelValue', true); await flushPromises() }
++it('TC-P2R2-D13-01: legacy summary clears unrelated credentials without auto execution', async () => {
++  const q = await historySetup(legacy('https://8.8.8.8/legacy'), { protocol: 'HTTP', request: { method: 'POST', url: 'https://8.8.8.8/original', body: 'synthetic-body', headers: [{ name: 'Authorization', value: 'synthetic-header' }], auth: { type: 'BEARER', token: 'synthetic-token' } } })
++  await loadLegacy(q); expect(executed(q)).toHaveLength(0); expect(q.w.text()).toContain('旧摘要')
++  await review(q.w); button(q.w, '发送').vm.$emit('click'); await flushPromises()
++  const p = JSON.parse(String(executed(q)[0]![1]!.body)); expect(p.auth.type).toBe('NONE'); expect(p.body).toBe(''); expect(p.headers).toEqual([])
++})
++for (const embedded of [false, true]) it(`TC-P2R2-D13-02: unresolved historical masks block every UI send, embedded=${embedded}`, async () => {
++  const q = await historySetup(legacy(), undefined, embedded); await loadLegacy(q); button(q.w, '发送').vm.$emit('click'); await flushPromises(); expect(executed(q)).toHaveLength(0)
++  await review(q.w); button(q.w, embedded ? '发送' : '重发').vm.$emit('click'); await flushPromises(); expect(executed(q)).toHaveLength(0)
++})
++it('TC-P2R2-D13-03: an ordinary wildcard request is not a historical placeholder', async () => {
++  const q = await setup('HTTP', url => url.endsWith('/execute') ? Promise.resolve(response(result)) : undefined, { protocol: 'HTTP', request: { method: 'GET', url: 'https://8.8.8.8/path/***', headers: [], body: '', auth: { type: 'NONE' } } })
++  button(q.w, '发送').vm.$emit('click'); await flushPromises(); expect(executed(q)).toHaveLength(1)
++})
++it('TC-P2R2-D13-04: reconstructed and explicitly reviewed history can be manually sent', async () => {
++  const q = await historySetup(); await loadLegacy(q)
++  const value = q.w.findAllComponents({ name: 'Input' }).find(c => c.props('modelValue') === '***')!; value.vm.$emit('update:modelValue', 'synthetic-value'); await flushPromises()
++  expect(executed(q)).toHaveLength(0); await review(q.w); button(q.w, '发送').vm.$emit('click'); await flushPromises(); expect(executed(q)).toHaveLength(1); expect(JSON.parse(String(executed(q)[0]![1]!.body)).url).toContain('synthetic-value')
++})
++it('TC-P2R2-D13-05: valid encrypted replay does not reject its redacted summary URL', async () => {
++  const item = legacy('https://8.8.8.8/?token=***', { replayStatus: 'AVAILABLE', replayDraft: JSON.stringify({ protocol: 'HTTP', request: { method: 'GET', url: 'https://8.8.8.8/?token=synthetic-real', auth: { type: 'NONE' } } }) })
++  const q = await historySetup(item); button(q.w, '重发').vm.$emit('click'); await flushPromises(); expect(executed(q)).toHaveLength(1)
++})
++it('TC-P2R2-D13-06: P1 unavailable states remain disabled', async () => {
++  for (const replayStatus of ['EXPIRED', 'UNKNOWN_CREATED_AT', 'UNREADABLE']) {
++    const q = await historySetup(legacy('https://8.8.8.8', { replayStatus })); expect(button(q.w, '载入').props('disabled')).toBe(true); expect(button(q.w, '重发').props('disabled')).toBe(true); expect(executed(q)).toHaveLength(0)
++  }
++})
++it('TC-P2R2-D13-07: A/B/A invalidates historical reconstruction approval', async () => {
++  const q = await historySetup(legacy('https://8.8.8.8/legacy')); await loadLegacy(q); await review(q.w)
++  q.session.projectId = 'p2'; q.session.projectId = 'p1'; await flushPromises(); button(q.w, '发送').vm.$emit('click'); await flushPromises(); expect(executed(q)).toHaveLength(0)
++})
++it('TC-P2R2-D13-08: new ordinary drafts keep the original API payload without a star blacklist', async () => {
++  const q = await setup('HTTP', url => url.endsWith('/execute') ? Promise.resolve(response(result)) : undefined, { protocol: 'HTTP', request: { method: 'POST', url: 'https://8.8.8.8/direct?q=***', body: '***', headers: [], auth: { type: 'NONE' } } })
++  button(q.w, '发送').vm.$emit('click'); await flushPromises(); expect(JSON.parse(String(executed(q)[0]![1]!.body))).toMatchObject({ body: '***' })
++})
+--- /dev/null
++++ b/src/test/p2r2OwnedWebSocket.test.ts
+@@ -0,0 +1,32 @@
++import { expect, it, vi } from 'vitest'
++import { OwnedWebSocketSessions } from '@/utils/ownedWebSocket'
++const scope = (projectId = 'p1') => ({ projectId, key: projectId + ':page', current: () => true })
++function setup() {
++  let id = 0
++  const connect = vi.fn(async () => ({ id: 'socket-' + ++id, status: 'OPEN', autoReconnect: true }))
++  const close = vi.fn(async (_project: string, sessionId: string) => ({ id: sessionId, status: 'CLOSED', autoReconnect: false }))
++  return { manager: new OwnedWebSocketSessions({ connect, close }), connect, close }
++}
++it('TC-P2R2-D14-02: unchanged page configuration reuses only its own active session', async () => {
++  const q = setup(), config = { url: 'wss://fixture.test', auth: { type: 'NONE' } }
++  const first = await q.manager.connect(scope(), config); expect(await q.manager.connect(scope(), config)).toEqual(first)
++  expect(q.connect).toHaveBeenCalledTimes(1); expect(q.close).not.toHaveBeenCalled()
++})
++it('TC-P2R2-D14-06: manual close is terminal, repeat close does not reopen or resubscribe', async () => {
++  const q = setup(); await q.manager.connect(scope(), { reconnect: true, subscriptions: ['fixture'] }); const closed = await q.manager.close()
++  expect(closed).toMatchObject({ status: 'CLOSED', autoReconnect: false }); await q.manager.close(); expect(q.close).toHaveBeenCalledTimes(1); expect(q.connect).toHaveBeenCalledTimes(1)
++})
++it('TC-P2R2-D14-07: foreign session updates cannot change which owned session gets closed', async () => {
++  const q = setup(); const other = new OwnedWebSocketSessions({ connect: q.connect, close: q.close })
++  const a = await q.manager.connect(scope(), {}), b = await other.connect(scope('p2'), {})
++  q.manager.update(b!); await q.manager.close(); expect(q.close).toHaveBeenCalledWith('p1', a!.id); expect(q.close).not.toHaveBeenCalledWith('p2', b!.id); expect(other.session).toEqual(b)
++})
++it('TC-P2R2-D14-04: a failed close retains the exact old owner for explicit retry', async () => {
++  const q = setup(); const old = await q.manager.connect(scope(), { url: 'old' }); q.close.mockRejectedValueOnce(new Error('controlled close failure'))
++  await expect(q.manager.connect(scope(), { url: 'new' })).rejects.toThrow('controlled close failure'); expect(q.manager.session).toEqual(old); expect(q.connect).toHaveBeenCalledTimes(1)
++  await q.manager.connect(scope(), { url: 'new' }); expect(q.close).toHaveBeenLastCalledWith('p1', old!.id); expect(q.connect).toHaveBeenCalledTimes(2)
++})
++it('TC-P2R2-D14-08: invalid or failed creation never takes ownership of a foreign handle', async () => {
++  const q = setup(); q.connect.mockRejectedValueOnce(new Error('controlled invalid target'))
++  await expect(q.manager.connect(scope(), { url: 'bad' })).rejects.toThrow('controlled invalid target'); expect(q.manager.session).toBeNull(); expect(q.close).not.toHaveBeenCalled()
++})
+--- /dev/null
++++ b/src/test/p2r2RowActions.test.ts
+@@ -0,0 +1,93 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
++import ArcoVue, { Button, Message, Popconfirm } from '@arco-design/web-vue'
++import TasksPage from '@/pages/TasksPage.vue'
++import NotificationTemplatesPage from '@/pages/NotificationTemplatesPage.vue'
++import PluginsPage from '@/pages/PluginsPage.vue'
++import { useSessionStore } from '@/stores/session'
++
++type Kind = 'task' | 'notification' | 'plugin'
++type Hook = (url: string, init?: RequestInit) => Promise<Response> | undefined
++const wrappers: VueWrapper[] = []
++const stamp = '2026-10-30T00:00:00Z'
++const profile = { id: 'qa', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: stamp }
++const csrf = { token: 'fixture', headerName: 'X-CSRF' }
++const response = (data: unknown, status = 200) => new Response(JSON.stringify(status >= 400 ? { message: '受控错误' } : { data }), { status })
++function deferred() { let resolve!: (r: Response) => void; const promise = new Promise<Response>(r => { resolve = r }); return { promise, resolve } }
++afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear() })
++async function setup(kind: Kind) {
++  vi.spyOn(Message, 'success').mockImplementation(() => ({ close: vi.fn() })); vi.spyOn(Message, 'error').mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(), session = useSessionStore(pinia)
++  session.profile = { ...profile }; session.signedIn = true; session.projectId = 'p1'
++  session.organizations = [{ id: 'o', name: 'QA', code: 'QA' }]
++  session.projectsByOrganization = { o: ['p1', 'p2'].map(id => ({ id, name: id, code: id, description: '', status: 'ACTIVE', createdByName: null, createdAt: stamp, updatedAt: stamp })) }
++  let hook: Hook = () => undefined
++  const fetcher = vi.fn((url: string, init?: RequestInit) => {
++    const custom = hook(url, init); if (custom) return custom
++    const p = url.includes('/p2/') ? 'p2' : 'p1'
++    const data = url.endsWith('/csrf') ? csrf : url.endsWith('/context') ? { organizations: session.organizations, projects: session.projectsByOrganization }
++      : url.endsWith('/capabilities') ? { systemAdministration: true }
++        : url.endsWith('/tasks') ? [{ id: 'task-' + p, projectId: p, name: '任务', taskType: 'API', status: 'QUEUED', progress: 0, version: 1, createdAt: stamp, updatedAt: stamp }]
++          : url.endsWith('/notification-templates') ? [{ id: 'template-' + p, name: '模板', channel: 'WEBHOOK', eventCode: 'quality.report.ready', enabled: true, updatedAt: stamp }]
++            : url.endsWith('/notification-deliveries') ? [{ id: 'delivery-' + p, templateName: '投递', status: 'FAILED', channel: 'WEBHOOK', eventCode: 'quality.report.ready', attemptCount: 1, nextAttemptAt: stamp, deliveredAt: null, createdAt: stamp }]
++              : url.endsWith('/plugins') ? [{ id: 'plugin', displayName: '插件', pluginKey: 'qa.plugin', pluginType: 'INTEGRATION', status: 'DISABLED', activeVersion: '1.0.0', permissions: ['integration:outbound'], installedAt: stamp, updatedAt: stamp }]
++                : []
++    return Promise.resolve(response(data))
++  })
++  vi.stubGlobal('fetch', fetcher)
++  const w = mount(kind === 'task' ? TasksPage : kind === 'notification' ? NotificationTemplatesPage : PluginsPage, { global: { plugins: [pinia, ArcoVue], stubs: { UnifiedExecutionsPanel: true, Modal: true, Drawer: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } })
++  wrappers.push(w); await flushPromises()
++  const trigger = async () => {
++    if (kind === 'plugin') w.findAllComponents(Popconfirm).find(p => String(p.props('content')).includes('声明权限'))!.vm.$emit('ok')
++    else if (kind === 'notification') w.findAllComponents(Popconfirm).find(p => String(p.props('content')).includes('重复通知'))!.vm.$emit('ok')
++    else w.findAllComponents(Button).find(b => b.text() === '标记执行中')!.vm.$emit('click')
++    await flushPromises()
++  }
++  return { w, session, fetcher, trigger, hook: (value: Hook) => { hook = value } }
++}
++const writes = (q: Awaited<ReturnType<typeof setup>>) => q.fetcher.mock.calls.filter(([, init]) => init?.method && init.method !== 'GET')
++for (const kind of ['task', 'notification'] as const) it(`TC-P2R2-D20-${kind === 'task' ? '01' : '02'}: scope invalidation before dispatch cancels ${kind}`, async () => {
++  const q = await setup(kind), gate = deferred(); q.hook(url => url.endsWith('/csrf') ? gate.promise : undefined)
++  await q.trigger(); q.session.selectProject('p2'); await flushPromises(); gate.resolve(response(csrf)); await flushPromises()
++  expect(writes(q)).toHaveLength(0)
++})
++it('TC-P2R2-D20-03: plugin leave cancels precommit action', async () => {
++  const q = await setup('plugin'), gate = deferred(); q.hook(url => url.endsWith('/csrf') ? gate.promise : undefined)
++  await q.trigger(); q.w.unmount(); gate.resolve(response(csrf)); await flushPromises(); expect(writes(q)).toHaveLength(0)
++})
++it('TC-P2R2-D20-03: a project selection alone does not cancel a global action', async () => {
++  const q = await setup('plugin'), gate = deferred(); q.hook(url => url.endsWith('/csrf') ? gate.promise : undefined)
++  await q.trigger(); q.session.selectProject('p2'); gate.resolve(response(csrf)); await flushPromises(); expect(writes(q)).toHaveLength(1); expect(String(writes(q)[0]![0])).toContain('/extensions/plugins/plugin/')
++})
++for (const kind of ['task', 'notification'] as const) it(`TC-P2R2-D20-04: A/B/A invalidates ${kind}`, async () => {
++  const q = await setup(kind), gate = deferred(); q.hook(url => url.endsWith('/csrf') ? gate.promise : undefined)
++  await q.trigger(); q.session.selectProject('p2'); q.session.selectProject('p1'); await flushPromises(); gate.resolve(response(csrf)); await flushPromises(); expect(writes(q)).toHaveLength(0)
++})
++for (const kind of ['task', 'notification', 'plugin'] as const) it(`TC-P2R2-D20-04: same-account reauthentication invalidates ${kind}`, async () => {
++  const q = await setup(kind), gate = deferred(); q.hook(url => url.endsWith('/csrf') ? gate.promise : undefined)
++  await q.trigger(); q.session.profile = null; q.session.signedIn = false; q.session.profile = { ...profile }; q.session.signedIn = true; await flushPromises()
++  gate.resolve(response(csrf)); await flushPromises(); expect(writes(q)).toHaveLength(0)
++})
++it('TC-P2R2-D20-05: dispatched work keeps its original URL and payload', async () => {
++  const q = await setup('task'), gate = deferred(); q.hook((_url, init) => init?.method === 'PUT' ? gate.promise : undefined)
++  await q.trigger(); q.session.selectProject('p2'); await flushPromises(); gate.resolve(response({})); await flushPromises()
++  expect(writes(q)).toHaveLength(1); expect(String(writes(q)[0]![0])).toContain('/p1/tasks/task-p1'); expect(JSON.parse(String(writes(q)[0]![1]!.body))).toMatchObject({ status: 'RUNNING', expectedVersion: 1 })
++})
++it('TC-P2R2-D20-06: late completion after A/B/A cannot decorate the replacement view', async () => {
++  const q = await setup('task'), gate = deferred(); q.hook((_url, init) => init?.method === 'PUT' ? gate.promise : undefined)
++  await q.trigger(); q.session.selectProject('p2'); q.session.selectProject('p1'); await flushPromises(); const calls = q.fetcher.mock.calls.length
++  gate.resolve(response({})); await flushPromises(); expect(q.fetcher.mock.calls.length).toBe(calls); expect(Message.success).not.toHaveBeenCalled()
++})
++it('TC-P2R2-D20-07: a cancelled token cannot clear a newer pending action', async () => {
++  const q = await setup('task'), first = deferred(), second = deferred(); let count = 0
++  q.hook(url => url.endsWith('/csrf') ? (++count === 1 ? first.promise : second.promise) : undefined)
++  await q.trigger(); await q.trigger(); expect(count).toBe(1)
++  q.session.selectProject('p2'); q.session.selectProject('p1'); await flushPromises(); await q.trigger(); expect(count).toBe(2)
++  first.resolve(response(csrf)); await flushPromises(); await q.trigger(); expect(count).toBe(2)
++  second.resolve(response(csrf)); await flushPromises(); expect(writes(q)).toHaveLength(1)
++})
++it('TC-P2R2-D20-08: CSRF authorization refusal never produces a business write', async () => {
++  const q = await setup('task'); q.hook(url => url.endsWith('/csrf') ? Promise.resolve(response({}, 403)) : undefined)
++  await q.trigger(); expect(writes(q)).toHaveLength(0); expect(Message.error).toHaveBeenCalledWith('受控错误')
++})
+--- /dev/null
++++ b/src/test/p2r2WebSocketPage.test.ts
+@@ -0,0 +1,69 @@
++import { createPinia } from 'pinia'
++import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
++import { createMemoryHistory, createRouter } from 'vue-router'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import { afterEach, expect, it, vi } from 'vitest'
++import ApiDebugPage from '@/pages/ApiDebugPage.vue'
++import { useSessionStore } from '@/stores/session'
++
++const wrappers: VueWrapper[] = []
++afterEach(async () => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; await flushPromises(); vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear(); sessionStorage.clear() })
++const response = (data: unknown, status = 200) => new Response(JSON.stringify(status < 400 ? { data } : { message: String(data) }), { status })
++function deferred<T = Response>() { let resolve!: (value: T) => void; const promise = new Promise<T>(release => { resolve = release }); return { promise, resolve } }
++const CodeEditor = { name: 'QaCodeEditor', props: { modelValue: { type: String, default: '' } }, emits: ['update:modelValue'], template: '<textarea :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />' }
++const Select = { name: 'QaSelect', props: { modelValue: { type: [String, Number, Array], default: '' }, placeholder: { type: String, default: '' } }, emits: ['update:modelValue', 'change'], template: '<div><slot /></div>' }
++const discovery = (service: string) => ({ services: [service], methods: [{ name: 'Unary', callType: 'UNARY' }], truncated: false })
++const wsSession = { id: 'ws-a', status: 'OPEN', target: 'wss://8.8.8.8/echo', messageCount: 0, connectedAt: '2026-10-24T00:00:00Z', autoReconnect: false }
++async function setup(protocol = 'HTTP', override?: (url: string, init?: RequestInit) => Promise<Response> | undefined, replay?: unknown) {
++  for (const name of ['success', 'error', 'info', 'warning'] as const) vi.spyOn(Message, name).mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(), session = useSessionStore(pinia); session.projectId = 'p1'
++  const fetcher = vi.fn((url: string, init?: RequestInit) => override?.(url, init) ?? Promise.resolve(response(
++    url.endsWith('/csrf') ? { headerName: 'X-CSRF', token: 'fixture' }
++      : url.endsWith('/context') ? { organizations: [{ id: 'o1' }], projects: { o1: [{ id: 'p1', organizationId: 'o1', name: 'QA', code: 'P1' }, { id: 'p2', organizationId: 'o1', name: 'QA2', code: 'P2' }] } }
++        : url.endsWith('/catalogs') ? [{ id: 'root', name: '根目录', parentId: null, sortOrder: 0 }]
++          : url.endsWith('/environments') ? [{ environmentCode: 'dev', name: '开发', enabled: true, defaultEnvironment: true }, { environmentCode: 'qa', name: 'QA', enabled: true }]
++            : url.endsWith('/parameters') ? { environments: ['dev', 'qa'], parameters: [{ key: 'DEV_VALUE', value: 'dev', environmentCode: 'dev' }, { key: 'QA_VALUE', value: 'qa', environmentCode: 'qa' }] }
++              : url.endsWith('/secrets') ? { environments: ['qa'], secrets: [{ key: 'QA_SECRET', environmentCode: 'qa' }] }
++                : url.endsWith('/descriptors') ? [{ id: 'offline-b', name: '离线B', serviceCount: 1, sourceFormat: 'PROTO3' }]
++                  : url.includes('/discovery') ? discovery('qa.Other')
++                    : url.endsWith('/unary') ? { success: true, status: 'OK', body: '{}', durationMs: 1 }
++                      : url.endsWith('/connect') || url.endsWith('/sessions/ws-a') ? wsSession
++                        : url.endsWith('/curl/import') ? { importedCount: 1, items: ['已保存'] } : [])))
++  vi.stubGlobal('fetch', fetcher)
++  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/debug', component: { template: '<div />' } }] })
++  await router.push({ path: '/debug', query: replay ? { replayDraft: JSON.stringify(replay) } : { protocol, url: protocol === 'GRPC' ? '8.8.8.8:443' : protocol === 'WEBSOCKET' ? 'wss://8.8.8.8/echo' : 'https://8.8.8.8/echo' } })
++  const w = mount(ApiDebugPage, { global: { plugins: [pinia, ArcoVue, router], stubs: { teleport: true, CodeEditor, Select, ApiDebugSyncArchive: true, Dropdown: { template: '<div><slot /><slot name="content" /></div>' } }, config: { warnHandler: () => {} } } })
++  wrappers.push(w); await flushPromises(); return { w, session, fetcher }
++}
++const button = (w: VueWrapper, label: string) => w.findAllComponents({ name: 'Button' }).find(item => item.text().trim() === label)!
++const history = { id: 'history-ws', projectId: 'p1', method: 'GET', protocol: 'WEBSOCKET', requestUrl: 'wss://8.8.8.8/new', replayDraft: JSON.stringify({ protocol: 'WEBSOCKET', request: { url: 'wss://8.8.8.8/new', headers: [], auth: { type: 'NONE' }, subscriptions: ['subscribe'] } }), createdAt: '2026-10-30T00:00:00Z' }
++async function connected(closeStatus = 200) {
++  const calls: string[] = []
++  const q = await setup('WEBSOCKET', (url, init) => {
++    if (init?.method === 'POST') calls.push(url)
++    if (url.includes('/api-debug/history')) return Promise.resolve(response([history]))
++    if (url.endsWith('/close')) return Promise.resolve(response({ ...wsSession, status: 'CLOSED', autoReconnect: false }, closeStatus))
++    return undefined
++  })
++  button(q.w, '连接').vm.$emit('click'); await flushPromises(); return { ...q, calls }
++}
++it('TC-P2R2-D14-01: read-only history load keeps old session but prevents sending new draft to it', async () => {
++  const q = await connected(); button(q.w, '载入').vm.$emit('click'); await flushPromises()
++  expect(q.calls.filter(x => x.endsWith('/connect'))).toHaveLength(1); expect(q.calls.some(x => x.endsWith('/close'))).toBe(false)
++  expect(button(q.w, '发送文本消息').props('disabled')).toBe(true)
++})
++it('TC-P2R2-D14-03: explicit replacement closes the owned old session before new connect', async () => {
++  const q = await connected(); button(q.w, '载入').vm.$emit('click'); await flushPromises(); button(q.w, '连接').vm.$emit('click'); await flushPromises()
++  expect(q.calls.map(x => x.endsWith('/close') ? 'close' : 'connect')).toEqual(['connect', 'close', 'connect'])
++})
++it('TC-P2R2-D14-04: failed close preserves the old handle and prevents a second connection', async () => {
++  const q = await connected(503); button(q.w, '载入').vm.$emit('click'); await flushPromises(); button(q.w, '连接').vm.$emit('click'); await flushPromises()
++  expect(q.calls.filter(x => x.endsWith('/connect'))).toHaveLength(1); expect(q.calls.some(x => x.endsWith('/sessions/ws-a/close'))).toBe(true); expect(Message.error).toHaveBeenCalled()
++})
++for (const action of ['project', 'unmount']) it(`TC-P2R2-D14-05: late creation after ${action} cleans only its own original-project session`, async () => {
++  const gate = deferred(); const q = await setup('WEBSOCKET', url => url.endsWith('/connect') ? gate.promise : url.endsWith('/close') ? Promise.resolve(response({ ...wsSession, status: 'CLOSED' })) : undefined)
++  button(q.w, '连接').vm.$emit('click'); await flushPromises(); if (action === 'project') q.session.projectId = 'p2'; else q.w.unmount()
++  gate.resolve(response(wsSession)); await flushPromises()
++  const close = q.fetcher.mock.calls.filter(([url, init]) => url.endsWith('/close') && init?.method === 'POST'); expect(close).toHaveLength(1); expect(close[0]![0]).toContain('/p1/api-debug/websocket/sessions/ws-a/close')
++  expect(q.fetcher.mock.calls.some(([url, init]) => url.includes('/sessions/') && (!init?.method || init.method === 'GET'))).toBe(false)
++})
+--- /dev/null
++++ b/src/test/p2r2WorkbenchHandoff.test.ts
+@@ -0,0 +1,27 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { createMemoryHistory, createRouter } from 'vue-router'
++import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
++import ArcoVue from '@arco-design/web-vue'
++import ApiInterfaceWorkbench from '@/components/api-testing/ApiInterfaceWorkbench.vue'
++import { useSessionStore } from '@/stores/session'
++import { consumeApiDebugHandoff } from '@/utils/apiDebugHandoff'
++const wrappers: VueWrapper[] = []
++afterEach(async () => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; await flushPromises(); vi.unstubAllGlobals(); vi.restoreAllMocks(); sessionStorage.clear(); localStorage.clear() })
++const stamp = '2026-10-30T00:00:00Z'
++it('TC-P2R2-D15-02: advanced navigation carries full runtime auth in memory with no Web Storage write', async () => {
++  const pinia = createPinia(), session = useSessionStore(pinia); session.projectId = 'p1'; session.signedIn = true; session.profile = { id: 'qa', account: 'qa', displayName: 'QA', email: 'qa@example.test', authenticatedAt: stamp }
++  const router = createRouter({ history: createMemoryHistory(), routes: ['/api-testing/interfaces', '/api-testing/quick-request'].map(path => ({ path, component: { template: '<div />' } })) }); await router.push('/api-testing/interfaces')
++  const fetcher = vi.fn(async (url: string) => new Response(JSON.stringify({ data: url.endsWith('/parameters') ? { parameters: [] } : [] })))
++  vi.stubGlobal('fetch', fetcher)
++  const version = { id: 'v1', versionName: '1.0.0', summary: '', description: '', requestHeaders: JSON.stringify([{ name: 'Authorization', type: 'string', required: false, example: 'synthetic-header-secret', description: '' }]), requestQuery: '[]', requestPath: '[]', requestBody: 'synthetic-body-secret', responseBody: '{}', exampleResponse: '{"statusCode":200}', status: 'DRAFT', publishedAt: null, createdAt: stamp }
++  const api = { id: 'api1', catalogId: 'c', method: 'POST', path: '/path', name: 'QA', status: 'DRAFT', currentVersionId: 'v1', versionCount: 1, createdBy: 'qa', updatedBy: 'qa', createdAt: stamp, updatedAt: stamp }
++  const w = mount(ApiInterfaceWorkbench, { props: { projectId: 'p1', api, version, versions: [version], selectedVersionId: 'v1', catalogName: 'QA', createdByName: 'QA', updatedByName: 'QA' }, global: { plugins: [pinia, ArcoVue, router], stubs: { CodeEditor: true, teleport: true }, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises()
++  w.findAllComponents({ name: 'Tabs' })[0]!.vm.$emit('update:activeKey', 'debug'); await flushPromises()
++  const storage = vi.spyOn(Storage.prototype, 'setItem'); storage.mockClear()
++  w.findAllComponents({ name: 'Button' }).find(b => b.text().trim() === '高级调试')!.vm.$emit('click'); await flushPromises()
++  expect(router.currentRoute.value.path).toBe('/api-testing/quick-request'); expect(storage).not.toHaveBeenCalled()
++  const token = router.currentRoute.value.query.handoff; expect(token).toEqual(expect.any(String)); expect(JSON.stringify(router.currentRoute.value.query)).not.toContain('synthetic')
++  const packet = consumeApiDebugHandoff(session, token); expect(packet!.request.auth.type).toBe('NONE'); expect(packet!.request.body).toBe('synthetic-body-secret'); expect(packet!.request.headers).toContainEqual({ name: 'Authorization', value: 'synthetic-header-secret' })
++  expect(fetcher.mock.calls.some(([url]) => url.endsWith('/execute') || url.endsWith('/drafts'))).toBe(false)
++})
+--- /dev/null
++++ b/services/platform-api/src/test/java/io/testhub/platform/P2R2AuditActionsFlowTests.java
+@@ -0,0 +1,36 @@
++package io.testhub.platform;
++
++import com.fasterxml.jackson.databind.JsonNode;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.audit.AuditService;
++import java.util.*;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import static org.junit.jupiter.api.Assertions.*;
++import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
++
++class P2R2AuditActionsFlowTests extends P1FlowTestSupport {
++    @Autowired AuditService audit;
++    void event(PlatformUserPrincipal a,String p,String action) {audit.record(a,access.context(a).organizations().getFirst().id(),p,action,"QA_RESOURCE",unique(),Map.of());}
++    JsonNode actions(PlatformUserPrincipal a,String p,String suffix) throws Exception {
++        var r=mvc.perform(get("/api/v1/audit-logs/actions?projectId="+p+suffix).with(user(a))).andReturn();assertEquals(200,r.getResponse().getStatus());return json.readTree(r.getResponse().getContentAsString()).path("data");
++    }
++    @Test @DisplayName("TC-P2R2-D04-01") void optionsDoNotShrinkWithActionFilter() throws Exception {
++        var a=admin();String p=project(a);event(a,p,"QA_FIRST");event(a,p,"QA_SECOND");var all=actions(a,p,"");assertEquals(all,actions(a,p,"&action=QA_FIRST&limit=1"));assertTrue(all.toString().contains("QA_SECOND"));
++    }
++    @Test @DisplayName("TC-P2R2-D04-02") void rareActionOlderThanTheListLimitIsStillReachable() throws Exception {
++        var a=admin();String p=project(a);event(a,p,"QA_OLDER_THAN_200");jdbc.sql("UPDATE audit_log SET created_at='2020-01-01 00:00:00' WHERE project_id=:p AND action='QA_OLDER_THAN_200'").param("p",p).update();for(int n=0;n<205;n++)event(a,p,"QA_RECENT");
++        assertFalse(audit.recent(p,null,200).stream().anyMatch(e->e.action().equals("QA_OLDER_THAN_200")));assertTrue(actions(a,p,"").toString().contains("QA_OLDER_THAN_200"));
++    }
++    @Test @DisplayName("TC-P2R2-D04-03") void emptyResultsDoNotEraseDistinctSortedMetadata() throws Exception {
++        var a=admin();String p=project(a);for(String action:List.of("QA_Z","QA_A","QA_Z"))event(a,p,action);assertTrue(audit.recent(p,"QA_ABSENT",100).isEmpty());var values=new ArrayList<String>();actions(a,p,"").forEach(v->values.add(v.asText()));assertEquals(values.stream().distinct().sorted().toList(),values);assertEquals(1,values.stream().filter("QA_Z"::equals).count());
++    }
++    @Test @DisplayName("TC-P2R2-D04-04") void metadataUsesTheExistingAdminAndProjectScope() throws Exception {
++        var a=admin();var b=actor();String p=project(a),other=project(b);event(a,p,"QA_VISIBLE");event(b,other,"QA_OTHER_PROJECT");assertFalse(actions(a,p,"").toString().contains("QA_OTHER_PROJECT"));assertEquals(403,mvc.perform(get("/api/v1/audit-logs/actions").with(user(b))).andReturn().getResponse().getStatus());assertEquals(401,mvc.perform(get("/api/v1/audit-logs/actions")).andReturn().getResponse().getStatus());
++    }
++    @Test @DisplayName("TC-P2R2-D04-06") void metadataNeverContainsAuditDetailsAndLeavesRowLimitIntact() throws Exception {
++        var a=admin();String p=project(a);event(a,p,"QA_A");event(a,p,"QA_B");actions(a,p,"").forEach(v->assertTrue(v.isTextual()));assertEquals(1,audit.recent(p,null,1).size());
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/test/java/io/testhub/platform/P2R2UiFreezeFlowTests.java
+@@ -0,0 +1,50 @@
++package io.testhub.platform;
++
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.config.SystemConfigRepository;
++import io.testhub.platform.uiautomation.*;
++import java.time.Instant;
++import java.util.*;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.DisplayName;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.web.server.ResponseStatusException;
++import static org.junit.jupiter.api.Assertions.*;
++
++class P2R2UiFreezeFlowTests extends P1FlowTestSupport {
++    @Autowired UiAutomationService ui;
++    @Autowired UiAutomationRepository rows;
++    @Autowired UiAutomationScheduleService schedules;
++    @Autowired SystemConfigRepository configs;
++    record Fixture(PlatformUserPrincipal actor,String project,UiAutomationBrowserProfile profile,UiAutomationPageObject object,UiAutomationScenario scenario) { }
++    Fixture fixture(boolean reference) {
++        var a=actor();String p=project(a);configs.upsert("ui-automation.allowed-origins","https://ui.example.test",a.userId());
++        var profile=ui.createProfile(a,p,new UiAutomationService.ProfileRequest(unique(),"chromium","https://ui.example.test",1280,720,true));
++        var object=ui.createPageObject(a,p,new UiAutomationService.PageObjectRequest(unique(),"#saved",""));
++        var step=new UiAutomationStep("click","CLICK","点击",reference?null:"#direct",reference?object.id():null,null,null,null,1000);
++        var scenario=ui.createScenario(a,p,new UiAutomationService.ScenarioRequest(profile.id(),unique(),"","STOP",Map.of(),List.of(step)));
++        return new Fixture(a,p,profile,object,scenario);
++    }
++    void edit(Fixture f,String selector){ui.updatePageObject(f.actor,f.project,f.object.id(),new UiAutomationService.PageObjectRequest(f.object.name(),selector,""));}
++    UiAutomationExecution queue(Fixture f){return ui.execute(f.actor,f.project,f.scenario.id(),30,null);}
++    UiAutomationManifest manifest(Fixture f,UiAutomationExecution e){return rows.findManifest(f.project,e.id()).orElseThrow();}
++    String selector(Fixture f,UiAutomationExecution e){return manifest(f,e).snapshot().scenario().steps().getFirst().selector();}
++    long count(String table,Fixture f){return jdbc.sql("SELECT COUNT(*) FROM "+table+" WHERE project_id=:p").param("p",f.project).query(Long.class).single();}
++    @Test @DisplayName("TC-P2R2-D18-01") void objectIsResolvedAtQueueTime() {var f=fixture(true);assertEquals(f.object.id(),f.scenario.steps().getFirst().pageObjectId());edit(f,"#before-queue");assertEquals("#before-queue",selector(f,queue(f)));}
++    @Test @DisplayName("TC-P2R2-D18-02") void manifestAndChecksumDescribeTheActualQueuedSnapshot() {var f=fixture(true);var e=queue(f);var m=manifest(f,e);assertEquals(f.scenario.id(),m.scenarioId());assertEquals(f.scenario.version(),m.scenarioVersion());assertEquals(f.profile.name(),m.snapshot().browserProfile().name());assertEquals("#saved",m.snapshot().scenario().steps().getFirst().selector());assertTrue(m.checksum().matches("[a-f0-9]{64}"));assertEquals(1,count("ui_automation_execution",f));assertTrue(jdbc.sql("SELECT COUNT(*) FROM ui_automation_runner_outbox WHERE execution_id=:id").param("id",e.id()).query(Long.class).single()>0);}
++    @Test @DisplayName("TC-P2R2-D18-03") void objectEditsNeverRewriteExistingManifest() {var f=fixture(true);var first=queue(f);var before=manifest(f,first);edit(f,"#after-queue");assertEquals(before,manifest(f,first));assertEquals("#after-queue",selector(f,queue(f)));assertEquals(before,manifest(f,first));}
++    @Test @DisplayName("TC-P2R2-D18-04") void aDirectSelectorDoesNotFollowAnUnrelatedObject() {var f=fixture(false);edit(f,"#other-object");assertEquals("#direct",selector(f,queue(f)));}
++    @Test @DisplayName("TC-P2R2-D18-06") void invalidScopeOrObjectAndDisabledProfileLeaveNoPartialQueue() {
++        var f=fixture(true);var other=actor();assertThrows(org.springframework.security.access.AccessDeniedException.class,()->ui.execute(other,f.project,f.scenario.id(),30,null));
++        ui.updateProfile(f.actor,f.project,f.profile.id(),new UiAutomationService.ProfileRequest(f.profile.name(),"chromium",f.profile.baseUrl(),1280,720,false));assertEquals(409,assertThrows(ResponseStatusException.class,()->queue(f)).getStatusCode().value());
++        ui.updateProfile(f.actor,f.project,f.profile.id(),new UiAutomationService.ProfileRequest(f.profile.name(),"chromium",f.profile.baseUrl(),1280,720,true));
++        jdbc.sql("DELETE FROM ui_automation_page_object WHERE id=:id").param("id",f.object.id()).update();assertThrows(ResponseStatusException.class,()->queue(f));assertEquals(0,count("ui_automation_execution",f));assertEquals(0,count("ui_automation_execution_manifest",f));
++    }
++    @Test @DisplayName("TC-P2R2-D18-07") void newScheduledAndRetryExecutionsResolveCurrentObjects() {
++        var f=fixture(true);var schedule=schedules.create(f.actor,f.project,new UiAutomationScheduleService.ScheduleInput(f.scenario.id(),null,unique(),"0 0 0 1 1 ? 2099","UTC",30,1,5,true));
++        var original=ui.executeFromSchedule(schedule);var old=manifest(f,original);edit(f,"#auto-retry");
++        ui.applyRunnerEvent(new UiAutomationRunnerProtocol.Event(original.taskId(),original.id(),"qa-runner","FAILED","QA_FAILURE","controlled fixture",Instant.now()));
++        var automatic=rows.findExecutions(f.project).stream().filter(e->original.id().equals(e.retryOfExecutionId())).findFirst().orElseThrow();assertEquals("#auto-retry",selector(f,automatic));assertEquals(old,manifest(f,original));
++        edit(f,"#manual-retry");var manual=ui.retry(f.actor,f.project,original.id());assertEquals(original.id(),manual.retryOfExecutionId());assertEquals("#manual-retry",selector(f,manual));assertEquals(old,manifest(f,original));
++    }
++}
+--- /dev/null
++++ b/scripts/qa/p2r2-desktop-http.mjs
+@@ -0,0 +1,129 @@
++/* global fetch, AbortSignal */
++// Native JVM acceptance in a new filesystem workspace; no Electron window or user workspace is used.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import path from 'node:path'
++import crypto from 'node:crypto'
++import process from 'node:process'
++import os from 'node:os'
++import { promisify } from 'node:util'
++import { spawn, execFile } from 'node:child_process'
++import { fileURLToPath } from 'node:url'
++import { setTimeout as delay } from 'node:timers/promises'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261030/p2-round2-fixes-r1'), directory = await fs.mkdtemp(path.join(root, '.testhub/p2r2-http-qa-'))
++const java = path.join(process.env.JAVA_HOME, 'bin/java'), jar = path.join(root, 'services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar')
++const result = { headless: true, realPackagedJvm: true, desktopProfile: true, electronUpgradeTest: false, cases: [], cleanup: false }
++const env = { ...process.env }
++for (const key of Object.keys(env)) if (key.startsWith('TESTHUB_') || key.startsWith('SPRING_')) delete env[key]
++Object.assign(env, { SPRING_PROFILES_ACTIVE: 'desktop', TESTHUB_DESKTOP_DATA_DIRECTORY: directory, TESTHUB_LOCAL_DB_PASSWORD: crypto.randomBytes(24).toString('hex'),
++  TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test', TESTHUB_REGISTRATION_ENABLED: 'true' })
++let child, origin, logHandle, launch = 0
++async function start() {
++  const file = path.join(directory, `backend-${++launch}.log`); logHandle = await fs.open(file, 'w')
++  child = spawn(java, ['-jar', jar, '--server.port=0', '--testhub.registration.enabled=true', '--testhub.bootstrap.demo-enabled=false'], { cwd: root, env, stdio: ['ignore', logHandle.fd, logHandle.fd] })
++  child.on('error', error => { result.launchError = error.message })
++  for (let n = 0; n < 300; n++) {
++    if (child.exitCode !== null || child.signalCode !== null || result.launchError) throw new Error('Owned QA JVM failed to start')
++    const match = /Tomcat started on port (\d+)/.exec(await fs.readFile(file, 'utf8'))
++    if (match) {
++      origin = 'http://127.0.0.1:' + match[1]
++      try { if ((await fetch(origin + '/actuator/health/readiness', { signal: AbortSignal.timeout(5_500) })).status === 200) return } catch { /* Wait for ApplicationReadyEvent. */ }
++    }
++    await delay(250)
++  }
++  throw new Error('Owned QA JVM did not become ready within 75 seconds')
++}
++async function stop() {
++  if (!child) return
++  const running = child; child = null
++  if (running.exitCode === null && running.signalCode === null) {
++    running.kill('SIGTERM')
++    for (let n = 0; n < 150 && running.exitCode === null && running.signalCode === null; n++) await delay(100)
++    if (running.exitCode === null && running.signalCode === null) { running.kill('SIGKILL'); await new Promise(resolve => running.once('exit', resolve)); throw new Error('Owned JVM failed to stop within 15 seconds') }
++  }
++  await logHandle?.close(); logHandle = null
++}
++function browser() { return { cookies: new Map() } }
++async function request(client, url, method = 'GET', payload) {
++  const headers = { Cookie: [...client.cookies].map(([key, value]) => key + '=' + value).join('; ') }
++  if (payload !== undefined) {
++    const csrf = await request(client, '/api/v1/auth/csrf')
++    assert.equal(csrf.status, 200); headers[csrf.body.data.headerName] = csrf.body.data.token
++    headers.Cookie = [...client.cookies].map(([key, value]) => key + '=' + value).join('; '); headers['Content-Type'] = 'application/json'
++  }
++  const response = await fetch(origin + url, { method, headers, body: payload === undefined ? undefined : JSON.stringify(payload), signal: AbortSignal.timeout(8_000) })
++  for (const cookie of response.headers.getSetCookie()) {
++    const [pair] = cookie.split(';'), equals = pair.indexOf('='); client.cookies.set(pair.slice(0, equals), pair.slice(equals + 1))
++  }
++  return { status: response.status, body: response.status === 204 ? null : await response.json() }
++}
++async function step(id, title, operation) { await operation(); result.cases.push({ id, title, status: 'PASS' }) }
++const exec = promisify(execFile)
++// This bridge writes only the fresh owned QA database while its JVM is stopped.
++const bridge = `
++import java.sql.*; import java.nio.file.*; import java.time.*;
++class P2R2SqlBridge {
++ public static void main(String[] args) throws Exception {
++  try(var c=DriverManager.getConnection("jdbc:h2:file:"+Path.of(System.getenv("TESTHUB_DESKTOP_DATA_DIRECTORY")).resolve("workspace")+";MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE","sa",System.getenv("TESTHUB_LOCAL_DB_PASSWORD"))) {
++   try(var s=c.prepareStatement("INSERT INTO membership(id,user_id,organization_id,role_code) VALUES('p2r2-admin',?,?,'SYSTEM_ADMIN')")){s.setString(1,args[0]);s.setString(2,args[1]);s.executeUpdate();}
++   for(int n=0;n<207;n++) {
++    String action=n==0?"QA_OLDER_THAN_200":n==206?"QA_OTHER_PROJECT":"QA_RECENT";
++    try(var s=c.prepareStatement("INSERT INTO audit_log(id,user_id,organization_id,project_id,action,resource_type,outcome,request_id,detail,created_at) VALUES(?,?,?,?,?,'QA','SUCCESS','qa-request',JSON '{}',?)")) {
++     s.setString(1,"p2r2-event-"+n);s.setString(2,args[0]);s.setString(3,args[1]);s.setString(4,n==206?args[3]:args[2]);s.setString(5,action);s.setTimestamp(6,Timestamp.from(n==0?Instant.parse("2020-01-01T00:00:00Z"):Instant.now()));s.executeUpdate();
++    }
++   }
++  }
++ }
++}`
++try {
++  await start()
++  const client = browser(), account = 'p2r2-' + crypto.randomUUID(), password = crypto.randomUUID() + 'Aa1!'
++  assert.equal((await request(client, '/api/v1/auth/register', 'POST', { account, email: crypto.randomUUID() + '@example.test', displayName: 'P2R2隔离验收', password })).status, 201)
++  const me = (await request(client, '/api/v1/auth/me')).body.data
++  const context = (await request(client, '/api/v1/access/context')).body.data
++  const organization = context.organizations[0].id, project = Object.values(context.projects).flat()[0].id
++  const other = browser()
++  assert.equal((await request(other, '/api/v1/auth/register', 'POST', { account: 'other-' + crypto.randomUUID(), email: crypto.randomUUID() + '@example.test', displayName: '隔离其他项目', password })).status, 201)
++  const otherProject = Object.values((await request(other, '/api/v1/access/context')).body.data.projects).flat()[0].id
++  await step('TC-P2R2-D04-04', '普通账号403、匿名401，元数据沿用既有管理员权限', async () => {
++    assert.equal((await request(client, '/api/v1/audit-logs/actions')).status, 403)
++    assert.equal((await request(browser(), '/api/v1/audit-logs/actions')).status, 401)
++  })
++  await stop()
++  const entries = (await exec('unzip', ['-Z1', jar])).stdout.split('\n'), h2 = entries.find(value => /^BOOT-INF\/lib\/h2-[\d.]+\.jar$/.test(value))
++  assert.ok(h2)
++  const name = path.basename(h2), h2Jar = path.join(os.homedir(), '.m2/repository/com/h2database/h2', name.slice(3, -4), name)
++  const source = path.join(directory, 'P2R2SqlBridge.java'); await fs.writeFile(source, bridge)
++  await exec(java, ['--class-path', h2Jar, source, me.id, organization, project, otherProject], { env, maxBuffer: 1_000_000 })
++  await start()
++  assert.equal((await request(client, '/api/v1/auth/me')).status, 200)
++  const base = '/api/v1/audit-logs', scoped = '?projectId=' + project
++  await step('TC-P2R2-D04-01', '真实HTTP动作筛选不收缩独立动作集合', async () => {
++    const all = await request(client, base + '/actions' + scoped)
++    assert.equal(all.status, 200)
++    assert.deepEqual((await request(client, base + '/actions' + scoped + '&action=QA_RECENT&limit=1')).body.data, all.body.data)
++  })
++  await step('TC-P2R2-D04-02', '真实持久化稀有动作超出200条仍在元数据中', async () => {
++    const response = await request(client, base + scoped + '&limit=200'); assert.equal(response.status, 200)
++    const rows = response.body.data
++    assert.equal(rows.length, 200); assert.ok(!rows.some(row => row.action === 'QA_OLDER_THAN_200'))
++    assert.ok((await request(client, base + '/actions' + scoped)).body.data.includes('QA_OLDER_THAN_200'))
++  })
++  await step('TC-P2R2-D04-03', '空筛选不影响去重排序动作集合', async () => {
++    assert.deepEqual((await request(client, base + scoped + '&action=QA_ABSENT')).body.data, [])
++    const actions = (await request(client, base + '/actions' + scoped)).body.data
++    assert.deepEqual(actions, [...new Set(actions)].sort())
++    assert.ok(!actions.includes('QA_OTHER_PROJECT'))
++  })
++  await step('TC-P2R2-D04-06', '元数据只返回动作字符串，原列表limit仍生效', async () => {
++    assert.ok((await request(client, base + '/actions' + scoped)).body.data.every(value => typeof value === 'string'))
++    assert.equal((await request(client, base + scoped + '&limit=1')).body.data.length, 1)
++  })
++} catch (error) { result.error = error.message; process.exitCode = 1 }
++finally {
++  try { await stop() } catch (error) { result.cleanupError = error.message; process.exitCode = 1 }
++  await fs.rm(directory, { recursive: true, force: true }); result.cleanup = true
++  await fs.mkdir(out, { recursive: true }); await fs.writeFile(path.join(out, 'native-http.json'), JSON.stringify(result, null, 2) + '\n')
++  process.stdout.write(JSON.stringify(result) + '\n')
++}
+--- /dev/null
++++ b/scripts/qa/p2r2-observation-ui.mjs
+@@ -0,0 +1,120 @@
++/* global document, localStorage, sessionStorage */
++// Browser acceptance uses controlled API fixtures. It does not claim real Runner or remote WS coverage.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import http from 'node:http'
++import path from 'node:path'
++import process from 'node:process'
++import { fileURLToPath, URL } from 'node:url'
++import { chromium } from '../../services/playwright-runner/node_modules/playwright/index.mjs'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261030/p2-round2-fixes-r1'), dist = path.join(root, 'dist')
++const stamp = '2026-10-30T00:00:00Z'
++const result = { headless: true, isolatedHttpFixtures: true, realBackendAcceptance: false, cases: [], cleanup: false }
++const server = http.createServer(async (req, res) => {
++  try {
++    let file = path.resolve(dist, '.' + decodeURIComponent(new URL(req.url, 'http://qa.invalid').pathname))
++    if (!file.startsWith(dist + path.sep) || !path.extname(file)) file = path.join(dist, 'index.html')
++    res.writeHead(200, { 'Content-Type': { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }[path.extname(file)] || 'application/octet-stream' })
++    res.end(await fs.readFile(file))
++  } catch { res.writeHead(404); res.end() }
++})
++await fs.mkdir(out, { recursive: true }); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
++const origin = `http://127.0.0.1:${server.address().port}`
++let browser
++async function run(id, title, routePath, operation) {
++  const context = await browser.newContext({ viewport: { width: 1600, height: 1100 } }), hits = [], errors = []
++  const state = { csrfGate: null, csrfRelease: null, connections: 0 }
++  await context.route('**/api/**', async route => {
++    const request = route.request(), url = new URL(request.url()), p = url.pathname, method = request.method()
++    const hit = { path: p, method, query: url.search }; hits.push(hit)
++    if (method !== 'GET') hit.payload = request.postDataJSON()
++    let data
++    if (p.endsWith('/auth/me')) data = { id: 'me', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: stamp }
++    else if (p.endsWith('/auth/csrf')) { if (state.csrfGate) await state.csrfGate; data = { headerName: 'X-CSRF', token: 'fixture' } }
++    else if (p.endsWith('/auth/capabilities')) data = { registrationEnabled: true }
++    else if (p.endsWith('/access/context')) data = { organizations: [{ id: 'o', name: 'QA组织', code: 'QA' }], projects: { o: ['p1', 'p2'].map(id => ({ id, name: id === 'p1' ? 'QA项目一' : 'QA项目二', code: id, status: 'ACTIVE', description: '', createdAt: stamp, updatedAt: stamp })) } }
++    else if (p.endsWith('/capabilities')) data = { systemAdministration: true }
++    else if (p.endsWith('/tasks')) data = [{ id: 'task', projectId: p.includes('/p2/') ? 'p2' : 'p1', name: 'QA任务', taskType: 'API', status: 'QUEUED', progress: 0, version: 1, createdAt: stamp, updatedAt: stamp }]
++    else if (p.endsWith('/environments')) data = []
++    else if (p.endsWith('/parameters')) data = { environments: [], parameters: [] }
++    else if (p.endsWith('/secrets')) data = { environments: [], secrets: [] }
++    else if (p.endsWith('/workspace-preferences')) data = { revision: 0, state: { folders: [], hiddenIds: [], folderIds: {}, displayMode: 'NAME' } }
++    else if (p.endsWith('/catalogs')) data = [{ id: 'root', name: '源目录', parentId: null, sortOrder: 0, createdAt: stamp, updatedAt: stamp }]
++    else if (p.endsWith('/definitions')) data = [{ id: 'a', catalogId: 'root', method: 'POST', path: '/runtime', name: '交接接口', currentVersionId: 'v', versionCount: 1, status: 'DRAFT', createdAt: stamp, updatedAt: stamp }]
++    else if (p.endsWith('/versions')) data = [{ id: 'v', versionName: '1.0.0', requestHeaders: '[{"name":"X-Run","type":"string","required":false,"example":"qa-header-fixture","description":""}]', requestQuery: '[]', requestPath: '[]', requestBody: 'qa-body-fixture', responseBody: '{}', exampleResponse: '{"statusCode":200}', status: 'DRAFT', publishedAt: null, createdAt: stamp }]
++    else if (p.endsWith('/execute')) data = { historyId: 'run', success: true, statusCode: 200, durationMs: 1, body: '{}', responseHeaders: [], truncated: false }
++    else if (p.endsWith('/connect')) data = { id: 'ws-' + (++state.connections), status: 'OPEN', target: 'wss://8.8.8.8/echo', messageCount: 0, connectedAt: stamp, autoReconnect: false }
++    else if (p.endsWith('/close')) data = { id: p.split('/').at(-2), status: 'CLOSED', messageCount: 0, connectedAt: stamp, autoReconnect: false }
++    else if (/\/sessions\/ws-\d+$/.test(p)) data = { id: p.split('/').at(-1), status: 'OPEN', messageCount: 0, connectedAt: stamp, autoReconnect: false }
++    else if (p.endsWith('/audit-logs/actions')) data = ['QA_A', 'QA_B', 'QA_OLDER_THAN_200']
++    else if (p.endsWith('/audit-logs')) data = [{ id: 'audit', action: url.searchParams.get('action') || 'QA_A', resourceType: 'QA', outcome: 'SUCCESS', requestId: 'qa-fixture', createdAt: stamp }]
++    else data = []
++    await route.fulfill({ json: { data } })
++  })
++  const page = await context.newPage(); page.setDefaultTimeout(10_000); page.on('pageerror', error => errors.push(error.message))
++  try { await page.goto(origin + routePath); await operation(page, hits, state); assert.deepEqual(errors, []); result.cases.push({ id, title, status: 'PASS' }) }
++  catch (error) { result.cases.push({ id, title, status: 'FAIL', error: error.message, browserErrors: errors }) }
++  finally { state.csrfRelease?.(); await context.close() }
++}
++try {
++  browser = await chromium.launch({ headless: true, channel: 'chrome' }); result.browserVersion = browser.version()
++  await run('TC-P2R2-D20-01', 'CSRF等待中切换项目，业务请求不发出', '/tasks', async (page, hits, state) => {
++    await page.getByRole('button', { name: '标记执行中', exact: true }).waitFor()
++    state.csrfGate = new Promise(resolve => { state.csrfRelease = resolve })
++    await page.getByRole('button', { name: '标记执行中', exact: true }).click()
++    await page.waitForFunction(() => document.querySelector('.arco-btn-loading'))
++    await page.getByLabel('选择项目').click(); await page.locator('.arco-select-option:visible').filter({ hasText: 'QA项目二' }).click()
++    state.csrfRelease(); await page.getByRole('button', { name: '标记执行中', exact: true }).waitFor()
++    assert.equal(hits.filter(hit => hit.method === 'PUT').length, 0)
++  })
++  await run('TC-P2R2-D13-01/02/03', '嵌入式旧摘要必须重建核对后手动发送', '/api-testing/quick-request?method=GET&protocol=HTTP&url=https%3A%2F%2F8.8.8.8%2Flegacy%3Ftoken%3D***&legacyHistory=1', async (page, hits) => {
++    await page.locator('.legacy-history-review').waitFor()
++    await page.getByRole('button', { name: '发送', exact: true }).click(); await page.locator('.arco-message').filter({ hasText: '重建' }).first().waitFor()
++    assert.equal(hits.filter(hit => hit.path.endsWith('/execute')).length, 0)
++    await page.getByText('我已核对重建请求，下一步由我手动发送', { exact: true }).click()
++    const url = page.getByPlaceholder('输入 http 或 https 开头的完整 URL'); await url.fill('https://8.8.8.8/legacy?token=rebuilt'); await url.blur()
++    await page.getByRole('button', { name: '发送', exact: true }).click(); await page.getByText('200', { exact: true }).first().waitFor()
++    const sends = hits.filter(hit => hit.path.endsWith('/execute')); assert.equal(sends.length, 1); assert.equal(sends[0].payload.auth.type, 'NONE'); assert.equal(sends[0].payload.body, '')
++  })
++  await run('TC-P2R2-D14-01/03', '草稿改变后禁用旧连接发送，显式替换先关闭自有连接', '/api-testing/quick-request?protocol=WEBSOCKET&url=wss%3A%2F%2F8.8.8.8%2Fecho', async (page, hits) => {
++    await page.getByRole('button', { name: '连接', exact: true }).first().click(); await page.getByText('OPEN', { exact: true }).first().waitFor()
++    const url = page.getByPlaceholder('wss://ws.postman-echo.com/raw'); await url.fill('wss://8.8.8.8/other'); await url.blur()
++    assert.equal(await page.getByRole('button', { name: /发送文本消息/ }).isDisabled(), true)
++    await Promise.all([page.waitForResponse(response => response.url().endsWith('/connect') && response.status() === 200), page.getByRole('button', { name: '连接', exact: true }).first().click()])
++    assert.deepEqual(hits.filter(hit => hit.method === 'POST' && /\/(connect|close)$/.test(hit.path)).map(hit => hit.path.split('/').at(-1)), ['connect', 'close', 'connect'])
++    assert.ok(hits.some(hit => hit.path.endsWith('/sessions/ws-1/close')))
++  })
++  await run('TC-P2R2-D15-01/02/06', '实际源页面到高级调试传递认证和完整请求且不落Web Storage', '/api-testing/interfaces', async (page, hits) => {
++    await page.getByText('交接接口', { exact: true }).first().click(); await page.locator('.arco-tabs-tab:visible').filter({ hasText: /^调试$/ }).click()
++    await page.getByLabel('请求服务地址').locator('input').fill('https://8.8.8.8')
++    await page.locator('.arco-tabs-tab:visible').filter({ hasText: /^Auth$/ }).click()
++    const auth = page.locator('.arco-form-item').filter({ hasText: '认证类型' }); await auth.locator('.arco-select-view').click(); await page.locator('.arco-select-option:visible').filter({ hasText: 'Bearer Token' }).click()
++    await page.locator('.arco-form-item').filter({ hasText: /^Token/ }).locator('input').fill('qa-token-fixture')
++    await page.getByRole('button', { name: '高级调试', exact: true }).click(); await page.waitForURL('**/quick-request?**')
++    const u = new URL(page.url()); assert.deepEqual([...u.searchParams.keys()].sort(), ['handoff', 'sourceApiId']); assert.equal(u.searchParams.get('sourceApiId'), 'a')
++    const storage = await page.evaluate(() => JSON.stringify([Object.entries(localStorage), Object.entries(sessionStorage)]))
++    for (const marker of ['qa-token-fixture', 'qa-header-fixture', 'qa-body-fixture']) assert.ok(!storage.includes(marker))
++    assert.equal(hits.filter(hit => hit.path.endsWith('/execute')).length, 0)
++    await page.getByRole('button', { name: '发送', exact: true }).click(); await page.getByText('200', { exact: true }).first().waitFor()
++    const p = hits.find(hit => hit.path.endsWith('/execute')).payload
++    assert.equal(p.auth.type, 'BEARER'); assert.equal(p.auth.token, 'qa-token-fixture'); assert.equal(p.body, 'qa-body-fixture'); assert.ok(p.headers.some(h => h.name === 'X-Run' && h.value === 'qa-header-fixture'))
++  })
++  await run('TC-P2R2-D04-01/02', '真实Arco下拉切换A到B仍可选择超出行限制的稀有动作', '/audit', async (page, hits) => {
++    const select = page.locator('.audit-toolbar .arco-select-view'); await select.click(); await page.locator('.arco-select-option:visible').filter({ hasText: /^QA_A$/ }).click()
++    await page.waitForFunction(() => document.querySelector('.audit-last-success')?.textContent.includes('QA_A'))
++    await select.click(); await page.locator('.arco-select-option:visible').filter({ hasText: /^QA_B$/ }).click()
++    await page.waitForFunction(() => document.querySelector('.audit-last-success')?.textContent.includes('QA_B'))
++    await select.click(); await page.locator('.arco-select-option:visible').filter({ hasText: 'QA_OLDER_THAN_200' }).waitFor()
++    assert.ok(hits.some(hit => hit.path.endsWith('/audit-logs') && hit.query.includes('action=QA_B') && hit.query.includes('limit=100')))
++  })
++  await run('TC-P2R2-D18-05', '页面对象说明与入队冻结规则一致', '/ui-automation', async page => {
++    await page.locator('.arco-tabs-tab:visible').filter({ hasText: /^页面对象$/ }).click(); await page.getByText('场景保存页面对象引用，执行清单在入队时解析并冻结实际定位器。', { exact: true }).waitFor()
++    assert.ok(!(await page.locator('body').innerText()).includes('场景保存时会冻结实际定位器'))
++  })
++} finally {
++  await browser?.close(); await new Promise(resolve => server.close(resolve)); result.cleanup = true
++  result.passed = result.cases.filter(item => item.status === 'PASS').length; result.failed = result.cases.length - result.passed
++  await fs.writeFile(path.join(out, 'headless-ui.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n')
++  if (result.failed) process.exitCode = 1
++}

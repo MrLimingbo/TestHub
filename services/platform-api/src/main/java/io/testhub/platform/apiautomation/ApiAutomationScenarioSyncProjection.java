@@ -114,7 +114,7 @@ public class ApiAutomationScenarioSyncProjection {
     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
     public record Snapshot(int version, String scope, String projectId, String actorId, String revision, List<Item> items,
                            Map<String, String> blockedNames, Map<String, String> itemIds, Map<String, String> referenceIds) { }
-    public record Item(String name, Map<String, Object> definition) { }
+    public record Item(String name, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Definition.class) Map<String, Object> definition) { }
     public record Definition(String description, String environmentCode, String failureStrategy, List<AutomationStep> steps,
                              Map<String, String> variables, String preRequestScript, String postResponseScript) { }
 }

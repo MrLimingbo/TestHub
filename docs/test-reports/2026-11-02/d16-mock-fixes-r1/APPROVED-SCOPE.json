@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-02",
+  "status": "AUTHORIZED",
+  "currentModule": "Mock",
+  "currentObservation": "OBS-09-E013",
+  "ruleSelections": {
+    "D16-I": "A",
+    "D16-N": "A",
+    "D16-S": "A",
+    "D16-NULL": "A",
+    "D16-OLD": "A"
+  },
+  "numericFields": {
+    "priority": "0..1000，管理API省略/null为0",
+    "expiresInDays": "1..365，省略/null永久有效",
+    "responseStatus": "200..599，管理API省略/null为200"
+  },
+  "stringFields": [
+    "requestQuery.*",
+    "requestHeaders.*",
+    "responseHeaders.*",
+    "requestBody",
+    "responseBody"
+  ],
+  "scope": "管理新建/编辑、分享、迁移/同步、运行匹配、后台页面；保留既有完整迁移/同步协议、规范化与事务边界。",
+  "gate": "Mock结果呈审后再进入性能测试",
+  "remainingD16ModulesWaiting": 4,
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

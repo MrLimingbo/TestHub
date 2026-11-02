@@ -1,0 +1,211 @@
+{
+  "total": 51,
+  "passed": 51,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "TC-P2R2-D15-01/06: runtime NONE/HEADER reaches manual execution unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "TC-P2R2-D15-01/06: runtime BEARER/HEADER reaches manual execution unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "TC-P2R2-D15-01/06: runtime BASIC/HEADER reaches manual execution unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "TC-P2R2-D15-01/06: runtime API_KEY/HEADER reaches manual execution unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "TC-P2R2-D15-01/06: runtime API_KEY/QUERY reaches manual execution unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "TC-P2R2-D15-04: missing packet starts blank and warns instead of restoring another draft",
+      "status": "passed"
+    },
+    {
+      "name": "TC-P2R2-D15-03: a scope round-trip or source-ID mismatch rejects the handoff",
+      "status": "passed"
+    },
+    {
+      "name": "TC-P2R2-D15-03/06: a consumed runtime request cannot survive a project round-trip",
+      "status": "passed"
+    },
+    {
+      "name": "profile: late create 200 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "profile: late edit 200 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "profile: late create 503 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "profile: cancel while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "profile: project-return while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "profile: unmount while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "profile: an old completion cannot clear the new save spinner",
+      "status": "passed"
+    },
+    {
+      "name": "profile: a current failure retains input and permits retry",
+      "status": "passed"
+    },
+    {
+      "name": "object: late create 200 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "object: late edit 200 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "object: late create 503 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "object: cancel while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "object: project-return while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "object: unmount while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "object: an old completion cannot clear the new save spinner",
+      "status": "passed"
+    },
+    {
+      "name": "object: a current failure retains input and permits retry",
+      "status": "passed"
+    },
+    {
+      "name": "scenario: late create 200 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "scenario: late edit 200 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "scenario: late create 503 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "scenario: cancel while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "scenario: project-return while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "scenario: unmount while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "scenario: an old completion cannot clear the new save spinner",
+      "status": "passed"
+    },
+    {
+      "name": "scenario: a current failure retains input and permits retry",
+      "status": "passed"
+    },
+    {
+      "name": "schedule: late create 200 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "schedule: late edit 200 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "schedule: late create 503 preserves a replacement draft",
+      "status": "passed"
+    },
+    {
+      "name": "schedule: cancel while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "schedule: project-return while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "schedule: unmount while CSRF is pending prevents an obsolete write",
+      "status": "passed"
+    },
+    {
+      "name": "schedule: an old completion cannot clear the new save spinner",
+      "status": "passed"
+    },
+    {
+      "name": "schedule: a current failure retains input and permits retry",
+      "status": "passed"
+    },
+    {
+      "name": "execute: cancel during CSRF cannot queue a task",
+      "status": "passed"
+    },
+    {
+      "name": "execute: project-return during CSRF cannot queue a task",
+      "status": "passed"
+    },
+    {
+      "name": "execute: unmount during CSRF cannot queue a task",
+      "status": "passed"
+    },
+    {
+      "name": "execute: a late 200 after cancellation has no toast or follow-up",
+      "status": "passed"
+    },
+    {
+      "name": "execute: a late 503 after cancellation has no toast or follow-up",
+      "status": "passed"
+    },
+    {
+      "name": "initial context 200 after unmount cannot reload assets or show errors",
+      "status": "passed"
+    },
+    {
+      "name": "initial context 503 after unmount cannot reload assets or show errors",
+      "status": "passed"
+    },
+    {
+      "name": "initial assets after unmount cannot revive the old page",
+      "status": "passed"
+    },
+    {
+      "name": "initial assets after project-return cannot revive the old page",
+      "status": "passed"
+    },
+    {
+      "name": "duplicate object save callbacks only send one write",
+      "status": "passed"
+    },
+    {
+      "name": "object save captures the submitted form before awaiting CSRF",
+      "status": "passed"
+    }
+  ]
+}

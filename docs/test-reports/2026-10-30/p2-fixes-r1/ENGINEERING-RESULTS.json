@@ -1,0 +1,100 @@
+{
+  "H2Full": {
+    "PASS": 1092,
+    "FAIL": 0,
+    "SKIP": 3
+  },
+  "H2LatestP2": {
+    "PASS": 60,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "MySQLRedisS3Full": {
+    "PASS": 1095,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "frontend": {
+    "numTotalTests": 834,
+    "numPassedTests": 834,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "headlessUI": {
+    "headless": true,
+    "isolatedHttpFixtures": true,
+    "realBackendAcceptance": false,
+    "cases": [
+      {
+        "id": "TC-P2-D01-06",
+        "title": "孤立参数可见且编辑禁用",
+        "status": "PASS",
+        "durationMs": 1693
+      },
+      {
+        "id": "TC-P2-D03-CFG-02",
+        "title": "停用环境仍可维护并明确不可执行",
+        "status": "PASS",
+        "durationMs": 2376
+      },
+      {
+        "id": "TC-P2-D10-13",
+        "title": "目录复制断线后重试保持同一Key",
+        "status": "PASS",
+        "durationMs": 1871
+      },
+      {
+        "id": "TC-P2-D22-07/08",
+        "title": "冲突保留草稿，主动读取版本后单独保存",
+        "status": "PASS",
+        "durationMs": 2091
+      }
+    ],
+    "cleanup": true,
+    "browserVersion": "156.0.8078.76",
+    "passed": 4,
+    "failed": 0
+  },
+  "realHTTP": {
+    "headless": true,
+    "realPackagedJvm": true,
+    "desktopProfile": true,
+    "electronUpgradeTest": false,
+    "cases": [
+      {
+        "id": "TC-P2-D01-03",
+        "title": "真实HTTP拒绝未定义环境普通参数",
+        "status": "PASS"
+      },
+      {
+        "id": "TC-P2-D10-07",
+        "title": "真实JVM重启后同Key返回已持久化回执且不再复制",
+        "status": "PASS"
+      },
+      {
+        "id": "TC-P2-D09-08",
+        "title": "真实HTTP导出保留当前201响应",
+        "status": "PASS"
+      },
+      {
+        "id": "TC-P2-D22-02",
+        "title": "真实HTTP版本0可保存、缺失428、旧版409",
+        "status": "PASS"
+      }
+    ],
+    "cleanup": true
+  },
+  "lint": {
+    "exitCode": 0,
+    "existingWarnings": 2,
+    "newWarnings": 0
+  },
+  "build": {
+    "exitCode": 0
+  },
+  "note": "工程次数与正式63条互有包含；不可相加作为业务用例数。H2三条MySQL专属跳过由MySQL完整环境补验。",
+  "typecheck": {
+    "exitCode": 0
+  }
+}

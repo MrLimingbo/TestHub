@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSessionStore } from '@/stores/session'
 import { isLocalDesktop } from '@/utils/desktopWorkspace'
 
 interface Envelope<T> { data: T }
@@ -10,13 +11,14 @@ interface SigningKey { id: string; keyId: string; displayName: string; enabled: 
 interface AdapterDefinition { type: string; displayName: string; category: string; requiredFields: string[]; description: string }
 interface Adapter { id: string; adapterType: string; displayName: string; endpoint: string; configuredFields: string[]; enabled: boolean; createdAt: string; updatedAt: string }
 
+const session = useSessionStore()
 const plugins = ref<Plugin[]>([]), signingKeys = ref<SigningKey[]>([]), adapters = ref<Adapter[]>([]), definitions = ref<AdapterDefinition[]>([])
 const loading = ref(true), allowed = ref(false), loadError = ref(''), keyError = ref('')
 const keyManagerVisible = ref(false), keyVisible = ref(false), packageVisible = ref(false), adapterVisible = ref(false)
-const editingAdapterId = ref<string | null>(null), pending = reactive(new Set<string>())
+const editingAdapterId = ref<string | null>(null), pending = reactive(new Map<string, symbol>())
 const saving = reactive({ key: false, package: false, adapter: false })
 const sequences = { key: 0, package: 0, adapter: 0 }
-let disposed = false, loadSequence = 0, keySequence = 0
+let disposed = false, loadSequence = 0, keySequence = 0, actionScope = 0
 const formKey = reactive({ keyId: '', displayName: '', publicKeyBase64: '' })
 const formPackage = reactive({ signerKeyId: '', manifestJson: '{\n  "pluginKey": "example.adapter",\n  "displayName": "示例扩展",\n  "pluginType": "INTEGRATION",\n  "version": "1.0.0",\n  "entrypoint": "adapter/index.js",\n  "permissions": ["integration:outbound"]\n}', signatureBase64: '' })
 const formAdapter = reactive({ adapterType: 'OIDC', displayName: '', endpoint: '', configurationJson: '', enabled: false })
@@ -28,9 +30,10 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
   if (!response.ok) throw new Error(body.message ?? '请求失败，请稍后重试')
   return body.data
 }
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, canSend?: () => boolean): Promise<T> {
   const encoded = body === undefined ? undefined : JSON.stringify(body)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (canSend && !canSend()) throw new Error('操作已取消')
   return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: encoded })
 }
 async function loadKeys() {
@@ -41,16 +44,21 @@ async function loadKeys() {
 }
 async function load() {
   const request = ++loadSequence; loading.value = true; loadError.value = ''
-  plugins.value = []; adapters.value = []; definitions.value = []; signingKeys.value = []; allowed.value = false; keySequence++
+  plugins.value = []; adapters.value = []
+  keySequence++
   try {
-    const capability = await read<{ systemAdministration: boolean }>('/api/v1/administration/capabilities')
-    if (typeof capability?.systemAdministration !== 'boolean') throw new Error('无法读取插件管理权限')
+    let capability: { systemAdministration: boolean }
+    try { capability = await read<{ systemAdministration: boolean }>('/api/v1/administration/capabilities') }
+    catch (error) { if (!disposed && request === loadSequence) revokeForms(); throw error }
     if (disposed || request !== loadSequence) return
+    if (typeof capability?.systemAdministration !== 'boolean') { revokeForms(); throw new Error('无法读取插件管理权限') }
+    allowed.value = capability.systemAdministration
+    if (!allowed.value) revokeForms()
     const [nextPlugins, nextAdapters, nextDefinitions] = await Promise.all([
       read<Plugin[]>('/api/v1/extensions/plugins'), read<Adapter[]>('/api/v1/extensions/adapters'), read<AdapterDefinition[]>('/api/v1/extensions/adapter-definitions'),
     ])
     if (disposed || request !== loadSequence) return
-    allowed.value = capability.systemAdministration; plugins.value = nextPlugins; adapters.value = nextAdapters; definitions.value = nextDefinitions
+    plugins.value = nextPlugins; adapters.value = nextAdapters; definitions.value = nextDefinitions
     if (allowed.value) await loadKeys()
   } catch (error) { if (!disposed && request === loadSequence) loadError.value = error instanceof Error ? error.message : '扩展中心加载失败' }
   finally { if (!disposed && request === loadSequence) loading.value = false }
@@ -58,15 +66,23 @@ async function load() {
 type FormKind = 'key' | 'package' | 'adapter'
 function cancel(kind: FormKind) {
   sequences[kind]++
+  saving[kind] = false
   if (kind === 'key') formKey.publicKeyBase64 = ''
   if (kind === 'package') { formPackage.signatureBase64 = ''; formPackage.manifestJson = '' }
   if (kind === 'adapter') formAdapter.configurationJson = ''
 }
+function revokeForms() {
+  actionScope++; pending.clear()
+  allowed.value = false; signingKeys.value = []
+  keyManagerVisible.value = false; keyVisible.value = false; packageVisible.value = false; adapterVisible.value = false
+  cancel('key'); cancel('package'); cancel('adapter')
+}
 async function save(kind: FormKind, url: string, method: 'POST' | 'PUT', input: unknown, message: string): Promise<boolean> {
   if (disposed || !allowed.value || saving[kind]) return false
   const sequence = sequences[kind]; saving[kind] = true
+  const canSave = () => !disposed && sequence === sequences[kind]
   try {
-    await mutate(url, method, input)
+    await mutate(url, method, input, canSave)
     if (disposed || sequence !== sequences[kind]) return false
     if (kind === 'key') keyVisible.value = false
     if (kind === 'package') packageVisible.value = false
@@ -78,18 +94,23 @@ async function save(kind: FormKind, url: string, method: 'POST' | 'PUT', input: 
     if (disposed || sequence !== sequences[kind]) return false
     Message.success(message); return true
   } catch (error) { if (!disposed && sequence === sequences[kind]) Message.error(error instanceof Error ? error.message : '保存失败'); return false }
-  finally { saving[kind] = false }
+  finally { if (sequence === sequences[kind]) saving[kind] = false }
 }
 function openKey() { if (!allowed.value) return; cancel('key'); Object.assign(formKey, { keyId: '', displayName: '', publicKeyBase64: '' }); keyVisible.value = true }
 function saveKey() { return save('key', '/api/v1/extensions/signing-keys', 'POST', { ...formKey }, '可信签名密钥已登记') }
 async function openKeyManager() { if (!allowed.value) return; keyManagerVisible.value = true; await loadKeys() }
 async function action(key: string, url: string, message: string, method: 'POST' | 'DELETE' = 'POST') {
   if (disposed || !allowed.value || pending.has(key)) return
-  pending.add(key)
-  try { await mutate(url, method); if (disposed) return; await load(); if (!disposed) Message.success(message) }
-  catch (error) { if (!disposed) Message.error(error instanceof Error ? error.message : '操作失败') }
-  finally { pending.delete(key) }
+  const scope = actionScope, token = Symbol(key)
+  const current = () => !disposed && allowed.value && scope === actionScope && pending.get(key) === token
+  pending.set(key, token)
+  try { await mutate(url, method, undefined, current); if (!current()) return; await load(); if (current()) Message.success(message) }
+  catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '操作失败') }
+  finally { if (pending.get(key) === token) pending.delete(key) }
 }
+watch([() => session.authGeneration, () => session.profile?.id, () => session.profile?.authenticatedAt, () => session.signedIn], () => {
+  revokeForms(); void load()
+}, { flush: 'sync' })
 function changeSigningKey(key: SigningKey, enabled: boolean) { return action('key:' + key.id, `/api/v1/extensions/signing-keys/${key.id}/${enabled ? 'enable' : 'revoke'}`, enabled ? '签名密钥已启用' : '签名密钥已撤销') }
 function openPackage() { if (!allowed.value) return; cancel('package'); formPackage.signerKeyId = signingKeys.value.find(item => item.enabled)?.keyId ?? ''; packageVisible.value = true }
 function savePackage() { return save('package', '/api/v1/extensions/plugins/packages', 'POST', { ...formPackage }, '插件清单已校验并登记为停用状态') }
@@ -130,7 +151,7 @@ onMounted(load)
     <a-alert v-if="allowed && keyError" type="error">{{ keyError }} <a-button type="text" @click="loadKeys">重读签名密钥</a-button></a-alert>
     <a-button type="text" :loading="loading" @click="load">刷新插件与适配器</a-button>
     <section class="panel safety-note"><icon-safe /><div><strong>受控扩展边界</strong><p>升级后的插件会自动保持停用状态，需管理员复核后再启用。凭据仅作为加密适配器配置保存，不会在列表、审计详情或浏览器中回显。</p></div></section>
-    <a-spin :loading="loading">
+    <div :aria-busy="loading">
       <section class="panel data-panel">
         <div class="section-head"><div><span class="eyebrow">PLUGIN REGISTRY</span><h3>已安装插件</h3></div><a-space v-if="allowed"><a-button @click="openPackage"><icon-upload /> 安装签名包</a-button><a-button type="outline" @click="openKeyManager"><icon-key /> 管理签名密钥</a-button></a-space></div>
         <a-table :data="plugins" :pagination="false" row-key="id">
@@ -153,7 +174,7 @@ onMounted(load)
           <article v-for="definition in definitions" v-show="!adapters.some(adapter => adapter.adapterType === definition.type)" :key="definition.type" class="adapter-card adapter-available"><div class="adapter-card-head"><a-tag color="gray">{{ definition.category }}</a-tag><span>未配置</span></div><strong>{{ definition.displayName }}</strong><small>{{ definition.description }}</small><small>必填：{{ definition.requiredFields.join('、') }}</small><a-button v-if="allowed" type="outline" size="small" @click="openAdapter(); resetAdapter(definition.type)">配置</a-button></article>
         </div>
       </section>
-    </a-spin>
+    </div>
 
     <a-drawer v-if="allowed" v-model:visible="keyManagerVisible" title="可信签名密钥" :width="640" :footer="false"><div class="key-toolbar"><small>公钥登记后不再回显；撤销只阻止新安装，不会静默改变已安装插件。</small><a-button type="primary" size="small" @click="openKey"><icon-plus /> 登记密钥</a-button></div><a-alert v-if="!allowed" type="warning" :show-icon="true">仅系统管理员可查看、登记或撤销签名密钥。</a-alert><a-alert v-if="keyError" type="error">{{ keyError }} <a-button type="text" @click="loadKeys">重读签名密钥</a-button></a-alert><a-table v-if="allowed" :data="signingKeys" :pagination="false" row-key="id"><template #columns><a-table-column title="密钥"><template #cell="{ record }"><strong>{{ record.displayName }}</strong><small class="key-meta">{{ record.keyId }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-badge :status="record.enabled ? 'success' : 'normal'" :text="record.enabled ? '可用于安装' : '已撤销'" /></template></a-table-column><a-table-column title="登记时间"><template #cell="{ record }">{{ date(record.createdAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-popconfirm :content="record.enabled ? '撤销密钥只阻止新安装，已登记插件保持原状态，确认继续？' : '重新信任此签名密钥，确认继续？'" @ok="changeSigningKey(record, !record.enabled)"><a-button type="text" :loading="pending.has('key:' + record.id)" :status="record.enabled ? 'warning' : 'success'">{{ record.enabled ? '撤销' : '启用' }}</a-button></a-popconfirm></template></a-table-column></template></a-table><a-empty v-if="allowed && !signingKeys.length" description="尚未登记可信签名密钥" /></a-drawer>
     <a-modal v-if="allowed" v-model:visible="keyVisible" title="登记可信 Ed25519 签名密钥" width="620px" :ok-loading="saving.key" :on-before-ok="saveKey" @cancel="cancel('key')"><a-alert type="warning" :show-icon="true">只接受 X.509 格式的 Base64 Ed25519 公钥。登记后公钥不再回显；撤销会阻止新插件包使用该密钥。</a-alert><a-form :model="formKey" layout="vertical" class="modal-form"><a-form-item label="密钥标识" required><a-input v-model="formKey.keyId" placeholder="acme.release.2026" /></a-form-item><a-form-item label="显示名称" required><a-input v-model="formKey.displayName" placeholder="Acme 发布签名密钥" /></a-form-item><a-form-item label="公钥 Base64" required><a-textarea v-model="formKey.publicKeyBase64" :auto-size="{ minRows: 4, maxRows: 6 }" /></a-form-item></a-form></a-modal>

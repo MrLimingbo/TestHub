@@ -1,0 +1,313 @@
+{
+  "command": "JAVA_HOME=<native JDK 21> node scripts/desktop/test-mysql-backend.mjs --tests=P2D16MockFlowTests,Mock*Tests",
+  "buildSuccess": true,
+  "scope": "Affected Mock suites, not full MySQL regression",
+  "suiteCount": 6,
+  "suites": [
+    {
+      "name": "io.testhub.platform.P2D16MockFlowTests",
+      "total": 35,
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "name": "errorLocationAndPrivacy",
+          "status": "PASS"
+        },
+        {
+          "name": "editValid",
+          "status": "PASS"
+        },
+        {
+          "name": "statusExact",
+          "status": "PASS"
+        },
+        {
+          "name": "statusRange",
+          "status": "PASS"
+        },
+        {
+          "name": "statusUpper",
+          "status": "PASS"
+        },
+        {
+          "name": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "numericStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "receipts",
+          "status": "PASS"
+        },
+        {
+          "name": "revisionConflict",
+          "status": "PASS"
+        },
+        {
+          "name": "runtimeMatching",
+          "status": "PASS"
+        },
+        {
+          "name": "permission",
+          "status": "PASS"
+        },
+        {
+          "name": "bodyStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "statusFractions",
+          "status": "PASS"
+        },
+        {
+          "name": "editInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "shareAtomic",
+          "status": "PASS"
+        },
+        {
+          "name": "queryStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "overflowAndRawNonFinite",
+          "status": "PASS"
+        },
+        {
+          "name": "nullTextPolicy",
+          "status": "PASS"
+        },
+        {
+          "name": "expiryInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "mapTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "expiryExact",
+          "status": "PASS"
+        },
+        {
+          "name": "expiryUpper",
+          "status": "PASS"
+        },
+        {
+          "name": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "name": "priorityExact",
+          "status": "PASS"
+        },
+        {
+          "name": "priorityLower",
+          "status": "PASS"
+        },
+        {
+          "name": "priorityUpper",
+          "status": "PASS"
+        },
+        {
+          "name": "ruleDefaults",
+          "status": "PASS"
+        },
+        {
+          "name": "expiryPermanent",
+          "status": "PASS"
+        },
+        {
+          "name": "bodyTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "name": "priorityFractions",
+          "status": "PASS"
+        },
+        {
+          "name": "headerStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "numericTypes",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.MockShareFlowTests",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "sharesOnlySafeMockCallingGuideAndRevocationImmediatelyHidesIt",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.MockSyncFlowTests",
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "auditFailureRollsBackDefinitionNewServerRulesAndReceipt",
+          "status": "PASS"
+        },
+        {
+          "name": "definitionsPreservePublicKeySharesRuntimeEnablementAndRuleIdentityNewCopiesDisabled",
+          "status": "PASS"
+        },
+        {
+          "name": "strictJsonInvalidHeadersAndUnnormalizedDefinitionsCannotWrite",
+          "status": "PASS"
+        },
+        {
+          "name": "enabledRuleEditorChangesRuntimeAndInvalidEditKeepsOriginal",
+          "status": "PASS"
+        },
+        {
+          "name": "caseDifferencesMissingParentAndDuplicateExistingNamesNeverChooseArbitraryRows",
+          "status": "PASS"
+        },
+        {
+          "name": "writerScopeActorCsrfAndRuleScopeRequired",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentRetriesReturnOriginalReceiptWithoutDuplicateOrLaterOverwrite",
+          "status": "PASS"
+        },
+        {
+          "name": "mergedLimitsAndFinalSnapshotSizeRollbackAllWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "existingCrudEditAndEnablementInvalidateWholeBatch",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.MockTransferFlowTests",
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "malformedRuleRollsBackWholeBatchAndForeignProjectIsForbidden",
+          "status": "PASS"
+        },
+        {
+          "name": "copiesRulesWithNewKeysAndRevokedSharesThenAllowsManualActivation",
+          "status": "PASS"
+        },
+        {
+          "name": "twentyImportedRevokedSharesDoNotPreventCreatingNewTargetShares",
+          "status": "PASS"
+        },
+        {
+          "name": "receiptIsIdempotentAndConflictsRollback",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.MockServiceFlowTests",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "createsProjectScopedMockAndServesItsManualRuleWithoutAuthentication",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.MockRuntimeHttpFlowTests",
+      "total": 11,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "malformedRuntimeJsonNeverMatchesAValidSubset",
+          "status": "PASS"
+        },
+        {
+          "name": "matchesRawFormBodiesAndKeepsFormFieldsOutOfQueryConditions",
+          "status": "PASS"
+        },
+        {
+          "name": "requiresExplicitEnabledForBothSwitchesAndPreservesExistingState",
+          "status": "PASS"
+        },
+        {
+          "name": "hidesExpiredSharesWithoutChangingTheRuntimeService",
+          "status": "PASS"
+        },
+        {
+          "name": "serializesConcurrentDuplicateServerCreation",
+          "status": "PASS"
+        },
+        {
+          "name": "preservesValidScalarArrayAndNullJsonMatching",
+          "status": "PASS"
+        },
+        {
+          "name": "matchesUtf8PathsAndPreservesPlusInPath",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsDuplicateAndTrimmedServerNamesWithActionableConflict",
+          "status": "PASS"
+        },
+        {
+          "name": "enforcesRequestBodyLimitInBytesBeforeDecodingUtf8",
+          "status": "PASS"
+        },
+        {
+          "name": "normalizesNullMapValuesOnCreateAndUpdate",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsIncompleteOrTrailingJsonOnCreateAndUpdateWithoutChangingTheRule",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "total": 61,
+    "passed": 61,
+    "failed": 0,
+    "skipped": 0
+  },
+  "cleanupTail": "[INFO] Finished at: 2026-11-02T16:35:36+08:00\n[INFO] ------------------------------------------------------------------------\nRemoved owned QA containers, network and volumes\nRemoved isolated MySQL acceptance files"
+}

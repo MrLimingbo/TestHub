@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import RichTextEditor from '@/components/RichTextEditor.vue'
 import RichTextViewer from '@/components/RichTextViewer.vue'
@@ -95,6 +95,13 @@ const selectedDefectId = ref('')
 const links = ref<DefectLink[]>([])
 const loading = ref(false)
 const saving = ref(false)
+const defectSaving = ref(false)
+const deleting = ref(false)
+const linksLoading = ref(false)
+let active = true
+let formVersion = 0
+let loadRequest = 0
+let linkRequest = 0
 const keyword = ref('')
 const viewFilter = ref<ViewFilter>('ALL')
 const statusFilter = ref<string>()
@@ -206,25 +213,30 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
   return body.data
 }
 
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, canSend = () => true): Promise<T> {
+  const payload = body === undefined ? undefined : JSON.stringify(body)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (!canSend()) throw new Error('操作已取消')
   return read<T>(url, {
     method,
     headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: payload,
   })
 }
 
 async function load() {
-  if (!projectId.value) return
+  const pid = projectId.value, request = ++loadRequest
+  const current = () => active && pid === projectId.value && request === loadRequest
+  if (!pid) return
   loading.value = true
   try {
     const [requirementData, caseData, defectData, memberData] = await Promise.all([
-      read<Requirement[]>(`/api/v1/projects/${projectId.value}/functional/requirements`),
-      read<TestCase[]>(`/api/v1/projects/${projectId.value}/functional/cases`),
-      read<Defect[]>(`/api/v1/projects/${projectId.value}/functional/defects`),
-      read<ProjectMember[]>(`/api/v1/projects/${projectId.value}/members`),
+      read<Requirement[]>(`/api/v1/projects/${pid}/functional/requirements`),
+      read<TestCase[]>(`/api/v1/projects/${pid}/functional/cases`),
+      read<Defect[]>(`/api/v1/projects/${pid}/functional/defects`),
+      read<ProjectMember[]>(`/api/v1/projects/${pid}/members`),
     ])
+    if (!current()) return
     requirements.value = requirementData
     cases.value = caseData
     defects.value = defectData
@@ -233,12 +245,12 @@ async function load() {
     selectedDefectIds.value = selectedDefectIds.value.filter((id) => defectData.some((item) => item.id === id))
     if (selectedDefectId.value && !defectData.some((item) => item.id === selectedDefectId.value)) {
       selectedDefectId.value = ''
-      links.value = []
+      closeDetail()
     }
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '加载缺陷数据失败')
+    if (current()) Message.error(error instanceof Error ? error.message : '加载缺陷数据失败')
   } finally {
-    loading.value = false
+    if (current()) loading.value = false
   }
 }
 
@@ -267,6 +279,7 @@ function defectPayload(defect: Defect, patch: Partial<Defect> = {}) {
 }
 
 function openDefect(defect?: Defect) {
+  ++formVersion; defectSaving.value = false
   clearFormErrors(defectErrors)
   editingId.value = defect?.id ?? null
   Object.assign(defectForm, {
@@ -292,7 +305,12 @@ function openDefect(defect?: Defect) {
   defectDialog.value = true
 }
 
+function cancelDefect() { ++formVersion; defectSaving.value = false; defectDialog.value = false }
+
 async function saveDefect(): Promise<boolean> {
+  if (defectSaving.value) return false
+  const version = formVersion, pid = projectId.value, id = editingId.value
+  const current = () => active && version === formVersion && pid === projectId.value
   clearFormErrors(defectErrors)
   const title = defectForm.title.trim()
   const source = defectForm.source.trim().toUpperCase()
@@ -321,24 +339,21 @@ async function saveDefect(): Promise<boolean> {
   defectForm.externalUrl = externalUrl
   defectForm.keywords = keywords
   defectForm.description = sanitizeRichText(defectForm.description)
-  saving.value = true
+  defectSaving.value = true
   try {
-    const url = editingId.value
-      ? `/api/v1/projects/${projectId.value}/functional/defects/${editingId.value}`
-      : `/api/v1/projects/${projectId.value}/functional/defects`
-    const saved = await mutate<Defect>(url, editingId.value ? 'PUT' : 'POST', defectForm)
-    defectDialog.value = false
-    selectedDefectId.value = saved.id
-    await load()
-    Message.success(editingId.value ? 'Bug 已更新' : 'Bug 已创建')
+    const saved = await mutate<Defect>(`/api/v1/projects/${pid}/functional/defects${id ? `/${id}` : ''}`, id ? 'PUT' : 'POST', defectForm, () => current() && defectDialog.value)
+    if (current()) { defectDialog.value = false; selectedDefectId.value = saved.id }
+    if (active && pid === projectId.value) await load()
+    if (!current()) return false
+    Message.success(id ? 'Bug 已更新' : 'Bug 已创建')
     return true
   } catch (error) {
-    Object.assign(defectErrors, formErrorsFrom(error))
-    if (Object.keys(defectErrors).length === 0) Message.error(error instanceof Error ? error.message : '保存 Bug 失败')
+    if (current()) {
+      Object.assign(defectErrors, formErrorsFrom(error))
+      if (Object.keys(defectErrors).length === 0) Message.error(error instanceof Error ? error.message : '保存 Bug 失败')
+    }
     return false
-  } finally {
-    saving.value = false
-  }
+  } finally { if (current()) defectSaving.value = false }
 }
 
 async function updateDefect(defect: Defect, patch: Partial<Defect>, success: string): Promise<boolean> {
@@ -389,53 +404,78 @@ async function removeDefect(defect: Defect) {
 }
 
 async function deleteSelectedDefects() {
-  if (!selectedDefectIds.value.length) return
-  const ids = [...selectedDefectIds.value]
+  if (!selectedDefectIds.value.length || deleting.value) return
+  const ids = [...selectedDefectIds.value], pid = projectId.value
+  deleting.value = true
   try {
-    await Promise.all(ids.map((id) => mutate(`/api/v1/projects/${projectId.value}/functional/defects/${id}`, 'DELETE')))
-    selectedDefectIds.value = []
-    selectedDefectId.value = ''
+    const results = await Promise.allSettled(ids.map(id => mutate(`/api/v1/projects/${pid}/functional/defects/${id}`, 'DELETE')))
+    if (!active || pid !== projectId.value) return
+    const deleted = new Set(ids.filter((_, index) => results[index]?.status === 'fulfilled'))
+    ++loadRequest
+    defects.value = defects.value.filter(defect => !deleted.has(defect.id))
+    workspace.defects.value = workspace.defects.value.filter(defect => !deleted.has(defect.id))
+    selectedDefectIds.value = selectedDefectIds.value.filter(id => !deleted.has(id))
+    if (deleted.has(selectedDefectId.value)) { selectedDefectId.value = ''; closeDetail() }
     await load()
-    Message.success(`已删除 ${ids.length} 个 Bug`)
-  } catch (error) {
-    Message.error(error instanceof Error ? error.message : '批量删除 Bug 失败')
-  }
+    if (!active || pid !== projectId.value) return
+    const failure = results.find(result => result.status === 'rejected')
+    if (failure?.status === 'rejected') Message.error(failure.reason instanceof Error ? failure.reason.message : '部分 Bug 删除失败，请重试剩余项')
+    else Message.success(`已删除 ${deleted.size} 个 Bug`)
+  } finally { if (active && pid === projectId.value) deleting.value = false }
 }
 
+function closeDetail() {
+  ++linkRequest; links.value = []; linksLoading.value = false; detailVisible.value = false
+}
 async function openDetail(defect: Defect) {
   selectedDefectId.value = defect.id
-  detailVisible.value = true
+  links.value = []; linkForm.assetId = ''; detailVisible.value = true
   await loadLinks()
 }
 
 async function loadLinks() {
-  links.value = selectedDefectId.value
-    ? await read<DefectLink[]>(`/api/v1/projects/${projectId.value}/functional/defects/${selectedDefectId.value}/links`)
-    : []
+  const pid = projectId.value, id = selectedDefectId.value, request = ++linkRequest
+  const current = () => active && detailVisible.value && pid === projectId.value && id === selectedDefectId.value && request === linkRequest
+  links.value = []
+  if (!id || !detailVisible.value) return
+  linksLoading.value = true
+  try {
+    const data = await read<DefectLink[]>(`/api/v1/projects/${pid}/functional/defects/${id}/links`)
+    if (current()) links.value = data
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '加载关联资产失败') }
+  finally { if (current()) linksLoading.value = false }
 }
 
 async function addLink() {
+  if (linksLoading.value) return
   if (!selectedDefectId.value || !linkForm.assetId) {
     Message.warning('请选择要关联的测试资产')
     return
   }
+  const pid = projectId.value, id = selectedDefectId.value, request = linkRequest
+  const current = () => active && detailVisible.value && pid === projectId.value && id === selectedDefectId.value && request === linkRequest
   try {
-    await mutate(`/api/v1/projects/${projectId.value}/functional/defects/${selectedDefectId.value}/links`, 'POST', linkForm)
+    await mutate(`/api/v1/projects/${pid}/functional/defects/${id}/links`, 'POST', linkForm, current)
+    if (!current()) return
     linkForm.assetId = ''
     await Promise.all([loadLinks(), load()])
     Message.success('测试资产已关联')
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '关联失败')
+    if (current()) Message.error(error instanceof Error ? error.message : '关联失败')
   }
 }
 
 async function removeLink(linkId: string) {
+  if (linksLoading.value || !links.value.some(link => link.id === linkId)) return
+  const pid = projectId.value, id = selectedDefectId.value, request = linkRequest
+  const current = () => active && detailVisible.value && pid === projectId.value && id === selectedDefectId.value && request === linkRequest
   try {
-    await mutate(`/api/v1/projects/${projectId.value}/functional/defects/${selectedDefectId.value}/links/${linkId}`, 'DELETE')
+    await mutate(`/api/v1/projects/${pid}/functional/defects/${id}/links/${linkId}`, 'DELETE', undefined, current)
+    if (!current()) return
     await Promise.all([loadLinks(), load()])
     Message.success('关联已解除')
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '解除关联失败')
+    if (current()) Message.error(error instanceof Error ? error.message : '解除关联失败')
   }
 }
 
@@ -485,9 +525,12 @@ async function importWorkbook() {
   }
 }
 
-watch(projectId, (current, previous) => {
-  if (current && current !== previous) load()
+watch(projectId, () => {
+  cancelDefect(); closeDetail(); ++loadRequest; defects.value = []; selectedDefectIds.value = []; selectedDefectId.value = ''; deleting.value = false
+  void load()
 })
+watch(detailVisible, visible => { if (!visible) { ++linkRequest; links.value = []; linksLoading.value = false } }, { flush: 'sync' })
+onBeforeUnmount(() => { active = false; ++formVersion; ++loadRequest; ++linkRequest })
 onMounted(load)
 </script>
 
@@ -522,7 +565,7 @@ onMounted(load)
           :content="`确认删除选中的 ${selectedDefectIds.length} 个 Bug 吗？`"
           @ok="deleteSelectedDefects"
         >
-          <a-button status="danger" :disabled="!selectedDefectIds.length"><icon-delete /> 批量删除（{{ selectedDefectIds.length }}）</a-button>
+          <a-button status="danger" :disabled="!selectedDefectIds.length" :loading="deleting"><icon-delete /> 批量删除（{{ selectedDefectIds.length }}）</a-button>
         </a-popconfirm>
       </div>
     </header>
@@ -622,8 +665,9 @@ onMounted(load)
     v-model:visible="defectDialog"
     :title="editingId ? `编辑 Bug #${defects.find((item) => item.id === editingId)?.displayId ?? ''}` : '提交 Bug'"
     width="980px"
-    :ok-loading="saving"
+    :ok-loading="defectSaving"
     :on-before-ok="saveDefect"
+    @cancel="cancelDefect"
   >
     <a-form :model="defectForm" layout="vertical">
       <a-form-item label="所属目录" :validate-status="defectErrors.catalogId ? 'error' : undefined" :help="defectErrors.catalogId">
@@ -766,13 +810,13 @@ onMounted(load)
           <a-select v-model="linkForm.assetId" allow-search allow-clear placeholder="选择要关联的资产" :style="{ flex: 1 }">
             <a-option v-for="asset in linkAssets" :key="asset.id" :value="asset.id">{{ asset.label }}</a-option>
           </a-select>
-          <a-button type="primary" @click="addLink"><icon-link /> 关联</a-button>
+          <a-button type="primary" :disabled="linksLoading" @click="addLink"><icon-link /> 关联</a-button>
         </div>
         <div v-for="link in links" :key="link.id" class="link-row">
           <div><a-tag color="arcoblue">{{ assetLabel(link.assetType) }}</a-tag><strong>{{ link.assetLabel }}</strong><small>{{ date(link.createdAt) }}</small></div>
           <a-popconfirm content="确认解除该关联吗？" @ok="removeLink(link.id)"><a-button type="text" status="danger"><icon-delete /></a-button></a-popconfirm>
         </div>
-        <a-empty v-if="links.length === 0" description="尚未关联测试资产" />
+        <a-empty v-if="!linksLoading && links.length === 0" description="尚未关联测试资产" />
       </section>
     </template>
   </a-drawer>

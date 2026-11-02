@@ -48,6 +48,11 @@ public class FileObjectRepository {
                 .param("projectId", projectId).param("fileId", fileId).update();
     }
 
+    public void lock(String projectId, String fileId) {
+        jdbc.sql("SELECT id FROM file_object WHERE project_id = :projectId AND id = :fileId FOR UPDATE")
+                .param("projectId", projectId).param("fileId", fileId).query(String.class).optional();
+    }
+
     private FileObject map(String id, String organizationId, String projectId, String objectKey, String originalName,
                            String contentType, long sizeBytes, String uploadedBy, Timestamp createdAt) {
         return new FileObject(id, organizationId, projectId, objectKey, originalName, contentType, sizeBytes, uploadedBy,

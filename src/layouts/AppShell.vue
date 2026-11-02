@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { Message } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 import { isLocalDesktop, connectAccountService, openLocalExecutionSettings, openLocalBackup, isAccountDesktop, openAccountTransfer } from '@/utils/desktopWorkspace'
@@ -9,6 +10,7 @@ const route = useRoute()
 const router = useRouter()
 const session = useSessionStore()
 const collapsed = ref(false)
+const loggingOut = ref(false)
 
 const sections = [
   { label: '总览', items: [{ path: '/dashboard', label: '工作台', icon: 'IconDashboard' }] },
@@ -35,7 +37,18 @@ const sections = [
 
 const title = computed(() => sections.flatMap((section) => section.items)
   .find((item) => route.path === item.path || route.path.startsWith(`${item.path}/`))?.label ?? 'TestHub')
-const logout = async () => { await session.signOut(); await router.push('/login') }
+const logout = async () => {
+  if (loggingOut.value) return
+  loggingOut.value = true
+  try {
+    await session.signOut()
+    await router.push('/login')
+  } catch (error) {
+    Message.error(error instanceof Error ? error.message : '退出失败，请重试')
+  } finally {
+    loggingOut.value = false
+  }
+}
 </script>
 
 <template>

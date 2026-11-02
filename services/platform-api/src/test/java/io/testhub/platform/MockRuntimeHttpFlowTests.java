@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,6 +18,8 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,6 +109,90 @@ class MockRuntimeHttpFlowTests {
                 .andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value("REQUEST_REJECTED"));
         assertEquals(200, runtime("GET", "/public", "text/plain", "").statusCode());
         assertFalse(share.path("expiresAt").isNull());
+    }
+
+    @Test
+    void rejectsIncompleteOrTrailingJsonOnCreateAndUpdateWithoutChangingTheRule() throws Exception {
+        initialize("严格JSON配置");
+        JsonNode existing = create(management() + "/rules", Map.of("name", "original", "httpMethod", "POST", "path", "/json",
+                "requestBodyMatch", "JSON_SUBSET", "requestBody", "{\"x\":1}", "responseBody", "original"));
+        for (String body : List.of("{\"x\":", "not-json", "{\"x\":1} trailing", "{\"x\":1} {\"y\":2}", "null true")) {
+            String payload = json.writeValueAsString(Map.of("name", "invalid", "httpMethod", "POST", "path", "/json",
+                    "requestBodyMatch", "JSON_SUBSET", "requestBody", body));
+            mvc.perform(post(management() + "/rules").cookie(session, csrfCookie).header(csrfHeader, csrfToken)
+                            .contentType(MediaType.APPLICATION_JSON).content(payload)).andExpect(status().isBadRequest());
+            mvc.perform(put(management() + "/rules/" + existing.path("id").asText()).cookie(session, csrfCookie)
+                            .header(csrfHeader, csrfToken).contentType(MediaType.APPLICATION_JSON).content(payload))
+                    .andExpect(status().isBadRequest());
+        }
+        mvc.perform(get(management() + "/rules").cookie(session))
+                .andExpect(jsonPath("$.data.length()").value(1)).andExpect(jsonPath("$.data[0].name").value("original"));
+        assertEquals("original", runtime("POST", "/json", "application/json", "{\"x\":1,\"y\":2} \n\t").body());
+    }
+
+    @Test
+    void malformedRuntimeJsonNeverMatchesAValidSubset() throws Exception {
+        initialize("严格JSON运行时");
+        createRule(Map.of("httpMethod", "POST", "path", "/json", "requestBodyMatch", "JSON_SUBSET", "requestBody", "{\"x\":1}"));
+        for (String body : List.of("{\"x\":1} trailing", "{\"x\":1} {\"y\":2}", "{\"x\":1} true", "{\"x\":", "", " \n")) {
+            assertEquals(404, runtime("POST", "/json", "application/json", body).statusCode(), body);
+        }
+        assertEquals(200, runtime("POST", "/json", "application/json", "{\"x\":1,\"y\":2}\n").statusCode());
+    }
+
+    @Test
+    void preservesValidScalarArrayAndNullJsonMatching() throws Exception {
+        initialize("合法JSON根");
+        int i = 0;
+        for (String body : List.of("null", "true", "42", "\"text\"", "[1,2]", "{\"nested\":{\"x\":1}}")) {
+            String path = "/root-" + i++;
+            createRule(Map.of("httpMethod", "POST", "path", path, "requestBodyMatch", "JSON_SUBSET", "requestBody", body));
+            assertEquals(200, runtime("POST", path, "application/json", body + " \n").statusCode(), body);
+            assertEquals(404, runtime("POST", path, "application/json", body + " null").statusCode(), body);
+        }
+    }
+
+    @Test
+    void normalizesNullMapValuesOnCreateAndUpdate() throws Exception {
+        initialize("空值Map");
+        for (String field : List.of("requestQuery", "requestHeaders", "responseHeaders")) {
+            Map<String, String> values = new LinkedHashMap<>(); values.put("X-QA", null);
+            Map<String, Object> payload = new LinkedHashMap<>(Map.of("name", field, "httpMethod", "GET", "path", "/null", field, values));
+            JsonNode created = create(management() + "/rules", payload);
+            String key = field.equals("requestHeaders") ? "x-qa" : "X-QA";
+            assertEquals("", created.path(field).path(key).asText("missing"));
+            mvc.perform(put(management() + "/rules/" + created.path("id").asText()).cookie(session, csrfCookie)
+                            .header(csrfHeader, csrfToken).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(payload)))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.data." + field + "." + key).value(""));
+        }
+    }
+
+    @Test
+    void rejectsDuplicateAndTrimmedServerNamesWithActionableConflict() throws Exception {
+        initialize("唯一名称");
+        mvc.perform(post("/api/v1/projects/" + projectId + "/mock/servers").cookie(session, csrfCookie).header(csrfHeader, csrfToken)
+                        .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(Map.of("name", "  HTTP Mock 验收 唯一名称  "))))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.message").value("当前项目已存在同名 Mock 服务，请使用其他名称"));
+        assertEquals(1, jdbc.sql("SELECT COUNT(*) FROM mock_server WHERE project_id=:project AND name=:name")
+                .param("project", projectId).param("name", "HTTP Mock 验收 唯一名称").query(Integer.class).single());
+    }
+
+    @Test
+    void serializesConcurrentDuplicateServerCreation() throws Exception {
+        initialize("并发名称");
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            var tasks = List.<java.util.concurrent.Callable<Integer>>of(() -> duplicateNameRequest(), () -> duplicateNameRequest());
+            List<Integer> statuses = executor.invokeAll(tasks).stream().map(result -> {
+                try { return result.get(); } catch (Exception error) { throw new IllegalStateException(error); }
+            }).sorted().toList();
+            assertEquals(List.of(200, 409), statuses);
+        }
+    }
+
+    private int duplicateNameRequest() throws Exception {
+        return mvc.perform(post("/api/v1/projects/" + projectId + "/mock/servers").cookie(session, csrfCookie).header(csrfHeader, csrfToken)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"HTTP Mock 验收 并发新服务\"}"))
+                .andReturn().getResponse().getStatus();
     }
 
     private void initialize(String label) throws Exception {

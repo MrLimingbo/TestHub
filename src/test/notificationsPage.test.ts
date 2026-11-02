@@ -52,13 +52,13 @@ describe('notification project and form boundaries', () => {
     expect(await submit(wrapper)).toBe(false); await flushPromises(); expect(mutations()).toHaveLength(1)
     release(failed); expect(await pending).toBe(false); expect(modal(wrapper).props('visible')).toBe(true); expect(modal(wrapper).findAllComponents(Input)[0]!.props('modelValue')).toBe('模板一')
   })
-  it('captures original project, template and secret before csrf; replacement stays open', async () => {
+  it('cancels the obsolete form during csrf and leaves the new project draft open', async () => {
     let release!: (value: unknown) => void
     const { wrapper, session } = await setup(url => url.endsWith('/csrf') ? new Promise(r => { release = r }) : undefined)
     button(wrapper, '编辑').vm.$emit('click'); await flushPromises(); modal(wrapper).findComponent(InputPassword).vm.$emit('update:modelValue', 'qa-signing-fixture'); await flushPromises()
     const pending = submit(wrapper); await flushPromises(); session.selectProject('p2'); await flushPromises(); button(wrapper, '新建模板').vm.$emit('click'); await flushPromises()
     release({ token: 'fixture', headerName: 'X-CSRF' }); expect(await pending).toBe(false)
-    expect(mutations()[0]![0]).toBe('/api/v1/projects/p1/notification-templates/template-p1'); expect(JSON.parse(String(mutations()[0]![1]!.body))).toMatchObject({ name: '模板一', signingSecret: 'qa-signing-fixture' }); expect(modal(wrapper).props('visible')).toBe(true)
+    expect(mutations()).toHaveLength(0); expect(modal(wrapper).props('visible')).toBe(true)
     expect((modal(wrapper).find('input[type=password]').element as HTMLInputElement).value).toBe('')
   })
   it('cancel clears signing plaintext and invalidates a pending completion', async () => {
@@ -87,12 +87,12 @@ describe('notification project and form boundaries', () => {
     confirm.vm.$emit('ok'); confirm.vm.$emit('ok'); await flushPromises(); expect(mutations()).toHaveLength(1)
     release({}); await flushPromises()
   })
-  it('delete requires confirmation and captures original route through project switch', async () => {
+  it('delete requires confirmation and cancels before dispatch after project switch', async () => {
     let release!: (value: unknown) => void
     const { wrapper, session } = await setup(url => url.endsWith('/csrf') ? new Promise(r => { release = r }) : undefined)
     const confirm = wrapper.findAllComponents(Popconfirm).find(p => String(p.props('content')).includes('删除模板'))!
     expect(confirm.exists()).toBe(true); confirm.vm.$emit('ok'); await flushPromises(); session.selectProject('p2'); await flushPromises()
-    release({ token: 'fixture', headerName: 'X-CSRF' }); await flushPromises(); expect(mutations()[0]![0]).toBe('/api/v1/projects/p1/notification-templates/template-p1'); expect(wrapper.text()).toContain('模板二')
+    release({ token: 'fixture', headerName: 'X-CSRF' }); await flushPromises(); expect(mutations()).toHaveLength(0); expect(wrapper.text()).toContain('模板二')
   })
   it('inactive channel definition makes actual delivery limitation visible', async () => {
     const { wrapper } = await setup(); button(wrapper, '编辑').vm.$emit('click'); await flushPromises()

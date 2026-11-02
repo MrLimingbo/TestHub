@@ -8,9 +8,12 @@ import ApiDebugSyncArchive from '@/components/ApiDebugSyncArchive.vue'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
 import { useSessionStore } from '@/stores/session'
 import { isLocalDesktop, isAccountDesktop, openGrpcDescriptorSync } from '@/utils/desktopWorkspace'
+import { consumeApiDebugHandoff, discardApiDebugHandoff, type ApiDebugHandoffRequest } from '@/utils/apiDebugHandoff'
+import { OwnedWebSocketSessions } from '@/utils/ownedWebSocket'
 import { executeDesktopHttpRequest, isDesktopHttpDebugAvailable } from '@/utils/desktopApiDebug'
 import {
   apiDebugDraftFromHistory,
+  apiDebugReplayUnavailableReason,
   apiDebugDraftFromQuery,
   buildApiDebugCurlCommand,
   isRedactedApiDebugUrl,
@@ -39,7 +42,7 @@ interface Project { id: string; organizationId: string; name: string; code: stri
 interface Context { organizations: Organization[]; projects: Record<string, Project[]> }
 interface Header { name: string; value: string }
 interface DebugResult { historyId: string; success: boolean; statusCode: number | null; statusText: string | null; durationMs: number; responseHeaders: Header[]; body: string; truncated: boolean; errorMessage: string | null; historyWarning?: string | null }
-interface History { id: string; projectId: string; method: string; protocol: string; requestUrl: string; responseStatus: number | null; durationMs: number; responseSize: number; result: string; errorMessage: string | null; replayDraft: string | null; createdAt: string }
+interface History { id: string; projectId: string; method: string; protocol: string; requestUrl: string; responseStatus: number | null; durationMs: number; responseSize: number; result: string; errorMessage: string | null; replayDraft: string | null; createdAt: string; replayStatus?: string; replayExpiresAt?: string | null }
 interface Parameter { id: string; environmentCode: string; key: string; value: string }
 interface Secret { id: string; environmentCode: string; key: string }
 interface ParameterCollection { environments: string[]; parameters: Parameter[] }
@@ -73,7 +76,16 @@ const emit = defineEmits<{
 const context = ref<Context | null>(null)
 const syncedTemplate = ref(false)
 const syncedTemplateReviewed = ref(false)
+const legacyHistoryActive = ref(false), legacyHistoryReviewed = ref(false), legacyHistoryId = ref('')
+let legacyHistoryScope = -1
 function canSendReviewedTemplate() {
+  if (legacyHistoryActive.value) {
+    if (legacyHistoryScope !== contextGeneration) { Message.warning('旧摘要来源已失效，请重新载入或新建空白请求'); return false }
+    const target = protocolType.value === 'HTTP' ? applyQuickRequestQuery(url.value, queryRows.value) : url.value
+    if (!legacyHistoryReviewed.value || isRedactedApiDebugUrl(target)) {
+      Message.warning('请补齐旧摘要中的脱敏字段并核对重建请求，再手动发送'); return false
+    }
+  }
   if (syncedTemplate.value && !syncedTemplateReviewed.value) { Message.warning('请补齐脱敏模板并勾选核对后手动发送'); return false }
   if (syncedTemplate.value) {
     const activeAuth = (value: typeof auth) => value.type === 'BEARER' ? { type: value.type, token: value.token } : value.type === 'BASIC' ? { type: value.type, username: value.username, password: value.password } : value.type === 'API_KEY' ? { type: value.type, key: value.key, value: value.value, placement: value.placement } : { type: value.type }
@@ -117,8 +129,10 @@ const webSocket = reactive<{ session: WebSocketSession | null; message: string; 
 const environment = ref('')
 const environments = ref<string[]>([])
 const projectEnvironments = ref<ProjectEnvironment[]>([])
-const parameters = ref<Parameter[]>([])
-const secrets = ref<Secret[]>([])
+const allParameters = ref<Parameter[]>([])
+const allSecrets = ref<Secret[]>([])
+const parameters = computed(() => allParameters.value.filter((item) => item.environmentCode === environment.value))
+const secrets = computed(() => allSecrets.value.filter((item) => item.environmentCode === environment.value))
 const auth = reactive<ApiDebugRequestAuth>({ type: 'NONE', token: '', username: '', password: '', key: 'X-API-Key', value: '', placement: 'HEADER' })
 type QuickBodyType = 'NONE' | 'FORM_DATA' | 'URLENCODED' | 'JSON' | 'XML' | 'TEXT'
 
@@ -156,6 +170,62 @@ let grpcStreamPollTimer: number | undefined
 let grpcClientStreamPollTimer: number | undefined
 let grpcBidiStreamPollTimer: number | undefined
 let routeDraftApplied = false
+let disposed = false
+let contextGeneration = 0
+let saveInterfaceGeneration = 0
+let discoveryGeneration = 0
+let webSocketGeneration = 0
+let environmentGeneration = 0
+let httpRequestSequence = 0
+let headerEditRevision = 0, bodyEditRevision = 0, urlEditRevision = 0
+let runtimeHandoff: { request: ApiDebugHandoffRequest; headers: number; body: number; url: number } | null = null
+watch([headerRows, cookieRows, quickBodyType, formBodyRows, injectRequestId], () => { headerEditRevision++ }, { deep: true, flush: 'sync' })
+watch([body, quickBodyType, formBodyRows], () => { bodyEditRevision++ }, { deep: true, flush: 'sync' })
+watch([url, queryRows], () => { urlEditRevision++ }, { deep: true, flush: 'sync' })
+
+function requestContext() {
+  const generation = contextGeneration
+  const activeProjectId = projectId.value
+  const activeUserId = sessionStore.profile?.id
+  return { projectId: activeProjectId, current: () => !disposed && generation === contextGeneration
+    && activeProjectId === projectId.value && activeUserId === sessionStore.profile?.id }
+}
+
+watch([projectId, () => sessionStore.profile?.id, () => sessionStore.authGeneration, () => sessionStore.profile?.authenticatedAt, () => sessionStore.signedIn], () => {
+  contextGeneration++
+  if (legacyHistoryActive.value || runtimeHandoff) {
+    legacyHistoryReviewed.value = false
+    clearReconstructedRequest()
+    url.value = ''
+    hydrateQuickHttpEditor()
+  }
+  webSocketGeneration++
+  discoveryGeneration++
+  grpcDiscovery.loading = false
+  grpcDiscovery.services = []
+  grpcDiscovery.methods = []
+  sending.value = false
+  saveInterfaceDialog.value = false
+  stopWebSocketPolling()
+  cleanupOwnedWebSocket()
+  webSocket.session = null; webSocket.messages = []
+}, { flush: 'sync' })
+watch(protocolType, () => { webSocketGeneration++; stopWebSocketPolling() }, { flush: 'sync' })
+watch(saveInterfaceDialog, (visible) => {
+  if (!visible) { saveInterfaceGeneration++; savingInterface.value = false }
+}, { flush: 'sync' })
+watch(() => [protocolType.value, url.value, environment.value, grpcDescriptor.selectedId, grpc.tls, grpc.timeoutMs,
+  grpcMetadataText.value, ...Object.values(grpcAuth), contextGeneration], () => {
+  discoveryGeneration++
+  grpcDiscovery.loading = false
+  grpcDiscovery.services = []
+  grpcDiscovery.methods = []
+}, { flush: 'sync' })
+watch(() => grpc.service, () => {
+  discoveryGeneration++
+  grpcDiscovery.loading = false
+  grpcDiscovery.methods = []
+}, { flush: 'sync' })
 
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
 const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value))
@@ -175,7 +245,7 @@ const variableCaption = computed(() => protocolType.value === 'WEBSOCKET'
 const networkPolicyDescription = computed(() => protocolType.value === 'WEBSOCKET'
   ? isLocalDesktop() ? 'WebSocket 可访问公网；本机或内网地址需在本地执行设置中授权，WS/WSS 分别对应 HTTP/HTTPS，并匹配主机与端口。链路本地、组播和保留地址仍禁止。' : 'WebSocket 目标必须为公开可访问的 WS/WSS 地址；内网、回环、链路本地地址和手工握手头均会被拦截。'
   : protocolType.value === 'GRPC'
-    ? isLocalDesktop() ? 'gRPC 可访问公网；本机或内网地址需在本地执行设置中授权相同主机与端口，启用 TLS 对应 HTTPS，否则对应 HTTP。链路本地、组播和保留地址仍禁止。流会话仅保存在当前进程内存中。' : 'gRPC 目标必须为公开可访问的主机:端口；内网、回环、链路本地地址会被拦截。在线反射描述符仅在本次调用内存中存在；导入的离线描述符是项目级、已校验的编译资产，调用时不会请求远端反射。服务端流、客户端流与双向流数据仅保存在当前控制面内存会话；每个方向限制为 100 条消息、总计 512 KB，达到上限会自动取消。双向流完成发送后仍会继续接收响应。JSON、ASCII Metadata、认证值与响应均不写入历史。'
+    ? isLocalDesktop() ? 'gRPC 可访问公网；本机或内网地址需在本地执行设置中授权相同主机与端口，启用 TLS 对应 HTTPS，否则对应 HTTP。链路本地、组播和保留地址仍禁止。流会话仅保存在当前进程内存中。' : 'gRPC 目标必须为公开可访问的主机:端口；内网、回环、链路本地地址会被拦截。在线反射描述符仅在本次调用内存中存在；导入的离线描述符是项目级、已校验的编译资产，调用时不会请求远端反射。服务端流、客户端流与双向流数据仅保存在当前控制面内存会话；每个方向限制为 100 条消息、总计 512 KB，达到上限会自动取消。双向流完成发送后仍会继续接收响应。Unary请求JSON、Metadata和启用的认证配置按30天回放策略加密保存；响应正文和流消息不写入历史。'
     : isDesktopHttpDebugAvailable()
       ? '桌面端 HTTP/HTTPS 请求直接从当前电脑发出，可访问接口地址或环境变量配置的任意内网地址；每个目标 Origin 首次访问需确认，且不会自动跟随重定向。'
       : '在线 HTTP/HTTPS 默认阻止内网访问；管理员可在系统配置启用 api-debug.allow-configured-private-targets，允许接口地址或环境变量使用任意私网 IP/端口，也可通过 api-debug.allowed-private-origins 精确放行。回环、链路本地、云元数据、组播、保留地址与重定向始终禁止。')
@@ -229,9 +299,11 @@ async function read<T>(path: string, init?: RequestInit): Promise<T> {
   return envelope.data
 }
 
-async function mutate<T>(path: string, bodyValue: unknown): Promise<T> {
+async function mutate<T>(path: string, bodyValue: unknown, beforeSend?: () => void): Promise<T> {
+  const payload = JSON.stringify(bodyValue)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
-  return read<T>(path, { method: 'POST', headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: JSON.stringify(bodyValue) })
+  beforeSend?.()
+  return read<T>(path, { method: 'POST', headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: payload })
 }
 
 async function mutateForm<T>(path: string, form: FormData): Promise<T> {
@@ -279,7 +351,18 @@ function hydrateQuickHttpEditor() {
   else formBodyRows.value = [createQuickRequestRow()]
 }
 
+function clearReconstructedRequest() {
+  runtimeHandoff = null
+  body.value = ''; headersText.value = ''; grpcMetadataText.value = ''
+  Object.assign(auth, { type: 'NONE', token: '', username: '', password: '', key: 'X-API-Key', value: '', placement: 'HEADER' })
+  Object.assign(grpcAuth, { type: 'NONE', token: '', username: '', password: '', key: 'X-API-Key', value: '' })
+  graphql.query = ''; graphql.variables = '{}'; graphql.operationName = ''
+  soap.envelope = ''; soap.action = ''; grpc.requestJson = '{}'
+  formBodyRows.value = [createQuickRequestRow()]
+}
 function resetNewQuickRequest() {
+  legacyHistoryActive.value = false; legacyHistoryReviewed.value = false; legacyHistoryId.value = ''; legacyHistoryScope = -1
+  clearReconstructedRequest()
   quickRequestName.value = '快捷请求'
   quickRequestNameDraft.value = '快捷请求'
   editingQuickRequestName.value = false
@@ -292,6 +375,7 @@ function resetNewQuickRequest() {
   requestTab.value = 'params'
   result.value = null
   responseBody.value = '发送请求后将在这里展示响应正文。'
+  hydrateQuickHttpEditor()
 }
 
 function syncQueryFromUrl() {
@@ -313,6 +397,7 @@ function removeQuickRow(rows: QuickRequestKeyValueRow[], index: number) {
 }
 
 function quickRequestBody() {
+  if (runtimeHandoff && runtimeHandoff.body === bodyEditRevision) return runtimeHandoff.request.body
   if (quickBodyType.value === 'NONE') return ''
   if (quickBodyType.value === 'URLENCODED') return serializeUrlEncodedRows(formBodyRows.value)
   if (quickBodyType.value === 'FORM_DATA') return serializeMultipartRows(formBodyRows.value, '----TestHubQuickRequestBoundary')
@@ -344,15 +429,17 @@ function quickRequestHeaders() {
 }
 
 function headers() {
+  if (protocolType.value === 'HTTP' && runtimeHandoff && runtimeHandoff.headers === headerEditRevision) return runtimeHandoff.request.headers.map(header => ({ ...header }))
   return protocolType.value === 'HTTP' ? quickRequestHeaders() : parseHeaderText()
 }
 
 function quickRequestPayload() {
-  syncUrlFromQuery()
+  const originalUrl = runtimeHandoff && runtimeHandoff.url === urlEditRevision ? runtimeHandoff.request.url : null
+  if (originalUrl === null) syncUrlFromQuery()
   return {
     name: quickRequestName.value.trim() || '快捷请求',
     method: method.value,
-    url: url.value,
+    url: originalUrl ?? url.value,
     headers: headers(),
     body: quickRequestBody(),
     timeoutMs: timeoutMs.value,
@@ -379,7 +466,10 @@ function grpcMetadata() {
 
 async function loadHistory() {
   if (!projectId.value) return
-  history.value = await read<History[]>(`/api/v1/projects/${projectId.value}/api-debug/history?limit=20`)
+  const scope = requestContext()
+  const items = await read<History[]>(`/api/v1/projects/${scope.projectId}/api-debug/history?limit=20`)
+  if (!scope.current()) return
+  history.value = items
   emit('historyChange')
 }
 
@@ -388,24 +478,28 @@ async function loadCatalogs() {
   catalogs.value = await read<Catalog[]>(`/api/v1/projects/${projectId.value}/api-design/catalogs`)
 }
 
-async function loadEnvironment(preferredEnvironment?: string) {
+async function loadEnvironment(preferredEnvironment?: string, chooseDefault = true) {
   if (!projectId.value) return
+  const scope = requestContext()
+  const generation = ++environmentGeneration
+  const selectedEnvironment = preferredEnvironment ?? environment.value
   const [environmentData, parameterData, secretData] = await Promise.all([
-    read<ProjectEnvironment[]>(`/api/v1/projects/${projectId.value}/environments`),
-    read<ParameterCollection>(`/api/v1/projects/${projectId.value}/parameters`),
-    read<SecretCollection>(`/api/v1/projects/${projectId.value}/secrets`),
+    read<ProjectEnvironment[]>(`/api/v1/projects/${scope.projectId}/environments`),
+    read<ParameterCollection>(`/api/v1/projects/${scope.projectId}/parameters`),
+    read<SecretCollection>(`/api/v1/projects/${scope.projectId}/secrets`),
   ])
+  if (!scope.current() || generation !== environmentGeneration || (preferredEnvironment === undefined && selectedEnvironment !== environment.value)) return
   projectEnvironments.value = environmentData
   environments.value = environmentData.map((item) => item.environmentCode)
   if (preferredEnvironment !== undefined) environment.value = preferredEnvironment.trim()
   if (environment.value && !environments.value.includes(environment.value)) environment.value = ''
-  if (!environment.value && environments.value.length) {
+  if (chooseDefault && !environment.value && environments.value.length) {
     environment.value = environmentData.find((item) => item.enabled && item.defaultEnvironment)?.environmentCode
       ?? environmentData.find((item) => item.enabled)?.environmentCode
       ?? environments.value[0]
   }
-  parameters.value = parameterData.parameters.filter((parameter) => parameter.environmentCode === environment.value)
-  secrets.value = secretData.secrets.filter((secret) => secret.environmentCode === environment.value)
+  allParameters.value = parameterData.parameters
+  allSecrets.value = secretData.secrets
 }
 
 async function loadGrpcDescriptors() {
@@ -417,14 +511,35 @@ async function loadGrpcDescriptors() {
 async function load() {
   loading.value = true
   try {
-    context.value = await read<Context>('/api/v1/access/context')
+    const loadedContext = await read<Context>('/api/v1/access/context')
+    if (disposed) return
+    context.value = loadedContext
     projectId.value = sessionStore.resolveProjectId(projects.value)
-    const routeDraft = readApiDebugRouteDraft(window.sessionStorage, route.query.draft)
-      ?? apiDebugDraftFromQuery(route.query as Record<string, unknown>)
-    await loadEnvironment(routeDraft?.environment)
-    if (!routeDraft && props.embedded) resetNewQuickRequest()
-    else applyRouteDraft(routeDraft)
+    const loadScope = requestContext()
+    let routeDraft: ApiDebugRouteDraft | null = null
+    let handoffEnvironment: string | null = null
+    let handoffAccepted = false
+    if (route.query.handoff !== undefined) {
+      const packet = consumeApiDebugHandoff(sessionStore, route.query.handoff)
+      routeDraftApplied = true
+      if (packet && packet.sourceApiId === route.query.sourceApiId) {
+        applyStoredReplayDraft(JSON.stringify(packet)); handoffEnvironment = packet.request.environmentCode; handoffAccepted = true
+        runtimeHandoff = { request: packet.request, headers: -1, body: -1, url: -1 }
+      }
+      else { resetNewQuickRequest(); Message.warning('高级调试交接已失效，请返回源接口重新打开；未沿用其他请求认证') }
+    } else {
+      routeDraft = readApiDebugRouteDraft(window.sessionStorage, route.query.draft)
+        ?? apiDebugDraftFromQuery(route.query as Record<string, unknown>)
+      if (!routeDraft && props.embedded) resetNewQuickRequest()
+      else applyRouteDraft(routeDraft)
+    }
+    await loadEnvironment(environment.value || routeDraft?.environment, route.query.handoff === undefined)
+    if (!loadScope.current()) return
+    if (handoffAccepted && handoffEnvironment && environment.value !== handoffEnvironment) {
+      resetNewQuickRequest(); Message.warning('源运行环境已不可用，请返回源接口核对后重新打开高级调试')
+    }
     if (protocolType.value === 'HTTP') hydrateQuickHttpEditor()
+    if (runtimeHandoff) runtimeHandoff = { ...runtimeHandoff, headers: headerEditRevision, body: bodyEditRevision, url: urlEditRevision }
     removeApiDebugRouteDraft(window.sessionStorage, route.query.draft)
     await Promise.all([loadHistory(), loadGrpcDescriptors(), loadCatalogs()])
   } catch (error) { Message.error(error instanceof Error ? error.message : '加载快捷请求工作台失败') } finally { loading.value = false }
@@ -435,6 +550,10 @@ function applyRouteDraft(draft: ApiDebugRouteDraft | null) {
   routeDraftApplied = true
   if (!draft) return
   if (draft.replayDraft && applyStoredReplayDraft(draft.replayDraft)) return
+  if (draft.legacyHistory) {
+    resetNewQuickRequest()
+    legacyHistoryActive.value = true; legacyHistoryId.value = draft.legacyHistoryId ?? ''; legacyHistoryScope = contextGeneration
+  }
   if (draft.name) quickRequestName.value = draft.name
   if (draft.protocol) {
     protocolType.value = draft.protocol
@@ -527,25 +646,34 @@ async function send() {
     else await sendGrpc()
     return
   }
+  if (disposed || sending.value || !projectId.value) return
+  const scope = requestContext(), request = ++httpRequestSequence
+  const current = () => scope.current() && request === httpRequestSequence
+  const origin = `项目 ${selectedProject.value?.name ?? scope.projectId}（${scope.projectId}） · 请求 #${request}`
+  const expectedCode = expectedStatus.value, expectedText = expectedBodyContains.value
   sending.value = true
   result.value = null
   try {
     const payload = quickRequestPayload()
     const response = isDesktopHttpDebugAvailable()
-      ? await executeDesktopHttpRequest(projectId.value, payload,
+      ? await executeDesktopHttpRequest(scope.projectId, payload,
           Object.fromEntries(parameters.value.map((parameter) => [parameter.key, parameter.value])))
-      : await mutate<DebugResult>(`/api/v1/projects/${projectId.value}/api-debug/execute`, payload)
-    result.value = response
-    responseBody.value = response.success ? (response.body || '(目标服务未返回响应体)') : (response.errorMessage ?? '连接目标服务失败')
-    await loadHistory()
-    if (response.historyWarning) Message.warning(`请求已完成，但${response.historyWarning}`)
-    else if (postOperationChecks.value.some((check) => !check.passed)) Message.warning('请求已完成，但后置校验存在失败项')
-    else if (response.success) Message.success(`请求完成 · ${response.statusCode} · ${response.durationMs} ms`)
-    else Message.warning(response.errorMessage ?? '请求未能连接到目标服务')
+      : await mutate<DebugResult>(`/api/v1/projects/${scope.projectId}/api-debug/execute`, payload)
+    if (current()) {
+      result.value = response
+      responseBody.value = response.success ? (response.body || '(目标服务未返回响应体)') : (response.errorMessage ?? '连接目标服务失败')
+      await loadHistory()
+    }
+    const label = `${origin}${response.historyId ? ` · 执行 ${response.historyId}` : ''}`
+    if (response.historyWarning) Message.warning(`${label} · 请求已完成，但${response.historyWarning}`)
+    else if ((expectedCode !== undefined && response.statusCode !== expectedCode) || (expectedText.trim() && !response.body.includes(expectedText))) Message.warning(`${label} · 请求已完成，但后置校验存在失败项`)
+    else if (response.success) Message.success(`${label} · 请求完成 · ${response.statusCode} · ${response.durationMs} ms`)
+    else Message.warning(`${label} · ${response.errorMessage ?? '请求未能连接到目标服务'}`)
   } catch (error) {
-    responseBody.value = error instanceof Error ? error.message : '发送请求失败'
-    Message.error(responseBody.value)
-  } finally { sending.value = false }
+    const message = error instanceof Error ? error.message : '发送请求失败'
+    if (current()) responseBody.value = message
+    Message.error(`${origin} · ${message}`)
+  } finally { if (current()) sending.value = false }
 }
 
 function grpcCallPayload() {
@@ -813,33 +941,41 @@ function grpcDiscoveryPayload(service: string | null) {
 async function discoverGrpcServices() {
   if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
+  const scope = requestContext()
+  const generation = ++discoveryGeneration
+  const current = () => scope.current() && generation === discoveryGeneration
   grpcDiscovery.loading = true
   try {
     const response = grpcDescriptor.selectedId
-      ? await read<GrpcDiscoveryResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/descriptors/${grpcDescriptor.selectedId}/discovery`)
-      : await mutate<GrpcDiscoveryResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/discovery`, grpcDiscoveryPayload(null))
+      ? await read<GrpcDiscoveryResult>(`/api/v1/projects/${scope.projectId}/api-debug/grpc/descriptors/${grpcDescriptor.selectedId}/discovery`)
+      : await mutate<GrpcDiscoveryResult>(`/api/v1/projects/${scope.projectId}/api-debug/grpc/discovery`, grpcDiscoveryPayload(null), () => { if (!current()) throw new Error('发现上下文已改变') })
+    if (!current()) return
     grpcDiscovery.services = response.services
     grpcDiscovery.methods = []
     if (!response.services.length) Message.info('目标服务未返回可发现的 gRPC 服务')
     else Message.success(`已发现 ${response.services.length}${response.truncated ? '+' : ''} 个服务`)
     if (response.truncated) Message.warning('发现结果已限制为前 500 项')
-  } catch (error) { Message.error(error instanceof Error ? error.message : 'gRPC 服务发现失败') } finally { grpcDiscovery.loading = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : 'gRPC 服务发现失败') } finally { if (current()) grpcDiscovery.loading = false }
 }
 
 async function discoverGrpcMethods() {
   if (!canSendReviewedTemplate()) return
   if (!projectId.value) return
   if (!grpc.service.trim()) { Message.warning('请先填写或选择服务名称'); return }
+  const scope = requestContext()
+  const generation = ++discoveryGeneration
+  const current = () => scope.current() && generation === discoveryGeneration
   grpcDiscovery.loading = true
   try {
     const response = grpcDescriptor.selectedId
-      ? await read<GrpcDiscoveryResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/descriptors/${grpcDescriptor.selectedId}/discovery?service=${encodeURIComponent(grpc.service)}`)
-      : await mutate<GrpcDiscoveryResult>(`/api/v1/projects/${projectId.value}/api-debug/grpc/discovery`, grpcDiscoveryPayload(grpc.service))
+      ? await read<GrpcDiscoveryResult>(`/api/v1/projects/${scope.projectId}/api-debug/grpc/descriptors/${grpcDescriptor.selectedId}/discovery?service=${encodeURIComponent(grpc.service)}`)
+      : await mutate<GrpcDiscoveryResult>(`/api/v1/projects/${scope.projectId}/api-debug/grpc/discovery`, grpcDiscoveryPayload(grpc.service), () => { if (!current()) throw new Error('发现上下文已改变') })
+    if (!current()) return
     grpcDiscovery.methods = response.methods
     if (!response.methods.length) Message.info('目标服务未返回可发现的方法')
     else Message.success(`已发现 ${response.methods.length}${response.truncated ? '+' : ''} 个方法`)
     if (response.truncated) Message.warning('发现结果已限制为前 500 项')
-  } catch (error) { Message.error(error instanceof Error ? error.message : 'gRPC 方法发现失败') } finally { grpcDiscovery.loading = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : 'gRPC 方法发现失败') } finally { if (current()) grpcDiscovery.loading = false }
 }
 
 function grpcCallType(value: GrpcMethodSummary['callType']) {
@@ -903,70 +1039,102 @@ function startWebSocketPolling() {
   webSocketPollTimer = window.setInterval(() => { void loadWebSocketMessages() }, 2000)
 }
 
-async function loadWebSocketMessages() {
-  if (!projectId.value || !webSocket.session?.id) return
+async function loadWebSocketMessages(): Promise<boolean> {
+  if (!projectId.value || !webSocket.session?.id) return false
+  const scope = requestContext(), generation = webSocketGeneration, sessionId = webSocket.session.id
+  const current = () => scope.current() && generation === webSocketGeneration && sessionId === webSocket.session?.id
   try {
     const [session, messages] = await Promise.all([
-      read<WebSocketSession>(`/api/v1/projects/${projectId.value}/api-debug/websocket/sessions/${webSocket.session.id}`),
-      read<WebSocketMessage[]>(`/api/v1/projects/${projectId.value}/api-debug/websocket/sessions/${webSocket.session.id}/messages`),
+      read<WebSocketSession>(`/api/v1/projects/${scope.projectId}/api-debug/websocket/sessions/${sessionId}`),
+      read<WebSocketMessage[]>(`/api/v1/projects/${scope.projectId}/api-debug/websocket/sessions/${sessionId}/messages`),
     ])
+    if (!current()) return false
+    webSocketConnections.update(session)
     webSocket.session = session
     webSocket.messages = messages
     if (session.status === 'CLOSED' || session.status === 'ERROR') stopWebSocketPolling()
+    return true
   } catch (error) {
-    stopWebSocketPolling()
-    Message.error(error instanceof Error ? error.message : '读取 WebSocket 消息失败')
+    if (current()) {
+      stopWebSocketPolling()
+      Message.error(error instanceof Error ? error.message : '读取 WebSocket 消息失败')
+    }
+    return false
   }
 }
 
-async function connectWebSocket() {
-  if (!canSendReviewedTemplate()) return
-  if (!projectId.value) return
-  if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '')) {
-    await loadWebSocketMessages()
-    Message.info(webSocket.session?.status === 'OPEN' ? 'WebSocket 已连接，已刷新消息' : 'WebSocket 正在连接或重连')
-    return
+function webSocketPayload() {
+  return {
+    url: url.value, headers: headers(), environmentCode: environment.value || null, auth: { ...auth },
+    subprotocols: webSocket.subprotocolsText.split(',').map(item => item.trim()).filter(Boolean),
+    subscriptions: [...webSocket.subscriptions],
+    reconnect: { enabled: webSocket.autoReconnect, maxAttempts: webSocket.maxReconnectAttempts, delayMs: webSocket.reconnectDelayMs },
   }
+}
+const webSocketConnections = new OwnedWebSocketSessions<WebSocketSession>({
+  connect: (project, payload, current) => mutate<WebSocketSession>(`/api/v1/projects/${project}/api-debug/websocket/connect`, payload, () => { if (!current()) throw new Error('连接上下文已改变') }),
+  close: (project, id) => mutate<WebSocketSession>(`/api/v1/projects/${project}/api-debug/websocket/sessions/${id}/close`, {}),
+})
+const webSocketScopeKey = () => `${contextGeneration}:${projectId.value}:${sessionStore.authGeneration}`
+const webSocketMatchesDraft = computed(() => !!webSocket.session && webSocketConnections.matches(webSocketScopeKey(), webSocketPayload()))
+function cleanupOwnedWebSocket() {
+  const owned = webSocketConnections.session
+  if (!owned) return
+  void webSocketConnections.close().catch(() => {
+    Message.warning(`本页原WebSocket会话 ${owned.id} 关闭未确认，请返回原范围核对`)
+  })
+}
+async function connectWebSocket() {
+  if (!canSendReviewedTemplate() || !projectId.value || sending.value) return
+  const scope = requestContext(), generation = ++webSocketGeneration
+  const current = () => scope.current() && generation === webSocketGeneration
   sending.value = true
+  stopWebSocketPolling()
   try {
-    webSocket.session = await mutate<WebSocketSession>(`/api/v1/projects/${projectId.value}/api-debug/websocket/connect`, {
-      url: url.value,
-      headers: headers(),
-      environmentCode: environment.value || null,
-      auth: { ...auth },
-      subprotocols: webSocket.subprotocolsText.split(',').map((item) => item.trim()).filter(Boolean),
-      subscriptions: webSocket.subscriptions,
-      reconnect: { enabled: webSocket.autoReconnect, maxAttempts: webSocket.maxReconnectAttempts, delayMs: webSocket.reconnectDelayMs },
-    })
-    await loadWebSocketMessages()
+    const session = await webSocketConnections.connect({ projectId: scope.projectId, key: webSocketScopeKey(), current }, webSocketPayload())
+    if (!session || !current()) return
+    webSocket.session = session
+    if (!await loadWebSocketMessages() || !current()) return
     await loadHistory()
-    startWebSocketPolling()
-    Message.success('WebSocket 已连接')
+    if (!current()) return
+    if (['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session?.status ?? '')) startWebSocketPolling()
+    if (webSocket.session?.status === 'OPEN') Message.success('WebSocket 已连接')
   } catch (error) {
-    Message.error(error instanceof Error ? error.message : '连接 WebSocket 失败')
-  } finally { sending.value = false }
+    if (current()) {
+      webSocket.session = webSocketConnections.session
+      Message.error(error instanceof Error ? error.message : '连接 WebSocket 失败')
+    }
+  } finally { if (current()) sending.value = false }
 }
 
 async function sendWebSocketMessage() {
-  if (!canSendReviewedTemplate()) return
-  if (!projectId.value || !webSocket.session) return
+  if (!canSendReviewedTemplate() || !projectId.value || !webSocket.session || sending.value) return
   if (webSocket.session.status !== 'OPEN') { Message.warning('请先建立 WebSocket 连接'); return }
+  if (!webSocketMatchesDraft.value) { Message.warning('草稿与当前连接不同，请先连接替换本页旧会话'); return }
+  const scope = requestContext(), generation = ++webSocketGeneration, sessionId = webSocket.session.id
+  const current = () => scope.current() && generation === webSocketGeneration
   sending.value = true
   try {
-    webSocket.session = await mutate<WebSocketSession>(`/api/v1/projects/${projectId.value}/api-debug/websocket/sessions/${webSocket.session.id}/messages`, { message: webSocket.message })
+    const session = await mutate<WebSocketSession>(`/api/v1/projects/${scope.projectId}/api-debug/websocket/sessions/${sessionId}/messages`, { message: webSocket.message }, () => { if (!current()) throw new Error('连接上下文已改变') })
+    if (!current()) return
+    webSocket.session = session
     await loadWebSocketMessages()
-  } catch (error) { Message.error(error instanceof Error ? error.message : '发送 WebSocket 消息失败') } finally { sending.value = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '发送 WebSocket 消息失败') } finally { if (current()) sending.value = false }
 }
 
 async function closeWebSocket() {
-  if (!projectId.value || !webSocket.session) return
+  if (!projectId.value || !webSocket.session || sending.value) return
+  const scope = requestContext(), generation = ++webSocketGeneration
+  const current = () => scope.current() && generation === webSocketGeneration
   sending.value = true
   try {
-    webSocket.session = await mutate<WebSocketSession>(`/api/v1/projects/${projectId.value}/api-debug/websocket/sessions/${webSocket.session.id}/close`, {})
-    await loadWebSocketMessages()
+    const session = await webSocketConnections.close()
+    if (!current()) return
+    if (session) webSocket.session = session
     stopWebSocketPolling()
     Message.success('WebSocket 已关闭')
-  } catch (error) { Message.error(error instanceof Error ? error.message : '关闭 WebSocket 失败') } finally { sending.value = false }
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '关闭 WebSocket 失败') }
+  finally { if (current()) sending.value = false }
 }
 
 function addSubscription() {
@@ -1011,20 +1179,22 @@ function loadAuth(source: unknown, target: { type: string; token: string; userna
   })
 }
 
-function loadHeaders(source: unknown): string {
+function loadHeaders(source: unknown, nameField: 'name' | 'key' = 'name'): string {
   return Array.isArray(source) ? source.map((item) => {
     const header = asRecord(item)
-    return header ? `${text(header.name)}: ${text(header.value)}` : ''
+    return header ? `${text(header[nameField])}: ${text(header.value)}` : ''
   }).filter(Boolean).join('\n') : ''
 }
 
 function applyStoredReplayDraft(serialized: string): boolean {
-  syncedTemplate.value = false; syncedTemplateReviewed.value = false
   try {
     const saved = asRecord(JSON.parse(serialized))
     const request = saved && asRecord(saved.request)
     const type = text(saved?.protocol).toUpperCase()
     if (!request || !['HTTP', 'GRAPHQL', 'SOAP', 'WEBSOCKET', 'GRPC'].includes(type)) return false
+    runtimeHandoff = null
+    syncedTemplate.value = false; syncedTemplateReviewed.value = false
+    legacyHistoryActive.value = false; legacyHistoryReviewed.value = false; legacyHistoryId.value = ''; legacyHistoryScope = -1
     quickRequestName.value = text(request.name, '快捷请求') || '快捷请求'
     protocolType.value = type as typeof protocolType.value
     method.value = text(request.method, type === 'HTTP' ? 'GET' : 'POST')
@@ -1036,7 +1206,7 @@ function applyStoredReplayDraft(serialized: string): boolean {
       grpc.method = text(request.method)
       grpc.requestJson = text(request.requestJson, '{}')
       grpc.timeoutMs = Number(request.timeoutMs) || 10_000
-      grpcMetadataText.value = loadHeaders(request.metadata).replaceAll(': ', ': ')
+      grpcMetadataText.value = loadHeaders(request.metadata, 'key')
       loadAuth(request.auth, grpcAuth)
     } else if (type === 'WEBSOCKET') {
       url.value = text(request.url)
@@ -1075,8 +1245,11 @@ function applyStoredReplayDraft(serialized: string): boolean {
 }
 
 function loadHistoryRequest(item: History, notify = true): boolean {
+  const unavailable = apiDebugReplayUnavailableReason(item.replayStatus)
+  if (unavailable) { if (notify) Message.warning(unavailable); return false }
   const draft = apiDebugDraftFromHistory(item)
-  if (draft?.replayDraft && applyStoredReplayDraft(draft.replayDraft)) {
+  if (draft?.replayDraft) {
+    if (!applyStoredReplayDraft(draft.replayDraft)) { if (notify) Message.warning('回放草稿格式无效，原请求与连接保持'); return false }
     result.value = null
     responseBody.value = '已载入加密保存的请求配置，可检查参数后再次发送。'
     if (notify) Message.success('已载入历史请求，可检查参数后再次发送')
@@ -1086,6 +1259,8 @@ function loadHistoryRequest(item: History, notify = true): boolean {
     if (notify) Message.warning('该历史记录没有可回放的请求配置')
     return false
   }
+  clearReconstructedRequest()
+  legacyHistoryActive.value = true; legacyHistoryReviewed.value = false; legacyHistoryId.value = item.id; legacyHistoryScope = contextGeneration
   protocolType.value = 'HTTP'
   quickRequestName.value = '快捷请求'
   changeProtocol()
@@ -1094,18 +1269,14 @@ function loadHistoryRequest(item: History, notify = true): boolean {
   requestTab.value = 'body'
   result.value = null
   hydrateQuickHttpEditor()
-  responseBody.value = '已载入历史请求。历史仅保存脱敏的 Method 与 URL，重发会沿用当前 Header、Auth 与 Body。'
+  responseBody.value = '已载入历史请求。旧摘要仅包含 Method 与 URL，原先的 Header、Auth 与 Body 已清空；请重建并核对后手动发送。'
   if (notify) Message.success('已载入历史请求，可检查参数后再次发送')
   return true
 }
 
 async function replayHistoryRequest(item: History) {
-  if (!loadHistoryRequest(item, false)) {
-    Message.warning('该历史记录没有可回放的请求配置')
-    return
-  }
-  if (isRedactedApiDebugUrl(item.requestUrl)) {
-    Message.warning('该历史 URL 含已脱敏参数，请补充真实参数后再发送')
+  if (!(legacyHistoryActive.value && legacyHistoryId.value === item.id && legacyHistoryScope === contextGeneration) && !loadHistoryRequest(item, false)) {
+    Message.warning(apiDebugReplayUnavailableReason(item.replayStatus) || '该历史记录没有可回放的请求配置')
     return
   }
   replayingHistoryId.value = item.id
@@ -1168,6 +1339,7 @@ async function copyGeneratedCode() {
 }
 
 async function openSaveInterface() {
+  const scope = requestContext()
   if (protocolType.value !== 'HTTP') {
     Message.warning('当前仅支持将 HTTP 快捷请求保存为正式接口')
     return
@@ -1175,8 +1347,9 @@ async function openSaveInterface() {
   if (!catalogs.value.length) {
     try {
       await loadCatalogs()
+      if (!scope.current()) return
     } catch (error) {
-      Message.error(error instanceof Error ? error.message : '加载接口目录失败')
+      if (scope.current()) Message.error(error instanceof Error ? error.message : '加载接口目录失败')
       return
     }
   }
@@ -1185,12 +1358,18 @@ async function openSaveInterface() {
     return
   }
   clearFormErrors(saveInterfaceErrors)
+  saveInterfaceGeneration++
+  savingInterface.value = false
   saveInterfaceForm.catalogId = catalogOptions.value[0].id
   saveInterfaceForm.name = suggestedInterfaceName()
   saveInterfaceDialog.value = true
 }
 
 async function saveAsInterface() {
+  if (!saveInterfaceDialog.value || savingInterface.value) return false
+  const scope = requestContext()
+  const generation = saveInterfaceGeneration
+  const current = () => scope.current() && generation === saveInterfaceGeneration && saveInterfaceDialog.value
   clearFormErrors(saveInterfaceErrors)
   if (!saveInterfaceForm.catalogId) saveInterfaceErrors.catalogId = '请选择接口目录'
   if (!saveInterfaceForm.name.trim()) saveInterfaceErrors.name = '请输入接口名称'
@@ -1215,19 +1394,22 @@ async function saveAsInterface() {
       auth: { ...auth },
     })
     const imported = await mutate<ImportResult>(
-      `/api/v1/projects/${projectId.value}/api-design/interchange/curl/import`,
+      `/api/v1/projects/${scope.projectId}/api-design/interchange/curl/import`,
       { catalogId: saveInterfaceForm.catalogId, name: saveInterfaceForm.name.trim(), command: curl.command },
+      () => { if (!current()) throw new Error('保存会话已结束') },
     )
+    if (!current()) return false
     saveInterfaceDialog.value = false
     Message.success(`已保存为正式接口：${imported.items[0] ?? saveInterfaceForm.name.trim()}`)
     if (curl.secretsRemoved) Message.info('敏感值已替换为环境变量占位符，未写入接口资产')
     return true
   } catch (error) {
+    if (!current()) return false
     Object.assign(saveInterfaceErrors, formErrorsFrom(error))
     if (!Object.keys(saveInterfaceErrors).length) saveInterfaceErrors.form = error instanceof Error ? error.message : '保存正式接口失败'
     return false
   } finally {
-    savingInterface.value = false
+    if (current()) savingInterface.value = false
   }
 }
 
@@ -1243,6 +1425,11 @@ async function copyResponse() {
 
 onMounted(load)
 onBeforeUnmount(() => {
+  disposed = true
+  runtimeHandoff = null
+  if (typeof route.query.handoff === 'string') discardApiDebugHandoff(sessionStore, route.query.handoff)
+  contextGeneration++
+  cleanupOwnedWebSocket()
   stopWebSocketPolling()
   stopGrpcStreamPolling()
   stopGrpcClientStreamPolling()
@@ -1258,11 +1445,12 @@ onBeforeUnmount(() => {
     </nav>
     <a-button v-if="descriptorSyncAvailable" @click="openDescriptorSync">gRPC 描述文件同步</a-button>
     <PageHeader v-if="!props.embedded" eyebrow="API TESTING WORKBENCH" title="快捷请求与高级调试" description="作为接口测试模块的临时请求工作台，可从正式接口载入运行草稿，并继续调试 HTTP、GraphQL、SOAP、WebSocket 与 gRPC 请求。" action="清空响应" @action="clearResponse" />
+    <a-alert class="replay-policy-note" type="info">请求配置（含启用的Header、认证和正文）加密保存，供有项目写权限者回放，30天到期。旧历史密文仅限制回放，暂不自动删除；新策略密文到期后在服务正常运行时按最多24小时周期回收。摘要和既有备份另行保留。</a-alert>
     <section v-if="!props.embedded" class="debug-summary panel">
       <div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code }}</small></div>
       <a-select v-model="projectId" :style="{ width: '240px' }" @change="changeProject"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select>
       <div><span>安全策略</span><strong>受限网络</strong><small>HTTP 内网按 Origin 放行</small></div>
-      <div><span>请求历史</span><strong>{{ history.length }}</strong><small>仅保存脱敏摘要</small></div>
+      <div><span>请求历史</span><strong>{{ history.length }}</strong><small>摘要与限期加密回放</small></div>
     </section>
     <a-spin :loading="loading">
       <section class="debug-workspace" :class="{ 'debug-workspace--embedded': props.embedded }">
@@ -1273,9 +1461,11 @@ onBeforeUnmount(() => {
               <div><a-tag size="small" :color="item.method === 'GET' ? 'green' : item.method === 'POST' ? 'arcoblue' : 'orange'">{{ item.method }}</a-tag><a-tag size="small" :color="item.result === 'DRAFT' ? 'orange' : item.result === 'COMPLETED' && ((item.responseStatus ?? 500) < 400 || item.protocol === 'WEBSOCKET') ? 'green' : 'red'">{{ item.result === 'DRAFT' ? '草稿' : item.protocol === 'WEBSOCKET' && item.result === 'COMPLETED' ? '已连接' : item.responseStatus ?? '失败' }}</a-tag></div>
               <code :title="item.requestUrl">{{ item.requestUrl }}</code>
               <small>{{ item.durationMs }} ms · {{ date(item.createdAt) }}</small>
+              <small v-if="apiDebugReplayUnavailableReason(item.replayStatus)">{{ apiDebugReplayUnavailableReason(item.replayStatus) }}</small>
+              <small v-else-if="item.replayExpiresAt">回放有效至 {{ date(item.replayExpiresAt) }}</small>
               <div class="history-actions">
-                <a-button size="mini" :disabled="sending" @click="loadHistoryRequest(item)">载入</a-button>
-                <a-button size="mini" type="primary" :loading="replayingHistoryId === item.id" :disabled="sending" @click="replayHistoryRequest(item)">重发</a-button>
+                <a-button size="mini" :disabled="sending || !!apiDebugReplayUnavailableReason(item.replayStatus)" @click="loadHistoryRequest(item)">载入</a-button>
+                <a-button size="mini" type="primary" :loading="replayingHistoryId === item.id" :disabled="sending || !!apiDebugReplayUnavailableReason(item.replayStatus)" @click="replayHistoryRequest(item)">重发</a-button>
               </div>
             </div>
           </div>
@@ -1327,6 +1517,7 @@ onBeforeUnmount(() => {
             <a-button type="text" size="small" @click="router.push('/system-settings/environments')"><icon-settings /> 管理环境</a-button>
             <a-button type="text" size="small" @click="Message.info('当前 gRPC 支持在线反射或离线 Proto/DescriptorSet 发现、Unary、服务端流、客户端流与双向流；流式调用仅保留当前内存会话，每个方向均受 100 条消息与 512 KB 上限约束。')">查看边界</a-button>
           </div>
+          <a-alert v-if="legacyHistoryActive" type="warning" class="legacy-history-review">旧摘要只提供 Method 与 URL，其他请求的认证、请求头和正文已清空。请补齐脱敏字段并重新配置。<br /><a-checkbox v-model="legacyHistoryReviewed">我已核对重建请求，下一步由我手动发送</a-checkbox><a-button type="text" @click="resetNewQuickRequest">新建空白请求</a-button></a-alert>
           <a-alert v-if="syncedTemplate" type="warning" class="synced-template-review">脱敏模板已载入。补齐 SYNC_REVIEW 占位符，重新选择环境、文件和 gRPC 描述符，确认目标及请求内容。<br /><a-checkbox v-model="syncedTemplateReviewed">我已补齐并核对模板，下一步由我手动发送</a-checkbox></a-alert>
           <a-tabs v-if="protocolType === 'HTTP'" v-model:active-key="requestTab" class="request-tabs quick-http-tabs">
             <a-tab-pane key="params" :title="`Params ${activeQueryCount || ''}`">
@@ -1360,7 +1551,7 @@ onBeforeUnmount(() => {
               <template v-else-if="protocolType === 'GRPC'">
                 <div class="editor-caption">使用在线服务端反射，或导入项目级 <code>.proto</code> / FileDescriptorSet 后离线发现服务与方法；两种来源都会把 JSON 转为 Protobuf 请求。离线描述符不会向目标发送反射请求；本节点支持 Unary、受限服务端流、客户端流与双向流。</div>
                 <section class="descriptor-panel">
-                  <div class="descriptor-head"><div><strong>描述符来源</strong><small>未选择时使用在线反射；导入后仅保存已校验的编译描述符集，不保存原始请求、认证或响应。</small></div><a-tag :color="grpcDescriptor.selectedId ? 'green' : 'arcoblue'">{{ grpcDescriptor.selectedId ? '离线描述符' : '在线反射' }}</a-tag></div>
+                  <div class="descriptor-head"><div><strong>描述符来源</strong><small>未选择时使用在线反射；描述符资产仅保存已校验的编译描述符集；Unary请求配置的加密留存遵循本页说明，响应正文不保存。</small></div><a-tag :color="grpcDescriptor.selectedId ? 'green' : 'arcoblue'">{{ grpcDescriptor.selectedId ? '离线描述符' : '在线反射' }}</a-tag></div>
                   <div class="descriptor-select-row"><a-select v-model="grpcDescriptor.selectedId" allow-clear placeholder="在线反射（默认）" @change="changeGrpcDescriptor"><a-option v-for="item in grpcDescriptor.items" :key="item.id" :value="item.id">{{ item.name }} · {{ item.serviceCount }} 服务 · {{ item.sourceFormat === 'PROTO3' ? 'Proto3' : 'DescriptorSet' }}</a-option></a-select><a-popconfirm content="删除后无法恢复该项目的离线描述符，是否继续？" @ok="deleteGrpcDescriptor"><a-button status="danger" :disabled="!grpcDescriptor.selectedId">删除</a-button></a-popconfirm></div>
                   <div class="descriptor-import-row"><a-input v-model="grpcDescriptor.name" :max-length="128" placeholder="描述符名称，例如：订单服务 Proto" /><label class="proto-file-input"><input type="file" accept=".proto,.desc,.pb,.bin" multiple @change="selectGrpcFiles" /><span>{{ grpcDescriptor.files.length ? `已选 ${grpcDescriptor.files.length} 个文件` : '选择 Proto 文件' }}</span></label><a-button :loading="grpcDescriptor.importing" @click="importGrpcDescriptor">导入</a-button></div>
                   <small class="descriptor-help">支持最多 16 个总计 512 KB 的 <code>.proto</code> 文件（可解析同批次平铺文件的 import），或一个 protoc 生成的 <code>FileDescriptorSet</code>（.desc/.pb）。</small>
@@ -1394,10 +1585,10 @@ onBeforeUnmount(() => {
                 <div class="editor-caption">连接仅允许公开可访问的 <code>ws://</code> 或 <code>wss://</code> 目标。会话、认证值和文本消息仅保存在服务端内存，不会写入调试历史；连接前保存的订阅帧会在每次成功连接后自动发送。</div>
                 <section class="websocket-panel">
                   <div class="websocket-head"><div><strong>连接状态</strong><a-tag :color="webSocketStatusColor">{{ webSocket.session?.status ?? '未连接' }}</a-tag><small v-if="webSocket.session">{{ webSocket.session.target }} · {{ webSocket.session.messageCount }} 条消息<template v-if="webSocket.session.autoReconnect"> · 重连 {{ webSocket.session.reconnectAttempts }}/{{ webSocket.session.maxReconnectAttempts }}</template><template v-if="webSocket.session.selectedSubprotocol"> · {{ webSocket.session.selectedSubprotocol }}</template></small></div><div><a-button size="small" :loading="sending" @click="connectWebSocket">连接</a-button><a-button size="small" status="danger" :disabled="!webSocket.session || webSocket.session.status === 'CLOSED'" @click="closeWebSocket">关闭</a-button></div></div>
-                  <div v-if="webSocket.session?.closeReason" class="websocket-close">{{ webSocket.session.closeReason }}</div>
+                  <a-alert v-if="webSocket.session && ['OPEN', 'CONNECTING', 'RECONNECTING'].includes(webSocket.session.status) && !webSocketMatchesDraft" type="warning">草稿与当前连接不同；当前连接仍属于原配置，请主动连接替换后再发送。</a-alert><div v-if="webSocket.session?.closeReason" class="websocket-close">{{ webSocket.session.closeReason }}</div>
                   <div class="subscription-box"><div class="subscription-title"><strong>订阅帧</strong><small>保存到当前会话，首次连接和自动重连后均会发送；不会持久化。</small></div><a-textarea v-model="webSocket.subscriptionDraft" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" :auto-size="{ minRows: 2, maxRows: 5 }" placeholder="例如：{&quot;type&quot;:&quot;subscribe&quot;,&quot;topic&quot;:&quot;orders&quot;}" :max-length="32000" show-word-limit /><div class="subscription-actions"><a-button size="small" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" @click="addSubscription">保存订阅帧</a-button><span>{{ webSocket.subscriptions.length }}/12</span></div><div v-if="webSocket.subscriptions.length" class="subscription-list"><article v-for="(item, index) in webSocket.subscriptions" :key="`${index}-${item}`"><code>{{ item }}</code><a-button size="mini" status="danger" :disabled="!!webSocket.session && webSocket.session.status !== 'CLOSED'" @click="removeSubscription(index)">移除</a-button></article></div></div>
                   <a-textarea v-model="webSocket.message" :auto-size="{ minRows: 3, maxRows: 6 }" placeholder="输入要发送的文本消息" :max-length="32000" show-word-limit />
-                  <div class="websocket-send"><a-button type="primary" :loading="sending" :disabled="webSocket.session?.status !== 'OPEN'" @click="sendWebSocketMessage">发送文本消息 <icon-send /></a-button><a-button size="small" @click="loadWebSocketMessages">刷新消息</a-button></div>
+                  <div class="websocket-send"><a-button type="primary" :loading="sending" :disabled="webSocket.session?.status !== 'OPEN' || !webSocketMatchesDraft" @click="sendWebSocketMessage">发送文本消息 <icon-send /></a-button><a-button size="small" @click="loadWebSocketMessages">刷新消息</a-button></div>
                   <div v-if="webSocket.messages.length" class="websocket-messages"><article v-for="item in webSocket.messages" :key="item.id" class="websocket-message" :class="item.direction.toLowerCase()"><div><a-tag size="small" :color="item.direction === 'IN' ? 'green' : 'arcoblue'">{{ item.direction === 'IN' ? '收到' : '发送' }}</a-tag><small>{{ date(item.createdAt) }}<template v-if="item.truncated"> · 已截断</template></small></div><pre>{{ item.payload }}</pre></article></div>
                   <a-empty v-else description="连接后即可查看实时文本消息" />
                 </section>

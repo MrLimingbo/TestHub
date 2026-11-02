@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch, type Ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import UiAutomationHistoryPanel from '@/components/UiAutomationHistoryPanel.vue'
@@ -36,8 +36,10 @@ async function showArtifactSync() {
 const preparingBrowser = ref(false)
 const browserStatus = ref<LocalEngineStatus>()
 let preparationGeneration = 0
-async function refreshBrowserStatus() { if (localDesktop) browserStatus.value = await localBrowserStatus() }
-async function cancelPreparation() { preparationGeneration++; await cancelBrowserPreparation() }
+let browserOperation = 0
+let browserOwner: (() => boolean) | undefined
+async function refreshBrowserStatus() { const current = projectGuard(); if (localDesktop && current()) { const status = await localBrowserStatus(); if (current()) browserStatus.value = status } }
+async function cancelPreparation() { preparationGeneration++; invalidateSave(); await cancelBrowserPreparation() }
 async function prepareScenario(scenarioId: string) {
   if (!localDesktop) return
   const project = projectId.value, generation = preparationGeneration
@@ -51,11 +53,21 @@ async function prepareScenario(scenarioId: string) {
     profiles.value.find(item => item.id === profile.id)?.version !== profileVersion)
     throw new Error('项目或场景配置已变化，请重新确认后执行。')
 }
-async function withBrowser(scenarioId: string, action: () => Promise<void>) {
+async function withBrowser(scenarioId: string, action: () => Promise<void>, owner?: () => boolean) {
+  const sameProject = projectGuard(), generation = preparationGeneration
+  const current = () => sameProject() && (!owner || owner()) && generation === preparationGeneration
+  if (!current()) return
   if (preparingBrowser.value) throw new Error('正在准备浏览器，请稍候。')
+  const request = ++browserOperation
+  browserOwner = owner
   preparingBrowser.value = true
-  try { if (scenarioId) await prepareScenario(scenarioId); await action() }
-  finally { preparingBrowser.value = false; await refreshBrowserStatus().catch(() => {}) }
+  try { if (scenarioId) await prepareScenario(scenarioId); if (current()) await action() }
+  finally {
+    if (request === browserOperation) {
+      preparingBrowser.value = false; browserOwner = undefined
+      if (sameProject()) await refreshBrowserStatus().catch(() => {})
+    }
+  }
 }
 let timer: number | undefined
 let assetsRequest = 0
@@ -63,6 +75,23 @@ let reportRequest = 0
 const reportExecutionId = ref('')
 const reportError = ref('')
 const loadError = ref('')
+let disposed = false
+let projectRevision = 0
+let saveRevision = 0
+function projectGuard() {
+  const project = projectId.value, revision = projectRevision
+  return () => !disposed && project === projectId.value && revision === projectRevision
+}
+function invalidateSave() {
+  saveRevision++; saving.value = false
+  if (browserOwner && !browserOwner()) { browserOperation++; browserOwner = undefined; preparingBrowser.value = false }
+}
+watch([profileVisible, objectVisible, scenarioVisible, executeVisible, scheduleVisible], invalidateSave, { flush: 'sync' })
+watch(projectId, () => {
+  if (preparingBrowser.value && localDesktop) void cancelBrowserPreparation()
+  projectRevision++; preparationGeneration++; assetsRequest++; invalidateSave(); closeReport()
+  profileVisible.value = objectVisible.value = scenarioVisible.value = executeVisible.value = scheduleVisible.value = false
+}, { flush: 'sync' })
 const profileForm = reactive({ id: '', name: '', browser: 'chromium' as Profile['browser'], baseUrl: '', viewportWidth: 1440, viewportHeight: 900, enabled: true })
 const objectForm = reactive({ id: '', name: '', selectorValue: '', description: '' })
 const scenarioForm = reactive<{ id: string; name: string; description: string; browserProfileId: string; failureStrategy: 'STOP' | 'CONTINUE'; variablesText: string; steps: Step[] }>({ id: '', name: '', description: '', browserProfileId: '', failureStrategy: 'STOP', variablesText: '{}', steps: [] })
@@ -81,59 +110,133 @@ const stepMeta: Record<StepType, string> = { NAVIGATE: '导航', FILL: '填写',
 const date = (value?: string) => value ? new Intl.DateTimeFormat('zh-CN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : '—'
 const size = (value: number) => value < 1024 ? `${value} B` : `${(value / 1024 / 1024).toFixed(1)} MB`
 async function read<T>(url: string, init?: RequestInit): Promise<T> { const response = await fetch(url, { credentials: 'include', ...init }); const body = await response.json().catch(() => ({})) as Envelope<T> & { message?: string }; if (!response.ok) throw new Error(body.message ?? '请求失败，请稍后重试'); return body.data }
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> { const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf'); return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) }) }
-async function loadAssets() { if (!projectId.value) return; const request = ++assetsRequest; const project = projectId.value; const base = `/api/v1/projects/${project}/ui-automation`; const [profileData, objectData, scenarioData, executionData, runnerData, planData, scheduleData] = await Promise.all([read<Profile[]>(`${base}/browser-profiles`), read<PageObject[]>(`${base}/page-objects`), read<Scenario[]>(`${base}/scenarios`), read<Execution[]>(`${base}/executions`), read<Runner[]>(`${base}/runner-status`), read<FunctionalPlan[]>(`/api/v1/projects/${projectId.value}/functional/plans`), read<Schedule[]>(`${base}/schedules`)]); if (request !== assetsRequest || project !== projectId.value) return; loadError.value = ''; profiles.value = profileData; pageObjects.value = objectData; scenarios.value = scenarioData; executions.value = executionData; runners.value = runnerData; functionalPlans.value = planData; schedules.value = scheduleData; if (!scenarios.value.some((item) => item.id === selectedScenarioId.value)) selectedScenarioId.value = scenarios.value[0]?.id ?? '' }
-async function load() { loading.value = true; try { context.value = await read<Context>('/api/v1/access/context'); projectId.value = session.resolveProjectId(projects.value); await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '加载 Web UI 自动化资源失败') } finally { loading.value = false } }
-async function changeProject() { preparationGeneration++; assetsRequest++; closeReport(); profileVisible.value = objectVisible.value = scenarioVisible.value = executeVisible.value = scheduleVisible.value = false; profiles.value = []; pageObjects.value = []; scenarios.value = []; functionalPlans.value = []; schedules.value = []; executions.value = []; runners.value = []; executionScenario.value = null; selectedScenarioId.value = ''; loadError.value = ''; try { await loadAssets() } catch (error) { Message.error(error instanceof Error ? error.message : '切换项目失败') } }
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, current?: () => boolean): Promise<T> {
+  const content = body === undefined ? undefined : JSON.stringify(body)
+  const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
+  if (current && !current()) throw new Error('操作已取消，请重新确认。')
+  return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: content })
+}
+async function loadAssets(owner: () => boolean = () => true) {
+  if (disposed || !projectId.value || !owner()) return
+  const request = ++assetsRequest, project = projectId.value, sameProject = projectGuard()
+  const current = () => sameProject() && request === assetsRequest && owner()
+  const base = `/api/v1/projects/${project}/ui-automation`
+  try {
+    const [profileData, objectData, scenarioData, executionData, runnerData, planData, scheduleData] = await Promise.all([
+      read<Profile[]>(`${base}/browser-profiles`), read<PageObject[]>(`${base}/page-objects`), read<Scenario[]>(`${base}/scenarios`),
+      read<Execution[]>(`${base}/executions`), read<Runner[]>(`${base}/runner-status`),
+      read<FunctionalPlan[]>(`/api/v1/projects/${project}/functional/plans`), read<Schedule[]>(`${base}/schedules`),
+    ])
+    if (!current()) return
+    loadError.value = ''; profiles.value = profileData; pageObjects.value = objectData; scenarios.value = scenarioData
+    executions.value = executionData; runners.value = runnerData; functionalPlans.value = planData; schedules.value = scheduleData
+    if (!scenarios.value.some(item => item.id === selectedScenarioId.value)) selectedScenarioId.value = scenarios.value[0]?.id ?? ''
+  } catch (error) { if (current()) throw error }
+}
+async function load() {
+  let current = projectGuard()
+  loading.value = true
+  try {
+    const data = await read<Context>('/api/v1/access/context')
+    if (!current()) return
+    context.value = data; projectId.value = session.resolveProjectId(projects.value); current = projectGuard()
+    await loadAssets(current)
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '加载 Web UI 自动化资源失败') }
+  finally { if (current()) loading.value = false }
+}
+async function changeProject() {
+  const current = projectGuard()
+  preparationGeneration++; assetsRequest++; closeReport()
+  profileVisible.value = objectVisible.value = scenarioVisible.value = executeVisible.value = scheduleVisible.value = false
+  profiles.value = []; pageObjects.value = []; scenarios.value = []; functionalPlans.value = []; schedules.value = []
+  executions.value = []; runners.value = []; executionScenario.value = null; selectedScenarioId.value = ''; loadError.value = ''
+  try { await loadAssets(current) } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '切换项目失败') }
+}
+async function saveDialog<T>(visible: Ref<boolean>, action: (project: string, current: () => boolean) => Promise<T>, message: string, apply?: (result: T) => void) {
+  if (disposed || saving.value || !visible.value) return false
+  const project = projectId.value, sameProject = projectGuard()
+  let revision = saveRevision
+  const current = () => sameProject() && revision === saveRevision
+  saving.value = true
+  try {
+    const result = await action(project, current)
+    if (!current()) return false
+    apply?.(result)
+    visible.value = false
+    // Own the close transition, but yield to any dialog opened while the list reloads.
+    revision = saveRevision
+    await loadAssets(current)
+    if (current()) Message.success(message)
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '保存失败') }
+  finally { if (current()) saving.value = false }
+  // Arco must not close a replacement dialog when this callback finishes late.
+  return false
+}
 function resetProfile() { Object.assign(profileForm, { id: '', name: '', browser: 'chromium', baseUrl: '', viewportWidth: 1440, viewportHeight: 900, enabled: true }) }
 function editProfile(item: Profile) { Object.assign(profileForm, item); profileVisible.value = true }
-async function saveProfile() { saving.value = true; try { const payload = { ...profileForm }; const base = `/api/v1/projects/${projectId.value}/ui-automation/browser-profiles`; await mutate<Profile>(profileForm.id ? `${base}/${profileForm.id}` : base, profileForm.id ? 'PUT' : 'POST', payload); profileVisible.value = false; await loadAssets(); Message.success('浏览器配置已保存'); return true } catch (error) { Message.error(error instanceof Error ? error.message : '保存失败'); return false } finally { saving.value = false } }
+async function saveProfile() {
+  return saveDialog(profileVisible, (project, current) => {
+    const payload = { ...profileForm }, id = profileForm.id, base = `/api/v1/projects/${project}/ui-automation/browser-profiles`
+    return mutate<Profile>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload, current)
+  }, '浏览器配置已保存')
+}
 function resetObject() { Object.assign(objectForm, { id: '', name: '', selectorValue: '', description: '' }) }
 function editObject(item: PageObject) { Object.assign(objectForm, item); objectVisible.value = true }
-async function saveObject() { saving.value = true; try { const base = `/api/v1/projects/${projectId.value}/ui-automation/page-objects`; await mutate<PageObject>(objectForm.id ? `${base}/${objectForm.id}` : base, objectForm.id ? 'PUT' : 'POST', objectForm); objectVisible.value = false; await loadAssets(); Message.success('页面对象已保存'); return true } catch (error) { Message.error(error instanceof Error ? error.message : '保存失败'); return false } finally { saving.value = false } }
+async function saveObject() {
+  return saveDialog(objectVisible, (project, current) => {
+    const payload = { ...objectForm }, id = objectForm.id, base = `/api/v1/projects/${project}/ui-automation/page-objects`
+    return mutate<PageObject>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload, current)
+  }, '页面对象已保存')
+}
 function defaultStep(type: StepType = 'NAVIGATE'): Step { const id = `step-${Date.now().toString(36)}-${scenarioForm.steps.length + 1}`; if (type === 'NAVIGATE') return { id, type, name: '打开页面', url: '/' }; if (type === 'WAIT') return { id, type, name: '等待页面稳定', timeoutMillis: 1000 }; if (type === 'SCREENSHOT') return { id, type, name: '采集页面截图' }; return { id, type, name: stepMeta[type], selector: '', timeoutMillis: 10000 } }
 function resetScenario() { Object.assign(scenarioForm, { id: '', name: '', description: '', browserProfileId: profiles.value.find(item => item.enabled)?.id ?? '', failureStrategy: 'STOP', variablesText: '{}', steps: [defaultStep()] }) }
 function openScenario() { resetScenario(); scenarioVisible.value = true }
 function editScenario(item: Scenario) { Object.assign(scenarioForm, { id: item.id, name: item.name, description: item.description, browserProfileId: item.browserProfileId, failureStrategy: item.failureStrategy, variablesText: JSON.stringify(item.variables, null, 2), steps: item.steps.map((step) => ({ ...step })) }); scenarioVisible.value = true }
 function selectorHint(step: Step) { return step.pageObjectId ? `引用页面对象：${pageObjects.value.find((item) => item.id === step.pageObjectId)?.name ?? '已删除'}` : '直接 CSS / Playwright 定位器' }
 function requiresSelector(type: StepType) { return ['FILL', 'CLICK', 'ASSERT_VISIBLE', 'ASSERT_TEXT'].includes(type) }
-async function saveScenario() { saving.value = true; try { let variables: Record<string, string>; try { variables = JSON.parse(scenarioForm.variablesText || '{}') } catch { throw new Error('场景变量必须是 JSON 对象') }; if (!variables || Array.isArray(variables) || typeof variables !== 'object' || Object.values(variables).some(value => typeof value !== 'string')) throw new Error('场景变量必须是字符串值的 JSON 对象'); const payload = { browserProfileId: scenarioForm.browserProfileId, name: scenarioForm.name, description: scenarioForm.description, failureStrategy: scenarioForm.failureStrategy, variables, steps: scenarioForm.steps }; const base = `/api/v1/projects/${projectId.value}/ui-automation/scenarios`; const saved = await mutate<Scenario>(scenarioForm.id ? `${base}/${scenarioForm.id}` : base, scenarioForm.id ? 'PUT' : 'POST', payload); scenarioVisible.value = false; selectedScenarioId.value = saved.id; await loadAssets(); Message.success('Web UI 场景已保存'); return true } catch (error) { Message.error(error instanceof Error ? error.message : '保存失败'); return false } finally { saving.value = false } }
+async function saveScenario() {
+  return saveDialog(scenarioVisible, (project, current) => {
+    let variables: Record<string, string>
+    try { variables = JSON.parse(scenarioForm.variablesText || '{}') } catch { throw new Error('场景变量必须是 JSON 对象') }
+    if (!variables || Array.isArray(variables) || typeof variables !== 'object' || Object.values(variables).some(value => typeof value !== 'string')) throw new Error('场景变量必须是字符串值的 JSON 对象')
+    const id = scenarioForm.id, base = `/api/v1/projects/${project}/ui-automation/scenarios`
+    const payload = { browserProfileId: scenarioForm.browserProfileId, name: scenarioForm.name, description: scenarioForm.description,
+      failureStrategy: scenarioForm.failureStrategy, variables, steps: scenarioForm.steps.map(step => ({ ...step })) }
+    return mutate<Scenario>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload, current)
+  }, 'Web UI 场景已保存', saved => { selectedScenarioId.value = saved.id })
+}
 function openExecution(item: Scenario) { executionScenario.value = item; Object.assign(executeForm, { timeoutSeconds: 300, functionalPlanId: '' }); executeVisible.value = true }
 async function execute() {
-  if (!executionScenario.value || saving.value) return false
-  const scenarioId = executionScenario.value.id
+  if (disposed || !executeVisible.value || !executionScenario.value || saving.value) return false
+  const scenarioId = executionScenario.value.id, project = projectId.value, revision = saveRevision, sameProject = projectGuard()
+  const current = () => sameProject() && revision === saveRevision && executeVisible.value
   const payload = { timeoutSeconds: executeForm.timeoutSeconds, functionalPlanId: executeForm.functionalPlanId || null }
   saving.value = true
   try {
     await withBrowser(scenarioId, async () => {
-      const execution = await mutate<Execution>(`/api/v1/projects/${projectId.value}/ui-automation/scenarios/${scenarioId}/executions`, 'POST', payload)
-      executions.value.unshift(execution); executeVisible.value = false
-      Message.success('场景已进入 Playwright Runner 队列')
-    })
-    return true
-  } catch (error) { Message.error(error instanceof Error ? error.message : '提交执行失败'); return false }
-  finally { saving.value = false }
+      const execution = await mutate<Execution>(`/api/v1/projects/${project}/ui-automation/scenarios/${scenarioId}/executions`, 'POST', payload, current)
+      if (!current()) return
+      executions.value.unshift(execution)
+      Message.success('场景已进入 Playwright Runner 队列'); executeVisible.value = false
+    }, current)
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '提交执行失败') }
+  finally { if (current()) saving.value = false }
+  return false
 }
 async function cancelExecution(item: Execution) { try { const updated = await mutate<Execution>(`/api/v1/projects/${projectId.value}/ui-automation/executions/${item.id}/cancel`, 'POST'); Object.assign(item, updated); Message.success(updated.status === 'CANCELLED' ? '任务已取消' : '已向 Runner 发出取消指令') } catch (error) { Message.error(error instanceof Error ? error.message : '取消失败') } }
 async function retryExecution(item: Execution) { try { await withBrowser(item.scenarioId, async () => { const execution = await mutate<Execution>(`/api/v1/projects/${projectId.value}/ui-automation/executions/${item.id}/retry`, 'POST'); executions.value.unshift(execution); Message.success('失败执行已重新排队') }) } catch (error) { Message.error(error instanceof Error ? error.message : '重试失败') } }
 function resetSchedule() { Object.assign(scheduleForm, { id: '', scenarioId: selectedScenarioId.value || scenarios.value[0]?.id || '', functionalPlanId: '', name: '', cronExpression: '0 0 9 ? * MON-FRI', timezone: 'Asia/Shanghai', timeoutSeconds: 300, maxRetryAttempts: 1, retryBackoffSeconds: 30, enabled: true }) }
 function editSchedule(item: Schedule) { Object.assign(scheduleForm, { ...item, functionalPlanId: item.functionalPlanId ?? '' }); scheduleVisible.value = true }
 async function saveSchedule() {
-  if (saving.value) return false
-  saving.value = true
-  const id = scheduleForm.id
-  const payload = { ...scheduleForm, functionalPlanId: scheduleForm.functionalPlanId || null }
-  try {
+  return saveDialog(scheduleVisible, async (project, current) => {
+    const id = scheduleForm.id, payload = { ...scheduleForm, functionalPlanId: scheduleForm.functionalPlanId || null }
     await withBrowser(payload.enabled ? payload.scenarioId : '', async () => {
       if (JSON.stringify(payload) !== JSON.stringify({ ...scheduleForm, functionalPlanId: scheduleForm.functionalPlanId || null }))
         throw new Error('定时计划配置已变化，请重新确认后保存。')
-      const base = `/api/v1/projects/${projectId.value}/ui-automation/schedules`
-      await mutate<Schedule>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload)
-      scheduleVisible.value = false; await loadAssets(); Message.success('定时计划已保存并同步到 Quartz')
-    })
-    return true
-  } catch (error) { Message.error(error instanceof Error ? error.message : '保存定时计划失败'); return false }
-  finally { saving.value = false }
+      const base = `/api/v1/projects/${project}/ui-automation/schedules`
+      await mutate<Schedule>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload, current)
+    }, current)
+  }, '定时计划已保存并同步到 Quartz')
 }
 
 async function runSchedule(item: Schedule) { try { await withBrowser(item.scenarioId, async () => { const execution = await mutate<Execution>(`/api/v1/projects/${projectId.value}/ui-automation/schedules/${item.id}/run`, 'POST'); executions.value.unshift(execution); Message.success('定时计划已进入执行队列') }) } catch (error) { Message.error(error instanceof Error ? error.message : '立即执行失败') } }
@@ -160,7 +263,7 @@ onMounted(() => {
     if (reportVisible.value) void loadReport()
   }, 3000)
 })
-onBeforeUnmount(() => { preparationGeneration++; if (preparingBrowser.value) void cancelBrowserPreparation(); if (timer) window.clearInterval(timer); assetsRequest++; closeReport() })
+onBeforeUnmount(() => { const preparing = preparingBrowser.value; disposed = true; invalidateSave(); preparationGeneration++; if (preparing) void cancelBrowserPreparation(); if (timer) window.clearInterval(timer); assetsRequest++; closeReport() })
 </script>
 
 <template>
@@ -177,10 +280,10 @@ onBeforeUnmount(() => { preparationGeneration++; if (preparingBrowser.value) voi
     <section class="summary panel"><div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配' }}</strong><small>{{ selectedProject?.code ?? '—' }}</small></div><a-select v-model="projectId" :style="{ width: '230px' }" @change="changeProject"><a-option v-for="item in projects" :key="item.id" :value="item.id">{{ item.name }}</a-option></a-select><div><span>浏览器配置</span><strong>{{ profiles.length }}</strong><small>{{ profiles.filter((item) => item.enabled).length }} 个已启用</small></div><div><span>页面对象</span><strong>{{ pageObjects.length }}</strong><small>项目级可复用</small></div><div><span>场景</span><strong>{{ scenarios.length }}</strong><small>版本冻结执行清单</small></div><div class="runner"><span>Playwright Runner</span><strong :class="{ ready: executable.length }">{{ executable.length ? `${executable.length} 个已就绪` : '执行禁用' }}</strong><small>{{ activeRunner ? `${activeRunner.runnerId} · ${activeRunner.trustStatus}` : '等待安全心跳' }}</small></div></section>
     <a-alert v-if="!localDesktop" :type="executable.length ? 'success' : 'info'" :show-icon="true" class="safety-alert">{{ executable.length ? '可信 Runner 已启用。每个场景在独立浏览器上下文中运行，目标 Origin、时限、内存和写入工件均受边界约束。' : 'Runner 尚未启用执行。请先在系统配置中设置 ui-automation.allowed-origins，再为受限 Runner 注入控制面地址和同一目标 Origin 白名单；提交任务不会在当前状态访问任何网页。' }}</a-alert>
     <section class="assets panel"><a-tabs default-active-key="profiles"><a-tab-pane key="profiles" title="浏览器项目"><template #title>浏览器项目 <a-badge :count="profiles.length" :max-count="99" /></template><div class="toolbar"><span>基准 URL 必须命中系统级 Origin 白名单。</span><a-button type="primary" size="small" @click="resetProfile(); profileVisible = true"><icon-plus /> 新建浏览器项目</a-button></div><a-table :data="profiles" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="名称" data-index="name" /><a-table-column title="浏览器"><template #cell="{ record }"><a-tag color="purple">{{ record.browser }}</a-tag></template></a-table-column><a-table-column title="基准 URL"><template #cell="{ record }"><code>{{ record.baseUrl }}</code></template></a-table-column><a-table-column title="视口"><template #cell="{ record }">{{ record.viewportWidth }} × {{ record.viewportHeight }}</template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="record.enabled ? 'green' : 'gray'">{{ record.enabled ? '已启用' : '已停用' }}</a-tag></template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="editProfile(record)">编辑</a-button></template></a-table-column></template></a-table><a-empty v-if="!loading && profiles.length === 0" description="尚未配置浏览器项目" /></a-tab-pane>
-      <a-tab-pane key="objects" title="页面对象"><div class="toolbar"><span>用稳定的定位器抽离页面元素，场景保存时会冻结实际定位器。</span><a-button type="primary" size="small" @click="resetObject(); objectVisible = true"><icon-plus /> 新建页面对象</a-button></div><a-table :data="pageObjects" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="名称" data-index="name" /><a-table-column title="定位器"><template #cell="{ record }"><code>{{ record.selectorValue }}</code></template></a-table-column><a-table-column title="说明" data-index="description" /><a-table-column title="更新于"><template #cell="{ record }">{{ date(record.updatedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="editObject(record)">编辑</a-button></template></a-table-column></template></a-table><a-empty v-if="!loading && pageObjects.length === 0" description="可先创建登录按钮、搜索框等页面对象" /></a-tab-pane>
+      <a-tab-pane key="objects" title="页面对象"><div class="toolbar"><span>场景保存页面对象引用，执行清单在入队时解析并冻结实际定位器。</span><a-button type="primary" size="small" @click="resetObject(); objectVisible = true"><icon-plus /> 新建页面对象</a-button></div><a-table :data="pageObjects" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="名称" data-index="name" /><a-table-column title="定位器"><template #cell="{ record }"><code>{{ record.selectorValue }}</code></template></a-table-column><a-table-column title="说明" data-index="description" /><a-table-column title="更新于"><template #cell="{ record }">{{ date(record.updatedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-button size="mini" @click="editObject(record)">编辑</a-button></template></a-table-column></template></a-table><a-empty v-if="!loading && pageObjects.length === 0" description="可先创建登录按钮、搜索框等页面对象" /></a-tab-pane>
       <a-tab-pane key="schedules"><template #title>定时执行 <a-badge :count="schedules.length" :max-count="99" /></template><div class="toolbar"><span>Quartz 使用项目内固定场景；失败按配置退避重试，停止或取消不会自动重试。</span><a-button type="primary" size="small" @click="resetSchedule(); scheduleVisible = true"><icon-plus /> 新建定时计划</a-button></div><a-table :data="schedules" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="计划" data-index="name" /><a-table-column title="场景"><template #cell="{ record }">{{ scenarios.find((item) => item.id === record.scenarioId)?.name ?? '已删除' }}</template></a-table-column><a-table-column title="功能测试计划"><template #cell="{ record }">{{ record.functionalPlanName || '未关联' }}</template></a-table-column><a-table-column title="Cron"><template #cell="{ record }"><code>{{ record.cronExpression }}</code><small class="code">{{ record.timezone }}</small></template></a-table-column><a-table-column title="重试"><template #cell="{ record }">{{ record.maxRetryAttempts }} 次 · {{ record.retryBackoffSeconds }}s</template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="record.enabled ? 'green' : 'gray'">{{ record.enabled ? '已启用' : '已停用' }}</a-tag><small v-if="record.lastExecutionStatus" class="code">最近：{{ statusText(record.lastExecutionStatus) }}</small></template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button size="mini" :disabled="!record.enabled || (!localDesktop && !executable.length) || preparingBrowser" @click="runSchedule(record)">立即执行</a-button><a-button size="mini" @click="editSchedule(record)">编辑</a-button></a-space></template></a-table-column></template></a-table><a-empty v-if="!loading && schedules.length === 0" description="尚未配置定时执行计划" /></a-tab-pane></a-tabs></section>
     <section class="workspace"><aside class="scenario-list panel"><div class="section-heading"><div><span class="eyebrow">SCENARIOS</span><h3>自动化场景</h3></div><a-button type="text" size="small" @click="resetScenario(); scenarioVisible = true"><icon-plus /></a-button></div><a-spin :loading="loading"><button v-for="item in scenarios" :key="item.id" class="scenario-item" :class="{ selected: selectedScenarioId === item.id }" @click="selectedScenarioId = item.id"><div><strong>{{ item.name }}</strong><small>{{ item.steps.length }} 步 · {{ item.failureStrategy === 'CONTINUE' ? '继续执行' : '失败停止' }}</small></div><a-tag size="small">v{{ item.version }}</a-tag></button><a-empty v-if="!loading && !scenarios.length" description="尚无场景" /></a-spin></aside>
-      <main v-if="selectedScenario" class="scenario-detail"><section class="scenario-header panel"><div><span class="eyebrow">SCENARIO · V{{ selectedScenario.version }}</span><h2>{{ selectedScenario.name }}</h2><p>{{ selectedScenario.description || '暂未填写场景说明。' }}</p></div><a-space><a-button :disabled="(!localDesktop && !executable.length) || preparingBrowser" @click="openExecution(selectedScenario)"><icon-play-circle /> 执行场景</a-button><a-button type="primary" @click="editScenario(selectedScenario)"><icon-edit /> 编辑编排</a-button></a-space></section><section class="scenario-overview panel"><div><span>浏览器项目</span><strong>{{ profiles.find((item) => item.id === selectedScenario?.browserProfileId)?.name ?? '已删除' }}</strong></div><div><span>失败策略</span><strong>{{ selectedScenario.failureStrategy === 'CONTINUE' ? '继续后续步骤' : '首次失败停止' }}</strong></div><div><span>变量</span><strong>{{ Object.keys(selectedScenario.variables).length }}</strong></div><div><span>冻结步骤</span><strong>{{ selectedScenario.steps.length }}</strong></div></section><section class="step-panel panel"><div class="section-heading"><div><span class="eyebrow">DECLARATIVE FLOW</span><h3>步骤编排</h3></div><span class="step-boundary">无脚本 · 无任意网络 · 受控 Runner</span></div><ol class="step-list"><li v-for="(step, index) in selectedScenario.steps" :key="step.id"><span class="step-index">{{ index + 1 }}</span><article><header><a-tag color="arcoblue">{{ stepMeta[step.type] }}</a-tag><strong>{{ step.name }}</strong><small>{{ step.timeoutMillis ? `${step.timeoutMillis}ms` : '默认 30s' }}</small></header><code v-if="step.url">{{ step.url }}</code><code v-if="step.selector">{{ step.selector }}</code><p v-if="step.value">填写：{{ step.value }}</p><p v-if="step.expectedText">期望文本：{{ step.expectedText }}</p><p v-if="step.pageObjectId">页面对象：{{ pageObjects.find((item) => item.id === step.pageObjectId)?.name ?? '已解析到执行清单' }}</p></article></li></ol></section><section class="execution-panel panel"><div class="section-heading"><div><span class="eyebrow">RUN HISTORY</span><h3>执行记录</h3></div><a-button size="small" @click="loadAssets"><icon-refresh /> 刷新</a-button></div><a-table :data="executions.filter((item) => item.scenarioId === selectedScenario?.id)" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="任务"><template #cell="{ record }"><strong>{{ record.taskId }}</strong><small v-if="record.retryAttempt" class="code">重试 #{{ record.retryAttempt }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusText(record.status) }}</a-tag><small class="code">{{ record.statusCode }}</small></template></a-table-column><a-table-column title="关联"><template #cell="{ record }"><span>{{ record.functionalPlanName || '未关联计划' }}</span><small v-if="record.scheduleId" class="code">定时计划</small></template></a-table-column><a-table-column title="Runner" data-index="runnerId" /><a-table-column title="提交时间"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button size="mini" @click="openReport(record)">报告</a-button><a-button v-if="['QUEUED','ACCEPTED','RUNNING','CANCELLING'].includes(record.status)" size="mini" status="warning" :disabled="record.status === 'CANCELLING'" @click="cancelExecution(record)">取消</a-button><a-button v-if="['FAILED','REJECTED','TIMED_OUT'].includes(record.status)" size="mini" @click="retryExecution(record)">重试</a-button></a-space></template></a-table-column></template></a-table><a-empty v-if="!executions.some((item) => item.scenarioId === selectedScenario?.id)" description="当前场景暂无执行记录" /></section></main>
+      <main v-if="selectedScenario" class="scenario-detail"><section class="scenario-header panel"><div><span class="eyebrow">SCENARIO · V{{ selectedScenario.version }}</span><h2>{{ selectedScenario.name }}</h2><p>{{ selectedScenario.description || '暂未填写场景说明。' }}</p></div><a-space><a-button :disabled="(!localDesktop && !executable.length) || preparingBrowser" @click="openExecution(selectedScenario)"><icon-play-circle /> 执行场景</a-button><a-button type="primary" @click="editScenario(selectedScenario)"><icon-edit /> 编辑编排</a-button></a-space></section><section class="scenario-overview panel"><div><span>浏览器项目</span><strong>{{ profiles.find((item) => item.id === selectedScenario?.browserProfileId)?.name ?? '已删除' }}</strong></div><div><span>失败策略</span><strong>{{ selectedScenario.failureStrategy === 'CONTINUE' ? '继续后续步骤' : '首次失败停止' }}</strong></div><div><span>变量</span><strong>{{ Object.keys(selectedScenario.variables).length }}</strong></div><div><span>已保存步骤</span><strong>{{ selectedScenario.steps.length }}</strong></div></section><section class="step-panel panel"><div class="section-heading"><div><span class="eyebrow">DECLARATIVE FLOW</span><h3>步骤编排</h3></div><span class="step-boundary">无脚本 · 无任意网络 · 受控 Runner</span></div><ol class="step-list"><li v-for="(step, index) in selectedScenario.steps" :key="step.id"><span class="step-index">{{ index + 1 }}</span><article><header><a-tag color="arcoblue">{{ stepMeta[step.type] }}</a-tag><strong>{{ step.name }}</strong><small>{{ step.timeoutMillis ? `${step.timeoutMillis}ms` : '默认 30s' }}</small></header><code v-if="step.url">{{ step.url }}</code><code v-if="step.selector">{{ step.selector }}</code><p v-if="step.value">填写：{{ step.value }}</p><p v-if="step.expectedText">期望文本：{{ step.expectedText }}</p><p v-if="step.pageObjectId">页面对象：{{ pageObjects.find((item) => item.id === step.pageObjectId)?.name ?? '已解析到执行清单' }}</p></article></li></ol></section><section class="execution-panel panel"><div class="section-heading"><div><span class="eyebrow">RUN HISTORY</span><h3>执行记录</h3></div><a-button size="small" @click="loadAssets()"><icon-refresh /> 刷新</a-button></div><a-table :data="executions.filter((item) => item.scenarioId === selectedScenario?.id)" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="任务"><template #cell="{ record }"><strong>{{ record.taskId }}</strong><small v-if="record.retryAttempt" class="code">重试 #{{ record.retryAttempt }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusText(record.status) }}</a-tag><small class="code">{{ record.statusCode }}</small></template></a-table-column><a-table-column title="关联"><template #cell="{ record }"><span>{{ record.functionalPlanName || '未关联计划' }}</span><small v-if="record.scheduleId" class="code">定时计划</small></template></a-table-column><a-table-column title="Runner" data-index="runnerId" /><a-table-column title="提交时间"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button size="mini" @click="openReport(record)">报告</a-button><a-button v-if="['QUEUED','ACCEPTED','RUNNING','CANCELLING'].includes(record.status)" size="mini" status="warning" :disabled="record.status === 'CANCELLING'" @click="cancelExecution(record)">取消</a-button><a-button v-if="['FAILED','REJECTED','TIMED_OUT'].includes(record.status)" size="mini" @click="retryExecution(record)">重试</a-button></a-space></template></a-table-column></template></a-table><a-empty v-if="!executions.some((item) => item.scenarioId === selectedScenario?.id)" description="当前场景暂无执行记录" /></section></main>
       <main v-else class="panel empty"><a-empty description="选择或创建一个 Web UI 自动化场景"><template #extra><a-button type="primary" @click="resetScenario(); scenarioVisible = true">创建场景</a-button></template></a-empty></main></section>
     <a-modal v-model:visible="profileVisible" :title="profileForm.id ? '编辑浏览器项目' : '新建浏览器项目'" :ok-loading="saving" :on-before-ok="saveProfile"><a-form :model="profileForm" layout="vertical"><a-form-item label="配置名称" required><a-input v-model="profileForm.name" placeholder="例如：订单 Web · Chromium" /></a-form-item><div class="two"><a-form-item label="浏览器"><a-select v-model="profileForm.browser"><a-option value="chromium">Chromium</a-option><a-option value="firefox">Firefox</a-option><a-option value="webkit">WebKit</a-option></a-select></a-form-item><a-form-item label="启用状态"><a-switch v-model="profileForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item></div><a-form-item label="基准 URL" required><a-input v-model="profileForm.baseUrl" placeholder="https://web.example.test" /><template #extra>只能使用系统配置 ui-automation.allowed-origins 中列出的 Origin。</template></a-form-item><div class="two"><a-form-item label="视口宽度"><a-input-number v-model="profileForm.viewportWidth" :min="320" :max="3840" /></a-form-item><a-form-item label="视口高度"><a-input-number v-model="profileForm.viewportHeight" :min="320" :max="2160" /></a-form-item></div></a-form></a-modal>
     <a-modal v-model:visible="objectVisible" :title="objectForm.id ? '编辑页面对象' : '新建页面对象'" :ok-loading="saving" :on-before-ok="saveObject"><a-form :model="objectForm" layout="vertical"><a-form-item label="名称" required><a-input v-model="objectForm.name" placeholder="例如：登录按钮" /></a-form-item><a-form-item label="定位器" required><a-input v-model="objectForm.selectorValue" placeholder="例如：[data-testid='login-submit']" /></a-form-item><a-form-item label="说明"><a-textarea v-model="objectForm.description" :auto-size="{ minRows: 2, maxRows: 4 }" /></a-form-item></a-form></a-modal>

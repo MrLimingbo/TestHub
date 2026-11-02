@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-30",
+  "status": "APPROVED",
+  "basis": "用户消息：审核通过 继续",
+  "approvedObservations": [
+    "OBS-03B-E002",
+    "OBS-03D-E006",
+    "OBS-07-S005",
+    "OBS-07-E013",
+    "OBS-08-E011",
+    "OBS-16-E003"
+  ],
+  "approvedRules": {
+    "D02": "A",
+    "D05": "A/P0",
+    "D11": "A",
+    "D12": "A/30d/L0/G0",
+    "D03": "A",
+    "D25": "A/5s"
+  },
+  "acceptedResults": {
+    "formalCases": {
+      "total": 72,
+      "positive": 29,
+      "negative": 43,
+      "passed": 72,
+      "failed": 0,
+      "skipped": 0
+    },
+    "mysqlFull": {
+      "tests": 1035,
+      "passed": 1035,
+      "failed": 0,
+      "skipped": 0
+    },
+    "frontendFull": {
+      "tests": 826,
+      "passed": 826,
+      "failed": 0
+    }
+  },
+  "executionSnapshotPreserved": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-10-29/p1-fixes-r1/summary.json",
+  "snapshotSha256": "35d0a653f7d76864f92d0c6fdc79a89f299b59b69ce000d3e00509fcf833c3a0",
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "doesNotAuthorizeUnconfirmedRulesOrEnvironmentPreparation": true,
+  "note": "按观察项ID批准P1六项；D03共享的OBS-03B-E005未随之关闭。后续仅准备新的规则审核包，尚不实施。"
+}

@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-02",
+  "ownedQaNodeProcessesRemaining": 0,
+  "ownedNativeJvmStopped": true,
+  "headlessBrowserClosed": true,
+  "staticFixtureServerClosed": true,
+  "nativeHttpTemporaryWorkspacesRemaining": 0,
+  "H2WrapperWorkspaceRemovalConfirmed": true,
+  "capturedH2WorkspacePathsAbsent": 1,
+  "targetedH2WrapperCleanupInFinally": true,
+  "MySQLWrapperOwnedContainersNetworksVolumesRemoved": true,
+  "MySQLTemporaryFilesRemoved": true,
+  "rawSurefireXmlAndTxtRemoved": 296,
+  "rawWorkFolderEntriesRemoved": 55,
+  "sanitizedOutputFilesRetained": [
+    "summary.json",
+    "VERIFICATION-MANIFEST.json",
+    "CLEANUP.json"
+  ],
+  "sanitizedReportFolder": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-mock-fixes-r1",
+  "screenshotsTracesOrTemporaryPackagesRetained": false,
+  "currentJarDistAndRuntimeRetained": true,
+  "desktopRuntimePreviousCopies": 0,
+  "userOrSharedWorkspacesTouched": false,
+  "unrelatedOldQaWorkspacesTouched": false,
+  "sharedServicesStopped": false,
+  "scope": "Only this batch owned files/reports/processes; unknown old .testhub data and shared services preserved."
+}

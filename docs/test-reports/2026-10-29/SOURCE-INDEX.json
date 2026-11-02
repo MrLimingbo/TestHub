@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-29",
+  "files": [
+    {
+      "path": ".github/workflows/desktop-release.yml",
+      "sha256": "f02f09d1822125b49bf2a3899a3633d6f82aeaebc60ec06b4c6b6c3c569124e8"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "b5614748b24f5a46f051d15e9e0648097ce6b97d9fdb70b267e204f947ff3c25"
+    },
+    {
+      "path": "apps/desktop/package.json",
+      "sha256": "8edc629e89e581bb9f9319f6f32dd6aa4f4b13355313c3a1fc9f232d8acfe4d2"
+    },
+    {
+      "path": "docs/desktop-packaging.md",
+      "sha256": "4eec6db4ac7b6d75bc47e801a325a3775c2a8cfc3fca74b85f132f8cf124de60"
+    },
+    {
+      "path": "docs/mobile-automation-qa-2026-09-16.md",
+      "sha256": "e0117c17dbed024e99a74a787e7ce294091a2c62138e7ca486d1c6a5ce522052"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/environment-blockers.json",
+      "sha256": "7fec867fc09f91d5651ebff13def51ee76a8e570db5f6515742d34bfab95ca4f"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/observations.json",
+      "sha256": "98ae869bd3a800f28bacfe5900345c4c22cc7405da03dc2d7cb7583f590ba19a"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/summary.json",
+      "sha256": "72d237ba2e4f0a0e9729b41384efdf66e0dbcc457bad7be17c84612559ad7294"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/unconfirmed-risk.json",
+      "sha256": "aa971f6b174cf7acd5ecd089fb0200bda899cb0ca23ad74fda03040fb61975c8"
+    },
+    {
+      "path": "output/qa-20261029/observation-triage/decisions.json",
+      "sha256": "7d306804eef8ce687fdcb8be49ef21ac8a8cafe1f9cdf12b4d50be95ca3aeeaf"
+    },
+    {
+      "path": "output/qa-20261029/observation-triage/environment-preparation.json",
+      "sha256": "14189759fd555162404e698a28a5b01f218cf0db2ec7f8b20e876226fa74d070"
+    },
+    {
+      "path": "output/qa-20261029/observation-triage/triage-spec.json",
+      "sha256": "34adb46bdc1c572848fd1d4ddc7b3b0b0c57cb0bad2f779690106b86c704d0ba"
+    },
+    {
+      "path": "services/appium-runner/package.json",
+      "sha256": "1f6bd3abb3335e604372a872be11eccdbc837fcd15c656726058329566b4bebf"
+    },
+    {
+      "path": "services/appium-runner/src/runner.js",
+      "sha256": "ee8b500c95a99d2275df6b0557b8bab90dc4081ca58e1d0f3cffcef944c40b40"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/apidebug/ApiDebugService.java",
+      "sha256": "79f7ede4766a15862376977e0f7e1fc4b39eb8d827b95b4f22016040bffd2fec"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileRunnerProtocol.java",
+      "sha256": "10ee0b487844812a602a3a5fb97fe0289a7de73751309f229723d4b1bac9bfd7"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterRepository.java",
+      "sha256": "b887469c2c8a99ecd22f2b376444b19d89805ca7830c9cc43277f6a39cc2804e"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterService.java",
+      "sha256": "342174ad850731732d6137e23c0f89f91b52b6c2fb19b8374f32101ad7ca7d1c"
+    },
+    {
+      "path": "src/pages/ApiDebugPage.vue",
+      "sha256": "d95340ae5bb76ed98e075317577846e690c9d0afed7969445a2b7fe1645a5761"
+    },
+    {
+      "path": "src/pages/AuditLogPage.vue",
+      "sha256": "fc8f837e2bb98331404a1d8d58f569b15ecaf4204b944599153198d28302c26f"
+    },
+    {
+      "path": "src/pages/AutomationPage.vue",
+      "sha256": "ee5db288ce16680b352f7532040215b318f34f5513b3dcf0dbf06ab3d6a07f41"
+    },
+    {
+      "path": "src/pages/MockSharePage.vue",
+      "sha256": "a125eda3770b35b5ccc784340353f41604110807979039af6b0ae93e5845248d"
+    },
+    {
+      "path": "src/pages/NotificationTemplatesPage.vue",
+      "sha256": "4ef57102d2bf4e16780a3312880486000536103bfc00ed1bf7fd9b2a3b920d5f"
+    },
+    {
+      "path": "src/pages/PluginsPage.vue",
+      "sha256": "80fed594bc50097e9045ce138849366fa1346a8aba86ca90faa2f70f6b95cf71"
+    },
+    {
+      "path": "src/pages/ReportsPage.vue",
+      "sha256": "23fe331a0178c1175c94f1ed254f1fe851a4508887e2a53929cef8f35be21695"
+    },
+    {
+      "path": "src/pages/TasksPage.vue",
+      "sha256": "d03eff397f5cfc67d678f74803475911fbc20585a82b0cf7ba7697fa321c1b4c"
+    },
+    {
+      "path": "src/pages/UiAutomationPage.vue",
+      "sha256": "c5e1ec2057300babfd7df337c785685b12de97df8b44c44f38b608dfd0dc30d6"
+    }
+  ],
+  "purpose": "历史结果与当前代码只读核对，不替代新的功能验证",
+  "builder": "/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261029/observation-triage/build-plan.py"
+}

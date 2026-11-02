@@ -1,0 +1,288 @@
+[
+  {
+    "id": "OBS-03C-E007",
+    "moduleName": "文件管理与操作日志",
+    "priority": "P2",
+    "title": "审计刷新失败标识与成功时间",
+    "file": "src/pages/AuditLogPage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "打开“权限与审计”，等待列表成功加载。",
+      "在隔离网络夹具中使下一次审计刷新返回503，再点击刷新。",
+      "观察旧行及其时间和筛选归属；恢复成功响应后点击重试。"
+    ],
+    "previousBehavior": "旧数据仍保留，但原界面没有持续失败标识或上次成功时间，容易被误当作本次成功结果。",
+    "correctedBehavior": "保留旧行，显示旧数据、原筛选范围、上次成功时间与重试入口；首次失败不虚构成功记录，成功空结果也有成功时间；迟到响应不改当前状态。",
+    "testCaseIds": [
+      "DF-A01",
+      "DF-A02",
+      "DF-A03",
+      "DF-A04",
+      "DF-A05",
+      "DF-A06"
+    ],
+    "positive": 1,
+    "negative": 5,
+    "passed": 6,
+    "browserScenario": "UI-01",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-13-E015",
+    "moduleName": "质量报告与任务",
+    "priority": "P2",
+    "title": "超过50项目时显式选择与请求门控",
+    "file": "src/pages/ReportsPage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "使用隔离访问上下文提供51个可访问项目，打开“报表统计”。",
+      "观察初载请求；选择1个及50个项目，再清空筛选并尝试刷新或导出。",
+      "尝试选择第51项，以及打开新定时计划检查默认项目范围。"
+    ],
+    "previousBehavior": "初载会自动带入全部51项，触发超限请求；单纯清空数组又可能触发隐式全量查询。",
+    "correctedBehavior": "超过50项时先等待用户选择，查询/导出均有请求门控；限制最多50并提示，清空后暂停查询；新计划不自动填51项；50项以内保留既有全部项目语义。",
+    "testCaseIds": [
+      "DF-R01",
+      "DF-R02",
+      "DF-R03",
+      "DF-R04",
+      "DF-R05",
+      "DF-R06",
+      "DF-R07",
+      "DF-R08",
+      "DF-R09",
+      "DF-R10"
+    ],
+    "positive": 4,
+    "negative": 6,
+    "passed": 10,
+    "browserScenario": "UI-02",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-13-E017",
+    "moduleName": "质量报告与任务",
+    "priority": "P2",
+    "title": "任务保存状态按表单会话隔离",
+    "file": "src/pages/TasksPage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "打开任务草稿A并提交，在CSRF、业务保存或保存后刷新阶段分别阻塞响应。",
+      "取消/重开草稿B，填写新名称并立即保存。",
+      "先释放A的成功或失败响应，检查B的输入、保存加载和可见性，再释放B。"
+    ],
+    "previousBehavior": "全页saving被旧操作占用，重开的草稿不能独立保存；直接重置也会让旧finally错误地清除新保存状态。",
+    "correctedBehavior": "取消、创建及编辑切换时重置当前表单加载，finally只释放自己的会话；A不能阻止、解锁或关闭B，当前失败保留输入且可重试，重复点击和项目往返保护保持。",
+    "testCaseIds": [
+      "DF-S01",
+      "DF-S02",
+      "DF-S11",
+      "DF-S12",
+      "DF-S21",
+      "DF-S22",
+      "DF-S07"
+    ],
+    "positive": 1,
+    "negative": 6,
+    "passed": 7,
+    "browserScenario": "UI-04",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-07-E006",
+    "moduleName": "接口调试",
+    "priority": "P3",
+    "title": "HTTP完成通知标明原项目与执行",
+    "file": "src/pages/ApiDebugPage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "在项目A的快捷请求入口发送HTTP请求，并延迟执行结果。",
+      "切换到项目B或A/B/A并发送新请求；也覆盖离页后原请求完成。",
+      "释放A的成功或失败响应，检查通知归属、当前响应和加载状态。"
+    ],
+    "previousBehavior": "旧HTTP完成通知未标原项目与执行，切项目后容易误认为当前项目的结果。",
+    "correctedBehavior": "通知始终使用发送时项目名/ID、本页请求编号和可用的执行/历史ID；保留已提交请求及原有完成通知，离页完成也带原归属；旧响应不写当前表单、历史或加载状态。",
+    "testCaseIds": [
+      "DF-D01",
+      "DF-D02",
+      "DF-D03",
+      "DF-D04",
+      "DF-D05"
+    ],
+    "positive": 1,
+    "negative": 4,
+    "passed": 5,
+    "browserScenario": "UI-05",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-08-E012",
+    "moduleName": "接口自动化",
+    "priority": "P3",
+    "title": "本页提交提示准确说明实际范围",
+    "file": "src/components/api-automation/AutomationRunPanel.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "打开接口自动化运行面板并查看提醒开关说明。",
+      "启用开关并提交，检查本页提示和提交载荷；关闭后再次提交。",
+      "刷新页面，检查开关状态与通知/订阅请求。"
+    ],
+    "previousBehavior": "原文字容易使人误认为开关会保存或持续提醒；实际只有本页提交提示。",
+    "correctedBehavior": "界面和提示明确写明刷新后重置、不保存、不发送外部通知；开关仅控制既有本页提示，不新增通知字段、订阅、投递或持久化。",
+    "testCaseIds": [
+      "DF-N01",
+      "DF-N02",
+      "DF-N03",
+      "DF-N04"
+    ],
+    "positive": 3,
+    "negative": 1,
+    "passed": 4,
+    "browserScenario": "UI-06",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-09-E012",
+    "moduleName": "Mock",
+    "priority": "P3",
+    "title": "公开分享复制失败恢复与手动复制",
+    "file": "src/pages/MockSharePage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "打开隔离Mock公开分享，使用页面内剪贴板替身，不接触系统剪贴板。",
+      "分别令writeText拒绝、同步抛异常或完全不可用，点击复制。",
+      "检查失败反馈并手选完整地址；恢复替身后重试；覆盖切换分享后的迟到完成。"
+    ],
+    "previousBehavior": "拒绝时产生未处理异常，不可用时静默返回；地址缺少明确的完整手选入口。",
+    "correctedBehavior": "失败均被处理并提示手动复制，没有假成功；地址为可聚焦只读完整输入，聚焦可全选；成功有反馈，重试可恢复；旧分享的完成不能标记新分享。",
+    "testCaseIds": [
+      "DF-M01",
+      "DF-M02",
+      "DF-M03",
+      "DF-M04",
+      "DF-M05",
+      "DF-M06"
+    ],
+    "positive": 2,
+    "negative": 4,
+    "passed": 6,
+    "browserScenario": "UI-07",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-13-E009",
+    "moduleName": "质量报告与任务",
+    "priority": "P3",
+    "title": "任务列表刷新与新建草稿解耦",
+    "file": "src/pages/TasksPage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "成功进入任务中心，令列表刷新保持等待。",
+      "分别使用页头和工具栏新建入口打开草稿并填写名称。",
+      "释放旧列表的成功/503，及切项目往返，检查草稿与请求归属。"
+    ],
+    "previousBehavior": "列表loading会隐藏/禁用新建入口，create也会直接返回，无法在刷新期间开新草稿。",
+    "correctedBehavior": "新建仅依赖有效项目及页面生命周期，列表刷新不阻塞；迟到结果不重置草稿；切项目仍关闭旧表单；旧保存的独立性由OBS-13-E017一并回归。",
+    "testCaseIds": [
+      "DF-T01",
+      "DF-T02",
+      "DF-T03",
+      "DF-T04"
+    ],
+    "positive": 1,
+    "negative": 3,
+    "passed": 4,
+    "browserScenario": "UI-03",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-14-E004",
+    "moduleName": "通知、集成、插件与运维",
+    "priority": "P3",
+    "title": "通知列表刷新与新建模板解耦",
+    "file": "src/pages/NotificationTemplatesPage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "在有效项目打开通知与集成，延迟下一次模板列表刷新。",
+      "点击新建模板并填写新草稿名称。",
+      "释放旧刷新成功/503；另覆盖切项目、取消、旧保存完成和新保存状态。"
+    ],
+    "previousBehavior": "新建依赖列表loading，即使页头可点也不会打开；旧保存状态也可能占用新表单。",
+    "correctedBehavior": "有效项目下可在刷新中开草稿，表单会话及加载独立；旧刷新不改草稿，旧保存不关闭或解锁新会话；保留项目/CSRF保护、签名密钥处理和渠道语义。",
+    "testCaseIds": [
+      "DF-F01",
+      "DF-F02",
+      "DF-F03",
+      "DF-F04"
+    ],
+    "positive": 1,
+    "negative": 3,
+    "passed": 4,
+    "browserScenario": "UI-08",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-14-E014",
+    "moduleName": "通知、集成、插件与运维",
+    "priority": "P3",
+    "title": "插件包草稿与登记列表刷新解耦",
+    "file": "src/pages/PluginsPage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "以已有管理员能力成功加载插件中心，再阻塞下一次能力复核/登记刷新。",
+      "点击安装签名包，填写草稿；仅打开表单，不安装或启用。",
+      "释放列表成功/503，验证草稿保留；另释放能力拒绝，验证表单失效且无写入。"
+    ],
+    "previousBehavior": "刷新开始即清除allowed，配合整区遮罩，使已授权用户无法打开新包草稿。",
+    "correctedBehavior": "刷新不覆盖表单操作区，沿用已知权限直到复核完成；初次权限未知、复核失败或明确拒绝仍不开放；保留列表刷新失败清空登记的既有行为、精确签名字符及服务端验证。",
+    "testCaseIds": [
+      "DF-F11",
+      "DF-F12",
+      "DF-F13",
+      "DF-P01",
+      "DF-P02"
+    ],
+    "positive": 1,
+    "negative": 4,
+    "passed": 5,
+    "browserScenario": "UI-09",
+    "browserStatus": "PASS"
+  },
+  {
+    "id": "OBS-14-E019",
+    "moduleName": "通知、集成、插件与运维",
+    "priority": "P3",
+    "title": "适配器草稿与登记列表刷新解耦",
+    "file": "src/pages/PluginsPage.vue",
+    "originalStatus": "OPEN_POLICY_OR_SPECIFICATION",
+    "status": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+    "reproductionSteps": [
+      "以管理员成功加载适配器定义，再延迟下一次能力或登记刷新。",
+      "新建适配器，填写名称及自有配置草稿。",
+      "释放旧列表成功/503，验证不重置；覆盖权限撤销、离页和既有配置保留/格式校验。"
+    ],
+    "previousBehavior": "刷新会临时撤下管理能力和操作入口，整区加载也会遮挡新建适配器。",
+    "correctedBehavior": "已授权的新建草稿独立，定义用于表单初始化且不被迟到列表重置；失去权限时取消表单；不更改加密配置、信任或执行权限，不安装适配器工作进程。",
+    "testCaseIds": [
+      "DF-F21",
+      "DF-F22",
+      "DF-F23",
+      "DF-P11",
+      "DF-P12"
+    ],
+    "positive": 1,
+    "negative": 4,
+    "passed": 5,
+    "browserScenario": "UI-10",
+    "browserStatus": "PASS"
+  }
+]

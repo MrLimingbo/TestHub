@@ -1,0 +1,253 @@
+{
+  "status": "PROPOSED_NOT_EXECUTED",
+  "notFormalExecutedCases": true,
+  "count": 35,
+  "groups": [
+    {
+      "id": "D16-AC-01",
+      "ruleOrObservation": "D16-I",
+      "title": "有限整数等价值",
+      "expected": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-02",
+      "ruleOrObservation": "D16-I",
+      "title": "非整数不得截断",
+      "expected": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-03",
+      "ruleOrObservation": "D16-N",
+      "title": "数字字符串策略",
+      "expected": "按N-A拒绝整数字段\"10\"、\" 10 \"、\"10.0\"和错误率\"2.50\"；若选B按明示白名单验收。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-04",
+      "ruleOrObservation": "D16-I",
+      "title": "原始非有限JSON",
+      "expected": "发送原始NaN/Infinity/-Infinity字节应400；不能使用JSON.stringify后变null的样例冒充验证。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-05",
+      "ruleOrObservation": "D16-I",
+      "title": "溢出及大指数",
+      "expected": "18446744073709551616、1e10000及超范围值受控拒绝；不得long/int回绕或500。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-06",
+      "ruleOrObservation": "D16-I",
+      "title": "错误JSON类型",
+      "expected": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-07",
+      "ruleOrObservation": "D16-S",
+      "title": "字符串契约与保真",
+      "expected": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-08",
+      "ruleOrObservation": "D16-NULL",
+      "title": "可选字段默认值",
+      "expected": "逐项核对Mock默认优先级/状态/永久、Web视口、Web/移动执行超时和移动步骤超时。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-09",
+      "ruleOrObservation": "D16-OLD",
+      "title": "已审核兼容规则保持",
+      "expected": "版本令牌、报告428/409、组织项目授权和原范围限制不因类型策略改变。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-10",
+      "ruleOrObservation": "OBS-08-E010",
+      "title": "WAIT合法边界",
+      "expected": "0/600000允许；-1/600001拒绝；新建与编辑采用相同规则。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-11",
+      "ruleOrObservation": "OBS-08-E010",
+      "title": "WAIT保存时拒绝小数",
+      "expected": "WAIT=1.5保存400，不新增场景/修订/成功业务审计，不留先保存后执行才失败的入口。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-12",
+      "ruleOrObservation": "OBS-08-E010",
+      "title": "WAIT复用及执行入口",
+      "expected": "可复用步骤、导入/同步、预检/展开采用同一规则；旧非法定义新入队阻止，不产生业务执行/outbox。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-13",
+      "ruleOrObservation": "OBS-09-E013",
+      "title": "Mock优先级与状态",
+      "expected": "0/1000和200/599边界与默认保持；小数/越界拒绝，既有规则顺序不变。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-14",
+      "ruleOrObservation": "OBS-09-E013",
+      "title": "Mock有效期",
+      "expected": "null/省略仍永久；1/365允许，0/366和1.5拒绝；拒绝不生成可用分享。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-15",
+      "ruleOrObservation": "OBS-09-E013",
+      "title": "Mock条件/正文字符串",
+      "expected": "条件、Header值、正文数字/布尔拒绝；明确JSON正文字符串可用，拒绝不改旧匹配行为。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-16",
+      "ruleOrObservation": "OBS-10-E011",
+      "title": "性能整数边界",
+      "expected": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-17",
+      "ruleOrObservation": "OBS-10-E011",
+      "title": "阶梯关联约束",
+      "expected": "阶段数/间隔/总时长/TPS/集合点限制保持，不因规范化导致绕过关联条件。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-18",
+      "ruleOrObservation": "OBS-10-E011",
+      "title": "性能字符串与真小数",
+      "expected": "Header/Query/CSV/文本契约按S；errorThresholdPercent数值2.50允许，2.501拒绝，不能取整。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-19",
+      "ruleOrObservation": "OBS-11-E021",
+      "title": "Web视口边界与默认",
+      "expected": "320/3840、320/2160及默认1440/900保持；小数/越界拒绝。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-20",
+      "ruleOrObservation": "OBS-11-E021",
+      "title": "Web步骤和执行超时",
+      "expected": "WAIT与非WAIT不同下界、可选值及执行10..3600保持；非法输入不入队。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-21",
+      "ruleOrObservation": "OBS-11-E021",
+      "title": "Web变量/文本保真",
+      "expected": "数字不自动转字符串；显式\"001\"和模板变量值保留；既有trim重名防护继续有效。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-22",
+      "ruleOrObservation": "OBS-12-E020",
+      "title": "移动超时边界与默认",
+      "expected": "步骤1..60000/默认30000，执行10..3600/默认300保持，非整数拒绝。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-23",
+      "ruleOrObservation": "OBS-12-E020",
+      "title": "移动变量/文本类型",
+      "expected": "变量和步骤文本按字符串契约；变量null仍拒绝，合法值不转换。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-24",
+      "ruleOrObservation": "OBS-12-E020",
+      "title": "移动拒绝在设备操作前",
+      "expected": "畸形清单/输入在受控协议预检失败，不创建Appium会话；只记协议验收，不解除4项移动实机阻塞。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-25",
+      "ruleOrObservation": "OBS-13-E018",
+      "title": "任务进度显式提供",
+      "expected": "按NULL-A缺失/null拒绝；0/100允许，-1/101/小数拒绝，旧任务与版本未改。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-26",
+      "ruleOrObservation": "OBS-13-E018",
+      "title": "任务状态机",
+      "expected": "合法进度后QUEUED归0、SUCCEEDED归100；即使最终会归零/100，也先拒绝非法输入。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-27",
+      "ruleOrObservation": "OBS-13-E018",
+      "title": "报告周期",
+      "expected": "1/90允许；0/91/1.5/null/缺失拒绝；失败不改计划版本、Quartz配置或成功业务审计。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-28",
+      "ruleOrObservation": "D16-OLD",
+      "title": "写入口一致",
+      "expected": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-29",
+      "ruleOrObservation": "D16-OLD",
+      "title": "导入与同步不绕过",
+      "expected": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-30",
+      "ruleOrObservation": "D16-OLD",
+      "title": "存量可读无迁移",
+      "expected": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-31",
+      "ruleOrObservation": "D16-OLD",
+      "title": "旧非法定义的新执行",
+      "expected": "新入队前校验；旧排队任务在预检校验规范化运行值、失败有原因且不创建外部资源；已有运行不自动取消。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-32",
+      "ruleOrObservation": "D16-S",
+      "title": "页面与错误定位",
+      "expected": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-33",
+      "ruleOrObservation": "D16-OLD",
+      "title": "权限隔离及并发保护",
+      "expected": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-34",
+      "ruleOrObservation": "D16-I",
+      "title": "非目标字段不扩大范围",
+      "expected": "真实小数百分比、通用步骤config、原expectedVersion及未列字段契约保持。",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "D16-AC-35",
+      "ruleOrObservation": "D16-OLD",
+      "title": "暂缓与独立风险",
+      "expected": "另外9项观察、12项环境未补齐；升级关闭风险保留未确认，不借普通Runner预检或JAR退出关闭。",
+      "status": "NOT_EXECUTED"
+    }
+  ],
+  "note": "批准后再据选定规则设计正式正反用例与证据模型；本文件不宣称35条动态测试已执行。"
+}

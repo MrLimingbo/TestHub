@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-02",
+  "module": "Mock",
+  "observation": "OBS-09-E013",
+  "status": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+  "formalCases": 40,
+  "positive": 21,
+  "negative": 19,
+  "passed": 40,
+  "failed": 0,
+  "blocked": 0,
+  "resultsApprovedOverall": 33,
+  "pendingModuleResults": 1,
+  "D16ModulesWaitingForGate": 4,
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "nextModule": "性能测试",
+  "nextModuleStarted": false,
+  "historicalExecutionStatisticsFrozen": true
+}

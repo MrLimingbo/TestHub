@@ -1,8 +1,12 @@
 package io.testhub.platform.mock;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
@@ -12,6 +16,7 @@ import io.testhub.platform.security.AuthenticatedPrincipal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +48,7 @@ public class MockService {
     private final AuditService audit;
     private final ApiDesignService apiDesign;
     private final ObjectMapper json;
+    private final ObjectReader completeJson;
 
     public MockService(MockRepository repository, AccessService access, AuditService audit, ApiDesignService apiDesign, ObjectMapper json) {
         this.repository = repository;
@@ -50,6 +56,7 @@ public class MockService {
         this.audit = audit;
         this.apiDesign = apiDesign;
         this.json = json;
+        this.completeJson = json.reader().with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
     }
 
     public List<MockServer> servers(AuthenticatedPrincipal principal, String projectId) {
@@ -65,6 +72,9 @@ public class MockService {
             throw conflict("每个项目最多创建 20 个 Mock 服务");
         }
         String name = required(input == null ? null : input.name(), "Mock 服务名称", 160);
+        if (repository.serverNameExists(projectId, name)) {
+            throw conflict("当前项目已存在同名 Mock 服务，请使用其他名称");
+        }
         String id = UlidCreator.getUlid().toString();
         repository.insertServer(id, project.organizationId(), projectId, UlidCreator.getUlid().toString(), name, principal.userId());
         MockServer result = requireServer(projectId, id);
@@ -394,7 +404,7 @@ public class MockService {
         if (body.isBlank()) throw rejected("当前请求体匹配方式需要填写请求体条件");
         if ("JSON_SUBSET".equals(match)) {
             try {
-                json.readTree(body);
+                completeJson.readTree(body);
             } catch (JsonProcessingException exception) {
                 throw rejected("JSON 子集匹配的请求体条件必须是合法 JSON");
             }
@@ -424,7 +434,7 @@ public class MockService {
 
     private boolean jsonSubset(String expectedSource, String actualSource) {
         try {
-            return jsonSubset(json.readTree(expectedSource), json.readTree(actualSource));
+            return jsonSubset(completeJson.readTree(expectedSource), completeJson.readTree(actualSource));
         } catch (JsonProcessingException exception) {
             return false;
         }
@@ -468,16 +478,21 @@ public class MockService {
     public record ServerInput(String name) {
     }
 
-    public record ShareInput(String name, Integer expiresInDays) {
+    public record ShareInput(String name, @JsonDeserialize(using = MockJson.Expiry.class) Integer expiresInDays) {
     }
 
-    public record RuleInput(String name, String httpMethod, String path, Integer priority, Map<String, String> requestQuery,
-                            Map<String, String> requestHeaders, String requestBodyMatch, String requestBody, Integer responseStatus,
-                            Map<String, String> responseHeaders, String responseBody) {
+    public record RuleInput(String name, String httpMethod, String path, @JsonDeserialize(using = MockJson.Priority.class) Integer priority, @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> requestQuery,
+                            @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> requestHeaders, String requestBodyMatch, @JsonDeserialize(using = MockJson.Text.class) String requestBody, @JsonDeserialize(using = MockJson.Status.class) Integer responseStatus,
+                            @JsonDeserialize(contentUsing = MockJson.Text.class) Map<String, String> responseHeaders, @JsonDeserialize(using = MockJson.Text.class) String responseBody) {
         public RuleInput {
-            requestQuery = requestQuery == null ? Map.of() : Map.copyOf(requestQuery);
-            requestHeaders = requestHeaders == null ? Map.of() : Map.copyOf(requestHeaders);
-            responseHeaders = responseHeaders == null ? Map.of() : Map.copyOf(responseHeaders);
+            requestQuery = copyInputMap(requestQuery);
+            requestHeaders = copyInputMap(requestHeaders);
+            responseHeaders = copyInputMap(responseHeaders);
+        }
+
+        private static Map<String, String> copyInputMap(Map<String, String> values) {
+            // Preserve null values until the shared field validators normalize them to empty strings.
+            return values == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(values));
         }
     }
 }

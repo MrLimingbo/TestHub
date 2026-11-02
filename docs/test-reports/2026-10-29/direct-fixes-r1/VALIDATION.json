@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "date": "2026-10-29",
+  "checks": [
+    {
+      "command": "npx pnpm@10.13.1 test --reporter=default --reporter=json --outputFile=output/qa-20261029/direct-fixes-r1/frontend-final.json",
+      "exitCode": 0,
+      "passed": 817,
+      "failed": 0,
+      "unhandledErrors": 0
+    },
+    {
+      "command": "npx pnpm@10.13.1 lint",
+      "exitCode": 0,
+      "errors": 0,
+      "existingWarnings": 2
+    },
+    {
+      "command": "npx pnpm@10.13.1 build",
+      "exitCode": 0,
+      "includesTypecheck": true
+    },
+    {
+      "command": "node scripts/qa/direct-observation-ui.mjs",
+      "exitCode": 0,
+      "passed": 10,
+      "failed": 0,
+      "headless": true,
+      "usesIsolatedHttpFixtures": true
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "baselineCodeFilesChecked": 1326,
+  "unchangedExistingCodeFiles": 1313,
+  "approvedProductFilesChanged": 9,
+  "approvedExistingTestFilesChanged": 4,
+  "newTestFiles": [
+    "src/test/directObservationForms.test.ts"
+  ],
+  "newReusableQaScripts": [
+    "scripts/qa/direct-observation-ui.mjs"
+  ],
+  "historicalFactFilesUnchanged": 4,
+  "ruleCardsStillUnselected": 26,
+  "deferredObservationRecords": 37,
+  "environmentBlockedRecordsPreserved": 12,
+  "unconfirmedRiskRetained": true,
+  "localReportLinksChecked": 40,
+  "cleanupVerified": true
+}

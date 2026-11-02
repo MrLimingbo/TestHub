@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Message } from '@arco-design/web-vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import DashboardTrendChart from '@/components/DashboardTrendChart.vue'
 import MetricGrid from '@/components/MetricGrid.vue'
 import { useSessionStore } from '@/stores/session'
@@ -32,6 +32,8 @@ const projectId = computed({ get: () => session.projectId, set: (value: string) 
 const periodDays = ref(7)
 const dashboard = ref<Dashboard | null>(null)
 const loading = ref(true)
+let dashboardRequest = 0
+let disposed = false
 
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
 const selectedProject = computed(() => projects.value.find((project) => project.id === projectId.value) ?? null)
@@ -103,23 +105,31 @@ async function read<T>(url: string): Promise<T> {
   return (await response.json() as ApiEnvelope<T>).data
 }
 async function loadDashboard() {
+  if (disposed) return
+  const request = ++dashboardRequest
   if (!projectId.value) return
   loading.value = true
   try {
-    dashboard.value = await read<Dashboard>(`/api/v1/projects/${projectId.value}/dashboard?days=${periodDays.value}`)
+    const result = await read<Dashboard>(`/api/v1/projects/${projectId.value}/dashboard?days=${periodDays.value}`)
+    if (request !== dashboardRequest) return
+    dashboard.value = result
   } catch (error) {
+    if (request !== dashboardRequest) return
     dashboard.value = null
     Message.error(error instanceof Error ? error.message : '无法读取项目质量数据')
   } finally {
-    loading.value = false
+    if (request === dashboardRequest) loading.value = false
   }
 }
 async function initialize() {
   try {
-    context.value = await read<Context>('/api/v1/access/context')
+    const result = await read<Context>('/api/v1/access/context')
+    if (disposed) return
+    context.value = result
     projectId.value = session.resolveProjectId(projects.value)
     await loadDashboard()
   } catch (error) {
+    if (disposed) return
     loading.value = false
     Message.error(error instanceof Error ? error.message : '无法读取项目上下文')
   }
@@ -127,6 +137,7 @@ async function initialize() {
 
 watch([projectId, periodDays], () => { void loadDashboard() })
 onMounted(() => { void initialize() })
+onBeforeUnmount(() => { disposed = true; dashboardRequest++ })
 </script>
 
 <template>

@@ -1,0 +1,154 @@
+{
+  "modified": [
+    {
+      "path": "src/pages/TasksPage.vue",
+      "beforeSha256": "c4c02d93950bb3cffbb41b48c52773e78f043294004570a0092f79d7ac9cb8c2",
+      "afterSha256": "8804949e69b682964dabba07353d6f69a2781d092291ff73a0a3e4efa5d331a8"
+    },
+    {
+      "path": "src/pages/ApiDebugPage.vue",
+      "beforeSha256": "99aa540160e6614d2a76d13190751e9d1e1f5f235f8206ed7c291a8ee56c9af8",
+      "afterSha256": "fc0720386f117db6eff18b5015f230054e8467e3d62cc3decf9df19438ba9b69"
+    },
+    {
+      "path": "src/pages/NotificationTemplatesPage.vue",
+      "beforeSha256": "15616f07c3cbe5bebe891365cfd1ba73f0c8a4283cd63255ae86dfa34de1e18b",
+      "afterSha256": "eea90ac9315cd703c5d7745f0c25fff74853f12fea3bccc9b1912696f858dd63"
+    },
+    {
+      "path": "src/pages/AuditLogPage.vue",
+      "beforeSha256": "6d3696d6c42f03de70610156b4c2eaa0f69188e330c788f3c3ddbd441c648687",
+      "afterSha256": "9881a0e0eae6eb198f9d10bf1c20dc67004ca70ece157f7aa840431911295d81"
+    },
+    {
+      "path": "src/pages/UiAutomationPage.vue",
+      "beforeSha256": "c5e1ec2057300babfd7df337c785685b12de97df8b44c44f38b608dfd0dc30d6",
+      "afterSha256": "ff1f3b6ffe01986459a4603198063d361f39a4ededfa99ec95a725e95eb39f18"
+    },
+    {
+      "path": "src/pages/PluginsPage.vue",
+      "beforeSha256": "6c7640ae578108f7a5c2152518c1b8aca4c603570d696344f957a0b1747d563f",
+      "afterSha256": "42e492b979690d98324ba71a0bc04a84824d21d6dba44023fc23621520ace63b"
+    },
+    {
+      "path": "src/test/apiDebugFixes.test.ts",
+      "beforeSha256": "5beea7eba847805aea8f64345e7e6ba761dfe06bd8200f0e255b8a3dd9759b29",
+      "afterSha256": "bc8684398e7f608e61ec9d8491f6cdecab13bd2903d0db59fef1c3b746f0b435"
+    },
+    {
+      "path": "src/test/apiDebugDraft.test.ts",
+      "beforeSha256": "5fae5738fe65c01fad0d4a76c0fa0fb08fb77153b7c70a0ede8d3031a4130cd1",
+      "afterSha256": "c447caa5861c4458cbd2deadd556d562072c990b87ae80c0c87065ed9bcccf97"
+    },
+    {
+      "path": "src/test/extensionsOperationsPages.test.ts",
+      "beforeSha256": "1379acec47c6942fc0b9de6436352aa7261725b1882dedde17d624549e0ce8c3",
+      "afterSha256": "ca553e878882fd3e6ba1ab7b2ddbb6bf0371e05e0f6c551f4a7d4923b36d0b51"
+    },
+    {
+      "path": "src/test/auditLogPage.test.ts",
+      "beforeSha256": "67c87d5bfb1d189f30de9103e889f3ab37c86d45f54863be1ba13775f5d24bcc",
+      "afterSha256": "dbb47ddfd74cd66797bd637d7f05d39b51eacc6c4f8921c9af78542ab8419e30"
+    },
+    {
+      "path": "src/test/notificationsPage.test.ts",
+      "beforeSha256": "42dd6bb259f4ee7cac177ffeea5f6ee343a2b11c6a066cd089589f7de87f1c3d",
+      "afterSha256": "205e1a84a82f453bb9cf4cc5839c3c84657cf1fe0259642d67e7d77f8de5e5fe"
+    },
+    {
+      "path": "src/components/api-testing/ApiInterfaceWorkbench.vue",
+      "beforeSha256": "98c4a5de267ab87b91ab1f0d203ec905e468410629b7644f93eb992e1f19c33e",
+      "afterSha256": "946238cae2d88aa1730db4c626cdd0b922f65c3284f8bcb161dbc4d0ff7d86b5"
+    },
+    {
+      "path": "src/utils/apiDebugDraft.ts",
+      "beforeSha256": "055de9fd8aa56c0f0b2204b82ee2d745de803eb5e7dea87668d5884319ecbf8d",
+      "afterSha256": "31d4662919c1d92cca58a8de2b3c7b34ebbfafa55fd4d5436315e80647e3b37f"
+    },
+    {
+      "path": "src/stores/session.ts",
+      "beforeSha256": "7c76ddd3611d302d767ef4794973d27bc7e3d214c730612e602d8acbcd510c85",
+      "afterSha256": "b8dc878d119f0cd6047515a7d6ed2a8070c96f89e97fcb3ccfbb4ffcef9fb74f"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/audit/AuditService.java",
+      "beforeSha256": "37e2eb968014449213fe310a62c768eb2c4baf9017ad7ebd6a52ed2bed335968",
+      "afterSha256": "dfa4d57f871c715b3619700fc8288a822c2b9880f47dba2b31c9ad73ac82140a"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/audit/AuditRepository.java",
+      "beforeSha256": "316b19780975c5b6d8e2f42d3149e573ac4038d11a86a777c2d5d57bc80e8cde",
+      "afterSha256": "43f835e3298adbd2552cf3d64d10553ea30281f7c61ad41e28755a70cf7a082f"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/administration/AdministrationController.java",
+      "beforeSha256": "7e0365f105a7ce5a38d839474743b7faf9858699ce17e9656049a130b6c7c379",
+      "afterSha256": "3b59f8c937262fa4ca5bfe7ef612fe1b21c4a7f2e5fabeec704f6dffd65b5307"
+    }
+  ],
+  "added": [
+    {
+      "path": "src/utils/ownedWebSocket.ts",
+      "sha256": "c64c719bd884674dc104272916632a37d70ada3973e41daf383f2b083b6e05e4"
+    },
+    {
+      "path": "src/utils/apiDebugHandoff.ts",
+      "sha256": "1eddd7504a63c0465abb3d91fe4e100f354edc84a8b8795ab30e14ec732ecc90"
+    },
+    {
+      "path": "src/test/p2r2AuditOptions.test.ts",
+      "sha256": "a8c7e76eab582004f3447024add0a35a257992474d7f82ffc68d9968b0213212"
+    },
+    {
+      "path": "src/test/p2r2DebugHandoff.test.ts",
+      "sha256": "570f58edcc139f59640365bf5adcd03fa71c9642faf666e3bf8dcd786bbc851b"
+    },
+    {
+      "path": "src/test/p2r2FreezeWording.test.ts",
+      "sha256": "9598c82ad4aff00e0eb4eafd33f37484d5571fe6cab5fca6d0a4c052c358e422"
+    },
+    {
+      "path": "src/test/p2r2HandoffPage.test.ts",
+      "sha256": "cda633af00b2fb008a34cbcd84401115bba97b23d6f89b39176d7bcb71e28376"
+    },
+    {
+      "path": "src/test/p2r2HistorySend.test.ts",
+      "sha256": "43b00b186072b1cda52bf566f4b9439f345aeb8117cb73a8c4fb2d201ff94af5"
+    },
+    {
+      "path": "src/test/p2r2OwnedWebSocket.test.ts",
+      "sha256": "f2bdcaadc75cc3f5b891415b009c670a9fefc1942da953b249204889e764b131"
+    },
+    {
+      "path": "src/test/p2r2RowActions.test.ts",
+      "sha256": "3782fab59794cc5f3e66de8474a6ac69750a8d2ab215144d09a71f1725592eec"
+    },
+    {
+      "path": "src/test/p2r2WebSocketPage.test.ts",
+      "sha256": "46bf7940a69039aa18e3fa29b0613908ce2ff2c7113e8c4c9339ae8027bb7e20"
+    },
+    {
+      "path": "src/test/p2r2WorkbenchHandoff.test.ts",
+      "sha256": "2fc8422bfbf6f82ad0f34c3efcc922fcb697cedcc10354fbf55566318f74f9fc"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2R2AuditActionsFlowTests.java",
+      "sha256": "a7cc35269085498e8d53cd823d3d934ece39f51413a31e1a8e25abb9e34849e4"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2R2UiFreezeFlowTests.java",
+      "sha256": "5a155d733bfabfce56acd841826e85b966f895692272d879df58c12d3a1df335"
+    },
+    {
+      "path": "scripts/qa/p2r2-desktop-http.mjs",
+      "sha256": "eded9c6d9853af3d5bf12273ff4875ad58e229a433b5c21daf43317684e235b6"
+    },
+    {
+      "path": "scripts/qa/p2r2-observation-ui.mjs",
+      "sha256": "434a09798224992a03c105920e670f8cfc2a6ec929c5d104a7828ba23b57e67f"
+    }
+  ],
+  "baselineFiles": 1345,
+  "unmodifiedBaselineFiles": 1328,
+  "patchSha256": "95a5e29b95bc61de36bfb54d7eca86e7f3203659565fccb749bc2baad2415a82"
+}

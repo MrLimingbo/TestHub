@@ -6,7 +6,7 @@ const wrappers: ReturnType<typeof mount>[] = []
 afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.useRealTimers() })
 const summary = { functionalCaseCount: 0, apiDefinitionCount: 0, automationScenarioCount: 0, openDefectCount: 0, criticalDefectCount: 0, completedExecutions: 0, passedExecutions: 0, failedExecutions: 0, passRatePercent: null }
 const report = (name = '最新项目') => ({ from: '2026-10-01', to: '2026-10-04', generatedAt: '', projectCount: 1, summary, trend: [], projects: [{ projectId: 'p1', projectName: name, projectCode: 'QA', ...summary, healthStatus: 'NO_EXECUTIONS' }] })
-const schedule = { id: 's1', name: '周报', projectIds: ['p1'], cronExpression: '0 0 9 ? * MON', timezone: 'UTC', periodDays: 7, enabled: false, lastRunAt: null, lastRunStatus: null }
+const schedule = { id: 's1', name: '周报', projectIds: ['p1'], cronExpression: '0 0 9 ? * MON', timezone: 'UTC', periodDays: 7, enabled: false, version: 0, lastRunAt: null, lastRunStatus: null }
 async function setup(override?: (url: string, init?: RequestInit) => unknown) {
   vi.stubGlobal('fetch', vi.fn(async (input: string, init?: RequestInit) => {
     const custom = await override?.(input, init)
@@ -38,8 +38,11 @@ describe('Reports page', () => {
   it('invalid dates invalidate an earlier request and display an actionable error', async () => {
     let delayed = false, release!: (value: unknown) => void
     const wrapper = await setup(url => delayed && url.includes('/quality?') ? new Promise(resolve => { release = resolve }) : undefined)
-    delayed = true; await wrapper.get('input[aria-label="开始日期"]').setValue('2026-10-01'); await flushPromises()
-    await wrapper.get('input[aria-label="结束日期"]').setValue('2026-09-01'); await flushPromises()
+    const initialFrom = (wrapper.get('input[aria-label="开始日期"]').element as HTMLInputElement).value
+    const precedingDay = (value: string) => new Date(Date.parse(value + 'T00:00:00Z') - 86_400_000).toISOString().slice(0, 10)
+    const changedFrom = precedingDay(initialFrom)
+    delayed = true; await wrapper.get('input[aria-label="开始日期"]').setValue(changedFrom); await flushPromises()
+    await wrapper.get('input[aria-label="结束日期"]').setValue(precedingDay(changedFrom)); await flushPromises()
     release(report('过期项目')); await flushPromises(); expect(wrapper.text()).not.toContain('过期项目'); expect(wrapper.text()).toContain('开始日期不能晚于结束日期')
   })
   it('closing run records discards a delayed response', async () => {

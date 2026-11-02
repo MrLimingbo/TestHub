@@ -1,0 +1,1722 @@
+--- /dev/null
++++ after/scripts/qa/p2-desktop-http.mjs
+@@ -0,0 +1,106 @@
++/* global fetch, AbortSignal */
++// Native JVM acceptance in a new filesystem workspace; no Electron window or user workspace is used.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import path from 'node:path'
++import crypto from 'node:crypto'
++import process from 'node:process'
++import { spawn } from 'node:child_process'
++import { fileURLToPath } from 'node:url'
++import { setTimeout as delay } from 'node:timers/promises'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261030/p2-fixes-r1'), directory = await fs.mkdtemp(path.join(root, '.testhub/p2-http-qa-'))
++const java = path.join(process.env.JAVA_HOME, 'bin/java'), jar = path.join(root, 'services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar')
++const result = { headless: true, realPackagedJvm: true, desktopProfile: true, electronUpgradeTest: false, cases: [], cleanup: false }
++const env = { ...process.env }
++for (const key of Object.keys(env)) if (key.startsWith('TESTHUB_') || key.startsWith('SPRING_')) delete env[key]
++Object.assign(env, { SPRING_PROFILES_ACTIVE: 'desktop', TESTHUB_DESKTOP_DATA_DIRECTORY: directory, TESTHUB_LOCAL_DB_PASSWORD: crypto.randomBytes(24).toString('hex'),
++  TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test', TESTHUB_REGISTRATION_ENABLED: 'true' })
++let child, origin, logHandle, launch = 0
++async function start() {
++  const file = path.join(directory, `backend-${++launch}.log`); logHandle = await fs.open(file, 'w')
++  child = spawn(java, ['-jar', jar, '--server.port=0', '--testhub.registration.enabled=true', '--testhub.bootstrap.demo-enabled=false'], { cwd: root, env, stdio: ['ignore', logHandle.fd, logHandle.fd] })
++  child.on('error', error => { result.launchError = error.message })
++  for (let n = 0; n < 300; n++) {
++    if (child.exitCode !== null || child.signalCode !== null || result.launchError) throw new Error('Owned QA JVM failed to start')
++    const match = /Tomcat started on port (\d+)/.exec(await fs.readFile(file, 'utf8'))
++    if (match) {
++      origin = 'http://127.0.0.1:' + match[1]
++      try { if ((await fetch(origin + '/actuator/health/readiness', { signal: AbortSignal.timeout(5_500) })).status === 200) return } catch { /* Wait for ApplicationReadyEvent. */ }
++    }
++    await delay(250)
++  }
++  throw new Error('Owned QA JVM did not become ready within 75 seconds')
++}
++async function stop() {
++  if (!child) return
++  const running = child; child = null
++  if (running.exitCode === null && running.signalCode === null) {
++    running.kill('SIGTERM')
++    for (let n = 0; n < 150 && running.exitCode === null && running.signalCode === null; n++) await delay(100)
++    if (running.exitCode === null && running.signalCode === null) { running.kill('SIGKILL'); await new Promise(resolve => running.once('exit', resolve)); throw new Error('Owned JVM failed to stop within 15 seconds') }
++  }
++  await logHandle?.close(); logHandle = null
++}
++function browser() { return { cookies: new Map() } }
++async function request(client, url, method = 'GET', payload) {
++  const headers = { Cookie: [...client.cookies].map(([key, value]) => key + '=' + value).join('; ') }
++  if (payload !== undefined) {
++    const csrf = await request(client, '/api/v1/auth/csrf')
++    assert.equal(csrf.status, 200); headers[csrf.body.data.headerName] = csrf.body.data.token
++    headers.Cookie = [...client.cookies].map(([key, value]) => key + '=' + value).join('; '); headers['Content-Type'] = 'application/json'
++  }
++  const response = await fetch(origin + url, { method, headers, body: payload === undefined ? undefined : JSON.stringify(payload), signal: AbortSignal.timeout(8_000) })
++  for (const cookie of response.headers.getSetCookie()) {
++    const [pair] = cookie.split(';'), equals = pair.indexOf('='); client.cookies.set(pair.slice(0, equals), pair.slice(equals + 1))
++  }
++  return { status: response.status, body: response.status === 204 ? null : await response.json() }
++}
++async function step(id, title, operation) { await operation(); result.cases.push({ id, title, status: 'PASS' }) }
++try {
++  await start()
++  const client = browser(), account = 'p2-' + crypto.randomUUID(), password = crypto.randomUUID() + 'Aa1!'
++  assert.equal((await request(client, '/api/v1/auth/register', 'POST', { account, email: crypto.randomUUID() + '@example.test', displayName: 'P2隔离验收', password })).status, 201)
++  const context = (await request(client, '/api/v1/access/context')).body.data
++  const project = Object.values(context.projects).flat()[0].id, api = '/api/v1/projects/' + project
++  await step('TC-P2-D01-03', '真实HTTP拒绝未定义环境普通参数', async () => {
++    assert.equal((await request(client, api + '/parameters', 'POST', { environmentCode: 'missing', key: 'KEY', value: 'blocked' })).status, 400)
++  })
++  const root = (await request(client, api + '/api-design/catalogs', 'POST', { name: '源目录', sortOrder: 0 })).body.data
++  assert.ok(root.id)
++  const source = (await request(client, api + '/api-design/definitions', 'POST', { catalogId: root.id, method: 'GET', path: '/receipt', name: '回执接口', versionName: '1.0.0', headers: [], query: [], pathParameters: [], requestBody: '', responseBody: '{"kept":true}', exampleResponse: { statusCode: 201 } })).body.data
++  assert.ok(source.id)
++  const copyPath = api + '/api-design/catalogs/' + root.id
++  const preview = await request(client, copyPath + '/copy-preview'); assert.equal(preview.status, 200)
++  const payload = { requestKey: crypto.randomUUID(), expectedSourceDigest: preview.body.data.sourceDigest }
++  const copied = await request(client, copyPath + '/copy', 'POST', payload); assert.equal(copied.status, 200)
++  const before = (await request(client, api + '/api-design/definitions')).body.data.length
++  await stop(); await start()
++  await step('TC-P2-D10-07', '真实JVM重启后同Key返回已持久化回执且不再复制', async () => {
++    assert.equal((await request(client, '/api/v1/auth/me')).status, 200)
++    const replay = await request(client, copyPath + '/copy', 'POST', payload)
++    assert.equal(replay.status, 200); assert.deepEqual(replay.body.data, copied.body.data)
++    assert.equal((await request(client, api + '/api-design/definitions')).body.data.length, before)
++    assert.equal((await request(client, copyPath + '/copy', 'POST', { ...payload, expectedSourceDigest: 'b'.repeat(64) })).status, 409)
++  })
++  await step('TC-P2-D09-08', '真实HTTP导出保留当前201响应', async () => {
++    const exported = await request(client, api + '/api-design/interchange/openapi/export')
++    assert.equal(exported.status, 200); assert.ok(exported.body.paths['/receipt'].get.responses['201'])
++  })
++  await step('TC-P2-D22-02', '真实HTTP版本0可保存、缺失428、旧版409', async () => {
++    const path = '/api/v1/reports/quality/schedules'
++    const input = { name: '版本计划', projectIds: [project], cronExpression: '0 0 0 1 1 ? 2099', timezone: 'UTC', periodDays: 7, enabled: false }
++    const created = await request(client, path, 'POST', input); assert.equal(created.status, 200); assert.equal(created.body.data.version, 0)
++    const target = path + '/' + created.body.data.id
++    assert.equal((await request(client, target, 'PUT', input)).status, 428)
++    const saved = await request(client, target, 'PUT', { ...input, expectedVersion: 0 }); assert.equal(saved.status, 200); assert.equal(saved.body.data.version, 1)
++    assert.equal((await request(client, target, 'PUT', { ...input, expectedVersion: 0 })).status, 409)
++    assert.equal((await request(client, target, 'PUT', { ...input, expectedVersion: 1.5 })).status, 400)
++  })
++} catch (error) { result.error = error.message; process.exitCode = 1 }
++finally {
++  try { await stop() } catch (error) { result.cleanupError = error.message; process.exitCode = 1 }
++  await fs.rm(directory, { recursive: true, force: true }); result.cleanup = true
++  await fs.mkdir(out, { recursive: true }); await fs.writeFile(path.join(out, 'native-http.json'), JSON.stringify(result, null, 2) + '\n')
++  process.stdout.write(JSON.stringify(result) + '\n')
++}
+--- /dev/null
++++ after/scripts/qa/p2-observation-ui.mjs
+@@ -0,0 +1,111 @@
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import http from 'node:http'
++import path from 'node:path'
++import process from 'node:process'
++import { fileURLToPath, URL } from 'node:url'
++import { performance } from 'node:perf_hooks'
++import { chromium } from '../../services/playwright-runner/node_modules/playwright/index.mjs'
++
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261030/p2-fixes-r1')
++const dist = path.join(root, 'dist'), stamp = '2026-10-29T00:00:00Z'
++const result = { headless: true, isolatedHttpFixtures: true, realBackendAcceptance: false, cases: [], cleanup: false }
++const server = http.createServer(async (req, res) => {
++  try {
++    let file = path.resolve(dist, '.' + decodeURIComponent(new URL(req.url, 'http://qa.invalid').pathname))
++    if (!file.startsWith(dist + path.sep) || !path.extname(file)) file = path.join(dist, 'index.html')
++    const body = await fs.readFile(file)
++    res.writeHead(200, { 'Content-Type': { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }[path.extname(file)] || 'application/octet-stream' }); res.end(body)
++  } catch { res.writeHead(404); res.end() }
++})
++await fs.mkdir(out, { recursive: true }); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
++const origin = `http://127.0.0.1:${server.address().port}`
++let browser
++async function run(id, title, routePath, options, operation) {
++  const context = await browser.newContext({ viewport: { width: 1600, height: 1000 } }), hits = [], errors = []
++  let reset = false, copyAttempts = 0, reportVersion = 0
++  await context.route('**/api/**', async route => {
++    const request = route.request(), url = new URL(request.url()), p = url.pathname, method = request.method(); hits.push({ path: p, method })
++    let status = 200, data
++    if (p.endsWith('/copy-preview')) data = { sourceDigest: 'a'.repeat(64), itemCount: 1, limit: 200 }
++    else if (p.endsWith('/copy') && method === 'POST') {
++      hits[hits.length - 1].payload = request.postDataJSON()
++      if (++copyAttempts === 1) { await route.abort('connectionreset'); return }
++      data = { rootCatalogId: 'copied', catalogCount: 1, definitionCount: 0 }
++    }
++    else if (p.endsWith('/schedules/s1') && method === 'PUT') {
++      hits[hits.length - 1].payload = request.postDataJSON()
++      if (reportVersion === 0) { status = 409; data = null; reportVersion = 1 } else data = { version: 2 }
++    }
++    else if (p.endsWith('/schedules')) data = [{ id: 's1', name: reportVersion ? '其他成员的新计划' : '原始计划', projectIds: ['p'], version: reportVersion, cronExpression: '0 0 0 1 1 ? 2099', timezone: 'UTC', periodDays: 7, enabled: false, lastRunAt: null }]
++    else if (p.includes('/reports/quality?')) data = { from: '2026-10-01', to: '2026-10-30', projectCount: 0, summary: { functionalCaseCount: 0, apiDefinitionCount: 0, automationScenarioCount: 0, openDefectCount: 0, criticalDefectCount: 0, completedExecutions: 0, passedExecutions: 0, failedExecutions: 0, passRatePercent: null }, projects: [], trend: [] }
++    else if (p.endsWith('/catalogs')) data = [{ id: 'root', name: '源目录', parentId: null, sortOrder: 0, createdAt: stamp, updatedAt: stamp }]
++    else if (p.endsWith('/definitions')) data = [{ id: 'a', catalogId: 'root', method: 'GET', path: '/a', name: '接口A', currentVersionId: 'v', versionCount: 1, status: 'DRAFT', createdAt: stamp, updatedAt: stamp }]
++    else if (p.endsWith('/versions')) data = [{ id: 'v', versionName: '1.0.0', requestHeaders: '[]', requestQuery: '[]', requestPath: '[]', requestBody: '', responseBody: '{}', exampleResponse: '{"statusCode":201}', status: 'DRAFT', createdAt: stamp }]
++    else if (p.endsWith('/workspace-preferences')) data = { revision: 0, state: { folders: [], hiddenIds: [], folderIds: {}, displayMode: 'NAME' } }
++    else if (p.endsWith('/auth/me')) { status = reset && options.self ? 401 : 200; data = { id: 'me', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: stamp } }
++    else if (p.endsWith('/auth/csrf')) data = { headerName: 'X-CSRF', token: 'fixture' }
++    else if (p.endsWith('/auth/capabilities')) data = { registrationEnabled: true }
++    else if (p.endsWith('/access/context')) data = { organizations: [{ id: 'o', name: 'QA组织', code: 'QA' }], projects: { o: [{ id: 'p', name: 'QA项目', code: 'P', status: 'ACTIVE', description: '', createdAt: stamp, updatedAt: stamp }] } }
++    else if (p.endsWith('/capabilities')) data = { systemAdministration: true }
++    else if (p.endsWith('/accounts')) data = { items: [{ id: options.self ? 'me' : 'other', account: 'qa-account', email: 'qa@example.test', displayName: 'QA', enabled: true, createdAt: stamp, updatedAt: stamp }], total: 1, page: 1, pageSize: 10 }
++    else if (p.endsWith('/password') && method === 'PUT') { status = options.failure ? 503 : 204; if (!options.failure) reset = true }
++    else if (p.endsWith('/environments')) data = [{ id: 'env', name: '测试', environmentCode: 'test', enabled: true, defaultEnvironment: true }, { id: 'off', name: '停用环境', environmentCode: 'off', enabled: false, defaultEnvironment: false }]
++    else if (p.endsWith('/parameters')) data = { environments: ['test', 'orphan'], parameters: [{ id: 'legacy', environmentCode: 'orphan', key: 'LEGACY', value: 'preserved', updatedAt: stamp }] }
++    else if (p.endsWith('/secrets')) data = { environments: ['test'], secrets: [] }
++    else if (p.endsWith('/api-debug/history')) data = options.history ? [options.history] : []
++    else if (p.endsWith('/api-design/preferences')) data = { revision: 0, state: { folders: [], hiddenIds: [], folderIds: {}, displayMode: 'NAME' } }
++    else data = []
++    await route.fulfill(status === 204 ? { status } : { status, json: status >= 400 ? { code: 'DEPENDENCY_UNAVAILABLE', message: 'QA受控失败' } : { data } })
++  })
++  const page = await context.newPage(); page.setDefaultTimeout(8_000); page.on('pageerror', e => errors.push(e.message))
++  const started = performance.now()
++  try {
++    await page.goto(origin + routePath); await operation(page, hits); assert.deepEqual(errors, [])
++    result.cases.push({ id, title, status: 'PASS', durationMs: Math.round(performance.now() - started) })
++  } catch (error) { result.cases.push({ id, title, status: 'FAIL', error: error.message, browserErrors: errors, pageText: (await page.locator('body').innerText()).slice(0, 2500), requests: hits }) }
++  finally { await context.close() }
++}
++try {
++  browser = await chromium.launch({ headless: true, channel: 'chrome' }); result.browserVersion = browser.version()
++  await run('TC-P2-D01-06', '孤立参数可见且编辑禁用', '/project-settings/environments', {}, async page => {
++    const row = page.locator('tr').filter({ hasText: 'LEGACY' }); await row.waitFor(); assert.ok((await row.innerText()).includes('缺失定义'))
++    assert.equal(await row.getByRole('button', { name: '编辑', exact: true }).isDisabled(), true)
++  })
++  await run('TC-P2-D03-CFG-02', '停用环境仍可维护并明确不可执行', '/project-settings/environments', {}, async page => {
++    await page.getByRole('button', { name: '新建参数', exact: true }).click()
++    const modal = page.locator('.arco-modal').filter({ hasText: '新建环境参数' }); await modal.waitFor()
++    assert.ok((await modal.innerText()).includes('不可执行'))
++    await modal.locator('.arco-select-view').click()
++    const option = page.locator('.arco-select-option:visible').filter({ hasText: '停用环境' }); await option.waitFor()
++    assert.ok(!(await option.getAttribute('class')).includes('disabled')); await option.click()
++  })
++  await run('TC-P2-D10-13', '目录复制断线后重试保持同一Key', '/api-testing/interfaces', {}, async (page, hits) => {
++    for (let n = 0; n < 2; n++) {
++      await page.locator('.catalog-entry').hover(); await page.locator('[aria-label="目录 源目录 更多操作"]').click()
++      await page.locator('.arco-dropdown-option:visible').filter({ hasText: /复制/ }).first().click()
++      await page.locator('.arco-message').filter({ hasText: n === 0 ? '相同请求重试' : '完整复制' }).waitFor()
++    }
++    const copies = hits.filter(hit => hit.path.endsWith('/copy'))
++    assert.equal(copies.length, 2); assert.deepEqual(copies[0].payload, copies[1].payload)
++    assert.equal(hits.filter(hit => hit.path.endsWith('/catalogs') && hit.method === 'POST').length, 0)
++  })
++  await run('TC-P2-D22-07/08', '冲突保留草稿，主动读取版本后单独保存', '/reports', {}, async (page, hits) => {
++    await page.getByRole('button', { name: '编辑', exact: true }).click()
++    const modal = page.locator('.arco-modal').filter({ hasText: '编辑定时质量报告' }); await modal.waitFor()
++    const name = modal.locator('.arco-form-item').filter({ hasText: '计划名称' }).locator('input'); await name.fill('我的保留草稿')
++    await modal.getByRole('button', { name: '确定', exact: true }).click()
++    await modal.getByRole('button', { name: '读取最新版本', exact: true }).waitFor(); assert.equal(await name.inputValue(), '我的保留草稿')
++    assert.equal(hits.filter(hit => hit.method === 'PUT').length, 1)
++    await modal.getByRole('button', { name: '读取最新版本', exact: true }).click(); await modal.getByText(/其他成员的新计划/).waitFor()
++    assert.equal(await name.inputValue(), '我的保留草稿'); assert.equal(hits.filter(hit => hit.method === 'PUT').length, 1)
++    await modal.getByRole('button', { name: '确定', exact: true }).click(); await modal.waitFor({ state: 'hidden' })
++    assert.deepEqual(hits.filter(hit => hit.method === 'PUT').map(hit => hit.payload.expectedVersion), [0, 1])
++  })
++} finally {
++  await browser?.close(); await new Promise(resolve => server.close(resolve)); result.cleanup = true
++  result.passed = result.cases.filter(item => item.status === 'PASS').length; result.failed = result.cases.length - result.passed
++  await fs.writeFile(path.join(out, 'headless-ui.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n')
++  if (result.failed) process.exitCode = 1
++}
+--- /dev/null
++++ after/scripts/qa/test-p2-backend.mjs
+@@ -0,0 +1,23 @@
++import fs from 'node:fs/promises'
++import path from 'node:path'
++import crypto from 'node:crypto'
++import process from 'node:process'
++import { fileURLToPath } from 'node:url'
++import { spawn } from 'node:child_process'
++
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const selected = process.argv[2] || 'P2*Tests'
++if (!/^[A-Za-z0-9_,*]+$/.test(selected) || !selected.startsWith('P2')) throw new Error('Only P2 test classes are accepted')
++const phase = process.argv[3] || 'test'
++if (!['test', 'package'].includes(phase)) throw new Error('Only test or package phases are accepted')
++const directory = path.join(root, '.testhub', 'p2-backend-qa-' + crypto.randomUUID())
++await fs.mkdir(path.dirname(directory), { recursive: true }); await fs.mkdir(directory)
++const env = { ...process.env }
++for (const key of Object.keys(env)) if (key.startsWith('SPRING_') || key.startsWith('TESTHUB_')) delete env[key]
++Object.assign(env, { SPRING_PROFILES_ACTIVE: 'desktop', TESTHUB_DESKTOP_DATA_DIRECTORY: directory,
++  TESTHUB_LOCAL_DB_PASSWORD: crypto.randomBytes(32).toString('hex'), TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test' })
++try {
++  const child = spawn(path.join(root, 'mvnw'), ['-pl', 'services/platform-api', '-am', '-Dtest=' + selected,
++    '-Dsurefire.failIfNoSpecifiedTests=false', '-Dtesthub.bootstrap.demo-enabled=false', phase], { cwd: root, env, stdio: 'inherit' })
++  process.exitCode = await new Promise((resolve, reject) => { child.once('error', reject); child.once('close', code => resolve(code ?? 1)) })
++} finally { await fs.rm(directory, { recursive: true, force: true }) }
+--- /dev/null
++++ after/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiCatalogCopyController.java
+@@ -0,0 +1,34 @@
++package io.testhub.platform.apidesign;
++
++import io.testhub.platform.security.AuthenticatedPrincipal;
++import io.testhub.platform.shared.api.ApiResponse;
++import org.springframework.security.core.Authentication;
++import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.PathVariable;
++import org.springframework.web.bind.annotation.PostMapping;
++import org.springframework.web.bind.annotation.RequestBody;
++import org.springframework.web.bind.annotation.RequestMapping;
++import org.springframework.web.bind.annotation.RestController;
++
++@RestController
++@RequestMapping("/api/v1/projects/{projectId}/api-design/catalogs/{catalogId}")
++public class ApiCatalogCopyController {
++    private final ApiCatalogCopyService copies;
++
++    public ApiCatalogCopyController(ApiCatalogCopyService copies) {
++        this.copies = copies;
++    }
++
++    @GetMapping("/copy-preview")
++    public ApiResponse<ApiCatalogCopyService.Preview> preview(Authentication authentication, @PathVariable String projectId,
++                                                             @PathVariable String catalogId) {
++        return ApiResponse.of(copies.preview((AuthenticatedPrincipal) authentication.getPrincipal(), projectId, catalogId));
++    }
++
++    @PostMapping("/copy")
++    public ApiResponse<ApiCatalogCopyService.Result> copy(Authentication authentication, @PathVariable String projectId,
++                                                         @PathVariable String catalogId,
++                                                         @RequestBody ApiCatalogCopyService.Request request) {
++        return ApiResponse.of(copies.copy((AuthenticatedPrincipal) authentication.getPrincipal(), projectId, catalogId, request));
++    }
++}
+--- /dev/null
++++ after/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiCatalogCopyRepository.java
+@@ -0,0 +1,35 @@
++package io.testhub.platform.apidesign;
++
++import java.util.Optional;
++import org.springframework.jdbc.core.simple.JdbcClient;
++import org.springframework.stereotype.Repository;
++
++@Repository
++public class ApiCatalogCopyRepository {
++    private final JdbcClient jdbc;
++
++    public ApiCatalogCopyRepository(JdbcClient jdbc) {
++        this.jdbc = jdbc;
++    }
++
++    public Optional<Receipt> find(String organization, String project, String user, String key) {
++        return jdbc.sql("""
++                SELECT payload_sha256, result_json FROM api_catalog_copy_receipt
++                WHERE organization_id = :organization AND project_id = :project
++                    AND requested_by = :user AND request_key = :key
++                FOR UPDATE
++                """).param("organization", organization).param("project", project).param("user", user).param("key", key)
++                .query((rs, row) -> new Receipt(rs.getString(1), rs.getString(2))).optional();
++    }
++
++    public void insert(String id, String organization, String project, String user, String key, String hash, String result) {
++        jdbc.sql("""
++                INSERT INTO api_catalog_copy_receipt
++                    (id, organization_id, project_id, requested_by, request_key, payload_sha256, result_json)
++                VALUES (:id, :organization, :project, :user, :key, :hash, :result)
++                """).param("id", id).param("organization", organization).param("project", project).param("user", user)
++                .param("key", key).param("hash", hash).param("result", result).update();
++    }
++
++    public record Receipt(String payloadSha256, String resultJson) { }
++}
+--- /dev/null
++++ after/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiCatalogCopyService.java
+@@ -0,0 +1,172 @@
++package io.testhub.platform.apidesign;
++
++import com.fasterxml.jackson.core.JsonProcessingException;
++import com.fasterxml.jackson.core.type.TypeReference;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.github.f4b6a3.ulid.UlidCreator;
++import io.testhub.platform.access.AccessService;
++import io.testhub.platform.audit.AuditService;
++import io.testhub.platform.security.AuthenticatedPrincipal;
++import java.nio.charset.StandardCharsets;
++import java.security.MessageDigest;
++import java.security.NoSuchAlgorithmException;
++import java.util.ArrayDeque;
++import java.util.ArrayList;
++import java.util.Comparator;
++import java.util.HashSet;
++import java.util.HexFormat;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.util.Locale;
++import java.util.Map;
++import java.util.Objects;
++import java.util.Set;
++import java.util.UUID;
++import org.springframework.http.HttpStatus;
++import org.springframework.stereotype.Service;
++import org.springframework.transaction.annotation.Isolation;
++import org.springframework.transaction.annotation.Transactional;
++import org.springframework.web.server.ResponseStatusException;
++
++/** One project transaction owns the source snapshot, copied assets, audit records and durable retry receipt. */
++@Service
++public class ApiCatalogCopyService {
++    public static final int LIMIT = 200;
++    private static final Set<String> WRITERS = Set.of("SYSTEM_ADMIN", "ORG_ADMIN", "PROJECT_ADMIN", "TEST_LEAD", "TESTER");
++    private final ApiDesignRepository repository;
++    private final ApiCatalogCopyRepository receipts;
++    private final ApiDesignService design;
++    private final AccessService access;
++    private final AuditService audit;
++    private final ObjectMapper json;
++    public ApiCatalogCopyService(ApiDesignRepository repository, ApiCatalogCopyRepository receipts, ApiDesignService design,
++                                 AccessService access, AuditService audit, ObjectMapper json) {
++        this.repository = repository;
++        this.receipts = receipts;
++        this.design = design;
++        this.access = access;
++        this.audit = audit;
++        this.json = json;
++    }
++
++    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
++    public Preview preview(AuthenticatedPrincipal actor, String project, String sourceId) {
++        access.requireProjectParameterWrite(actor,project,WRITERS);
++        Snapshot snapshot=snapshot(project,sourceId);
++        return new Preview(sourceId,snapshot.root.parentId(),snapshot.digest,snapshot.catalogs.size(),snapshot.definitions.size(),snapshot.itemCount,LIMIT);
++    }
++
++    @Transactional(isolation = Isolation.READ_COMMITTED)
++    public Result copy(AuthenticatedPrincipal actor, String project, String sourceId, Request request) {
++        var scope=access.requireProjectParameterWrite(actor,project,WRITERS);
++        if(request==null)throw bad("复制请求不能为空");
++        String key=requestKey(request.requestKey());
++        String expected=request.expectedSourceDigest()==null?"":request.expectedSourceDigest().trim().toLowerCase(Locale.ROOT);
++        if(!expected.matches("[a-f0-9]{64}"))throw bad("请先读取目录复制预检，再提交复制");
++        String payload=hash((sourceId+"\n"+expected).getBytes(StandardCharsets.UTF_8));
++        repository.lockProject(project);
++        var previous=receipts.find(scope.organizationId(),project,actor.userId(),key);
++        if(previous.isPresent()) {
++            if(!previous.get().payloadSha256().equals(payload))throw conflict("该复制请求Key已用于不同内容，请核对后发起新复制");
++            try{return json.readValue(previous.get().resultJson(), Result.class);}
++            catch(JsonProcessingException error){throw new IllegalStateException("目录复制回执损坏，未重建副本",error);}
++        }
++        Snapshot snapshot=snapshot(project,sourceId);
++        if(snapshot.itemCount>LIMIT)throw bad("单次目录复制最多200个目录与接口，未创建副本");
++        if(!snapshot.digest.equals(expected))throw conflict("源目录或当前版本已变化，请重新预检后确认复制");
++        var mapping=new LinkedHashMap<String, String>();
++        var newDefinitions=new ArrayList<String>();
++        var routeRegistry=new ArrayList<>(repository.findDefinitions(project,null));
++        for(ApiCatalog catalog:snapshot.catalogs) {
++            boolean root=catalog.id().equals(sourceId);
++            String parent=root?catalog.parentId():mapping.get(catalog.parentId());
++            String name=root?copyName(project,catalog):catalog.name();
++            ApiCatalog created=design.createCatalog(actor,project,new ApiDesignService.CatalogInput(name,parent,catalog.sortOrder()));
++            mapping.put(catalog.id(),created.id());
++        }
++        for(Definition source:snapshot.definitions) {
++            ApiDefinition api = source.api;
++            ApiDefinitionVersion version = source.version;
++            String name = api.name() + " 副本";
++            if (name.length() > 200) name = name.substring(0, 200);
++            ApiDefinition created=design.createDefinition(actor,project,new ApiDesignService.DefinitionInput(mapping.get(api.catalogId()),
++                    api.method(),copyPath(api,routeRegistry),name,version.versionName(),version.summary(),version.description(),
++                    parameters(version.requestHeaders()),parameters(version.requestQuery()),parameters(version.requestPath()),
++                    version.requestBody(),version.responseBody(),metadata(version.exampleResponse())));
++            routeRegistry.add(created);
++            newDefinitions.add(created.id());
++        }
++        Result result=new Result(mapping.get(sourceId),mapping.size(),newDefinitions.size(), List.copyOf(mapping.values()), List.copyOf(newDefinitions));
++        try {receipts.insert(UlidCreator.getUlid().toString(),scope.organizationId(),project,actor.userId(),key,payload,json.writeValueAsString(result));}
++        catch(JsonProcessingException error){throw new IllegalStateException("目录复制回执编码失败",error);}
++        audit.record(actor,scope.organizationId(),project, "API_CATALOG_COPIED", "API_CATALOG",result.rootCatalogId(),
++                Map.of("catalogCount",result.catalogCount(), "definitionCount",result.definitionCount(), "sourceCatalogId",sourceId));
++        return result;
++    }
++
++    private Snapshot snapshot(String project, String sourceId) {
++        List<ApiCatalog> all=repository.findCatalogs(project);
++        ApiCatalog root=all.stream().filter(c->c.id().equals(sourceId)).findFirst()
++                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "源接口目录不存在"));
++        if(root.parentId()!=null&&all.stream().noneMatch(c->c.id().equals(root.parentId())))throw conflict("源目录父级缺失，未复制");
++        var tree = new ArrayList<ApiCatalog>();
++        var queue = new ArrayDeque<ApiCatalog>();
++        var visited = new HashSet<String>();
++        queue.add(root);
++        while(!queue.isEmpty()) {
++            ApiCatalog next = queue.removeFirst();
++            if (!visited.add(next.id())) throw conflict("目录结构存在循环，未复制");
++            tree.add(next);
++            all.stream().filter(c->next.id().equals(c.parentId())).sorted(Comparator.comparingInt(ApiCatalog::sortOrder).thenComparing(ApiCatalog::id)).forEach(queue::addLast);
++        }
++        List<ApiDefinition> apis=repository.findDefinitions(project,null).stream().filter(a->visited.contains(a.catalogId())).sorted(Comparator.comparing(ApiDefinition::id)).toList();
++        int count = tree.size() + apis.size();
++        var definitions = new ArrayList<Definition>();
++        for(ApiDefinition api:apis) {
++            ApiDefinitionVersion chosen=null;
++            if(count<=LIMIT) {
++                List<ApiDefinitionVersion> versions=repository.findVersions(project,api.id());
++                chosen=versions.stream().filter(v->v.id().equals(api.currentVersionId())).findFirst()
++                        .orElseGet(()->versions.stream().findFirst().orElseThrow(()->conflict("源接口没有可复制的当前版本，未复制")));
++            }
++            definitions.add(new Definition(api,chosen));
++        }
++        try {String digest=hash(json.writeValueAsBytes(List.of(tree,definitions, Objects.toString(root.parentId(), ""))));return new Snapshot(root, List.copyOf(tree), List.copyOf(definitions),count,digest);}
++        catch(JsonProcessingException error){throw new IllegalStateException("目录复制快照编码失败",error);}
++    }
++    private String copyName(String project, ApiCatalog root) {
++        int index=1;
++        while(true) {
++            String suffix = " 副本" + (index == 1 ? "" : " " + index);
++            String prefix = root.name();
++            if (prefix.length() + suffix.length() > 160) prefix = prefix.substring(0, 160 - suffix.length());
++            String name=prefix+suffix;if(!repository.catalogNameExists(project,root.parentId(),name, ""))return name;index++;
++        }
++    }
++    private String copyPath(ApiDefinition source, List<ApiDefinition> apis) {
++        String path=source.path().replaceAll("/+$", "");String base=(path.isEmpty()?"/":path)+"-copy";String candidate=base;int index=2;
++        var paths=new HashSet<String>();for(var api:apis)if(api.method().equalsIgnoreCase(source.method()))paths.add(api.path());
++        while(paths.contains(candidate))candidate=base+"-"+index++;
++        return candidate;
++    }
++    private List<ApiDesignService.ParameterInput> parameters(String value) {
++        try{return json.readValue(value,new TypeReference<List<ApiDesignService.ParameterInput>>(){});}
++        catch(JsonProcessingException error){throw conflict("源接口参数损坏，未复制");}
++    }
++    private Map<String, Object> metadata(String value) {
++        try{return json.readValue(value,new TypeReference<Map<String, Object>>(){});}
++        catch(JsonProcessingException error){throw conflict("源接口响应元数据损坏，未复制");}
++    }
++    private String requestKey(String value) {
++        try {String normalized=UUID.fromString(value).toString();if(!normalized.equalsIgnoreCase(value))throw new IllegalArgumentException();return normalized;}
++        catch(IllegalArgumentException|NullPointerException error){throw bad("复制请求Key必须为UUID");}
++    }
++    private String hash(byte[] bytes) {try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));}catch(NoSuchAlgorithmException error){throw new IllegalStateException(error);}}
++    private ResponseStatusException bad(String message){return new ResponseStatusException(HttpStatus.BAD_REQUEST,message);}
++    private ResponseStatusException conflict(String message){return new ResponseStatusException(HttpStatus.CONFLICT,message);}
++    private record Definition(ApiDefinition api, ApiDefinitionVersion version) { }
++    private record Snapshot(ApiCatalog root, List<ApiCatalog> catalogs, List<Definition> definitions, int itemCount, String digest) { }
++    public record Request(String requestKey, String expectedSourceDigest) { }
++    public record Preview(String sourceCatalogId, String targetParentId, String sourceDigest, int catalogCount, int definitionCount, int itemCount, int limit) { }
++    public record Result(String rootCatalogId, int catalogCount, int definitionCount, List<String> catalogIds, List<String> definitionIds) { }
++}
+--- before/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiDesignService.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiDesignService.java
+@@ -386,7 +386,10 @@
+     }
+ 
+     private ProjectSummary writeAccess(AuthenticatedPrincipal principal, String projectId) {
+-        return access.requireProjectParameterWrite(principal, projectId, WRITERS);
++        ProjectSummary project = access.requireProjectParameterWrite(principal, projectId, WRITERS);
++        // Normal edits and atomic directory copies coordinate on the same project lock.
++        repository.lockProject(projectId);
++        return project;
+     }
+     private void validateCatalogParent(String projectId, String catalogId, String parentId) {
+         String candidate = parentId;
+--- before/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiInterchangeService.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/apidesign/ApiInterchangeService.java
+@@ -121,8 +121,9 @@
+                 requestBody.putObject("content").putObject("application/json")
+                         .set("example", jsonOrText(version.requestBody()));
+             }
+-            ObjectNode response = operation.putObject("responses").putObject("200");
+-            response.put("description", "Success");
++            int statusCode = responseStatus(version.exampleResponse());
++            ObjectNode response = operation.putObject("responses").putObject(Integer.toString(statusCode));
++            response.put("description", harStatusText(statusCode));
+             response.putObject("content").putObject("application/json")
+                     .set("example", jsonOrText(version.responseBody()));
+         }
+@@ -710,9 +711,10 @@
+             body.putObject("options").putObject("raw").put("language", version.requestBody().trim().startsWith("{") || version.requestBody().trim().startsWith("[") ? "json" : "text");
+         }
+         ObjectNode response = item.putArray("response").addObject();
+-        response.put("name", "Success");
+-        response.put("status", "OK");
+-        response.put("code", 200);
++        int statusCode = responseStatus(version.exampleResponse());
++        response.put("name", harStatusText(statusCode));
++        response.put("status", harStatusText(statusCode));
++        response.put("code", statusCode);
+         response.put("body", version.responseBody());
+     }
+ 
+@@ -767,11 +769,22 @@
+     }
+ 
+     private int responseStatus(String exampleResponse) {
++        if (exampleResponse == null || exampleResponse.isBlank()) return 200;
+         try {
+-            int statusCode = json.readTree(exampleResponse).path("statusCode").asInt(200);
+-            return statusCode >= 100 && statusCode <= 599 ? statusCode : 200;
+-        } catch (JsonProcessingException exception) {
+-            return 200;
++            JsonNode metadata = json.readTree(exampleResponse);
++            if (metadata == null || metadata.isNull() || metadata.isMissingNode()
++                    || metadata.isTextual() && metadata.asText().isBlank()) return 200;
++            if (!metadata.isObject()) throw rejected("响应状态元数据格式不合法，未导出，请修正后重试");
++            JsonNode value = metadata.get("statusCode");
++            if (value == null || value.isNull()) return 200;
++            int status;
++            if (value.isIntegralNumber() && value.canConvertToInt()) status = value.intValue();
++            else if (value.isTextual() && value.asText().trim().matches("[0-9]+")) status = Integer.parseInt(value.asText().trim());
++            else throw rejected("响应状态码必须为100至599的整数，未导出，请修正后重试");
++            if (status < 100 || status > 599) throw rejected("响应状态码必须为100至599的整数，未导出，请修正后重试");
++            return status;
++        } catch (JsonProcessingException | NumberFormatException exception) {
++            throw rejected("响应状态元数据不合法，未导出，请修正后重试");
+         }
+     }
+ 
+@@ -785,6 +798,7 @@
+ 
+     private String harStatusText(int statusCode) {
+         return switch (statusCode) {
++            case 200 -> "OK";
+             case 201 -> "Created";
+             case 202 -> "Accepted";
+             case 204 -> "No Content";
+@@ -794,7 +808,7 @@
+             case 404 -> "Not Found";
+             case 409 -> "Conflict";
+             case 500 -> "Internal Server Error";
+-            default -> "OK";
++            default -> "HTTP " + statusCode;
+         };
+     }
+ 
+@@ -832,7 +846,7 @@
+                 String name = summary.isBlank() ? method.toUpperCase(Locale.ROOT) + " " + path : summary;
+                 result.add(new ApiDesignService.DefinitionInput(catalogId, method.toUpperCase(Locale.ROOT), path, name, version,
+                         summary, operation.path("description").asText(""), headers, query, pathParameters,
+-                        requestBody, responseBody, Map.of("statusCode", 200)));
++                        requestBody, responseBody, Map.of("statusCode", openApiResponseStatus(operation.path("responses")))));
+             });
+         });
+         return result;
+@@ -931,11 +945,27 @@
+ 
+     private String responseBody(JsonNode responses) {
+         if (!responses.isObject()) return "{}";
+-        JsonNode response = responses.has("200") ? responses.path("200")
+-                : responses.has("201") ? responses.path("201") : responses.path("default");
++        JsonNode response = responses.path(primaryResponseKey(responses));
+         JsonNode media = response.path("content").path("application/json");
+         return printable(media.has("example") ? media.path("example")
+                 : media.isMissingNode() ? response.path("schema") : media.path("schema"));
++    }
++
++    private String primaryResponseKey(JsonNode responses) {
++        if (responses.has("200")) return "200";
++        if (responses.has("201")) return "201";
++        if (responses.has("default")) return "default";
++        var keys = responses.fieldNames();
++        while (keys.hasNext()) {
++            String key = keys.next();
++            if (key.matches("[1-5][0-9]{2}")) return key;
++        }
++        return "default";
++    }
++
++    private int openApiResponseStatus(JsonNode responses) {
++        String key = primaryResponseKey(responses);
++        return key.equals("default") ? 200 : Integer.parseInt(key);
+     }
+ 
+     private void appendParameters(ArrayNode target, String source, String location) {
+--- before/services/platform-api/src/main/java/io/testhub/platform/extension/EnterpriseAdapterCatalog.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/extension/EnterpriseAdapterCatalog.java
+@@ -60,6 +60,7 @@
+             if (!key.matches("[a-z][a-zA-Z0-9_.-]{0,79}") || value.isBlank() || value.length() > 20_000) {
+                 throw rejected("适配器配置字段不合法");
+             }
++            if (normalized.containsKey(key)) throw rejected("适配器配置字段去除首尾空白后不能重复");
+             normalized.put(key, value);
+         }
+         if (!normalized.keySet().containsAll(definition.requiredFields())) {
+--- before/services/platform-api/src/main/java/io/testhub/platform/parameter/EnvironmentSecretService.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/parameter/EnvironmentSecretService.java
+@@ -49,6 +49,7 @@
+         if (value == null || value.isEmpty() || value.length() > 20_000) {
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "密钥值不能为空且不能超过 20000 字符");
+         }
++        parameters.requireDefinedEnvironment(projectId, normalizedEnvironment);
+         parameters.upsertSecret(UlidCreator.getUlid().toString(), project.organizationId(), project.id(),
+                 normalizedEnvironment, normalizedKey, cipher.encrypt(value), principal.userId());
+         audit.record(principal, project.organizationId(), project.id(), "ENVIRONMENT_SECRET_UPSERTED", "ENVIRONMENT_SECRET",
+--- before/services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterRepository.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterRepository.java
+@@ -164,6 +164,13 @@
+                 .map(enabled -> !enabled).orElse(false);
+     }
+ 
++    public void requireDefinedEnvironment(String projectId, String environmentCode) {
++        // Called after the shared project lock, also held by environment deletion.
++        boolean exists = jdbc.sql("SELECT EXISTS(SELECT 1 FROM project_environment WHERE project_id=:project AND environment_code=:environment)")
++                .param("project", projectId).param("environment", environmentCode).query(Boolean.class).single();
++        if (!exists) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "配置所属环境尚未定义，请先在环境管理中创建；旧孤立配置仅可读取或显式删除");
++    }
++
+     private Instant timestamp(Timestamp timestamp) {
+         return timestamp == null ? null : timestamp.toInstant();
+     }
+--- before/services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterService.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/parameter/ProjectParameterService.java
+@@ -46,6 +46,7 @@
+         if (value == null || value.length() > 20_000) {
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "参数值不能为空且不能超过 20000 字符");
+         }
++        parameters.requireDefinedEnvironment(projectId, normalizedEnvironment);
+         parameters.upsert(UlidCreator.getUlid().toString(), project.organizationId(), project.id(), normalizedEnvironment,
+                 normalizedKey, value, principal.userId());
+         audit.record(principal, project.organizationId(), project.id(), "PROJECT_PARAMETER_UPSERTED", "PROJECT_PARAMETER",
+--- before/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java
+@@ -253,6 +253,7 @@
+             if (value.length() > 1_024 || value.indexOf('\r') >= 0 || value.indexOf('\n') >= 0) {
+                 throw rejected("查询参数值不合法或过长");
+             }
++            if (result.containsKey(name)) throw rejected("查询参数名称去除首尾空白后不能重复");
+             result.put(name, value);
+         }
+         return Map.copyOf(result);
+--- before/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportSchedule.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportSchedule.java
+@@ -7,5 +7,12 @@
+ public record QualityReportSchedule(String id, String organizationId, String name, List<String> projectIds,
+                                     String cronExpression, String timezone, int periodDays, boolean enabled,
+                                     String lastRunId, String lastRunStatus, Instant lastRunAt, String createdBy,
+-                                    Instant createdAt, Instant updatedAt) {
++                                    Instant createdAt, Instant updatedAt, long version) {
++    public QualityReportSchedule(String id, String organizationId, String name, List<String> projectIds,
++                                 String cronExpression, String timezone, int periodDays, boolean enabled,
++                                 String lastRunId, String lastRunStatus, Instant lastRunAt, String createdBy,
++                                 Instant createdAt, Instant updatedAt) {
++        this(id, organizationId, name, projectIds, cronExpression, timezone, periodDays, enabled,
++                lastRunId, lastRunStatus, lastRunAt, createdBy, createdAt, updatedAt, 0);
++    }
+ }
+--- before/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleController.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleController.java
+@@ -1,5 +1,6 @@
+ package io.testhub.platform.reporting;
+ 
++import com.fasterxml.jackson.databind.JsonNode;
+ import io.testhub.platform.security.AuthenticatedPrincipal;
+ import io.testhub.platform.shared.api.ApiResponse;
+ import jakarta.validation.Valid;
+@@ -65,7 +66,7 @@
+ 
+     private QualityReportScheduleService.ScheduleInput input(ScheduleRequest request) {
+         return new QualityReportScheduleService.ScheduleInput(request.name(), request.projectIds(), request.cronExpression(),
+-                request.timezone(), request.periodDays(), request.enabled());
++                request.timezone(), request.periodDays(), request.enabled(), request.expectedVersion());
+     }
+ 
+     private AuthenticatedPrincipal principal(Authentication authentication) {
+@@ -74,5 +75,5 @@
+ 
+     public record ScheduleRequest(@NotBlank @Size(max = 160) String name, @NotEmpty @Size(max = 50) List<@NotBlank @Size(max = 26) String> projectIds,
+                                   @NotBlank @Size(max = 160) String cronExpression, @NotBlank @Size(max = 64) String timezone,
+-                                  @NotNull @Min(1) @Max(90) Integer periodDays, @NotNull Boolean enabled) { }
++                                  @NotNull @Min(1) @Max(90) Integer periodDays, @NotNull Boolean enabled, JsonNode expectedVersion) { }
+ }
+--- before/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleRepository.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleRepository.java
+@@ -58,6 +58,19 @@
+                 .param("periodDays", periodDays).param("enabled", enabled).update();
+     }
+ 
++    public int updateVersioned(String id, String organizationId, String name, List<String> projectIds, String cronExpression,
++                      String timezone, int periodDays, boolean enabled, long expectedVersion) {
++        return jdbc.sql("""
++                UPDATE quality_report_schedule
++                SET name = :name, project_ids = CAST(:projectIds AS JSON), cron_expression = :cronExpression,
++                    timezone = :timezone, period_days = :periodDays, enabled = :enabled, config_version = config_version + 1,
++                    updated_at = CURRENT_TIMESTAMP(3)
++                WHERE id = :id AND organization_id = :organizationId AND config_version = :expectedVersion
++                """).param("id", id).param("organizationId", organizationId).param("name", name)
++                .param("projectIds", write(projectIds)).param("cronExpression", cronExpression).param("timezone", timezone)
++                .param("expectedVersion", expectedVersion).param("periodDays", periodDays).param("enabled", enabled).update();
++    }
++
+     public void delete(String id, String organizationId) {
+         jdbc.sql("DELETE FROM quality_report_schedule WHERE id = :id AND organization_id = :organizationId")
+                 .param("id", id).param("organizationId", organizationId).update();
+@@ -111,7 +124,7 @@
+ 
+     private String scheduleSelect() {
+         return "SELECT id, organization_id, name, project_ids, cron_expression, timezone, period_days, enabled, last_run_id, "
+-                + "last_run_status, last_run_at, created_by, created_at, updated_at FROM quality_report_schedule";
++                + "last_run_status, last_run_at, created_by, created_at, updated_at, config_version FROM quality_report_schedule";
+     }
+ 
+     private QualityReportSchedule schedule(java.sql.ResultSet rs) throws java.sql.SQLException {
+@@ -119,7 +132,7 @@
+                 projectIds(rs.getString("project_ids")), rs.getString("cron_expression"), rs.getString("timezone"),
+                 rs.getInt("period_days"), rs.getBoolean("enabled"), rs.getString("last_run_id"),
+                 rs.getString("last_run_status"), instant(rs.getTimestamp("last_run_at")), rs.getString("created_by"),
+-                instant(rs.getTimestamp("created_at")), instant(rs.getTimestamp("updated_at")));
++                instant(rs.getTimestamp("created_at")), instant(rs.getTimestamp("updated_at")), rs.getLong("config_version"));
+     }
+ 
+     private List<String> projectIds(String value) {
+--- before/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleService.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportScheduleService.java
+@@ -1,5 +1,6 @@
+ package io.testhub.platform.reporting;
+ 
++import com.fasterxml.jackson.databind.JsonNode;
+ import com.github.f4b6a3.ulid.UlidCreator;
+ import io.testhub.platform.access.AccessService;
+ import io.testhub.platform.access.ProjectSummary;
+@@ -87,14 +88,15 @@
+         QualityReportSchedule existing = owned(principal, scheduleId, true);
+         lockOrganization(existing.organizationId());
+         existing = owned(principal, scheduleId, true);
++        long expectedVersion = expectedVersion(input);
+         SchedulePayload payload = payload(principal, input);
+         if (!existing.organizationId().equals(payload.organizationId())) {
+             throw rejected("定时报告不可跨组织变更项目范围");
+         }
+         try {
+-            if (schedules.update(scheduleId, existing.organizationId(), payload.name(), payload.projectIds(), payload.cronExpression(),
+-                    payload.timezone(), payload.periodDays(), payload.enabled()) == 0) {
+-                throw notFound("质量报告计划不存在");
++            if (schedules.updateVersioned(scheduleId, existing.organizationId(), payload.name(), payload.projectIds(), payload.cronExpression(),
++                    payload.timezone(), payload.periodDays(), payload.enabled(), expectedVersion) == 0) {
++                throw conflict("质量报告计划已被其他成员更新，请读取最新版本、核对草稿后再保存");
+             }
+         } catch (DataIntegrityViolationException exception) {
+             throw conflict("当前组织已存在同名质量报告计划");
+@@ -293,5 +295,20 @@
+     record SchedulePayload(String organizationId, String name, List<String> projectIds, String cronExpression,
+                                    String timezone, int periodDays, boolean enabled) { }
+     public record ScheduleInput(String name, List<String> projectIds, String cronExpression, String timezone,
+-                                Integer periodDays, Boolean enabled) { }
++                                Integer periodDays, Boolean enabled, JsonNode expectedVersion) {
++        public ScheduleInput(String name, List<String> projectIds, String cronExpression, String timezone,
++                             Integer periodDays, Boolean enabled) {
++            this(name, projectIds, cronExpression, timezone, periodDays, enabled, null);
++        }
++    }
++    private long expectedVersion(ScheduleInput input) {
++        JsonNode version = input == null ? null : input.expectedVersion();
++        if (version == null || version.isNull()) {
++            throw new ResponseStatusException(HttpStatus.PRECONDITION_REQUIRED, "修改质量报告计划必须提供expectedVersion，请读取最新版本");
++        }
++        if (!version.isIntegralNumber() || !version.canConvertToLong() || version.longValue() < 0) {
++            throw rejected("expectedVersion必须为非负整数");
++        }
++        return version.longValue();
++    }
+ }
+--- before/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java
++++ after/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java
+@@ -424,6 +424,7 @@
+             if (!key.matches("[A-Za-z_][A-Za-z0-9_]{0,63}") || value.length() > 4096 || value.contains("\r") || value.contains("\n")) {
+                 throw rejected("场景变量格式不合法");
+             }
++            if (result.containsKey(key)) throw rejected("场景变量名称去除首尾空白后不能重复");
+             result.put(key, value);
+         }
+         return Map.copyOf(result);
+--- /dev/null
++++ after/services/platform-api/src/main/resources/db/desktop/V56__api_catalog_copy_receipt.sql
+@@ -0,0 +1,13 @@
++CREATE TABLE api_catalog_copy_receipt (
++    id CHAR(26) PRIMARY KEY,
++    organization_id CHAR(26) NOT NULL,
++    project_id CHAR(26) NOT NULL,
++    requested_by CHAR(26) NOT NULL,
++    request_key VARCHAR(36) NOT NULL,
++    payload_sha256 CHAR(64) NOT NULL,
++    result_json MEDIUMTEXT NOT NULL,
++    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
++    CONSTRAINT fk_api_copy_project FOREIGN KEY (project_id) REFERENCES project(id),
++    CONSTRAINT fk_api_copy_actor FOREIGN KEY (requested_by) REFERENCES user_account(id),
++    UNIQUE KEY uk_api_copy_request (project_id, requested_by, request_key)
++);
+--- /dev/null
++++ after/services/platform-api/src/main/resources/db/migration/V112__api_catalog_copy_receipt.sql
+@@ -0,0 +1,13 @@
++CREATE TABLE api_catalog_copy_receipt (
++    id CHAR(26) PRIMARY KEY,
++    organization_id CHAR(26) NOT NULL,
++    project_id CHAR(26) NOT NULL,
++    requested_by CHAR(26) NOT NULL,
++    request_key VARCHAR(36) NOT NULL,
++    payload_sha256 CHAR(64) NOT NULL,
++    result_json MEDIUMTEXT NOT NULL,
++    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
++    CONSTRAINT fk_api_copy_project FOREIGN KEY (project_id) REFERENCES project(id),
++    CONSTRAINT fk_api_copy_actor FOREIGN KEY (requested_by) REFERENCES user_account(id),
++    UNIQUE KEY uk_api_copy_request (project_id, requested_by, request_key)
++);
+--- before/services/platform-api/src/test/java/io/testhub/platform/CrossRegressionFixesFlowTests.java
++++ after/services/platform-api/src/test/java/io/testhub/platform/CrossRegressionFixesFlowTests.java
+@@ -131,6 +131,7 @@
+     @ParameterizedTest @MethodSource("parameterBoundaries")
+     void publicNameBoundariesRetainFullAuditIdentifierAndStableRecord(int length, int envLength, boolean secret) {
+         var f = fixture(); String env = "e".repeat(envLength), key = "K".repeat(length);
++        environments.create(f.actor(), f.project(), new ProjectEnvironmentService.CreateInput("参数边界环境", env, "", "", true, false));
+         if (length > 128) {
+             var error = assertThrows(ResponseStatusException.class, () -> {
+                 if (secret) secrets.upsert(f.actor(), f.project(), env, key, "qa-value");
+--- before/services/platform-api/src/test/java/io/testhub/platform/P1ParameterRulesFlowTests.java
++++ after/services/platform-api/src/test/java/io/testhub/platform/P1ParameterRulesFlowTests.java
+@@ -15,6 +15,15 @@
+ import org.springframework.web.server.ResponseStatusException;
+ 
+ class P1ParameterRulesFlowTests extends P1FlowTestSupport {
++    @org.springframework.beans.factory.annotation.Autowired io.testhub.platform.parameter.ProjectEnvironmentService environments;
++    @Override io.testhub.platform.account.PlatformUserPrincipal actor() {
++        var actor = super.actor();
++        for (String code : java.util.List.of("qa", "other")) {
++            environments.create(actor, project(actor), new io.testhub.platform.parameter.ProjectEnvironmentService.CreateInput(code, code, "", "", true, false));
++        }
++        return actor;
++    }
++
+     @Autowired ProjectParameterService parameters;
+     @Autowired EnvironmentSecretService secrets;
+     record Stored(String id, String value, boolean secret) { }
+--- /dev/null
++++ after/services/platform-api/src/test/java/io/testhub/platform/P2CatalogCopyFlowTests.java
+@@ -0,0 +1,71 @@
++package io.testhub.platform;
++
++import static org.junit.jupiter.api.Assertions.*;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
++import com.fasterxml.jackson.databind.JsonNode;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.apidesign.*;
++import java.util.*;
++import java.util.concurrent.*;
++import java.util.concurrent.atomic.AtomicInteger;
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.http.MediaType;
++import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
++import org.springframework.test.web.servlet.MvcResult;
++
++class P2CatalogCopyFlowTests extends P1FlowTestSupport {
++    @Autowired ApiDesignService design;
++    @MockitoSpyBean ApiDesignRepository repository;
++    @AfterEach void restore() { reset(repository); }
++    record Fixture(PlatformUserPrincipal actor,String project,ApiCatalog root) { }
++    Fixture fixture(int definitions,int children) {
++        var a=actor();String p=project(a);var root=design.createCatalog(a,p,new ApiDesignService.CatalogInput("源目录",null,0));
++        for(int n=0;n<children;n++)design.createCatalog(a,p,new ApiDesignService.CatalogInput("子目录"+n,root.id(),n));
++        for(int n=0;n<definitions;n++)design.createDefinition(a,p,new ApiDesignService.DefinitionInput(root.id(),"GET","/p2/"+n,"接口"+n,"1.0.0","","",List.of(),List.of(),List.of(),"","{\"kept\":true}",Map.of("statusCode",201)));
++        return new Fixture(a,p,root);
++    }
++    String path(Fixture f){return "/api/v1/projects/"+f.project+"/api-design/catalogs/"+f.root.id();}
++    JsonNode preview(Fixture f) throws Exception {return json.readTree(mvc.perform(get(path(f)+"/copy-preview").with(user(f.actor))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("data");}
++    MvcResult copy(Fixture f,String key,String digest) throws Exception {return mvc.perform(post(path(f)+"/copy").with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(Map.of("requestKey",key,"expectedSourceDigest",digest)))).andReturn();}
++    JsonNode result(MvcResult result){try{return json.readTree(result.getResponse().getContentAsString()).path("data");}catch(Exception e){throw new IllegalStateException(e);}}
++    long count(String table,Fixture f){return jdbc.sql("SELECT COUNT(*) FROM "+table+" WHERE project_id=:p").param("p",f.project).query(Long.class).single();}
++    void failInMiddle(int position){var calls=new AtomicInteger();doAnswer(call->{if(calls.incrementAndGet()==position)throw new org.springframework.dao.DataIntegrityViolationException("controlled copy failure");return call.callRealMethod();}).when(repository).insertDefinition(anyString(),anyString(),anyString(),anyString(),anyString(),anyString(),anyString(),anyString());}
++    @Test @DisplayName("[TC-P2-D10-01][POS] one server operation copies the source tree and current versions")
++    void successfulTree() throws Exception {var f=fixture(2,1);var original=design.definitions(f.actor,f.project,null).getFirst();
++        design.createVersion(f.actor,f.project,original.id(),new ApiDesignService.VersionInput("2.0.0","current","latest only",List.of(),List.of(),List.of(),"","{\"latest\":true}",Map.of("statusCode",204)));
++        var p=preview(f);assertEquals(4,p.path("itemCount").asInt());var r=copy(f,UUID.randomUUID().toString(),p.path("sourceDigest").asText());assertEquals(200,r.getResponse().getStatus());var receipt=result(r);assertEquals(2,receipt.path("catalogCount").asInt());assertEquals(2,receipt.path("definitionCount").asInt());assertEquals(4,count("api_catalog",f));assertEquals(4,count("api_definition",f));assertTrue(design.definitions(f.actor,f.project,null).stream().anyMatch(a->a.path().endsWith("-copy")));var copiedApis=design.definitions(f.actor,f.project,null).stream().filter(a->a.path().contains("-copy")).toList();assertTrue(copiedApis.stream().allMatch(a->design.versions(f.actor,f.project,a.id()).size()==1));assertTrue(copiedApis.stream().flatMap(a->design.versions(f.actor,f.project,a.id()).stream()).anyMatch(v->v.versionName().equals("2.0.0")&&v.responseBody().contains("latest")));}
++    @Test @DisplayName("[TC-P2-D10-02][NEG] failure after an earlier copied definition rolls back the entire branch")
++    void middleFailure() throws Exception {var f=fixture(2,1);String digest=preview(f).path("sourceDigest").asText();long audit=auditCount();
++        doThrow(new org.springframework.dao.DataIntegrityViolationException("controlled first write failure")).when(repository).insertCatalog(anyString(),anyString(),anyString(),nullable(String.class),anyString(),anyInt(),anyString());
++        assertTrue(copy(f,UUID.randomUUID().toString(),digest).getResponse().getStatus()>=400);assertEquals(2,count("api_catalog",f));assertEquals(0,count("api_catalog_copy_receipt",f));assertEquals(audit,auditCount());reset(repository);for(int position:List.of(1,2)){failInMiddle(position);var r=copy(f,UUID.randomUUID().toString(),digest);assertTrue(r.getResponse().getStatus()>=400);assertEquals(2,count("api_catalog",f));assertEquals(2,count("api_definition",f));assertEquals(0,count("api_catalog_copy_receipt",f));assertEquals(audit,auditCount());reset(repository);}}
++    @Test @DisplayName("[TC-P2-D10-03][NEG] receipt persistence failure leaves no copied assets or successful audit")
++    void receiptFailure() throws Exception {var f=fixture(1,0);String digest=preview(f).path("sourceDigest").asText(),key=UUID.randomUUID().toString(),constraint="p2_copy_"+UUID.randomUUID().toString().replace("-","").substring(0,12);jdbc.sql("ALTER TABLE api_catalog_copy_receipt ADD CONSTRAINT "+constraint+" CHECK(request_key <> '"+key+"')").update();long audit=auditCount();var r=copy(f,key,digest);assertTrue(r.getResponse().getStatus()>=400);assertEquals(1,count("api_catalog",f));assertEquals(1,count("api_definition",f));assertEquals(audit,auditCount());}
++    @Test @DisplayName("[TC-P2-D10-04][POS] replaying the same accepted request returns the original copy IDs")
++    void lostResponse() throws Exception {var f=fixture(1,0);String digest=preview(f).path("sourceDigest").asText(),key=UUID.randomUUID().toString();var first=copy(f,key,digest);assertEquals(200,first.getResponse().getStatus());var second=copy(f,key,digest);assertEquals(200,second.getResponse().getStatus());assertEquals(result(first),result(second));assertEquals(2,count("api_catalog",f));assertEquals(1,count("api_catalog_copy_receipt",f));}
++    @Test @DisplayName("[TC-P2-D10-05][NEG] reusing a request key with a changed payload is a conflict")
++    void differentPayload() throws Exception {var f=fixture(0,0);String digest=preview(f).path("sourceDigest").asText(),key=UUID.randomUUID().toString();assertEquals(200,copy(f,key,digest).getResponse().getStatus());assertEquals(409,copy(f,key,"0".repeat(64)).getResponse().getStatus());assertEquals(2,count("api_catalog",f));}
++    @Test @DisplayName("[TC-P2-D10-06][POS] concurrent retries of one request commit only one copy")
++    void concurrentRetry() throws Exception {var f=fixture(1,0);String digest=preview(f).path("sourceDigest").asText(),key=UUID.randomUUID().toString();try(var pool=Executors.newFixedThreadPool(2)){var gate=new CountDownLatch(1);var one=pool.submit(()->{gate.await();return copy(f,key,digest);});var two=pool.submit(()->{gate.await();return copy(f,key,digest);});gate.countDown();var a=one.get(15,TimeUnit.SECONDS);var b=two.get(15,TimeUnit.SECONDS);assertEquals(200,a.getResponse().getStatus());assertEquals(200,b.getResponse().getStatus());assertEquals(result(a),result(b));}assertEquals(2,count("api_catalog",f));}
++    @Test @DisplayName("[TC-P2-D10-07][POS] receipt and its response are persisted independently of browser state")
++    void durableReceipt() throws Exception {var f=fixture(0,0);String key=UUID.randomUUID().toString(),digest=preview(f).path("sourceDigest").asText();var r=copy(f,key,digest);assertEquals(200,r.getResponse().getStatus());String saved=jdbc.sql("SELECT result_json FROM api_catalog_copy_receipt WHERE project_id=:p AND request_key=:k").param("p",f.project).param("k",key).query(String.class).single();assertEquals(result(r),json.readTree(saved));assertEquals(result(r),result(copy(f,key,digest)));}
++    @Test @DisplayName("[TC-P2-D10-08][POS] an explicitly new request key creates a separate sibling copy")
++    void explicitNewCopy() throws Exception {var f=fixture(0,0);String digest=preview(f).path("sourceDigest").asText();var a=copy(f,UUID.randomUUID().toString(),digest);var b=copy(f,UUID.randomUUID().toString(),digest);assertEquals(200,a.getResponse().getStatus());assertEquals(200,b.getResponse().getStatus());assertNotEquals(result(a).path("rootCatalogId"),result(b).path("rootCatalogId"));assertEquals(3,count("api_catalog",f));}
++    @Test @DisplayName("[TC-P2-D10-09][NEG] stale source preview cannot copy a changed subtree")
++    void staleSource() throws Exception {var f=fixture(1,0);String digest=preview(f).path("sourceDigest").asText();design.createCatalog(f.actor,f.project,new ApiDesignService.CatalogInput("后来新增",f.root.id(),1));assertEquals(409,copy(f,UUID.randomUUID().toString(),digest).getResponse().getStatus());assertEquals(2,count("api_catalog",f));}
++    @Test @DisplayName("[TC-P2-D10-10][NEG] 201 source items cannot leave a partially copied branch")
++    void overLimit() throws Exception {var f=fixture(0,200);var other=actor();
++        int denied=mvc.perform(get(path(f)+"/copy-preview").with(user(other))).andReturn().getResponse().getStatus();assertTrue(denied==403||denied==404);
++        denied=mvc.perform(post(path(f)+"/copy").with(user(other)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(Map.of("requestKey",UUID.randomUUID().toString(),"expectedSourceDigest","a".repeat(64))))).andReturn().getResponse().getStatus();assertTrue(denied==403||denied==404);
++        var p=preview(f);assertEquals(201,p.path("itemCount").asInt());assertEquals(400,copy(f,UUID.randomUUID().toString(),p.path("sourceDigest").asText()).getResponse().getStatus());assertEquals(201,count("api_catalog",f));}
++    @Test @DisplayName("[TC-P2-D10-11][POS] exactly 200 source items are accepted atomically")
++    void atLimit() throws Exception {var f=fixture(0,199);var p=preview(f);assertEquals(200,p.path("itemCount").asInt());assertEquals(200,copy(f,UUID.randomUUID().toString(),p.path("sourceDigest").asText()).getResponse().getStatus());assertEquals(400,count("api_catalog",f));}
++    @Test @DisplayName("[TC-P2-D10-12][NEG] old partial copies are not cleaned as part of a new request")
++    void oldPartialRetained() throws Exception {var f=fixture(1,0);var old=design.createCatalog(f.actor,f.project,new ApiDesignService.CatalogInput("源目录 副本",null,0));String digest=preview(f).path("sourceDigest").asText();assertEquals(200,copy(f,UUID.randomUUID().toString(),digest).getResponse().getStatus());assertTrue(design.catalogs(f.actor,f.project).stream().anyMatch(c->c.id().equals(old.id())));}
++}
+--- /dev/null
++++ after/services/platform-api/src/test/java/io/testhub/platform/P2EnvironmentRulesFlowTests.java
+@@ -0,0 +1,67 @@
++package io.testhub.platform;
++
++import static org.junit.jupiter.api.Assertions.*;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.parameter.*;
++import io.testhub.platform.apiautomation.*;
++import java.util.List;
++import java.util.Map;
++import java.util.concurrent.*;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.security.access.AccessDeniedException;
++import org.springframework.web.server.ResponseStatusException;
++
++class P2EnvironmentRulesFlowTests extends P1FlowTestSupport {
++    @Autowired ProjectParameterService parameters;
++    @Autowired EnvironmentSecretService secrets;
++    @Autowired ProjectEnvironmentService environments;
++    @Autowired ApiAutomationScenarioService scenarios;
++    @Autowired ApiAutomationExecutionService executions;
++    String env(PlatformUserPrincipal a) { return environments.list(a, project(a)).getFirst().environmentCode(); }
++    ProjectEnvironment add(PlatformUserPrincipal a, String code, boolean enabled) {
++        return environments.create(a, project(a), new ProjectEnvironmentService.CreateInput("P2 " + code, code, "", "", enabled, false));
++    }
++    void reject(int code, Runnable run) { assertEquals(code, assertThrows(ResponseStatusException.class, run::run).getStatusCode().value()); }
++    long count(String p) { return jdbc.sql("SELECT COUNT(*) FROM project_parameter WHERE project_id=:p").param("p", p).query(Long.class).single(); }
++    void seedLegacy(PlatformUserPrincipal a, boolean secret) {
++        jdbc.sql("""
++                INSERT INTO project_parameter(id,organization_id,project_id,environment_code,parameter_key,parameter_value,secret,updated_by)
++                VALUES(:id,:o,:p,'orphan',:k,:v,:s,:u)
++                """).param("id", com.github.f4b6a3.ulid.UlidCreator.getUlid().toString()).param("o", access.context(a).organizations().getFirst().id())
++                .param("p", project(a)).param("k", secret ? "LEGACY_SECRET" : "LEGACY").param("v", secret ? "legacy-sealed-fixture" : "preserved").param("s", secret).param("u", a.userId()).update();
++    }
++    @Test @DisplayName("[TC-P2-D01-01][POS] defined environments accept ordinary and secret updates")
++    void definedWrites() { var a = actor(); String p = project(a), e = env(a); parameters.upsert(a,p,e,"NORMAL","one"); parameters.upsert(a,p,e,"NORMAL","two"); secrets.upsert(a,p,e,"SECRET",password()); assertEquals("two",parameters.list(a,p,e).parameters().getFirst().value()); assertEquals(1,secrets.list(a,p,e).secrets().size()); }
++    @Test @DisplayName("[TC-P2-D01-02][POS] existing environment normalization is retained")
++    void normalization() { var a=actor();add(a,"p2-qa",true);parameters.upsert(a,project(a)," P2-QA "," KEY ","one");assertEquals("KEY",parameters.list(a,project(a),"p2-qa").parameters().getFirst().key()); }
++    @Test @DisplayName("[TC-P2-D01-03][NEG] undefined ordinary writes cannot create a row or success audit")
++    void undefinedOrdinary() {var a=actor();String p=project(a);long rows=count(p),audit=auditCount();reject(400,()->parameters.upsert(a,p,"missing","KEY","no"));assertEquals(rows,count(p));assertEquals(audit,auditCount());}
++    @Test @DisplayName("[TC-P2-D01-04][NEG] undefined secret writes cannot create ciphertext")
++    void undefinedSecret() {var a=actor();String p=project(a);long rows=count(p),audit=auditCount();reject(400,()->secrets.upsert(a,p,"missing","KEY",password()));assertEquals(rows,count(p));assertEquals(audit,auditCount());}
++    @Test @DisplayName("[TC-P2-D01-05][NEG] another project cannot supply the missing definition")
++    void projectScope() {var a=actor();var b=actor();add(b,"only-other",true);reject(400,()->parameters.upsert(a,project(a),"only-other","KEY","no"));assertThrows(AccessDeniedException.class,()->parameters.upsert(b,project(a),env(a),"KEY","no"));}
++    @Test @DisplayName("[TC-P2-D01-06][POS] legacy orphan parameters and secret summaries remain readable")
++    void legacyRead() {var a=actor();seedLegacy(a,false);seedLegacy(a,true);assertEquals("preserved",parameters.list(a,project(a),"orphan").parameters().getFirst().value());assertEquals("LEGACY_SECRET",secrets.list(a,project(a),"orphan").secrets().getFirst().key());assertFalse(json.valueToTree(secrets.list(a,project(a),"orphan")).toString().contains("legacy-sealed-fixture"));}
++    @Test @DisplayName("[TC-P2-D01-07][NEG] orphan updates fail without changing existing values or metadata")
++    void legacyWrite() {var a=actor();seedLegacy(a,false);var before=parameters.list(a,project(a),"orphan");reject(400,()->parameters.upsert(a,project(a),"orphan","LEGACY","changed"));assertEquals(before,parameters.list(a,project(a),"orphan"));}
++    @Test @DisplayName("[TC-P2-D01-08][POS] disabled but defined configuration remains maintainable")
++    void disabledDefined() {var a=actor();add(a,"p2-off",false);parameters.upsert(a,project(a),"p2-off","KEY","kept");secrets.upsert(a,project(a),"p2-off","SECRET",password());assertEquals("kept",parameters.list(a,project(a),"p2-off").parameters().getFirst().value());}
++    @Test @DisplayName("[TC-P2-D01-09][NEG] concurrent environment deletion and writes leave no new orphan")
++    void deleteRace() throws Exception {var a=actor();var e=add(a,"p2-race",true);var gate=new CountDownLatch(1);try(var pool=Executors.newFixedThreadPool(2)){var write=pool.submit(()->{gate.await();try{parameters.upsert(a,project(a),e.environmentCode(),"KEY","value");}catch(ResponseStatusException error){assertEquals(400,error.getStatusCode().value());}return null;});var deletion=pool.submit(()->{gate.await();environments.delete(a,project(a),e.id());return null;});gate.countDown();write.get(10,TimeUnit.SECONDS);deletion.get(10,TimeUnit.SECONDS);}assertTrue(parameters.list(a,project(a),e.environmentCode()).parameters().isEmpty());}
++    @Test @DisplayName("[TC-P2-D01-10][NEG] legacy callers reject missing definitions while established guards remain")
++    void compatibility() {var a=actor();String p=project(a),e=env(a);reject(400,()->parameters.upsert(a,p,"missing","KEY","value"));add(a,"missing",true);parameters.upsert(a,p,"missing","KEY","value");secrets.upsert(a,p,e,"SEALED",password());reject(409,()->parameters.upsert(a,p,e,"SEALED","no"));reject(400,()->parameters.upsert(a,p,e,"BASE_URL","no"));}
++    @Test @DisplayName("[TC-P2-D03-CFG-01][POS] enabled environment configuration lifecycle stays available")
++    void enabledLifecycle() {var a=actor();String p=project(a),e=env(a);parameters.upsert(a,p,e,"KEY","one");parameters.upsert(a,p,e,"KEY","two");var row=parameters.list(a,p,e).parameters().getFirst();parameters.delete(a,p,row.id());assertTrue(parameters.list(a,p,e).parameters().isEmpty());}
++    @Test @DisplayName("[TC-P2-D03-CFG-02][POS] disabled environment has the same authorized maintenance API")
++    void disabledLifecycle() {var a=actor();var e=add(a,"p2-maintain",false);parameters.upsert(a,project(a),e.environmentCode(),"KEY","one");parameters.upsert(a,project(a),e.environmentCode(),"KEY","two");var row=parameters.list(a,project(a),e.environmentCode()).parameters().getFirst();parameters.delete(a,project(a),row.id());assertTrue(parameters.list(a,project(a),e.environmentCode()).parameters().isEmpty());}
++    @Test @DisplayName("[TC-P2-D03-CFG-03][POS] toggling enabled does not erase a committed configuration")
++    void toggle() {var a=actor();var e=add(a,"p2-toggle",true);parameters.upsert(a,project(a),e.environmentCode(),"KEY","one");environments.update(a,project(a),e.id(),new ProjectEnvironmentService.UpdateInput(e.name(),"","",false,e.version()));parameters.upsert(a,project(a),e.environmentCode(),"KEY","two");assertEquals("two",parameters.list(a,project(a),e.environmentCode()).parameters().getFirst().value());}
++    @Test @DisplayName("[TC-P2-D03-CFG-04][NEG] disabled maintenance grants no new cross-project privileges")
++    void disabledPermissions() {var a=actor();var b=actor();add(a,"p2-private",false);assertThrows(AccessDeniedException.class,()->secrets.upsert(b,project(a),"p2-private","KEY",password()));reject(400,()->secrets.upsert(a,project(a),"p2-private","BASE_URL",password()));}
++    @Test @DisplayName("[TC-P2-D03-CFG-05][NEG] maintaining disabled configuration cannot queue an execution")
++    void executionStillDisabled() {var a=actor();add(a,"p2-no-run",false);parameters.upsert(a,project(a),"p2-no-run","KEY","value");var scene=scenarios.create(a,project(a),new ApiAutomationScenarioService.ScenarioInput("P2", "", "p2-no-run", "STOP", List.of(new AutomationStep("wait","WAIT","等待",Map.of("delayMillis",1))), Map.of(), "", "", null));reject(409,()->executions.create(a,project(a),scene.id(),30,null,Map.of()));}
++    @Test @DisplayName("[TC-P2-D03-CFG-06][NEG] missing configuration environments cannot masquerade as disabled ones")
++    void missingStillRejected() {var a=actor();reject(400,()->parameters.upsert(a,project(a),"p2-absent","KEY","no"));}
++}
+--- /dev/null
++++ after/services/platform-api/src/test/java/io/testhub/platform/P2NormalizedKeysFlowTests.java
+@@ -0,0 +1,61 @@
++package io.testhub.platform;
++
++import io.testhub.platform.performance.*;
++import io.testhub.platform.uiautomation.*;
++import io.testhub.platform.extension.*;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import java.util.*;
++import org.junit.jupiter.api.*;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.web.server.ResponseStatusException;
++import static org.junit.jupiter.api.Assertions.*;
++
++class P2NormalizedKeysFlowTests extends P1FlowTestSupport {
++    @Autowired PerformanceTestPlanService performance;
++    @Autowired UiAutomationService ui;
++    @Autowired ExtensionRegistryService extensions;
++    @Autowired ExtensionRegistryRepository adapters;
++    @Autowired io.testhub.platform.apidesign.ApiInterchangeService interchange;
++    @Autowired io.testhub.platform.apidesign.ApiDesignService design;
++    Map<String,String> collision(boolean reverse, boolean equal) {
++        var result=new LinkedHashMap<String,String>();
++        result.put(reverse?" key ":"key","one");result.put(reverse?"key":" key ",equal?"one":"two");return result;
++    }
++    PerformanceTestPlanService.PlanInput plan(Map<String,String> query,String url) {
++        return json.convertValue(Map.of("name",unique(),"status","DRAFT","threadGroups",List.of(Map.of(
++                "name","group","targetUrl",url,"loadModel","RAMP_UP","threadCount",1,"rampUpSeconds",0,
++                "durationSeconds",10,"queryParameters",query))),PerformanceTestPlanService.PlanInput.class);
++    }
++    UiAutomationService.ScenarioRequest scenario(PlatformUserPrincipal actor,Map<String,String> variables) {
++        var profile=ui.createTransferredProfile(actor,project(actor),new UiAutomationService.ProfileRequest(unique(),"CHROMIUM","https://example.test",1280,720,false));
++        return new UiAutomationService.ScenarioRequest(profile.id(),unique(),"","STOP",variables,List.of(
++                new UiAutomationStep("wait","WAIT","等待",null,null,null,null,null,1)));
++    }
++    ExtensionRegistryService.AdapterInput adapter(Map<String,String> config) {
++        return new ExtensionRegistryService.AdapterInput("WECHAT_WORK",unique(),"https://example.test",config,false);
++    }
++    Map<String,String> adapterCollision(boolean reverse,boolean equal) {
++        var value=new LinkedHashMap<String,String>();value.put(reverse?" webhookKey ":"webhookKey","one");value.put(reverse?"webhookKey":" webhookKey ",equal?"one":"two");return value;
++    }
++    void bad(Runnable work) { assertEquals(400,assertThrows(ResponseStatusException.class,work::run).getStatusCode().value()); }
++    @Test @DisplayName("TC-P2-D17-01") void performanceRejectsTrimCollision() {var a=actor();bad(()->performance.create(a,project(a),plan(collision(false,false),"https://example.test")));assertTrue(performance.list(a,project(a)).isEmpty());}
++    @Test @DisplayName("TC-P2-D17-02") void webRejectsTrimCollision() {var a=actor();var input=scenario(a,collision(false,false));bad(()->ui.createScenario(a,project(a),input));}
++    @Test @DisplayName("TC-P2-D17-03") void adapterRejectsTrimCollision() {var a=admin();bad(()->extensions.saveAdapter(a,null,adapter(adapterCollision(false,false))));}
++    @Test @DisplayName("TC-P2-D17-04") void collisionIsIndependentOfOrderAndValue() {var a=admin();for(boolean reverse:List.of(false,true))for(boolean equal:List.of(false,true)) {bad(()->performance.create(a,project(a),plan(collision(reverse,equal),"https://example.test")));var input=scenario(a,collision(reverse,equal));bad(()->ui.createScenario(a,project(a),input));bad(()->extensions.saveAdapter(a,null,adapter(adapterCollision(reverse,equal))));}}
++    @Test @DisplayName("TC-P2-D17-05") void separateObjectsMayReuseKeys() {var a=actor();for(int i=0;i<2;i++){assertNotNull(performance.create(a,project(a),plan(Map.of("key","v"),"https://example.test")));assertNotNull(ui.createScenario(a,project(a),scenario(a,Map.of("key","v"))));}}
++    @Test @DisplayName("TC-P2-D17-06") void caseRulesRemainDistinct() {var a=admin();assertNotNull(performance.create(a,project(a),plan(Map.of("Key","v","key","w"),"https://example.test")));assertNotNull(ui.createScenario(a,project(a),scenario(a,Map.of("Key","v","key","w"))));assertNotNull(extensions.saveAdapter(a,null,adapter(Map.of("webhookKey","v","webhookkey","w"))));}
++    @Test @DisplayName("TC-P2-D17-07") void failedEditsKeepRowsCipherAndAudits() {
++        var a=admin();var created=extensions.saveAdapter(a,null,adapter(Map.of("webhookKey","v")));var previous=adapters.findAdapter(created.id()).orElseThrow();long audit=auditCount();
++        bad(()->extensions.saveAdapter(a,created.id(),adapter(adapterCollision(false,true))));assertEquals(previous,adapters.findAdapter(created.id()).orElseThrow());assertEquals(audit,auditCount());
++        var saved=performance.create(a,project(a),plan(Map.of("key","old"),"https://example.test"));var broken=plan(collision(false,false),"https://example.test");
++        var input=new PerformanceTestPlanService.PlanInput(broken.name(),broken.description(),broken.status(),broken.threadGroups(),saved.version());
++        bad(()->performance.update(a,project(a),saved.id(),input));assertEquals(saved,performance.detail(a,project(a),saved.id()));
++        var valid=scenario(a,Map.of("key","old"));var web=ui.createScenario(a,project(a),valid);long webAudit=auditCount();
++        var badWeb=new UiAutomationService.ScenarioRequest(valid.browserProfileId(),valid.name(),valid.description(),valid.failureStrategy(),collision(false,false),valid.steps());
++        bad(()->ui.updateScenario(a,project(a),web.id(),badWeb));assertEquals(web,ui.scenarios(a,project(a)).stream().filter(r->r.id().equals(web.id())).findFirst().orElseThrow());assertEquals(webAudit,auditCount());
++
++    }
++    @Test @DisplayName("TC-P2-D17-08") void validationAndAuthorizationStillApply() {var a=actor();bad(()->performance.create(a,project(a),plan(Map.of("bad key","v"),"https://example.test")));var input=scenario(a,Map.of("bad key","v"));bad(()->ui.createScenario(a,project(a),input));assertThrows(org.springframework.security.access.AccessDeniedException.class,()->extensions.saveAdapter(a,null,adapter(adapterCollision(false,false))));}
++    @Test @DisplayName("TC-P2-D17-09") void omittedConfigurationKeepsCipher() {var a=admin();var row=extensions.saveAdapter(a,null,adapter(Map.of("webhookKey","v")));String cipher=adapters.findAdapter(row.id()).orElseThrow().configurationCiphertext();extensions.saveAdapter(a,row.id(),adapter(null));assertEquals(cipher,adapters.findAdapter(row.id()).orElseThrow().configurationCiphertext());}
++    @Test @DisplayName("TC-P2-D17-10") void repeatedUrlQueryRemainsLegal() throws Exception {var a=actor();String p=project(a);var c=design.createCatalog(a,p,new io.testhub.platform.apidesign.ApiDesignService.CatalogInput(unique(),null,0));var result=interchange.importCurl(a,p,new io.testhub.platform.apidesign.ApiInterchangeService.CurlImportInput(c.id(),unique(),"curl 'https://example.test/search?k=1&k=2'"));assertEquals(1,result.importedCount());var api=design.definitions(a,p,c.id()).getFirst();assertEquals(2,json.readTree(design.versions(a,p,api.id()).getFirst().requestQuery()).size());}
++}
+--- /dev/null
++++ after/services/platform-api/src/test/java/io/testhub/platform/P2ResponseCodeFlowTests.java
+@@ -0,0 +1,52 @@
++package io.testhub.platform;
++
++import static org.junit.jupiter.api.Assertions.*;
++import com.fasterxml.jackson.databind.JsonNode;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.apidesign.*;
++import java.util.*;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.security.access.AccessDeniedException;
++import org.springframework.web.server.ResponseStatusException;
++
++class P2ResponseCodeFlowTests extends P1FlowTestSupport {
++    @Autowired ApiDesignService design;
++    @Autowired ApiInterchangeService interchange;
++    record Fixture(PlatformUserPrincipal actor,String project,ApiCatalog catalog,ApiDefinition api) { }
++    Fixture fixture(Object status) { var a=actor();String p=project(a);var c=design.createCatalog(a,p,new ApiDesignService.CatalogInput(unique(),null,0));var api=design.createDefinition(a,p,input(c.id(),"/p2",status));return new Fixture(a,p,c,api); }
++    ApiDesignService.DefinitionInput input(String catalog,String path,Object status) {
++        Map<String,Object> metadata=new LinkedHashMap<>();if(status!=null)metadata.put("statusCode",status);
++        return new ApiDesignService.DefinitionInput(catalog,"GET",path,"P2响应","1.0.0","","",List.of(),List.of(),List.of(),"","{\"source\":\"kept\"}",metadata);
++    }
++    JsonNode export(Fixture f,String format) {return switch(format){case "OpenAPI"->interchange.exportOpenApi(f.actor,f.project,f.catalog.id());case "Postman"->interchange.exportPostman(f.actor,f.project,f.catalog.id());default->interchange.exportHar(f.actor,f.project,f.catalog.id(),"https://example.test");};}
++    int code(JsonNode doc,String format,String path) {return switch(format){case "OpenAPI"->Integer.parseInt(doc.path("paths").path(path).path("get").path("responses").fieldNames().next());case "Postman"->doc.path("item").get(0).path("response").get(0).path("code").asInt();default->doc.path("log").path("entries").get(0).path("response").path("status").asInt();};}
++    void setMetadata(Fixture f,String metadata){String stored=metadata;try{var n=json.readTree(metadata);if(n==null||n.isMissingNode())stored=json.writeValueAsString(metadata);}catch(Exception ignored){try{stored=json.writeValueAsString(metadata);}catch(Exception e){throw new IllegalStateException(e);}}jdbc.sql("UPDATE api_definition_version SET example_response=CAST(:m AS JSON) WHERE id=:id").param("m",stored).param("id",f.api.currentVersionId()).update();}
++    void invalid(Object status){var f=fixture(status);for(String format:List.of("OpenAPI","Postman","HAR")){var e=assertThrows(ResponseStatusException.class,()->export(f,format));assertEquals(400,e.getStatusCode().value());}assertEquals(1,design.definitions(f.actor,f.project,null).size());}
++    void validCodes(String format){for(int status:List.of(100,201,204,301,400,404,500,599)){var f=fixture(status);assertEquals(status,code(export(f,format),format,"/p2"));}}
++    @Test @DisplayName("[TC-P2-D09-01][POS] OpenAPI preserves the approved valid status matrix") void openApi(){validCodes("OpenAPI");}
++    @Test @DisplayName("[TC-P2-D09-02][POS] Postman preserves the approved valid status matrix") void postman(){validCodes("Postman");}
++    @Test @DisplayName("[TC-P2-D09-03][POS] HAR preserves the approved valid status matrix") void har(){validCodes("HAR");}
++    @Test @DisplayName("[TC-P2-D09-04][POS] truly missing or null metadata defaults to 200") void missing(){for(String metadata:List.of("{}","{\"statusCode\":null}","null","")){var f=fixture(null);setMetadata(f,metadata);for(String format:List.of("OpenAPI","Postman","HAR"))assertEquals(200,code(export(f,format),format,"/p2"));}}
++    @Test @DisplayName("[TC-P2-D09-05][NEG] floating JSON status values cannot be truncated") void decimal(){invalid(200.0);invalid(201.9);}
++    @Test @DisplayName("[TC-P2-D09-06][NEG] status outside 100 to 599 cannot become a successful default") void range(){invalid(99);invalid(600);}
++    @Test @DisplayName("[TC-P2-D09-07][NEG] malformed or nonnumeric status metadata rejects export") void malformed(){invalid("bad");invalid("");var f=fixture(201);setMetadata(f,"broken-json");for(String format:List.of("OpenAPI","Postman","HAR"))assertEquals(400,assertThrows(ResponseStatusException.class,()->export(f,format)).getStatusCode().value());}
++    @Test @DisplayName("[TC-P2-D09-08][POS] an imported single response keeps its status on subsequent exports") void roundTrip(){var a=actor();String p=project(a);var c=design.createCatalog(a,p,new ApiDesignService.CatalogInput(unique(),null,0));String doc="{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"QA\",\"version\":\"1\"},\"paths\":{\"/p2\":{\"get\":{\"responses\":{\"201\":{\"description\":\"Created\",\"content\":{\"application/json\":{\"example\":{\"kept\":true}}}}}}}}}";interchange.importOpenApi(a,p,new ApiInterchangeService.OpenApiImportInput(c.id(),doc));var f=new Fixture(a,p,c,design.definitions(a,p,c.id()).getFirst());for(String format:List.of("OpenAPI","Postman","HAR"))assertEquals(201,code(export(f,format),format,"/p2"));
++        var postman=export(f,"Postman");var har=export(f,"HAR");
++        for(String origin:List.of("Postman","HAR")) {
++            // Each imported fixture uses its own project because route uniqueness is project-wide.
++            var other=actor();String otherProject=project(other);var target=design.createCatalog(other,otherProject,new ApiDesignService.CatalogInput(unique(),null,0));
++            if(origin.equals("Postman"))interchange.importPostman(other,otherProject,new ApiInterchangeService.PostmanImportInput(target.id(),postman.toString()));
++            else interchange.importHar(other,otherProject,new ApiInterchangeService.HarImportInput(target.id(),har.toString()));
++            var imported=new Fixture(other,otherProject,target,design.definitions(other,otherProject,target.id()).getFirst());
++            for(String format:List.of("OpenAPI","Postman","HAR"))assertEquals(201,code(export(imported,format),format,"/p2"));
++            assertTrue(design.versions(other,otherProject,imported.api.id()).getFirst().responseBody().contains("kept"));
++        }
++    }
++    @Test @DisplayName("[TC-P2-D09-09][POS] export uses the established current-version selection") void currentVersion(){var f=fixture(201);design.createVersion(f.actor,f.project,f.api.id(),new ApiDesignService.VersionInput("2.0.0","","",List.of(),List.of(),List.of(),"","{}",Map.of("statusCode",500)));for(String format:List.of("OpenAPI","Postman","HAR"))assertEquals(500,code(export(f,format),format,"/p2"));}
++    @Test @DisplayName("[TC-P2-D09-10][POS] catalog filtering does not mix response codes from other definitions") void catalogScope(){var f=fixture(201);var other=design.createCatalog(f.actor,f.project,new ApiDesignService.CatalogInput(unique(),null,0));design.createDefinition(f.actor,f.project,input(other.id(),"/other",500));assertEquals(1,export(f,"OpenAPI").path("paths").size());}
++    @Test @DisplayName("[TC-P2-D09-11][NEG] response metadata cannot be exported across unauthorized projects") void permissions(){var f=fixture(201);var b=actor();assertThrows(AccessDeniedException.class,()->interchange.exportOpenApi(b,f.project,null));}
++    @Test @DisplayName("[TC-P2-D09-12][POS] decimal digit strings retain their existing compatibility") void stringStatus(){var f=fixture(" 201 ");for(String format:List.of("OpenAPI","Postman","HAR"))assertEquals(201,code(export(f,format),format,"/p2"));}
++    @Test @DisplayName("[TC-P2-D09-13][POS] existing 200 formats and response bodies remain consumable") void original(){var f=fixture(200);for(String format:List.of("OpenAPI","Postman","HAR")){var doc=export(f,format);assertEquals(200,code(doc,format,"/p2"));assertTrue(doc.toString().contains("kept"));}}
++}
+--- /dev/null
++++ after/services/platform-api/src/test/java/io/testhub/platform/P2ScheduleVersionFlowTests.java
+@@ -0,0 +1,36 @@
++package io.testhub.platform;
++
++import com.fasterxml.jackson.databind.JsonNode;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.reporting.*;
++import java.util.*;
++import java.util.concurrent.*;
++import org.junit.jupiter.api.*;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.http.MediaType;
++import org.springframework.test.web.servlet.MvcResult;
++import static org.junit.jupiter.api.Assertions.*;
++import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++
++class P2ScheduleVersionFlowTests extends P1FlowTestSupport {
++    @Autowired QualityReportScheduleService schedules;
++    @Autowired QualityReportScheduleRepository repository;
++    JsonNode create(PlatformUserPrincipal a,boolean enabled) throws Exception {
++        return data(mvc.perform(post("/api/v1/reports/quality/schedules").with(user(a)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body(a,enabled)))).andReturn());
++    }
++    Map<String,Object> body(PlatformUserPrincipal a,boolean enabled) {return new LinkedHashMap<>(Map.of("name",unique(),"projectIds",List.of(project(a)),"cronExpression","0 0 0 1 1 ? 2099","timezone","UTC","periodDays",7,"enabled",enabled));}
++    JsonNode data(MvcResult result) throws Exception {assertEquals(200,result.getResponse().getStatus());return json.readTree(result.getResponse().getContentAsString()).path("data");}
++    MvcResult update(PlatformUserPrincipal a,String id,Map<String,Object> payload) throws Exception {return mvc.perform(put("/api/v1/reports/quality/schedules/"+id).with(user(a)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(payload))).andReturn();}
++    JsonNode row(String id){return json.valueToTree(repository.findById(id).orElseThrow());}
++    Map<String,Object> edit(PlatformUserPrincipal a,Object version){var b=body(a,false);b.put("expectedVersion",version);return b;}
++    @Test @DisplayName("TC-P2-D22-01") void initialZeroAndExistingVersionsAreVisible() throws Exception {var a=actor();var s=create(a,false);assertEquals(0,s.path("version").asLong(-1));jdbc.sql("UPDATE quality_report_schedule SET config_version=8 WHERE id=:id").param("id",s.path("id").asText()).update();assertEquals(8,row(s.path("id").asText()).path("version").asLong(-1));}
++    @Test @DisplayName("TC-P2-D22-02") void matchingVersionIncrementsExactlyOnce() throws Exception {var a=actor();var s=create(a,false);String id=s.path("id").asText();assertEquals(1,data(update(a,id,edit(a,0))).path("version").asLong(-1));assertEquals(2,data(update(a,id,edit(a,1))).path("version").asLong(-1));}
++    @Test @DisplayName("TC-P2-D22-03") void staleEditorHasNoSideEffects() throws Exception {var a=actor();String id=create(a,false).path("id").asText();data(update(a,id,edit(a,0)));var before=row(id);long audit=auditCount();assertEquals(409,update(a,id,edit(a,0)).getResponse().getStatus());assertEquals(before,row(id));assertEquals(audit,auditCount());}
++    @Test @DisplayName("TC-P2-D22-04") void concurrentEditorsProduceOneSuccess() throws Exception {var a=actor();String id=create(a,false).path("id").asText();try(var pool=Executors.newFixedThreadPool(2)){var start=new CountDownLatch(1);var left=pool.submit(()->{start.await();return update(a,id,edit(a,0)).getResponse().getStatus();});var right=pool.submit(()->{start.await();return update(a,id,edit(a,0)).getResponse().getStatus();});start.countDown();assertEquals(Set.of(200,409),Set.of(left.get(15,TimeUnit.SECONDS),right.get(15,TimeUnit.SECONDS)));}assertEquals(1,row(id).path("version").asLong(-1));}
++    @Test @DisplayName("TC-P2-D22-05") void missingOrNullPreconditionReturns428() throws Exception {var a=actor();String id=create(a,false).path("id").asText();assertEquals(428,update(a,id,body(a,false)).getResponse().getStatus());assertEquals(428,update(a,id,edit(a,null)).getResponse().getStatus());assertEquals(0,row(id).path("version").asLong(-1));}
++    @Test @DisplayName("TC-P2-D22-06") void invalidTypeRangeAndFractionReturn400() throws Exception {var a=actor();String id=create(a,false).path("id").asText();for(Object value:List.of(-1,0.0,1.5,"0",true,Map.of(),List.of(),"9223372036854775808"))assertEquals(400,update(a,id,edit(a,value)).getResponse().getStatus(),"invalid version type");}
++    @Test @DisplayName("TC-P2-D22-09") void runMetadataDoesNotChangeConfigVersion() throws Exception {var a=actor();String id=create(a,true).path("id").asText();data(mvc.perform(post("/api/v1/reports/quality/schedules/"+id+"/run").with(user(a)).with(csrf())).andReturn());assertNotNull(repository.findById(id).orElseThrow().lastRunId());assertEquals(0,row(id).path("version").asLong(-1));assertEquals(1,data(update(a,id,edit(a,0))).path("version").asLong(-1));}
++    @Test @DisplayName("TC-P2-D22-10") void unauthorizedRequestCannotEditConfiguration() throws Exception {var a=actor();String id=create(a,false).path("id").asText();var other=actor();int status=update(other,id,edit(other,0)).getResponse().getStatus();assertTrue(status==403||status==404);assertEquals(0,row(id).path("version").asLong(-1));}
++    @Test @DisplayName("TC-P2-D22-11") void failedPersistenceDoesNotBumpVersionOrEraseHistory() throws Exception {var a=actor();String id=create(a,true).path("id").asText();schedules.runNow(a,id);var duplicate=create(a,false);var before=row(id);long audit=auditCount();var payload=edit(a,0);payload.put("name",duplicate.path("name").asText());assertEquals(409,update(a,id,payload).getResponse().getStatus());assertEquals(before,row(id));assertEquals(audit,auditCount());assertEquals(1,schedules.runs(a,id).size());}
++}
+--- before/services/platform-api/src/test/java/io/testhub/platform/QualityReportSyncFlowTests.java
++++ after/services/platform-api/src/test/java/io/testhub/platform/QualityReportSyncFlowTests.java
+@@ -35,6 +35,7 @@
+  record Fixture(PlatformUserPrincipal actor,String project,String org){}
+  Fixture fixture(){String account="quality-sync-"+UUID.randomUUID();var actor=new PlatformUserPrincipal(registration.register(account,account+"@example.test","报告同步验收","Quality-fixture-2026!"));var c=access.context(actor);String org=c.organizations().getFirst().id();return new Fixture(actor,c.projects().get(org).getFirst().id(),org);}
+  String extra(Fixture f,String code){return access.createProject(f.actor(),"隔离关联项目 "+code,code,"").id();}
++ QualityReportScheduleService.ScheduleInput edit(String id,QualityReportScheduleService.ScheduleInput value){return new QualityReportScheduleService.ScheduleInput(value.name(),value.projectIds(),value.cronExpression(),value.timezone(),value.periodDays(),value.enabled(),new com.fasterxml.jackson.databind.node.LongNode(repository.findById(id).orElseThrow().version()));}
+  QualityReportScheduleService.ScheduleInput input(String name,List<String> projects,int days,boolean enabled){return new QualityReportScheduleService.ScheduleInput(name,projects,"0 0 0 1 1 ? 2099","Asia/Shanghai",days,enabled);}
+  Snapshot snapshot(Fixture f){return sync.snapshot(f.actor(),f.project(),f.actor().userId());}
+  Item item(String name,List<String> projects,int days){return new Item("SCHEDULE",name,new Definition(projects,"0 0 0 1 1 ? 2099","Asia/Shanghai",days));}
+@@ -45,9 +46,9 @@
+  @Test void copiesExplicitOrderedProjectsDisabledWithoutRunsNotificationsOrDuplicateReceipt()throws Exception{var f=fixture();String link=extra(f,"TARGET_DIFFERENT_CODE");var r=request(f,item("周报",List.of(link,f.project()),7));var receipt=apply(f,r);assertEquals(receipt,apply(f,r));var result=repository.findById(receipt.results().getFirst().id()).orElseThrow();assertEquals(List.of(link,f.project()),result.projectIds());assertFalse(result.enabled());assertFalse(quartz.checkExists(job(result.id())));assertTrue(schedules.runs(f.actor(),result.id()).isEmpty());assertEquals(0,jdbc.sql("SELECT COUNT(*) FROM notification_delivery WHERE organization_id=:o").param("o",f.org()).query(Long.class).single());assertEquals(1,receipts(f));assertEquals(1,schedules.list(f.actor()).size());assertThrows(ResponseStatusException.class,()->schedules.runNow(f.actor(),result.id()));}
+  @Test void changedDestinationDisablesQuartzAndPreservesLocalRunsCreatorAndLastResult()throws Exception{var f=fixture();var row=schedules.create(f.actor(),input("周报",List.of(f.project()),7,true));var run=schedules.runNow(f.actor(),row.id());assertEquals("SUCCEEDED",run.status());assertTrue(quartz.checkExists(job(row.id())));apply(f,request(f,item("周报",List.of(f.project()),30)));var result=repository.findById(row.id()).orElseThrow();assertFalse(result.enabled());assertEquals(30,result.periodDays());assertEquals(row.createdBy(),result.createdBy());assertEquals(run.id(),result.lastRunId());assertEquals(run,schedules.runs(f.actor(),row.id()).getFirst());assertFalse(quartz.checkExists(job(row.id())));}
+  @Test void unchangedConfigurationKeepsNativeActivationAndManualEnableStillRunsLocalReports()throws Exception{var f=fixture();var row=schedules.create(f.actor(),input("周报",List.of(f.project()),7,true));long version=snapshot(f).itemVersions().get("SCHEDULE\n周报");apply(f,request(f,item("周报",List.of(f.project()),7)));assertTrue(repository.findById(row.id()).orElseThrow().enabled());assertTrue(quartz.checkExists(job(row.id())));assertEquals(version,snapshot(f).itemVersions().get("SCHEDULE\n周报"));assertEquals("SUCCEEDED",schedules.runNow(f.actor(),row.id()).status());}
+- @Test void receiptReplayNeverRedisablesManuallyEnabledOrRecreatedTarget()throws Exception{var f=fixture();var r=request(f,item("周报",List.of(f.project()),7));var receipt=apply(f,r);String id=receipt.results().getFirst().id();schedules.update(f.actor(),id,input("周报",List.of(f.project()),7,true));assertThrows(ResponseStatusException.class,()->apply(f,r));assertTrue(repository.findById(id).orElseThrow().enabled());schedules.delete(f.actor(),id);var replacement=schedules.create(f.actor(),input("周报",List.of(f.project()),7,true));assertNotEquals(id,replacement.id());assertThrows(ResponseStatusException.class,()->apply(f,r));assertTrue(repository.findById(replacement.id()).orElseThrow().enabled());assertEquals(1,schedules.list(f.actor()).size());}
++ @Test void receiptReplayNeverRedisablesManuallyEnabledOrRecreatedTarget()throws Exception{var f=fixture();var r=request(f,item("周报",List.of(f.project()),7));var receipt=apply(f,r);String id=receipt.results().getFirst().id();schedules.update(f.actor(),id,edit(id,input("周报",List.of(f.project()),7,true)));assertThrows(ResponseStatusException.class,()->apply(f,r));assertTrue(repository.findById(id).orElseThrow().enabled());schedules.delete(f.actor(),id);var replacement=schedules.create(f.actor(),input("周报",List.of(f.project()),7,true));assertNotEquals(id,replacement.id());assertThrows(ResponseStatusException.class,()->apply(f,r));assertTrue(repository.findById(replacement.id()).orElseThrow().enabled());assertEquals(1,schedules.list(f.actor()).size());}
+  @Test void committedUuidCannotChangePayloadAndDeletedCopyCannotBeRebuilt(){var f=fixture();var r=request(f,item("周报",List.of(f.project()),7));var receipt=apply(f,r);var changed=new Request(r.requestKey(),r.expectedUserId(),"f".repeat(64),r.operations());assertThrows(ResponseStatusException.class,()->apply(f,changed));schedules.delete(f.actor(),receipt.results().getFirst().id());assertThrows(ResponseStatusException.class,()->apply(f,r));assertTrue(schedules.list(f.actor()).isEmpty());}
+- @Test void nativeConfigurationVersionProtectsConcurrentActivationAndCrossAnchorEdits(){var f=fixture();String linked=extra(f,"LINKED");var row=schedules.create(f.actor(),input("周报",List.of(linked,f.project()),7,false));var stale=request(f,item("周报",List.of(f.project()),30));schedules.update(f.actor(),row.id(),input("周报",List.of(linked,f.project()),7,true));assertThrows(ResponseStatusException.class,()->apply(f,stale));var before=sync.snapshot(f.actor(),linked,f.actor().userId());apply(f,request(f,item("周报",List.of(linked,f.project()),14)));assertNotEquals(before.revision(),sync.snapshot(f.actor(),linked,f.actor().userId()).revision());assertFalse(repository.findById(row.id()).orElseThrow().enabled());}
++ @Test void nativeConfigurationVersionProtectsConcurrentActivationAndCrossAnchorEdits(){var f=fixture();String linked=extra(f,"LINKED");var row=schedules.create(f.actor(),input("周报",List.of(linked,f.project()),7,false));var stale=request(f,item("周报",List.of(f.project()),30));schedules.update(f.actor(),row.id(),edit(row.id(),input("周报",List.of(linked,f.project()),7,true)));assertThrows(ResponseStatusException.class,()->apply(f,stale));var before=sync.snapshot(f.actor(),linked,f.actor().userId());apply(f,request(f,item("周报",List.of(linked,f.project()),14)));assertNotEquals(before.revision(),sync.snapshot(f.actor(),linked,f.actor().userId()).revision());assertFalse(repository.findById(row.id()).orElseThrow().enabled());}
+  @Test void lateOccupiedNameRollsBackChangesReceiptVersionAndKeepsOldQuartzJob()throws Exception{var f=fixture();String other=extra(f,"OTHER");var row=schedules.create(f.actor(),input("原计划",List.of(f.project()),7,true));schedules.create(f.actor(),input("范围外同名",List.of(other),7,true));var before=snapshot(f);var r=request(f,item("原计划",List.of(f.project()),30),item("范围外同名",List.of(f.project()),14));assertThrows(ResponseStatusException.class,()->apply(f,r));assertEquals(before,snapshot(f));assertTrue(repository.findById(row.id()).orElseThrow().enabled());assertTrue(quartz.checkExists(job(row.id())));assertEquals(0,receipts(f));}
+  @Test void explicitTransactionRollbackDoesNotRemoveQuartzJob()throws Exception{var f=fixture();var row=schedules.create(f.actor(),input("周报",List.of(f.project()),7,true));var r=request(f,item("周报",List.of(f.project()),30));new TransactionTemplate(transactions).executeWithoutResult(tx->{apply(f,r);assertTrue(quartzCheck(row.id()));tx.setRollbackOnly();});assertTrue(repository.findById(row.id()).orElseThrow().enabled());assertTrue(quartz.checkExists(job(row.id())));assertEquals(0,receipts(f));}
+  boolean quartzCheck(String id){try{return quartz.checkExists(job(id));}catch(Exception e){throw new IllegalStateException(e);}}
+--- before/services/platform-api/src/test/java/io/testhub/platform/desktop/DesktopBackupToolTests.java
++++ after/services/platform-api/src/test/java/io/testhub/platform/desktop/DesktopBackupToolTests.java
+@@ -17,7 +17,7 @@
+             sql.executeUpdate("INSERT INTO desktop_runtime_state(state_key,state_value,expires_at) VALUES('nonce','value',999999)");
+             sql.executeUpdate("INSERT INTO desktop_stream(stream_key,last_id) VALUES('queue',0)");
+         }
+-        assertEquals("55", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
++        assertEquals("56", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
+         try (var connection = DriverManager.getConnection(url(), "sa", "backup-fixture"); var sql = connection.createStatement(); var row = sql.executeQuery("SELECT COUNT(*) FROM desktop_runtime_state")) { row.next(); assertEquals(1, row.getInt(1)); }
+         DesktopBackupTool.prepare(directory, "backup-fixture", true);
+         try (var connection = DriverManager.getConnection(url(), "sa", "backup-fixture"); var sql = connection.createStatement()) {
+@@ -42,7 +42,7 @@
+         }
+         assertEquals("3", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
+         DesktopBackupTool.prepare(directory, "backup-fixture", true);
+-        assertEquals("55", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
++        assertEquals("56", DesktopBackupTool.prepare(directory, "backup-fixture", false).get("databaseVersion"));
+         try (var connection = DriverManager.getConnection(url(), "sa", "backup-fixture"); var sql = connection.createStatement();
+              var row = sql.executeQuery("SELECT config_value FROM system_config WHERE config_key='backup.fixture'")) {
+             assertTrue(row.next()); assertEquals(encrypted, row.getString(1));
+--- before/src/pages/ApiDesignPage.vue
++++ after/src/pages/ApiDesignPage.vue
+@@ -5,7 +5,7 @@
+ import ApiDefinitionEditor from '@/components/api-testing/ApiDefinitionEditor.vue'
+ import ApiDebugPage from '@/pages/ApiDebugPage.vue'
+ import ApiInterfaceWorkbench from '@/components/api-testing/ApiInterfaceWorkbench.vue'
+-import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
++import { ApiRequestError, clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
+ import { useSessionStore } from '@/stores/session'
+ import {
+   apiTreeDisplayText,
+@@ -652,14 +652,6 @@
+     Message.success(parent ? `目录已移动到“${parent.name}”` : '目录已移动到接口根目录')
+   } catch (error) { Message.error(error instanceof Error ? error.message : '移动目录失败') }
+ }
+-function uniqueCatalogCopyName(catalog: Catalog) {
+-  const siblingNames = new Set(catalogs.value.filter((item) => item.parentId === catalog.parentId).map((item) => item.name))
+-  const base = `${catalog.name} 副本`
+-  let candidate = base
+-  let suffix = 2
+-  while (siblingNames.has(candidate)) candidate = `${base} ${suffix++}`
+-  return candidate
+-}
+ function currentVersionOf(api: ApiDefinition, items: ApiVersion[]) {
+   return items.find((version) => version.id === api.currentVersionId) ?? items[0]
+ }
+@@ -697,31 +689,43 @@
+     Message.success('接口已复制，副本请求路径已自动避让冲突')
+   } catch (error) { Message.error(error instanceof Error ? error.message : '复制接口失败') } finally { saving.value = false }
+ }
++// A transport failure may follow a commit: keep the original identity until a receipt is confirmed.
++let catalogCopyScope = 0
++const catalogCopyRequests = new Map<string, { requestKey: string; expectedSourceDigest: string }>()
+ async function copyCatalog(catalog: Catalog) {
++  if (saving.value) return
+   saving.value = true
+-  const routeRegistry = [...definitions.value]
++  const ownerProject = projectId.value
++  const ownerScope = catalogCopyScope
++  const ownerUser = session.profile?.id
++  const identity = `${ownerUser ?? ''}/${ownerProject}/${catalog.id}`
++  const current = () => pageActive && ownerScope === catalogCopyScope && ownerProject === projectId.value && ownerUser === session.profile?.id
++  let submitted = false
+   try {
+-    const copyBranch = async (source: Catalog, parentId: string | null, root: boolean) => {
+-      const created = await mutate<Catalog>(`/api/v1/projects/${projectId.value}/api-design/catalogs`, 'POST', {
+-        name: root ? uniqueCatalogCopyName(source) : source.name,
+-        parentId,
+-        sortOrder: source.sortOrder,
+-      })
+-      for (const api of definitions.value.filter((item) => item.catalogId === source.id)) {
+-        await createDefinitionCopy(api, created.id, routeRegistry)
+-      }
+-      for (const child of catalogs.value.filter((item) => item.parentId === source.id)) {
+-        await copyBranch(child, created.id, false)
+-      }
+-      return created
++    let request = catalogCopyRequests.get(identity)
++    if (!request) {
++      const preview = await read<{ sourceDigest: string; itemCount: number; limit: number }>(`/api/v1/projects/${ownerProject}/api-design/catalogs/${catalog.id}/copy-preview`)
++      if (!current()) return
++      if (preview.itemCount > preview.limit) throw new Error(`单次目录复制最多${preview.limit}个目录与接口，未创建副本`)
++      request = { requestKey: crypto.randomUUID(), expectedSourceDigest: preview.sourceDigest }
++      catalogCopyRequests.set(identity, request)
+     }
+-    const created = await copyBranch(catalog, catalog.parentId, true)
++    const result = await mutate<{ rootCatalogId: string }>(`/api/v1/projects/${ownerProject}/api-design/catalogs/${catalog.id}/copy`, 'POST', request, () => {
++      if (!current()) throw new Error('复制所属项目已切换，请返回原项目后重试')
++      submitted = true
++    })
++    catalogCopyRequests.delete(identity)
++    if (!current()) return
+     await loadAssets()
+-    expandedCatalogIds.value = new Set([...expandedCatalogIds.value, created.id])
+-    Message.success('接口目录及其中接口已复制')
++    if (!current()) return
++    expandedCatalogIds.value = new Set([...expandedCatalogIds.value, result.rootCatalogId])
++    Message.success('接口目录及当前版本已完整复制')
+   } catch (error) {
+-    await loadAssets()
+-    Message.error(error instanceof Error ? `${error.message}；已保留成功创建的资产` : '复制接口目录失败')
++    const rejected = error instanceof ApiRequestError && error.status >= 400 && error.status < 500
++    if (rejected) catalogCopyRequests.delete(identity)
++    if (!current()) return
++    const reason = error instanceof Error ? error.message : '复制接口目录失败'
++    Message.error(submitted && !rejected ? `${reason}；提交状态未确认，请使用相同请求重试` : reason)
+   } finally { saving.value = false }
+ }
+ async function updateDefinitionMetadata(api: ApiDefinition, values: Partial<Pick<ApiDefinition, 'catalogId' | 'name'>>) {
+@@ -1185,7 +1189,7 @@
+ watch([() => interchangeForm.catalogId, () => interchangeForm.document, () => interchangeForm.name, () => interchangeForm.command, interchangeKind], () => {
+   resetFormSession('interchange'); interchangeResult.value = null
+ }, { flush: 'sync' })
+-watch([projectId, () => session.profile?.id], invalidateAssetForms, { flush: 'sync' })
++watch([projectId, () => session.profile?.id], () => { catalogCopyScope++; invalidateAssetForms() }, { flush: 'sync' })
+ watch(selectedApiId, cancelVersion, { flush: 'sync' })
+ watch(() => route.query.apiId, async (value) => {
+   if (typeof value !== 'string' || value === selectedApiId.value || !definitions.value.some((api) => api.id === value)) return
+--- before/src/pages/ProjectSettingsPage.vue
++++ after/src/pages/ProjectSettingsPage.vue
+@@ -89,6 +89,13 @@
+ const currentProject = computed(() => session.currentProject)
+ const availableProjects = computed(() => session.projects)
+ const environmentNames = computed(() => projectEnvironments.value.map((item) => item.environmentCode))
++const orphanEnvironmentCodes = computed(() => Array.from(new Set([...parameters.value, ...secrets.value].map(item => item.environmentCode)))
++  .filter(code => !environmentNames.value.includes(code)))
++function hasEnvironment(code: string) { return environmentNames.value.includes(code) }
++function environmentLabel(code: string) {
++  const item = projectEnvironments.value.find(environment => environment.environmentCode === code)
++  return item ? `${item.name} · ${code}${item.enabled ? '' : ' · 已停用（不可执行）'}` : `${code} · 缺失定义（只读）`
++}
+ const visibleParameters = computed(() => environmentFilter.value
+   ? parameters.value.filter((item) => item.environmentCode === environmentFilter.value && item.key !== 'BASE_URL')
+   : parameters.value.filter((item) => item.key !== 'BASE_URL'))
+@@ -287,6 +294,7 @@
+ 
+ function openEnvironment(kind: 'parameter' | 'secret', item?: Parameter) {
+   if (loading.value || !session.projectId) return
++  if (item && !hasEnvironment(item.environmentCode)) { Message.warning('该配置的环境定义缺失，仅可读取或显式删除；请先创建环境定义'); return }
+   if (!projectEnvironments.value.length) {
+     Message.warning('请先在系统设置中创建项目环境')
+     void router.push('/system-settings/environments')
+@@ -296,9 +304,9 @@
+   environmentKind.value = kind
+   editingParameterId.value = item?.id ?? null
+   environmentForm.environmentCode = item?.environmentCode ?? (
+-    environmentFilter.value
++    (hasEnvironment(environmentFilter.value) ? environmentFilter.value : '')
+     || projectEnvironments.value.find((environment) => environment.defaultEnvironment)?.environmentCode
+-    || projectEnvironments.value.find((environment) => environment.enabled)?.environmentCode
++    || projectEnvironments.value[0]?.environmentCode
+     || ''
+   )
+   environmentForm.key = item?.key ?? ''
+@@ -310,6 +318,7 @@
+   const projectId = formProjectId, view = viewSequence, form = formSequence, kind = environmentKind.value
+   if (!projectId || saving.value || disposed) return false
+   const input = { ...environmentForm }
++  if (!hasEnvironment(input.environmentCode)) { Message.warning('请先创建并选择项目环境定义'); return false }
+   saving.value = true
+   try {
+     const endpoint = kind === 'secret' ? 'secrets' : 'parameters'
+@@ -535,7 +544,8 @@
+           </div>
+           <div class="environment-toolbar">
+             <a-select v-model="environmentFilter" allow-clear placeholder="全部环境" :style="{ width: '200px' }">
+-              <a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode">{{ environment.name }} · {{ environment.environmentCode }}</a-option>
++              <a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode">{{ environmentLabel(environment.environmentCode) }}</a-option>
++              <a-option v-for="code in orphanEnvironmentCodes" :key="code" :value="code">{{ environmentLabel(code) }}</a-option>
+             </a-select>
+             <a-radio-group v-model="environmentView" type="button">
+               <a-radio value="parameters">环境参数（{{ visibleParameters.length }}）</a-radio>
+@@ -544,16 +554,16 @@
+           </div>
+           <a-table v-if="environmentView === 'parameters'" :data="visibleParameters" :pagination="false" row-key="id">
+             <template #columns>
+-              <a-table-column title="环境"><template #cell="{ record }"><a-tag color="arcoblue">{{ record.environmentCode }}</a-tag></template></a-table-column>
++              <a-table-column title="环境"><template #cell="{ record }"><a-tag :color="hasEnvironment(record.environmentCode) ? 'arcoblue' : 'orange'">{{ environmentLabel(record.environmentCode) }}</a-tag></template></a-table-column>
+               <a-table-column title="参数名称"><template #cell="{ record }"><strong>{{ record.key }}</strong></template></a-table-column>
+               <a-table-column title="参数值"><template #cell="{ record }"><code class="value-code">{{ record.value }}</code></template></a-table-column>
+               <a-table-column title="更新时间"><template #cell="{ record }">{{ formatDate(record.updatedAt) }}</template></a-table-column>
+-              <a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" @click="openEnvironment('parameter', record)">编辑</a-button><a-popconfirm content="确定删除该参数吗？" @ok="removeEnvironmentItem('parameters', record.id)"><a-button type="text" status="danger" :loading="pending.has('parameters:' + record.id)">删除</a-button></a-popconfirm></a-space></template></a-table-column>
++              <a-table-column title="操作"><template #cell="{ record }"><a-space><a-button type="text" :disabled="!hasEnvironment(record.environmentCode)" @click="openEnvironment('parameter', record)">编辑</a-button><a-popconfirm content="确定删除该参数吗？" @ok="removeEnvironmentItem('parameters', record.id)"><a-button type="text" status="danger" :loading="pending.has('parameters:' + record.id)">删除</a-button></a-popconfirm></a-space></template></a-table-column>
+             </template>
+           </a-table>
+           <a-table v-else :data="visibleSecrets" :pagination="false" row-key="id">
+             <template #columns>
+-              <a-table-column title="环境"><template #cell="{ record }"><a-tag color="purple">{{ record.environmentCode }}</a-tag></template></a-table-column>
++              <a-table-column title="环境"><template #cell="{ record }"><a-tag :color="hasEnvironment(record.environmentCode) ? 'purple' : 'orange'">{{ environmentLabel(record.environmentCode) }}</a-tag></template></a-table-column>
+               <a-table-column title="密钥名称"><template #cell="{ record }"><strong>{{ record.key }}</strong><small class="masked">•••••••• · 已加密</small></template></a-table-column>
+               <a-table-column title="更新时间"><template #cell="{ record }">{{ formatDate(record.updatedAt) }}</template></a-table-column>
+               <a-table-column title="操作"><template #cell="{ record }"><a-popconfirm content="确定删除该密钥吗？" @ok="removeEnvironmentItem('secrets', record.id)"><a-button type="text" status="danger" :loading="pending.has('secrets:' + record.id)">删除</a-button></a-popconfirm></template></a-table-column>
+@@ -642,7 +652,8 @@
+     <a-modal v-model:visible="environmentDialog" :title="environmentKind === 'secret' ? '新建环境密钥' : (editingParameterId ? '编辑环境参数' : '新建环境参数')" :ok-loading="saving" width="580px" :on-before-ok="saveEnvironmentItem">
+       <a-alert v-if="environmentKind === 'secret'" type="warning">密钥值仅在传输时可见，保存后会加密且无法再次回显。</a-alert>
+       <a-form :model="environmentForm" layout="vertical">
+-        <a-form-item label="所属环境" required><a-select v-model="environmentForm.environmentCode" :disabled="!!editingParameterId" placeholder="请选择项目环境"><a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode" :disabled="!environment.enabled">{{ environment.name }} · {{ environment.environmentCode }}</a-option></a-select></a-form-item>
++        <a-form-item label="所属环境" required><a-select v-model="environmentForm.environmentCode" :disabled="!!editingParameterId" placeholder="请选择项目环境"><a-option v-for="environment in projectEnvironments" :key="environment.id" :value="environment.environmentCode">{{ environmentLabel(environment.environmentCode) }}</a-option></a-select></a-form-item>
++        <a-alert type="info">已停用环境仍可维护配置，但不可执行；缺失环境定义的旧配置仅可读取或显式删除。</a-alert>
+         <a-form-item :label="environmentKind === 'secret' ? '密钥名称' : '参数名称'" required><a-input v-model="environmentForm.key" :disabled="!!editingParameterId" placeholder="API_BASE_URL" /></a-form-item>
+         <a-form-item :label="environmentKind === 'secret' ? '密钥值' : '参数值'" required>
+           <a-input-password v-if="environmentKind === 'secret'" v-model="environmentForm.value" placeholder="输入需要加密保存的值" />
+--- before/src/pages/ReportsPage.vue
++++ after/src/pages/ReportsPage.vue
+@@ -1,4 +1,5 @@
+ <script setup lang="ts">
++import { ApiRequestError, toApiRequestError } from '@/composables/useApiFormErrors'
+ import { Message } from '@arco-design/web-vue'
+ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+ import DashboardTrendChart from '@/components/DashboardTrendChart.vue'
+@@ -51,6 +52,7 @@
+   projects: ProjectHealth[]
+ }
+ interface QualityReportSchedule {
++  version: number
+   id: string
+   name: string
+   projectIds: string[]
+@@ -73,6 +75,9 @@
+ const savingSchedule = ref(false), reportError = ref(''), runsError = ref('')
+ let reportRequest = 0, schedulesRequest = 0, runsRequest = 0, formRequest = 0, disposed = false
+ const schedules = ref<QualityReportSchedule[]>([])
++const scheduleVersion = ref<number | null>(null)
++const scheduleConflict = ref(false), refreshingScheduleVersion = ref(false)
++const latestSchedule = ref<QualityReportSchedule | null>(null)
+ const scheduleVisible = ref(false)
+ const runsVisible = ref(false)
+ const editingScheduleId = ref<string | null>(null)
+@@ -143,7 +148,7 @@
+ async function read<T>(url: string, init?: RequestInit): Promise<T> {
+   const response = await fetch(url, { credentials: 'include', ...init })
+   const body = await response.json().catch(() => ({})) as ApiEnvelope<T> & { message?: string }
+-  if (!response.ok) throw new Error(body.message ?? '无法读取质量报表')
++  if (!response.ok) throw toApiRequestError(response, body)
+   return body.data
+ }
+ async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, current = () => !disposed): Promise<T> {
+@@ -192,12 +197,14 @@
+ function createSchedule() {
+   formRequest++
+   editingScheduleId.value = null
++  scheduleVersion.value = null; scheduleConflict.value = false; latestSchedule.value = null
+   scheduleForm.value = { name: '', projectIds: projectScopeError.value ? [] : selectedProjectIds.value.length ? [...selectedProjectIds.value] : projects.value.map((project) => project.id), cronExpression: '0 0 9 ? * MON', timezone: 'Asia/Shanghai', periodDays: 7, enabled: true }
+   scheduleVisible.value = true
+ }
+ function editSchedule(schedule: QualityReportSchedule) {
+   formRequest++
+   editingScheduleId.value = schedule.id
++  scheduleVersion.value = schedule.version; scheduleConflict.value = false; latestSchedule.value = null
+   scheduleForm.value = { name: schedule.name, projectIds: [...schedule.projectIds], cronExpression: schedule.cronExpression, timezone: schedule.timezone, periodDays: schedule.periodDays, enabled: schedule.enabled }
+   scheduleVisible.value = true
+ }
+@@ -209,7 +216,7 @@
+   }
+   const request = formRequest, id = editingScheduleId.value
+   const current = () => !disposed && request === formRequest
+-  const input = { ...scheduleForm.value, projectIds: [...scheduleForm.value.projectIds] }
++  const input = { ...scheduleForm.value, projectIds: [...scheduleForm.value.projectIds], ...(id ? { expectedVersion: scheduleVersion.value } : {}) }
+   savingSchedule.value = true
+   try {
+     const url = id ? `/api/v1/reports/quality/schedules/${id}` : '/api/v1/reports/quality/schedules'
+@@ -218,8 +225,30 @@
+     scheduleVisible.value = false; await loadSchedules()
+     if (!current()) return false
+     Message.success(id ? '定时报告已更新' : '定时报告已创建'); return true
+-  } catch (error) { if (!disposed && request === formRequest) Message.error(error instanceof Error ? error.message : '保存定时报告失败'); return false }
++  } catch (error) {
++    if (current()) {
++      if (error instanceof ApiRequestError && (error.status === 409 || error.status === 428)) scheduleConflict.value = true
++      Message.error(error instanceof Error ? error.message : '保存定时报告失败')
++    }
++    return false
++  }
+   finally { savingSchedule.value = false }
++}
++async function refreshScheduleVersion() {
++  const id = editingScheduleId.value, request = formRequest
++  if (!id || refreshingScheduleVersion.value || savingSchedule.value) return
++  refreshingScheduleVersion.value = true
++  try {
++    const items = await read<QualityReportSchedule[]>('/api/v1/reports/quality/schedules')
++    if (disposed || request !== formRequest || !scheduleVisible.value) return
++    const latest = items.find(item => item.id === id)
++    if (!latest) throw new Error('该计划已删除，请关闭草稿后核对计划列表')
++    scheduleVersion.value = latest.version
++    latestSchedule.value = latest
++    Message.info('已读取最新版本；请对照最新配置核对草稿，再点击确定保存')
++  } catch (error) {
++    if (!disposed && request === formRequest) Message.error(error instanceof Error ? error.message : '读取最新版本失败')
++  } finally { refreshingScheduleVersion.value = false }
+ }
+ async function runSchedule(schedule: QualityReportSchedule) {
+   if (disposed) return
+@@ -333,7 +362,7 @@
+       <a-empty v-else-if="!loading" description="未能生成质量报表，请调整筛选范围后重试" />
+     </a-spin>
+     <section class="panel schedule-panel"><div class="panel-title"><div><h3>定时质量报告</h3><p>按 Quartz Cron 与时区生成跨项目质量报告；通知模板可订阅 ready / risk 事件。</p></div><a-space><a-button v-if="syncAvailable" type="text" @click="openPlanSync">质量报告计划同步</a-button><a-button type="text" @click="createSchedule"><icon-plus /> 新建计划</a-button></a-space></div><a-table :data="schedules" :pagination="false" row-key="id"><template #columns><a-table-column title="计划"><template #cell="{ record }"><strong>{{ record.name }}</strong><small class="schedule-meta">{{ record.projectIds.length }} 个项目 · {{ record.periodDays }} 天周期</small></template></a-table-column><a-table-column title="触发规则"><template #cell="{ record }"><code>{{ record.cronExpression }}</code><small class="schedule-meta">{{ record.timezone }}</small></template></a-table-column><a-table-column title="上次运行"><template #cell="{ record }"><a-tag v-if="record.lastRunStatus" :color="record.lastRunStatus === 'SUCCEEDED' ? 'green' : 'red'">{{ record.lastRunStatus }}</a-tag><span v-else class="schedule-meta">尚未运行</span><small class="schedule-meta">{{ date(record.lastRunAt) }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-badge :status="record.enabled ? 'success' : 'normal'" :text="record.enabled ? '已启用' : '已停用'" /></template></a-table-column><a-table-column title="操作" :width="230"><template #cell="{ record }"><a-space><a-button type="text" :disabled="!record.enabled" @click="runSchedule(record)">立即运行</a-button><a-button type="text" @click="viewRuns(record)">记录</a-button><a-button type="text" @click="editSchedule(record)">编辑</a-button><a-popconfirm content="删除后历史运行记录也会移除，确认继续？" @ok="removeSchedule(record)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table><a-empty v-if="schedules.length === 0" description="尚未创建定时质量报告，可先选择项目和周报周期。" /></section>
+-    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑定时质量报告' : '新建定时质量报告'" width="640px" :ok-loading="savingSchedule" :on-before-ok="saveSchedule" @cancel="closeSchedule"><a-form :model="scheduleForm" layout="vertical"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" placeholder="例如：每周项目质量报告" /></a-form-item><a-form-item label="项目范围" required extra="选择需要纳入质量汇总且你有管理权限的项目。"><a-select v-model="scheduleForm.projectIds" multiple :limit="projectLimit" :max-tag-count="3" placeholder="选择项目" @exceed-limit="projectLimitWarning"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select></a-form-item><a-form-item label="Quartz Cron" required extra="采用六或七段 Quartz 表达式，例如每周一 09:00：0 0 9 ? * MON。"><a-input v-model="scheduleForm.cronExpression" /></a-form-item><div class="schedule-form-row"><a-form-item label="时区" required><a-select v-model="scheduleForm.timezone"><a-option value="Asia/Shanghai">Asia/Shanghai</a-option><a-option value="UTC">UTC</a-option></a-select></a-form-item><a-form-item label="统计周期（天）" required><a-input-number v-model="scheduleForm.periodDays" :min="1" :max="90" /></a-form-item></div><a-form-item label="启用计划"><a-switch v-model="scheduleForm.enabled"><template #checked>启用</template><template #unchecked>停用</template></a-switch></a-form-item></a-form></a-modal>
++    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑定时质量报告' : '新建定时质量报告'" width="640px" :ok-loading="savingSchedule" :on-before-ok="saveSchedule" @cancel="closeSchedule"><a-alert v-if="scheduleConflict" type="warning">保存未完成，草稿已保留。<a-button size="small" :loading="refreshingScheduleVersion" :disabled="savingSchedule" @click="refreshScheduleVersion">读取最新版本</a-button><div v-if="latestSchedule">最新版本 {{ latestSchedule.version }}：名称 {{ latestSchedule.name }}；项目 {{ latestSchedule.projectIds.join('、') }}；Cron {{ latestSchedule.cronExpression }}；时区 {{ latestSchedule.timezone }}；周期 {{ latestSchedule.periodDays }} 天；{{ latestSchedule.enabled ? '启用' : '停用' }}。请核对下面草稿后再次保存。</div></a-alert><a-form :model="scheduleForm" layout="vertical"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" placeholder="例如：每周项目质量报告" /></a-form-item><a-form-item label="项目范围" required extra="选择需要纳入质量汇总且你有管理权限的项目。"><a-select v-model="scheduleForm.projectIds" multiple :limit="projectLimit" :max-tag-count="3" placeholder="选择项目" @exceed-limit="projectLimitWarning"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select></a-form-item><a-form-item label="Quartz Cron" required extra="采用六或七段 Quartz 表达式，例如每周一 09:00：0 0 9 ? * MON。"><a-input v-model="scheduleForm.cronExpression" /></a-form-item><div class="schedule-form-row"><a-form-item label="时区" required><a-select v-model="scheduleForm.timezone"><a-option value="Asia/Shanghai">Asia/Shanghai</a-option><a-option value="UTC">UTC</a-option></a-select></a-form-item><a-form-item label="统计周期（天）" required><a-input-number v-model="scheduleForm.periodDays" :min="1" :max="90" /></a-form-item></div><a-form-item label="启用计划"><a-switch v-model="scheduleForm.enabled"><template #checked>启用</template><template #unchecked>停用</template></a-switch></a-form-item></a-form></a-modal>
+     <a-modal v-model:visible="runsVisible" :title="`${selectedSchedule?.name ?? ''} · 运行记录`" width="760px" :footer="false" @cancel="closeRuns"><a-alert v-if="runsError" type="error">{{ runsError }}</a-alert><a-table :data="scheduleRuns" :pagination="false" row-key="id"><template #columns><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="record.status === 'SUCCEEDED' ? 'green' : 'red'">{{ record.status }}</a-tag></template></a-table-column><a-table-column title="统计范围"><template #cell="{ record }">{{ record.from }} 至 {{ record.to }}</template></a-table-column><a-table-column title="通知投递" data-index="deliveryCount" /><a-table-column title="开始时间"><template #cell="{ record }">{{ date(record.startedAt) }}</template></a-table-column><a-table-column title="结果"><template #cell="{ record }"><span class="schedule-error">{{ record.errorMessage ?? '质量报告已生成' }}</span></template></a-table-column></template></a-table><a-empty v-if="scheduleRuns.length === 0" description="暂无运行记录" /></a-modal>
+   </div>
+ </template>
+--- /dev/null
++++ after/src/test/p2CatalogCopyUi.test.ts
+@@ -0,0 +1,76 @@
++import { defineComponent } from 'vue'
++import { createPinia } from 'pinia'
++import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
++import { createMemoryHistory, createRouter } from 'vue-router'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import { afterEach, expect, it, vi } from 'vitest'
++import ApiDesignPage from '@/pages/ApiDesignPage.vue'
++import { emptyApiDesignPreferences } from '@/utils/apiDesignPreferences'
++import { useSessionStore } from '@/stores/session'
++
++const wrappers: VueWrapper[] = []
++afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear() })
++const response = (data: unknown, status = 200) => new Response(JSON.stringify(status < 400 ? { data } : { message: String(data) }), { status })
++function deferred<T = Response>() {
++  let resolve!: (value: T) => void
++  const promise = new Promise<T>(release => { resolve = release })
++  return { promise, resolve }
++}
++const timestamp = '2026-10-24T00:00:00Z'
++const version = (id = 'v1') => ({ id, versionName: '1.0.0', summary: '', description: '原始快照', requestHeaders: '[]', requestQuery: '[]', requestPath: '[]', requestBody: '{"source":"original"}', responseBody: '{}', exampleResponse: '{"statusCode":200}', status: 'DRAFT', publishedAt: null, createdAt: timestamp })
++const definition = (id: string) => ({ id, catalogId: 'root', method: 'GET', path: '/' + id, name: id, status: 'DRAFT', currentVersionId: 'v1', versionCount: 1, createdBy: 'u1', updatedBy: 'u1', createdAt: timestamp, updatedAt: timestamp })
++const Workbench = defineComponent({ name: 'ApiInterfaceWorkbench', props: { api: { type: Object, default: null }, version: { type: Object, default: null } }, emits: ['new-version', 'edit'], template: '<div class="test-workbench"><slot name="editor" /></div>' })
++async function setup(override?: (url: string, init?: RequestInit) => Promise<Response> | undefined) {
++  vi.spyOn(Message, 'success').mockImplementation(() => ({ close: vi.fn() }))
++  vi.spyOn(Message, 'error').mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(), session = useSessionStore(pinia); session.projectId = 'p1'
++  const state = { versions: [version()] }
++  const fetcher = vi.fn((url: string, init?: RequestInit) => override?.(url, init) ?? Promise.resolve(response(
++    url.endsWith('/csrf') ? { headerName: 'X-CSRF', token: 'fixture' }
++      : url.endsWith('/context') ? { organizations: [{ id: 'o1' }], projects: { o1: [{ id: 'p1', organizationId: 'o1', name: '项目', code: 'P1' }, { id: 'p2', organizationId: 'o1', name: '项目2', code: 'P2' }] } }
++        : url.endsWith('/catalogs') ? [{ id: 'root', parentId: null, name: '根目录', sortOrder: 0 }]
++          : url.endsWith('/definitions') ? [definition('a'), definition('b')]
++            : url.endsWith('/versions') ? state.versions
++              : url.endsWith('/workspace-preferences') ? { revision: 0, state: emptyApiDesignPreferences() } : [])))
++  vi.stubGlobal('fetch', fetcher)
++  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/api-testing/interfaces', component: { template: '<div />' } }] }); await router.push('/api-testing/interfaces')
++  const w = mount(ApiDesignPage, { global: { plugins: [pinia, ArcoVue, router], stubs: { teleport: true, ApiInterfaceWorkbench: Workbench, Dropdown: { template: '<div><slot /><slot name="content" /></div>' }, Dsubmenu: { template: '<div><slot /><slot name="content" /></div>' } }, config: { warnHandler: () => {} } } })
++  wrappers.push(w); await flushPromises(); return { w, session, fetcher, state }
++}
++const copy = async (w: VueWrapper) => { w.findAllComponents({ name: 'Doption' }).find(item => item.text().trim() === '复制')!.vm.$emit('click'); await flushPromises() }
++it('TC-P2-D10-13: ambiguous failure reuses the durable request key and digest', async () => {
++  let fail = true
++  const { w, fetcher } = await setup((url, init) => url.endsWith('/copy-preview') ? Promise.resolve(response({ sourceDigest: 'a'.repeat(64), itemCount: 2, limit: 200 }))
++    : url.endsWith('/copy') && init?.method === 'POST' ? (fail ? Promise.reject(new TypeError('connection lost')) : Promise.resolve(response({ rootCatalogId: 'copied', catalogCount: 1, definitionCount: 1 }))) : undefined)
++  await copy(w)
++  expect(Message.error).toHaveBeenCalledWith(expect.stringContaining('相同请求重试'))
++  fail = false; await copy(w)
++  const posts = fetcher.mock.calls.filter(([url, init]) => url.endsWith('/copy') && init?.method === 'POST')
++  expect(posts).toHaveLength(2)
++  expect(JSON.parse(posts[0]![1]!.body as string)).toEqual(JSON.parse(posts[1]![1]!.body as string))
++  expect(JSON.parse(posts[0]![1]!.body as string).requestKey).toMatch(/^[a-f0-9-]{36}$/)
++  expect(fetcher.mock.calls.some(([url, init]) => url.endsWith('/catalogs') && init?.method === 'POST')).toBe(false)
++})
++it('TC-P2-D10-13: project switch during CSRF prevents a copy to the new project', async () => {
++  const csrf = deferred()
++  const { w, session, fetcher } = await setup(url => url.endsWith('/copy-preview') ? Promise.resolve(response({ sourceDigest: 'a'.repeat(64), itemCount: 2, limit: 200 })) : url.endsWith('/csrf') ? csrf.promise : undefined)
++  await copy(w); session.projectId = 'p2'; await flushPromises()
++  csrf.resolve(response({ headerName: 'X-CSRF', token: 'fixture' })); await flushPromises()
++  expect(fetcher.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
++  expect(Message.success).not.toHaveBeenCalled()
++})
++it('TC-P2-D10-13: late successful copy cannot refresh the current project', async () => {
++  const old = deferred()
++  const { w, session, fetcher } = await setup((url, init) => url.endsWith('/copy-preview') ? Promise.resolve(response({ sourceDigest: 'a'.repeat(64), itemCount: 2, limit: 200 })) : init?.method === 'POST' ? old.promise : undefined)
++  await copy(w); session.projectId = 'p2'; await flushPromises(); const calls = fetcher.mock.calls.length
++  old.resolve(response({ rootCatalogId: 'old-project-copy', catalogCount: 1, definitionCount: 1 })); await flushPromises()
++  expect(fetcher.mock.calls.length).toBe(calls)
++  expect(Message.success).not.toHaveBeenCalled()
++})
++it('TC-P2-D10-13: leaving and returning during CSRF cancels the original submission', async () => {
++  const csrf = deferred()
++  const { w, session, fetcher } = await setup(url => url.endsWith('/copy-preview') ? Promise.resolve(response({ sourceDigest: 'a'.repeat(64), itemCount: 2, limit: 200 })) : url.endsWith('/csrf') ? csrf.promise : undefined)
++  await copy(w); session.projectId = 'p2'; session.projectId = 'p1'; await flushPromises()
++  csrf.resolve(response({ headerName: 'X-CSRF', token: 'fixture' })); await flushPromises()
++  expect(fetcher.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
++})
+--- /dev/null
++++ after/src/test/p2EnvironmentUi.test.ts
+@@ -0,0 +1,27 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
++import { createPinia } from 'pinia'
++import ArcoVue, { Button, Modal, Option } from '@arco-design/web-vue'
++import ProjectSettingsPage from '@/pages/ProjectSettingsPage.vue'
++import { useSessionStore } from '@/stores/session'
++
++vi.mock('vue-router', () => ({ useRoute: () => ({ path: '/project-settings/environments', query: {} }), useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }))
++const wrappers: VueWrapper[] = []
++afterEach(() => { wrappers.splice(0).forEach(w => w.unmount()); vi.restoreAllMocks(); vi.unstubAllGlobals(); localStorage.clear() })
++async function setup(orphan = false) {
++  vi.stubGlobal('fetch', vi.fn(async (url: string) => new Response(JSON.stringify({ data: url.endsWith('/environments') ? [{ id: 'off', name: '停用环境', environmentCode: 'off', defaultEnvironment: true, enabled: false }]
++    : url.endsWith('/parameters') ? { environments: ['off', 'orphan'], parameters: orphan ? [{ id: 'old', environmentCode: 'orphan', key: 'LEGACY', value: 'old', updatedAt: '2026-10-30T00:00:00Z' }] : [] }
++      : url.endsWith('/secrets') ? { environments: [], secrets: [] } : [] }))))
++  const pinia = createPinia(), session = useSessionStore(pinia); session.projectId = 'p'; session.organizations = [{ id: 'o', name: 'QA', code: 'QA' }]; session.projectsByOrganization = { o: [{ id: 'p', name: 'QA', code: 'QA', status: 'ACTIVE', description: '', createdByName: null, createdAt: '', updatedAt: '' }] }
++  vi.spyOn(session, 'loadAccessContext').mockResolvedValue()
++  const w = mount(ProjectSettingsPage, { global: { plugins: [pinia, ArcoVue], stubs: { Modal: true, RouterLink: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises(); return w
++}
++it('[TC-P2-D01-06][POS][UI] orphan rows remain visible with a missing-definition label', async () => {
++  const w = await setup(true); expect(w.text()).toContain('LEGACY'); expect(w.text()).toContain('缺失定义'); expect(w.findAllComponents(Button).find(b => b.text() === '编辑')!.props('disabled')).toBe(true)
++})
++it('[TC-P2-D03-CFG-02][POS][UI] disabled definitions are selectable for maintenance with an execution warning', async () => {
++  const w = await setup(); w.findAllComponents(Button).find(b => b.text() === '新建参数')!.vm.$emit('click'); await flushPromises()
++  const modal = w.findAllComponents(Modal).find(m => m.props('title') === '新建环境参数')!
++  const option = modal.findAllComponents(Option).find(o => o.props('value') === 'off')!
++  expect(option.props('disabled')).not.toBe(true); expect(modal.text()).toContain('不可执行')
++})
+--- /dev/null
++++ after/src/test/p2ScheduleVersionUi.test.ts
+@@ -0,0 +1,67 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
++import { createPinia } from 'pinia'
++import ArcoVue, { Button, Input, Message, Modal } from '@arco-design/web-vue'
++import ReportsPage from '@/pages/ReportsPage.vue'
++import TasksPage from '@/pages/TasksPage.vue'
++import PageHeader from '@/components/PageHeader.vue'
++import { useSessionStore } from '@/stores/session'
++
++type Kind = 'report' | 'task'
++type Hook = (url: string, init?: RequestInit) => Promise<Response> | undefined
++const wrappers: VueWrapper[] = []
++afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear() })
++const response = (data: unknown, status = 200) => new Response(status === 204 ? undefined : JSON.stringify(status >= 400 ? { message: 'QA请求失败' } : { data }), { status })
++const schedule = { id: 's1', name: 'QA周报', projectIds: ['p1'], cronExpression: '0 0 9 ? * MON', timezone: 'Asia/Shanghai', periodDays: 7, enabled: true, version: 0, lastRunAt: null, lastRunStatus: null }
++const task = { id: 't1', projectId: 'p1', organizationId: 'o1', taskType: 'API', name: 'QA任务', status: 'QUEUED', progress: 0, version: 1, requestedBy: 'qa', createdAt: '2026-10-27T00:00:00Z', updatedAt: '2026-10-27T00:00:00Z', sourceTaskId: null }
++const summary = { functionalCaseCount: 0, apiDefinitionCount: 0, automationScenarioCount: 0, openDefectCount: 0, criticalDefectCount: 0, completedExecutions: 0, passedExecutions: 0, failedExecutions: 0, passRatePercent: null }
++const csrf = { token: 'fixture', headerName: 'X-CSRF' }
++const button = (w: VueWrapper, name: string) => w.findAllComponents(Button).find(b => b.text() === name)!
++const modal = (w: VueWrapper, kind: Kind) => w.findAllComponents(Modal).find(m => String(m.props('title')).includes(kind === 'report' ? '定时质量报告' : '执行任务'))!
++const field = (w: VueWrapper, kind: Kind) => modal(w, kind).findAllComponents({ name: 'FormItem' }).find(f => f.props('label') === (kind === 'report' ? '计划名称' : '任务名称'))!.findComponent(Input)
++const save = (w: VueWrapper, kind: Kind) => (modal(w, kind).props('onBeforeOk') as () => Promise<boolean>)()
++async function open(w: VueWrapper, kind: Kind, name = '草稿A', edit = false) {
++  if (edit) button(w, '编辑').vm.$emit('click')
++  else if (kind === 'report') button(w, '新建计划').vm.$emit('click')
++  else w.findComponent(PageHeader).vm.$emit('action')
++  await flushPromises(); field(w, kind).vm.$emit('update:modelValue', name); await flushPromises()
++}
++async function setup(kind: Kind) {
++  vi.spyOn(Message, 'success').mockImplementation(() => ({ close: vi.fn() })); vi.spyOn(Message, 'error').mockImplementation(() => ({ close: vi.fn() }))
++  let hook: Hook = () => undefined
++  const fetcher = vi.fn((url: string, init?: RequestInit) => {
++    const custom = hook(url, init)
++    if (custom) return custom
++    const data = url.endsWith('/context') ? { organizations: [{ id: 'o1' }], projects: { o1: ['p1', 'p2'].map(id => ({ id, name: id, code: id, organizationId: 'o1' })) } }
++      : url.endsWith('/csrf') ? csrf
++        : init?.method ? url.endsWith('/run') ? { id: 'r1', status: 'SUCCEEDED', deliveryCount: 0 } : kind === 'report' ? schedule : task
++          : url.endsWith('/schedules') ? [schedule]
++            : url.endsWith('/tasks') ? url.includes('/p1/') ? [task] : []
++              : { from: '2026-10-01', to: '2026-10-27', projectCount: 0, summary, trend: [], projects: [] }
++    return Promise.resolve(response(data))
++  })
++  vi.stubGlobal('fetch', fetcher)
++  const pinia = createPinia(), session = useSessionStore(pinia); session.projectId = 'p1'
++  const w = mount(kind === 'report' ? ReportsPage : TasksPage, { global: { plugins: [pinia, ArcoVue], stubs: { Modal: true, Popconfirm: true, DashboardTrendChart: true, UnifiedExecutionsPanel: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } })
++  wrappers.push(w); await flushPromises()
++  return { w, session, fetcher, hook: (value: Hook) => { hook = value } }
++}
++type Fixture = Awaited<ReturnType<typeof setup>>
++const writes = (q: Fixture) => q.fetcher.mock.calls.filter(([, init]) => ['POST', 'PUT', 'DELETE'].includes(init?.method ?? ''))
++
++it('TC-P2-D22-07: stale update keeps draft and original version without an automatic retry', async () => {
++  const q = await setup('report'); q.hook((_url, init) => init?.method === 'PUT' ? Promise.resolve(response({}, 409)) : undefined)
++  await open(q.w, 'report', '保留的草稿', true); expect(await save(q.w, 'report')).toBe(false); await flushPromises()
++  expect(modal(q.w, 'report').props('visible')).toBe(true); expect(field(q.w, 'report').props('modelValue')).toBe('保留的草稿')
++  expect(writes(q)).toHaveLength(1); expect(JSON.parse(writes(q)[0]![1]!.body as string).expectedVersion).toBe(0)
++  expect(modal(q.w, 'report').text()).toContain('读取最新版本')
++})
++it('TC-P2-D22-08: explicit version refresh keeps draft and requires a separate save', async () => {
++  const q = await setup('report'); let version = 0
++  q.hook((url, init) => init?.method === 'PUT' ? Promise.resolve(response({}, version === 0 ? 409 : 200)) : url.endsWith('/schedules') && !init?.method ? Promise.resolve(response([{ ...schedule, version, name: '其他人修改的最新名称' }])) : undefined)
++  await open(q.w, 'report', '我的待核对草稿', true); await save(q.w, 'report'); await flushPromises(); version = 1
++  button(q.w, '读取最新版本').vm.$emit('click'); await flushPromises()
++  expect(writes(q)).toHaveLength(1); expect(field(q.w, 'report').props('modelValue')).toBe('我的待核对草稿')
++  expect(modal(q.w, 'report').text()).toContain('其他人修改的最新名称')
++  expect(await save(q.w, 'report')).toBe(true); expect(JSON.parse(writes(q)[1]![1]!.body as string).expectedVersion).toBe(1)
++})
+--- before/src/test/qualityReportTaskFixes.test.ts
++++ after/src/test/qualityReportTaskFixes.test.ts
+@@ -13,7 +13,7 @@
+ afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear() })
+ const response = (data: unknown, status = 200) => new Response(status === 204 ? undefined : JSON.stringify(status >= 400 ? { message: 'QA请求失败' } : { data }), { status })
+ function deferred() { let resolve!: (value: Response) => void; const promise = new Promise<Response>(r => { resolve = r }); return { promise, resolve } }
+-const schedule = { id: 's1', name: 'QA周报', projectIds: ['p1'], cronExpression: '0 0 9 ? * MON', timezone: 'Asia/Shanghai', periodDays: 7, enabled: true, lastRunAt: null, lastRunStatus: null }
++const schedule = { id: 's1', name: 'QA周报', projectIds: ['p1'], cronExpression: '0 0 9 ? * MON', timezone: 'Asia/Shanghai', periodDays: 7, enabled: true, version: 0, lastRunAt: null, lastRunStatus: null }
+ const task = { id: 't1', projectId: 'p1', organizationId: 'o1', taskType: 'API', name: 'QA任务', status: 'QUEUED', progress: 0, version: 1, requestedBy: 'qa', createdAt: '2026-10-27T00:00:00Z', updatedAt: '2026-10-27T00:00:00Z', sourceTaskId: null }
+ const summary = { functionalCaseCount: 0, apiDefinitionCount: 0, automationScenarioCount: 0, openDefectCount: 0, criticalDefectCount: 0, completedExecutions: 0, passedExecutions: 0, failedExecutions: 0, passRatePercent: null }
+ const csrf = { token: 'fixture', headerName: 'X-CSRF' }
+--- before/src/test/reportsPage.test.ts
++++ after/src/test/reportsPage.test.ts
+@@ -6,7 +6,7 @@
+ afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers.length = 0; vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.useRealTimers() })
+ const summary = { functionalCaseCount: 0, apiDefinitionCount: 0, automationScenarioCount: 0, openDefectCount: 0, criticalDefectCount: 0, completedExecutions: 0, passedExecutions: 0, failedExecutions: 0, passRatePercent: null }
+ const report = (name = '最新项目') => ({ from: '2026-10-01', to: '2026-10-04', generatedAt: '', projectCount: 1, summary, trend: [], projects: [{ projectId: 'p1', projectName: name, projectCode: 'QA', ...summary, healthStatus: 'NO_EXECUTIONS' }] })
+-const schedule = { id: 's1', name: '周报', projectIds: ['p1'], cronExpression: '0 0 9 ? * MON', timezone: 'UTC', periodDays: 7, enabled: false, lastRunAt: null, lastRunStatus: null }
++const schedule = { id: 's1', name: '周报', projectIds: ['p1'], cronExpression: '0 0 9 ? * MON', timezone: 'UTC', periodDays: 7, enabled: false, version: 0, lastRunAt: null, lastRunStatus: null }
+ async function setup(override?: (url: string, init?: RequestInit) => unknown) {
+   vi.stubGlobal('fetch', vi.fn(async (input: string, init?: RequestInit) => {
+     const custom = await override?.(input, init)
+@@ -38,8 +38,11 @@
+   it('invalid dates invalidate an earlier request and display an actionable error', async () => {
+     let delayed = false, release!: (value: unknown) => void
+     const wrapper = await setup(url => delayed && url.includes('/quality?') ? new Promise(resolve => { release = resolve }) : undefined)
+-    delayed = true; await wrapper.get('input[aria-label="开始日期"]').setValue('2026-10-01'); await flushPromises()
+-    await wrapper.get('input[aria-label="结束日期"]').setValue('2026-09-01'); await flushPromises()
++    const initialFrom = (wrapper.get('input[aria-label="开始日期"]').element as HTMLInputElement).value
++    const precedingDay = (value: string) => new Date(Date.parse(value + 'T00:00:00Z') - 86_400_000).toISOString().slice(0, 10)
++    const changedFrom = precedingDay(initialFrom)
++    delayed = true; await wrapper.get('input[aria-label="开始日期"]').setValue(changedFrom); await flushPromises()
++    await wrapper.get('input[aria-label="结束日期"]').setValue(precedingDay(changedFrom)); await flushPromises()
+     release(report('过期项目')); await flushPromises(); expect(wrapper.text()).not.toContain('过期项目'); expect(wrapper.text()).toContain('开始日期不能晚于结束日期')
+   })
+   it('closing run records discards a delayed response', async () => {

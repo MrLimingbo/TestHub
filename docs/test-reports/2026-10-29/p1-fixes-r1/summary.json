@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-29",
+  "status": "VERIFIED_AWAITING_USER_REVIEW",
+  "formalCases": {
+    "total": 72,
+    "positive": 29,
+    "negative": 43,
+    "passed": 72,
+    "failed": 0,
+    "skipped": 0
+  },
+  "perDecision": [
+    {
+      "decision": "D02",
+      "tests": 10,
+      "positive": 4,
+      "negative": 6,
+      "passed": 10,
+      "failed": 0,
+      "status": "VERIFIED_AWAITING_USER_REVIEW"
+    },
+    {
+      "decision": "D05",
+      "tests": 13,
+      "positive": 6,
+      "negative": 7,
+      "passed": 13,
+      "failed": 0,
+      "status": "VERIFIED_AWAITING_USER_REVIEW"
+    },
+    {
+      "decision": "D11",
+      "tests": 8,
+      "positive": 4,
+      "negative": 4,
+      "passed": 8,
+      "failed": 0,
+      "status": "VERIFIED_AWAITING_USER_REVIEW"
+    },
+    {
+      "decision": "D12",
+      "tests": 21,
+      "positive": 7,
+      "negative": 14,
+      "passed": 21,
+      "failed": 0,
+      "status": "VERIFIED_AWAITING_USER_REVIEW"
+    },
+    {
+      "decision": "D03",
+      "tests": 12,
+      "positive": 5,
+      "negative": 7,
+      "passed": 12,
+      "failed": 0,
+      "status": "VERIFIED_AWAITING_USER_REVIEW"
+    },
+    {
+      "decision": "D25",
+      "tests": 8,
+      "positive": 3,
+      "negative": 5,
+      "passed": 8,
+      "failed": 0,
+      "status": "VERIFIED_AWAITING_USER_REVIEW"
+    }
+  ],
+  "engineering": {
+    "mysqlFull": {
+      "tests": 1035,
+      "passed": 1035,
+      "failed": 0,
+      "skipped": 0
+    },
+    "h2FullBeforeFinalD25Patch": {
+      "tests": 1025,
+      "passed": 1022,
+      "failed": 0,
+      "skipped": 3
+    },
+    "h2FinalFocused": {
+      "tests": 88,
+      "passed": 86,
+      "failed": 0,
+      "skipped": 2
+    },
+    "frontendFull": {
+      "tests": 826,
+      "passed": 826,
+      "failed": 0
+    },
+    "headlessUiFixtures": {
+      "tests": 7,
+      "passed": 7,
+      "failed": 0
+    },
+    "nativeJarHttp": {
+      "tests": 7,
+      "passed": 7,
+      "failed": 0
+    },
+    "additionalP1EngineeringCases": 20,
+    "realRedisHttpFlowInsideMysqlSuite": 1,
+    "priorApprovedFrontendProtection": {
+      "tests": 56,
+      "passed": 56
+    },
+    "lint": {
+      "errors": 0,
+      "preexistingWarnings": 2
+    },
+    "typecheck": "PASS",
+    "frontendBuild": "PASS",
+    "backendPackage": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "scope": {
+    "previousObservationsApproved": 10,
+    "currentObservationsAwaitingReview": 6,
+    "otherObservationsDeferred": 31,
+    "environmentBlockersDeferred": 12,
+    "oldCiphertextBulkDeletionExecuted": false,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "shutdownRootCauseConfirmed": false
+  },
+  "initialFailuresRetained": {
+    "h2First": {
+      "tests": 1023,
+      "failures": 4,
+      "errors": 3,
+      "skipped": 3,
+      "disposition": "Test assets updated for approved new rules; subsequent full H2 passed"
+    },
+    "mysqlFirst": {
+      "tests": 1025,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "disposition": "Redis wrapped connection-reset handling and probe/business client isolation fixed; subsequent full MySQL passed"
+    },
+    "frontendFirst": {
+      "tests": 826,
+      "failed": 20,
+      "disposition": "Rechecked all 826 at lower concurrency without changing timeout/assertions"
+    }
+  },
+  "countingNote": "Functional cases, engineering suites and HTTP/UI layers overlap; never sum into a unique total or rewrite the historical 3090 occurrences.",
+  "cleanup": {
+    "ownedComposeInfrastructureRemoved": true,
+    "ownedNativeJvmWorkspaceRemoved": true,
+    "ownedBrowsersClosed": true,
+    "remainingOwnedP1Workspaces": []
+  },
+  "packagedJarSha256": "d41c49785202daa51cf9a1713b30896151e77ca42330713abf91fe8395b3b744"
+}

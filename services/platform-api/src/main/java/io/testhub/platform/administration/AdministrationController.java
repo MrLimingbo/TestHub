@@ -9,6 +9,7 @@ import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +53,13 @@ public class AdministrationController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/audit-logs/actions")
+    public ApiResponse<List<String>> auditActions(Authentication authentication,
+                                                  @RequestParam(required = false) String projectId) {
+        access.requireSystemAdmin(principal(authentication));
+        return ApiResponse.of(audit.actions(projectId));
+    }
+
     @GetMapping("/audit-logs")
     public ApiResponse<List<AuditLogEntry>> auditLogs(Authentication authentication,
                                                         @RequestParam(required = false) String projectId,
@@ -66,6 +74,6 @@ public class AdministrationController {
         return (AuthenticatedPrincipal) authentication.getPrincipal();
     }
 
-    public record ConfigRequest(@NotBlank @Size(max = 128) String key, @NotBlank @Size(max = 20_000) String value) {
+    public record ConfigRequest(@NotBlank @Size(max = 128) String key, @NotNull @Size(max = 20_000) String value) {
     }
 }

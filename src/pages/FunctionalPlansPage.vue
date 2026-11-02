@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useSessionStore } from '@/stores/session'
 import { clearFormErrors, formErrorsFrom, toApiRequestError } from '@/composables/useApiFormErrors'
@@ -36,6 +36,16 @@ const selectedPlanIds = ref<string[]>([])
 const runSteps = ref<RunStep[]>([])
 const loading = ref(true)
 const saving = ref(false)
+const runSaving = ref(false)
+const planDetailsReady = ref(false)
+const deleting = ref(false)
+let active = true
+let formVersion = 0
+let runFormVersion = 0
+let listRequest = 0
+let planRequest = 0
+let runRequest = 0
+let stepRequest = 0
 const planDialog = ref(false)
 const editingPlanId = ref('')
 const runDialog = ref(false)
@@ -59,37 +69,79 @@ async function read<T>(url: string, init?: RequestInit): Promise<T> {
   if (!response.ok) throw toApiRequestError(response, body)
   return body.data
 }
-async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+async function mutate<T>(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown, canSend = () => true): Promise<T> {
+  const payload = body === undefined ? undefined : JSON.stringify(body)
   const csrf = await read<{ token: string; headerName: string }>('/api/v1/auth/csrf')
-  return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: body === undefined ? undefined : JSON.stringify(body) })
+  if (!canSend()) throw new Error('操作已取消')
+  return read<T>(url, { method, headers: { 'Content-Type': 'application/json', [csrf.headerName]: csrf.token }, body: payload })
 }
-async function loadCases() { cases.value = await read<TestCase[]>(`/api/v1/projects/${projectId.value}/functional/cases`) }
+async function loadCases() {
+  const pid = projectId.value
+  const data = await read<TestCase[]>(`/api/v1/projects/${pid}/functional/cases`)
+  if (active && pid === projectId.value) cases.value = data
+}
 async function loadPlans() {
-  allPlans.value = await read<Plan[]>(`/api/v1/projects/${projectId.value}/functional/plans`)
-  if (selectedPlanId.value && !plans.value.some((plan) => plan.id === selectedPlanId.value)) selectedPlanId.value = ''
-  if (!selectedPlanId.value && plans.value[0]) selectedPlanId.value = plans.value[0].id
+  const pid = projectId.value, request = ++listRequest
+  const data = await read<Plan[]>(`/api/v1/projects/${pid}/functional/plans`)
+  if (!active || pid !== projectId.value || request !== listRequest) return
+  allPlans.value = data
+  selectedPlanIds.value = selectedPlanIds.value.filter(id => data.some(plan => plan.id === id))
+  if (!plans.value.some(plan => plan.id === selectedPlanId.value)) selectedPlanId.value = plans.value[0]?.id ?? ''
   await loadPlanDetails()
 }
 async function loadPlanDetails() {
-  planCases.value = selectedPlanId.value ? await read<PlanCase[]>(`/api/v1/projects/${projectId.value}/functional/plans/${selectedPlanId.value}/cases`) : []
-  runs.value = await read<Run[]>(`/api/v1/projects/${projectId.value}/functional/runs${selectedPlanId.value ? `?planId=${selectedPlanId.value}` : ''}`)
-  if (!runs.value.some((run) => run.id === selectedRunId.value)) selectedRunId.value = runs.value[0]?.id ?? ''
-  await loadRunDetails()
+  const pid = projectId.value, id = selectedPlanId.value, request = ++planRequest
+  ++runRequest; ++stepRequest
+  planCases.value = []; runs.value = []; runCases.value = []; runSteps.value = []
+  const current = () => active && pid === projectId.value && id === selectedPlanId.value && request === planRequest
+  planDetailsReady.value = false
+  if (!id) { selectedRunId.value = ''; selectedRunCaseId.value = ''; return }
+  try {
+    const [scope, batches] = await Promise.all([
+      read<PlanCase[]>(`/api/v1/projects/${pid}/functional/plans/${id}/cases`),
+      read<Run[]>(`/api/v1/projects/${pid}/functional/runs?planId=${id}`),
+    ])
+    if (!current()) return
+    planCases.value = scope; runs.value = batches; planDetailsReady.value = true
+    if (!batches.some(run => run.id === selectedRunId.value)) selectedRunId.value = batches[0]?.id ?? ''
+    await loadRunDetails()
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '加载计划详情失败') }
 }
 async function loadRunDetails() {
-  runCases.value = selectedRunId.value ? await read<RunCase[]>(`/api/v1/projects/${projectId.value}/functional/runs/${selectedRunId.value}/cases`) : []
-  if (!runCases.value.some((item) => item.id === selectedRunCaseId.value)) selectedRunCaseId.value = runCases.value[0]?.id ?? ''
-  await loadRunSteps()
+  const pid = projectId.value, plan = selectedPlanId.value, id = selectedRunId.value, request = ++runRequest
+  ++stepRequest; runCases.value = []; runSteps.value = []
+  const current = () => active && pid === projectId.value && plan === selectedPlanId.value && id === selectedRunId.value && request === runRequest
+  if (!id) { selectedRunCaseId.value = ''; return }
+  try {
+    const data = await read<RunCase[]>(`/api/v1/projects/${pid}/functional/runs/${id}/cases`)
+    if (!current()) return
+    runCases.value = data
+    if (!data.some(item => item.id === selectedRunCaseId.value)) selectedRunCaseId.value = data[0]?.id ?? ''
+    await loadRunSteps()
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '加载批次详情失败') }
 }
-async function loadRunSteps() { runSteps.value = selectedRunCaseId.value ? await read<RunStep[]>(`/api/v1/projects/${projectId.value}/functional/run-cases/${selectedRunCaseId.value}/steps`) : [] }
+async function loadRunSteps() {
+  const pid = projectId.value, plan = selectedPlanId.value, run = selectedRunId.value, id = selectedRunCaseId.value, request = ++stepRequest
+  runSteps.value = []
+  const current = () => active && pid === projectId.value && plan === selectedPlanId.value && run === selectedRunId.value && id === selectedRunCaseId.value && request === stepRequest
+  if (!id) return
+  try {
+    const data = await read<RunStep[]>(`/api/v1/projects/${pid}/functional/run-cases/${id}/steps`)
+    if (current()) runSteps.value = data
+  } catch (error) { if (current()) Message.error(error instanceof Error ? error.message : '加载执行步骤失败') }
+}
 async function load() {
   loading.value = true
   try {
-    context.value = await read<Context>('/api/v1/access/context'); projectId.value = session.resolveProjectId(projects.value)
-    await loadCases(); await loadPlans()
-  } catch (error) { Message.error(error instanceof Error ? error.message : '加载测试计划失败') } finally { loading.value = false }
+    const data = await read<Context>('/api/v1/access/context')
+    if (!active) return
+    context.value = data; projectId.value = session.resolveProjectId(projects.value)
+    await loadCases(); if (active) await loadPlans()
+  } catch (error) { if (active) Message.error(error instanceof Error ? error.message : '加载测试计划失败') } finally { if (active) loading.value = false }
 }
 function openPlan(plan?: Plan) {
+  if (plan && !planDetailsReady.value) return
+  ++formVersion; saving.value = false
   clearFormErrors(planErrors)
   editingPlanId.value = plan?.id ?? ''
   Object.assign(planForm, plan ? {
@@ -109,40 +161,70 @@ function openPlan(plan?: Plan) {
   })
   planDialog.value = true
 }
-function openRun() { clearFormErrors(runErrors); runForm.name = selectedPlan.value ? `${selectedPlan.value.name} · 执行批次` : ''; runDialog.value = true }
+function cancelPlan() { ++formVersion; saving.value = false; planDialog.value = false }
+function cancelRun() { ++runFormVersion; runSaving.value = false; runDialog.value = false }
+function openRun() {
+  ++runFormVersion; runSaving.value = false; clearFormErrors(runErrors)
+  const suffix = ' · 执行批次'
+  let prefix = selectedPlan.value?.name.slice(0, 200 - suffix.length) ?? ''
+  if (/[\uD800-\uDBFF]$/.test(prefix)) prefix = prefix.slice(0, -1)
+  runForm.name = prefix + suffix; runDialog.value = true
+}
 async function savePlan(): Promise<boolean> {
+  if (saving.value) return false
+  const version = formVersion, pid = projectId.value, id = editingPlanId.value
+  const current = () => active && version === formVersion && pid === projectId.value
   saving.value = true
   try {
-    const url = editingPlanId.value
-      ? `/api/v1/projects/${projectId.value}/functional/plans/${editingPlanId.value}`
-      : `/api/v1/projects/${projectId.value}/functional/plans`
-    const saved = await mutate<Plan>(url, editingPlanId.value ? 'PUT' : 'POST', planForm)
-    planDialog.value = false
-    selectedPlanId.value = saved.id
-    await loadPlans()
-    await workspace.reload()
-    Message.success(editingPlanId.value ? '测试计划已更新' : '测试计划已创建')
+    const saved = await mutate<Plan>(`/api/v1/projects/${pid}/functional/plans${id ? `/${id}` : ''}`, id ? 'PUT' : 'POST', planForm, () => current() && planDialog.value)
+    if (current()) { planDialog.value = false; selectedPlanId.value = saved.id }
+    if (active && pid === projectId.value) { await loadPlans(); await workspace.reload() }
+    if (!current()) return false
+    Message.success(id ? '测试计划已更新' : '测试计划已创建')
     return true
-  }
-  catch (error) { clearFormErrors(planErrors); Object.assign(planErrors, formErrorsFrom(error)); if (Object.keys(planErrors).length === 0) Message.error(error instanceof Error ? error.message : '保存计划失败'); return false } finally { saving.value = false }
+  } catch (error) {
+    if (current()) { clearFormErrors(planErrors); Object.assign(planErrors, formErrorsFrom(error)); if (Object.keys(planErrors).length === 0) Message.error(error instanceof Error ? error.message : '保存计划失败') }
+    return false
+  } finally { if (current()) saving.value = false }
 }
 async function saveRun(): Promise<boolean> {
-  if (!selectedPlanId.value) return false
-  saving.value = true
-  try { const created = await mutate<Run>(`/api/v1/projects/${projectId.value}/functional/plans/${selectedPlanId.value}/runs`, 'POST', runForm); runDialog.value = false; selectedRunId.value = created.id; await loadPlanDetails(); selectedRunId.value = created.id; await loadRunDetails(); Message.success('执行批次已创建'); return true }
-  catch (error) { clearFormErrors(runErrors); Object.assign(runErrors, formErrorsFrom(error)); if (Object.keys(runErrors).length === 0) Message.error(error instanceof Error ? error.message : '创建执行批次失败'); return false } finally { saving.value = false }
+  if (!selectedPlanId.value || runSaving.value) return false
+  const version = runFormVersion, pid = projectId.value, plan = selectedPlanId.value
+  const current = () => active && version === runFormVersion && pid === projectId.value && plan === selectedPlanId.value
+  runSaving.value = true
+  try {
+    const created = await mutate<Run>(`/api/v1/projects/${pid}/functional/plans/${plan}/runs`, 'POST', runForm, () => current() && runDialog.value)
+    if (current()) { runDialog.value = false; selectedRunId.value = created.id }
+    if (active && pid === projectId.value && plan === selectedPlanId.value) await loadPlanDetails()
+    if (!current()) return false
+    Message.success('执行批次已创建'); return true
+  } catch (error) {
+    if (current()) { clearFormErrors(runErrors); Object.assign(runErrors, formErrorsFrom(error)); if (Object.keys(runErrors).length === 0) Message.error(error instanceof Error ? error.message : '创建执行批次失败') }
+    return false
+  } finally { if (current()) runSaving.value = false }
 }
 async function selectPlan(id: string) { selectedPlanId.value = id; await loadPlanDetails() }
 function togglePlanSelection(id: string, selected: boolean) {
   selectedPlanIds.value = selected ? [...new Set([...selectedPlanIds.value, id])] : selectedPlanIds.value.filter((item) => item !== id)
 }
 async function deleteSelectedPlans() {
-  if (!selectedPlanIds.value.length) return
-  const ids = [...selectedPlanIds.value]
+  if (!selectedPlanIds.value.length || deleting.value) return
+  const ids = [...selectedPlanIds.value], pid = projectId.value
+  deleting.value = true
   try {
-    await Promise.all(ids.map((id) => mutate(`/api/v1/projects/${projectId.value}/functional/plans/${id}`, 'DELETE')))
-    selectedPlanIds.value = []; selectedPlanId.value = ''; await loadPlans(); Message.success(`已删除 ${ids.length} 个测试计划`)
-  } catch (error) { Message.error(error instanceof Error ? error.message : '批量删除测试计划失败') }
+    const results = await Promise.allSettled(ids.map(id => mutate(`/api/v1/projects/${pid}/functional/plans/${id}`, 'DELETE')))
+    if (!active || pid !== projectId.value) return
+    const deleted = new Set(ids.filter((_, index) => results[index]?.status === 'fulfilled'))
+    ++listRequest
+    allPlans.value = allPlans.value.filter(plan => !deleted.has(plan.id))
+    selectedPlanIds.value = selectedPlanIds.value.filter(id => !deleted.has(id))
+    if (deleted.has(selectedPlanId.value)) { selectedPlanId.value = plans.value[0]?.id ?? ''; await loadPlanDetails() }
+    const failure = results.find(result => result.status === 'rejected')
+    try { await loadPlans() } catch (error) { Message.error(error instanceof Error ? error.message : '刷新计划列表失败') }
+    if (!active || pid !== projectId.value) return
+    if (failure?.status === 'rejected') Message.error(failure.reason instanceof Error ? failure.reason.message : '部分测试计划删除失败，请重试剩余项')
+    else Message.success(`已删除 ${deleted.size} 个测试计划`)
+  } finally { if (active && pid === projectId.value) deleting.value = false }
 }
 async function selectRun(id: string) { selectedRunId.value = id; await loadRunDetails() }
 async function selectRunCase(id: string) { selectedRunCaseId.value = id; await loadRunSteps() }
@@ -154,6 +236,12 @@ async function updateStep(step: RunStep, status: string) {
   try { await mutate(`/api/v1/projects/${projectId.value}/functional/run-steps/${step.id}`, 'PUT', { status, actualResult: step.actualResult }); await loadRunSteps(); Message.success('步骤结果已保存') }
   catch (error) { Message.error(error instanceof Error ? error.message : '保存步骤结果失败') }
 }
+onBeforeUnmount(() => { active = false; ++formVersion; ++runFormVersion })
+watch(projectId, () => {
+  cancelPlan(); cancelRun(); ++listRequest; ++planRequest; ++runRequest; ++stepRequest
+  allPlans.value = []; cases.value = []; selectedPlanIds.value = []; selectedPlanId.value = ''; planCases.value = []; runs.value = []; runCases.value = []; runSteps.value = []; deleting.value = false
+  void Promise.all([loadCases(), loadPlans()]).catch(error => { if (active) Message.error(error instanceof Error ? error.message : '加载测试计划失败') })
+})
 onMounted(load)
 watch(workspace.selectedCatalogId, async () => {
   selectedPlanIds.value = []
@@ -166,16 +254,16 @@ watch(workspace.selectedCatalogId, async () => {
   <div class="plans-page">
     <section class="plan-summary panel"><div><span>测试计划</span><strong>{{ plans.length }}</strong><small>{{ workspace.selectedCatalogName.value }}</small></div><div><span>计划用例</span><strong>{{ selectedPlan?.caseCount ?? 0 }}</strong><small>当前计划范围</small></div><div><span>执行批次</span><strong>{{ currentPlanRunCount }}</strong><small>当前计划</small></div><a-button type="primary" @click="openPlan()"><icon-plus /> 新建测试计划</a-button></section>
     <section class="plan-layout">
-      <aside class="plan-list panel"><div class="section-heading"><div><span class="eyebrow">TEST PLANS</span><h3>测试计划</h3></div><a-space><a-popconfirm v-if="selectedPlanIds.length" :content="`确认删除选中的 ${selectedPlanIds.length} 个测试计划吗？`" @ok="deleteSelectedPlans"><a-button type="text" status="danger" size="small"><icon-delete /> 删除</a-button></a-popconfirm><a-button type="text" size="small" @click="openPlan()"><icon-plus /></a-button></a-space></div><a-spin :loading="loading"><button v-for="plan in plans" :key="plan.id" class="plan-item" :class="{ selected: selectedPlanId === plan.id }" @click="selectPlan(plan.id)"><a-checkbox :model-value="selectedPlanIds.includes(plan.id)" @click.stop @change="(value) => togglePlanSelection(plan.id, Boolean(value))" /><div><strong>{{ plan.name }}</strong><small>ID: {{ plan.id }}</small><small>{{ plan.planCode }} · {{ plan.caseCount }} 个用例</small></div><a-tag :color="statusColor(plan.status)">{{ statusLabel(plan.status) }}</a-tag></button></a-spin><a-empty v-if="!loading && plans.length === 0" description="还没有测试计划" /><a-button long type="outline" class="create-plan-button" @click="openPlan()"><icon-plus /> 创建测试计划</a-button></aside>
+      <aside class="plan-list panel"><div class="section-heading"><div><span class="eyebrow">TEST PLANS</span><h3>测试计划</h3></div><a-space><a-popconfirm v-if="selectedPlanIds.length" :content="`确认删除选中的 ${selectedPlanIds.length} 个测试计划吗？`" @ok="deleteSelectedPlans"><a-button type="text" status="danger" size="small" :loading="deleting"><icon-delete /> 删除</a-button></a-popconfirm><a-button type="text" size="small" @click="openPlan()"><icon-plus /></a-button></a-space></div><a-spin :loading="loading"><button v-for="plan in plans" :key="plan.id" class="plan-item" :class="{ selected: selectedPlanId === plan.id }" @click="selectPlan(plan.id)"><a-checkbox :model-value="selectedPlanIds.includes(plan.id)" @click.stop @change="(value) => togglePlanSelection(plan.id, Boolean(value))" /><div><strong>{{ plan.name }}</strong><small>ID: {{ plan.id }}</small><small>{{ plan.planCode }} · {{ plan.caseCount }} 个用例</small></div><a-tag :color="statusColor(plan.status)">{{ statusLabel(plan.status) }}</a-tag></button></a-spin><a-empty v-if="!loading && plans.length === 0" description="还没有测试计划" /><a-button long type="outline" class="create-plan-button" @click="openPlan()"><icon-plus /> 创建测试计划</a-button></aside>
       <div v-if="selectedPlan" class="plan-content">
-        <section class="plan-header panel"><div><div class="eyebrow">{{ selectedPlan.planCode }}</div><h2>{{ selectedPlan.name }}</h2><p>{{ selectedPlan.description || '暂无计划说明，创建执行批次后开始记录结果。' }}</p></div><a-space><a-button :disabled="selectedPlan.caseCount === 0" @click="openRun"><icon-play-circle /> 创建执行批次</a-button><a-button type="primary" @click="openPlan(selectedPlan)"><icon-edit /> 编辑计划</a-button></a-space></section>
+        <section class="plan-header panel"><div><div class="eyebrow">{{ selectedPlan.planCode }}</div><h2>{{ selectedPlan.name }}</h2><p>{{ selectedPlan.description || '暂无计划说明，创建执行批次后开始记录结果。' }}</p></div><a-space><a-button :disabled="selectedPlan.caseCount === 0" @click="openRun"><icon-play-circle /> 创建执行批次</a-button><a-button type="primary" :disabled="!planDetailsReady" @click="openPlan(selectedPlan)"><icon-edit /> 编辑计划</a-button></a-space></section>
         <section class="execution-grid"><div class="panel plan-cases"><div class="section-title"><div><strong>计划用例</strong><span>{{ planCases.length }} 条</span></div><a-tag color="arcoblue">范围快照</a-tag></div><a-table :data="planCases" :pagination="false" row-key="id"><template #columns><a-table-column title="ID" data-index="caseCode" :sortable="{ sortDirections: ['ascend', 'descend'], sorter: true }" /><a-table-column title="用例" data-index="title"><template #cell="{ record }"><div class="case-name"><span class="case-icon"><icon-check-circle /></span><div><strong>{{ record.title }}</strong><small>{{ record.caseCode }}</small></div></div></template></a-table-column><a-table-column title="优先级"><template #cell="{ record }"><a-tag :color="priorityColor(record.priority)">{{ record.priority }}</a-tag></template></a-table-column><a-table-column title="资产状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag></template></a-table-column></template></a-table><a-empty v-if="planCases.length === 0" description="编辑计划并选择用例" /></div><div class="panel run-list"><div class="section-title"><div><strong>执行批次</strong><span>{{ runs.length }} 个</span></div><a-button type="text" size="small" :disabled="selectedPlan.caseCount === 0" @click="openRun"><icon-plus /></a-button></div><button v-for="run in runs" :key="run.id" class="run-item" :class="{ selected: selectedRunId === run.id }" @click="selectRun(run.id)"><div><strong>{{ run.name }}</strong><small>ID: {{ run.id }}</small><small>{{ date(run.createdAt) }}</small></div><div class="run-rate"><b>{{ run.passedCount }}/{{ run.totalCount }}</b><a-tag :color="statusColor(run.status)">{{ statusLabel(run.status) }}</a-tag></div></button><a-empty v-if="runs.length === 0" description="创建批次开始执行" /></div></section>
         <section v-if="selectedRun" class="panel report-panel"><div class="section-title"><div><strong>执行报告</strong><span>{{ selectedRun.name }}</span></div><a-tag :color="statusColor(selectedRun.status)">{{ statusLabel(selectedRun.status) }}</a-tag></div><div class="report-metrics"><div><span>总用例</span><strong>{{ selectedRun.totalCount }}</strong></div><div class="passed"><span>通过</span><strong>{{ selectedRun.passedCount }}</strong></div><div class="failed"><span>失败</span><strong>{{ selectedRun.failedCount }}</strong></div><div class="blocked"><span>阻塞</span><strong>{{ selectedRun.blockedCount }}</strong></div><div class="not-run"><span>未执行</span><strong>{{ selectedRun.notRunCount }}</strong></div></div><div class="run-detail"><div class="run-case-list"><div class="detail-heading">用例结果</div><button v-for="item in runCases" :key="item.id" class="run-case-item" :class="{ selected: selectedRunCaseId === item.id }" @click="selectRunCase(item.id)"><div><strong>{{ item.title }}</strong><small>{{ item.caseCode }}</small></div><a-tag :color="statusColor(item.status)">{{ statusLabel(item.status) }}</a-tag></button></div><div class="step-list"><div class="detail-heading">步骤级结果 <span v-if="runSteps.length">{{ runSteps.length }} 步</span></div><div v-for="step in runSteps" :key="step.id" class="step-item"><div class="step-number">{{ step.stepNo }}</div><div class="step-copy"><strong>{{ step.stepText }}</strong><a-input v-model="step.actualResult" placeholder="记录实际结果" size="small" /></div><a-select :model-value="step.status" size="small" :style="{ width: '96px' }" @change="(value) => updateStep(step, String(value))"><a-option value="NOT_RUN">未执行</a-option><a-option value="PASSED">通过</a-option><a-option value="FAILED">失败</a-option><a-option value="BLOCKED">阻塞</a-option></a-select></div><a-empty v-if="runSteps.length === 0" description="选择一个执行用例查看步骤" /></div><div v-if="selectedRunCase" class="run-case-note"><label for="execution-note">执行备注</label><a-textarea v-model="selectedRunCase.note" :textarea-attrs="{ id: 'execution-note' }" :max-length="20000" :auto-size="{ minRows: 2, maxRows: 6 }" placeholder="记录执行备注" /><a-button size="small" @click="updateRunCase(selectedRunCase!, selectedRunCase!.status, true)">保存备注</a-button></div><div v-if="selectedRunCase" class="run-case-actions"><a-button status="success" @click="updateRunCase(runCases.find((item) => item.id === selectedRunCaseId)!, 'PASSED')">标记通过</a-button><a-button status="danger" @click="updateRunCase(runCases.find((item) => item.id === selectedRunCaseId)!, 'FAILED')">标记失败</a-button><a-button @click="updateRunCase(runCases.find((item) => item.id === selectedRunCaseId)!, 'BLOCKED')">标记阻塞</a-button></div></div></section>
       </div>
       <div v-else class="panel no-plan"><a-empty description="选择或创建一个测试计划，开始组织功能测试执行。"><template #extra><a-button type="primary" @click="openPlan()">新建测试计划</a-button></template></a-empty></div>
     </section>
-    <a-modal v-model:visible="planDialog" :title="editingPlanId ? '编辑测试计划' : '新建测试计划'" width="700px" :ok-loading="saving" :on-before-ok="savePlan"><a-form :model="planForm" layout="vertical"><div class="form-grid"><a-form-item label="计划编号" required :validate-status="planErrors.planCode ? 'error' : undefined" :help="planErrors.planCode"><a-input v-model="planForm.planCode" :disabled="Boolean(editingPlanId)" placeholder="例如：PLAN_ORDER_001" @input="delete planErrors.planCode" /></a-form-item><a-form-item label="所属目录"><a-select v-model="planForm.catalogId" allow-clear placeholder="未分类"><a-option v-for="catalog in workspace.catalogs.value" :key="catalog.id" :value="catalog.id">{{ catalog.name }}</a-option></a-select></a-form-item></div><div class="form-grid"><a-form-item label="计划名称" required :validate-status="planErrors.name ? 'error' : undefined" :help="planErrors.name"><a-input v-model="planForm.name" placeholder="例如：订单核心回归测试" @input="delete planErrors.name" /></a-form-item><a-form-item label="计划状态"><a-select v-model="planForm.status"><a-option value="DRAFT">草稿</a-option><a-option value="READY">待执行</a-option><a-option value="ARCHIVED">已归档</a-option></a-select></a-form-item></div><a-form-item label="计划说明" :validate-status="planErrors.description ? 'error' : undefined" :help="planErrors.description"><a-textarea v-model="planForm.description" :auto-size="{ minRows: 3, maxRows: 6 }" @input="delete planErrors.description" /></a-form-item><a-form-item label="选择用例" :validate-status="planErrors.caseIds ? 'error' : undefined" :help="planErrors.caseIds"><div class="case-picker"><a-checkbox v-for="item in cases" :key="item.id" v-model="planForm.caseIds" :value="item.id" @change="delete planErrors.caseIds">{{ item.caseCode }} · {{ item.title }}</a-checkbox><a-empty v-if="cases.length === 0" description="请先在用例库创建测试用例" /></div></a-form-item></a-form></a-modal>
-    <a-modal v-model:visible="runDialog" title="创建执行批次" width="520px" :ok-loading="saving" :on-before-ok="saveRun"><a-form :model="runForm" layout="vertical"><a-alert type="info">将复制当前计划的 {{ selectedPlan?.caseCount ?? 0 }} 个用例，并初始化步骤级执行结果。</a-alert><a-form-item label="批次名称" required :validate-status="runErrors.name ? 'error' : undefined" :help="runErrors.name"><a-input v-model="runForm.name" placeholder="例如：2026-07-12 订单回归" @input="delete runErrors.name" /></a-form-item></a-form></a-modal>
+    <a-modal v-model:visible="planDialog" :title="editingPlanId ? '编辑测试计划' : '新建测试计划'" width="700px" :ok-loading="saving" :on-before-ok="savePlan" @cancel="cancelPlan"><a-form :model="planForm" layout="vertical"><div class="form-grid"><a-form-item label="计划编号" required :validate-status="planErrors.planCode ? 'error' : undefined" :help="planErrors.planCode"><a-input v-model="planForm.planCode" :disabled="Boolean(editingPlanId)" placeholder="例如：PLAN_ORDER_001" @input="delete planErrors.planCode" /></a-form-item><a-form-item label="所属目录"><a-select v-model="planForm.catalogId" allow-clear placeholder="未分类"><a-option v-for="catalog in workspace.catalogs.value" :key="catalog.id" :value="catalog.id">{{ catalog.name }}</a-option></a-select></a-form-item></div><div class="form-grid"><a-form-item label="计划名称" required :validate-status="planErrors.name ? 'error' : undefined" :help="planErrors.name"><a-input v-model="planForm.name" placeholder="例如：订单核心回归测试" @input="delete planErrors.name" /></a-form-item><a-form-item label="计划状态"><a-select v-model="planForm.status"><a-option value="DRAFT">草稿</a-option><a-option value="READY">待执行</a-option><a-option value="ARCHIVED">已归档</a-option></a-select></a-form-item></div><a-form-item label="计划说明" :validate-status="planErrors.description ? 'error' : undefined" :help="planErrors.description"><a-textarea v-model="planForm.description" :auto-size="{ minRows: 3, maxRows: 6 }" @input="delete planErrors.description" /></a-form-item><a-form-item label="选择用例" :validate-status="planErrors.caseIds ? 'error' : undefined" :help="planErrors.caseIds"><div class="case-picker"><a-checkbox v-for="item in cases" :key="item.id" v-model="planForm.caseIds" :value="item.id" @change="delete planErrors.caseIds">{{ item.caseCode }} · {{ item.title }}</a-checkbox><a-empty v-if="cases.length === 0" description="请先在用例库创建测试用例" /></div></a-form-item></a-form></a-modal>
+    <a-modal v-model:visible="runDialog" title="创建执行批次" width="520px" :ok-loading="runSaving" :on-before-ok="saveRun" @cancel="cancelRun"><a-form :model="runForm" layout="vertical"><a-alert type="info">将复制当前计划的 {{ selectedPlan?.caseCount ?? 0 }} 个用例，并初始化步骤级执行结果。</a-alert><a-form-item label="批次名称" required :validate-status="runErrors.name ? 'error' : undefined" :help="runErrors.name"><a-input v-model="runForm.name" placeholder="例如：2026-07-12 订单回归" @input="delete runErrors.name" /></a-form-item></a-form></a-modal>
   </div>
 </template>
 

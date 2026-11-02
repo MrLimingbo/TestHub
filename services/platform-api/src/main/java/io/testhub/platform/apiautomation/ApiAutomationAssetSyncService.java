@@ -283,7 +283,7 @@ public class ApiAutomationAssetSyncService {
     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
     private ResponseStatusException tooLarge() { return new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "接口自动化资料同步请求不能超过 10 MiB"); }
     public record Snapshot(int version, String scope, String projectId, String actorId, String revision, List<Item> items, Map<String, String> itemIds) { }
-    public record Item(String kind, String name, Map<String, Object> definition) { }
+    public record Item(String kind, String name, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = WaitStepJson.Definition.class) Map<String, Object> definition) { }
     public record Reusable(String description, List<AutomationStep> steps) { }
     public record DataSet(String sourceFormat, List<String> columns, List<Map<String, String>> rows, String sourceFileLink) { }
     public record Profile(String environmentCode, Map<String, String> variables) { }

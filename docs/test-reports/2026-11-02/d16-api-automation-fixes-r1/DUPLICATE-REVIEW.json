@@ -1,0 +1,1 @@
+{"exactDuplicates":0,"nearDuplicatePairs":[{"caseIds":["TC-D16API-02","TC-D16API-03"],"disposition":"RETAIN_DISTINCT_BOUNDARIES","reason":"分别验证0与-1下边界、600000与600001上边界；两个已明确的独立COV目标，不是同分区换数据。"}],"unresolvedDuplicates":0}

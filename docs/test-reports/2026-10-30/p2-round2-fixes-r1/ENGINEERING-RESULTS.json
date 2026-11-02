@@ -1,0 +1,41 @@
+{
+  "frontend": {
+    "total": 891,
+    "passed": 891,
+    "failed": 0
+  },
+  "H2": {
+    "total": 1106,
+    "passed": 1103,
+    "skipped": 3,
+    "failed": 0
+  },
+  "MySQLRedisS3": {
+    "total": 1106,
+    "passed": 1106,
+    "skipped": 0,
+    "failed": 0
+  },
+  "headlessBrowser": {
+    "groups": 6,
+    "passed": 6,
+    "controlledHttpFixtures": true
+  },
+  "nativeJarHttp": {
+    "groups": 5,
+    "passed": 5,
+    "desktopProfile": true
+  },
+  "formalDenominator": 45,
+  "initialRunNotes": [
+    "A prior concurrent frontend run had one unchanged UI schedule test timeout; targeted 51-case rerun and final single-worker full rerun passed without timeout changes.",
+    "New consumed-handoff scope assertion initially forbade a user-triggered blank request; corrected oracle verifies zero automatic writes and that manual payload contains no old URL/Auth/Header/Body.",
+    "Browser fixture selectors and native H2 JSON fixture corrected before final runs; these are not product defects."
+  ],
+  "existingWarnings": [
+    "2 vue prop-type warnings in apiDesignFixes.test.ts",
+    "Monaco dependency source map unavailable during tests",
+    "Vite chunk size advisory"
+  ],
+  "newProductDefectsConfirmed": 0
+}

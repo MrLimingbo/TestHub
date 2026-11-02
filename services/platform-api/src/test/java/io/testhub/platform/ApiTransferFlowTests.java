@@ -45,6 +45,8 @@ import org.springframework.test.web.servlet.ResultActions;
 @ActiveProfiles(resolver = FunctionalDatabaseProfile.class)
 @DirtiesContext
 class ApiTransferFlowTests {
+    // These cases exercise active replay migration; expired replay is covered by P1ReplayRulesFlowTests.
+    private static final java.time.Instant ACTIVE_HISTORY_TIME = java.time.Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS).minusSeconds(60);
     @TempDir static Path directory;
     @DynamicPropertySource static void properties(DynamicPropertyRegistry registry) {
         if (FunctionalDatabaseProfile.mysql()) {
@@ -507,7 +509,7 @@ class ApiTransferFlowTests {
     void history(Fixture f, String encrypted, String historyId) {
         historyRepository.insert(new io.testhub.platform.apidebug.ApiDebugHistory(historyId, access.context(f.actor()).organizations().getFirst().id(),
                 f.project(), "GET", "HTTP", "https://fixture.example.test/path", 200, 15, 30, "COMPLETED", null,
-                encrypted, f.actor().userId(), java.time.Instant.parse("2026-09-18T01:02:03Z")));
+                encrypted, f.actor().userId(), ACTIVE_HISTORY_TIME));
     }
     @Test void historyV3TransfersMoreThanRecentLimitAndReencryptsWithProvenanceAndRetrySafety() throws Exception {
         var source = fixture(); var target = fixture();
@@ -523,7 +525,7 @@ class ApiTransferFlowTests {
         for (var row : saved) {
             assertNotEquals(encrypted, row.replayDraft()); assertEquals(json.readTree(draft), json.readTree(cipher.decrypt(row.replayDraft())));
             assertEquals(source.project(), row.importSourceProjectId()); assertNotNull(row.importSourceId());
-            assertEquals(target.actor().userId(), row.createdBy()); assertEquals(java.time.Instant.parse("2026-09-18T01:02:03Z"), row.createdAt());
+            assertEquals(target.actor().userId(), row.createdBy()); assertEquals(ACTIVE_HISTORY_TIME, row.createdAt());
         }
         assertEquals(source.project(), debugService.history(target.actor(), target.project(), 1).getFirst().importSourceProjectId());
         assertEquals(125, historyRepository.findRecent(source.project(), 1000).size());
@@ -581,7 +583,7 @@ class ApiTransferFlowTests {
         String path = "/api/v1/projects/" + s.path("sourceProjectId").asText() + "/files/" + s.at("/files/items/0/id").asText() + "/download";
         var h = s.putArray("debugHistory").addObject().put("id", id()).put("method", "GRPC").put("protocol", "GRPC")
                 .put("requestUrl", "grpc://fixture.example.test/fixture.history.EchoService/Call").put("responseStatus", 0)
-                .put("durationMs", 1).put("responseSize", 1).put("result", "COMPLETED").put("createdAt", "2026-09-18T00:00:00Z");
+                .put("durationMs", 1).put("responseSize", 1).put("result", "COMPLETED").put("createdAt", ACTIVE_HISTORY_TIME.toString());
         var request = h.putObject("replayDraft").put("protocol", "GRPC").putObject("request");
         request.put("descriptorId", descriptor.id()).put("requestJson", "{\"url\":\"" + path + "\"}");
         apply(target, typed(s));

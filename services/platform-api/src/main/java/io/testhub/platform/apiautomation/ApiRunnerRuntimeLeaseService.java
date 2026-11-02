@@ -147,11 +147,12 @@ public class ApiRunnerRuntimeLeaseService {
                     null, null, null, null, null, null, requests);
         }
         if ("WAIT".equals(step.type())) {
+            long delayMillis;
+            try { delayMillis = WaitDelayMillis.require(step.config().get("delayMillis"), "steps[" + step.id() + "].config.delayMillis"); }
+            catch (ResponseStatusException error) { throw unsupported(error.getReason()); }
             if (!step.config().keySet().equals(Set.of("delayMillis"))) throw unsupported("等待步骤不符合受限 Runner 协议");
-            int delayMillis = integer(step.config().get("delayMillis"), "delayMillis");
-            if (delayMillis < 0 || delayMillis > 600_000) throw unsupported("等待步骤延迟不合法");
             return new ApiRunnerRuntimeConfiguration.Step(step.id(), "WAIT", null, null, null, null,
-                    null, null, (long) delayMillis, null, null, null, null);
+                    null, null, delayMillis, null, null, null, null);
         }
         if ("CONDITION".equals(step.type())) {
             if (!step.config().keySet().equals(Set.of("source", "operator", "expectedStatus"))

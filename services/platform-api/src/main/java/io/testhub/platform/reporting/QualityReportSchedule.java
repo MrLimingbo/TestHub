@@ -7,5 +7,12 @@ import java.util.List;
 public record QualityReportSchedule(String id, String organizationId, String name, List<String> projectIds,
                                     String cronExpression, String timezone, int periodDays, boolean enabled,
                                     String lastRunId, String lastRunStatus, Instant lastRunAt, String createdBy,
-                                    Instant createdAt, Instant updatedAt) {
+                                    Instant createdAt, Instant updatedAt, long version) {
+    public QualityReportSchedule(String id, String organizationId, String name, List<String> projectIds,
+                                 String cronExpression, String timezone, int periodDays, boolean enabled,
+                                 String lastRunId, String lastRunStatus, Instant lastRunAt, String createdBy,
+                                 Instant createdAt, Instant updatedAt) {
+        this(id, organizationId, name, projectIds, cronExpression, timezone, periodDays, enabled,
+                lastRunId, lastRunStatus, lastRunAt, createdBy, createdAt, updatedAt, 0);
+    }
 }
