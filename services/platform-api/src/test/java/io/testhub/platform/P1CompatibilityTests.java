@@ -8,6 +8,8 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.DriverManager;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import javax.tools.ToolProvider;
 import org.flywaydb.core.Flyway;
@@ -40,12 +42,19 @@ class P1CompatibilityTests {
     private void verifyMigration(String url, String user, String password, String location, String before, String after) throws Exception {
         Flyway.configure().dataSource(url, user, password).locations("classpath:" + location).target(before).load().migrate();
         String ciphertext = "sealed-legacy-fixture-" + UUID.randomUUID();
+        LocalDateTime createdAt = LocalDateTime.of(2020, 1, 1, 0, 0);
+        Instant originalCreatedAt;
         try (var connection = DriverManager.getConnection(url, user, password); var sql = connection.createStatement()) {
             sql.executeUpdate("INSERT INTO user_account(id,account,email,display_name,password_hash) VALUES('u','p1-migration','p1@example.test','QA','fixture-hash')");
             sql.executeUpdate("INSERT INTO organization(id,name,code) VALUES('o','QA','P1')");
             sql.executeUpdate("INSERT INTO project(id,organization_id,name,code) VALUES('p','o','QA','P1')");
             try (var insert = connection.prepareStatement("INSERT INTO api_debug_history(id,organization_id,project_id,method,request_url,duration_ms,response_size,result,created_by,replay_draft_ciphertext,created_at) VALUES('h','o','p','GET','https://example.test',1,0,'DRAFT','u',?,'2020-01-01 00:00:00')")) {
                 insert.setString(1, ciphertext); insert.executeUpdate();
+            }
+            try (var rows = sql.executeQuery("SELECT created_at FROM api_debug_history WHERE id='h'")) {
+                assertTrue(rows.next());
+                assertEquals(createdAt, rows.getObject(1, LocalDateTime.class));
+                originalCreatedAt = rows.getTimestamp(1).toInstant();
             }
         }
         assertEquals(2, Flyway.configure().dataSource(url, user, password).locations("classpath:" + location).target(after).load().migrate().migrationsExecuted);
@@ -55,7 +64,10 @@ class P1CompatibilityTests {
             }
             try (var rows = sql.executeQuery("SELECT replay_draft_ciphertext,replay_expires_at,replay_retention_managed,created_at FROM api_debug_history WHERE id='h'")) {
                 assertTrue(rows.next()); assertEquals(ciphertext, rows.getString(1)); assertNull(rows.getObject(2));
-                assertFalse(rows.getBoolean(3)); assertEquals("2020-01-01", rows.getTimestamp(4).toLocalDateTime().toLocalDate().toString());
+                assertFalse(rows.getBoolean(3));
+                // Timestamp.toLocalDateTime() uses the JVM zone; compare database fields and the preserved instant separately.
+                assertEquals(createdAt, rows.getObject(4, LocalDateTime.class));
+                assertEquals(originalCreatedAt, rows.getTimestamp(4).toInstant());
             }
             sql.executeUpdate("UPDATE api_debug_history SET replay_draft_ciphertext=NULL WHERE replay_retention_managed=TRUE AND replay_expires_at<=CURRENT_TIMESTAMP");
             try (var rows = sql.executeQuery("SELECT replay_draft_ciphertext FROM api_debug_history WHERE id='h'")) { assertTrue(rows.next()); assertEquals(ciphertext, rows.getString(1)); }

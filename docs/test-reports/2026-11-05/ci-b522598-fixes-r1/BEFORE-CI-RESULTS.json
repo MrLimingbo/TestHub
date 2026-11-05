@@ -1,0 +1,61 @@
+{
+  "at": "2026-11-05T07:34:46.629761+00:00",
+  "commit": "b522598a641516bd46eb10ac4e55684d2ed01304",
+  "runId": 41981648534,
+  "runUrl": "https://github.com/MrLimingbo/TestHub/actions/runs/41981648534",
+  "event": "push",
+  "branch": "main",
+  "status": "completed",
+  "conclusion": "failure",
+  "jobs": {
+    "web": {
+      "jobId": 127092869830,
+      "conclusion": "success",
+      "lint": "success",
+      "tests": "success",
+      "startupTests": "success",
+      "build": "success"
+    },
+    "platform-api": {
+      "jobId": 127092870061,
+      "conclusion": "failure",
+      "total": 1374,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "failure": "P1CompatibilityTests.mysqlUpgradePreservesLegacyCiphertextAndDefaultsSecurityVersion expected2020-01-01 but read2019-12-31"
+    },
+    "release-gate": {
+      "jobId": 127092869945,
+      "conclusion": "failure",
+      "fixedHighVulnerabilities": 3,
+      "findings": [
+        {
+          "library": "com.google.guava:guava",
+          "installed": "33.4.8-jre",
+          "cve": "CVE-2026-102554"
+        },
+        {
+          "library": "org.xerial.snappy:snappy-java",
+          "installed": "1.1.10.7",
+          "cve": "CVE-2026-108106"
+        },
+        {
+          "library": "org.xerial.snappy:snappy-java",
+          "installed": "1.1.10.7",
+          "cve": "CVE-2026-93451"
+        }
+      ]
+    }
+  },
+  "localBeforeFix": {
+    "command": "JAVA_HOME=<native21> TZ=UTC JAVA_TOOL_OPTIONS=-Duser.timezone=UTC node scripts/desktop/test-mysql-backend.mjs --tests=P1CompatibilityTests",
+    "total": 3,
+    "passed": 2,
+    "failed": 1,
+    "sameFailureAsCI": true,
+    "ownedInfrastructureCleaned": true
+  },
+  "dependencyOrigin": "io.minio:minio:8.6.0 -> guava33.4.8-jre / snappy-java1.1.10.7",
+  "restoreSkippedWork": false
+}

@@ -1,0 +1,52 @@
+{
+  "at": "2026-11-05T07:41:11.606779+00:00",
+  "baseCommit": "b522598a641516bd46eb10ac4e55684d2ed01304",
+  "fixScope": [
+    "services/platform-api/pom.xml",
+    "services/platform-api/src/test/java/io/testhub/platform/P1CompatibilityTests.java"
+  ],
+  "testAssetFix": "数据库LocalDateTime字段保持精确期望，额外比较迁移前后Instant；不依赖JVM默认时区显示，也不更改生产迁移",
+  "dependencyFix": {
+    "origin": "io.minio:minio:8.6.0",
+    "guava": {
+      "before": "33.4.8-jre",
+      "after": "33.8.0-jre"
+    },
+    "snappy-java": {
+      "before": "1.1.10.7",
+      "after": "1.1.10.12"
+    }
+  },
+  "verification": {
+    "beforeUtc": {
+      "total": 3,
+      "passed": 2,
+      "failed": 1
+    },
+    "afterUtc": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "afterAsiaShanghai": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "sameMethodsAcrossTimezonesNotCountedAsNewCases": true,
+    "resolvedDependenciesConfirmed": true,
+    "gitDiffCheck": "PASS",
+    "ownedMysqlRedisS3CleanedAfterEachRun": true
+  },
+  "securityGateThresholdsChanged": false,
+  "vulnerabilityIgnoresAdded": false,
+  "githubFinalVerification": "CHECK_NEW_FIX_COMMIT_VERIFY_RUN",
+  "preservedConstraints": {
+    "D26": "SKIPPED_BY_USER_SPEC_RETAINED",
+    "environmentCasesSkipped": 12,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "rootCauseConfirmed": false,
+    "restored": false
+  },
+  "historicalReportsAndCountsRewritten": false
+}
