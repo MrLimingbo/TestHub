@@ -1,0 +1,286 @@
+{
+  "total": 56,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": 56,
+  "exitCode": 0,
+  "suiteCount": 5,
+  "suites": [
+    {
+      "name": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "total": 24,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "disabledNewLoginIs401WithNoAuthenticatedSessionForCorrectOrWrongPassword(boolean)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "disabledNewLoginIs401WithNoAuthenticatedSessionForCorrectOrWrongPassword(boolean)[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentCreateCannotReserveTheSameIdentifierAcrossDifferentColumns()[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentCreateCannotReserveTheSameIdentifierAcrossDifferentColumns()[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentCreateCannotReserveTheSameIdentifierAcrossDifferentColumns()[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "nullMissingOversizedConfigAndEmptyNetworkBooleanAreStillRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "emptyGeneratedNameNeverShortensTheAccount(int)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "emptyGeneratedNameNeverShortensTheAccount(int)[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "emptyGeneratedNameNeverShortensTheAccount(int)[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String)[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String)[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String)[4]",
+          "status": "PASS"
+        },
+        {
+          "name": "ownIdentifiersMayMatchOrSwapAndDeletedIdentifiersCanBeReused",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentRegistrationAndAdministrationShareTheSameIdentityGuard()[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentRegistrationAndAdministrationShareTheSameIdentityGuard()[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentRegistrationAndAdministrationShareTheSameIdentityGuard()[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentUpdatesCannotReserveTheSameIdentifierAcrossDifferentColumns()[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentUpdatesCannotReserveTheSameIdentifierAcrossDifferentColumns()[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentUpdatesCannotReserveTheSameIdentifierAcrossDifferentColumns()[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "disabledIdentifiersRemainReservedAndRegistrationCannotIntroduceCrossFieldCollision",
+          "status": "PASS"
+        },
+        {
+          "name": "legacyAmbiguityFailsClosedWithoutBreakingTheUnambiguousAccountLogin",
+          "status": "PASS"
+        },
+        {
+          "name": "automaticNameDoesNotSplitASurrogatePairAndExplicitOverlengthNameStillFails",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsBothCrossFieldDirectionsOnCreateAndUpdateWithoutChangingAccountsOrAudit",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.P1SessionRulesFlowTests",
+      "total": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "selfReset",
+          "status": "PASS"
+        },
+        {
+          "name": "deleteAccount",
+          "status": "PASS"
+        },
+        {
+          "name": "noResurrection",
+          "status": "PASS"
+        },
+        {
+          "name": "patDisabledOrDeleted",
+          "status": "PASS"
+        },
+        {
+          "name": "patSurvivesPasswordReset",
+          "status": "PASS"
+        },
+        {
+          "name": "normal",
+          "status": "PASS"
+        },
+        {
+          "name": "freshLogin",
+          "status": "PASS"
+        },
+        {
+          "name": "otherAccount",
+          "status": "PASS"
+        },
+        {
+          "name": "disable",
+          "status": "PASS"
+        },
+        {
+          "name": "resetRejectsReadAndWrite",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.P1CompatibilityTests",
+      "total": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "h2UpgradePreservesLegacyCiphertextAndDefaultsSecurityVersion",
+          "status": "PASS"
+        },
+        {
+          "name": "previouslySerializedAccountDefaultsItsMissingSecurityVersionToZero",
+          "status": "PASS"
+        },
+        {
+          "name": "mysqlUpgradePreservesLegacyCiphertextAndDefaultsSecurityVersion",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.P2D06AccountSearchTests",
+      "total": 12,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "B10_unauthorizedAndProjectTokensCannotSearch",
+          "status": "PASS"
+        },
+        {
+          "name": "B09_originalPageClamping",
+          "status": "PASS"
+        },
+        {
+          "name": "B01_plainTrimCaseAndUnicode",
+          "status": "PASS"
+        },
+        {
+          "name": "B06_quoteAndSqlTextRemainData",
+          "status": "PASS"
+        },
+        {
+          "name": "B03_underscoreIsLiteralAcrossFields",
+          "status": "PASS"
+        },
+        {
+          "name": "B12_encodedHttpResponseAndReadOnlyFields",
+          "status": "PASS"
+        },
+        {
+          "name": "B08_listCountAndPageBoundaries",
+          "status": "PASS"
+        },
+        {
+          "name": "B11_explicitEscapeAcrossDatabaseModesAndLongInput",
+          "status": "PASS"
+        },
+        {
+          "name": "B05_combinedRepeatedAndEscapeCharacter",
+          "status": "PASS"
+        },
+        {
+          "name": "B04_backslashAndTrailingBackslash",
+          "status": "PASS"
+        },
+        {
+          "name": "B07_emptyDisabledDeletedAndNullPhone",
+          "status": "PASS"
+        },
+        {
+          "name": "B02_percentIsLiteralAcrossFields",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.SystemSettingsFlowTests",
+      "total": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "registeredWorkspaceCanManageOwnEnvironmentsWithoutGlobalPermissions",
+          "status": "PASS"
+        },
+        {
+          "name": "capabilityIsAuthenticatedAndDoesNotGrantRegisteredUsersGlobalManagement",
+          "status": "PASS"
+        },
+        {
+          "name": "adminAccountLifecyclePreservesHashingSelfProtectionAndScopedOptions",
+          "status": "PASS"
+        },
+        {
+          "name": "configLifecycleRequiresCsrfAndAuditContainsKeysWithoutValues",
+          "status": "PASS"
+        },
+        {
+          "name": "secretSystemConfigCannotBeReadOverwrittenOrDeletedViaOrdinaryConfigApi",
+          "status": "PASS"
+        },
+        {
+          "name": "accountMutationsRequireCsrfAndPasswordNeverAppearsInResponsesOrAudit",
+          "status": "PASS"
+        },
+        {
+          "name": "networkPolicyRequiresStrictBooleanAndDoesNotGrantEnvironmentAdminGlobalRights",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "modeDiagnostics": {
+    "midSessionParameterRoundTripUnchanged": false,
+    "freshConnectionModesVerified": 2
+  },
+  "modeSetup": "Driver sessionVariables configured at connection creation; both fresh ordinary and NO_BACKSLASH_ESCAPES parameter round-trip and production repository assertions passed",
+  "ownedInfrastructureCleanupConfirmed": true
+}

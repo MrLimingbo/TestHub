@@ -1,0 +1,17 @@
+{
+  "total": 949,
+  "passed": 949,
+  "failed": 0,
+  "files": 99,
+  "newMethodsIncluded": 4,
+  "focusedPassed": 4,
+  "command": "node_modules/.bin/vitest run --maxWorkers=2",
+  "exitCode": 0,
+  "evidenceType": "Vue/Arco happy-dom component tests; declared selection events, DOM refresh, controlled fetch and download fixture",
+  "productUiChanged": false,
+  "initialFixtureRun": "2passed/2failed: Select root aria-label lookup; narrowed to filter container, original assertions retained; final4/4",
+  "existingNotices": [
+    "Monaco dependency sourcemap missing",
+    "Vue toRefs warning"
+  ]
+}

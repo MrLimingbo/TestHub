@@ -1,0 +1,133 @@
+{
+  "date": "2026-11-04",
+  "commands": [
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D21ReportScopeTests",
+      "phase": "FIRST_BEFORE",
+      "exitCode": 1,
+      "result": "12passed/1failed; expanded repeated-key CSV variants before production edit"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D21ReportScopeTests",
+      "phase": "VALID_BEFORE",
+      "exitCode": 1,
+      "result": "10passed/3failed/0errors/0skip"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D21ReportScopeTests",
+      "phase": "FOCUSED_AFTER",
+      "exitCode": 0,
+      "result": "13/13; full H2 later reverified current loopback-only server property"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "result": "1339passed/3skip;1342total;JAR BUILD SUCCESS"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D21ReportScopeTests,QualityReportFlowTests,QualityReportScheduleFlowTests,QualityReportTransferFlowTests,QualityReportSyncFlowTests,P2D16QualityScheduleTests'",
+      "exitCode": 0,
+      "result": "44/44;6suites;owned infrastructure cleaned"
+    },
+    {
+      "command": "./node_modules/.bin/vitest run src/test/d21ReportScope.test.ts",
+      "phase": "FIRST_UI_FIXTURE",
+      "exitCode": 1,
+      "result": "2passed/2fixture selector failures; no product failure classification"
+    },
+    {
+      "command": "./node_modules/.bin/vitest run src/test/d21ReportScope.test.ts",
+      "phase": "FINAL_FOCUSED_UI",
+      "exitCode": 0,
+      "result": "4/4"
+    },
+    {
+      "command": "./node_modules/.bin/vitest run --maxWorkers=2",
+      "exitCode": 0,
+      "result": "949/949;99files"
+    },
+    {
+      "command": "./node_modules/.bin/eslint .",
+      "exitCode": 0,
+      "result": "0errors/2existing Vue prop warnings"
+    },
+    {
+      "command": "./node_modules/.bin/vue-tsc --noEmit",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "./node_modules/.bin/vite build",
+      "exitCode": 0,
+      "result": "PASS;existing chunk-size notice"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "requirements-to-test-cases/scripts/validate_cases.py TEST-CASES.json --evidence EVIDENCE.json",
+      "exitCode": 0,
+      "result": "Schema1.1 pass;17cases;0errors/warnings;2inputs extracted"
+    },
+    {
+      "command": "requirements-to-test-cases/scripts/export_cases.py TEST-CASES.json --evidence EVIDENCE.json --formats md --stem TEST-PLAN",
+      "exitCode": 0,
+      "result": "Markdown and summary JSON generated;all17IDs present"
+    }
+  ],
+  "backendJarSha256": "4c5217296a8dd65b740827757610b4576373e4dd4a856f3f931c429d202f9051",
+  "noInstalledRuntimeReplaced": true,
+  "noSchemaMigrationAdded": true,
+  "rawLogs": [
+    {
+      "name": "testhub-d21-before-final.log",
+      "sha256": "d05ae2f53efb5d4fe6c0bd2a3cae6f1faee414a392ceba7e91a25d643551fa6b"
+    },
+    {
+      "name": "testhub-d21-before.log",
+      "sha256": "bc2b4782c6f4e438fe71cda8d73c374001883ebc6c0f9cf3c46cfe049194ab70"
+    },
+    {
+      "name": "testhub-d21-build.log",
+      "sha256": "f75af27465f23191ceca330c1ed899e72c5d387c1d4fbd54159c18efb35ec0f9"
+    },
+    {
+      "name": "testhub-d21-focused.log",
+      "sha256": "3bbfdbbfa57b641f11ea8204f7c355f74101cbd8d599d43a03cd63b6fda7d032"
+    },
+    {
+      "name": "testhub-d21-h2.log",
+      "sha256": "6d21cba3d49edf4d4f1afda0888c822b5fba71972524757af6d87fbda053452e"
+    },
+    {
+      "name": "testhub-d21-lint.log",
+      "sha256": "e4c232b1eac58282cfb7d513810a316a15f3ea0fd7a63a87b37be7aa44750fa6"
+    },
+    {
+      "name": "testhub-d21-mysql.log",
+      "sha256": "5edc2adc5432d3f0910aea36b5439169ffe55d10e28f5627694f98b7889e6d9f"
+    },
+    {
+      "name": "testhub-d21-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "testhub-d21-ui-final.log",
+      "sha256": "cf60a268268e9039bc6dfbd1de7cdffb2b30032725e742ad59037e450769de2d"
+    },
+    {
+      "name": "testhub-d21-ui.log",
+      "sha256": "9ade22d871c989d45146c617cd048ec297424c10ce093108d6449f336a4b7a65"
+    },
+    {
+      "name": "testhub-d21-vitest.log",
+      "sha256": "28ae9fae3924b18e2f4705b75eaf95246bfc84282fcc859406653374fec11a2c"
+    }
+  ],
+  "rawEvidenceCopy": {
+    "name": "testhub-d21-evidence.json",
+    "sha256": "98f1d6b6782133b243f32a8d0947d0f2390fa55d93694632826fe256cc34170e"
+  }
+}

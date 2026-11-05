@@ -39,7 +39,7 @@ function validateItem(item){
  const d=item?.definition,fail=()=>{throw new Error('执行历史资料无效，请核对结果、时间和步骤。')}
  if(!exact(item,['kind','name','definition'])||item.kind!=='RUN'||!id(item.name)||!exact(d,['planCode','title','status','startedAt','finishedAt','cases'])||!code(d.planCode)||typeof d.title!=='string'||!d.title.trim()||d.title.length>200||!Array.isArray(d.cases)||!d.cases.length||d.cases.length>1000||!time(d.startedAt)||!time(d.finishedAt))fail()
  let terminal=0,steps=0,previous='';for(const c of d.cases){
-  if(!exact(c,['caseCode','status','note','executedAt','steps'])||!code(c.caseCode)||c.caseCode<=previous||!result(c.status)||typeof c.note!=='string'||c.note.length>20000||!time(c.executedAt)||!Array.isArray(c.steps)||c.steps.length>5000)fail();previous=c.caseCode;if(c.status!=='NOT_RUN')terminal++
+  if(!exact(c,Object.hasOwn(c,'titleSnapshot')?['caseCode','status','note','executedAt','steps','titleSnapshot']:['caseCode','status','note','executedAt','steps'])||(Object.hasOwn(c,'titleSnapshot')&&(typeof c.titleSnapshot!=='string'||!c.titleSnapshot.trim()||c.titleSnapshot.length>200))||!code(c.caseCode)||c.caseCode<=previous||!result(c.status)||typeof c.note!=='string'||c.note.length>20000||!time(c.executedAt)||!Array.isArray(c.steps)||c.steps.length>5000)fail();previous=c.caseCode;if(c.status!=='NOT_RUN')terminal++
   let number=0;for(const s of c.steps){if(!exact(s,['number','text','status','actualResult','updatedAt'])||!Number.isInteger(s.number)||s.number<=number||s.number>9999||typeof s.text!=='string'||!s.text.trim()||s.text.length>20000||!result(s.status)||typeof s.actualResult!=='string'||s.actualResult.length>20000||!time(s.updatedAt)||(c.status==='PASSED'&&s.status!=='PASSED'))fail();number=s.number;steps++}
  }
  const expected=terminal===0?'NOT_STARTED':terminal===d.cases.length?'COMPLETED':'RUNNING';if(d.status!==expected||steps>5000||(terminal>0&&d.startedAt===null)||(d.status==='COMPLETED')!==(d.finishedAt!==null)||(d.finishedAt!==null&&Date.parse(d.finishedAt)<Date.parse(d.startedAt)))fail();return item
@@ -57,7 +57,7 @@ function validateLayout(value,item){
 function validateRuns(runs){if(!Array.isArray(runs)||runs.length>100)throw new Error('批次对应关系无效。');for(const side of ['local','remote'])if(new Set(runs.map(r=>r?.[side]?.key)).size!==runs.length||runs.some(r=>!id(r?.[side]?.id)||!id(r[side].key)||!code(r[side].planCode)))throw new Error('已有批次必须一对一配对。');if(runs.some(r=>r.local.planCode!==r.remote.planCode))throw new Error('对应批次的计划编号必须一致。')}
 function translate(item,side,b,wire=false){const p=b.runs.find(p=>p[wire?'local':side].key===item.name);return {...content(item),name:p?p[wire?side:'local'].key:item.name}}
 function mapped(raw,side,b){const pairs=raw.items.map(i=>[i,translate(i,side,b)]),items=pairs.map(([,v])=>v);if(new Set(items.map(keyOf)).size!==items.length)throw new Error('批次对应关系与来源标识冲突，请重新核对。');return {...raw,items,itemIds:Object.fromEntries(pairs.map(([a,v])=>[referenceKey(v),raw.itemIds[referenceKey(a)]])),layouts:Object.fromEntries(pairs.map(([a,v])=>[referenceKey(v),raw.layouts[referenceKey(a)]])),createdAt:Object.fromEntries(pairs.map(([a,v])=>[referenceKey(v),raw.createdAt[referenceKey(a)]]))}}
-const layout=d=>JSON.stringify([d.planCode,d.cases.map(c=>[c.caseCode,c.steps.map(s=>[s.number,s.text])])])
+const layout=d=>JSON.stringify([d.planCode,d.cases.map(c=>[c.caseCode,c.titleSnapshot??null,c.steps.map(s=>[s.number,s.text])])])
 const assetsUsed=(item,snapshot)=>Object.fromEntries(['PLAN\n'+item.definition.planCode,...item.definition.cases.map(c=>'CASE\n'+c.caseCode)].map(k=>[k,snapshot.assetIds[k]]))
 function validateState(state) {
   if (state?.version !== 1 || !Array.isArray(state.bases) || state.bases.length > 100 || !Array.isArray(state.conflicts) || state.conflicts.length > 200)
@@ -168,6 +168,10 @@ class FunctionalHistorySync {
     if (this.state.binding) { const next = clone(this.state); next.binding.enabled = false; next.binding.requiresRebind = true; await this.save(next) }
   }
   changes(local, remote) {
+    const hasTitles = snapshot => snapshot.items.some(item => item.definition.cases.some(c => c.titleSnapshot != null))
+    if ((hasTitles(local) && remote.titleSnapshotsSupported !== true) || (hasTitles(remote) && local.titleSnapshotsSupported !== true)) {
+      throw new Error('对端不支持历史标题快照，请更新两端服务后再同步；资料未发送。')
+    }
     const l = new Map(local.items.map(i => [keyOf(i), i])), r = new Map(remote.items.map(i => [keyOf(i), i])), bases = new Map(this.state.bases.map(i => [keyOf(i), i]))
     const push = [], pull = [], conflicts = [], unchanged = []
     const issue = (key, reason) => { const a = l.get(key), b = r.get(key); const old = conflicts.find(c => c.key === key); if (old) { old.reason = reason; old.canResolve = false; old.reviewAfterMissing = true } else conflicts.push({ key, local: a ? content(a) : null, remote: b ? content(b) : null, reason, canResolve: false, reviewAfterMissing: true }) }

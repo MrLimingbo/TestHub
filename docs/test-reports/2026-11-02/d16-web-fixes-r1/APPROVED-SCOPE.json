@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-02",
+  "observation": "OBS-11-E021",
+  "module": "Web UI自动化",
+  "selectedRules": {
+    "D16-I": "A",
+    "D16-N": "A",
+    "D16-S": "A",
+    "D16-NULL": "A",
+    "D16-OLD": "A"
+  },
+  "ruleApproval": "../d16-rule-review/REVIEW-APPROVAL.json",
+  "previousResultApproval": "../d16-performance-fixes-r1/REVIEW-APPROVAL.json",
+  "scope": "视口、步骤及执行超时、variables/value/expectedText；对应新建/编辑/迁移/同步/新入队/运行预检。定时计划timeoutSeconds为同一执行超时入口；不扩大到重试次数、退避、metadata/URL/selector、移动或设备能力。",
+  "gate": "完成后等待Web结果审核，未进入移动模块",
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "newUpgradeInvestigation": false
+}

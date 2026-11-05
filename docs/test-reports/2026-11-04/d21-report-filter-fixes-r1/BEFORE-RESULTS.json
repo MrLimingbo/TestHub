@@ -1,0 +1,66 @@
+{
+  "phase": "VALID_BEFORE",
+  "total": 13,
+  "passed": 10,
+  "failed": 3,
+  "errors": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "method": "B01_omittedUsesExistingDefault",
+      "status": "PASS"
+    },
+    {
+      "method": "B02_explicitEmptyAndBlankAreRejected",
+      "status": "FAIL",
+      "message": "raw query rejection: projectIds; export=false ==> expected: <400> but was: <200>"
+    },
+    {
+      "method": "B09_fiftyOneUniqueIdsRejected",
+      "status": "PASS"
+    },
+    {
+      "method": "B07_mixedKeysCsvTrimAndDedupKeepOrder",
+      "status": "PASS"
+    },
+    {
+      "method": "B03_commaOnlyIsRejected",
+      "status": "FAIL",
+      "message": "raw query rejection: projectIds=01M6J9B8B5T8F7DP6RHE6RCAFH&projectIds=%2C; export=false ==> expected: <400> but was: <200>"
+    },
+    {
+      "method": "B05_emptyRepeatedKeysAreRejected",
+      "status": "PASS"
+    },
+    {
+      "method": "B04_emptyCsvSegmentsAreRejected",
+      "status": "FAIL",
+      "message": "raw query rejection: projectIds=01M6J9B8NQ6F5WGFSN68X2KETH%2C&projectIds=01M6J9B8NRMJQZ9Q0T9EGDKQ0X; export=false ==> expected: <400> but was: <200>"
+    },
+    {
+      "method": "B10_limitIsAppliedAfterDedup",
+      "status": "PASS"
+    },
+    {
+      "method": "B12_crossOrganizationCannotLeakOrAudit",
+      "status": "PASS"
+    },
+    {
+      "method": "B06_singleIdRestrictsBothOutputs",
+      "status": "PASS"
+    },
+    {
+      "method": "B11_defaultOverFiftyIsNotNewlyLimited",
+      "status": "PASS"
+    },
+    {
+      "method": "B08_fiftyUniqueIdsAccepted",
+      "status": "PASS"
+    },
+    {
+      "method": "B13_projectMembershipBoundaryIsPreserved",
+      "status": "PASS"
+    }
+  ],
+  "rawLogSha256": "d05ae2f53efb5d4fe6c0bd2a3cae6f1faee414a392ceba7e91a25d643551fa6b"
+}

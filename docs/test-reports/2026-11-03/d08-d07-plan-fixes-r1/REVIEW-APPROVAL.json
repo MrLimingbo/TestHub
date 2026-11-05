@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-03",
+  "status": "APPROVED_REPORTED_SCOPE",
+  "basis": "用户审核通过当前报告，要求待审批服务恢复后补跑D08/D07隔离MySQL，完成后更新报告再次审核；暂不进入下一模块。",
+  "approvedObservations": [
+    "OBS-05-E003",
+    "OBS-05-E002"
+  ],
+  "reportSha256": "68ef8162ab37cbc1bc9c9c4517fb3a9381e5dadcba314258b5c73c5ac3ad4003",
+  "acceptedResults": {
+    "newTestMethodsPassed": 16,
+    "h2Passed": 1314,
+    "h2Skipped": 3,
+    "frontendPassed": 938,
+    "desktopFunctionalPassed": 222
+  },
+  "acceptedLimitation": "MySQL未执行，需补跑并再次审核；本审批不证明MySQL通过。",
+  "mysqlApproved": false,
+  "nextModuleAuthorized": false,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

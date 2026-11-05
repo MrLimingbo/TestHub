@@ -1,0 +1,457 @@
+{
+  "date": "2026-11-03",
+  "scope": "冷status及只读context/preview/prepare；已加载status轮询只读内存",
+  "entries": [
+    {
+      "channel": "api-automation-asset-sync",
+      "page": "api-automation-asset-sync.html",
+      "installer": "apps/desktop/app/src/api-automation-asset-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "api-automation-history-sync",
+      "page": "api-automation-history-sync.html",
+      "installer": "apps/desktop/app/src/api-automation-history-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "api-automation-scenario-sync",
+      "page": "api-automation-scenario-sync.html",
+      "installer": "apps/desktop/app/src/api-automation-scenario-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "api-automation-trigger-sync",
+      "page": "api-automation-trigger-sync.html",
+      "installer": "apps/desktop/app/src/api-automation-trigger-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "api-debug-history-sync",
+      "page": "api-debug-history-sync.html",
+      "installer": "apps/desktop/app/src/api-debug-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "api-debug-replay-sync",
+      "page": "api-debug-replay-sync.html",
+      "installer": "apps/desktop/app/src/api-debug-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "api-design-sync",
+      "page": "api-design-sync.html",
+      "installer": "apps/desktop/app/src/api-design-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-asset-tag-sync",
+      "page": "functional-asset-tag-sync.html",
+      "installer": "apps/desktop/app/src/functional-asset-tag-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-defect-execution-sync",
+      "page": "functional-defect-execution-sync.html",
+      "installer": "apps/desktop/app/src/functional-defect-execution-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-defect-link-sync",
+      "page": "functional-defect-link-sync.html",
+      "installer": "apps/desktop/app/src/functional-defect-link-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-defect-people-sync",
+      "page": "functional-defect-people-sync.html",
+      "installer": "apps/desktop/app/src/functional-defect-people-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-defect-sync",
+      "page": "functional-defect-sync.html",
+      "installer": "apps/desktop/app/src/functional-defect-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-defect-workflow-sync",
+      "page": "functional-defect-workflow-sync.html",
+      "installer": "apps/desktop/app/src/functional-defect-workflow-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-governance-sync",
+      "page": "functional-governance-sync.html",
+      "installer": "apps/desktop/app/src/functional-governance-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-history-sync",
+      "page": "functional-history-sync.html",
+      "installer": "apps/desktop/app/src/functional-history-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "functional-sync",
+      "page": "functional-sync.html",
+      "installer": "apps/desktop/app/src/functional-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "grpc-descriptor-sync",
+      "page": "grpc-descriptor-sync.html",
+      "installer": "apps/desktop/app/src/grpc-descriptor-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "mobile-application-file-sync",
+      "page": "mobile-application-file-sync.html",
+      "installer": "apps/desktop/app/src/mobile-application-file-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "mobile-automation-artifact-sync",
+      "page": "mobile-automation-artifact-sync.html",
+      "installer": "apps/desktop/app/src/mobile-automation-artifact-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "mobile-automation-history-sync",
+      "page": "mobile-automation-history-sync.html",
+      "installer": "apps/desktop/app/src/mobile-automation-history-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "mobile-automation-sync",
+      "page": "mobile-automation-sync.html",
+      "installer": "apps/desktop/app/src/mobile-automation-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "mock-sync",
+      "page": "mock-sync.html",
+      "installer": "apps/desktop/app/src/mock-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "notification-sync",
+      "page": "notification-sync.html",
+      "installer": "apps/desktop/app/src/notification-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "performance-artifact-sync",
+      "page": "performance-artifact-sync.html",
+      "installer": "apps/desktop/app/src/performance-artifact-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "performance-history-sync",
+      "page": "performance-history-sync.html",
+      "installer": "apps/desktop/app/src/performance-history-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "performance-sync",
+      "page": "performance-sync.html",
+      "installer": "apps/desktop/app/src/performance-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "project-file-sync",
+      "page": "project-file-sync.html",
+      "installer": "apps/desktop/app/src/project-file-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "project-version-sync",
+      "page": "project-version-sync.html",
+      "installer": "apps/desktop/app/src/project-version-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "quality-report-sync",
+      "page": "quality-report-sync.html",
+      "installer": "apps/desktop/app/src/quality-report-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "settings-sync",
+      "page": "settings-sync.html",
+      "installer": "apps/desktop/app/src/settings-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "task-sync",
+      "page": "task-sync.html",
+      "installer": "apps/desktop/app/src/task-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "ui-automation-artifact-sync",
+      "page": "ui-automation-artifact-sync.html",
+      "installer": "apps/desktop/app/src/ui-automation-artifact-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "ui-automation-history-sync",
+      "page": "ui-automation-history-sync.html",
+      "installer": "apps/desktop/app/src/ui-automation-history-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "ui-automation-sync",
+      "page": "ui-automation-sync.html",
+      "installer": "apps/desktop/app/src/ui-automation-sync-ipc.cjs",
+      "operations": [
+        "status (cold/unloaded only)",
+        "context",
+        "preview"
+      ]
+    },
+    {
+      "channel": "api-transfer",
+      "page": "api-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "automation-transfer",
+      "page": "automation-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "mobile-automation-transfer",
+      "page": "mobile-automation-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "mock-transfer",
+      "page": "mock-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "notification-transfer",
+      "page": "notification-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "performance-transfer",
+      "page": "performance-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "quality-report-transfer",
+      "page": "quality-report-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "settings-transfer",
+      "page": "settings-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "task-transfer",
+      "page": "task-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "transfer",
+      "page": "transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    },
+    {
+      "channel": "ui-automation-transfer",
+      "page": "ui-automation-transfer.html",
+      "installer": "apps/desktop/app/src/main.cjs",
+      "operations": [
+        "context",
+        "prepare"
+      ]
+    }
+  ],
+  "entryGroups": 45,
+  "readHandlers": 124,
+  "excludedOperations": [
+    "open入口的既有登录/运行时预检（页面尚未打开，非预览操作）",
+    "bind/run/resolve/enabled/unbind写流程",
+    "commit上传",
+    "备份恢复",
+    "应用整体退出"
+  ],
+  "exclusionsRetainExistingLocksAndConfirmations": true,
+  "coldStatusHandlers": 34,
+  "scopeAmendment": "发现首次status启动后端先于context，因此同属预览读取生命周期，补入同一取消及矩阵；状态元数据准备不再启动后端。"
+}

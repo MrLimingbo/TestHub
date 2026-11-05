@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-03",
+  "status": "PENDING_OVERALL_REPORT_REVIEW",
+  "D16ModulesResultsApproved": 6,
+  "formalCaseTotal": 189,
+  "formalCasePositive": 83,
+  "formalCaseNegative": 106,
+  "formalCasePassed": 189,
+  "testMethodTotal": 48,
+  "testMethodPositiveOnly": 11,
+  "testMethodNegativeOnly": 18,
+  "testMethodMixed": 19,
+  "testMethodPassed": 48,
+  "observationsResultsApproved": 38,
+  "observationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "historicalCaseCountFrozen": 3090,
+  "historicalProductBugsFrozen": 108,
+  "historicalAssetIssuesFrozen": 1,
+  "newProductTestExecutionThisSummary": false,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

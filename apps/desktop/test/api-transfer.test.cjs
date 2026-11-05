@@ -133,6 +133,7 @@ function mainHarness() {
     },
     openSetupWindow: () => {}, showLocalError: () => {}, dialog: { showMessageBox: async () => ({ response: 0 }) },
   }
+  context.runReadTransfer = (_event, operation) => context.runApiTransfer(operation)
   vm.createContext(context)
   vm.runInContext(source.slice(source.indexOf('function requireApiTransferSender'), source.indexOf('function updateBackup')), context)
   const event = contents => ({ sender: contents, senderFrame: contents.mainFrame })

@@ -1,5 +1,7 @@
 package io.testhub.platform.uiautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
@@ -199,5 +201,5 @@ public class UiAutomationScheduleService {
     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
 
     public record ScheduleInput(String scenarioId, String functionalPlanId, String name, String cronExpression, String timezone,
-                                Integer timeoutSeconds, Integer maxRetryAttempts, Integer retryBackoffSeconds, Boolean enabled) { }
+                                @JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutSeconds, Integer maxRetryAttempts, Integer retryBackoffSeconds, Boolean enabled) { }
 }

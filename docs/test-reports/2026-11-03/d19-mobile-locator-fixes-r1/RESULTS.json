@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+  "observation": "OBS-12-E022",
+  "rule": "D19-A",
+  "newTestMethods": {
+    "total": 18,
+    "positiveOnly": 8,
+    "negativeOnly": 8,
+    "mixed": 2,
+    "passed": 18,
+    "failed": 0,
+    "blocked": 0
+  },
+  "checks": {
+    "frontendPassed": 935,
+    "h2": {
+      "total": 1307,
+      "passed": 1304,
+      "skipped": 3,
+      "failed": 0,
+      "errors": 0
+    },
+    "mysqlAffected": {
+      "suites": 10,
+      "passed": 79,
+      "failed": 0
+    },
+    "runnerPassed": 21,
+    "lint": "PASS_WITH_2_EXISTING_WARNINGS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "diffCheck": "PASS"
+  },
+  "realDeviceExecutions": 0,
+  "environmentBlockersDeferred": 12,
+  "otherObservationsWaitingForModuleGate": 8,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

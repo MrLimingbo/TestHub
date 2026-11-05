@@ -1,5 +1,6 @@
 package io.testhub.platform.functional;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.f4b6a3.ulid.UlidCreator;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
@@ -28,14 +29,14 @@ public class FunctionalTransferHistory {
         if(runs.size()>1000)throw invalid("单次最多迁移 1000 个执行批次。");
         Map<String,List<RunCase>> cases=new HashMap<>();
         var rows=jdbc.sql("SELECT c.* FROM functional_test_run_case c JOIN functional_test_run r ON r.id=c.run_id WHERE r.project_id=:project ORDER BY c.id LIMIT 10001")
-                .param("project",project).query((rs,n)->Map.entry(rs.getString("run_id"),new RunCase(rs.getString("id"),rs.getString("case_id"),rs.getString("status"),rs.getString("note"),time(rs,"executed_at"),List.of()))).list();
+                .param("project",project).query((rs,n)->Map.entry(rs.getString("run_id"),new RunCase(rs.getString("id"),rs.getString("case_id"),rs.getString("status"),rs.getString("note"),time(rs,"executed_at"),List.of(),rs.getString("title_snapshot")))).list();
         if(rows.size()>10000)throw invalid("单次最多迁移 10000 条执行用例。");
         Map<String,List<Step>> steps=new HashMap<>();
         var stepRows=jdbc.sql("SELECT s.* FROM functional_test_run_step s JOIN functional_test_run_case c ON c.id=s.run_case_id JOIN functional_test_run r ON r.id=c.run_id WHERE r.project_id=:project ORDER BY s.step_no,s.id LIMIT 50001")
                 .param("project",project).query((rs,n)->Map.entry(rs.getString("run_case_id"),new Step(rs.getString("id"),rs.getInt("step_no"),rs.getString("step_text"),rs.getString("status"),rs.getString("actual_result"),time(rs,"updated_at")))).list();
         if(stepRows.size()>50000)throw invalid("单次最多迁移 50000 条执行步骤。");
         stepRows.forEach(row->steps.computeIfAbsent(row.getKey(),key->new ArrayList<>()).add(row.getValue()));
-        for(var row:rows){var c=row.getValue();cases.computeIfAbsent(row.getKey(),key->new ArrayList<>()).add(new RunCase(c.id(),c.caseId(),c.status(),c.note(),c.executedAt(),steps.getOrDefault(c.id(),List.of())));}
+        for(var row:rows){var c=row.getValue();cases.computeIfAbsent(row.getKey(),key->new ArrayList<>()).add(new RunCase(c.id(),c.caseId(),c.status(),c.note(),c.executedAt(),steps.getOrDefault(c.id(),List.of()),c.titleSnapshot()));}
         return new Definitions(runs.stream().map(r->new Run(r.id(),r.planId(),r.name(),r.status(),r.startedAt(),r.finishedAt(),r.createdAt(),r.updatedAt(),cases.getOrDefault(r.id(),List.of()))).toList());
     }
 
@@ -50,6 +51,7 @@ public class FunctionalTransferHistory {
             Set<String> members=new HashSet<>(); int terminal=0;
             for(var c:run.cases()) {
                 timestamps(c.executedAt());
+                if (c.titleSnapshot()!=null && (c.titleSnapshot().isBlank() || c.titleSnapshot().length()>200)) throw invalid("历史标题快照无效");
                 if(!ids.add(c.id())||!cases.contains(c.caseId())||!members.add(c.caseId()))throw invalid("执行用例重复或关联用例不在迁移范围内。");
                 if(!c.status().equals("NOT_RUN"))terminal++;
                 Set<Integer> numbers=new HashSet<>();
@@ -79,8 +81,8 @@ public class FunctionalTransferHistory {
                     .param("start",run.startedAt()).param("finish",run.finishedAt()).param("created",run.createdAt()).param("updated",run.updatedAt()).update();
             for(var c:run.cases()) {
                 String caseId=id();assets.put(c.id(),caseId);cases++;
-                jdbc.sql("INSERT INTO functional_test_run_case(id,run_id,case_id,status,note,executed_by,executed_at) VALUES(:id,:run,:case,:status,:note,NULL,:executed)")
-                        .param("id",caseId).param("run",runId).param("case",assets.get(c.caseId())).param("status",c.status()).param("note",c.note()).param("executed",c.executedAt()).update();
+                jdbc.sql("INSERT INTO functional_test_run_case(id,run_id,case_id,status,note,executed_by,executed_at,title_snapshot) VALUES(:id,:run,:case,:status,:note,NULL,:executed,:title)")
+                        .param("id",caseId).param("run",runId).param("case",assets.get(c.caseId())).param("status",c.status()).param("note",c.note()).param("executed",c.executedAt()).param("title",c.titleSnapshot()).update();
                 for(var step:c.steps()) {
                     steps++;
                     jdbc.sql("INSERT INTO functional_test_run_step(id,run_case_id,step_no,step_text,status,actual_result,updated_by,updated_at) VALUES(:id,:case,:number,:text,:status,:actual,NULL,:updated)")
@@ -92,7 +94,7 @@ public class FunctionalTransferHistory {
     }
     public static Definitions rewrite(Definitions data,UnaryOperator<String> text) {
         if(data==null)return null;
-        return new Definitions(data.runs().stream().map(r->new Run(r.id(),r.planId(),r.name(),r.status(),r.startedAt(),r.finishedAt(),r.createdAt(),r.updatedAt(),r.cases().stream().map(c->new RunCase(c.id(),c.caseId(),c.status(),text.apply(c.note()),c.executedAt(),c.steps().stream().map(s->new Step(s.id(),s.number(),text.apply(s.text()),s.status(),text.apply(s.actualResult()),s.updatedAt())).toList())).toList())).toList());
+        return new Definitions(data.runs().stream().map(r->new Run(r.id(),r.planId(),r.name(),r.status(),r.startedAt(),r.finishedAt(),r.createdAt(),r.updatedAt(),r.cases().stream().map(c->new RunCase(c.id(),c.caseId(),c.status(),text.apply(c.note()),c.executedAt(),c.steps().stream().map(s->new Step(s.id(),s.number(),text.apply(s.text()),s.status(),text.apply(s.actualResult()),s.updatedAt())).toList(),c.titleSnapshot())).toList())).toList());
     }
     private static void timestamps(Instant... values) {
         // Both backends use millisecond precision; the enterprise schema uses MySQL TIMESTAMP(3).
@@ -109,7 +111,12 @@ public class FunctionalTransferHistory {
                       @NotNull Instant createdAt,@NotNull Instant updatedAt,@NotNull @Size(min=1,max=10000) List<@NotNull @Valid RunCase> cases){}
     public record RunCase(@NotBlank @Size(max=26) String id,@NotBlank @Size(max=26) String caseId,
                           @NotNull @Pattern(regexp="NOT_RUN|PASSED|FAILED|BLOCKED") String status,@NotNull @Size(max=20000) String note,
-                          Instant executedAt,@NotNull @Size(max=50000) List<@NotNull @Valid Step> steps){}
+                          Instant executedAt,@NotNull @Size(max=50000) List<@NotNull @Valid Step> steps,
+                          @JsonInclude(JsonInclude.Include.NON_NULL) @Size(max=200) @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using=FunctionalTitleSnapshot.class) String titleSnapshot) {
+        public RunCase(String id,String caseId,String status,String note,Instant executedAt,List<Step> steps) {
+            this(id,caseId,status,note,executedAt,steps,null);
+        }
+    }
     public record Step(@NotBlank @Size(max=26) String id,@Min(1) int number,@NotBlank @Size(max=20000) String text,
                        @NotNull @Pattern(regexp="NOT_RUN|PASSED|FAILED|BLOCKED") String status,@NotNull @Size(max=20000) String actualResult,Instant updatedAt){}
     public record Counts(int runs,int cases,int steps){}

@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-04",
+  "status": "IMPLEMENTED_PENDING_RESULT_REVIEW_WITH_OPEN_FINDING",
+  "observation": "OBS-14-E024",
+  "rule": "D23-A",
+  "implementationKind": "OpenAPI descriptions and bounded compatibility contract;runtimepolicy already matched approvedA",
+  "formalCases": {
+    "total": 20,
+    "positive": 9,
+    "negative": 11,
+    "passed": 20,
+    "failed": 0,
+    "blocked": 0
+  },
+  "additionalDiagnosticMethods": 1,
+  "diagnosticMethodPassDoesNotCloseBug": true,
+  "checks": {
+    "h2": {
+      "total": 1363,
+      "passed": 1360,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 3,
+      "suiteCount": 159
+    },
+    "mysqlAffected": {
+      "total": 54,
+      "passed": 54,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 6
+    },
+    "frontendAffectedPassed": 66,
+    "frontendFiles": 3,
+    "lint": "PASS_WITH_2_EXISTING_WARNINGS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "backendJar": "PASS",
+    "diffCheck": "PASS"
+  },
+  "policyDocumentationGapResolved": 1,
+  "unknownFieldPolicyRuntimeDefectsConfirmed": 0,
+  "newConfirmedProductBugs": 1,
+  "newProductBugsFixed": 0,
+  "openNewBugIds": [
+    "BUG-D23-001"
+  ],
+  "newFormalTestAssetIssues": 0,
+  "productionFilesChanged": 2,
+  "productionRuntimeBehaviorChanged": false,
+  "schemaChanged": false,
+  "uiProductChanged": false,
+  "historicalEnvironmentBlockersDeferred": 12,
+  "otherHistoricalObservationsWaitingForModuleGate": 2,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "noNextModuleExecuted": true
+}

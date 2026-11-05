@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-03",
+  "status": "APPROVED",
+  "basis": "用户消息：审核通过 继续",
+  "approvedObservation": "OBS-11-E021",
+  "acceptedResults": {"formalCases": 56, "positive": 22, "negative": 34, "passed": 56, "failed": 0, "blocked": 0},
+  "reportSha256": "2349d16b949430f2b24c27055a61b0dcf65623a39d7f36eaf3744a1e388ea002",
+  "nextModule": "移动端自动化",
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

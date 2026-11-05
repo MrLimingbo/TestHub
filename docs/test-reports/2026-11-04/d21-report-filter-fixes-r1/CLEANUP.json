@@ -1,0 +1,1307 @@
+{
+  "date": "2026-11-04",
+  "rawLogNamesRemoved": [
+    "testhub-d21-before-final.log",
+    "testhub-d21-before.log",
+    "testhub-d21-build.log",
+    "testhub-d21-focused.log",
+    "testhub-d21-h2.log",
+    "testhub-d21-lint.log",
+    "testhub-d21-mysql.log",
+    "testhub-d21-typecheck.log",
+    "testhub-d21-ui-final.log",
+    "testhub-d21-ui.log",
+    "testhub-d21-vitest.log"
+  ],
+  "rawLogHashesVerifiedBeforeRemoval": true,
+  "rawEvidenceCopyRemoved": "testhub-d21-evidence.json",
+  "rawTemporaryLogsRemoved": true,
+  "rawSurefireFilesRemoved": 316,
+  "rawSurefireSuites": 158,
+  "rawSurefireSha256": [
+    {
+      "name": "TEST-io.testhub.platform.AccessControlFlowTests.xml",
+      "sha256": "b5f802a0c0eaf75a71d378aab558142b21b360e37ca087eec26258baad037d3e"
+    },
+    {
+      "name": "io.testhub.platform.AccessControlFlowTests.txt",
+      "sha256": "27e970373409926ecae4237351ab26ff1ee0c35e1b271d1a1f7015aba3a14030"
+    },
+    {
+      "name": "TEST-io.testhub.platform.AccountConfigFixesFlowTests.xml",
+      "sha256": "90d73e7cc132f476cee149b9f374385f7873dfc5358558ef8cdd9da518d9cf45"
+    },
+    {
+      "name": "io.testhub.platform.AccountConfigFixesFlowTests.txt",
+      "sha256": "a89b1ac99338cc67aaf764530d2304744ecfa4feb37f3b7f59efb810c29a0bd9"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationAssetSyncFlowTests.xml",
+      "sha256": "7e589a07df7fcb9de700d88206918090fb01de97058c8f3a172ebbc0dd24a8be"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationAssetSyncFlowTests.txt",
+      "sha256": "d0353ca7faca607c04f13854370dd1afe29889b215510078f7e0a5c4e5662c9c"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationDataSetFlowTests.xml",
+      "sha256": "6a65445cd9354448429f5d4b4e6d7995e1c466b4724b1758b8dc99d49f17c57a"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationDataSetFlowTests.txt",
+      "sha256": "14cada2cbefc5acab8a41e857de6638f2c687914eb54ab2ea0df6131ee30dd5d"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationExecutionFlowTests.xml",
+      "sha256": "b582aa25567232035a1ca68a9af9efc28207b91f2b4a45f1e93ef14e0b764113"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationExecutionFlowTests.txt",
+      "sha256": "2adbf9c78a81a9b1ad8ed3d2651dfd7aa04ecb505b52ae321e5e01769d9d084b"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationExecutionProfileFlowTests.xml",
+      "sha256": "c66df9fcd3abeb27139229fbedcd32263097bf45d72ce4737d768e90ead3e7b9"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationExecutionProfileFlowTests.txt",
+      "sha256": "37a69ca33912a173c23086ce3cedce4e581cdb7224495003d238c00377e1ec64"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationExternalTriggerFlowTests.xml",
+      "sha256": "b8ff0ff8dfdde542a238351e1207e705c2895bd6bea3898f27223e87590e9d0e"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationExternalTriggerFlowTests.txt",
+      "sha256": "775d5492bd911658ee62f57cde14d74237b09c1e845d0a3eabef883fa695e590"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationHistorySyncFlowTests.xml",
+      "sha256": "ddc5c680d7ad7b632972ebb9b14225e2d5f6c6bcb92ba7b697d3c86e0f20c848"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationHistorySyncFlowTests.txt",
+      "sha256": "27d73b1349d3ca954cd3c74063ff0cc9094c041225df9b107486b9175e437229"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationScenarioFlowTests.xml",
+      "sha256": "6a29a65a6e4dee4aac0a2f0ef365497ce4d55da6dd7a4e9a77eccf4ed0f7597f"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationScenarioFlowTests.txt",
+      "sha256": "821826cfcec447895cbefe5b487a2613eef1cb6f966894a6af35486a9c6d8757"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationScenarioReuseFlowTests.xml",
+      "sha256": "22ad10537eee0380c4499feb6721dcebf17b04bfeffc3d56f5a7d9a921971d39"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationScenarioReuseFlowTests.txt",
+      "sha256": "0a4f5317283519214ea6023a46abb371acdc3781d0098b3528b88fdf54ea7ce0"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationScenarioSyncFlowTests.xml",
+      "sha256": "d9e71eaa547ac596f6f9944fbdd9cfddc461e74bfb39d668ca304384119818d3"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests.txt",
+      "sha256": "797b62554ee92ffe15e6f19638bc78476031f56f347bf1fbb07f36a7f97d21e6"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationScheduleFlowTests.xml",
+      "sha256": "b136f27bdcaf8f57351efefd4b044d989de986756c1f829df6788128cfa7e9fd"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationScheduleFlowTests.txt",
+      "sha256": "2a192cbb7c22d87a3568351a57bd8069609d541afed427f55b2c62de6351a53a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationTransferFlowTests.xml",
+      "sha256": "729d66f7d1a16ed5b4111049dc286745d98231a3cf8de5ce9e0cab668bd5913e"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationTransferFlowTests.txt",
+      "sha256": "842c6b98ad005b2b99254c81c9c32a6c690e43af56cbbaf7f71ed5bc210e1237"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiAutomationTriggerSyncFlowTests.xml",
+      "sha256": "4a676c54cbd63fcb484ea548c759cb175e5d745abcf900360817798d49e8b55e"
+    },
+    {
+      "name": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests.txt",
+      "sha256": "2ecdd387a0688ca86cded2fda4a08f0d9efe2e2ba50058355fc3ec0b3b7ae82f"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiDebugFlowTests.xml",
+      "sha256": "44078df3f9896374d043bee057fd67c95ff6ede8e35caf1c862f95794828ccb3"
+    },
+    {
+      "name": "io.testhub.platform.ApiDebugFlowTests.txt",
+      "sha256": "3b8f06e15824e902cedf1ab6f8c9944e5b8d629d831d0a718dd25db06d97df1f"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiDebugHistorySyncFlowTests.xml",
+      "sha256": "4c2ef17adb921f4488d72b25f8e2d9894728bb1674b275ea36760de5f036b3aa"
+    },
+    {
+      "name": "io.testhub.platform.ApiDebugHistorySyncFlowTests.txt",
+      "sha256": "c649a152e048327d178f2cb34d711e9f37607e7fa17a786517a55c88c86a3629"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiDesignFixesFlowTests.xml",
+      "sha256": "cb4ad560a90c1c1a795373bb3710978f87e9ab2523f3bebbd3aa5791356275d2"
+    },
+    {
+      "name": "io.testhub.platform.ApiDesignFixesFlowTests.txt",
+      "sha256": "84df38fce0e3cfd3a42a1a3294aa0a17245efd98d3740f0d3d4e00387bee6f03"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiDesignFlowTests.xml",
+      "sha256": "a785c67533a4edcccc1619265c5476328e18839ff5e0f169d887d9092035139d"
+    },
+    {
+      "name": "io.testhub.platform.ApiDesignFlowTests.txt",
+      "sha256": "6db984bfcc90f4479cfe8e2dc38c89a6192d626c079a7efb07694c767e23cf24"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiDesignSyncFlowTests.xml",
+      "sha256": "83af89685589fce5d2d156a3e246a905c77e552c9d058830f63902a336568223"
+    },
+    {
+      "name": "io.testhub.platform.ApiDesignSyncFlowTests.txt",
+      "sha256": "51b332b3426e4497fc2c9c691e56320431a75056449dff5acde046fb8c69c9e7"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiInterchangeFlowTests.xml",
+      "sha256": "9d485e9d72fbfdb01dc9dc2222b663a74cc9098f5ac65eafaec08f5d72d0371c"
+    },
+    {
+      "name": "io.testhub.platform.ApiInterchangeFlowTests.txt",
+      "sha256": "e5b3463c0a78c6496e8d243b76ba476e18be70df78d8903a8243c0a1b310265e"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiRunnerInternalAuthenticationFlowTests.xml",
+      "sha256": "d02c62a43728fbfb0224692bfeeb53079512c82fa7dc171d1355347afd63ecbe"
+    },
+    {
+      "name": "io.testhub.platform.ApiRunnerInternalAuthenticationFlowTests.txt",
+      "sha256": "4bcb797d46fa90b61b31e70b25c281d8b4d234613058218f30c5860b47648ef9"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiRunnerRuntimeConfigurationFlowTests.xml",
+      "sha256": "b708a54465cec69327a28724f8cd2925f2f891e6001da4df84d1e4cf78952fb1"
+    },
+    {
+      "name": "io.testhub.platform.ApiRunnerRuntimeConfigurationFlowTests.txt",
+      "sha256": "faf0313d61dfd56206dbddcf7f8bdae012e56ebd97f091621e30da7787d36037"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiRunnerRuntimeLeaseFlowTests.xml",
+      "sha256": "f1c575c16e9e924dce514e4abed4174c812d70edc1ad681299575877311e33c2"
+    },
+    {
+      "name": "io.testhub.platform.ApiRunnerRuntimeLeaseFlowTests.txt",
+      "sha256": "c927f0af817ba48401f2ed67482f91a70c1306c3610bc7a7bb9b02b89516c042"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiRunnerStatusFlowTests.xml",
+      "sha256": "509f5d955d6414c4fbf975eeb0aba76af01f95e172819f8dd2ecf784757d11f8"
+    },
+    {
+      "name": "io.testhub.platform.ApiRunnerStatusFlowTests.txt",
+      "sha256": "290511b4b8c3d5562795eb02cc11b17fde8ba59e3c46dd23a1149d4c3891abba"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiRunnerTrustFlowTests.xml",
+      "sha256": "ed22e5ddbdc88f4e24d75aaf4193e29e7fb92ff962a8d6c90550dc700c15134e"
+    },
+    {
+      "name": "io.testhub.platform.ApiRunnerTrustFlowTests.txt",
+      "sha256": "a04033d121a1748757d040c4b2d0f6be75697960b1d847ad1a0f6dd96ba3f734"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiTransferFlowTests.xml",
+      "sha256": "579ede2bb040557a97f17f766ed91d17bc6f70ecb5d448b9801712f7b2d4a997"
+    },
+    {
+      "name": "io.testhub.platform.ApiTransferFlowTests.txt",
+      "sha256": "5a4efa19519499d9a02f01dd21fd6297284905dc7f40e110a9212118c8f014e3"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ApiWorkspacePreferencesFlowTests.xml",
+      "sha256": "a8c0f141c4e850cca159b911a1d0b62fd47a931f618abcf9547c2192333ec713"
+    },
+    {
+      "name": "io.testhub.platform.ApiWorkspacePreferencesFlowTests.txt",
+      "sha256": "cc623dca8085332c6998fd4963fe95f9e42a59d0bac3c1ac520ecbaca7f6f86a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.AuditResourceMysqlMigrationTests.xml",
+      "sha256": "3b1872327af0bf69a028b5a0ecba920ee3370953eca4b45d599d9991ca7017a7"
+    },
+    {
+      "name": "io.testhub.platform.AuditResourceMysqlMigrationTests.txt",
+      "sha256": "2fb8d43cf060d290653199cc5b07bd49dba24a70d009c0e1f5705e54f52386a5"
+    },
+    {
+      "name": "TEST-io.testhub.platform.AuthenticationFlowTests.xml",
+      "sha256": "4ff9b56e3acf085dcc17cf2208505926ad2ed86aa995368c11dbc622a2dac91d"
+    },
+    {
+      "name": "io.testhub.platform.AuthenticationFlowTests.txt",
+      "sha256": "1feebbec3b0cf9ef24c295da1cb8cbaef094dc95f33e165de200482d288367ab"
+    },
+    {
+      "name": "TEST-io.testhub.platform.CrossRegressionFixesFlowTests.xml",
+      "sha256": "0d505c45f71baae4b3200caf3f01d7993746416c5b97d6deab45eae9341806c9"
+    },
+    {
+      "name": "io.testhub.platform.CrossRegressionFixesFlowTests.txt",
+      "sha256": "47ecb057cfec1fcab8d5729726f08a784edbce6466110d04277802e645ce765a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ExtensionRegistryFlowTests.xml",
+      "sha256": "08dc9e85104a7099ff3c3450bfae3f61ad90061b877dc48b112353822f18ef88"
+    },
+    {
+      "name": "io.testhub.platform.ExtensionRegistryFlowTests.txt",
+      "sha256": "3821697e93f0a0e1fe866dd75d0ac176f9d13bca4618b1c772032df9df29c636"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ExtensionsOperationsFlowTests.xml",
+      "sha256": "657920a6b2b2da4a2ab172fb8e891374e051d941678f2e400a18b02a23b16584"
+    },
+    {
+      "name": "io.testhub.platform.ExtensionsOperationsFlowTests.txt",
+      "sha256": "f69d873a320a337c07a8c0cdf670fa0c12b62e8c4915767aba7485323722e59d"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalAssetFixesFlowTests.xml",
+      "sha256": "3a8021d614e757d4b85fefec6a425cc3bb3178f439318116c98c6acfd8c19bc5"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalAssetFixesFlowTests.txt",
+      "sha256": "0210e52de5c4d34559cf8837dfd174f5ef4f89ba6c1776d27ace89b85a1bc983"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalAssetFlowTests.xml",
+      "sha256": "d01dc63a9f841492e5e3bd1b4ae60fd88e535aedad8639f8885c74a626d38051"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalAssetFlowTests.txt",
+      "sha256": "3d02f7620c0ef87f3040d77bbe03ce6bfa64bc54058a5fad1b78215e6b000564"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalAssetTagSyncFlowTests.xml",
+      "sha256": "a5963c04933bc4c0ee3b09bb7cdaa4468e4f01afb3703df9b618df104541e264"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalAssetTagSyncFlowTests.txt",
+      "sha256": "9e893538b767658ced33ba096f7897fe7437320e9637bee89b0dd0995d6f50eb"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalDefectExecutionSyncFlowTests.xml",
+      "sha256": "333d72743c6ab6719b1fce4a4266e600c871836889f9e43f4e02e9d66fa0065a"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests.txt",
+      "sha256": "3d3372bcd7c2d5b85c2c38ff4d8fb94578b8bd588e9188eba140ff0a5886d721"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalDefectLinkSyncFlowTests.xml",
+      "sha256": "db72762d9fb3c8f4ba5b3fb0aa95bcf8edd0fed3147b2e53bbac54061cb7af9b"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests.txt",
+      "sha256": "f4ff4502795115a6625f8c9eb63773c116e048f4fdd67ad7391488f3f9cb8990"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalDefectPeopleSyncFlowTests.xml",
+      "sha256": "505ad5d5786416b18c3b6059e33865082603f785b32e21ebb9b05be835b7dde0"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests.txt",
+      "sha256": "cc38e5692d657679b5ff338935c16d6406296597df7d28e19605679eb1b1a5b0"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalDefectSyncFlowTests.xml",
+      "sha256": "c7aa915ee831afc133b8808de7c777cbf477774da504a55287fd22becffecb39"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalDefectSyncFlowTests.txt",
+      "sha256": "451d60dc97cb49f714404bb678bb2a8f4422bb0cc72cbc330aff1d2adf9e520f"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests.xml",
+      "sha256": "2b549b12b623e127b50e26bae4bd94cb9e6f6dbdbbaee40abb6305a44a20504f"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests.txt",
+      "sha256": "4c28ac199ee24ca1d2e7f9e2adaa2cd940d4bbf305431320bbae849246dc4eb4"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalDeliveryFixesFlowTests.xml",
+      "sha256": "92369b778d379b460977390817060bee8d29abf10e430231ca88e31485c1b95a"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalDeliveryFixesFlowTests.txt",
+      "sha256": "eef23da31d7057cb08c6b7167c5c70dba9df01ec4df2034b22406ed7dd591a36"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalDeliveryFlowTests.xml",
+      "sha256": "000ed94e83a8981600c263cf53910e4c6b8ab71eeed3670ec76d792c5347e707"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalDeliveryFlowTests.txt",
+      "sha256": "df529701646e4e36bc547827bc4b6749b72be10837e2f036dd5400acf8d2583b"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalExchangeRoundTripTests.xml",
+      "sha256": "e336e0c6ea0b6504c5d16c77c2610e50b27bf60196e4fb485cb3ea69a7f9e402"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalExchangeRoundTripTests.txt",
+      "sha256": "7efdc6fcd94394a59c6905bb9821f66940e245a3f6b42c8dd6480f8620a74d53"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalExecutionFlowTests.xml",
+      "sha256": "8db2b1f13471145a1169b254871e8109d9a28e4b01d9152c5c786640ea7e6cdf"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalExecutionFlowTests.txt",
+      "sha256": "49db73b915e328d7f43c8d95ebbb5a3b71e7ae77b2cb3a1605f149d2fcaed1c8"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalExecutionLifecycleTests.xml",
+      "sha256": "f4197c526fdfb82a1db2ccb0babf1763ee4976462d8ba6734da2d8e941436699"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalExecutionLifecycleTests.txt",
+      "sha256": "c9355118d610319ae3eacfb095a868782fefc722b4ca57c561b1d50007d857be"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalGovernanceFlowTests.xml",
+      "sha256": "e003c03d7d05468529d22a09bd0dc1a55c670efa2267a576ee81bf28247fdf51"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalGovernanceFlowTests.txt",
+      "sha256": "0379957a5f0ee2de8c32bd2a07f7ee92c462556e4a75d70d9c6f4711b8c45236"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalGovernanceSyncFlowTests.xml",
+      "sha256": "2290566e53b839e4284a40fa8128bf7b91e85493289171f930f575c562966b3b"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalGovernanceSyncFlowTests.txt",
+      "sha256": "1ce85c686c1f30499bfd1155e3f14b56df27f7c02f0f13e19f595bf81f1d1bd1"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalHistorySyncFlowTests.xml",
+      "sha256": "267bcef7a2deba3b858f784ec49903eb3e07332f2ce93e827b14588301f9593a"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalHistorySyncFlowTests.txt",
+      "sha256": "cda0cbe347e75137411171ecb4ff9b656a1b3bd0c8b47c79f44cc2e93aa75dae"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalSyncFlowTests.xml",
+      "sha256": "9ba7ecb830cefd7d37417bf99ca520873947aab25413b0c1db58be50e22b176b"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalSyncFlowTests.txt",
+      "sha256": "86915be61c7d143d22cfe0237745027d12c8d597c0503ce57b3a3b99ca2b8c0e"
+    },
+    {
+      "name": "TEST-io.testhub.platform.FunctionalTransferFlowTests.xml",
+      "sha256": "aa224c002adeab7c01fae8f84d3b60da54effa595ce52f979293d867fd246afb"
+    },
+    {
+      "name": "io.testhub.platform.FunctionalTransferFlowTests.txt",
+      "sha256": "c7430fdbac45f76deaa16e6ea25d8a65a3137195df0aea9f3725960f75c2764f"
+    },
+    {
+      "name": "TEST-io.testhub.platform.GrpcDebugFlowTests.xml",
+      "sha256": "7205a2f1602bcfe8ca62e81e4a0ecc41e8adf671e5a4b9a48ea356f7b431039e"
+    },
+    {
+      "name": "io.testhub.platform.GrpcDebugFlowTests.txt",
+      "sha256": "1d2e5a4c97f34b5390ee687a67bda0bffbc1b67f90e7e620bafad98ac02e4c64"
+    },
+    {
+      "name": "TEST-io.testhub.platform.GrpcDescriptorSyncFlowTests.xml",
+      "sha256": "29e1dce370603bab0e0f185a609e7327e5af58baf4a0e39b2b9ea614638303f8"
+    },
+    {
+      "name": "io.testhub.platform.GrpcDescriptorSyncFlowTests.txt",
+      "sha256": "780203ac3ea5c48fd0cf24418dfc6d693cfd4ec256f5d874f1a846f839c9b95a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.GrpcReflectionDebugTransportTests.xml",
+      "sha256": "6219828dd86e70d1db6097ddfabdde49c4ebf51c2966c7870bcb612900445a5b"
+    },
+    {
+      "name": "io.testhub.platform.GrpcReflectionDebugTransportTests.txt",
+      "sha256": "b53fce7db7ac79300824f9e4bdb3b0502912606fe690ef7c81f40af354741aad"
+    },
+    {
+      "name": "TEST-io.testhub.platform.HarArchiveFlowTests.xml",
+      "sha256": "c31fa9616e022711b48709dba83d6b0d635e5142d1b565f53346c061d31c1e3f"
+    },
+    {
+      "name": "io.testhub.platform.HarArchiveFlowTests.txt",
+      "sha256": "84e11d1d7c70198097fbebd01361760a3833a5afe9957cd6dcb4a7adf6285cb3"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MobileApplicationFileSyncFlowTests.xml",
+      "sha256": "741e4339549b26ce54f9b549fb7c9cf9de3d6a8185a5e83c2f88e43210f66041"
+    },
+    {
+      "name": "io.testhub.platform.MobileApplicationFileSyncFlowTests.txt",
+      "sha256": "97873d4ae7e061a7aa57efa181d17dfe6d4321c7fd591d03fdf71f544cb88720"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MobileAutomationArtifactSyncFlowTests.xml",
+      "sha256": "47bd0a380172839c825539dc3250b843c51cef75b5f069ca12eb7e90226a3f93"
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests.txt",
+      "sha256": "a06bd471d086e8a5eb653829602b566ceab8f430df05737a3e10b8f1c04cd65f"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MobileAutomationFixesFlowTests.xml",
+      "sha256": "23d25091511eef106e268fc07d52269cc204cd17563dbb500c56b0049f3c3213"
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationFixesFlowTests.txt",
+      "sha256": "d257b8eca24fd5e1c64411a3e61d20798f2f9d13504acbe10bcb5dd335e237a0"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MobileAutomationFlowTests.xml",
+      "sha256": "bb03f6c6ee522987d4f63b09bde5a3c2bdf58d5c1b378b7b939b5a720e9e34ee"
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationFlowTests.txt",
+      "sha256": "f9fa5e9510cdbc3b38ed00f50188ea7658880002f1bdc07f9729402c3682765c"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MobileAutomationHistorySyncFlowTests.xml",
+      "sha256": "5a1560d9c47f3ed1509a4476c0076ab33ab0a53643a37e9cb4289dc256ceb481"
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationHistorySyncFlowTests.txt",
+      "sha256": "a5ee5ef8c63d7cdbcdd279e5e0dff2168b3788bb7e137bd809d6a08c365fbc8d"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MobileAutomationSyncFlowTests.xml",
+      "sha256": "e211b9d5f591d057ccd4ebb3de8ee7d70b34c8007361d45714a135b93e356e53"
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationSyncFlowTests.txt",
+      "sha256": "b0a0ad9294fe9d7d37805504a6cee6c9da792fd17bea3eb9cd6da39170c869ab"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MobileAutomationTransferFlowTests.xml",
+      "sha256": "0c424c2e45af6e36168493390c2895cb6e3869d94f443efe5cd217e57f5b8b37"
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationTransferFlowTests.txt",
+      "sha256": "a2bfef6327bfb139df37fe88d23611de3203fb345bced98f7a77cdc0e18c4943"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MockRuntimeHttpFlowTests.xml",
+      "sha256": "b33b61feb7b52e38c00a6fcdcca75127b2d24144641c58ecde8e16c942a48682"
+    },
+    {
+      "name": "io.testhub.platform.MockRuntimeHttpFlowTests.txt",
+      "sha256": "f98c5d9f4164a90617d2b0bfea33765b508d89348e26a50a5b729388e1d27552"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MockServiceFlowTests.xml",
+      "sha256": "295e196380f1ceabed5f77eb97c06eefbf829b794f8ecc206f7f1e17b123b232"
+    },
+    {
+      "name": "io.testhub.platform.MockServiceFlowTests.txt",
+      "sha256": "e45dfb29b92f5bf97e85b03ceb81698bb192a6edebec6de7f2397f77354dd2f6"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MockShareFlowTests.xml",
+      "sha256": "db93eb46c611d4cd09c6a89b7e22a444b5a5cf451d9a97ba23cb0b8cd4db1b93"
+    },
+    {
+      "name": "io.testhub.platform.MockShareFlowTests.txt",
+      "sha256": "30a21c081095cfff9977b62a6ad40d0ba47eb04dbf4e1af849abea4ceaa050b8"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MockSyncFlowTests.xml",
+      "sha256": "3b9c97d749aeb10aa5d1c6eb2df0d37de202e3737de406c7f0334d69fece67c1"
+    },
+    {
+      "name": "io.testhub.platform.MockSyncFlowTests.txt",
+      "sha256": "6cee1dfc37a8035824034d53abc9fdcfbe7ca4464ea47666218ab4a0f8e36528"
+    },
+    {
+      "name": "TEST-io.testhub.platform.MockTransferFlowTests.xml",
+      "sha256": "79aaad68e6ecd315288aa9c922fbed2a5633750d600ddba788626559be9fd7c8"
+    },
+    {
+      "name": "io.testhub.platform.MockTransferFlowTests.txt",
+      "sha256": "9956d05bf412a9856385b34b17783825c32954108aed8b6b68e0b8f4d774a5cf"
+    },
+    {
+      "name": "TEST-io.testhub.platform.NotificationOperationsFixesFlowTests.xml",
+      "sha256": "3db684f23df5ca8e3c0f93ecbf696dfe60c09d36ceda6b89c5157fa95f863ad9"
+    },
+    {
+      "name": "io.testhub.platform.NotificationOperationsFixesFlowTests.txt",
+      "sha256": "6dfa068df913eaff5cbe4018fc1a993d515f671da2aa8ef9390e5eb6c925f695"
+    },
+    {
+      "name": "TEST-io.testhub.platform.NotificationSyncFlowTests.xml",
+      "sha256": "da619c8acd1e55d6d357310dfd48348c7bf822d22248b8d39563ebd494f771ea"
+    },
+    {
+      "name": "io.testhub.platform.NotificationSyncFlowTests.txt",
+      "sha256": "be779a82d35d6c3ca989a0afb8e6dcb0130c94afede96c6ef39035a3e8068c18"
+    },
+    {
+      "name": "TEST-io.testhub.platform.NotificationTransferFlowTests.xml",
+      "sha256": "96b4b6f00cfc1882ccb45f8de226c5108eb722cef82238717b78c2794cfc40eb"
+    },
+    {
+      "name": "io.testhub.platform.NotificationTransferFlowTests.txt",
+      "sha256": "f7a23f67ead146fa95ddd1d2e744961e3a4b5dcf44b2a882396c233c98909466"
+    },
+    {
+      "name": "TEST-io.testhub.platform.OperationsFlowTests.xml",
+      "sha256": "2256607899276d60e0a313c30296c2f3c36e41925efb5559835214483f93be18"
+    },
+    {
+      "name": "io.testhub.platform.OperationsFlowTests.txt",
+      "sha256": "943dcc936cc3aeaeccfa08903cab645252e71bef2aac774cae02d50d52fdc021"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P1CompatibilityTests.xml",
+      "sha256": "9908f486fc8fa55db4f2eb90acb660e430689ba979a34bd7f500ce4f5bd94e66"
+    },
+    {
+      "name": "io.testhub.platform.P1CompatibilityTests.txt",
+      "sha256": "638f0026157de4ccbf19ee4da6851a0a14c4a8dc9b4c15f4d504709ea42cdb77"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P1DisabledEnvironmentFlowTests.xml",
+      "sha256": "02761c0a7adcc70366be9567c331941b557dabd84ec75873ad505cabf2052d78"
+    },
+    {
+      "name": "io.testhub.platform.P1DisabledEnvironmentFlowTests.txt",
+      "sha256": "4fa0c81d97abfac50dac82b1195248324f5ce0656d039d5e32994cc4518ecf6f"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P1HealthDeadlineFlowTests.xml",
+      "sha256": "9621ac52956e2ee370260df842a8cc2833c2b4b329aa65f67389652b2db826dc"
+    },
+    {
+      "name": "io.testhub.platform.P1HealthDeadlineFlowTests.txt",
+      "sha256": "c4a3103b0aa59f7dbaaf252dffcc184a7cb5c5059da0c0424a26280676a391c5"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P1HistoryPermissionFlowTests.xml",
+      "sha256": "210dc72c60a28376dd0263b732e9ec52ef349e70804b6426235f03b6de582969"
+    },
+    {
+      "name": "io.testhub.platform.P1HistoryPermissionFlowTests.txt",
+      "sha256": "968d4700fcc17c71df58690b322e54120e45b95540cf83374ae947e8a68bada4"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P1ParameterRulesFlowTests.xml",
+      "sha256": "83fbbed78f18beacce0355a1d9f42bfd030c8bbce176fe958179a0f8c3e9598c"
+    },
+    {
+      "name": "io.testhub.platform.P1ParameterRulesFlowTests.txt",
+      "sha256": "cfba06adf5aaaf81fcfd917d19f8554678dcbc58471669a046adcf13888b8762"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P1RedisHttpFlowTests.xml",
+      "sha256": "2554ca3509a52b30d49998ec26a6d505ec9c7f37ec5ce269bf89e97dfc08b159"
+    },
+    {
+      "name": "io.testhub.platform.P1RedisHttpFlowTests.txt",
+      "sha256": "6619d741cac008c2489bdd77fd3508067fc9810ae82bac4caec373d227ca06c8"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P1ReplayRulesFlowTests.xml",
+      "sha256": "41cf02550b3cba716a1f629ed3934b32fea9529f5b29a5afb440927d44dac736"
+    },
+    {
+      "name": "io.testhub.platform.P1ReplayRulesFlowTests.txt",
+      "sha256": "9549e3a05c1b017a1a6212d6790d5091d008d08b1eceb66120dc51d0a87736b5"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P1SessionRulesFlowTests.xml",
+      "sha256": "263777fbbefe091a63b45d7aee7fab6b6ef20e8eb093ec599c64f1ef4bcc0b12"
+    },
+    {
+      "name": "io.testhub.platform.P1SessionRulesFlowTests.txt",
+      "sha256": "56ac632f9696f0f1c9f41872bb8527c49c027715f63cb482bfb65873fceb7f0a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2CatalogCopyFlowTests.xml",
+      "sha256": "b7ea728e90e3ab1c04934c76cf63be65d20b0dabd288a619f914331608828c80"
+    },
+    {
+      "name": "io.testhub.platform.P2CatalogCopyFlowTests.txt",
+      "sha256": "5dcc6ca4a9aa999b40040f65e49ad0f1040301a6eda3d107c010d742020fa859"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D06AccountSearchTests.xml",
+      "sha256": "b4c0133c5acd293fad0da0d3efd3f43560d7b4f12482ef50acea7d26431ff67b"
+    },
+    {
+      "name": "io.testhub.platform.P2D06AccountSearchTests.txt",
+      "sha256": "f1b9a2cf5a7c915593dd62d594e724b04049153bf6e90b414871a2eac09fa3be"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D08D07PlanTests.xml",
+      "sha256": "241a45d116a72a9de66d6eede894b5cca3564285c510972b2985babe6bb66760"
+    },
+    {
+      "name": "io.testhub.platform.P2D08D07PlanTests.txt",
+      "sha256": "45e51ef73bc49b8771deca91940599ccfd6a1932de05771a024dfa077180ea0c"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D16ApiWaitFlowTests.xml",
+      "sha256": "ff3188c59320e0c9dc18fa1f97b0c2205092c4a73750e91e7710dd77a596ddb2"
+    },
+    {
+      "name": "io.testhub.platform.P2D16ApiWaitFlowTests.txt",
+      "sha256": "7d43a450fbbd4b558da4c440793f8d15a8621b7a86613d892f09b8dfb9e37749"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D16MobileFlowTests.xml",
+      "sha256": "ee646928fb2ced9d7f6273ae08836298a4c09c9e7e28338934dca5ba2c7df895"
+    },
+    {
+      "name": "io.testhub.platform.P2D16MobileFlowTests.txt",
+      "sha256": "59ebf9db1cb89097bd34a6d90ac0a69cb8f64dd2c00d386c1e2e4782d66c896a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D16MockFlowTests.xml",
+      "sha256": "7d21797651a1a64747ee9bc8bd440756e531f3494ee02c7126bd682daa3e0fd3"
+    },
+    {
+      "name": "io.testhub.platform.P2D16MockFlowTests.txt",
+      "sha256": "9c77bdb1b524adf8b95aa1aa0696ee6cd4141fcbbfd0ce899066aecfcd8dc2a0"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D16PerformanceFlowTests.xml",
+      "sha256": "21350429bab506c3e83d6efe8f78d02f27b03ffc113a8455cf92979ad0278234"
+    },
+    {
+      "name": "io.testhub.platform.P2D16PerformanceFlowTests.txt",
+      "sha256": "8355002aa263b3205468b8431b724848217a9af7dde41098451edd14c3052b3f"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D16QualityScheduleTests.xml",
+      "sha256": "06b3f38fd9b10c02de1faa0cc029dcfecde950163c660f77ab3810317e5f372f"
+    },
+    {
+      "name": "io.testhub.platform.P2D16QualityScheduleTests.txt",
+      "sha256": "aab3d4dac2718eef1342fd644d48a7c3550acddb4233cec104d5cdef96992ab8"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D16TaskFlowTests.xml",
+      "sha256": "f0d643eb885e4e509a472aba8dd3828ac0b332c30c24dc32ccec16689e38c2f4"
+    },
+    {
+      "name": "io.testhub.platform.P2D16TaskFlowTests.txt",
+      "sha256": "94c49dd2dd9f89d42f29a8ae7f19933015a7f4c39f22e06bd297d558c89ea169"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D16WebFlowTests.xml",
+      "sha256": "e1f13a482974ac14895ce9cb3e132cf82e09a5da393e4c4320ad4392a12886a3"
+    },
+    {
+      "name": "io.testhub.platform.P2D16WebFlowTests.txt",
+      "sha256": "535c22cac3ff9bbf48a330ce7239dc9178c38c3f88146c83d69a2d46afc8a52d"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D19MobileLocatorTests.xml",
+      "sha256": "f59d238b35894c6395cf1b710f47fa11a7fb9e1278761db4bb7936bbd44d78bc"
+    },
+    {
+      "name": "io.testhub.platform.P2D19MobileLocatorTests.txt",
+      "sha256": "b3ddf57520965ec75a4d513575e7b45551bb046eba0fa9a31a502c29a5a5d9f5"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2D21ReportScopeTests.xml",
+      "sha256": "22d4755cbd6e8e0c58ea6c50f97dfdf451f3210abbf92956b99aaf92179b7774"
+    },
+    {
+      "name": "io.testhub.platform.P2D21ReportScopeTests.txt",
+      "sha256": "9d60b3e73f60d72aa83b0c8ac3efbec34ed13fe79dc2e90d277271117e584382"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2EnvironmentRulesFlowTests.xml",
+      "sha256": "225044a1fd86d989df5fa63270952c45f5b60b348a83ce4af94de2ff01048211"
+    },
+    {
+      "name": "io.testhub.platform.P2EnvironmentRulesFlowTests.txt",
+      "sha256": "1c65b0e73b8612f7e5e0e8c35851d189c285a05d0f9af2b7f87c87577a49c6f4"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2NormalizedKeysFlowTests.xml",
+      "sha256": "9ebe47e5ede0f6dfc0918caa1020ea38e17d5b9d89e61ff4f39505a447d7e1c4"
+    },
+    {
+      "name": "io.testhub.platform.P2NormalizedKeysFlowTests.txt",
+      "sha256": "03c180b213e5dc5e97a3a07dff785622628233ebd4d121ca770200a4b8b57bd6"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2R2AuditActionsFlowTests.xml",
+      "sha256": "bd77ebb39a50db218f0d1de877eb80baaed1a3c066ccd61221dfb9651ff5d61e"
+    },
+    {
+      "name": "io.testhub.platform.P2R2AuditActionsFlowTests.txt",
+      "sha256": "322da1c900a43a04ca1723e50b95e0cc6bdff3303b79d9cd65c2cf9e0b232ed7"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2R2UiFreezeFlowTests.xml",
+      "sha256": "52d9c8335233701bac0e828a1b4ec8083f2adcf0d110c55abbed6cf4c45cef1d"
+    },
+    {
+      "name": "io.testhub.platform.P2R2UiFreezeFlowTests.txt",
+      "sha256": "db3789eadc4409c82688650572fc37e2663695b76630631d1fc9060fffffd37a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2ResponseCodeFlowTests.xml",
+      "sha256": "1ca3f9a499d817f191104dc822b1f664430efc33f6213dfabf9ecc7ffb4d0588"
+    },
+    {
+      "name": "io.testhub.platform.P2ResponseCodeFlowTests.txt",
+      "sha256": "d8150262e5e9ef7f4bc49242504c2e1074fb859845e36e994764d3fefa7b2387"
+    },
+    {
+      "name": "TEST-io.testhub.platform.P2ScheduleVersionFlowTests.xml",
+      "sha256": "dd84f66e7084c79b31813b43615aefa38c19bf05bef58769d30883f2532f5fc2"
+    },
+    {
+      "name": "io.testhub.platform.P2ScheduleVersionFlowTests.txt",
+      "sha256": "ed991bbf55d7336a32c9b6b09935bc1fcf946365359c600ad3e685a0ef837071"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PerformanceArtifactSyncFlowTests.xml",
+      "sha256": "06629a232b44a64d0830c08b9c8aa41fc1af14866686114b0bcd51747cef5e7e"
+    },
+    {
+      "name": "io.testhub.platform.PerformanceArtifactSyncFlowTests.txt",
+      "sha256": "43f7d89f1b9a77610a93602ee41c8a157dcce0c602276e2df85f75e6ad21664f"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PerformanceHistorySyncFlowTests.xml",
+      "sha256": "68f541319f07de32287e8d5f8073b547d638d7f6a8fb4d870f3dea737be742cf"
+    },
+    {
+      "name": "io.testhub.platform.PerformanceHistorySyncFlowTests.txt",
+      "sha256": "975c9c86b5f8c08809cc72a3d653275c11a7d0f5dcc8f4ae4f7006b4655c1800"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PerformanceRunnerCapacityRecoveryFlowTests.xml",
+      "sha256": "f17ef06ffd98e1006967c0c0e4277b505f2112b2a3a491eaa1b37b066b3aa0cb"
+    },
+    {
+      "name": "io.testhub.platform.PerformanceRunnerCapacityRecoveryFlowTests.txt",
+      "sha256": "f01cc9f736f715fbda0aff06fa24fd94965a4bedb4781ed76ed0d4a6525de950"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PerformanceSyncFlowTests.xml",
+      "sha256": "d2433d33421d3073ea9bff9dc7eaf9aeabbac1bef8b09e0f0082ac894c29fe14"
+    },
+    {
+      "name": "io.testhub.platform.PerformanceSyncFlowTests.txt",
+      "sha256": "8d7bc68798075b9d3a3673c4eea3c6d499f8194b64c75bdc5c203c10523bf4ad"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PerformanceTestExecutionArtifactFlowTests.xml",
+      "sha256": "abcf26a2a253a14a77cca3ee3838c4b81bf40377d58dcc13d33d1b4056b785a4"
+    },
+    {
+      "name": "io.testhub.platform.PerformanceTestExecutionArtifactFlowTests.txt",
+      "sha256": "275cfdee0cc761b35ab529514c6280458c68df2a88f79c9c31b279de10c3f888"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PerformanceTestExecutionFlowTests.xml",
+      "sha256": "4214fb363d5f62fa0fc259ffec31bcc569f88ec1c86b3e1c911d5827ef21c3c5"
+    },
+    {
+      "name": "io.testhub.platform.PerformanceTestExecutionFlowTests.txt",
+      "sha256": "49361450ce1cf633bd0189af930e617ac05ed4a587d4c93c4e42b509012a3952"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PerformanceTestPlanFlowTests.xml",
+      "sha256": "c1fd398c737fe2c532f4d7b052156e04f521d38b702bba5539b5148c9a1f13f1"
+    },
+    {
+      "name": "io.testhub.platform.PerformanceTestPlanFlowTests.txt",
+      "sha256": "fe527587e3ba5fe860692d09dbcaa35e45b0a5d097741f1375de7c5de9e3954c"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PerformanceTransferFlowTests.xml",
+      "sha256": "b2c16c8c50ee851a7c89a6e7f4f9d04f02c135da04ab926806b34ddbb39e3be4"
+    },
+    {
+      "name": "io.testhub.platform.PerformanceTransferFlowTests.txt",
+      "sha256": "caa87297059470f247f170577a697a505f5f4ee664cc5fb89994508ec031eb30"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PlatformFoundationAcceptanceTests.xml",
+      "sha256": "995c8a4192417b58ad1cb0cfb08a90f0c975f401f7c0e6323ed84ff6d26aae04"
+    },
+    {
+      "name": "io.testhub.platform.PlatformFoundationAcceptanceTests.txt",
+      "sha256": "3c25ba1b3a2d1edd7f1c82534977b60fa5460f98de1aa98bf0a3414242efe356"
+    },
+    {
+      "name": "TEST-io.testhub.platform.PostmanCollectionFlowTests.xml",
+      "sha256": "9a01a838ec5475f735a37a3038ef5bdc55590045a56253d89845826ca0723262"
+    },
+    {
+      "name": "io.testhub.platform.PostmanCollectionFlowTests.txt",
+      "sha256": "519451bc2b0bf066e6ddec90d24a241f181b0d544cfecef6714f09651eb5103e"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectAccessFixesFlowTests.xml",
+      "sha256": "949fe74b8ed539ea16612014b98d9455f99b41e8a63d1e37c5c2a117913f1714"
+    },
+    {
+      "name": "io.testhub.platform.ProjectAccessFixesFlowTests.txt",
+      "sha256": "ad60d4326bc8b9ba9e4c1ce3b3db26dfb86592e4cae435f514948bb1097653c3"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectDashboardFlowTests.xml",
+      "sha256": "1f6a5f1122e1883b1e7e364a65ea2904901ad7b654e158db301f6c5d22dafe25"
+    },
+    {
+      "name": "io.testhub.platform.ProjectDashboardFlowTests.txt",
+      "sha256": "3354f82d399de89d2c738835cc7c8970f87d23f74a697455e3238129d7f72250"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectDashboardTimezoneTests.xml",
+      "sha256": "87ca8f4260c65379ea884b3ae2e4ad5652f5b69630bae84b66b2089e692d3135"
+    },
+    {
+      "name": "io.testhub.platform.ProjectDashboardTimezoneTests.txt",
+      "sha256": "12cf63bed40368fe6135d47b33d343eb806f0d575c94df028d218f7f5d482bd5"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectEnvironmentFlowTests.xml",
+      "sha256": "545ddb0b377de145a6282dd8fb7cb4f4423c3d97d384a27523e97427ba6405e4"
+    },
+    {
+      "name": "io.testhub.platform.ProjectEnvironmentFlowTests.txt",
+      "sha256": "a28d295753fa918e28c8d428d7050e48cf2aa063b10ee9a36c48b911b0fbb950"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectFileSyncFlowTests.xml",
+      "sha256": "ed6d5b67a33c0e4ca3468edc98bb86dc7b04ece5f859bb2d89562f3b25f06fc4"
+    },
+    {
+      "name": "io.testhub.platform.ProjectFileSyncFlowTests.txt",
+      "sha256": "f5ea3eb8bcb12c61aec0ca150c202cec2b06614602152dc1a19d350611a12ff1"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectSettingsSyncFlowTests.xml",
+      "sha256": "f462e20a0e1b8950cbb406fbd044ba1270e29678b957e52b0c47f8d9fad6fd60"
+    },
+    {
+      "name": "io.testhub.platform.ProjectSettingsSyncFlowTests.txt",
+      "sha256": "36add885a2beeadb74c05779e29fa3e84244e4bcb62648a171a1ccab7bcca15b"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectSettingsTransferFlowTests.xml",
+      "sha256": "907e7c88924c65e67bd724a6143c6a2b005b12295c0620d83bc541ebcc748a12"
+    },
+    {
+      "name": "io.testhub.platform.ProjectSettingsTransferFlowTests.txt",
+      "sha256": "2e5801d4d1a3a4809ac7fff53eccc12da7ccc9fbe9df5807fa8a40fbfaf8d218"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectVersionFlowTests.xml",
+      "sha256": "68bf7bfb9458a7e088ed42838ed8bd935fbd7d3d999f48e07ee5defb1993afbd"
+    },
+    {
+      "name": "io.testhub.platform.ProjectVersionFlowTests.txt",
+      "sha256": "eb7ef0562606f10e9b731ae4539295c1b3604ead1a4e7e90d264417fe322600a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.ProjectVersionSyncFlowTests.xml",
+      "sha256": "808bdc1c0f6fb6808a6a9f82ce1e585dfa96784510133184638c86a4293f10da"
+    },
+    {
+      "name": "io.testhub.platform.ProjectVersionSyncFlowTests.txt",
+      "sha256": "c8597f4f0c5003cc054c7a3e0178664b368a545f7dc70ebd8ee77e3d2a8ff0b4"
+    },
+    {
+      "name": "TEST-io.testhub.platform.QualityReportFlowTests.xml",
+      "sha256": "8f88ad1d8c4490afec069d28ae2473d59bae2f41da4e2a0d04d73da5d61b5588"
+    },
+    {
+      "name": "io.testhub.platform.QualityReportFlowTests.txt",
+      "sha256": "083ecdb242292269833c487b31d240ec5ead39fc6de1b481700e39185c5c82de"
+    },
+    {
+      "name": "TEST-io.testhub.platform.QualityReportScheduleFlowTests.xml",
+      "sha256": "760983e42ed621deb2cbdc51161ae8d8f0d64043c1b0a6e3a79fe87d65931ccf"
+    },
+    {
+      "name": "io.testhub.platform.QualityReportScheduleFlowTests.txt",
+      "sha256": "ff5da0b24c24f04a08a44045dfae2847dbc11a1a3e4de3229c6f8bbe3f8db249"
+    },
+    {
+      "name": "TEST-io.testhub.platform.QualityReportSyncFlowTests.xml",
+      "sha256": "41dca46a78778d9e7fefddf19c57ed256479a617a33c1ae371b1b8d133218535"
+    },
+    {
+      "name": "io.testhub.platform.QualityReportSyncFlowTests.txt",
+      "sha256": "6fb56a36a7b245f352651d34a57ffcceffd4226478c36eef5c17569ea7d831e4"
+    },
+    {
+      "name": "TEST-io.testhub.platform.QualityReportTransferFlowTests.xml",
+      "sha256": "ed931ce2d9225be1c891bfaa025d6f2e49b60f38fbd4dcd196ffbeffff203e32"
+    },
+    {
+      "name": "io.testhub.platform.QualityReportTransferFlowTests.txt",
+      "sha256": "53523dbd3cfb9d2eee04a7470e62ff9e46a13cff9ed265b4cacbf84fd9346cf6"
+    },
+    {
+      "name": "TEST-io.testhub.platform.RegistrationFlowTests.xml",
+      "sha256": "27d04711bbb8f0eeb4d365b735a1fa932557730b2d08c3076b4e6e017d0fd169"
+    },
+    {
+      "name": "io.testhub.platform.RegistrationFlowTests.txt",
+      "sha256": "0c88e70600768b56e5c54e3fd0f294e1657746812c626900eb0cefd28cb5daa3"
+    },
+    {
+      "name": "TEST-io.testhub.platform.RunnerRegistryFlowTests.xml",
+      "sha256": "253e629125a01203e3e610396fb644abf3ad4afdf10b2874ed59e371a6d2b94c"
+    },
+    {
+      "name": "io.testhub.platform.RunnerRegistryFlowTests.txt",
+      "sha256": "86ba545370cf4271a35ad0454b9275d3e718b4658928a259003dbc3dcfc79714"
+    },
+    {
+      "name": "TEST-io.testhub.platform.SmartExampleMockFlowTests.xml",
+      "sha256": "a9cf71d249941d3bdd4c8c74cf345fdfadb955c9ed6133fdd84a7d75fbca4df5"
+    },
+    {
+      "name": "io.testhub.platform.SmartExampleMockFlowTests.txt",
+      "sha256": "21d784bcdb144da4ea2f6986bdaed7d8ffcfdce680917d8e00ceb13e19caa56d"
+    },
+    {
+      "name": "TEST-io.testhub.platform.SystemSettingsFlowTests.xml",
+      "sha256": "6e1e145b9930b533e5028d9ad440117aff63b1e4b99b30c9754696e67eb9628f"
+    },
+    {
+      "name": "io.testhub.platform.SystemSettingsFlowTests.txt",
+      "sha256": "e47a816374762d74085697ceb0fe5eb1dd065baa10a9521772402d3039330c52"
+    },
+    {
+      "name": "TEST-io.testhub.platform.TaskRegistrationFlowTests.xml",
+      "sha256": "76bbea6bb3df61637811397084d843c8573b79f001db94905acc6f9eafde15c5"
+    },
+    {
+      "name": "io.testhub.platform.TaskRegistrationFlowTests.txt",
+      "sha256": "cf9af7a6017b958b5071ac5e55e757314388fde358867c4de44ee72a4c85106a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.TaskSyncFlowTests.xml",
+      "sha256": "633058b45d40afa04ffd0662b92fafe083d3d2173ab438644afbd3257c668059"
+    },
+    {
+      "name": "io.testhub.platform.TaskSyncFlowTests.txt",
+      "sha256": "be84507b06032e8ce7fefe99dc11659fdcf5f830619b092517c68b63cae2a773"
+    },
+    {
+      "name": "TEST-io.testhub.platform.TransferPayloadLimitFilterTests.xml",
+      "sha256": "06f35ce2771dadadeaa692384eaed7fc57675a9aa9c883e3d69b46110778b805"
+    },
+    {
+      "name": "io.testhub.platform.TransferPayloadLimitFilterTests.txt",
+      "sha256": "7d7038a9c455ff7b901b5c67aa6308f3f113c23fcc99f83253005bc6f806b57c"
+    },
+    {
+      "name": "TEST-io.testhub.platform.UiAutomationArtifactSyncFlowTests.xml",
+      "sha256": "1313589152498fcbebfd4c23c3295f8e81b2e5b24df0da2504da617c452df0ad"
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationArtifactSyncFlowTests.txt",
+      "sha256": "f2822330c29d4abe0ac2febd182d6964a37ac4f65fd6691dc561b38b0516b674"
+    },
+    {
+      "name": "TEST-io.testhub.platform.UiAutomationFlowTests.xml",
+      "sha256": "72dc1d6e8523906358d95832184ba54aefdd52153e0a14967c6692e1c00fab19"
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationFlowTests.txt",
+      "sha256": "83895bb0ceca4a4714ecb0327624dbb8e38d6fa7b24c71c142d702b07a07f800"
+    },
+    {
+      "name": "TEST-io.testhub.platform.UiAutomationHistorySyncFlowTests.xml",
+      "sha256": "e3f381e2325a78c4c491e67a6b4e0eea7a7ca7209ab36b86c6f0fa23de1e08a7"
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationHistorySyncFlowTests.txt",
+      "sha256": "f8a0bf24ec942650250d026168d47b769cd3044791d7771aeb832b1f8ce1f0b6"
+    },
+    {
+      "name": "TEST-io.testhub.platform.UiAutomationSyncFlowTests.xml",
+      "sha256": "66987c593b2642fafbd2bee4d950a558b7e7a3f75930c96a6ee0ce9e8c166403"
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationSyncFlowTests.txt",
+      "sha256": "1bdf75f798f6f8e665cc094f99b26e2ab92cc7fdf2a7c82de88cdff60a915518"
+    },
+    {
+      "name": "TEST-io.testhub.platform.UiAutomationTransferFlowTests.xml",
+      "sha256": "ddbfe8b1377ebc99206273f5d9d371e32f4acc2eb43974797cb698c3c59c172e"
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationTransferFlowTests.txt",
+      "sha256": "c54780adfeae99f122024840eb1bd6dfbb98cbfc3ffc2d36449f0db8615ffc8b"
+    },
+    {
+      "name": "TEST-io.testhub.platform.UnifiedExecutionFlowTests.xml",
+      "sha256": "6f3a071c9d6a3857317f88844045b483bf2c9b3553415b90725c431e3e8a1c53"
+    },
+    {
+      "name": "io.testhub.platform.UnifiedExecutionFlowTests.txt",
+      "sha256": "72dc2db6222526e963963384aa55373650b6dbe2de5c6cf1156cbd62cc1be4ee"
+    },
+    {
+      "name": "TEST-io.testhub.platform.WebSocketDebugFlowTests.xml",
+      "sha256": "fa522e911be0caf7424da75feb539d05a3f3746d4a082f075c2c96a94fd97035"
+    },
+    {
+      "name": "io.testhub.platform.WebSocketDebugFlowTests.txt",
+      "sha256": "35f6930c9eb8b919fbf1d50e1e682378885c8270c7c641cc419196698d10cc92"
+    },
+    {
+      "name": "TEST-io.testhub.platform.apidebug.ApiDebugFixesTests.xml",
+      "sha256": "db5253e95de54d6be1c8910f4e1c638fe89c0522b4d775e77dd08819aef44284"
+    },
+    {
+      "name": "io.testhub.platform.apidebug.ApiDebugFixesTests.txt",
+      "sha256": "e7e87a34ece0715a69559fec1a1b86f420d7a873d5cdf6e228d4e67a713235e8"
+    },
+    {
+      "name": "TEST-io.testhub.platform.apidebug.ApiDebugTargetPolicyTests.xml",
+      "sha256": "a706e054507063df4d6a65796d97a7807bf60edb9de8c494cb72277b7bd5ed35"
+    },
+    {
+      "name": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests.txt",
+      "sha256": "cd1cf23f78abfaa4bb218cf12e1129919ecda81fba094fb9c209930d80735275"
+    },
+    {
+      "name": "TEST-io.testhub.platform.apidebug.DesktopApiDebugTargetPolicyTests.xml",
+      "sha256": "22751132105058168fbf042214083705d3a7de28d00ba44defbdae6139eaf51f"
+    },
+    {
+      "name": "io.testhub.platform.apidebug.DesktopApiDebugTargetPolicyTests.txt",
+      "sha256": "d1d1b6ebf5e334d62b716adb39ef72d8922b1b99f66f5a3784ff76d09876aab1"
+    },
+    {
+      "name": "TEST-io.testhub.platform.apidebug.JdkApiDebugTransportTests.xml",
+      "sha256": "e761b7196d27814fa62b74368fd199203eece6924c3d2fe6e7b156ee7a236aca"
+    },
+    {
+      "name": "io.testhub.platform.apidebug.JdkApiDebugTransportTests.txt",
+      "sha256": "ba7208201c052877d3054e32a91a8457b598cdd86d7071f13ed3fa21225791a3"
+    },
+    {
+      "name": "TEST-io.testhub.platform.apidebug.P1ReplayFailureTests.xml",
+      "sha256": "955028d56ba19a48eaee951930ef81c262912e1ad23aec6ce964111f829504b0"
+    },
+    {
+      "name": "io.testhub.platform.apidebug.P1ReplayFailureTests.txt",
+      "sha256": "138c9334675156e58a2da13c9daaa6bb30ac247bb985289ad19c5e2daa3c9f97"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.AccountIdentityGuardMigrationTests.xml",
+      "sha256": "c33cd0fd477dc687ff526071d10ff1cb33a44676f97e3649392433077881484b"
+    },
+    {
+      "name": "io.testhub.platform.desktop.AccountIdentityGuardMigrationTests.txt",
+      "sha256": "df602964910e60445c61ff9a2500cddd142bd255b79febbaa07918e9780e1a13"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.AuditResourceIdentifierMigrationTests.xml",
+      "sha256": "3aac5605fe1386a0abe4e8691757027b588c4417210319fc8fde5800ecfa3c5e"
+    },
+    {
+      "name": "io.testhub.platform.desktop.AuditResourceIdentifierMigrationTests.txt",
+      "sha256": "cdfc72a91e884a3914acad1f91b1f8a8f5f21b0ccb85545932e4112705478b3c"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopBackupToolTests.xml",
+      "sha256": "3eff4640b7d6c5eca564274fd0e70c89239d0cdc628792c1bcadb08a5a321686"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopBackupToolTests.txt",
+      "sha256": "c4cf2fb33f92442dd43bb5167de06327efe309b60fbba792100004ab3cf833d6"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopBrokerControllerTests.xml",
+      "sha256": "dad77d1f227fb61104c1367c1928541bc40919f96b8b4a1352f2a19b8c60cf61"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopBrokerControllerTests.txt",
+      "sha256": "f2602151627f7b7ec9713d48c025308ca629a5665b7d3c11b03a717b4599e91e"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopDatabaseConfigurationTests.xml",
+      "sha256": "6837aff914fb2649822d0938480f0b75f7639d58a03dbc7874c43762924dba21"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopDatabaseConfigurationTests.txt",
+      "sha256": "87e8e0854950ce26d2a7e7fab567be5a5a6ac11ca7fc41f7d59f036ce4f6ece0"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopDatabaseTests.xml",
+      "sha256": "2da71f34fcb45624c8d4305593e81fb6b275c6b6618c0bbda5bd89e19eb84e3c"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopDatabaseTests.txt",
+      "sha256": "ddefc997ac09e1641a7de247747c94a6ad0a3601fc03a9a7dcd821cbb062b179"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopEngineArchiveToolTests.xml",
+      "sha256": "c20983e09dea10d30470c5a401a8bf04df8b2e1851bea8c432d835643c747253"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopEngineArchiveToolTests.txt",
+      "sha256": "e5b862975e22ba1a0419c93044cd7c82cd784e2f9171686332b321bb166c5f5c"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopExpiringStateStoreTests.xml",
+      "sha256": "933627511aadc17d07278aafca529fd5c2985da480cd9beea7f80314dc1b091b"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopExpiringStateStoreTests.txt",
+      "sha256": "562c3a4cc1dc6baafa8edbf55de30648184ee5f023ef1603383de9a0384199df"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopRuntimeBrokerTests.xml",
+      "sha256": "329922948b1d930fda6bc3c3f14230663d9fe8baea0f4c38e19bc8f49ae81054"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests.txt",
+      "sha256": "fa455715538e3d2b4c5c1a783d9bd3bdfff0b533c6fae36bdee876e22ee2537a"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopSessionPersistenceTests.xml",
+      "sha256": "41ea4069190e056de9786b877137cb75fecf73bcd7b6b5c8343efe8c02884890"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopSessionPersistenceTests.txt",
+      "sha256": "e04edbf8953cb1a69b6f2962783817f3fe5bb1567e23b3441415fdb3182679f3"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.DesktopWorkspaceFlowTests.xml",
+      "sha256": "3c08b58bb2f66c13b90361802724469e560271a5203c7d06d9df3c275aaf77d8"
+    },
+    {
+      "name": "io.testhub.platform.desktop.DesktopWorkspaceFlowTests.txt",
+      "sha256": "8bfd4db50189b64df53332ae2452f058f180eace55eced6dbbc83dae045d9893"
+    },
+    {
+      "name": "TEST-io.testhub.platform.desktop.PendingExecutionCancellationTests.xml",
+      "sha256": "0107950dedac35313834db42028575600cc81463ee72580c3597c88bf8c525a5"
+    },
+    {
+      "name": "io.testhub.platform.desktop.PendingExecutionCancellationTests.txt",
+      "sha256": "0a9f7302acbc12340584f87678d3f30efa2483e5808b0379dae78132248b7f93"
+    },
+    {
+      "name": "TEST-io.testhub.platform.mobileautomation.P2D16MobileInputTests.xml",
+      "sha256": "89bbf75e11be1e3466c7bead0f0b1425bd206dc6f6f9f546e9c10619d01fcc8e"
+    },
+    {
+      "name": "io.testhub.platform.mobileautomation.P2D16MobileInputTests.txt",
+      "sha256": "5db59c83f7a2e18552f816fb910c9b06c6cecf9f120f71cc03faeaa12ee0d53e"
+    },
+    {
+      "name": "TEST-io.testhub.platform.security.SecretCipherTests.xml",
+      "sha256": "548418cd3be1a254193674368ca309ae51884c16e6eed661bc57d05946e3460c"
+    },
+    {
+      "name": "io.testhub.platform.security.SecretCipherTests.txt",
+      "sha256": "41ac1443f01f46ace7ec9fbf0ab2ae9ce20c348227a95d8b3ea08e8f6e0ab820"
+    },
+    {
+      "name": "TEST-io.testhub.platform.shared.api.ApiRequestBodyTests.xml",
+      "sha256": "99b55009a8ed20b53fea9fb13ce0ac6b921180ccc3b6ddd62dff90c5d0735490"
+    },
+    {
+      "name": "io.testhub.platform.shared.api.ApiRequestBodyTests.txt",
+      "sha256": "0a96a7b7895d4ef5c83ccbfe408494edecf17575a49cde827f7d5a8ae7bf6386"
+    },
+    {
+      "name": "TEST-io.testhub.platform.shared.api.P1DependencyFailureTests.xml",
+      "sha256": "bfc224585157e9d384219a320e9916229ee3f377d7bba355a96404acb5e9484d"
+    },
+    {
+      "name": "io.testhub.platform.shared.api.P1DependencyFailureTests.txt",
+      "sha256": "199cc37004ad1a218f76b84511979ed2da238c53120f430bbc65a496aded1cc2"
+    },
+    {
+      "name": "TEST-io.testhub.platform.storage.FilesystemObjectStorageTests.xml",
+      "sha256": "d37eafe27f5958d4db84b82cad62766999483cd4e0dfac6da320e79b6215f456"
+    },
+    {
+      "name": "io.testhub.platform.storage.FilesystemObjectStorageTests.txt",
+      "sha256": "43716a6ba342b8bdcaf412bda09df0fd135d7585f1d7708eb1a3805a2eeeb91b"
+    },
+    {
+      "name": "TEST-io.testhub.platform.storage.ObjectStorageConfigurationTests.xml",
+      "sha256": "d72d475b9b4e003f5073e27e23617de41ce0d21aea28cd40e4871104909e4dad"
+    },
+    {
+      "name": "io.testhub.platform.storage.ObjectStorageConfigurationTests.txt",
+      "sha256": "4a6e3ea4cb10b8c3f045a7c30af145fb9711359ff6bb73c5047ef654b4f9e9b6"
+    },
+    {
+      "name": "TEST-io.testhub.platform.storage.P1StorageProbeTests.xml",
+      "sha256": "5e2b4f20c01f64b4e4e9bbc841d45098f1948e7d7ff0a65127aaff4369f651a8"
+    },
+    {
+      "name": "io.testhub.platform.storage.P1StorageProbeTests.txt",
+      "sha256": "8d4b19774a30ea7f9edc09ffd9a27b257abe0b21f84299d7f8b95ec38c4e2f92"
+    },
+    {
+      "name": "TEST-io.testhub.platform.uiautomation.UiAutomationTargetPolicyTests.xml",
+      "sha256": "f7eb05a9ac04031b76312e29c0ff1872d111135fa01ca7231804c20f8c20a44a"
+    },
+    {
+      "name": "io.testhub.platform.uiautomation.UiAutomationTargetPolicyTests.txt",
+      "sha256": "20dc761fc39c8fdd49d331e4606eb52b75539ce27de4bfd9767fdad25c174c03"
+    }
+  ],
+  "ownedLoggedDirectoriesVerifiedAbsent": [
+    ".testhub/backend-qa-3ae52cc2-b494-4a65-95d2-3743ad1ba1fc"
+  ],
+  "backendWrappersCompletedAndOwnFinallyCleanup": true,
+  "mysqlOwnedContainersNetworkVolumesRemoved": true,
+  "allTestHttpClientsClosedByAfterEach": true,
+  "allInvokedCommandsFinished": true,
+  "userWorkspacesTouched": false,
+  "sharedServicesTouched": false,
+  "unrelatedTemporaryFilesNotCleaned": true,
+  "installedRuntimeReplaced": false,
+  "desktopRuntimePreviousCopiesCreated": false,
+  "retained": [
+    "Sanitized summaries and source evidence",
+    "Reusable automated tests",
+    "Current backend JAR",
+    "Current frontend dist",
+    "Current desktop runtime"
+  ],
+  "noUpgradeShutdownRecheck": true
+}

@@ -1,0 +1,1435 @@
+{
+  "formalCases": 56,
+  "positive": 22,
+  "negative": 34,
+  "passed": 56,
+  "failed": 0,
+  "blocked": 0,
+  "notExecuted": 0,
+  "countsNotAdditive": true,
+  "cases": [
+    {
+      "id": "TC-D16WEB-01",
+      "title": "视口宽精确等值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "widthExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "widthExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "widthExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-01/02/05/06/07",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-02",
+      "title": "视口高精确等值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "heightExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "heightExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "heightExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-01/02/05/06/07",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-03",
+      "title": "宽边界及相邻越界",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "widthBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "widthBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "widthBounds",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-04",
+      "title": "高边界及相邻越界",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "heightBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "heightBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "heightBounds",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-05",
+      "title": "视口普通及微小小数",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "viewportFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "viewportFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "viewportFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-01/02/05/06/07",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-06",
+      "title": "视口字符串和错误类型",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "viewportTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "viewportTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "viewportTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-01/02/05/06/07",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-07",
+      "title": "视口缺失null默认",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "viewportDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "viewportDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "viewportDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-01/02/05/06/07",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-08",
+      "title": "WAIT精确等值超时",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "waitExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "waitExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "waitExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-08/10/12/13/15/16",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-09",
+      "title": "WAIT毫秒边界",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "waitBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "waitBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "waitBounds",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-10",
+      "title": "非WAIT精确等值超时",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "actionExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "actionExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "actionExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-08/10/12/13/15/16",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-11",
+      "title": "非WAIT不同下界",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "actionBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "actionBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "actionBounds",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-12",
+      "title": "步骤小数原始精度",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "stepFractions",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-08/10/12/13/15/16",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-13",
+      "title": "步骤数字字符串和容器",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "stepTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-08/10/12/13/15/16",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-14",
+      "title": "大整数指数及原始非有限JSON",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "overflow",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "overflow",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "overflow",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-15",
+      "title": "WAIT缺失null必须拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "waitRequired",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "waitRequired",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "waitRequired",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-08/10/12/13/15/16",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-16",
+      "title": "非WAIT可选超时默认",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "actionDefault",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "actionDefault",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "actionDefault",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-08/10/12/13/15/16",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-17",
+      "title": "执行超时精确等值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "executeExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "executeExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "executeExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-17/19/20",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-18",
+      "title": "执行秒数边界",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "executeBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "executeBounds",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "executeBounds",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-19",
+      "title": "执行小数字符串类型拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "executeTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "executeTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "executeTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-17/19/20",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-20",
+      "title": "缺失执行正文及null默认",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "executeDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "executeDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "executeDefaults",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-17/19/20",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-21",
+      "title": "定时同一执行超时入口",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "scheduleAlias",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "scheduleAlias",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "scheduleAlias",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-22",
+      "title": "变量显式字符串保真",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "variableStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "variableStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "variableStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-22/23/24/25/26/43",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-23",
+      "title": "变量非字符串值",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "variableTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "variableTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "variableTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-22/23/24/25/26/43",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-24",
+      "title": "变量真实null兼容",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "variableNull",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "variableNull",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "variableNull",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-22/23/24/25/26/43",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-25",
+      "title": "步骤value和expectedText字符串",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "stepStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-22/23/24/25/26/43",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-26",
+      "title": "步骤文本错误类型",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepTextTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepTextTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "stepTextTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-22/23/24/25/26/43",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-27",
+      "title": "步骤文本null和必填关系",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepTextRequired",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepTextRequired",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "stepTextRequired",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-28",
+      "title": "合法编辑与旧清单冻结",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "editFreeze",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "editFreeze",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "editFreeze",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-29",
+      "title": "非法配置编辑原子性",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "editProfileInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "editProfileInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "editProfileInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-29/30",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-30",
+      "title": "非法场景编辑原子性",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "editScenarioInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "editScenarioInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "editScenarioInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-29/30",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-31",
+      "title": "后步骤非法整批拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "lateStepInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "lateStepInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "lateStepInvalid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-32",
+      "title": "合法完整迁移等值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "transferValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-33",
+      "title": "非法完整迁移不得绕过",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-33/34/35",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-34",
+      "title": "同步等值数字精确规范化",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-33/34/35",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-35",
+      "title": "同步原始微小小数及文本错误",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-33/34/35",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-36",
+      "title": "交换回执幂等重放",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "replay",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "replay",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "replay",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-37",
+      "title": "同步过期revision",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "revisionConflict",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "revisionConflict",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "revisionConflict",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-38",
+      "title": "写权限与项目隔离",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "permission",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "permission",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "permission",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-39",
+      "title": "存量只读无批量改写",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-39",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-40",
+      "title": "旧非法新手动入队",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "oldManualQueue",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "oldManualQueue",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "oldManualQueue",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-41",
+      "title": "旧非法定时和重试入队",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "oldOtherQueue",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "oldOtherQueue",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "oldOtherQueue",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-42",
+      "title": "旧排队运行工件预检",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "oldRuntime",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "oldRuntime",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "oldRuntime",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-43",
+      "title": "字段索引与隐私错误",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "errorLocation",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "errorLocation",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "errorLocation",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16WEB-22/23/24/25/26/43",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-44",
+      "title": "非目标字段契约保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "nonTargetContract",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "nonTargetContract",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "nonTargetContract",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-45",
+      "title": "页面对象引用保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "objectReference",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "objectReference",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-focused.json",
+          "test": "objectReference",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-46",
+      "title": "页面视口非法原文",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-46/47/48: original decimal text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-46: profile invalid raw values never submit",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-46/47/48: original decimal text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-46: profile invalid raw values never submit",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16WEB-46",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-47",
+      "title": "页面视口等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-46/47/48: original decimal text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-47: profile exact spellings send numeric dimensions",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-46/47/48: original decimal text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-47: profile exact spellings send numeric dimensions",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16WEB-47",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-48",
+      "title": "页面WAIT及非WAIT超时",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-46/47/48: original decimal text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-48: WAIT and action timeouts validate original text",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-46/47/48: original decimal text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-48: WAIT and action timeouts validate original text",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16WEB-48",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-49",
+      "title": "页面执行在浏览器准备前拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-49/50: optional defaults and WAIT required fields remain distinct",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-49: invalid execution stops before local preparation",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-49/50: optional defaults and WAIT required fields remain distinct",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-49: invalid execution stops before local preparation",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16WEB-49",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-50",
+      "title": "页面清空及类型切换",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-49/50: optional defaults and WAIT required fields remain distinct",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-50: optional action blank and required WAIT stay distinct",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-49/50: optional defaults and WAIT required fields remain distinct",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-50: optional action blank and required WAIT stay distinct",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16WEB-50",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-51",
+      "title": "页面变量和步骤移除归属",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16WEB-51: variable guard and removed step input ownership remain",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-focused.json",
+          "test": "TC-D16WEB-51: variable guard and removed step input ownership remain",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16WEB-51",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-52",
+      "title": "Runner视口在资源前拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "runner-final.json",
+          "test": "TC-D16WEB-52",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-53",
+      "title": "Runner超时类型及边界",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "runner-final.json",
+          "test": "TC-D16WEB-53",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-54",
+      "title": "Runner变量与步骤文本",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "runner-final.json",
+          "test": "TC-D16WEB-54",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-55",
+      "title": "Runner合法工件与受控真实步骤",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "runner-final.json",
+          "test": "TC-D16WEB-55",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16WEB-55",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16WEB-56",
+      "title": "Runner运行请求拒绝先于准备",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "runner-final.json",
+          "test": "TC-D16WEB-56",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

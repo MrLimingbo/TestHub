@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-05T03:39:48.179Z",
+  "ownedProcessesRemaining": 0,
+  "ownedPrivateWorkspaceRemoved": true,
+  "rawLogsDatabasesCandidateRemoved": true,
+  "ownedKeychain": "NOT_PRESENT",
+  "userWorkspacesOrSharedServicesTouched": false,
+  "upgradeShutdownRecheck": false,
+  "stopAuthorizedByLatestUser": true,
+  "verifiedAt": "2026-11-05T03:40:37.559Z",
+  "supervisorAbsent": true,
+  "ownedPrivateDirectoryAbsent": true,
+  "initialCleanupHelperExitedNonzero": true,
+  "cleanupRetriedWithPromiseApi": true
+}

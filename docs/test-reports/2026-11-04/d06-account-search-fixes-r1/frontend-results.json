@@ -1,0 +1,13 @@
+{
+  "total": 945,
+  "passed": 945,
+  "failed": 0,
+  "files": 98,
+  "newMethodsIncluded": 4,
+  "focusedPassed": 4,
+  "command": "node_modules/.bin/vitest run --maxWorkers=2",
+  "exitCode": 0,
+  "evidenceType": "Vue/Arco happy-dom component tests with actual DOM input/search/clear",
+  "productUiChanged": false,
+  "independentRedNotRetained": true
+}

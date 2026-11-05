@@ -783,7 +783,7 @@ class FunctionalTransferFlowTests {
         assertEquals(0,count("functional_transfer_receipt",target.project()));
         mvc.perform(post(path).cookie(session,csrfResult.getResponse().getCookie("XSRF-TOKEN")).header(csrf.path("headerName").asText(),csrf.path("token").asText()).contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(request(target,snapshot)))).andExpect(status().isOk());
-        var response=mvc.perform(get(path+"?version=6&includePlans=true&includeGovernance=false&includeDefects=false&includeFiles=false&includeHistory=true").cookie(session)).andExpect(status().isOk()).andReturn();
+        var response=mvc.perform(get(path+"?version=6&includePlans=true&includeGovernance=false&includeDefects=false&includeFiles=false&includeHistory=true&titleSnapshots=true").cookie(session)).andExpect(status().isOk()).andReturn();
         var data=json.readTree(response.getResponse().getContentAsString()).path("data");assertEquals(3,data.path("history").path("runs").size());assertFalse(data.has("files"));assertFalse(data.has("defects"));assertFalse(data.has("governance"));
         mvc.perform(get(path+"?version=6&includePlans=false").cookie(session)).andExpect(status().isBadRequest());
     }

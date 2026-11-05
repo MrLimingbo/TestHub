@@ -1,0 +1,476 @@
+{
+  "status": "PASS",
+  "exitCode": 0,
+  "total": 98,
+  "passed": 98,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suiteCount": 6,
+  "suites": [
+    {
+      "name": "io.testhub.platform.FunctionalExecutionLifecycleTests",
+      "total": 4,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 4,
+      "methods": [
+        {
+          "name": "concurrentCaseResultsProduceCompletedRunWithConsistentCounts",
+          "status": "PASS"
+        },
+        {
+          "name": "preservesFirstStartAndCompletionTimeAcrossEditsAndReopening",
+          "status": "PASS"
+        },
+        {
+          "name": "foreignProjectAndViewerCannotChangeCaseOrStep",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentStepAndCaseResultsCannotLeavePassedCaseWithFailedStep",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+      "total": 14,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 14,
+      "methods": [
+        {
+          "name": "auditFailureRollsBackLinksAndReceiptAtomically",
+          "status": "PASS"
+        },
+        {
+          "name": "replaceOnlyRunCaseLinksKeepsProtectedDefectAndExecutionRows",
+          "status": "PASS"
+        },
+        {
+          "name": "planDeletionAndSyncShareLockAndRecheckAfterWaiting",
+          "status": "PASS"
+        },
+        {
+          "name": "rolesProjectActorCsrfAndPayloadLimitGuardBothDirections",
+          "status": "PASS"
+        },
+        {
+          "name": "executionResultEditsDoNotInvalidateAssociationIdentityOrGetOverwritten",
+          "status": "PASS"
+        },
+        {
+          "name": "missingDefectAndForeignExecutionRejectWholeBatchWithoutCreatingHistory",
+          "status": "PASS"
+        },
+        {
+          "name": "strictProtocolRejectsExtraHistoryFieldsMalformedIdsAndUnsortedSets",
+          "status": "PASS"
+        },
+        {
+          "name": "explicitClearRemovesOnlyExecutionAssociations",
+          "status": "PASS"
+        },
+        {
+          "name": "snapshotExposesScopedExecutionIdentityWithoutActorsNotesOrResults",
+          "status": "PASS"
+        },
+        {
+          "name": "deletedPlanLeavesUnavailableLegacyLinkAndNeverSilentlyClearsIt",
+          "status": "PASS"
+        },
+        {
+          "name": "ordinaryUnlinkAndSameCodeDefectRecreationInvalidateRevision",
+          "status": "PASS"
+        },
+        {
+          "name": "countLimitRejectsUnboundedProjectSnapshot",
+          "status": "PASS"
+        },
+        {
+          "name": "durableParallelReceiptRetainsCommittedIdentityAndLaterManualEdit",
+          "status": "PASS"
+        },
+        {
+          "name": "noOpAndRetainedAssociationsKeepOriginalIdsTimesAndActors",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+      "total": 16,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 16,
+      "methods": [
+        {
+          "name": "copiedHistoryRemainsEditableThroughOrdinaryExecutionApi",
+          "status": "PASS"
+        },
+        {
+          "name": "planDeletionAndHistorySyncShareProjectLock",
+          "status": "PASS"
+        },
+        {
+          "name": "projectFileLinksAndDuplicateTargetsRejectBeforeWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "accessActorCsrfAndBodyLimitEnforced",
+          "status": "PASS"
+        },
+        {
+          "name": "exactNoOpRetainsAllOrdinaryRowsAndMetadata",
+          "status": "PASS"
+        },
+        {
+          "name": "ordinaryEditInvalidatesExpectedRevision",
+          "status": "PASS"
+        },
+        {
+          "name": "snapshotScopesPortableResultsAndPhysicalLayoutWithoutForeignActors",
+          "status": "PASS"
+        },
+        {
+          "name": "layoutMismatchNeverReplacesCasesStepsOrDefectAssociations",
+          "status": "PASS"
+        },
+        {
+          "name": "newCopyPreservesSourceOriginAndTimesWithActualTargetCreatorAndNewIds",
+          "status": "PASS"
+        },
+        {
+          "name": "auditFailureRollsBackAllRowsAndReceipt",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidLifecyclePassedStepsTimePrecisionAndProtectedFieldsAreRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "durableReceiptReplaysCommittedLayoutAfterLaterEditAndRejectsReusedPayload",
+          "status": "PASS"
+        },
+        {
+          "name": "existingUpdateRetainsIdsCreationAndDefectLinksClearsOnlyChangedActors",
+          "status": "PASS"
+        },
+        {
+          "name": "sourceClockAheadNeverBreaksOrdinaryEditingOrExistingHistoryTransfer",
+          "status": "PASS"
+        },
+        {
+          "name": "missingDependenciesRejectWholeBatchWithoutPartialCreation",
+          "status": "PASS"
+        },
+        {
+          "name": "projectHistoryCountIsBounded",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.P2D08D07PlanTests",
+      "total": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 10,
+      "methods": [
+        {
+          "name": "B03_invalidCodes",
+          "status": "PASS"
+        },
+        {
+          "name": "B10_permissionAndFailedRunNoPartialWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "B06_transferPreservesSnapshotAndMissing",
+          "status": "PASS"
+        },
+        {
+          "name": "B02_differentCodeAtomic",
+          "status": "PASS"
+        },
+        {
+          "name": "B04_newRunFreezesTitleAndSteps",
+          "status": "PASS"
+        },
+        {
+          "name": "B01_equivalentCodeUpdates",
+          "status": "PASS"
+        },
+        {
+          "name": "B08_snapshotCannotBeOverwrittenOrRemoved",
+          "status": "PASS"
+        },
+        {
+          "name": "B05_legacyMissingIsExplicit",
+          "status": "PASS"
+        },
+        {
+          "name": "B07_syncPreservesSnapshotAndMissing",
+          "status": "PASS"
+        },
+        {
+          "name": "B09_concurrentRenameAndRunAreConsistent",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.FunctionalTransferFlowTests",
+      "total": 53,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 53,
+      "methods": [
+        {
+          "name": "legacyV1ToV7NeverIncludeGovernanceCatalogsOrNewReceiptField",
+          "status": "PASS"
+        },
+        {
+          "name": "aReadOnlyProjectMemberCanExportButCannotImport",
+          "status": "PASS"
+        },
+        {
+          "name": "enforcesPlanAssociationBudgetBeforeWritingAnyAssets",
+          "status": "PASS"
+        },
+        {
+          "name": "historyPreservesSnapshotsTimesNewScopesAndIdempotenceThenAllowsContinuation",
+          "status": "PASS"
+        },
+        {
+          "name": "versionDescriptionsRewriteOnlySelectedFilesAndRejectMissingReferences",
+          "status": "PASS"
+        },
+        {
+          "name": "conflictAndLateValidationFailureLeaveNoPartialAssetsOrReceipt",
+          "status": "PASS"
+        },
+        {
+          "name": "lateFieldValidationRollsBackTagsDefinitionsAndReceipt",
+          "status": "PASS"
+        },
+        {
+          "name": "legacyV5ShapeAndReceiptRemainUnchangedAfterHistoryUpgrade",
+          "status": "PASS"
+        },
+        {
+          "name": "legacyV4SerializationAndReceiptsStillExcludeFiles",
+          "status": "PASS"
+        },
+        {
+          "name": "historyRemapsDefectExecutionLinksAndFileReferencesInSavedResults",
+          "status": "PASS"
+        },
+        {
+          "name": "httpV6SelectionAndNestedHistoryValidationUseExistingAuthentication",
+          "status": "PASS"
+        },
+        {
+          "name": "historyRejectsBrokenGraphStatusesTimesAndScopeWithoutPartialWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "governanceTransferRemapsSharedTagsPreservesDefinitionsAndRetriesWithoutDuplicates",
+          "status": "PASS"
+        },
+        {
+          "name": "versionsAndFilesRollBackIfLaterDefectCreationFails",
+          "status": "PASS"
+        },
+        {
+          "name": "governanceCatalogGraphScopeAndCountRejectInvalidDataBeforeWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "unselectedPlansExcludePlanFieldsAndBindingsAndMetadataOnlyProjectsWork",
+          "status": "PASS"
+        },
+        {
+          "name": "twentyMiBFileUsesHttpBinaryDecoderAndRejectsOversizedRequest",
+          "status": "PASS"
+        },
+        {
+          "name": "emptyGovernanceCatalogsTransferIndependentlyWithHierarchyOwnershipAndRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsForeignDuplicatePlanReferencesAndVersionDowngrades",
+          "status": "PASS"
+        },
+        {
+          "name": "httpRequiresLoginCsrfAndValidNestedPayload",
+          "status": "PASS"
+        },
+        {
+          "name": "legacyV2SerializationAndReceiptsStillMatchAfterGovernanceUpgrade",
+          "status": "PASS"
+        },
+        {
+          "name": "fileOnlyProjectsWorkAndV5ScopesRemainIndependent",
+          "status": "PASS"
+        },
+        {
+          "name": "defaultV1ExportExcludesPlansAndRetainsLegacyReceiptBytes",
+          "status": "PASS"
+        },
+        {
+          "name": "editingTransferredClosedDefectDoesNotInventHistoricalActorsButReopeningResetsState",
+          "status": "PASS"
+        },
+        {
+          "name": "governanceCatalogsRespectExplicitVersionFlagsAndActorPermissions",
+          "status": "PASS"
+        },
+        {
+          "name": "defectsOnlyAndIndependentV4ScopesWorkWithoutLeakingUnselectedDefinitions",
+          "status": "PASS"
+        },
+        {
+          "name": "defectCodeConflictAndLateInvalidContentRollBackEntireTransfer",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsCyclesForeignReferencesAndReusedKeyWithDifferentPayload",
+          "status": "PASS"
+        },
+        {
+          "name": "filesCopyBytesRewriteRelativeLinksKeepExternalLinksAndRetryWithoutDuplicates",
+          "status": "PASS"
+        },
+        {
+          "name": "recoveryWaitsForActiveFileTransactionAndPreservesItsCommittedObject",
+          "status": "PASS"
+        },
+        {
+          "name": "defectsPreserveDefinitionsRemapLinksClearPeopleAndRetryExactly",
+          "status": "PASS"
+        },
+        {
+          "name": "tagOrFieldConflictsDoNotOverwriteTargetsOrLeavePartialAssets",
+          "status": "PASS"
+        },
+        {
+          "name": "historyHonorsProjectAndReadOnlyBoundaries",
+          "status": "PASS"
+        },
+        {
+          "name": "transfersPlansWithOrderedRemappedCasesAndDirectoriesButNotRuns",
+          "status": "PASS"
+        },
+        {
+          "name": "defectAssociationAndTotalAssetBudgetsApplyBeforeWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "legacyV6ExactShapeAndReceiptRemainStableAndNeverCopyVersions",
+          "status": "PASS"
+        },
+        {
+          "name": "historyLimitsRejectOversizeRunsCasesAndStepsBeforeWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidPlanAfterCreatingDefinitionsRollsBackEveryAsset",
+          "status": "PASS"
+        },
+        {
+          "name": "fileDigestSizeMissingReferencesAndOldVersionsRejectBeforeWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "defectsRejectForeignDuplicateAndExecutionLinksAndOldProtocolPayloads",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsOutOfScopeTagsAssetsDuplicateBindingsAndProtocolDowngrade",
+          "status": "PASS"
+        },
+        {
+          "name": "rollbackRemovesFileMetadataAndPhysicalObjectsAfterLateBusinessFailure",
+          "status": "PASS"
+        },
+        {
+          "name": "governanceCatalogsRollBackTogetherWithFilesHistoryAndVersionsOnLateFailure",
+          "status": "PASS"
+        },
+        {
+          "name": "preservesHierarchyAssociationsAndTypeUsingNewScopedIdsAndIdempotentReceipt",
+          "status": "PASS"
+        },
+        {
+          "name": "httpV7IndependentSelectionAndPermissionsRemainEnforced",
+          "status": "PASS"
+        },
+        {
+          "name": "versionsRejectConflictsInvalidDefinitionsAndBudgetsWithoutPartialWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "failedPhysicalCleanupKeepsDurableIntentAndRetriesWithoutDeletingCommittedFiles",
+          "status": "PASS"
+        },
+        {
+          "name": "versionOnlyTransferPreservesReleaseDefinitionsWithNewOwnershipAndIdempotence",
+          "status": "PASS"
+        },
+        {
+          "name": "deniesOtherAccountReadWriteAndChangedActor",
+          "status": "PASS"
+        },
+        {
+          "name": "legacyV3BytesAndReceiptsRemainCompatibleAndExportNeverIncludesDefects",
+          "status": "PASS"
+        },
+        {
+          "name": "historyAndFilesRollBackWhenLaterDefectValidationFails",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentRetriesCommitExactlyOneCopy",
+          "status": "PASS"
+        },
+        {
+          "name": "planOnlySnapshotWorksAndPlanCodeConflictDoesNotImportDefinitions",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.FunctionalExecutionFlowTests",
+      "total": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1,
+      "methods": [
+        {
+          "name": "planRunAndStepReportFormTraceableExecutionChain",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "profile": "mysql-qa",
+  "migration": {
+    "version": 113,
+    "description": "functional run case title snapshot",
+    "appliedSchemaCount": 6,
+    "completeMigrationChainCount": 6,
+    "scope": "Fresh exclusively owned per-class schemas migrated through V113; not a populated production V112-to-V113 upgrade"
+  },
+  "background": true,
+  "rawLogSha256": "c9b9c276bdbda7bac4631a27d531c99ffd6dc6d97ed19c99507a796e05141625",
+  "priorApprovalService403ResolvedForThisRun": true,
+  "priorBlockerReport": "../d08-d07-plan-fixes-r1/backend-mysql.json"
+}

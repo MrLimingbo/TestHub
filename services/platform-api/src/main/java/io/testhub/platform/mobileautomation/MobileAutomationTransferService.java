@@ -1,5 +1,6 @@
 package io.testhub.platform.mobileautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -161,7 +162,7 @@ public class MobileAutomationTransferService {
     public record Device(String id,String name,String platform,String udid,String automationName,Map<String,String> capabilities,boolean enabled,int version) { }
     public record Application(String id,String name,String platform,String appIdentifier,String versionName,boolean enabled,int version,boolean hasAppFile) { }
     public record Element(String id,String name,String platform,String locatorStrategy,String locatorValue,String description) { }
-    public record Scenario(String id,String deviceId,String applicationId,String name,String description,String failureStrategy,int version,Map<String,String> variables,List<MobileAutomationService.Step> steps) { }
+    public record Scenario(String id,String deviceId,String applicationId,String name,String description,String failureStrategy,int version,@JsonDeserialize(contentUsing=MobileInput.Text.class) Map<String,String> variables,@JsonDeserialize(contentUsing=MobileInput.Step.class) List<MobileAutomationService.Step> steps) { }
     public record ImportRequest(String requestKey,String expectedUserId,Snapshot snapshot) { }
     public record Receipt(String id,int devices,int applications,int elements,int scenarios,int steps,int detachedFiles) { }
 }

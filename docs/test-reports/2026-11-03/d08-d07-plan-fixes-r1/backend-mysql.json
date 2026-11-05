@@ -1,0 +1,19 @@
+{
+  "status": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+  "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D08D07PlanTests,FunctionalExecution*Tests,FunctionalHistorySyncFlowTests,FunctionalTransferFlowTests,FunctionalDefectExecutionSyncFlowTests'",
+  "attempts": 2,
+  "processCreated": false,
+  "testsExecuted": 0,
+  "passed": null,
+  "exitCode": null,
+  "reason": "Automatic approval review failed: unexpected status 403 Forbidden. The action was not executed because automatic approval review could not be completed. This is a review failure, not a determination that the action is unsafe.",
+  "noBypassAttempted": true,
+  "ownedInfrastructureCreated": false,
+  "distinctFromTwelveDeferredEnvironmentItems": true,
+  "residualRisk": [
+    "MySQL V113 runtime migration not verified",
+    "MySQL row locking and concurrent rename/run behavior not verified",
+    "MySQL history transfer/sync not verified"
+  ],
+  "resumeRequirement": "审批服务恢复后，按原授权执行上述隔离脚本；审核完成前不进入下一模块。"
+}

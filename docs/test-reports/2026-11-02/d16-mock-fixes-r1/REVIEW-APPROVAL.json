@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-02",
+  "status": "APPROVED",
+  "basis": "用户消息：审核通过 继续；按既定模块门槛批准Mock结果并推进性能，不预先批准性能结果。",
+  "approvedObservation": "OBS-09-E013",
+  "acceptedResults": {
+    "formalCases": 40,
+    "positive": 21,
+    "negative": 19,
+    "passed": 40,
+    "failed": 0,
+    "blocked": 0
+  },
+  "snapshotSha256": "02968367f950e33345e5da44f622ef7b83e103f242f7f2b0b97c4824a1980d48",
+  "executionSnapshotPreserved": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-mock-fixes-r1/summary.json",
+  "nextModule": "性能测试",
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

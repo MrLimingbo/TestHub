@@ -73,7 +73,7 @@ public class PerformanceTransferService {
                     .readValue(body);
             if (request == null || request.snapshot() == null) throw invalid("性能迁移资料不能为空");
             return request;
-        } catch (java.io.IOException error) { throw invalid("性能迁移请求 JSON 格式不合法或包含不支持的字段"); }
+        } catch (java.io.IOException error) { throw PerformanceJson.rejected(error, "性能迁移请求 JSON 格式不合法或包含不支持的字段"); }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)

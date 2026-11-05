@@ -1,0 +1,9 @@
+{
+  "command": "node --test services/playwright-runner/test/*.test.js",
+  "total": 20,
+  "passed": 20,
+  "failed": 0,
+  "skipped": 0,
+  "formal52to56": "PASS",
+  "scope": "Runner unit/protocol checks; real controlled Chrome and actual Runner.step evidence is in headless-ui.json. No remote deployed Runner claim."
+}

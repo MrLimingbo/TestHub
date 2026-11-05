@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-04",
+  "status": "APPROVED",
+  "reason": "任务API无DELETE，不能原样执行有界任务创建/删除混合",
+  "userAnswer": "改为计划创建/删除（推荐）",
+  "sequencePer100": {
+    "taskList": 40,
+    "planDetail": 20,
+    "qualityReport": 20,
+    "taskUpdate": 10,
+    "planCreate": 5,
+    "planDelete": 5
+  },
+  "fixedInitialCounts": {
+    "tasks": 200,
+    "plans": 20,
+    "casesPerPlan": 10,
+    "cases": 200
+  },
+  "warmupMinutes": 15,
+  "measurementMinutes": 120,
+  "cooldownMinutes": 15,
+  "windows": 2,
+  "other90OperationsAndDurationsUnchanged": true
+}

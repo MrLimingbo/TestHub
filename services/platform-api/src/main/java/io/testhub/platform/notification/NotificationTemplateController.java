@@ -2,6 +2,7 @@ package io.testhub.platform.notification;
 
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -55,6 +56,7 @@ public class NotificationTemplateController {
         return (AuthenticatedPrincipal) authentication.getPrincipal();
     }
 
+    @Schema(description = "本DTO外层未知字段兼容忽略，不入库、不生效、不产生权限提升。已知字段仍校验，项目和主体由路径与登录身份确定；迁移和同步严格入口遵循独立契约。")
     public record TemplateRequest(@NotBlank @Size(max = 120) String name,
                                   @NotBlank @Size(max = 80) String eventCode,
                                   @NotBlank String channel,

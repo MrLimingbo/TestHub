@@ -1,0 +1,116 @@
+{
+  "observationResultsApproved": 45,
+  "caseUnitsMustNotBeSummed": true,
+  "batches": [
+    {
+      "name": "10项可先修复",
+      "approvedObservationCount": 10,
+      "verification": "正式用例56：正16/反40，56通过",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "FIXED_VERIFIED_AWAITING_USER_REVIEW",
+      "report": "docs/test-reports/2026-10-29/direct-fixes-r1/REPORT.md",
+      "approval": "docs/test-reports/2026-10-29/direct-fixes-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-10-29/direct-fixes-r1/summary.json"
+    },
+    {
+      "name": "6项P1观察",
+      "approvedObservationCount": 6,
+      "verification": "正式用例72：正29/反43，72通过",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "VERIFIED_AWAITING_USER_REVIEW",
+      "report": "docs/test-reports/2026-10-29/p1-fixes-r1/REPORT.md",
+      "approval": "docs/test-reports/2026-10-29/p1-fixes-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-10-29/p1-fixes-r1/summary.json"
+    },
+    {
+      "name": "首批P2",
+      "approvedObservationCount": 8,
+      "verification": "正式用例63：正30/反33，63通过",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "IMPLEMENTED_REGRESSION_PASSED_PENDING_USER_REVIEW",
+      "report": "docs/test-reports/2026-10-30/p2-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-10-30/p2-fixes-r1/summary.json"
+    },
+    {
+      "name": "第二批P2",
+      "approvedObservationCount": 8,
+      "verification": "正式用例45：正25/反20，45通过",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "IMPLEMENTED_REGRESSION_PASSED_PENDING_USER_REVIEW",
+      "report": "docs/test-reports/2026-10-30/p2-round2-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-10-30/p2-round2-fixes-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-10-30/p2-round2-fixes-r1/summary.json"
+    },
+    {
+      "name": "D16六模块",
+      "approvedObservationCount": 6,
+      "verification": "189正式用例（正83/反106）及48测试方法（纯正11/纯反18/混合19），分别全通过",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "PENDING_OVERALL_REPORT_REVIEW",
+      "report": "docs/test-reports/2026-11-03/d16-overall-summary-r1/OVERALL-TEST-REPORT.md",
+      "approval": "docs/test-reports/2026-11-03/d16-overall-summary-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-11-03/d16-overall-summary-r1/summary.json"
+    },
+    {
+      "name": "D19移动定位器",
+      "approvedObservationCount": 1,
+      "verification": "18测试方法：纯正8/纯反8/混合2，18通过；未连真机",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+      "report": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/RESULTS.json"
+    },
+    {
+      "name": "D08/D07测试计划",
+      "approvedObservationCount": 2,
+      "verification": "原16测试方法通过；隔离MySQL复跑10方法通过（不新增分母），影响面98/98",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "MYSQL_SUPPLEMENT_COMPLETE_PENDING_USER_REVIEW",
+      "report": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/RESULTS.json"
+    },
+    {
+      "name": "D24桌面预览",
+      "approvedObservationCount": 1,
+      "verification": "24场景：纯正13/纯反8/混合3，24通过；离屏4/4",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+      "report": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/RESULTS.json"
+    },
+    {
+      "name": "D06账号搜索",
+      "approvedObservationCount": 1,
+      "verification": "16测试方法：纯正7/纯反7/混合2，16通过",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+      "report": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/RESULTS.json"
+    },
+    {
+      "name": "D21报告参数",
+      "approvedObservationCount": 1,
+      "verification": "正式用例17：正8/反9，17通过",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+      "report": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/RESULTS.json"
+    },
+    {
+      "name": "D23通知集成插件",
+      "approvedObservationCount": 1,
+      "verification": "正式用例32：正13/反19，32通过（原20＋补充12）",
+      "resultStatus": "RESULTS_APPROVED",
+      "executionSnapshotStatus": "FIX_IMPLEMENTED_PENDING_USER_REVIEW",
+      "report": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/REVIEW-APPROVAL.json",
+      "sourceSummary": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/RESULTS.json"
+    }
+  ]
+}

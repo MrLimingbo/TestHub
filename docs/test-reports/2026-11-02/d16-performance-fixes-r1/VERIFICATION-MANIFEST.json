@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-02",
+  "platform": "darwin-arm64",
+  "commands": [
+    {
+      "id": "frontend",
+      "command": "npx pnpm@10.13.1 exec vitest run --maxWorkers=1",
+      "exitCode": 0,
+      "occurrences": 909
+    },
+    {
+      "id": "H2-package",
+      "command": "JAVA_HOME=<native JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "occurrences": 1223
+    },
+    {
+      "id": "MySQL-affected",
+      "command": "JAVA_HOME=<native JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D16PerformanceFlowTests,Performance*Tests'",
+      "exitCode": 0,
+      "occurrences": 100
+    },
+    {
+      "id": "JMeter-Runner",
+      "command": "node --test services/jmeter-runner/test/*.test.js",
+      "exitCode": 0,
+      "occurrences": 26
+    },
+    {
+      "id": "headless-browser",
+      "command": "node scripts/qa/d16-performance-ui.mjs",
+      "exitCode": 0,
+      "occurrences": 5
+    },
+    {
+      "id": "native-http",
+      "command": "JAVA_HOME=<native JDK21> node scripts/qa/d16-performance-http.mjs",
+      "exitCode": 0,
+      "occurrences": 6
+    },
+    {
+      "id": "lint",
+      "command": "npx pnpm@10.13.1 lint",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "build",
+      "command": "npx pnpm@10.13.1 build",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "final-typecheck",
+      "command": "npx pnpm@10.13.1 typecheck",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "source-whitespace",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "occurrences": null
+    }
+  ],
+  "jarSha256": "f86895c67af1f6e80d520bd41a43a96cc613097aab0fe205f1a215cdd08921b5",
+  "distIndexSha256": "37ced9941a6ea270dd356baf7e797d5e95297fb7fe303e66078be6dc3397dc5b",
+  "finalSourceHashes": {
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceSyncService.java": "3b49bb41974cf35ea8eace7560d2bac87706530fa06138cc7471a4ad20000928",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestExecutionService.java": "ed2a4868730c041c964aa5208da460a0669f56d8ff3f1a3a57f65c4f7a6b9928",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanController.java": "9a74aa7eeff7679547b4695d2a904836f1cd530f3dc2ebea1331fdf4a19cc304",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanRepository.java": "e9f690a34369d624a76c63f98bc083249cd8a8c8c09417e868f4c3737d315e65",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java": "181367031468562754c6e40b287e32739024ec51ba14dd5106dc1543cc0b8323",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTransferService.java": "9b979244d9d650492e295d96e9f057bb576efbd252a7eb3fedf6042f3882b363",
+    "src/pages/PerformancePage.vue": "282009c85193e00e82dd1cfcde77681020888e526713eea07f390e6a3a0e7622",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceJson.java": "9d74897516e60f0bdcfe506f88427c5513fcb9221e2141a30af232566fedbb80",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceInputExceptionHandler.java": "9cb2da328c1f5b06423414f898f562b36bac384b5a0a71fd6f6f6967d4ef20e7",
+    "services/platform-api/src/test/java/io/testhub/platform/P2D16PerformanceFlowTests.java": "0bb384c4bdda94ce8bf01516cebedd41fe900cf1313977da4adc5bc7ed246590",
+    "src/utils/performanceNumberInput.ts": "f259b699fd376a845279ee9976d111f061b68aa0297870f48f7fb15ee7f43279",
+    "src/test/d16PerformancePage.test.ts": "4512804b2742db3270429c97a5fbf7ec785b905cd7d1d85dbff54ae171ba6b38",
+    "src/test/d16PerformanceNumbers.test.ts": "5333c05b05648bc5ea31236f1b6db10b289320edbfa63eb83324e6b4e6d2dad6",
+    "services/jmeter-runner/test/d16-input.test.js": "c6a521d1b2885f6106462c51aaabebd8bcff2912f55465323ff1c2e5bf9af81d",
+    "scripts/qa/d16-performance-ui.mjs": "dbb3d4f5ad70a283b38ceef41e042c393ff2da19e7f88d41243f08e4e8efeeb7",
+    "scripts/qa/d16-performance-http.mjs": "9f5136513fccf476082979394cf99aab5f348b90d53d64f32c8e70e524189d31"
+  },
+  "countsNotAdditive": true,
+  "formalCases": 63,
+  "realTargetLoadExecuted": false,
+  "upgradeExitRetested": false,
+  "installedRuntimeReplaced": false,
+  "originalEnvironmentBlockersPrepared": false
+}

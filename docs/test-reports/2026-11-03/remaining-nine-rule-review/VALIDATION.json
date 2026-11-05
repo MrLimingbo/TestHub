@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-03",
+  "validationType": "DOCUMENT_AND_STATIC_SOURCE_CONSISTENCY_ONLY",
+  "productTestExecutions": 0,
+  "ruleCards": 9,
+  "historicalDecisionGroups": 8,
+  "priorityCounts": {
+    "P2": 5,
+    "P3": 4
+  },
+  "acceptanceTargets": 40,
+  "formalTestCasesDesigned": 0,
+  "selectedOptions": 0,
+  "implementationAuthorized": false,
+  "sourceFilesUnchanged": 1408,
+  "staticEvidenceHashesVerified": 22,
+  "localLinksVerified": 25,
+  "D16OverallFrozenArtifactsUnchanged": 10,
+  "observationCounts": {
+    "approved": 38,
+    "notImplemented": 9
+  },
+  "environmentBlockersDeferred": 12,
+  "riskStatus": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "errors": []
+}

@@ -1,0 +1,12 @@
+{
+  "command": "node --test services/jmeter-runner/test/*.test.js",
+  "total": 26,
+  "passed": 25,
+  "failed": 0,
+  "skipped": 1,
+  "skippedReason": "Existing real JMeter integration requires configured native JMeter environment. No real target load run.",
+  "formal62": "PASS",
+  "formal63": "PASS",
+  "productionRunnerChanged": false,
+  "environmentBlockersCleared": false
+}

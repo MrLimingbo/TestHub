@@ -1,0 +1,172 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "duplicates: near-duplicate cases TC-D16PERF-01 and TC-D16PERF-04 (similarity 0.890); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-02 and TC-D16PERF-03 (similarity 0.885); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-02 and TC-D16PERF-05 (similarity 0.844); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-02 and TC-D16PERF-06 (similarity 0.840); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-02 and TC-D16PERF-09 (similarity 0.850); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-03 and TC-D16PERF-05 (similarity 0.838); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-04 and TC-D16PERF-05 (similarity 0.850); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-10 and TC-D16PERF-13 (similarity 0.872); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-10 and TC-D16PERF-15 (similarity 0.842); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-11 and TC-D16PERF-12 (similarity 0.883); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-11 and TC-D16PERF-14 (similarity 0.843); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-11 and TC-D16PERF-18 (similarity 0.823); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-12 and TC-D16PERF-14 (similarity 0.844); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16PERF-13 and TC-D16PERF-14 (similarity 0.828); consolidate unless coverage targets differ"
+  ],
+  "near_duplicates": [
+    {
+      "left": "TC-D16PERF-01",
+      "right": "TC-D16PERF-04",
+      "similarity": 0.89
+    },
+    {
+      "left": "TC-D16PERF-02",
+      "right": "TC-D16PERF-03",
+      "similarity": 0.885
+    },
+    {
+      "left": "TC-D16PERF-02",
+      "right": "TC-D16PERF-05",
+      "similarity": 0.844
+    },
+    {
+      "left": "TC-D16PERF-02",
+      "right": "TC-D16PERF-06",
+      "similarity": 0.84
+    },
+    {
+      "left": "TC-D16PERF-02",
+      "right": "TC-D16PERF-09",
+      "similarity": 0.85
+    },
+    {
+      "left": "TC-D16PERF-03",
+      "right": "TC-D16PERF-05",
+      "similarity": 0.838
+    },
+    {
+      "left": "TC-D16PERF-04",
+      "right": "TC-D16PERF-05",
+      "similarity": 0.85
+    },
+    {
+      "left": "TC-D16PERF-10",
+      "right": "TC-D16PERF-13",
+      "similarity": 0.872
+    },
+    {
+      "left": "TC-D16PERF-10",
+      "right": "TC-D16PERF-15",
+      "similarity": 0.842
+    },
+    {
+      "left": "TC-D16PERF-11",
+      "right": "TC-D16PERF-12",
+      "similarity": 0.883
+    },
+    {
+      "left": "TC-D16PERF-11",
+      "right": "TC-D16PERF-14",
+      "similarity": 0.843
+    },
+    {
+      "left": "TC-D16PERF-11",
+      "right": "TC-D16PERF-18",
+      "similarity": 0.823
+    },
+    {
+      "left": "TC-D16PERF-12",
+      "right": "TC-D16PERF-14",
+      "similarity": 0.844
+    },
+    {
+      "left": "TC-D16PERF-13",
+      "right": "TC-D16PERF-14",
+      "similarity": 0.828
+    }
+  ],
+  "quality": {
+    "case_quality_score": 99.33,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 95.56
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "stats": {
+    "case_count": 63,
+    "requirement_count": 7,
+    "covered_requirement_count": 7,
+    "requirement_coverage_percent": 100.0,
+    "acceptance_criteria_count": 63,
+    "covered_acceptance_criteria_count": 63,
+    "acceptance_criteria_coverage_percent": 100.0,
+    "coverage_item_count": 63,
+    "covered_coverage_item_count": 63,
+    "design_coverage_percent": 100.0,
+    "positive_count": 27,
+    "negative_count": 36,
+    "polarity_counts": {
+      "negative": 36,
+      "positive": 27
+    },
+    "priority_counts": {
+      "P2": 63
+    },
+    "type_counts": {
+      "boundary": 11,
+      "compatibility": 8,
+      "negative": 22,
+      "permission": 1,
+      "positive": 16,
+      "recovery": 1,
+      "state": 4
+    },
+    "technique_counts": {
+      "acceptance-criteria": 4,
+      "boundary-value-2": 11,
+      "compatibility-configuration": 8,
+      "data-lifecycle": 6,
+      "decision-table": 4,
+      "equivalence-partitioning": 22,
+      "error-guessing": 2,
+      "recovery-idempotency": 1,
+      "role-permission": 1,
+      "state-transition": 4
+    },
+    "module_counts": {
+      "性能测试 / D16类型规则": 63
+    },
+    "document_review_count": 0,
+    "document_review_type_counts": {},
+    "document_review_severity_counts": {},
+    "evidence_bundle_verified": true,
+    "evidence_reference_count": 399,
+    "unique_evidence_reference_count": 7,
+    "invalid_evidence_reference_count": 0,
+    "verified_evidence_quote_count": 63,
+    "invalid_evidence_quote_count": 0,
+    "visual_observation_count": 0,
+    "confirmed_visual_evidence_count": 0,
+    "exact_duplicate_group_count": 0,
+    "near_duplicate_pair_count": 14,
+    "untraceable_case_count": 0,
+    "case_quality_score": 99.33,
+    "case_quality_gate": "pass",
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "error_count": 0,
+    "warning_count": 14
+  }
+}

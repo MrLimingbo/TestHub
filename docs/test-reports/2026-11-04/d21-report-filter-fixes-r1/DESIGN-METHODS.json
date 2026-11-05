@@ -1,0 +1,13 @@
+{
+  "equivalence-partitioning": "适用：省略/空/CSV/重复键/合法范围",
+  "boundary-value-2": "适用：50/51及去重前后边界",
+  "role-permission": "适用：跨组织及无项目权限403",
+  "scenario": "适用：页面全选、清空和导出",
+  "decision-table/cause-effect": "输入有效性与授权按独立分区验证，不额外扩张缺少优先级规格的组合",
+  "state-transition": "无新增业务状态迁移；不强加",
+  "pairwise/classification-tree": "该参数是有序列表，格式/数量/权限边界已直接覆盖，无需抽样组合",
+  "data-lifecycle/recovery-idempotency": "只读范围规则，拒绝时无成功导出审计在端点断言；不新增恢复规则",
+  "compatibility-configuration": "同一用例在隔离H2及MySQL重复执行，不增加正式计数",
+  "error-guessing/exploratory/checklist": "仅原历史空段风险作为分区依据，不添加未经批准的预期",
+  "scope": "4条独立需求/4项验收标准/17个覆盖项；8正9反，零混合。"
+}

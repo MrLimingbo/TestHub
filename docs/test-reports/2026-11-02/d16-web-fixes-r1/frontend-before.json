@@ -1,0 +1,38 @@
+{
+  "numTotalTests": 6,
+  "numPassedTests": 2,
+  "numFailedTests": 4,
+  "numPendingTests": 0,
+  "success": false,
+  "suites": [
+    {
+      "name": "src/test/d16WebPage.test.ts",
+      "cases": [
+        {
+          "title": "TC-D16WEB-46: profile invalid raw values never submit",
+          "status": "FAIL"
+        },
+        {
+          "title": "TC-D16WEB-47: profile exact spellings send numeric dimensions",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16WEB-48: WAIT and action timeouts validate original text",
+          "status": "FAIL"
+        },
+        {
+          "title": "TC-D16WEB-49: invalid execution stops before local preparation",
+          "status": "FAIL"
+        },
+        {
+          "title": "TC-D16WEB-50: optional action blank and required WAIT stay distinct",
+          "status": "FAIL"
+        },
+        {
+          "title": "TC-D16WEB-51: variable guard and removed step input ownership remain",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

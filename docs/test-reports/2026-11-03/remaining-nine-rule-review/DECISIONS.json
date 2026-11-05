@@ -1,0 +1,250 @@
+{
+  "date": "2026-11-03",
+  "status": "PROPOSED_PENDING_RULE_REVIEW",
+  "observationCount": 9,
+  "historicalRuleGroups": 8,
+  "priorityCounts": {
+    "P2": 5,
+    "P3": 4
+  },
+  "recommendedSelections": {
+    "D19": "A",
+    "D08": "A",
+    "D24": "A",
+    "D26-R": "B",
+    "D26-L": "B",
+    "D06": "A",
+    "D07": "A",
+    "D21": "A",
+    "D23": "A"
+  },
+  "selectedOptions": null,
+  "implementationAuthorized": false,
+  "productTestExecutions": 0,
+  "acceptanceTargetCount": 40,
+  "acceptanceTargetsAreNotFormalTestCases": true,
+  "cards": [
+    {
+      "cardId": "D19",
+      "observationId": "OBS-12-E022",
+      "decisionId": "D19",
+      "module": "移动端自动化",
+      "priority": "P2",
+      "historicalFact": "Android资产可保存iOS定位策略。",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "options": {
+        "A": "严格按平台矩阵保存及执行，旧资产只读兼容",
+        "B": "允许保存跨平台策略并标未验证，执行前必须拒绝"
+      },
+      "acceptanceIds": [
+        "D19-AC-01",
+        "D19-AC-02",
+        "D19-AC-03",
+        "D19-AC-04",
+        "D19-AC-05"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [],
+      "implementationAuthorized": false
+    },
+    {
+      "cardId": "D08",
+      "observationId": "OBS-05-E003",
+      "decisionId": "D08",
+      "module": "测试计划与交付",
+      "priority": "P2",
+      "historicalFact": "历史执行用例标题跟随源资产改名，步骤快照仍保留。",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "options": {
+        "A": "新批次标题快照，旧缺失明确标识",
+        "B": "历史动态引用当前标题并明确标识"
+      },
+      "acceptanceIds": [
+        "D08-AC-01",
+        "D08-AC-02",
+        "D08-AC-03",
+        "D08-AC-04",
+        "D08-AC-05"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [],
+      "implementationAuthorized": false
+    },
+    {
+      "cardId": "D24",
+      "observationId": "OBS-15-E001",
+      "decisionId": "D24",
+      "module": "桌面工作区与跨端",
+      "priority": "P2",
+      "historicalFact": "原生同步预览为只读，但持有工作区锁，预览返回前不能关闭窗口。",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "options": {
+        "A": "协作取消，只在终止确认及锁释放后关闭；1秒反馈和5秒可中断确认目标",
+        "B": "不可取消，显示等待原因和时长，完成或超时后释放"
+      },
+      "acceptanceIds": [
+        "D24-AC-01",
+        "D24-AC-02",
+        "D24-AC-03",
+        "D24-AC-04",
+        "D24-AC-05"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [],
+      "implementationAuthorized": false
+    },
+    {
+      "cardId": "D26-R",
+      "observationId": "OBS-16-E001",
+      "decisionId": "D26",
+      "module": "横向回归",
+      "priority": "P2",
+      "historicalFact": "真实30分钟进程RSS、CPU和句柄采样已保存，未提供泄漏或资源阈值。",
+      "recommendedOption": "B",
+      "selectedOption": null,
+      "options": {
+        "A": "补齐正式资源阈值后达标验证",
+        "B": "按待批准固定负载采集隔离资源基线，不关闭观察"
+      },
+      "acceptanceIds": [
+        "D26-R-AC-01",
+        "D26-R-AC-02",
+        "D26-R-AC-03",
+        "D26-R-AC-04"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [
+        "A"
+      ],
+      "implementationAuthorized": false
+    },
+    {
+      "cardId": "D26-L",
+      "observationId": "OBS-16-E002",
+      "decisionId": "D26",
+      "module": "横向回归",
+      "priority": "P2",
+      "historicalFact": "31轮业务和健康延迟已采样，缺少业务SLA；窗口与其他独立验收有重叠。",
+      "recommendedOption": "B",
+      "selectedOption": null,
+      "options": {
+        "A": "补齐各业务端点SLA后达标验证",
+        "B": "共享负载采集业务基线，按端点统计，不关闭观察"
+      },
+      "acceptanceIds": [
+        "D26-L-AC-01",
+        "D26-L-AC-02",
+        "D26-L-AC-03",
+        "D26-L-AC-04"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [
+        "A"
+      ],
+      "implementationAuthorized": false
+    },
+    {
+      "cardId": "D06",
+      "observationId": "OBS-03D-E007",
+      "decisionId": "D06",
+      "module": "账号管理与系统参数",
+      "priority": "P3",
+      "historicalFact": "搜索百分号和下划线按SQL通配符匹配。",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "options": {
+        "A": "普通搜索采用字面子串并统一转义",
+        "B": "明确公开LIKE通配及字面转义语法"
+      },
+      "acceptanceIds": [
+        "D06-AC-01",
+        "D06-AC-02",
+        "D06-AC-03",
+        "D06-AC-04"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [],
+      "implementationAuthorized": false
+    },
+    {
+      "cardId": "D07",
+      "observationId": "OBS-05-E002",
+      "decisionId": "D07",
+      "module": "测试计划与交付",
+      "priority": "P3",
+      "historicalFact": "PUT中发送的新计划编号未应用，仍返回旧编号。",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "options": {
+        "A": "编号创建后不可改，规范化不同则400",
+        "B": "继续忽略编号变化，但明确反馈只读及实际编号",
+        "C": "另案设计允许改号，补规格后再审"
+      },
+      "acceptanceIds": [
+        "D07-AC-01",
+        "D07-AC-02",
+        "D07-AC-03",
+        "D07-AC-04"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [
+        "C"
+      ],
+      "implementationAuthorized": false
+    },
+    {
+      "cardId": "D21",
+      "observationId": "OBS-13-E019",
+      "decisionId": "D21",
+      "module": "质量报告与任务",
+      "priority": "P3",
+      "historicalFact": "报告项目参数末尾逗号返回400，空筛选按默认项目集合处理。",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "options": {
+        "A": "省略用原默认范围；显式空值/空段400",
+        "B": "显式列表容错去空段；结果为空仍400"
+      },
+      "acceptanceIds": [
+        "D21-AC-01",
+        "D21-AC-02",
+        "D21-AC-03",
+        "D21-AC-04"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [],
+      "implementationAuthorized": false
+    },
+    {
+      "cardId": "D23",
+      "observationId": "OBS-14-E024",
+      "decisionId": "D23",
+      "module": "通知、集成、插件与运维",
+      "priority": "P3",
+      "historicalFact": "普通JSON请求接受额外未知字段。",
+      "recommendedOption": "A",
+      "selectedOption": null,
+      "options": {
+        "A": "普通外层DTO兼容忽略未知字段，严格入口保持",
+        "B": "所列外层DTO逐接口立即严格400并接受客户端兼容变化"
+      },
+      "acceptanceIds": [
+        "D23-AC-01",
+        "D23-AC-02",
+        "D23-AC-03",
+        "D23-AC-04",
+        "D23-AC-05"
+      ],
+      "acceptanceStatus": "NOT_EXECUTED",
+      "requiresAdditionalSpecificationFor": [],
+      "implementationAuthorized": false
+    }
+  ],
+  "environmentPreparationAuthorized": false,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

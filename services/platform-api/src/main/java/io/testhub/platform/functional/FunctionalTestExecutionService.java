@@ -78,7 +78,10 @@ public class FunctionalTestExecutionService {
     public FunctionalTestPlan updatePlan(AuthenticatedPrincipal principal, String projectId, String planId, PlanInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
         validatePlan(input);
-        requirePlan(projectId, planId);
+        FunctionalTestPlan current = requirePlan(projectId, planId);
+        if (!normalizeCode(input.planCode(), "计划编号").equals(current.planCode())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "planCode 创建后不可修改");
+        }
         String name = required(input.name(), 200, "计划名称");
         String status = normalizePlanStatus(input.status());
         String catalogId = blankToNull(input.catalogId());
@@ -146,8 +149,8 @@ public class FunctionalTestExecutionService {
         executions.insertRun(runId, project.organizationId(), projectId, planId, runName, "NOT_STARTED", principal.userId());
         for (FunctionalTestPlanCase planCase : planCases) {
             String runCaseId = UlidCreator.getUlid().toString();
-            executions.insertRunCase(runCaseId, runId, planCase.caseId(), "NOT_RUN", "");
             FunctionalCase testCase = cases.findById(projectId, planCase.caseId()).orElseThrow();
+            executions.insertRunCase(runCaseId, runId, planCase.caseId(), "NOT_RUN", "", testCase.title());
             String[] steps = testCase.steps().split("\\R");
             for (int index = 0; index < steps.length; index++) {
                 if (!steps[index].isBlank()) executions.insertRunStep(UlidCreator.getUlid().toString(), runCaseId, index + 1, steps[index].trim());

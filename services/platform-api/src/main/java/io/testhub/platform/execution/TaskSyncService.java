@@ -2,6 +2,7 @@ package io.testhub.platform.execution;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.security.AuthenticatedPrincipal;
@@ -50,7 +51,10 @@ public class TaskSyncService {
         try {
             return json.readerFor(Request.class).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                     DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(body);
-        } catch (java.io.IOException error) { throw invalid("任务同步 JSON 格式不合法或包含不支持的字段"); }
+        } catch (java.io.IOException error) {
+            String field = TaskProgressInput.location(error);
+            throw invalid(field == null ? "任务同步 JSON 格式不合法或包含不支持的字段" : field + " 必须是精确整数 JSON 数值");
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -70,7 +74,7 @@ public class TaskSyncService {
                 throw invalid("更新任务必须包含唯一标识和有效目标版本");
             if (op.taskType() == null || op.status() == null || !ExecutionTaskService.TYPES.contains(op.taskType()) || !ExecutionTaskService.STATUSES.contains(op.status())
                     || op.name() == null || op.name().isBlank() || op.name().length() > 160 || !op.name().equals(op.name().trim())
-                    || op.progress() < 0 || op.progress() > 100 || (op.status().equals("SUCCEEDED") && op.progress() != 100)
+                    || op.progress() == null || op.progress() < 0 || op.progress() > 100 || (op.status().equals("SUCCEEDED") && op.progress() != 100)
                     || (op.status().equals("QUEUED") && op.progress() != 0)) throw invalid("同步任务名称、类型、状态或进度无效");
         }
         String hash = hash(encoded(request));
@@ -125,7 +129,8 @@ public class TaskSyncService {
     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
     public record Item(String id, long version, String taskType, String name, String status, int progress) { }
     public record Snapshot(int version, String scope, String projectId, String actorId, int maxTasks, List<Item> tasks) { }
-    public record Operation(String operationId, String taskId, Long expectedVersion, String taskType, String name, String status, int progress) { }
+    public record Operation(String operationId, String taskId, Long expectedVersion, String taskType, String name, String status,
+                            @JsonDeserialize(using = TaskProgressInput.class) Integer progress) { }
     public record Request(String requestKey, String expectedUserId, List<Operation> operations) { }
     public record Result(String operationId, Item task) { }
     public record Receipt(String requestKey, List<Result> results) { }

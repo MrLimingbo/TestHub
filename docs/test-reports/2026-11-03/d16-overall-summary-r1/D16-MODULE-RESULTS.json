@@ -1,0 +1,128 @@
+{
+  "date": "2026-11-03",
+  "moduleResultsApproved": 6,
+  "overallSummaryStatus": "PENDING_USER_REVIEW",
+  "modules": [
+    {
+      "module": "接口自动化",
+      "observation": "OBS-08-E010",
+      "status": "RESULTS_APPROVED",
+      "tests": {
+        "positive": 13,
+        "negative": 17,
+        "passed": 30,
+        "failed": 0,
+        "blocked": 0,
+        "unit": "FORMAL_CASE",
+        "total": 30
+      },
+      "report": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/REVIEW-APPROVAL.json"
+    },
+    {
+      "module": "Mock",
+      "observation": "OBS-09-E013",
+      "status": "RESULTS_APPROVED",
+      "tests": {
+        "positive": 21,
+        "negative": 19,
+        "passed": 40,
+        "failed": 0,
+        "blocked": 0,
+        "unit": "FORMAL_CASE",
+        "total": 40
+      },
+      "report": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/REVIEW-APPROVAL.json"
+    },
+    {
+      "module": "性能测试",
+      "observation": "OBS-10-E011",
+      "status": "RESULTS_APPROVED",
+      "tests": {
+        "positive": 27,
+        "negative": 36,
+        "passed": 63,
+        "failed": 0,
+        "blocked": 0,
+        "unit": "FORMAL_CASE",
+        "total": 63
+      },
+      "report": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/REVIEW-APPROVAL.json"
+    },
+    {
+      "module": "Web UI自动化",
+      "observation": "OBS-11-E021",
+      "status": "RESULTS_APPROVED",
+      "tests": {
+        "positive": 22,
+        "negative": 34,
+        "passed": 56,
+        "failed": 0,
+        "blocked": 0,
+        "unit": "FORMAL_CASE",
+        "total": 56
+      },
+      "report": "docs/test-reports/2026-11-02/d16-web-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-02/d16-web-fixes-r1/REVIEW-APPROVAL.json"
+    },
+    {
+      "module": "移动端自动化",
+      "observation": "OBS-12-E020",
+      "status": "RESULTS_APPROVED",
+      "tests": {
+        "total": 23,
+        "positiveOnly": 4,
+        "negativeOnly": 5,
+        "mixed": 14,
+        "passed": 23,
+        "failed": 0,
+        "blocked": 0,
+        "unit": "TEST_METHOD"
+      },
+      "report": "docs/test-reports/2026-11-03/d16-mobile-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-03/d16-mobile-fixes-r1/REVIEW-APPROVAL.json"
+    },
+    {
+      "module": "质量报告与任务",
+      "observation": "OBS-13-E018",
+      "status": "RESULTS_APPROVED",
+      "tests": {
+        "total": 25,
+        "positiveOnly": 7,
+        "negativeOnly": 13,
+        "mixed": 5,
+        "passed": 25,
+        "failed": 0,
+        "blocked": 0,
+        "unit": "TEST_METHOD"
+      },
+      "report": "docs/test-reports/2026-11-03/d16-quality-task-fixes-r1/FINAL-REPORT.md",
+      "approval": "docs/test-reports/2026-11-03/d16-quality-task-fixes-r1/REVIEW-APPROVAL.json"
+    }
+  ],
+  "totalsByUnit": {
+    "formalCases": {
+      "modules": 4,
+      "total": 189,
+      "positive": 83,
+      "negative": 106,
+      "passed": 189,
+      "failed": 0,
+      "blocked": 0
+    },
+    "testMethods": {
+      "modules": 2,
+      "total": 48,
+      "positiveOnly": 11,
+      "negativeOnly": 18,
+      "mixed": 19,
+      "passed": 48,
+      "failed": 0,
+      "blocked": 0
+    }
+  },
+  "combinedFormalCaseTotal": null,
+  "noCrossUnitOrEnvironmentAggregation": true
+}

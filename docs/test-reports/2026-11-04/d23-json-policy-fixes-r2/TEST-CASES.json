@@ -1,0 +1,865 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "name": "D23重复适配器409修复",
+    "version": "409规则已批2026-11-04",
+    "scope": "新专项12条：后端11前端1；与既有D23的20条分列，本轮合计32正式用例；X01不重复计数。",
+    "generated_at": "2026-11-04T12:45:08.492337+08:00"
+  },
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "RULE-AND-ACCEPTANCE.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/RULE-AND-ACCEPTANCE.md",
+      "type": "requirement",
+      "sha256": "a613fbc06bfe6dfffd90bbc671d09ec5dc1b2763c1266b271844a04ed9e95cc3"
+    },
+    {
+      "id": "SRC-002",
+      "name": "FOLLOWUP-RULE-APPROVAL.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-04/d23-json-policy-fixes-r1/FOLLOWUP-RULE-APPROVAL.json",
+      "type": "requirement",
+      "sha256": "b442c45bc82ae60f250758fd3b171009193793211c238d2940208bee02856d91"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-D23C-01",
+      "title": "AC-C01-重复创建",
+      "description": "同类型同名称的企业适配器创建冲突返回409，原记录及配置密文保持，不增加业务行或成功审计。普通外层未知标量/对象/数组仍按D23-A忽略，不能使重复登记成功，也不能让冲突重新变成500。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/AC-C01-重复创建"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23C-01",
+          "source_acceptance_id": "AC-C01",
+          "text": "同类型同名称的企业适配器创建冲突返回409，原记录及配置密文保持，不增加业务行或成功审计。普通外层未知标量/对象/数组仍按D23-A忽略，不能使重复登记成功，也不能让冲突重新变成500。",
+          "source_refs": [
+            "SRC-001#heading/AC-C01-重复创建"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D23C-02",
+      "title": "AC-C02-更新及唯一性边界",
+      "description": "更新为其他记录已占用的同类型同名称返回409，不部分修改名称、地址、启用状态、凭据密文或成功审计。配置为null保留和提供完整替换配置两条路径均验证。原记录保留原类型和名称允许更新；自由名称允许创建和改名；不同适配器类型可使用相同名称。既有trim/类型归一化和数据库排序规则保持，不新增大小写归一化或改造唯一约束。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23C-02",
+          "source_acceptance_id": "AC-C02",
+          "text": "更新为其他记录已占用的同类型同名称返回409，不部分修改名称、地址、启用状态、凭据密文或成功审计。配置为null保留和提供完整替换配置两条路径均验证。原记录保留原类型和名称允许更新；自由名称允许创建和改名；不同适配器类型可使用相同名称。既有trim/类型归一化和数据库排序规则保持，不新增大小写归一化或改造唯一约束。",
+          "source_refs": [
+            "SRC-001#heading/AC-C02-更新及唯一性边界"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D23C-03",
+      "title": "AC-C03-并发冲突",
+      "description": "两个并发创建请求争用同一个类型和名称，或两个不同记录并发改为同一空闲类型和名称，应只有一个成功、另一个409。数据库最终只有一个占用者，只为成功请求增加一条成功审计；失败请求不得部分写入，原记录/密文不丢失。仍由现有唯一约束仲裁，不依靠存在性预查询作为唯一保障。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/AC-C03-并发冲突"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23C-03",
+          "source_acceptance_id": "AC-C03",
+          "text": "两个并发创建请求争用同一个类型和名称，或两个不同记录并发改为同一空闲类型和名称，应只有一个成功、另一个409。数据库最终只有一个占用者，只为成功请求增加一条成功审计；失败请求不得部分写入，原记录/密文不丢失。仍由现有唯一约束仲裁，不依靠存在性预查询作为唯一保障。",
+          "source_refs": [
+            "SRC-001#heading/AC-C03-并发冲突"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D23C-04",
+      "title": "AC-C04-错误、权限与兼容",
+      "description": "409沿用/api/v1共享错误封装，给出可操作的重复名称提示，不回显SQL、冲突输入或配置值。只转换适配器写入阶段的重复键错误，其他校验、权限、CSRF、缺失记录及审计失败规则保持；不得把其他异常或所有数据库错误一概转换为409。前端409显示服务端冲突提示并保留草稿，改为自由名称后可重试成功，沿用原失败保留输入契约。既有D23的20条正式用例继续回归，独立X01采集方法增加明确409断言，不将历史500当作通过条件。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/AC-C04-错误、权限与兼容"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23C-04",
+          "source_acceptance_id": "AC-C04",
+          "text": "409沿用/api/v1共享错误封装，给出可操作的重复名称提示，不回显SQL、冲突输入或配置值。只转换适配器写入阶段的重复键错误，其他校验、权限、CSRF、缺失记录及审计失败规则保持；不得把其他异常或所有数据库错误一概转换为409。前端409显示服务端冲突提示并保留草稿，改为自由名称后可重试成功，沿用原失败保留输入契约。既有D23的20条正式用例继续回归，独立X01采集方法增加明确409断言，不将历史500当作通过条件。",
+          "source_refs": [
+            "SRC-001#heading/AC-C04-错误、权限与兼容"
+          ]
+        }
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "id": "COV-D23C-C01",
+      "title": "空闲名称可创建",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ]
+    },
+    {
+      "id": "COV-D23C-C02",
+      "title": "重复创建受控409",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23C-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C01-重复创建"
+      ]
+    },
+    {
+      "id": "COV-D23C-C03",
+      "title": "更新占用名称受控409且无部分写入",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ]
+    },
+    {
+      "id": "COV-D23C-C04",
+      "title": "原记录可保留原名更新",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ]
+    },
+    {
+      "id": "COV-D23C-C05",
+      "title": "自由改名与配置替换正常",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ]
+    },
+    {
+      "id": "COV-D23C-C06",
+      "title": "不同类型允许同名",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ]
+    },
+    {
+      "id": "COV-D23C-C07",
+      "title": "原trim规则下的重复仍409",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ]
+    },
+    {
+      "id": "COV-D23C-C08",
+      "title": "409封装可操作且不泄密",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D23C-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C04-错误、权限与兼容"
+      ]
+    },
+    {
+      "id": "COV-D23C-C09",
+      "title": "冲突处理不绕过原鉴权",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D23C-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C04-错误、权限与兼容"
+      ]
+    },
+    {
+      "id": "COV-D23C-C10",
+      "title": "并发重复创建只有一个成功",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D23C-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C03-并发冲突"
+      ]
+    },
+    {
+      "id": "COV-D23C-C11",
+      "title": "并发更新争用空闲名称不丢原记录",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D23C-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C03-并发冲突"
+      ]
+    },
+    {
+      "id": "COV-D23C-C12",
+      "title": "前端409保留草稿且可改名重试",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D23C-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C04-错误、权限与兼容"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "document_review": [],
+  "cases": [
+    {
+      "id": "TC-D23C-C01",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "空闲名称可创建",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C01"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以新类型名称组合创建合法适配器",
+          "expected": "返回200，保存已知字段并加密配置，只产生一条创建成功审计",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C02-更新及唯一性边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C02-更新及唯一性边界",
+              "quote": "自由名称允许创建和改名"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ],
+      "tags": [
+        "C01",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C02",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "重复创建受控409",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C02"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "已有同类型同名记录后，分别无附加字段和附加未知标量/对象/数组重复POST",
+          "expected": "全部409，既有行、密文及成功审计不变，无新记录",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C01-重复创建"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C01-重复创建",
+              "quote": "同类型同名称的企业适配器创建冲突返回409"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C01-重复创建"
+      ],
+      "tags": [
+        "C02",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C03",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "更新占用名称受控409且无部分写入",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C03"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "把另一记录改成已占用同类型名称，分别使用null配置和完整替换配置",
+          "expected": "均409，双方原记录、地址、启用状态、密文及成功审计不变",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C02-更新及唯一性边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C02-更新及唯一性边界",
+              "quote": "更新为其他记录已占用的同类型同名称返回409"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ],
+      "tags": [
+        "C03",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C04",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "原记录可保留原名更新",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C04"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "同一记录保留类型和名称，仅更新元数据并以null保留配置",
+          "expected": "返回200，元数据生效、原密文保持，不误判为名称冲突",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C02-更新及唯一性边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C02-更新及唯一性边界",
+              "quote": "原记录保留原类型和名称允许更新"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ],
+      "tags": [
+        "C04",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C05",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "自由改名与配置替换正常",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C05"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "把已有记录改为未占用名称并提供合法完整替换配置",
+          "expected": "返回200，名称和配置替换生效，仅一条更新成功审计",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C02-更新及唯一性边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C02-更新及唯一性边界",
+              "quote": "自由名称允许创建和改名"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ],
+      "tags": [
+        "C05",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C06",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "不同类型允许同名",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C06"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以另一合法适配器类型和相同名称创建",
+          "expected": "返回200，两种类型保留各自记录，未扩大唯一约束范围",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C02-更新及唯一性边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C02-更新及唯一性边界",
+              "quote": "不同适配器类型可使用相同名称"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ],
+      "tags": [
+        "C06",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C07",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "原trim规则下的重复仍409",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C07"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在已占用名称前后加入空白后分别创建与更新",
+          "expected": "原trim后发生的同类型同名冲突均409，无部分写入或成功审计",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C02-更新及唯一性边界"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C02-更新及唯一性边界",
+              "quote": "既有trim/类型归一化和数据库排序规则保持"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C02-更新及唯一性边界"
+      ],
+      "tags": [
+        "C07",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C08",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "409封装可操作且不泄密",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C08"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交真实重复名称，读取共享错误响应",
+          "expected": "409使用原错误封装与重复名称提示，无SQL、冲突输入、配置或凭据值回显",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C04-错误、权限与兼容"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C04-错误、权限与兼容",
+              "quote": "409沿用/api/v1共享错误封装，给出可操作的重复名称提示"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C04-错误、权限与兼容"
+      ],
+      "tags": [
+        "C08",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C09",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "冲突处理不绕过原鉴权",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C09"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "向已占用名称提交普通账号、匿名及缺失CSRF的创建/更新请求",
+          "expected": "原401/403检查保持，无名称存在性泄漏或成功审计写入",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C04-错误、权限与兼容"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C04-错误、权限与兼容",
+              "quote": "其他校验、权限、CSRF、缺失记录及审计失败规则保持"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C04-错误、权限与兼容"
+      ],
+      "tags": [
+        "C09",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C10",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "并发重复创建只有一个成功",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C10"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "并发提交两个同类型同名合法创建请求",
+          "expected": "一个成功一个409，最终一条记录且仅一条创建成功审计",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C03-并发冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C03-并发冲突",
+              "quote": "两个并发创建请求争用同一个类型和名称"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C03-并发冲突"
+      ],
+      "tags": [
+        "C10",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C11",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "并发更新争用空闲名称不丢原记录",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C11"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "并发把两个不同记录改为同一空闲类型名称",
+          "expected": "一个成功一个409；失败方完整原记录和密文不变，仅一条更新成功审计",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C03-并发冲突"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C03-并发冲突",
+              "quote": "失败请求不得部分写入，原记录/密文不丢失"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C03-并发冲突"
+      ],
+      "tags": [
+        "C11",
+        "BUG-D23-001",
+        "409"
+      ]
+    },
+    {
+      "id": "TC-D23C-C12",
+      "module": "通知、集成、插件与运维/BUG-D23-001",
+      "title": "前端409保留草稿且可改名重试",
+      "type": "recovery",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "按已批准409规则划分创建/更新冲突、唯一性边界、授权和并发/恢复目标；数据变体与跨库执行不另计数。",
+      "coverage_item_refs": [
+        "COV-D23C-C12"
+      ],
+      "preconditions": [
+        "{自有隔离库中的原授权账号及符合标题所述占用条件的适配器；无第三方连接}"
+      ],
+      "test_data": "{合法动态类型/名称/配置；具体随机夹具见对应自动化方法}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "创建和编辑分别接收409，再更换空闲名称重试",
+          "expected": "显示冲突提示，弹窗和草稿保留；重试200后成功关闭，无重复提交",
+          "evidence_refs": [
+            "SRC-001#heading/AC-C04-错误、权限与兼容"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/AC-C04-错误、权限与兼容",
+              "quote": "前端409显示服务端冲突提示并保留草稿，改为自由名称后可重试成功"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23C-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23C-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/AC-C04-错误、权限与兼容"
+      ],
+      "tags": [
+        "C12",
+        "BUG-D23-001",
+        "409"
+      ]
+    }
+  ]
+}

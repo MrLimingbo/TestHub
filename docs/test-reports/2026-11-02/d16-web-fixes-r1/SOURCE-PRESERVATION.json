@@ -1,0 +1,12 @@
+{
+  "baselineFiles": 1438,
+  "modified": 9,
+  "added": 9,
+  "unchanged": 1429,
+  "missingBaselineFiles": [],
+  "previousPerformanceArtifactsVerified": 35,
+  "previousArtifactMismatches": [],
+  "priorSnapshotNotRewritten": true,
+  "approvalCompanionAdded": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-performance-fixes-r1/REVIEW-APPROVAL.json",
+  "storedDomainStepManifestAndDependenciesPreserved": true
+}

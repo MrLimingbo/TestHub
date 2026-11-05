@@ -1,0 +1,110 @@
+{
+  "at": "2026-11-05T05:00:32.376181+00:00",
+  "scope": "DOCUMENT_AGGREGATION_VALIDATION_ONLY",
+  "total": 12,
+  "passed": 12,
+  "failed": 0,
+  "newProductExecution": false,
+  "results": [
+    {
+      "id": "V01_closeout_approval",
+      "result": "PASS"
+    },
+    {
+      "id": "V02_module_counts",
+      "result": "PASS"
+    },
+    {
+      "id": "V03_observation_states",
+      "result": "PASS"
+    },
+    {
+      "id": "V04_bug_registry",
+      "result": "PASS"
+    },
+    {
+      "id": "V05_asset_registry",
+      "result": "PASS"
+    },
+    {
+      "id": "V06_followup_units",
+      "result": "PASS"
+    },
+    {
+      "id": "V07_D26_skipped",
+      "result": "PASS"
+    },
+    {
+      "id": "V08_environment_skipped",
+      "result": "PASS"
+    },
+    {
+      "id": "V09_independent_risk",
+      "result": "PASS"
+    },
+    {
+      "id": "V10_frozen_artifacts",
+      "result": "PASS"
+    },
+    {
+      "id": "V11_source_digests",
+      "result": "PASS"
+    },
+    {
+      "id": "V12_delivery_links",
+      "result": "PASS"
+    }
+  ],
+  "details": {
+    "V01_closeout_approval": {
+      "closeoutApproved": true
+    },
+    "V02_module_counts": {
+      "historicalCases": 3090,
+      "positive": 1643,
+      "negative": 1447,
+      "historicalPassed": 3031,
+      "historicalUnclosedFailures": 0,
+      "historicalObserved": 47,
+      "historicalBlocked": 12,
+      "historicalBugsFixed": 108,
+      "currentObservationResultsApproved": 45,
+      "currentObservationsSkippedSpecRetained": 2
+    },
+    "V04_bug_registry": {
+      "registeredTotal": 109,
+      "historicalFrozen": 108,
+      "additionalApproved": 1
+    },
+    "V05_asset_registry": {
+      "fixedRegisteredAssetIssues": 2,
+      "currentReferenceCorrections": 9
+    },
+    "V06_followup_units": {
+      "approvedBatches": 11,
+      "approvedObservations": 45,
+      "D16FormalCases": 189,
+      "D16TestMethods": 48
+    },
+    "V07_D26_skipped": {
+      "validWindows": 0,
+      "requiredWindows": 2,
+      "restored": false
+    },
+    "V08_environment_skipped": {
+      "skippedEnvironmentCases": 12,
+      "environmentGroups": 7
+    },
+    "V10_frozen_artifacts": {
+      "manifests": 17,
+      "matchedFileEntries": 418
+    },
+    "V11_source_digests": {
+      "sourceFilesMatched": 92
+    },
+    "V12_delivery_links": {
+      "localLinksChecked": 65,
+      "newProductExecution": false
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-04",
+  "status": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+  "observation": "OBS-13-E019",
+  "rule": "D21-A",
+  "newCases": {
+    "total": 17,
+    "positive": 8,
+    "negative": 9,
+    "passed": 17,
+    "failed": 0,
+    "blocked": 0,
+    "backendMethods": 13,
+    "frontendMethods": 4
+  },
+  "checks": {
+    "h2": {
+      "total": 1342,
+      "passed": 1339,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 3,
+      "suiteCount": 158
+    },
+    "mysqlAffected": {
+      "total": 44,
+      "passed": 44,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 6
+    },
+    "frontendPassed": 949,
+    "frontendFiles": 99,
+    "lint": "PASS_WITH_2_EXISTING_WARNINGS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "backendJar": "PASS",
+    "diffCheck": "PASS"
+  },
+  "priorObservationImplemented": 1,
+  "newConfirmedProductBugs": 0,
+  "newFormalTestAssetIssues": 0,
+  "productionFilesChanged": 2,
+  "schemaChanged": false,
+  "uiProductChanged": false,
+  "historicalEnvironmentBlockersDeferred": 12,
+  "otherObservationsWaitingForModuleGate": 3,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "noNextModuleExecuted": true
+}

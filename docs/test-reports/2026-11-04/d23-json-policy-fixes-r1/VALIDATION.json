@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-04",
+  "checks": {
+    "formalCases": 20,
+    "positiveNegative": [
+      9,
+      11
+    ],
+    "additionalDiagnosticMethodsExcludedFromFormalCount": 1,
+    "openNewProductBugs": 1,
+    "newBugFixExecuted": false,
+    "specificationAssociationRequirementsCriteriaCoverageItems": [
+      5,
+      5,
+      20
+    ],
+    "documentFindingsRetained": 1,
+    "specificationReadinessScore": 99,
+    "specificationReadinessGate": "needs-clarification",
+    "jsonFilesParsed": 21,
+    "sourceHashesVerified": 16,
+    "existingSourcesModified": 2,
+    "sourcesAdded": 1,
+    "otherBaselineSourcesUnchanged": 1425,
+    "priorFrozenArtifactsUnchanged": 97,
+    "observationCounts": [
+      44,
+      1,
+      2
+    ],
+    "deferredEnvironmentBlockers": 12,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "h2TotalPassedSkipped": [
+      1363,
+      1360,
+      3
+    ],
+    "mysqlTotalPassedSkipped": [
+      54,
+      54,
+      0
+    ],
+    "frontendAffectedPassed": 66,
+    "localReportLinksChecked": 79,
+    "rawLogsRemoved": 10,
+    "rawSurefireFilesRemoved": 318,
+    "diffCheck": "PASS"
+  },
+  "errors": [],
+  "validationIsNotAdditionalProductTests": true
+}

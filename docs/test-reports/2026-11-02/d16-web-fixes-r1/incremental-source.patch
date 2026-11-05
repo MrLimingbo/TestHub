@@ -1,0 +1,1075 @@
+--- a/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationController.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationController.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.uiautomation;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import io.testhub.platform.security.AuthenticatedPrincipal;
+ import io.testhub.platform.shared.api.ApiResponse;
+@@ -132,16 +134,16 @@
+     private AuthenticatedPrincipal principal(Authentication authentication) { return (AuthenticatedPrincipal) authentication.getPrincipal(); }
+ 
+     public record ProfileRequest(@NotBlank @Size(max = 120) String name, @NotBlank @Size(max = 16) String browser,
+-                                 @NotBlank @Size(max = 2048) String baseUrl, @Min(320) @Max(3840) Integer viewportWidth,
+-                                 @Min(320) @Max(2160) Integer viewportHeight, @NotNull Boolean enabled) { }
++                                 @NotBlank @Size(max = 2048) String baseUrl, @Min(320) @Max(3840) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportWidth,
++                                 @Min(320) @Max(2160) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportHeight, @NotNull Boolean enabled) { }
+     public record PageObjectRequest(@NotBlank @Size(max = 120) String name, @NotBlank @Size(max = 1024) String selectorValue,
+                                     @Size(max = 1000) String description) { }
+     public record ScenarioRequest(@NotBlank @Size(max = 26) String browserProfileId, @NotBlank @Size(max = 160) String name,
+                                   @Size(max = 2000) String description, @NotBlank @Size(max = 16) String failureStrategy,
+-                                  Map<String, String> variables, @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps) { }
++                                  @JsonDeserialize(contentUsing = UiJson.Text.class) Map<String, String> variables, @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps) { }
+     public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 32) String type,
+                               @NotBlank @Size(max = 160) String name, @Size(max = 1024) String selector,
+-                              @Size(max = 26) String pageObjectId, @Size(max = 4096) String value, @Size(max = 2048) String url,
+-                              @Size(max = 4096) String expectedText, @Min(1) @Max(60000) Integer timeoutMillis) { }
+-    public record ExecuteRequest(@Min(10) @Max(3600) Integer timeoutSeconds, @Size(max = 26) String functionalPlanId) { }
++                              @Size(max = 26) String pageObjectId, @Size(max = 4096) @JsonDeserialize(using = UiJson.Text.class) String value, @Size(max = 2048) String url,
++                              @Size(max = 4096) @JsonDeserialize(using = UiJson.Text.class) String expectedText, @Min(1) @Max(60000) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutMillis) { }
++    public record ExecuteRequest(@Min(10) @Max(3600) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutSeconds, @Size(max = 26) String functionalPlanId) { }
+ }
+--- a/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationRepository.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationRepository.java
+@@ -202,6 +202,21 @@
+                 .param("scenarioVersion", execution.scenarioVersion()).param("content", content).param("checksum", checksum).update();
+     }
+ 
++    void requireExecutableTypes(String projectId, String scenarioId) {
++        jdbc.sql("SELECT variables,steps FROM ui_automation_scenario WHERE project_id=:p AND id=:i")
++                .param("p", projectId).param("i", scenarioId).query((rs, row) -> {
++                    UiJson.requireStoredScenario(json, rs.getString("variables"), rs.getString("steps"));
++                    return true;
++                }).optional();
++    }
++    void requireRuntimeTypes(String projectId, String executionId) {
++        jdbc.sql("SELECT content FROM ui_automation_execution_manifest WHERE project_id=:p AND execution_id=:i")
++                .param("p", projectId).param("i", executionId).query((rs, row) -> {
++                    UiJson.requireStoredManifest(json, rs.getString("content"));
++                    return true;
++                }).single();
++    }
++
+     public Optional<UiAutomationManifest> findManifest(String projectId, String executionId) {
+         return jdbc.sql("""
+                 SELECT id, execution_id, scenario_id, scenario_version, content, checksum, created_at
+--- a/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleController.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleController.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.uiautomation;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import io.testhub.platform.security.AuthenticatedPrincipal;
+ import io.testhub.platform.shared.api.ApiResponse;
+@@ -50,7 +52,7 @@
+ 
+     public record ScheduleRequest(@NotBlank @Size(max = 26) String scenarioId, @Size(max = 26) String functionalPlanId,
+                                   @NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 160) String cronExpression,
+-                                  @NotBlank @Size(max = 64) String timezone, @Min(10) @Max(3600) Integer timeoutSeconds,
++                                  @NotBlank @Size(max = 64) String timezone, @Min(10) @Max(3600) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutSeconds,
+                                   @Min(0) @Max(5) Integer maxRetryAttempts, @Min(5) @Max(3600) Integer retryBackoffSeconds,
+                                   Boolean enabled) {
+         UiAutomationScheduleService.ScheduleInput input() { return new UiAutomationScheduleService.ScheduleInput(scenarioId, functionalPlanId,
+--- a/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleService.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.uiautomation;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import com.github.f4b6a3.ulid.UlidCreator;
+ import io.testhub.platform.access.AccessService;
+@@ -199,5 +201,5 @@
+     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
+ 
+     public record ScheduleInput(String scenarioId, String functionalPlanId, String name, String cronExpression, String timezone,
+-                                Integer timeoutSeconds, Integer maxRetryAttempts, Integer retryBackoffSeconds, Boolean enabled) { }
++                                @JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutSeconds, Integer maxRetryAttempts, Integer retryBackoffSeconds, Boolean enabled) { }
+ }
+--- a/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.uiautomation;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import com.github.f4b6a3.ulid.UlidCreator;
+ import io.testhub.platform.access.AccessService;
+@@ -293,7 +295,12 @@
+     public UiAutomationRunnerRuntimeConfiguration runtimeConfiguration(String runnerId, String taskId, String executionId) {
+         UiAutomationExecution execution = automation.findExecutionByTask(taskId, executionId).orElseThrow(() ->
+                 new ResponseStatusException(HttpStatus.FORBIDDEN, "Playwright Runner 运行时工件不可用"));
++        automation.requireRuntimeTypes(execution.projectId(), execution.id());
+         UiAutomationManifest manifest = automation.findManifest(execution.projectId(), execution.id()).orElseThrow();
++        variables(manifest.snapshot().scenario().variables());
++        steps(execution.projectId(), manifest.snapshot().scenario().steps().stream().map(step -> new UiAutomationStep(
++                step.id(), step.type(), step.name(), step.selector(), null, step.value(), step.url(),
++                step.expectedText(), step.timeoutMillis())).toList());
+         UiAutomationManifest.BrowserProfile profile = manifest.snapshot().browserProfile();
+         String baseUrl = targets.normalizeAndAssertAllowed(profile.baseUrl());
+         if (automation.markRuntimeClaimed(taskId, executionId, runnerId) == 0) {
+@@ -330,9 +337,11 @@
+     private UiAutomationExecution queueExecution(String organizationId, String projectId, String requestedBy, String scenarioId,
+                                                  int timeout, UiAutomationSchedule schedule, FunctionalTestPlan plan,
+                                                  UiAutomationExecution retryOf, int retryAttempt, Instant requestedAt) {
+-        UiAutomationScenario scenario = scenario(projectId, scenarioId);
++        UiAutomationScenario scenario = executableScenario(projectId, scenarioId);
+         UiAutomationBrowserProfile profile = profile(projectId, scenario.browserProfileId());
+         if (!profile.enabled()) throw conflict("浏览器配置已停用，不能执行场景");
++        validateExecutionDefinition(projectId, scenario, profile);
++        timeout(timeout);
+         String executionId = UlidCreator.getUlid().toString();
+         String taskId = UlidCreator.getUlid().toString();
+         Instant deadlineAt = requestedAt.plusSeconds(timeout);
+@@ -348,6 +357,19 @@
+         return execution;
+     }
+ 
++    private void validateExecutionDefinition(String projectId, UiAutomationScenario scenario, UiAutomationBrowserProfile profile) {
++        integer(profile.viewportWidth(), 1440, 320, 3840, "视口宽度");
++        integer(profile.viewportHeight(), 900, 320, 2160, "视口高度");
++        variables(scenario.variables());
++        steps(projectId, scenario.steps());
++    }
++
++    private UiAutomationScenario executableScenario(String projectId, String scenarioId) {
++        // Inspect raw JSON before the legacy reader can coerce values or reject them without a field error.
++        automation.requireExecutableTypes(projectId, scenarioId);
++        return scenario(projectId, scenarioId);
++    }
++
+     private void onTerminal(UiAutomationExecution execution) {
+         if (execution.scheduleId() == null) return;
+         UiAutomationSchedule schedule = schedules.findById(execution.scheduleId()).orElse(null);
+@@ -355,6 +377,18 @@
+         schedules.markOutcome(schedule.id(), execution.id(), execution.status());
+         if (!Set.of("FAILED", "REJECTED", "TIMED_OUT").contains(execution.status()) || !schedule.enabled()
+                 || execution.retryAttempt() >= schedule.maxRetryAttempts()) return;
++        try {
++            UiAutomationScenario current = executableScenario(schedule.projectId(), schedule.scenarioId());
++            validateExecutionDefinition(schedule.projectId(), current, profile(schedule.projectId(), current.browserProfileId()));
++            timeout(schedule.timeoutSeconds());
++        } catch (ResponseStatusException error) {
++            if (error.getStatusCode().value() != 400) throw error;
++            // An invalid next definition must not roll back the completed execution's outcome.
++            audit.recordSystem(schedule.organizationId(), schedule.projectId(), "UI_AUTOMATION_RETRY_PRECHECK_REJECTED",
++                    "UI_AUTOMATION_EXECUTION", execution.id(), Map.of("scheduleId", schedule.id(),
++                            "retryOfExecutionId", execution.id(), "code", "INVALID_CURRENT_DEFINITION"));
++            return;
++        }
+         FunctionalTestPlan plan = functionalPlan(execution.projectId(), schedule.functionalPlanId());
+         Instant requestedAt = Instant.now().plusSeconds(schedule.retryBackoffSeconds());
+         UiAutomationExecution retry = queueExecution(schedule.organizationId(), schedule.projectId(), schedule.createdBy(),
+@@ -534,8 +568,8 @@
+     private ResponseStatusException notFound(String message) { return new ResponseStatusException(HttpStatus.NOT_FOUND, message); }
+     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
+ 
+-    public record ProfileRequest(String name, String browser, String baseUrl, Integer viewportWidth, Integer viewportHeight, Boolean enabled) { }
++    public record ProfileRequest(String name, String browser, String baseUrl, @JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportWidth, @JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportHeight, Boolean enabled) { }
+     public record PageObjectRequest(String name, String selectorValue, String description) { }
+     public record ScenarioRequest(String browserProfileId, String name, String description, String failureStrategy,
+-                                  Map<String, String> variables, List<UiAutomationStep> steps) { }
++                                  @JsonDeserialize(contentUsing = UiJson.Text.class) Map<String, String> variables, List<UiAutomationStep> steps) { }
+ }
+--- a/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationSyncService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationSyncService.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.uiautomation;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import com.fasterxml.jackson.databind.*;
+ import com.github.f4b6a3.ulid.UlidCreator;
+@@ -171,7 +173,7 @@
+                 normalized=new Schedule(d.scenarioName(),d.functionalPlanCode()==null?null:d.functionalPlanCode().toUpperCase(Locale.ROOT),p.cronExpression(),p.timezone(),p.timeoutSeconds(),p.maxRetryAttempts(),p.retryBackoffSeconds());}
+             default -> throw invalid("Web UI 类型无效");
+         }
+-        if(!json.valueToTree(normalized).equals(json.valueToTree(item.definition()))) throw invalid("Web UI 字段不合法或尚未规范化");
++        if(!UiJson.equivalentDefinition(item.kind(),json.valueToTree(item.definition()),json.valueToTree(normalized))) throw invalid("Web UI 字段不合法或尚未规范化");
+     }
+     private void validateReferences(List<Item> items,List<String> codes) {
+         var names=new HashSet<String>();items.forEach(i->names.add(i.kind()+"\n"+i.name()));
+@@ -188,17 +190,17 @@
+     private String uuid(String v) {if(v==null||!v.matches("[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")) throw invalid("同步请求标识必须是 UUID"); return UUID.fromString(v).toString();}
+     private Item item(String kind,String name,Object definition) {return new Item(kind,name,json.convertValue(definition,new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){}));}
+     private <T> T definition(Item item,Class<T> type) {return decodeValue(encoded(item.definition()),type);}
+-    private <T> T decodeValue(byte[] bytes,Class<T> type) {try{return json.readerFor(type).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(bytes);}catch(java.io.IOException e){throw invalid("Web UI 同步 JSON 不合法或包含不支持的字段");}}
++    private <T> T decodeValue(byte[] bytes,Class<T> type) {try{return json.readerFor(type).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS, DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).readValue(bytes);}catch(java.io.IOException e){throw UiJson.rejected(e, "Web UI 同步 JSON 不合法或包含不支持的字段");}}
+     private byte[] encoded(Object value) {try{return json.writer().with(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).writeValueAsBytes(value);}catch(java.io.IOException e){throw new IllegalStateException("Web UI 同步序列化失败",e);}}
+     private String hash(byte[] bytes) {try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));}catch(java.security.NoSuchAlgorithmException e){throw new IllegalStateException(e);}}
+     private ResponseStatusException invalid(String message) {return new ResponseStatusException(HttpStatus.BAD_REQUEST,message);}
+     private ResponseStatusException conflict(String message) {return new ResponseStatusException(HttpStatus.CONFLICT,message);}
+     public record Item(String kind,String name,Map<String,Object> definition) { }
+-    public record Profile(String browser,String baseUrl,Integer viewportWidth,Integer viewportHeight) { }
++    public record Profile(String browser,String baseUrl,@JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportWidth,@JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportHeight) { }
+     public record PageObject(String selectorValue,String description) { }
+-    public record Scenario(String browserProfileName,String description,String failureStrategy,Map<String,String> variables,List<Step> steps) { }
+-    public record Step(String id,String type,String name,String selector,String pageObjectName,String value,String url,String expectedText,Integer timeoutMillis) { }
+-    public record Schedule(String scenarioName,String functionalPlanCode,String cronExpression,String timezone,Integer timeoutSeconds,Integer maxRetryAttempts,Integer retryBackoffSeconds) { }
++    public record Scenario(String browserProfileName,String description,String failureStrategy,@JsonDeserialize(contentUsing = UiJson.Text.class) Map<String,String> variables,List<Step> steps) { }
++    public record Step(String id,String type,String name,String selector,String pageObjectName,@JsonDeserialize(using = UiJson.Text.class) String value,String url,@JsonDeserialize(using = UiJson.Text.class) String expectedText,@JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutMillis) { }
++    public record Schedule(String scenarioName,String functionalPlanCode,String cronExpression,String timezone,@JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutSeconds,Integer maxRetryAttempts,Integer retryBackoffSeconds) { }
+     public record Snapshot(int version,String scope,String projectId,String actorId,String revision,List<Item> items,List<String> functionalPlanCodes,long excludedExecutions) { }
+     public record Operation(String operationId,Item item) { }
+     public record Request(String requestKey,String expectedUserId,String expectedRevision,List<Operation> operations) { }
+--- a/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationTransferService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationTransferService.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.uiautomation;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import com.fasterxml.jackson.core.JsonProcessingException;
+ import com.fasterxml.jackson.databind.DeserializationFeature;
+@@ -73,7 +75,7 @@
+                     .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(body);
+             if (request == null || request.snapshot() == null) throw invalid("Web UI 迁移资料不能为空");
+             return request;
+-        } catch (java.io.IOException error) { throw invalid("Web UI 迁移 JSON 格式不合法或包含不支持的字段"); }
++        } catch (java.io.IOException error) { throw UiJson.rejected(error, "Web UI 迁移 JSON 格式不合法或包含不支持的字段"); }
+     }
+ 
+     @Transactional(isolation = Isolation.READ_COMMITTED)
+@@ -196,10 +198,10 @@
+     private ResponseStatusException invalid(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, message); }
+     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
+     public record Snapshot(int version, String sourceProjectId, List<Profile> profiles, List<PageObject> pageObjects, List<Scenario> scenarios, List<Schedule> schedules) { }
+-    public record Profile(String id, String name, String browser, String baseUrl, int viewportWidth, int viewportHeight, boolean enabled, int version) { }
++    public record Profile(String id, String name, String browser, String baseUrl, @JsonDeserialize(using = UiJson.PrimitiveInteger.class) int viewportWidth, @JsonDeserialize(using = UiJson.PrimitiveInteger.class) int viewportHeight, boolean enabled, int version) { }
+     public record PageObject(String id, String name, String selectorValue, String description) { }
+-    public record Scenario(String id, String browserProfileId, String name, String description, String failureStrategy, int version, Map<String, String> variables, List<UiAutomationStep> steps) { }
+-    public record Schedule(String id, String scenarioId, String name, String cronExpression, String timezone, int timeoutSeconds, int maxRetryAttempts, int retryBackoffSeconds, boolean enabled, String functionalPlanCode) { }
++    public record Scenario(String id, String browserProfileId, String name, String description, String failureStrategy, int version, @JsonDeserialize(contentUsing = UiJson.Text.class) Map<String, String> variables, @JsonDeserialize(contentUsing = UiJson.StepInput.class) List<UiAutomationStep> steps) { }
++    public record Schedule(String id, String scenarioId, String name, String cronExpression, String timezone, @JsonDeserialize(using = UiJson.PrimitiveInteger.class) int timeoutSeconds, int maxRetryAttempts, int retryBackoffSeconds, boolean enabled, String functionalPlanCode) { }
+     public record ImportRequest(String requestKey, String expectedUserId, Snapshot snapshot) { }
+     public record Receipt(String id, int profiles, int pageObjects, int scenarios, int steps, int schedules) { }
+ }
+--- a/services/playwright-runner/src/protocol.js
++++ b/services/playwright-runner/src/protocol.js
+@@ -67,5 +67,26 @@
+   if (!value || value.contract !== 'testhub.playwright-runner.runtime-configuration' || value.version !== 1 || value.executionId !== task.executionId || value.taskId !== task.taskId || !value.browser || !value.scenario) throw invalid('运行时配置不兼容')
+   const base = new URL(value.browser.baseUrl)
+   if (!allowedOrigins.includes(base.origin) || !['chromium', 'firefox', 'webkit'].includes(value.browser.browser) || !Array.isArray(value.scenario.steps) || value.scenario.steps.length === 0 || value.scenario.steps.length > 300) throw invalid('运行时配置超出 Runner 安全边界')
++  for (const [field, maximum] of [['viewportWidth', 3840], ['viewportHeight', 2160]]) {
++    const number = value.browser[field]
++    if (!Number.isSafeInteger(number) || number < 320 || number > maximum) throw invalid(`browser.${field} 不合法`)
++  }
++  const variables = value.scenario.variables ?? {}
++  if (typeof variables !== 'object' || Array.isArray(variables) || Object.keys(variables).length > 50
++    || Object.entries(variables).some(([key, entry]) => !/^[A-Za-z_][A-Za-z0-9_]{0,63}$/.test(key)
++      || (entry !== null && (typeof entry !== 'string' || entry.length > 4096 || /[\r\n]/.test(entry))))) throw invalid('scenario.variables 值必须是合法字符串')
++  for (const [index, step] of value.scenario.steps.entries()) {
++    if (!step || typeof step !== 'object' || !STEP_TYPES.has(step.type)) throw invalid(`steps[${index}] 不合法`)
++    const timeout = step.timeoutMillis
++    if ((step.type === 'WAIT' && timeout == null) || (timeout != null
++      && (!Number.isSafeInteger(timeout) || timeout < (step.type === 'WAIT' ? 1 : 100) || timeout > 60000))) throw invalid(`steps[${index}].timeoutMillis 不合法`)
++    for (const field of ['value', 'expectedText']) {
++      const text = step[field]
++      if (text != null && (typeof text !== 'string' || text.length > 4096)) throw invalid(`steps[${index}].${field} 必须是字符串`)
++    }
++    if (step.type === 'FILL' && !step.value?.trim()) throw invalid(`steps[${index}].value 必填`)
++    if (step.type === 'ASSERT_TEXT' && !step.expectedText?.trim()) throw invalid(`steps[${index}].expectedText 必填`)
++    if ((step.type === 'FILL' && /[\r\n]/.test(step.value)) || (step.type === 'ASSERT_TEXT' && /[\r\n]/.test(step.expectedText))) throw invalid(`steps[${index}] 文本不能换行`)
++  }
+   return Object.freeze(value)
+ }
+--- a/src/pages/UiAutomationPage.vue
++++ b/src/pages/UiAutomationPage.vue
+@@ -1,4 +1,5 @@
+ <script setup lang="ts">
++import { webIntegerError, webOptionalInteger, webStepTimeout, webStepError } from '@/utils/webIntegerInput'
+ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch, type Ref } from 'vue'
+ import { Message } from '@arco-design/web-vue'
+ import PageHeader from '@/components/PageHeader.vue'
+@@ -13,7 +14,7 @@
+ interface Profile { id: string; name: string; browser: 'chromium' | 'firefox' | 'webkit'; baseUrl: string; viewportWidth: number; viewportHeight: number; enabled: boolean; version: number; updatedAt: string }
+ interface PageObject { id: string; name: string; selectorValue: string; description: string; updatedAt: string }
+ type StepType = 'NAVIGATE' | 'FILL' | 'CLICK' | 'ASSERT_VISIBLE' | 'ASSERT_TEXT' | 'WAIT' | 'SCREENSHOT'
+-interface Step { id: string; type: StepType; name: string; selector?: string; pageObjectId?: string; value?: string; url?: string; expectedText?: string; timeoutMillis?: number }
++interface Step { timeoutText?: string; id: string; type: StepType; name: string; selector?: string; pageObjectId?: string; value?: string; url?: string; expectedText?: string; timeoutMillis?: number }
+ interface Scenario { id: string; browserProfileId: string; name: string; description: string; failureStrategy: 'STOP' | 'CONTINUE'; variables: Record<string, string>; steps: Step[]; version: number; updatedAt: string }
+ interface FunctionalPlan { id: string; planCode: string; name: string; status: string; caseCount: number }
+ interface Schedule { id: string; scenarioId: string; functionalPlanId?: string; functionalPlanName?: string; name: string; cronExpression: string; timezone: string; timeoutSeconds: number; maxRetryAttempts: number; retryBackoffSeconds: number; enabled: boolean; lastExecutionId?: string; lastExecutionStatus?: string; lastTriggeredAt?: string }
+@@ -93,6 +94,13 @@
+   profileVisible.value = objectVisible.value = scenarioVisible.value = executeVisible.value = scheduleVisible.value = false
+ }, { flush: 'sync' })
+ const profileForm = reactive({ id: '', name: '', browser: 'chromium' as Profile['browser'], baseUrl: '', viewportWidth: 1440, viewportHeight: 900, enabled: true })
++const viewportText = reactive({ width: '1440', height: '900' })
++const executionTimeoutText = ref('300')
++const scheduleTimeoutText = ref('300')
++const widthError = computed(() => viewportText.width.trim() ? webIntegerError(viewportText.width, 320, 3840, 'viewportWidth') : '')
++const heightError = computed(() => viewportText.height.trim() ? webIntegerError(viewportText.height, 320, 2160, 'viewportHeight') : '')
++const executeError = computed(() => executionTimeoutText.value.trim() ? webIntegerError(executionTimeoutText.value, 10, 3600, 'timeoutSeconds') : '')
++const scheduleError = computed(() => scheduleTimeoutText.value.trim() ? webIntegerError(scheduleTimeoutText.value, 10, 3600, 'timeoutSeconds') : '')
+ const objectForm = reactive({ id: '', name: '', selectorValue: '', description: '' })
+ const scenarioForm = reactive<{ id: string; name: string; description: string; browserProfileId: string; failureStrategy: 'STOP' | 'CONTINUE'; variablesText: string; steps: Step[] }>({ id: '', name: '', description: '', browserProfileId: '', failureStrategy: 'STOP', variablesText: '{}', steps: [] })
+ const executeForm = reactive({ timeoutSeconds: 300, functionalPlanId: '' })
+@@ -172,11 +180,11 @@
+   // Arco must not close a replacement dialog when this callback finishes late.
+   return false
+ }
+-function resetProfile() { Object.assign(profileForm, { id: '', name: '', browser: 'chromium', baseUrl: '', viewportWidth: 1440, viewportHeight: 900, enabled: true }) }
+-function editProfile(item: Profile) { Object.assign(profileForm, item); profileVisible.value = true }
++function resetProfile() { Object.assign(viewportText, { width: '1440', height: '900' }); Object.assign(profileForm, { id: '', name: '', browser: 'chromium', baseUrl: '', viewportWidth: 1440, viewportHeight: 900, enabled: true }) }
++function editProfile(item: Profile) { Object.assign(viewportText, { width: String(item.viewportWidth), height: String(item.viewportHeight) }); Object.assign(profileForm, item); profileVisible.value = true }
+ async function saveProfile() {
+   return saveDialog(profileVisible, (project, current) => {
+-    const payload = { ...profileForm }, id = profileForm.id, base = `/api/v1/projects/${project}/ui-automation/browser-profiles`
++    const payload = { ...profileForm, viewportWidth: webOptionalInteger(viewportText.width, 320, 3840, 'viewportWidth'), viewportHeight: webOptionalInteger(viewportText.height, 320, 2160, 'viewportHeight') }, id = profileForm.id, base = `/api/v1/projects/${project}/ui-automation/browser-profiles`
+     return mutate<Profile>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload, current)
+   }, '浏览器配置已保存')
+ }
+@@ -188,10 +196,22 @@
+     return mutate<PageObject>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload, current)
+   }, '页面对象已保存')
+ }
+-function defaultStep(type: StepType = 'NAVIGATE'): Step { const id = `step-${Date.now().toString(36)}-${scenarioForm.steps.length + 1}`; if (type === 'NAVIGATE') return { id, type, name: '打开页面', url: '/' }; if (type === 'WAIT') return { id, type, name: '等待页面稳定', timeoutMillis: 1000 }; if (type === 'SCREENSHOT') return { id, type, name: '采集页面截图' }; return { id, type, name: stepMeta[type], selector: '', timeoutMillis: 10000 } }
++function stepDraft(step: Step): Step { return { ...step, timeoutText: step.timeoutMillis == null ? '' : String(step.timeoutMillis) } }
++function defaultStep(type: StepType = 'NAVIGATE'): Step {
++  const id = `step-${Date.now().toString(36)}-${scenarioForm.steps.length + 1}`
++  if (type === 'NAVIGATE') return stepDraft({ id, type, name: '打开页面', url: '/' })
++  if (type === 'WAIT') return stepDraft({ id, type, name: '等待页面稳定', timeoutMillis: 1000 })
++  if (type === 'SCREENSHOT') return stepDraft({ id, type, name: '采集页面截图' })
++  return stepDraft({ id, type, name: stepMeta[type], selector: '', timeoutMillis: 10000 })
++}
++function stepPayload(step: Step, index: number) {
++  const { timeoutText, ...payload } = step
++  return { ...payload, timeoutMillis: webStepTimeout(timeoutText ?? (step.timeoutMillis == null ? '' : String(step.timeoutMillis)), step.type, index) }
++}
++
+ function resetScenario() { Object.assign(scenarioForm, { id: '', name: '', description: '', browserProfileId: profiles.value.find(item => item.enabled)?.id ?? '', failureStrategy: 'STOP', variablesText: '{}', steps: [defaultStep()] }) }
+ function openScenario() { resetScenario(); scenarioVisible.value = true }
+-function editScenario(item: Scenario) { Object.assign(scenarioForm, { id: item.id, name: item.name, description: item.description, browserProfileId: item.browserProfileId, failureStrategy: item.failureStrategy, variablesText: JSON.stringify(item.variables, null, 2), steps: item.steps.map((step) => ({ ...step })) }); scenarioVisible.value = true }
++function editScenario(item: Scenario) { Object.assign(scenarioForm, { id: item.id, name: item.name, description: item.description, browserProfileId: item.browserProfileId, failureStrategy: item.failureStrategy, variablesText: JSON.stringify(item.variables, null, 2), steps: item.steps.map(stepDraft) }); scenarioVisible.value = true }
+ function selectorHint(step: Step) { return step.pageObjectId ? `引用页面对象：${pageObjects.value.find((item) => item.id === step.pageObjectId)?.name ?? '已删除'}` : '直接 CSS / Playwright 定位器' }
+ function requiresSelector(type: StepType) { return ['FILL', 'CLICK', 'ASSERT_VISIBLE', 'ASSERT_TEXT'].includes(type) }
+ async function saveScenario() {
+@@ -201,18 +221,18 @@
+     if (!variables || Array.isArray(variables) || typeof variables !== 'object' || Object.values(variables).some(value => typeof value !== 'string')) throw new Error('场景变量必须是字符串值的 JSON 对象')
+     const id = scenarioForm.id, base = `/api/v1/projects/${project}/ui-automation/scenarios`
+     const payload = { browserProfileId: scenarioForm.browserProfileId, name: scenarioForm.name, description: scenarioForm.description,
+-      failureStrategy: scenarioForm.failureStrategy, variables, steps: scenarioForm.steps.map(step => ({ ...step })) }
++      failureStrategy: scenarioForm.failureStrategy, variables, steps: scenarioForm.steps.map(stepPayload) }
+     return mutate<Scenario>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload, current)
+   }, 'Web UI 场景已保存', saved => { selectedScenarioId.value = saved.id })
+ }
+-function openExecution(item: Scenario) { executionScenario.value = item; Object.assign(executeForm, { timeoutSeconds: 300, functionalPlanId: '' }); executeVisible.value = true }
++function openExecution(item: Scenario) { executionTimeoutText.value = '300'; executionScenario.value = item; Object.assign(executeForm, { timeoutSeconds: 300, functionalPlanId: '' }); executeVisible.value = true }
+ async function execute() {
+   if (disposed || !executeVisible.value || !executionScenario.value || saving.value) return false
+   const scenarioId = executionScenario.value.id, project = projectId.value, revision = saveRevision, sameProject = projectGuard()
+   const current = () => sameProject() && revision === saveRevision && executeVisible.value
+-  const payload = { timeoutSeconds: executeForm.timeoutSeconds, functionalPlanId: executeForm.functionalPlanId || null }
+   saving.value = true
+   try {
++    const payload = { timeoutSeconds: webOptionalInteger(executionTimeoutText.value, 10, 3600, 'timeoutSeconds', 300), functionalPlanId: executeForm.functionalPlanId || null }
+     await withBrowser(scenarioId, async () => {
+       const execution = await mutate<Execution>(`/api/v1/projects/${project}/ui-automation/scenarios/${scenarioId}/executions`, 'POST', payload, current)
+       if (!current()) return
+@@ -225,13 +245,13 @@
+ }
+ async function cancelExecution(item: Execution) { try { const updated = await mutate<Execution>(`/api/v1/projects/${projectId.value}/ui-automation/executions/${item.id}/cancel`, 'POST'); Object.assign(item, updated); Message.success(updated.status === 'CANCELLED' ? '任务已取消' : '已向 Runner 发出取消指令') } catch (error) { Message.error(error instanceof Error ? error.message : '取消失败') } }
+ async function retryExecution(item: Execution) { try { await withBrowser(item.scenarioId, async () => { const execution = await mutate<Execution>(`/api/v1/projects/${projectId.value}/ui-automation/executions/${item.id}/retry`, 'POST'); executions.value.unshift(execution); Message.success('失败执行已重新排队') }) } catch (error) { Message.error(error instanceof Error ? error.message : '重试失败') } }
+-function resetSchedule() { Object.assign(scheduleForm, { id: '', scenarioId: selectedScenarioId.value || scenarios.value[0]?.id || '', functionalPlanId: '', name: '', cronExpression: '0 0 9 ? * MON-FRI', timezone: 'Asia/Shanghai', timeoutSeconds: 300, maxRetryAttempts: 1, retryBackoffSeconds: 30, enabled: true }) }
+-function editSchedule(item: Schedule) { Object.assign(scheduleForm, { ...item, functionalPlanId: item.functionalPlanId ?? '' }); scheduleVisible.value = true }
++function resetSchedule() { scheduleTimeoutText.value = '300'; Object.assign(scheduleForm, { id: '', scenarioId: selectedScenarioId.value || scenarios.value[0]?.id || '', functionalPlanId: '', name: '', cronExpression: '0 0 9 ? * MON-FRI', timezone: 'Asia/Shanghai', timeoutSeconds: 300, maxRetryAttempts: 1, retryBackoffSeconds: 30, enabled: true }) }
++function editSchedule(item: Schedule) { scheduleTimeoutText.value = String(item.timeoutSeconds); Object.assign(scheduleForm, { ...item, functionalPlanId: item.functionalPlanId ?? '' }); scheduleVisible.value = true }
+ async function saveSchedule() {
+   return saveDialog(scheduleVisible, async (project, current) => {
+-    const id = scheduleForm.id, payload = { ...scheduleForm, functionalPlanId: scheduleForm.functionalPlanId || null }
++    const id = scheduleForm.id, source = JSON.stringify({ ...scheduleForm, timeoutText: scheduleTimeoutText.value }), payload = { ...scheduleForm, timeoutSeconds: webOptionalInteger(scheduleTimeoutText.value, 10, 3600, 'timeoutSeconds', 300), functionalPlanId: scheduleForm.functionalPlanId || null }
+     await withBrowser(payload.enabled ? payload.scenarioId : '', async () => {
+-      if (JSON.stringify(payload) !== JSON.stringify({ ...scheduleForm, functionalPlanId: scheduleForm.functionalPlanId || null }))
++      if (source !== JSON.stringify({ ...scheduleForm, timeoutText: scheduleTimeoutText.value }))
+         throw new Error('定时计划配置已变化，请重新确认后保存。')
+       const base = `/api/v1/projects/${project}/ui-automation/schedules`
+       await mutate<Schedule>(id ? `${base}/${id}` : base, id ? 'PUT' : 'POST', payload, current)
+@@ -285,11 +305,11 @@
+     <section class="workspace"><aside class="scenario-list panel"><div class="section-heading"><div><span class="eyebrow">SCENARIOS</span><h3>自动化场景</h3></div><a-button type="text" size="small" @click="resetScenario(); scenarioVisible = true"><icon-plus /></a-button></div><a-spin :loading="loading"><button v-for="item in scenarios" :key="item.id" class="scenario-item" :class="{ selected: selectedScenarioId === item.id }" @click="selectedScenarioId = item.id"><div><strong>{{ item.name }}</strong><small>{{ item.steps.length }} 步 · {{ item.failureStrategy === 'CONTINUE' ? '继续执行' : '失败停止' }}</small></div><a-tag size="small">v{{ item.version }}</a-tag></button><a-empty v-if="!loading && !scenarios.length" description="尚无场景" /></a-spin></aside>
+       <main v-if="selectedScenario" class="scenario-detail"><section class="scenario-header panel"><div><span class="eyebrow">SCENARIO · V{{ selectedScenario.version }}</span><h2>{{ selectedScenario.name }}</h2><p>{{ selectedScenario.description || '暂未填写场景说明。' }}</p></div><a-space><a-button :disabled="(!localDesktop && !executable.length) || preparingBrowser" @click="openExecution(selectedScenario)"><icon-play-circle /> 执行场景</a-button><a-button type="primary" @click="editScenario(selectedScenario)"><icon-edit /> 编辑编排</a-button></a-space></section><section class="scenario-overview panel"><div><span>浏览器项目</span><strong>{{ profiles.find((item) => item.id === selectedScenario?.browserProfileId)?.name ?? '已删除' }}</strong></div><div><span>失败策略</span><strong>{{ selectedScenario.failureStrategy === 'CONTINUE' ? '继续后续步骤' : '首次失败停止' }}</strong></div><div><span>变量</span><strong>{{ Object.keys(selectedScenario.variables).length }}</strong></div><div><span>已保存步骤</span><strong>{{ selectedScenario.steps.length }}</strong></div></section><section class="step-panel panel"><div class="section-heading"><div><span class="eyebrow">DECLARATIVE FLOW</span><h3>步骤编排</h3></div><span class="step-boundary">无脚本 · 无任意网络 · 受控 Runner</span></div><ol class="step-list"><li v-for="(step, index) in selectedScenario.steps" :key="step.id"><span class="step-index">{{ index + 1 }}</span><article><header><a-tag color="arcoblue">{{ stepMeta[step.type] }}</a-tag><strong>{{ step.name }}</strong><small>{{ step.timeoutMillis ? `${step.timeoutMillis}ms` : '默认 30s' }}</small></header><code v-if="step.url">{{ step.url }}</code><code v-if="step.selector">{{ step.selector }}</code><p v-if="step.value">填写：{{ step.value }}</p><p v-if="step.expectedText">期望文本：{{ step.expectedText }}</p><p v-if="step.pageObjectId">页面对象：{{ pageObjects.find((item) => item.id === step.pageObjectId)?.name ?? '已解析到执行清单' }}</p></article></li></ol></section><section class="execution-panel panel"><div class="section-heading"><div><span class="eyebrow">RUN HISTORY</span><h3>执行记录</h3></div><a-button size="small" @click="loadAssets()"><icon-refresh /> 刷新</a-button></div><a-table :data="executions.filter((item) => item.scenarioId === selectedScenario?.id)" :pagination="false" row-key="id" size="small"><template #columns><a-table-column title="任务"><template #cell="{ record }"><strong>{{ record.taskId }}</strong><small v-if="record.retryAttempt" class="code">重试 #{{ record.retryAttempt }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusText(record.status) }}</a-tag><small class="code">{{ record.statusCode }}</small></template></a-table-column><a-table-column title="关联"><template #cell="{ record }"><span>{{ record.functionalPlanName || '未关联计划' }}</span><small v-if="record.scheduleId" class="code">定时计划</small></template></a-table-column><a-table-column title="Runner" data-index="runnerId" /><a-table-column title="提交时间"><template #cell="{ record }">{{ date(record.requestedAt) }}</template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button size="mini" @click="openReport(record)">报告</a-button><a-button v-if="['QUEUED','ACCEPTED','RUNNING','CANCELLING'].includes(record.status)" size="mini" status="warning" :disabled="record.status === 'CANCELLING'" @click="cancelExecution(record)">取消</a-button><a-button v-if="['FAILED','REJECTED','TIMED_OUT'].includes(record.status)" size="mini" @click="retryExecution(record)">重试</a-button></a-space></template></a-table-column></template></a-table><a-empty v-if="!executions.some((item) => item.scenarioId === selectedScenario?.id)" description="当前场景暂无执行记录" /></section></main>
+       <main v-else class="panel empty"><a-empty description="选择或创建一个 Web UI 自动化场景"><template #extra><a-button type="primary" @click="resetScenario(); scenarioVisible = true">创建场景</a-button></template></a-empty></main></section>
+-    <a-modal v-model:visible="profileVisible" :title="profileForm.id ? '编辑浏览器项目' : '新建浏览器项目'" :ok-loading="saving" :on-before-ok="saveProfile"><a-form :model="profileForm" layout="vertical"><a-form-item label="配置名称" required><a-input v-model="profileForm.name" placeholder="例如：订单 Web · Chromium" /></a-form-item><div class="two"><a-form-item label="浏览器"><a-select v-model="profileForm.browser"><a-option value="chromium">Chromium</a-option><a-option value="firefox">Firefox</a-option><a-option value="webkit">WebKit</a-option></a-select></a-form-item><a-form-item label="启用状态"><a-switch v-model="profileForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item></div><a-form-item label="基准 URL" required><a-input v-model="profileForm.baseUrl" placeholder="https://web.example.test" /><template #extra>只能使用系统配置 ui-automation.allowed-origins 中列出的 Origin。</template></a-form-item><div class="two"><a-form-item label="视口宽度"><a-input-number v-model="profileForm.viewportWidth" :min="320" :max="3840" /></a-form-item><a-form-item label="视口高度"><a-input-number v-model="profileForm.viewportHeight" :min="320" :max="2160" /></a-form-item></div></a-form></a-modal>
++    <a-modal v-model:visible="profileVisible" :title="profileForm.id ? '编辑浏览器项目' : '新建浏览器项目'" :ok-loading="saving" :on-before-ok="saveProfile"><a-form :model="profileForm" layout="vertical"><a-form-item label="配置名称" required><a-input v-model="profileForm.name" placeholder="例如：订单 Web · Chromium" /></a-form-item><div class="two"><a-form-item label="浏览器"><a-select v-model="profileForm.browser"><a-option value="chromium">Chromium</a-option><a-option value="firefox">Firefox</a-option><a-option value="webkit">WebKit</a-option></a-select></a-form-item><a-form-item label="启用状态"><a-switch v-model="profileForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item></div><a-form-item label="基准 URL" required><a-input v-model="profileForm.baseUrl" placeholder="https://web.example.test" /><template #extra>只能使用系统配置 ui-automation.allowed-origins 中列出的 Origin。</template></a-form-item><div class="two"><a-form-item label="视口宽度" :validate-status="widthError ? 'error' : undefined" :help="widthError"><a-input v-model="viewportText.width" aria-label="Web viewportWidth" inputmode="decimal" /></a-form-item><a-form-item label="视口高度" :validate-status="heightError ? 'error' : undefined" :help="heightError"><a-input v-model="viewportText.height" aria-label="Web viewportHeight" inputmode="decimal" /></a-form-item></div></a-form></a-modal>
+     <a-modal v-model:visible="objectVisible" :title="objectForm.id ? '编辑页面对象' : '新建页面对象'" :ok-loading="saving" :on-before-ok="saveObject"><a-form :model="objectForm" layout="vertical"><a-form-item label="名称" required><a-input v-model="objectForm.name" placeholder="例如：登录按钮" /></a-form-item><a-form-item label="定位器" required><a-input v-model="objectForm.selectorValue" placeholder="例如：[data-testid='login-submit']" /></a-form-item><a-form-item label="说明"><a-textarea v-model="objectForm.description" :auto-size="{ minRows: 2, maxRows: 4 }" /></a-form-item></a-form></a-modal>
+-    <a-modal v-model:visible="executeVisible" title="执行 Web UI 场景" :ok-loading="saving" :on-before-ok="execute" @cancel="cancelPreparation"><a-form :model="executeForm" layout="vertical"><a-alert type="info" :show-icon="true" class="execute-hint">执行清单会在入队时冻结，浏览器与网络访问仅发生在隔离的 Playwright Runner 内。</a-alert><a-form-item label="执行超时（秒）"><a-input-number v-model="executeForm.timeoutSeconds" :min="10" :max="3600" /></a-form-item><a-form-item label="关联功能测试计划（可选）"><a-select v-model="executeForm.functionalPlanId" allow-clear placeholder="把这次自动化执行纳入功能测试追溯"><a-option v-for="item in functionalPlans" :key="item.id" :value="item.id">{{ item.planCode }} · {{ item.name }}</a-option></a-select><template #extra>关联后会在执行记录和报告中保留计划快照；不会改写功能测试用例的人工执行结果。</template></a-form-item></a-form></a-modal>
+-    <a-modal v-model:visible="scheduleVisible" :title="scheduleForm.id ? '编辑定时计划' : '新建定时计划'" width="680px" :ok-loading="saving" :on-before-ok="saveSchedule" @cancel="cancelPreparation"><a-form :model="scheduleForm" layout="vertical"><div class="two"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" placeholder="例如：工作日登录巡检" /></a-form-item><a-form-item label="执行场景" required><a-select v-model="scheduleForm.scenarioId"><a-option v-for="item in scenarios" :key="item.id" :value="item.id">{{ item.name }}</a-option></a-select></a-form-item></div><a-form-item label="关联功能测试计划（可选）"><a-select v-model="scheduleForm.functionalPlanId" allow-clear placeholder="不关联"><a-option v-for="item in functionalPlans" :key="item.id" :value="item.id">{{ item.planCode }} · {{ item.name }}</a-option></a-select></a-form-item><div class="two"><a-form-item label="Quartz Cron" required><a-input v-model="scheduleForm.cronExpression" placeholder="0 0 9 ? * MON-FRI" /></a-form-item><a-form-item label="时区" required><a-select v-model="scheduleForm.timezone"><a-option value="Asia/Shanghai">Asia/Shanghai</a-option><a-option value="UTC">UTC</a-option></a-select></a-form-item></div><div class="three"><a-form-item label="执行超时（秒）"><a-input-number v-model="scheduleForm.timeoutSeconds" :min="10" :max="3600" /></a-form-item><a-form-item label="失败重试次数"><a-input-number v-model="scheduleForm.maxRetryAttempts" :min="0" :max="5" /></a-form-item><a-form-item label="重试间隔（秒）"><a-input-number v-model="scheduleForm.retryBackoffSeconds" :min="5" :max="3600" /></a-form-item></div><a-form-item label="启用计划"><a-switch v-model="scheduleForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item><a-alert type="warning" :show-icon="true">重试仅在 Runner 返回失败、拒绝或超时时执行；用户主动取消不会重新排队。Cron 使用 Quartz 的六或七段格式。</a-alert></a-form></a-modal>
+-    <a-modal v-model:visible="scenarioVisible" :title="scenarioForm.id ? '编辑 Web UI 场景' : '新建 Web UI 场景'" width="920px" :ok-loading="saving" :on-before-ok="saveScenario"><a-form :model="scenarioForm" layout="vertical"><div class="two"><a-form-item label="场景名称" required><a-input v-model="scenarioForm.name" placeholder="例如：用户登录成功" /></a-form-item><a-form-item label="浏览器项目" required><a-select v-model="scenarioForm.browserProfileId" placeholder="选择已启用配置"><a-option v-for="item in profiles.filter((item) => item.enabled)" :key="item.id" :value="item.id">{{ item.name }} · {{ item.browser }}</a-option></a-select></a-form-item></div><a-form-item label="场景说明"><a-textarea v-model="scenarioForm.description" :auto-size="{ minRows: 2, maxRows: 3 }" /></a-form-item><div class="two"><a-form-item label="失败策略"><a-radio-group v-model="scenarioForm.failureStrategy"><a-radio value="STOP">首次失败停止</a-radio><a-radio value="CONTINUE">失败后继续</a-radio></a-radio-group></a-form-item><a-form-item label="变量（JSON 对象）"><a-textarea v-model="scenarioForm.variablesText" :auto-size="{ minRows: 2, maxRows: 4 }" placeholder="{ &quot;account&quot;: &quot;demo&quot; }" /></a-form-item></div><div class="form-heading"><div><strong>声明式步骤</strong><span>变量使用 <code v-pre>{{variable}}</code>；不会在控制面执行用户脚本。</span></div><a-select :model-value="'NAVIGATE'" :style="{ width: '150px' }" @change="(value) => scenarioForm.steps.push(defaultStep(value as StepType))"><a-option v-for="type in Object.keys(stepMeta)" :key="type" :value="type">添加 {{ stepMeta[type as StepType] }}</a-option></a-select></div><article v-for="(step, index) in scenarioForm.steps" :key="step.id" class="step-form"><header><strong>步骤 {{ index + 1 }}</strong><a-space><a-select v-model="step.type" :style="{ width: '130px' }"><a-option v-for="type in Object.keys(stepMeta)" :key="type" :value="type">{{ stepMeta[type as StepType] }}</a-option></a-select><a-button type="text" status="danger" :disabled="scenarioForm.steps.length === 1" @click="scenarioForm.steps.splice(index, 1)"><icon-delete /></a-button></a-space></header><div class="step-grid"><a-form-item label="步骤名称"><a-input v-model="step.name" /></a-form-item><a-form-item v-if="step.type === 'NAVIGATE'" label="页面路径"><a-input v-model="step.url" placeholder="/login 或 https://same-origin/path" /></a-form-item><a-form-item v-else-if="step.type === 'WAIT'" label="等待毫秒"><a-input-number v-model="step.timeoutMillis" :min="1" :max="60000" /></a-form-item><a-form-item v-else-if="requiresSelector(step.type)" label="页面对象（可选）"><a-select v-model="step.pageObjectId" allow-clear placeholder="引用已维护对象"><a-option v-for="item in pageObjects" :key="item.id" :value="item.id">{{ item.name }}</a-option></a-select></a-form-item></div><a-form-item v-if="requiresSelector(step.type)" label="定位器"><a-input v-model="step.selector" :disabled="!!step.pageObjectId" :placeholder="selectorHint(step)" /></a-form-item><a-form-item v-if="step.type === 'FILL'" label="填写内容"><a-input v-model="step.value" placeholder="可使用 {{account}}" /></a-form-item><a-form-item v-if="step.type === 'ASSERT_TEXT'" label="期望文本"><a-input v-model="step.expectedText" /></a-form-item><a-form-item v-if="step.type !== 'WAIT' && step.type !== 'SCREENSHOT'" label="步骤超时（毫秒）"><a-input-number v-model="step.timeoutMillis" :min="100" :max="60000" /></a-form-item></article></a-form></a-modal>
++    <a-modal v-model:visible="executeVisible" title="执行 Web UI 场景" :ok-loading="saving" :on-before-ok="execute" @cancel="cancelPreparation"><a-form :model="executeForm" layout="vertical"><a-alert type="info" :show-icon="true" class="execute-hint">执行清单会在入队时冻结，浏览器与网络访问仅发生在隔离的 Playwright Runner 内。</a-alert><a-form-item label="执行超时（秒）" :validate-status="executeError ? 'error' : undefined" :help="executeError"><a-input v-model="executionTimeoutText" aria-label="Web execute timeoutSeconds" inputmode="decimal" /></a-form-item><a-form-item label="关联功能测试计划（可选）"><a-select v-model="executeForm.functionalPlanId" allow-clear placeholder="把这次自动化执行纳入功能测试追溯"><a-option v-for="item in functionalPlans" :key="item.id" :value="item.id">{{ item.planCode }} · {{ item.name }}</a-option></a-select><template #extra>关联后会在执行记录和报告中保留计划快照；不会改写功能测试用例的人工执行结果。</template></a-form-item></a-form></a-modal>
++    <a-modal v-model:visible="scheduleVisible" :title="scheduleForm.id ? '编辑定时计划' : '新建定时计划'" width="680px" :ok-loading="saving" :on-before-ok="saveSchedule" @cancel="cancelPreparation"><a-form :model="scheduleForm" layout="vertical"><div class="two"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" placeholder="例如：工作日登录巡检" /></a-form-item><a-form-item label="执行场景" required><a-select v-model="scheduleForm.scenarioId"><a-option v-for="item in scenarios" :key="item.id" :value="item.id">{{ item.name }}</a-option></a-select></a-form-item></div><a-form-item label="关联功能测试计划（可选）"><a-select v-model="scheduleForm.functionalPlanId" allow-clear placeholder="不关联"><a-option v-for="item in functionalPlans" :key="item.id" :value="item.id">{{ item.planCode }} · {{ item.name }}</a-option></a-select></a-form-item><div class="two"><a-form-item label="Quartz Cron" required><a-input v-model="scheduleForm.cronExpression" placeholder="0 0 9 ? * MON-FRI" /></a-form-item><a-form-item label="时区" required><a-select v-model="scheduleForm.timezone"><a-option value="Asia/Shanghai">Asia/Shanghai</a-option><a-option value="UTC">UTC</a-option></a-select></a-form-item></div><div class="three"><a-form-item label="执行超时（秒）" :validate-status="scheduleError ? 'error' : undefined" :help="scheduleError"><a-input v-model="scheduleTimeoutText" aria-label="Web schedule timeoutSeconds" inputmode="decimal" /></a-form-item><a-form-item label="失败重试次数"><a-input-number v-model="scheduleForm.maxRetryAttempts" :min="0" :max="5" /></a-form-item><a-form-item label="重试间隔（秒）"><a-input-number v-model="scheduleForm.retryBackoffSeconds" :min="5" :max="3600" /></a-form-item></div><a-form-item label="启用计划"><a-switch v-model="scheduleForm.enabled" checked-text="启用" unchecked-text="停用" /></a-form-item><a-alert type="warning" :show-icon="true">重试仅在 Runner 返回失败、拒绝或超时时执行；用户主动取消不会重新排队。Cron 使用 Quartz 的六或七段格式。</a-alert></a-form></a-modal>
++    <a-modal v-model:visible="scenarioVisible" :title="scenarioForm.id ? '编辑 Web UI 场景' : '新建 Web UI 场景'" width="920px" :ok-loading="saving" :on-before-ok="saveScenario"><a-form :model="scenarioForm" layout="vertical"><div class="two"><a-form-item label="场景名称" required><a-input v-model="scenarioForm.name" placeholder="例如：用户登录成功" /></a-form-item><a-form-item label="浏览器项目" required><a-select v-model="scenarioForm.browserProfileId" placeholder="选择已启用配置"><a-option v-for="item in profiles.filter((item) => item.enabled)" :key="item.id" :value="item.id">{{ item.name }} · {{ item.browser }}</a-option></a-select></a-form-item></div><a-form-item label="场景说明"><a-textarea v-model="scenarioForm.description" :auto-size="{ minRows: 2, maxRows: 3 }" /></a-form-item><div class="two"><a-form-item label="失败策略"><a-radio-group v-model="scenarioForm.failureStrategy"><a-radio value="STOP">首次失败停止</a-radio><a-radio value="CONTINUE">失败后继续</a-radio></a-radio-group></a-form-item><a-form-item label="变量（JSON 对象）"><a-textarea v-model="scenarioForm.variablesText" :auto-size="{ minRows: 2, maxRows: 4 }" placeholder="{ &quot;account&quot;: &quot;demo&quot; }" /></a-form-item></div><div class="form-heading"><div><strong>声明式步骤</strong><span>变量使用 <code v-pre>{{variable}}</code>；不会在控制面执行用户脚本。</span></div><a-select :model-value="'NAVIGATE'" :style="{ width: '150px' }" @change="(value) => scenarioForm.steps.push(defaultStep(value as StepType))"><a-option v-for="type in Object.keys(stepMeta)" :key="type" :value="type">添加 {{ stepMeta[type as StepType] }}</a-option></a-select></div><article v-for="(step, index) in scenarioForm.steps" :key="step.id" class="step-form"><header><strong>步骤 {{ index + 1 }}</strong><a-space><a-select v-model="step.type" :style="{ width: '130px' }"><a-option v-for="type in Object.keys(stepMeta)" :key="type" :value="type">{{ stepMeta[type as StepType] }}</a-option></a-select><a-button type="text" status="danger" :disabled="scenarioForm.steps.length === 1" @click="scenarioForm.steps.splice(index, 1)"><icon-delete /></a-button></a-space></header><div class="step-grid"><a-form-item label="步骤名称"><a-input v-model="step.name" /></a-form-item><a-form-item v-if="step.type === 'NAVIGATE'" label="页面路径"><a-input v-model="step.url" placeholder="/login 或 https://same-origin/path" /></a-form-item><a-form-item v-else-if="step.type === 'WAIT'" label="等待毫秒" :validate-status="webStepError(step.timeoutText ?? '', step.type) ? 'error' : undefined" :help="webStepError(step.timeoutText ?? '', step.type)"><a-input v-model="step.timeoutText" :aria-label="`Web 步骤 ${index + 1} timeoutMillis`" inputmode="decimal" /></a-form-item><a-form-item v-else-if="requiresSelector(step.type)" label="页面对象（可选）"><a-select v-model="step.pageObjectId" allow-clear placeholder="引用已维护对象"><a-option v-for="item in pageObjects" :key="item.id" :value="item.id">{{ item.name }}</a-option></a-select></a-form-item></div><a-form-item v-if="requiresSelector(step.type)" label="定位器"><a-input v-model="step.selector" :disabled="!!step.pageObjectId" :placeholder="selectorHint(step)" /></a-form-item><a-form-item v-if="step.type === 'FILL'" label="填写内容"><a-input v-model="step.value" placeholder="可使用 {{account}}" /></a-form-item><a-form-item v-if="step.type === 'ASSERT_TEXT'" label="期望文本"><a-input v-model="step.expectedText" /></a-form-item><a-form-item v-if="step.type !== 'WAIT' && step.type !== 'SCREENSHOT'" label="步骤超时（毫秒）" :validate-status="webStepError(step.timeoutText ?? '', step.type) ? 'error' : undefined" :help="webStepError(step.timeoutText ?? '', step.type)"><a-input v-model="step.timeoutText" :aria-label="`Web 步骤 ${index + 1} timeoutMillis`" inputmode="decimal" /></a-form-item></article></a-form></a-modal>
+     <a-drawer v-model:visible="reportVisible" width="760px" :footer="false" @cancel="closeReport"><template #title>Web UI 自动化报告</template><a-alert v-if="reportError" type="error">{{ reportError }}</a-alert><a-spin :loading="!report && !reportError"><template v-if="report"><section class="report-title"><div><strong>{{ report.execution.scenarioName }}</strong><small>{{ report.execution.taskId }}</small></div><a-tag :color="statusColor(report.execution.status)">{{ statusText(report.execution.status) }}</a-tag></section><div class="report-summary"><div><span>步骤数</span><strong>{{ report.summary.totalSteps }}</strong></div><div><span>通过</span><strong>{{ report.summary.passedSteps }}</strong></div><div><span>失败</span><strong>{{ report.summary.failedSteps }}</strong></div><div><span>累计耗时</span><strong>{{ report.summary.totalDurationMillis }}ms</strong></div></div><section v-if="firstFailedStep" class="failure-locator"><div><span class="eyebrow">FAILURE LOCATOR</span><h3>#{{ firstFailedStep.stepSequence }} · {{ firstFailedStep.stepName }}</h3><p>{{ firstFailedStep.errorMessage || 'Runner 未提供额外错误信息。' }}</p></div><a-tag color="red">{{ firstFailedStep.stepType }}</a-tag></section><section class="report-section"><h3>步骤结果</h3><a-timeline><a-timeline-item v-for="step in report.steps" :key="step.id" :dot-color="step.outcome === 'PASSED' ? 'green' : 'red'" :label="`#${step.stepSequence} · ${step.durationMillis}ms`"><strong>{{ step.stepName }}</strong><a-tag size="small" :color="step.outcome === 'PASSED' ? 'green' : 'red'">{{ step.outcome }}</a-tag><p v-if="step.errorMessage">{{ step.errorMessage }}</p></a-timeline-item></a-timeline><a-empty v-if="!report.steps.length" description="等待 Runner 回传步骤结果" /></section><section class="report-section"><h3>工件与失败现场</h3><div v-if="visualArtifacts.length" class="visual-artifacts"><article v-for="item in visualArtifacts" :key="item.id" class="visual-artifact"><a-image v-if="item.artifactType === 'SCREENSHOT'" :src="artifactViewUrl(item)" :alt="item.originalName" width="100%" /><video v-else controls preload="metadata" :src="artifactViewUrl(item)">当前浏览器不支持视频预览。</video><div><strong>{{ item.artifactType === 'SCREENSHOT' ? '截图' : '执行视频' }}</strong><small>{{ item.originalName }} · {{ size(item.sizeBytes) }} · {{ date(item.createdAt) }}</small></div></article></div><div v-for="item in report.artifacts.filter((entry) => entry.artifactType === 'TRACE')" :key="item.id" class="artifact"><div><strong>TRACE</strong><small>{{ item.originalName }} · {{ size(item.sizeBytes) }} · 可在 Playwright Trace Viewer 中打开</small></div><a-link :href="artifactUrl(item)" target="_blank">下载 Trace</a-link></div><a-empty v-if="!report.artifacts.length" description="Runner 完成后将归档截图、Trace 和视频" /></section></template></a-spin></a-drawer>
+     <UiAutomationHistoryPanel :project-id="projectId" />
+   </div>
+--- /dev/null
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiJson.java
+@@ -0,0 +1,121 @@
++package io.testhub.platform.uiautomation;
++
++import com.fasterxml.jackson.core.JsonParser;
++import com.fasterxml.jackson.core.JsonToken;
++import com.fasterxml.jackson.databind.DeserializationContext;
++import com.fasterxml.jackson.databind.DeserializationFeature;
++import com.fasterxml.jackson.databind.JsonMappingException;
++import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
++import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
++import com.fasterxml.jackson.databind.node.ObjectNode;
++import java.io.IOException;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++import org.springframework.http.HttpStatus;
++import org.springframework.web.server.ResponseStatusException;
++
++/** Write and execution boundary rules; stored domain records retain their legacy read contract. */
++public final class UiJson {
++    private UiJson() { }
++    private static final Set<String> FIELDS = Set.of("viewportWidth", "viewportHeight", "timeoutMillis", "timeoutSeconds", "variables", "value", "expectedText");
++    public static class IntegerValue extends StdDeserializer<Integer> {
++        public IntegerValue() { super(Integer.class); }
++        @Override public Integer deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            if (parser.currentToken().isNumeric()) {
++                try { return parser.getDecimalValue().intValueExact(); }
++                catch (ArithmeticException | NumberFormatException ignored) { /* Never discard the fractional part. */ }
++            }
++            return context.reportInputMismatch(Integer.class, "Web 数字字段必须是精确整数 JSON 数值");
++        }
++    }
++    public static final class PrimitiveInteger extends IntegerValue {
++        @Override public Integer getNullValue(DeserializationContext context) { return 0; }
++    }
++    public static final class Text extends StdDeserializer<String> {
++        public Text() { super(String.class); }
++        @Override public String deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            if (parser.hasToken(JsonToken.VALUE_STRING)) return parser.getText();
++            return context.reportInputMismatch(String.class, "Web 变量或步骤文本必须是 JSON 字符串");
++        }
++    }
++    public record StepFields(String id, String type, String name, String selector, String pageObjectId,
++            @JsonDeserialize(using = Text.class) String value, String url,
++            @JsonDeserialize(using = Text.class) String expectedText,
++            @JsonDeserialize(using = IntegerValue.class) Integer timeoutMillis) { }
++    public static final class StepInput extends StdDeserializer<UiAutomationStep> {
++        public StepInput() { super(UiAutomationStep.class); }
++        @Override public UiAutomationStep deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            StepFields s = context.readValue(parser, StepFields.class);
++            return new UiAutomationStep(s.id(), s.type(), s.name(), s.selector(), s.pageObjectId(), s.value(), s.url(), s.expectedText(), s.timeoutMillis());
++        }
++    }
++    static String field(Throwable error) {
++        for (int depth = 0; error != null && depth < 12; depth++, error = error.getCause()) {
++            if (error instanceof JsonMappingException mapping) {
++                String container = null; int index = -1;
++                for (var reference : mapping.getPath()) {
++                    String name = reference.getFieldName();
++                    if (name != null && Set.of("steps", "profiles", "scenarios", "schedules").contains(name)) { container = name; index = -1; }
++                    if (reference.getIndex() >= 0) index = reference.getIndex();
++                    if (name != null && FIELDS.contains(name)) return (container == null ? "" : container + (index < 0 ? "" : "[" + index + "]") + ".") + name;
++                }
++            }
++        }
++        return null;
++    }
++    static ResponseStatusException rejected(IOException error, String fallback) {
++        String field = field(error);
++        return new ResponseStatusException(HttpStatus.BAD_REQUEST, field == null ? fallback : "Web 字段 " + field + " 类型或数值不合法");
++    }
++    private record StoredScenario(@JsonDeserialize(contentUsing = Text.class) Map<String, String> variables,
++            @JsonDeserialize(contentUsing = StepInput.class) List<UiAutomationStep> steps) { }
++    private record StoredBrowser(String name, String browser, String baseUrl,
++            @JsonDeserialize(using = IntegerValue.class) Integer viewportWidth,
++            @JsonDeserialize(using = IntegerValue.class) Integer viewportHeight) { }
++    private record StoredManifest(String contract, Integer manifestVersion, StoredBrowser browserProfile, StoredScenario scenario) { }
++    static void requireStoredScenario(ObjectMapper json, String variables, String steps) {
++        try {
++            json.readerFor(StoredScenario.class).without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
++                    .readValue("{\"variables\":" + (variables == null ? "{}" : variables) + ",\"steps\":" + (steps == null ? "[]" : steps) + "}");
++        } catch (IOException error) { throw rejected(error, "已保存的 Web 目标字段类型不合法，请先编辑修复"); }
++    }
++    static void requireStoredManifest(ObjectMapper json, String content) {
++        try {
++            StoredManifest value = json.readerFor(StoredManifest.class).without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).readValue(content);
++            if (value == null || value.browserProfile() == null || value.scenario() == null || value.scenario().steps() == null)
++                throw new IOException();
++            integer(value.browserProfile().viewportWidth(), 320, 3840);
++            integer(value.browserProfile().viewportHeight(), 320, 2160);
++            for (UiAutomationStep step : value.scenario().steps()) {
++                if (step == null) throw new IOException();
++                if ("WAIT".equals(step.type())) integer(step.timeoutMillis(), 1, 60000);
++                else if (step.timeoutMillis() != null) integer(step.timeoutMillis(), 100, 60000);
++            }
++        } catch (IOException error) { throw rejected(error, "旧 Web 运行清单目标字段不合法，无法签发运行配置"); }
++    }
++    private static void integer(Integer value, int minimum, int maximum) throws IOException {
++        if (value == null || value < minimum || value > maximum) throw new IOException();
++    }
++    /** Preserve full snapshot equality, except the explicitly approved numeric spellings. */
++    static boolean equivalentDefinition(String kind, JsonNode supplied, JsonNode canonical) {
++        JsonNode copy = supplied.deepCopy();
++        if ("PROFILE".equals(kind)) replaceNumbers(copy, canonical, "viewportWidth", "viewportHeight");
++        else if ("SCHEDULE".equals(kind)) replaceNumbers(copy, canonical, "timeoutSeconds");
++        else if ("SCENARIO".equals(kind) && copy.path("steps").isArray() && canonical.path("steps").isArray()) {
++            for (int i = 0; i < Math.min(copy.path("steps").size(), canonical.path("steps").size()); i++)
++                replaceNumbers(copy.path("steps").get(i), canonical.path("steps").get(i), "timeoutMillis");
++        }
++        return canonical.equals(copy);
++    }
++    private static void replaceNumbers(JsonNode supplied, JsonNode canonical, String... fields) {
++        if (!(supplied instanceof ObjectNode object)) return;
++        for (String field : fields) {
++            if (supplied.has(field) && supplied.get(field).isNumber() && canonical.has(field) && canonical.get(field).isIntegralNumber()
++                    && supplied.get(field).decimalValue().compareTo(canonical.get(field).decimalValue()) == 0)
++                object.set(field, canonical.get(field));
++        }
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiInputExceptionHandler.java
+@@ -0,0 +1,32 @@
++package io.testhub.platform.uiautomation;
++
++import io.testhub.platform.shared.api.ApiError;
++import io.testhub.platform.shared.api.ApiExceptionHandler;
++import io.testhub.platform.shared.api.RequestIdFilter;
++import jakarta.servlet.http.HttpServletRequest;
++import java.util.Map;
++import org.springframework.core.Ordered;
++import org.springframework.core.annotation.Order;
++import org.springframework.http.ResponseEntity;
++import org.springframework.http.converter.HttpMessageNotReadableException;
++import org.springframework.web.bind.annotation.ExceptionHandler;
++import org.springframework.web.bind.annotation.RestControllerAdvice;
++
++/** Expose only fixed field names, never Jackson's raw input/value messages. */
++@Order(Ordered.HIGHEST_PRECEDENCE)
++@RestControllerAdvice(assignableTypes = { UiAutomationController.class, UiAutomationScheduleController.class })
++public class UiInputExceptionHandler {
++    @ExceptionHandler(HttpMessageNotReadableException.class)
++    ResponseEntity<ApiError> unreadable(HttpServletRequest request, HttpMessageNotReadableException error) {
++        String requestId = (String) request.getAttribute(RequestIdFilter.REQUEST_ID_ATTRIBUTE);
++        if (Boolean.TRUE.equals(request.getAttribute(ApiExceptionHandler.BODY_TOO_LARGE_ATTRIBUTE))) {
++            String message = request.getAttribute(ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE) instanceof String value
++                    ? value : "迁移请求不能超过 33 MiB。";
++            return ResponseEntity.status(413).body(new ApiError("REQUEST_REJECTED", message, requestId, Map.of()));
++        }
++        String field = UiJson.field(error);
++        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_FAILED",
++                field == null ? "请求正文缺失或 JSON 格式不合法" : "Web 字段 " + field + " 类型或数值不合法",
++                requestId, field == null ? Map.of() : Map.of(field, "应使用字段要求的 JSON 类型和取值范围")));
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/test/java/io/testhub/platform/P2D16WebFlowTests.java
+@@ -0,0 +1,132 @@
++package io.testhub.platform;
++import static org.junit.jupiter.api.Assertions.*;
++import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++import com.fasterxml.jackson.databind.JsonNode;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.uiautomation.*;
++import java.util.*;
++import java.nio.charset.StandardCharsets;
++import java.time.Duration;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.DisplayName;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.http.MediaType;
++import org.springframework.test.web.servlet.MvcResult;
++import org.springframework.web.server.ResponseStatusException;
++class P2D16WebFlowTests extends P1FlowTestSupport {
++    @org.junit.jupiter.api.BeforeEach void approvedFixtureOrigin() {
++        jdbc.sql("DELETE FROM system_config WHERE config_key='ui-automation.allowed-origins'").update();
++        jdbc.sql("INSERT INTO system_config(config_key,config_value,secret,updated_by) VALUES('ui-automation.allowed-origins','https://ui.example.test',FALSE,'fixture')").update();
++    }
++    @Autowired UiAutomationService ui;
++    @Autowired UiAutomationRepository rows;
++    @Autowired UiAutomationSyncService sync;
++    @Autowired UiAutomationTransferService transfer;
++    @Autowired UiAutomationScheduleService schedules;
++    record F(PlatformUserPrincipal actor,String project,UiAutomationBrowserProfile profile) { }
++    F fixture(){var a=actor();String p=project(a);var profile=ui.createProfile(a,p,new UiAutomationService.ProfileRequest(unique(),"chromium","https://ui.example.test",800,600,true));return new F(a,p,profile);}
++    String base(F f){return "/api/v1/projects/"+f.project+"/ui-automation";}
++    Map<String,Object> profile(){var d=new LinkedHashMap<String,Object>();d.put("name",unique());d.put("browser","chromium");d.put("baseUrl","https://ui.example.test");d.put("enabled",true);d.put("viewportWidth",800);d.put("viewportHeight",600);return d;}
++    Map<String,Object> step(String type){var d=new LinkedHashMap<String,Object>();d.put("id","one");d.put("type",type);d.put("name",type);d.put("selector",Set.of("FILL","ASSERT_TEXT","CLICK","ASSERT_VISIBLE").contains(type)?"#input":null);d.put("value","FILL".equals(type)?"001":null);d.put("expectedText","ASSERT_TEXT".equals(type)?"001":null);d.put("url","NAVIGATE".equals(type)?"/":null);d.put("timeoutMillis",1000);return d;}
++    Map<String,Object> scenario(F f,Map<String,Object> s){var d=new LinkedHashMap<String,Object>();d.put("name",unique());d.put("description","");d.put("browserProfileId",f.profile.id());d.put("failureStrategy","STOP");d.put("variables",Map.of("id","001"));d.put("steps",List.of(s));return d;}
++    String profileRaw(String field,String token)throws Exception{var d=profile();d.put(field,"RAW");return json.writeValueAsString(d).replace("\"RAW\"",token);}
++    String scenarioRaw(F f,String type,String field,String token)throws Exception{var s=step(type);var d=scenario(f,s);if(field.equals("variables"))d.put(field,"RAW");else s.put(field,"RAW");return json.writeValueAsString(d).replace("\"RAW\"",token);}
++    MvcResult postTo(F f,String suffix,String body)throws Exception{return mvc.perform(post(base(f)+suffix).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andReturn();}
++    MvcResult putTo(F f,String suffix,String body)throws Exception{return mvc.perform(put(base(f)+suffix).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andReturn();}
++    void status(int n,MvcResult r)throws Exception{assertEquals(n,r.getResponse().getStatus(),r.getResponse().getContentAsString());}
++    JsonNode data(MvcResult r)throws Exception{return json.readTree(r.getResponse().getContentAsString()).path("data");}
++    Map<String,Long> counts(){var r=new LinkedHashMap<String,Long>();for(String t:List.of("ui_automation_browser_profile","ui_automation_scenario","ui_automation_schedule","ui_automation_execution","ui_automation_execution_manifest","ui_automation_runner_outbox","ui_automation_transfer_receipt","ui_automation_sync_receipt","audit_log"))r.put(t,jdbc.sql("SELECT COUNT(*) FROM "+t).query(Long.class).single());return r;}
++    void bad(F f,String suffix,String body)throws Exception{var b=counts();status(400,postTo(f,suffix,body));assertEquals(b,counts());}
++    void rejected(Runnable action){assertEquals(400,assertThrows(ResponseStatusException.class,action::run).getStatusCode().value());}
++    UiAutomationScenario scene(F f){return ui.createScenario(f.actor,f.project,new UiAutomationService.ScenarioRequest(f.profile.id(),unique(),"","STOP",Map.of("id","001"),List.of(new UiAutomationStep("wait","WAIT","Wait",null,null,null,null,null,1000),new UiAutomationStep("fill","FILL","Fill","#input",null,"001",null,null,1000),new UiAutomationStep("text","ASSERT_TEXT","Text","#input",null,null,null,"001",1000))));}
++    Map<String,Object> timer(UiAutomationScenario s){var d=new LinkedHashMap<String,Object>();d.put("name",unique());d.put("scenarioId",s.id());d.put("cronExpression","0 0 0 1 1 ? 2099");d.put("timezone","UTC");d.put("timeoutSeconds",300);d.put("maxRetryAttempts",1);d.put("retryBackoffSeconds",30);d.put("enabled",false);return d;}
++    UiAutomationSchedule timer(F f,UiAutomationScenario s,boolean enabled){return schedules.create(f.actor,f.project,new UiAutomationScheduleService.ScheduleInput(s.id(),null,unique(),"0 0 0 1 1 ? 2099","UTC",300,1,30,enabled));}
++    F source(){var f=fixture();var s=scene(f);timer(f,s,false);return f;}
++    UiAutomationSyncService.Request request(F source,F target){var items=sync.snapshot(source.actor,source.project,source.actor.userId()).items();return new UiAutomationSyncService.Request(UUID.randomUUID().toString(),target.actor.userId(),sync.snapshot(target.actor,target.project,target.actor.userId()).revision(),items.stream().map(i->new UiAutomationSyncService.Operation(UUID.randomUUID().toString(),i)).toList());}
++    String equivalent(String raw,int mode){return mode==0?raw:raw.replaceAll("(\"(?:viewportWidth|viewportHeight|timeoutMillis|timeoutSeconds)\":)([0-9]+)","$1$2"+(mode==1?".0":"e0"));}
++    List<String> invalidPayloads(String original){var result=new ArrayList<String>();for(String field:List.of("viewportWidth","viewportHeight","timeoutMillis","timeoutSeconds")){String value=field.equals("viewportWidth")?"800":field.equals("viewportHeight")?"600":field.equals("timeoutMillis")?"1000":"300";for(String t:List.of(value+".5",value+".0000000000000001","\""+value+"\"","true")){String changed=original.replaceAll("\""+field+"\":[0-9]+","\""+field+"\":"+t);assertNotEquals(original,changed);result.add(changed);}}
++        for(String t:List.of("1","true","[]","{}")){String changed=original.replace("\"variables\":{\"id\":\"001\"}","\"variables\":{\"id\":"+t+"}");assertNotEquals(original,changed);result.add(changed);for(String field:List.of("value","expectedText")){changed=original.replace("\""+field+"\":\"001\"","\""+field+"\":"+t);assertNotEquals(original,changed);result.add(changed);}}return result;}
++    void widthExact(String field,int n)throws Exception{var f=fixture();for(String t:List.of(""+n,n+".0",n+"e0")){var r=postTo(f,"/browser-profiles",profileRaw(field,t));status(200,r);assertEquals(n,data(r).path(field).asInt());}}
++    void widthBounds(String field,int max)throws Exception{var f=fixture();for(int n:List.of(320,max))status(200,postTo(f,"/browser-profiles",profileRaw(field,""+n)));for(int n:List.of(319,max+1))bad(f,"/browser-profiles",profileRaw(field,""+n));}
++    void stepExact(String type)throws Exception{var f=fixture();for(String t:List.of("1000","1000.0","1e3")){var r=postTo(f,"/scenarios",scenarioRaw(f,type,"timeoutMillis",t));status(200,r);assertEquals(1000,data(r).path("steps").get(0).path("timeoutMillis").asInt());}}
++    void stepBounds(String type,int min)throws Exception{var f=fixture();for(int n:List.of(min,60000))status(200,postTo(f,"/scenarios",scenarioRaw(f,type,"timeoutMillis",""+n)));for(int n:List.of(min-1,60001))bad(f,"/scenarios",scenarioRaw(f,type,"timeoutMillis",""+n));}
++    void corruptSteps(F f,UiAutomationScenario s,String token)throws Exception{String raw=json.writeValueAsString(s.steps()).replaceAll("\"timeoutMillis\":1000","\"timeoutMillis\":"+token);jdbc.sql("UPDATE ui_automation_scenario SET steps=CAST(:v AS JSON) WHERE project_id=:p AND id=:i").param("v",raw).param("p",f.project).param("i",s.id()).update();}
++    String dataId(MvcResult r){try{return data(r).path("id").asText();}catch(Exception e){throw new AssertionError(e);}}
++
++    @Test @DisplayName("TC-D16WEB-01") void widthExact()throws Exception{widthExact("viewportWidth",800);}
++    @Test @DisplayName("TC-D16WEB-02") void heightExact()throws Exception{widthExact("viewportHeight",600);}
++    @Test @DisplayName("TC-D16WEB-03") void widthBounds()throws Exception{widthBounds("viewportWidth",3840);}
++    @Test @DisplayName("TC-D16WEB-04") void heightBounds()throws Exception{widthBounds("viewportHeight",2160);}
++    @Test @DisplayName("TC-D16WEB-05") void viewportFractions()throws Exception{var f=fixture();for(String field:List.of("viewportWidth","viewportHeight"))for(String t:List.of("800.5","800.0000000000000001"))bad(f,"/browser-profiles",profileRaw(field,t));}
++    @Test @DisplayName("TC-D16WEB-06") void viewportTypes()throws Exception{var f=fixture();for(String field:List.of("viewportWidth","viewportHeight"))for(String t:List.of("\"800\"","true","[]","{}"))bad(f,"/browser-profiles",profileRaw(field,t));}
++    @Test @DisplayName("TC-D16WEB-07") void viewportDefaults()throws Exception{var f=fixture();for(boolean missing:List.of(true,false)){var d=profile();if(missing){d.remove("viewportWidth");d.remove("viewportHeight");}else{d.put("viewportWidth",null);d.put("viewportHeight",null);}var r=postTo(f,"/browser-profiles",json.writeValueAsString(d));status(200,r);assertEquals(1440,data(r).path("viewportWidth").asInt());assertEquals(900,data(r).path("viewportHeight").asInt());}}
++    @Test @DisplayName("TC-D16WEB-08") void waitExact()throws Exception{stepExact("WAIT");}
++    @Test @DisplayName("TC-D16WEB-09") void waitBounds()throws Exception{stepBounds("WAIT",1);}
++    @Test @DisplayName("TC-D16WEB-10") void actionExact()throws Exception{stepExact("FILL");}
++    @Test @DisplayName("TC-D16WEB-11") void actionBounds()throws Exception{stepBounds("FILL",100);}
++    @Test @DisplayName("TC-D16WEB-12") void stepFractions()throws Exception{var f=fixture();for(String type:List.of("WAIT","FILL"))for(String t:List.of("1000.5","1000.0000000000000001"))bad(f,"/scenarios",scenarioRaw(f,type,"timeoutMillis",t));}
++    @Test @DisplayName("TC-D16WEB-13") void stepTypes()throws Exception{var f=fixture();for(String type:List.of("WAIT","FILL"))for(String t:List.of("\"1000\"","true","[]","{}"))bad(f,"/scenarios",scenarioRaw(f,type,"timeoutMillis",t));}
++    @Test @DisplayName("TC-D16WEB-14") void overflow()throws Exception{var f=fixture();var s=scene(f);for(String t:List.of("18446744073709551616","1e10000","NaN","Infinity","-Infinity")){bad(f,"/browser-profiles",profileRaw("viewportWidth",t));bad(f,"/scenarios",scenarioRaw(f,"WAIT","timeoutMillis",t));bad(f,"/scenarios/"+s.id()+"/executions","{\"timeoutSeconds\":"+t+"}");}}
++    @Test @DisplayName("TC-D16WEB-15") void waitRequired()throws Exception{var f=fixture();bad(f,"/scenarios",scenarioRaw(f,"WAIT","timeoutMillis","null"));var st=step("WAIT");st.remove("timeoutMillis");bad(f,"/scenarios",json.writeValueAsString(scenario(f,st)));}
++    @Test @DisplayName("TC-D16WEB-16") void actionDefault()throws Exception{var f=fixture();for(boolean missing:List.of(true,false)){var st=step("FILL");if(missing)st.remove("timeoutMillis");else st.put("timeoutMillis",null);var r=postTo(f,"/scenarios",json.writeValueAsString(scenario(f,st)));status(200,r);assertTrue(data(r).path("steps").get(0).path("timeoutMillis").isNull());}}
++    @Test @DisplayName("TC-D16WEB-17") void executeExact()throws Exception{var f=fixture();var s=scene(f);for(String t:List.of("300","300.0","3e2")){var r=postTo(f,"/scenarios/"+s.id()+"/executions","{\"timeoutSeconds\":"+t+"}");status(200,r);var x=ui.executions(f.actor,f.project).stream().filter(y->y.id().equals(dataId(r))).findFirst().orElseThrow();assertEquals(300,Duration.between(x.requestedAt(),x.deadlineAt()).toSeconds());}}
++    @Test @DisplayName("TC-D16WEB-18") void executeBounds()throws Exception{var f=fixture();var s=scene(f);for(int n:List.of(10,3600))status(200,postTo(f,"/scenarios/"+s.id()+"/executions","{\"timeoutSeconds\":"+n+"}"));for(int n:List.of(9,3601))bad(f,"/scenarios/"+s.id()+"/executions","{\"timeoutSeconds\":"+n+"}");}
++    @Test @DisplayName("TC-D16WEB-19") void executeTypes()throws Exception{var f=fixture();var s=scene(f);for(String t:List.of("300.5","300.0000000000000001","\"300\"","true","[]","{}"))bad(f,"/scenarios/"+s.id()+"/executions","{\"timeoutSeconds\":"+t+"}");}
++    @Test @DisplayName("TC-D16WEB-20") void executeDefaults()throws Exception{var f=fixture();var s=scene(f);for(String body:List.of("","{}","{\"timeoutSeconds\":null}")){var r=postTo(f,"/scenarios/"+s.id()+"/executions",body);status(200,r);var x=ui.executions(f.actor,f.project).stream().filter(y->y.id().equals(dataId(r))).findFirst().orElseThrow();assertEquals(300,Duration.between(x.requestedAt(),x.deadlineAt()).toSeconds());}}
++    @Test @DisplayName("TC-D16WEB-21") void scheduleAlias()throws Exception{var f=fixture();var s=scene(f);var d=timer(s);d.put("timeoutSeconds","RAW");String raw=json.writeValueAsString(d);status(200,postTo(f,"/schedules",raw.replace("\"RAW\"","300.0")));for(String t:List.of("300.5","300.0000000000000001","\"300\""))bad(f,"/schedules",raw.replace("\"RAW\"",t).replace(String.valueOf(d.get("name")),unique()));}
++    @Test @DisplayName("TC-D16WEB-22") void variableStrings()throws Exception{var f=fixture();var r=postTo(f,"/scenarios",scenarioRaw(f,"WAIT","variables","{\"id\":\"001\",\"flag\":\"false\",\"literal\":\"null\",\"empty\":\"\"}"));status(200,r);assertEquals("001",data(r).path("variables").path("id").asText());}
++    @Test @DisplayName("TC-D16WEB-23") void variableTypes()throws Exception{var f=fixture();for(String t:List.of("1","true","[]","{}"))bad(f,"/scenarios",scenarioRaw(f,"WAIT","variables","{\"id\":"+t+"}"));}
++    @Test @DisplayName("TC-D16WEB-24") void variableNull()throws Exception{var f=fixture();for(String t:List.of("null","{\"id\":null}")){var r=postTo(f,"/scenarios",scenarioRaw(f,"WAIT","variables",t));status(200,r);if(t.startsWith("{"))assertEquals("",data(r).path("variables").path("id").asText());else assertEquals(0,data(r).path("variables").size());}}
++    @Test @DisplayName("TC-D16WEB-25") void stepStrings()throws Exception{var f=fixture();for(String type:List.of("FILL","ASSERT_TEXT")){String field=type.equals("FILL")?"value":"expectedText";var r=postTo(f,"/scenarios",scenarioRaw(f,type,field,"\" {{id}} \""));status(200,r);assertEquals("{{id}}",data(r).path("steps").get(0).path(field).asText());}}
++    @Test @DisplayName("TC-D16WEB-26") void stepTextTypes()throws Exception{var f=fixture();for(String field:List.of("value","expectedText"))for(String t:List.of("1","true","[]","{}"))bad(f,"/scenarios",scenarioRaw(f,field.equals("value")?"FILL":"ASSERT_TEXT",field,t));}
++    @Test @DisplayName("TC-D16WEB-27") void stepTextRequired()throws Exception{var f=fixture();for(String type:List.of("FILL","ASSERT_TEXT")){String field=type.equals("FILL")?"value":"expectedText";bad(f,"/scenarios",scenarioRaw(f,type,field,"null"));}status(200,postTo(f,"/scenarios",scenarioRaw(f,"WAIT","value","null")));}
++    @Test @DisplayName("TC-D16WEB-28") void editFreeze()throws Exception{var f=fixture();var s=scene(f);var x=ui.execute(f.actor,f.project,s.id(),300,null);var frozen=rows.findManifest(f.project,x.id()).orElseThrow();var r=putTo(f,"/browser-profiles/"+f.profile.id(),profileRaw("viewportWidth","1000.0"));status(200,r);assertEquals(2,data(r).path("version").asInt());r=putTo(f,"/scenarios/"+s.id(),scenarioRaw(f,"WAIT","timeoutMillis","2000.0"));status(200,r);assertEquals(2,data(r).path("version").asInt());assertEquals(frozen,rows.findManifest(f.project,x.id()).orElseThrow());}
++    @Test @DisplayName("TC-D16WEB-29") void editProfileInvalid()throws Exception{var f=fixture();var before=counts();status(400,putTo(f,"/browser-profiles/"+f.profile.id(),profileRaw("viewportWidth","800.5")));assertEquals(f.profile,ui.profiles(f.actor,f.project).getFirst());assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16WEB-30") void editScenarioInvalid()throws Exception{var f=fixture();var s=scene(f);var before=counts();status(400,putTo(f,"/scenarios/"+s.id(),scenarioRaw(f,"WAIT","timeoutMillis","1000.5")));assertEquals(s,ui.scenarios(f.actor,f.project).getFirst());assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16WEB-31") void lateStepInvalid()throws Exception{var f=fixture();var st=step("WAIT");st.put("id","second");st.put("timeoutMillis","RAW");var d=scenario(f,step("WAIT"));d.put("steps",List.of(step("WAIT"),st));bad(f,"/scenarios",json.writeValueAsString(d).replace("\"RAW\"","1000.5"));}
++    @Test @DisplayName("TC-D16WEB-32") void transferValid()throws Exception{var source=source();for(int n=0;n<3;n++){var target=fixture();String raw=equivalent(json.writeValueAsString(new UiAutomationTransferService.ImportRequest(UUID.randomUUID().toString(),target.actor.userId(),transfer.export(source.actor,source.project))),n);var r=transfer.transfer(target.actor,target.project,transfer.decode(raw.getBytes(StandardCharsets.UTF_8)));assertEquals(1,r.scenarios());assertTrue(ui.profiles(target.actor,target.project).stream().filter(p->p.name().equals(source.profile.name())).noneMatch(UiAutomationBrowserProfile::enabled));assertTrue(ui.executions(target.actor,target.project).isEmpty());}}
++    @Test @DisplayName("TC-D16WEB-33") void transferInvalid()throws Exception{var source=source();var target=fixture();String raw=json.writeValueAsString(new UiAutomationTransferService.ImportRequest(UUID.randomUUID().toString(),target.actor.userId(),transfer.export(source.actor,source.project)));for(String value:invalidPayloads(raw)){var b=counts();rejected(()->transfer.transfer(target.actor,target.project,transfer.decode(value.getBytes(StandardCharsets.UTF_8))));assertEquals(b,counts());}}
++    @Test @DisplayName("TC-D16WEB-34") void syncValid()throws Exception{var source=source();for(int n=0;n<3;n++){var target=fixture();String raw=equivalent(json.writeValueAsString(request(source,target)),n);assertEquals(3,assertDoesNotThrow(()->sync.apply(target.actor,target.project,sync.decode(raw.getBytes(StandardCharsets.UTF_8)))).results().size());}}
++    @Test @DisplayName("TC-D16WEB-35") void syncInvalid()throws Exception{var source=source();var target=fixture();String raw=json.writeValueAsString(request(source,target));for(String value:invalidPayloads(raw)){var b=counts();rejected(()->sync.apply(target.actor,target.project,sync.decode(value.getBytes(StandardCharsets.UTF_8))));assertEquals(b,counts());}}
++    @Test @DisplayName("TC-D16WEB-36") void replay()throws Exception{var source=source();var target=fixture();var r=request(source,target);var first=sync.apply(target.actor,target.project,r);var b=counts();assertEquals(first,sync.apply(target.actor,target.project,r));assertEquals(b,counts());var other=fixture();var tr=new UiAutomationTransferService.ImportRequest(UUID.randomUUID().toString(),other.actor.userId(),transfer.export(source.actor,source.project));var receipt=transfer.transfer(other.actor,other.project,tr);b=counts();assertEquals(receipt,transfer.transfer(other.actor,other.project,tr));assertEquals(b,counts());}
++    @Test @DisplayName("TC-D16WEB-37") void revisionConflict()throws Exception{var source=source();var target=fixture();var r=request(source,target);scene(target);var b=counts();assertEquals(409,assertThrows(ResponseStatusException.class,()->sync.apply(target.actor,target.project,r)).getStatusCode().value());assertEquals(b,counts());}
++    @Test @DisplayName("TC-D16WEB-38") void permission()throws Exception{var f=fixture();var other=actor();var b=counts();var r=mvc.perform(post(base(f)+"/browser-profiles").with(user(other)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(profileRaw("viewportWidth","800"))).andReturn();status(403,r);assertEquals(b,counts());}
++    @Test @DisplayName("TC-D16WEB-39") void oldReadOnly()throws Exception{var f=fixture();var s=scene(f);var x=ui.execute(f.actor,f.project,s.id(),300,null);var frozen=rows.findManifest(f.project,x.id()).orElseThrow();corruptSteps(f,s,"1000.5");var b=counts();assertEquals(1000,ui.scenarios(f.actor,f.project).getFirst().steps().getFirst().timeoutMillis());assertEquals(frozen,rows.findManifest(f.project,x.id()).orElseThrow());assertEquals(b,counts());}
++    @Test @DisplayName("TC-D16WEB-40") void oldManualQueue()throws Exception {
++        var f=fixture();var s=scene(f);var x=ui.execute(f.actor,f.project,s.id(),300,null);
++        var frozen=rows.findManifest(f.project,x.id()).orElseThrow();
++        // Use an exactly representable fraction for a persisted legacy fixture. Raw tiny fractions are covered before storage.
++        corruptSteps(f,s,"1000.5");
++        String stored=jdbc.sql("SELECT steps FROM ui_automation_scenario WHERE id=:i").param("i",s.id()).query(String.class).single();
++        assertTrue(json.readTree(stored).get(0).path("timeoutMillis").decimalValue().stripTrailingZeros().scale()>0);
++        var before=counts();rejected(()->ui.execute(f.actor,f.project,s.id(),300,null));assertEquals(before,counts());
++        corruptSteps(f,s,"1000");
++        for(String token:List.of("123","true","[]","{}")) {
++            jdbc.sql("UPDATE ui_automation_scenario SET variables=CAST(:v AS JSON) WHERE id=:i").param("v","{\"id\":"+token+"}").param("i",s.id()).update();
++            if(token.equals("123"))assertEquals("123",ui.scenarios(f.actor,f.project).getFirst().variables().get("id"));
++            rejected(()->ui.execute(f.actor,f.project,s.id(),300,null));assertEquals(before,counts());
++        }
++        jdbc.sql("UPDATE ui_automation_scenario SET variables=CAST(:v AS JSON) WHERE id=:i").param("v","{\"id\":\"001\"}").param("i",s.id()).update();
++        jdbc.sql("UPDATE ui_automation_browser_profile SET viewport_width=319 WHERE id=:i").param("i",f.profile.id()).update();
++        rejected(()->ui.execute(f.actor,f.project,s.id(),300,null));assertEquals(before,counts());
++        assertEquals(frozen,rows.findManifest(f.project,x.id()).orElseThrow());assertEquals(x.status(),ui.executions(f.actor,f.project).getFirst().status());
++    }
++    @Test @DisplayName("TC-D16WEB-41") void oldOtherQueue()throws Exception {
++        var f=fixture();var s=scene(f);var timer=timer(f,s,true);
++        var manual=ui.execute(f.actor,f.project,s.id(),300,null);
++        jdbc.sql("UPDATE ui_automation_execution SET status='FAILED' WHERE id=:i").param("i",manual.id()).update();
++        var automatic=ui.executeFromSchedule(timer);
++        ui.applyRunnerEvent(new UiAutomationRunnerProtocol.Event(automatic.taskId(),automatic.id(),"d16-fixture","ACCEPTED","TASK_ACCEPTED","accepted",java.time.Instant.now()));
++        corruptSteps(f,s,"1000.5");var before=counts();
++        rejected(()->ui.executeFromSchedule(timer));rejected(()->ui.retry(f.actor,f.project,manual.id()));assertEquals(before,counts());
++        assertDoesNotThrow(()->ui.applyRunnerEvent(new UiAutomationRunnerProtocol.Event(automatic.taskId(),automatic.id(),"d16-fixture","FAILED","PLAYWRIGHT_EXECUTION_FAILED","failed",java.time.Instant.now())));
++        var after=counts();for(String table:before.keySet())if(!table.equals("audit_log"))assertEquals(before.get(table),after.get(table),table);
++        assertEquals("FAILED",rows.findExecution(f.project,automatic.id()).orElseThrow().status());
++        assertEquals(1L,jdbc.sql("SELECT COUNT(*) FROM audit_log WHERE project_id=:p AND resource_id=:i AND action='UI_AUTOMATION_RETRY_PRECHECK_REJECTED'").param("p",f.project).param("i",automatic.id()).query(Long.class).single());
++    }
++    @Test @DisplayName("TC-D16WEB-42") void oldRuntime()throws Exception{var f=fixture();var s=scene(f);var x=ui.execute(f.actor,f.project,s.id(),300,null);String content=jdbc.sql("SELECT content FROM ui_automation_execution_manifest WHERE execution_id=:i").param("i",x.id()).query(String.class).single();String bad=content.replaceAll("\"timeoutMillis\"\\s*:\\s*1000","\"timeoutMillis\":1000.5");assertNotEquals(content,bad);jdbc.sql("UPDATE ui_automation_execution_manifest SET content=CAST(:c AS JSON) WHERE execution_id=:i").param("c",bad).param("i",x.id()).update();var b=counts();rejected(()->ui.runtimeConfiguration("d16-fixture",x.taskId(),x.id()));assertEquals(b,counts());assertEquals(x.status(),ui.executions(f.actor,f.project).getFirst().status());}
++    @Test @DisplayName("TC-D16WEB-43") void errorLocation()throws Exception{var f=fixture();var st=step("FILL");st.put("id","second");st.put("value","RAW");var d=scenario(f,step("WAIT"));d.put("steps",List.of(step("WAIT"),st));var r=postTo(f,"/scenarios",json.writeValueAsString(d).replace("\"RAW\"","{\"D16_PRIVATE_MARKER\":true}"));status(400,r);var b=json.readTree(r.getResponse().getContentAsString());assertTrue(b.path("details").has("steps[1].value"));assertFalse(b.toString().contains("D16_PRIVATE_MARKER"));}
++    @Test @DisplayName("TC-D16WEB-44") void nonTargetContract()throws Exception{var f=fixture();var s=scene(f);var d=timer(s);d.put("maxRetryAttempts","RAW");var r=postTo(f,"/schedules",json.writeValueAsString(d).replace("\"RAW\"","1.5"));status(200,r);assertEquals(1,data(r).path("maxRetryAttempts").asInt());}
++    @Test @DisplayName("TC-D16WEB-45") void objectReference()throws Exception{var f=fixture();var p=ui.createPageObject(f.actor,f.project,new UiAutomationService.PageObjectRequest(unique(),"#owned",""));var s=ui.createScenario(f.actor,f.project,new UiAutomationService.ScenarioRequest(f.profile.id(),unique(),"","STOP",Map.of(),List.of(new UiAutomationStep("fill","FILL","Fill",null,p.id(),"001",null,null,null))));var x=ui.execute(f.actor,f.project,s.id(),300,null);assertEquals("#owned",rows.findManifest(f.project,x.id()).orElseThrow().snapshot().scenario().steps().getFirst().selector());}
++}
+--- /dev/null
++++ b/src/utils/webIntegerInput.ts
+@@ -0,0 +1,41 @@
++/** Check decimal text before Number conversion can round away a fractional part. */
++export function webIntegerInput(raw: string, minimum: number, maximum: number, field: string): number {
++  const invalid = () => new Error(`${field} 必须是 ${minimum} 到 ${maximum} 之间的精确整数数值`)
++  const match = /^(-?)(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(raw.trim())
++  if (!match) throw invalid()
++  const fraction = match[3] ?? ''
++  let digits = (match[2]! + fraction).replace(/^0+/, '')
++  if (!digits) { if (minimum === 0) return 0; throw invalid() }
++  if (match[1] === '-') throw invalid()
++  const scale = BigInt(fraction.length) - BigInt(match[4] ?? '0')
++  if (scale > 0n) {
++    if (scale >= BigInt(digits.length)) throw invalid()
++    const removed = Number(scale)
++    if (!/^0+$/.test(digits.slice(-removed))) throw invalid()
++    digits = digits.slice(0, -removed)
++  } else if (scale < 0n) {
++    if (BigInt(digits.length) - scale > BigInt(String(maximum).length)) throw invalid()
++    digits += '0'.repeat(Number(-scale))
++  }
++  if (digits.length > String(maximum).length) throw invalid()
++  const value = Number(digits)
++  if (value < minimum || value > maximum) throw invalid()
++  return value
++}
++
++export function webIntegerError(raw: string, minimum: number, maximum: number, field: string): string {
++  try { webIntegerInput(raw, minimum, maximum, field); return '' }
++  catch (error) { return error instanceof Error ? error.message : `${field} 不合法` }
++}
++
++export function webOptionalInteger(raw: string, minimum: number, maximum: number, field: string, fallback?: number): number | undefined {
++  return raw.trim() ? webIntegerInput(raw, minimum, maximum, field) : fallback
++}
++export function webStepTimeout(raw: string, type: string, index = 0): number | undefined {
++  if (type !== 'WAIT' && !raw.trim()) return undefined
++  return webIntegerInput(raw, type === 'WAIT' ? 1 : 100, 60000, `steps[${index}].timeoutMillis`)
++}
++export function webStepError(raw: string, type: string): string {
++  try { webStepTimeout(raw, type); return '' }
++  catch (error) { return error instanceof Error ? error.message : 'timeoutMillis 不合法' }
++}
+--- /dev/null
++++ b/src/test/d16WebPage.test.ts
+@@ -0,0 +1,42 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { flushPromises, shallowMount, type VueWrapper } from '@vue/test-utils'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import UiAutomationPage from '@/pages/UiAutomationPage.vue'
++import { useSessionStore } from '@/stores/session'
++const desktop = vi.hoisted(() => ({ local: false, prepare: vi.fn(async () => {}) }))
++vi.mock('@/utils/desktopWorkspace', () => ({ isLocalDesktop: () => desktop.local, isAccountDesktop: () => false, ensureLocalBrowser: desktop.prepare, localBrowserStatus: async () => ({}), cancelBrowserPreparation: vi.fn(), openUiAutomationSync: vi.fn(), openUiAutomationHistorySync: vi.fn(), openUiAutomationArtifactSync: vi.fn(), openLocalExecutionSettings: vi.fn() }))
++const wrappers: VueWrapper[] = []
++afterEach(() => { wrappers.splice(0).forEach(w => w.unmount()); vi.unstubAllGlobals(); vi.restoreAllMocks(); desktop.local = false; desktop.prepare.mockClear(); localStorage.clear() })
++const profile = { id: 'p', name: 'QA', browser: 'chromium', baseUrl: 'https://ui.example.test', viewportWidth: 800, viewportHeight: 600, enabled: true, version: 1 }
++const scenario = { id: 's', name: 'Scene', browserProfileId: 'p', description: '', failureStrategy: 'STOP', variables: {}, steps: [{ id: 'wait', type: 'WAIT', name: 'Wait', timeoutMillis: 1000 }, { id: 'fill', type: 'FILL', name: 'Fill', selector: '#input', value: '001', timeoutMillis: 1000 }], version: 1 }
++async function setup(kind: 'profile' | 'scenario' | 'execute') {
++  for (const k of ['success', 'error'] as const) vi.spyOn(Message, k).mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(); useSessionStore(pinia).projectId = 'project'
++  const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
++    const data = ['POST', 'PUT'].includes(init?.method ?? '') ? { id: 'saved', ...JSON.parse(String(init!.body)) }
++      : url.endsWith('/csrf') ? { token: 'fixture', headerName: 'X-CSRF' } : url.endsWith('/context') ? { organizations: [{ id: 'o' }], projects: { o: [{ id: 'project', name: 'QA', code: 'QA' }] } }
++        : url.endsWith('/browser-profiles') ? [profile] : url.endsWith('/scenarios') ? [scenario] : url.endsWith('/runner-status') ? [{ runnerId: 'r', trusted: true, executionEnabled: true }] : []
++    return new Response(JSON.stringify({ data }))
++  }); vi.stubGlobal('fetch', fetcher)
++  const w = shallowMount(UiAutomationPage, { global: { plugins: [pinia, ArcoVue], renderStubDefaultSlot: true, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises()
++  const name = kind === 'profile' ? '新建浏览器项目' : kind === 'scenario' ? '编辑编排' : '执行场景'
++  w.findAllComponents({ name: 'Button' }).find(b => b.text().includes(name))!.vm.$emit('click'); await flushPromises()
++  const d = w.findAllComponents({ name: 'Modal' }).find(m => String(m.props('title')).includes(kind === 'profile' ? '浏览器项目' : kind === 'scenario' ? 'Web UI 场景' : '执行 Web UI 场景') && (kind !== 'scenario' || !String(m.props('title')).includes('执行')))!
++  if (kind === 'profile') { const f = d.findAllComponents({ name: 'FormItem' }); f.find(i => i.props('label') === '配置名称')!.findComponent({ name: 'Input' }).vm.$emit('update:modelValue', 'QA'); f.find(i => i.props('label') === '基准 URL')!.findComponent({ name: 'Input' }).vm.$emit('update:modelValue', 'https://ui.example.test'); await flushPromises() }
++  return { w, d, fetcher }
++}
++async function number(q: Awaited<ReturnType<typeof setup>>, label: string, raw: string) {
++  const item = q.d.findAllComponents({ name: 'FormItem' }).find(i => i.props('label') === label)!, old = item.findComponent({ name: 'InputNumber' })
++  if (old.exists()) old.vm.$emit('update:modelValue', raw ? Number(raw) : undefined)
++  else item.findComponent({ name: 'Input' }).vm.$emit('update:modelValue', raw)
++  await flushPromises()
++}
++async function save(q: Awaited<ReturnType<typeof setup>>) { await ((q.d.props() as Record<string, unknown>).onBeforeOk as () => Promise<boolean>)(); await flushPromises() }
++const writes = (q: Awaited<ReturnType<typeof setup>>) => q.fetcher.mock.calls.filter(([, i]) => ['POST', 'PUT'].includes(i?.method ?? ''))
++it('TC-D16WEB-46: profile invalid raw values never submit', async () => { const q = await setup('profile'); for (const value of ['800.5', '800.0000000000000001', '3841']) { await number(q, '视口宽度', value); await save(q); expect(writes(q)).toHaveLength(0); expect(q.d.props('visible')).toBe(true) } })
++it('TC-D16WEB-47: profile exact spellings send numeric dimensions', async () => { const q = await setup('profile'); await number(q, '视口宽度', '8e2'); await number(q, '视口高度', '600.0'); await save(q); const body = JSON.parse(String(writes(q)[0]![1]!.body)); expect(body.viewportWidth).toBe(800); expect(body.viewportHeight).toBe(600) })
++it('TC-D16WEB-48: WAIT and action timeouts validate original text', async () => { const q = await setup('scenario'); await number(q, '等待毫秒', '1000.5'); await save(q); expect(writes(q)).toHaveLength(0); await number(q, '等待毫秒', '1e3'); await number(q, '步骤超时（毫秒）', '99'); await save(q); expect(writes(q)).toHaveLength(0); await number(q, '步骤超时（毫秒）', '100.0'); await save(q); const steps = JSON.parse(String(writes(q)[0]![1]!.body)).steps; expect(steps[0].timeoutMillis).toBe(1000); expect(steps[1].timeoutMillis).toBe(100) })
++it('TC-D16WEB-49: invalid execution stops before local preparation', async () => { desktop.local = true; const q = await setup('execute'); await number(q, '执行超时（秒）', '300.5'); await save(q); expect(writes(q)).toHaveLength(0); expect(desktop.prepare).not.toHaveBeenCalled(); expect(Message.error).toHaveBeenCalledWith(expect.stringContaining('timeoutSeconds')) })
++it('TC-D16WEB-50: optional action blank and required WAIT stay distinct', async () => { const q = await setup('scenario'); await number(q, '等待毫秒', ''); await save(q); expect(writes(q)).toHaveLength(0); await number(q, '等待毫秒', '50'); await number(q, '步骤超时（毫秒）', ''); const type = q.d.findAll('.step-form')[1]!.findComponent({ name: 'Select' }); type.vm.$emit('update:modelValue', 'WAIT'); await flushPromises(); await save(q); expect(writes(q)).toHaveLength(0); type.vm.$emit('update:modelValue', 'FILL'); await flushPromises(); await save(q); const steps = JSON.parse(String(writes(q)[0]![1]!.body)).steps; expect(steps[0].timeoutMillis).toBe(50); expect(steps[1].timeoutMillis).toBeUndefined() })
++it('TC-D16WEB-51: variable guard and removed step input ownership remain', async () => { const q = await setup('scenario'); const vars = q.d.findAllComponents({ name: 'FormItem' }).find(i => i.props('label') === '变量（JSON 对象）')!.findComponent({ name: 'Textarea' }); vars.vm.$emit('update:modelValue', '{"id":1}'); await flushPromises(); await save(q); expect(writes(q)).toHaveLength(0); vars.vm.$emit('update:modelValue', '{}'); await number(q, '等待毫秒', '1.5'); q.d.findAll('.step-form')[0]!.findComponent({ name: 'Button' }).vm.$emit('click'); await flushPromises(); await number(q, '步骤超时（毫秒）', '100.0'); await save(q); expect(JSON.parse(String(writes(q)[0]![1]!.body)).steps[0].timeoutMillis).toBe(100) })
+--- /dev/null
++++ b/src/test/d16WebNumbers.test.ts
+@@ -0,0 +1,13 @@
++import { expect, it } from 'vitest'
++import { webIntegerInput, webOptionalInteger, webStepTimeout } from '@/utils/webIntegerInput'
++it('TC-D16WEB-46/47/48: original decimal text is checked before rounding', () => {
++  for (const raw of ['800', '800.0', '8e2']) expect(webIntegerInput(raw, 320, 3840, 'viewportWidth')).toBe(800)
++  for (const raw of ['800.5', '800.0000000000000001', '1e10000', '1e-10000', '3841', 'NaN', '"800"']) expect(() => webIntegerInput(raw, 320, 3840, 'viewportWidth')).toThrow()
++  expect(webStepTimeout('1.0', 'WAIT')).toBe(1); expect(() => webStepTimeout('99', 'FILL')).toThrow('timeoutMillis')
++})
++it('TC-D16WEB-49/50: optional defaults and WAIT required fields remain distinct', () => {
++  expect(webOptionalInteger('', 320, 3840, 'viewportWidth')).toBeUndefined()
++  expect(webOptionalInteger('', 10, 3600, 'timeoutSeconds', 300)).toBe(300)
++  expect(webStepTimeout('', 'FILL')).toBeUndefined(); expect(() => webStepTimeout('', 'WAIT')).toThrow('timeoutMillis')
++  expect(() => webStepTimeout('50', 'FILL')).toThrow(); expect(webStepTimeout('50', 'WAIT')).toBe(50)
++})
+--- /dev/null
++++ b/services/playwright-runner/test/d16-input.test.js
+@@ -0,0 +1,34 @@
++import assert from 'node:assert/strict'
++import test from 'node:test'
++import { validateRuntime } from '../src/protocol.js'
++import { PlaywrightRunner } from '../src/runner.js'
++const task = { taskId: '01J00000000000000000000001', executionId: '01J00000000000000000000002' }
++const profile = { browser: 'chromium', baseUrl: 'http://127.0.0.1:18081', viewportWidth: 800, viewportHeight: 600 }
++const step = { id: 'fill', type: 'FILL', name: 'Fill', selector: '#input', value: '001', timeoutMillis: 1000 }
++const artifact = (browser = profile, steps = [step], variables = {}) => ({ contract: 'testhub.playwright-runner.runtime-configuration', version: 1, ...task, browser, scenario: { failureStrategy: 'STOP', variables, steps } })
++const validate = value => validateRuntime(task, value, ['http://127.0.0.1:18081'])
++test('TC-D16WEB-52: viewport type and range fail pure preflight', () => {
++  for (const field of ['viewportWidth', 'viewportHeight']) for (const value of [800.5, '800', true, [], {}, null, 319, field === 'viewportWidth' ? 3841 : 2161]) assert.throws(() => validate(artifact({ ...profile, [field]: value })))
++})
++test('TC-D16WEB-53: WAIT and action timeouts have distinct required and default rules', () => {
++  for (const type of ['WAIT', 'FILL']) for (const value of [1000.5, '1000', true, [], {}, 60001, type === 'WAIT' ? 0 : 99]) assert.throws(() => validate(artifact(profile, [{ ...step, type, timeoutMillis: value }])))
++  assert.throws(() => validate(artifact(profile, [{ ...step, type: 'WAIT', timeoutMillis: null }])))
++  assert.doesNotThrow(() => validate(artifact(profile, [{ ...step, timeoutMillis: null }])))
++})
++test('TC-D16WEB-54: variables and selected text fields require strings', () => {
++  for (const value of [1, true, [], {}]) {
++    assert.throws(() => validate(artifact(profile, [step], { id: value })))
++    for (const field of ['value', 'expectedText']) assert.throws(() => validate(artifact(profile, [{ ...step, [field]: value }])))
++  }
++  assert.doesNotThrow(() => validate(artifact(profile, [step], { id: null })))
++})
++test('TC-D16WEB-55: canonical exact numbers and original optional defaults remain', () => {
++  for (const raw of ['800', '800.0', '8e2']) { const r = validate(artifact({ ...profile, viewportWidth: JSON.parse(raw) }, [{ ...step, timeoutMillis: null }], { id: '001', literal: 'null' })); assert.equal(r.browser.viewportWidth, 800); assert.equal(r.scenario.variables.id, '001'); assert.equal(r.scenario.steps[0].timeoutMillis, null) }
++})
++test('TC-D16WEB-56: run rejects bad runtime before preparing a browser', async () => {
++  let prepared = 0
++  const runner = new PlaywrightRunner({ commandClient: {}, readClient: {}, cancelClient: {}, config: { runnerId: 'qa', controlPlaneUrl: 'http://127.0.0.1:18081', heartbeatSigningKey: 'fixture-key', allowedTargetOrigins: ['http://127.0.0.1:18081'] }, fetcher: async () => new globalThis.Response(JSON.stringify({ data: artifact({ ...profile, viewportWidth: 800.5 }) })), prepareBrowser: async () => { prepared++ }, logger: { info() {}, warn() {}, error() {} } })
++  const active = { task, controller: new globalThis.AbortController(), browser: null, context: null, cancelled: false }
++  runner.prepareBrowser = async () => { prepared++ }
++  await assert.rejects(() => runner.run(task, active)); assert.equal(prepared, 0); assert.equal(active.root, undefined)
++})
+--- /dev/null
++++ b/scripts/qa/d16-web-ui.mjs
+@@ -0,0 +1,94 @@
++// Headless Web automation page acceptance uses controlled API fixtures; native HTTP has a separate QA script.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import http from 'node:http'
++import path from 'node:path'
++import process from 'node:process'
++import { fileURLToPath, URL } from 'node:url'
++import { PlaywrightRunner } from '../../services/playwright-runner/src/runner.js'
++import { validateRuntime } from '../../services/playwright-runner/src/protocol.js'
++import { chromium } from '../../services/playwright-runner/node_modules/playwright/index.mjs'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261102/d16-web-fixes-r1'), dist = path.join(root, 'dist')
++const stamp = '2026-10-30T00:00:00Z'
++const result = { headless: true, isolatedHttpFixtures: true, realBackendAcceptance: false, cases: [], cleanup: false }
++const server = http.createServer(async (req, res) => {
++  try {
++    if (new URL(req.url, 'http://qa.invalid').pathname === '/qa-form') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end('<input id="input"><div id="result"></div><script>document.querySelector("input").addEventListener("input", event => document.querySelector("#result").textContent = event.target.value)</script>'); return }
++    let file = path.resolve(dist, '.' + decodeURIComponent(new URL(req.url, 'http://qa.invalid').pathname))
++    if (!file.startsWith(dist + path.sep) || !path.extname(file)) file = path.join(dist, 'index.html')
++    const body = await fs.readFile(file)
++    res.writeHead(200, { 'Content-Type': { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }[path.extname(file)] || 'application/octet-stream' })
++    res.end(body)
++  } catch { if (!res.headersSent) res.writeHead(404); res.end() }
++})
++await fs.mkdir(out, { recursive: true }); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
++const origin = `http://127.0.0.1:${server.address().port}`
++let browser
++const profile = { id: 'p', name: 'QA Profile', browser: 'chromium', baseUrl: 'https://ui.example.test', viewportWidth: 800, viewportHeight: 600, enabled: true, version: 1 }
++const scenario = { id: 's', name: 'QA Scene', browserProfileId: 'p', description: '', failureStrategy: 'STOP', variables: {}, steps: [{ id: 'wait', type: 'WAIT', name: 'Wait', timeoutMillis: 1000 }, { id: 'fill', type: 'FILL', name: 'Fill', selector: '#input', value: '001', timeoutMillis: 1000 }], version: 1 }
++async function run(id, kind, operation) {
++  const context = await browser.newContext({ viewport: { width: 1600, height: 1100 } }), writes = [], errors = []
++  await context.route('**/api/**', async route => {
++    const r = route.request(), p = new URL(r.url()).pathname; let data
++    if (['POST', 'PUT'].includes(r.method())) { const input = r.postDataJSON(); writes.push(input); data = { id: 'saved', ...input } }
++    else if (p.endsWith('/auth/me')) data = { id: 'qa', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: stamp }
++    else if (p.endsWith('/auth/csrf')) data = { token: 'fixture', headerName: 'X-CSRF' }
++    else if (p.endsWith('/auth/capabilities')) data = { registrationEnabled: true }
++    else if (p.endsWith('/access/context')) data = { organizations: [{ id: 'o', name: 'QA', code: 'QA' }], projects: { o: [{ id: 'project', name: 'QA项目', code: 'QA', status: 'ACTIVE', createdAt: stamp, updatedAt: stamp }] } }
++    else if (p.endsWith('/capabilities')) data = { systemAdministration: true }
++    else if (p.endsWith('/browser-profiles')) data = [profile]
++    else if (p.endsWith('/scenarios')) data = [scenario]
++    else if (p.endsWith('/runner-status')) data = [{ runnerId: 'r', trusted: true, executionEnabled: true }]
++    else data = []
++    await route.fulfill({ json: { data } })
++  })
++  const page = await context.newPage(); page.setDefaultTimeout(10_000); page.on('pageerror', error => errors.push(error.message))
++  try {
++    await page.goto(origin + '/ui-automation')
++    if (kind === 'profile') { await page.locator('.arco-tabs-tab').filter({ hasText: '浏览器项目' }).click(); await page.getByRole('button', { name: '新建浏览器项目', exact: true }).click() }
++    else await page.getByRole('button', { name: kind === 'scenario' ? '编辑编排' : '执行场景', exact: true }).click()
++    const dialog = page.locator('.arco-modal').filter({ hasText: kind === 'profile' ? '新建浏览器项目' : kind === 'scenario' ? '编辑 Web UI 场景' : '执行 Web UI 场景' })
++    if (kind === 'profile') { await dialog.locator('.arco-form-item').filter({ hasText: '配置名称' }).locator('input').fill('QA'); await dialog.locator('.arco-form-item').filter({ hasText: '基准 URL' }).locator('input').fill('https://ui.example.test') }
++    const field = name => page.getByLabel(name, { exact: true }).locator('input')
++    const save = () => dialog.locator('.arco-modal-footer .arco-btn-primary').click()
++    const written = async () => Promise.all([page.waitForResponse(r => ['POST', 'PUT'].includes(r.request().method()) && !r.url().endsWith('/csrf')), save()])
++    await operation(page, dialog, field, save, written, writes); assert.deepEqual(errors, []); result.cases.push({ id, status: 'PASS' })
++  } catch (error) { result.cases.push({ id, status: 'FAIL', error: error.message, browserErrors: errors }) }
++  finally { await context.close() }
++}
++try {
++  browser = await chromium.launch({ headless: true, channel: 'chrome' }); result.browserVersion = browser.version()
++  await run('TC-D16WEB-46', 'profile', async (page, dialog, field, save, written, writes) => {
++    for (const raw of ['800.5', '800.0000000000000001', '3841']) { await field('Web viewportWidth').fill(raw); await save(); await page.locator('.arco-message').filter({ hasText: 'viewportWidth' }).first().waitFor(); assert.equal(writes.length, 0); assert.equal(await field('Web viewportWidth').inputValue(), raw) }
++  })
++  await run('TC-D16WEB-47', 'profile', async (page, dialog, field, save, written, writes) => { await field('Web viewportWidth').fill('8e2'); await field('Web viewportHeight').fill('600.0'); await written(); assert.equal(writes.at(-1).viewportWidth, 800); assert.equal(writes.at(-1).viewportHeight, 600) })
++  await run('TC-D16WEB-48', 'scenario', async (page, dialog, field, save, written, writes) => {
++    await field('Web 步骤 1 timeoutMillis').fill('1000.5'); await save(); await page.locator('.arco-message').filter({ hasText: 'timeoutMillis' }).first().waitFor(); assert.equal(writes.length, 0)
++    await field('Web 步骤 1 timeoutMillis').fill('1e3'); await field('Web 步骤 2 timeoutMillis').fill('99'); await save(); assert.equal(writes.length, 0)
++    await field('Web 步骤 2 timeoutMillis').fill('100.0'); await written(); assert.equal(writes.at(-1).steps[0].timeoutMillis, 1000); assert.equal(writes.at(-1).steps[1].timeoutMillis, 100)
++  })
++  await run('TC-D16WEB-49', 'execute', async (page, dialog, field, save, written, writes) => { await field('Web execute timeoutSeconds').fill('300.5'); await save(); await page.locator('.arco-message').filter({ hasText: 'timeoutSeconds' }).first().waitFor(); assert.equal(writes.length, 0); await field('Web execute timeoutSeconds').fill('3e2'); await written(); assert.equal(writes.at(-1).timeoutSeconds, 300) })
++  await run('TC-D16WEB-50', 'scenario', async (page, dialog, field, save, written, writes) => {
++    await field('Web 步骤 1 timeoutMillis').fill(''); await save(); await page.locator('.arco-message').filter({ hasText: 'timeoutMillis' }).first().waitFor(); assert.equal(writes.length, 0)
++    await field('Web 步骤 1 timeoutMillis').fill('50'); await field('Web 步骤 2 timeoutMillis').fill(''); await written(); assert.equal(writes.at(-1).steps[0].timeoutMillis, 50); assert.equal(writes.at(-1).steps[1].timeoutMillis, undefined)
++  })
++  await run('TC-D16WEB-51', 'scenario', async (page, dialog, field, save, written, writes) => {
++    const variables = dialog.locator('.arco-form-item').filter({ hasText: '变量（JSON 对象）' }).locator('textarea'); await variables.fill('{"id":1}'); await save(); await page.locator('.arco-message').filter({ hasText: '字符串' }).first().waitFor(); assert.equal(writes.length, 0)
++    await variables.fill('{}'); await field('Web 步骤 1 timeoutMillis').fill('1.5'); await dialog.locator('.step-form').first().locator('header button').click(); await field('Web 步骤 1 timeoutMillis').fill('100.0'); await written(); assert.equal(writes.at(-1).steps[0].timeoutMillis, 100)
++  })
++  const context = await browser.newContext(); const page = await context.newPage()
++  try {
++    const task = { taskId: 'fixture-task', executionId: 'fixture-execution' }
++    const steps = [{ id: 'nav', type: 'NAVIGATE', name: 'Open', url: '/qa-form', timeoutMillis: null }, { id: 'fill', type: 'FILL', name: 'Fill', selector: '#input', value: '{{id}}', timeoutMillis: 1000 }, { id: 'text', type: 'ASSERT_TEXT', name: 'Assert', selector: '#result', expectedText: '001', timeoutMillis: 1000 }, { id: 'wait', type: 'WAIT', name: 'Wait', timeoutMillis: 1 }]
++    const runtime = validateRuntime(task, { contract: 'testhub.playwright-runner.runtime-configuration', version: 1, ...task, browser: { browser: 'chromium', baseUrl: origin, viewportWidth: 800, viewportHeight: 600 }, scenario: { failureStrategy: 'STOP', variables: { id: '001' }, steps } }, [origin])
++    const runner = new PlaywrightRunner({ commandClient: {}, readClient: {}, cancelClient: {}, config: { allowedTargetOrigins: [origin] } })
++    for (const step of runtime.scenario.steps) await runner.step(page, step, runtime.scenario.variables, origin)
++    assert.equal(await page.locator('#input').inputValue(), '001'); result.cases.push({ id: 'TC-D16WEB-55', status: 'PASS', mode: 'real Chrome plus actual Runner.step; not a deployed queue service' })
++  } catch (error) { result.cases.push({ id: 'TC-D16WEB-55', status: 'FAIL', error: error.message }) }
++  finally { await context.close() }
++} finally {
++  await browser?.close(); await new Promise(resolve => server.close(resolve)); result.cleanup = true
++  result.passed = result.cases.filter(c => c.status === 'PASS').length; result.failed = result.cases.length - result.passed
++  await fs.writeFile(path.join(out, 'headless-ui.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n'); if (result.failed) process.exitCode = 1
++}
+--- /dev/null
++++ b/scripts/qa/d16-web-http.mjs
+@@ -0,0 +1,135 @@
++/* global fetch, AbortSignal */
++// Native JVM acceptance in a new filesystem workspace; no Electron window or user workspace is used.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import path from 'node:path'
++import crypto from 'node:crypto'
++import process from 'node:process'
++import { spawn } from 'node:child_process'
++import { fileURLToPath } from 'node:url'
++import { setTimeout as delay } from 'node:timers/promises'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261102/d16-web-fixes-r1'), directory = await fs.mkdtemp(path.join(root, '.testhub/d16-web-http-qa-'))
++const java = path.join(process.env.JAVA_HOME, 'bin/java'), jar = path.join(root, 'services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar')
++const result = { headless: true, realPackagedJvm: true, desktopProfile: true, electronUpgradeTest: false, cases: [], cleanup: false }
++const env = { ...process.env }
++for (const key of Object.keys(env)) if (key.startsWith('TESTHUB_') || key.startsWith('SPRING_')) delete env[key]
++Object.assign(env, { SPRING_PROFILES_ACTIVE: 'desktop', TESTHUB_DESKTOP_DATA_DIRECTORY: directory, TESTHUB_LOCAL_DB_PASSWORD: crypto.randomBytes(24).toString('hex'),
++  TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test', TESTHUB_REGISTRATION_ENABLED: 'true' })
++let child, origin, logHandle, launch = 0
++async function start() {
++  const file = path.join(directory, `backend-${++launch}.log`); logHandle = await fs.open(file, 'w')
++  child = spawn(java, ['-jar', jar, '--server.port=0', '--testhub.registration.enabled=true', '--testhub.bootstrap.demo-enabled=false'], { cwd: root, env, stdio: ['ignore', logHandle.fd, logHandle.fd] })
++  child.on('error', error => { result.launchError = error.message })
++  for (let n = 0; n < 300; n++) {
++    if (child.exitCode !== null || child.signalCode !== null || result.launchError) throw new Error('Owned QA JVM failed to start')
++    const match = /Tomcat started on port (\d+)/.exec(await fs.readFile(file, 'utf8'))
++    if (match) {
++      origin = 'http://127.0.0.1:' + match[1]
++      try { if ((await fetch(origin + '/actuator/health/readiness', { signal: AbortSignal.timeout(5_500) })).status === 200) return } catch { /* Wait for ApplicationReadyEvent. */ }
++    }
++    await delay(250)
++  }
++  throw new Error('Owned QA JVM did not become ready within 75 seconds')
++}
++async function stop() {
++  if (!child) return
++  const running = child; child = null
++  if (running.exitCode === null && running.signalCode === null) {
++    running.kill('SIGTERM')
++    for (let n = 0; n < 150 && running.exitCode === null && running.signalCode === null; n++) await delay(100)
++    if (running.exitCode === null && running.signalCode === null) { running.kill('SIGKILL'); await new Promise(resolve => running.once('exit', resolve)); throw new Error('Owned JVM failed to stop within 15 seconds') }
++  }
++  await logHandle?.close(); logHandle = null
++}
++function browser() { return { cookies: new Map() } }
++async function request(client, url, method = 'GET', payload) {
++  const headers = { Cookie: [...client.cookies].map(([key, value]) => key + '=' + value).join('; ') }
++  if (payload !== undefined) {
++    const csrf = await request(client, '/api/v1/auth/csrf')
++    assert.equal(csrf.status, 200); headers[csrf.body.data.headerName] = csrf.body.data.token
++    headers.Cookie = [...client.cookies].map(([key, value]) => key + '=' + value).join('; '); headers['Content-Type'] = 'application/json'
++  }
++  const response = await fetch(origin + url, { method, headers, body: payload === undefined ? undefined : JSON.stringify(payload), signal: AbortSignal.timeout(8_000) })
++  for (const cookie of response.headers.getSetCookie()) {
++    const [pair] = cookie.split(';'), equals = pair.indexOf('='); client.cookies.set(pair.slice(0, equals), pair.slice(equals + 1))
++  }
++  return { status: response.status, body: response.status === 204 ? null : await response.json() }
++}
++async function step(id, title, operation) { await operation(); result.cases.push({ id, title, status: 'PASS' }) }
++async function rawRequest(client, url, method, body) {
++  const csrf = await request(client, '/api/v1/auth/csrf'); assert.equal(csrf.status, 200)
++  const headers = { Cookie: [...client.cookies].map(([k,v]) => k + '=' + v).join('; '), 'Content-Type': 'application/json', [csrf.body.data.headerName]: csrf.body.data.token }
++  const response = await fetch(origin + url, { method, headers, body, signal: AbortSignal.timeout(8_000) })
++  return { status: response.status, body: await response.json() }
++}
++const profile = (field, token) => JSON.stringify({ name: crypto.randomUUID(), browser: 'chromium', baseUrl: 'https://ui.example.test', viewportWidth: 800, viewportHeight: 600, enabled: true, [field]: 'RAW' }).replace('"RAW"', token)
++const scene = (profileId, type, field, token) => {
++  const step = { id: 'one', type, name: type, selector: type === 'FILL' || type === 'ASSERT_TEXT' ? '#input' : null, value: type === 'FILL' ? '001' : null, expectedText: type === 'ASSERT_TEXT' ? '001' : null, timeoutMillis: 1000 }
++  const data = { name: crypto.randomUUID(), description: '', browserProfileId: profileId, failureStrategy: 'STOP', variables: { id: '001' }, steps: [step] }
++  if (field === 'variables') data.variables = 'RAW'; else step[field] = 'RAW'
++  return JSON.stringify(data).replace('"RAW"', token)
++}
++try {
++  await start()
++  const client = browser(), account = 'd16-' + crypto.randomUUID(), password = crypto.randomUUID() + 'Aa1!'
++  assert.equal((await request(client, '/api/v1/auth/register', 'POST', { account, email: crypto.randomUUID() + '@example.test', displayName: 'D16隔离验收', password })).status, 201)
++  const me = (await request(client, '/api/v1/auth/me')).body.data
++  const project = Object.values((await request(client, '/api/v1/access/context')).body.data.projects).flat()[0].id
++  const base = '/api/v1/projects/' + project + '/ui-automation'
++  const p = await rawRequest(client, base + '/browser-profiles', 'POST', profile('viewportWidth', '800')); assert.equal(p.status, 200)
++  let created
++  await step('TC-D16WEB-01/02/05/06/07', '真实HTTP视口精确整数类型与默认', async () => {
++    for (const field of ['viewportWidth', 'viewportHeight']) for (const token of ['800', '800.0', '8e2']) { const r = await rawRequest(client, base + '/browser-profiles', 'POST', profile(field, token)); assert.equal(r.status, 200); assert.equal(r.body.data[field], 800) }
++    const before = (await request(client, base + '/browser-profiles')).body.data.length
++    for (const token of ['800.5', '800.0000000000000001', '"800"', 'true', '[]', '1e10000', 'NaN', 'Infinity']) assert.equal((await rawRequest(client, base + '/browser-profiles', 'POST', profile('viewportWidth', token))).status, 400)
++    assert.equal((await request(client, base + '/browser-profiles')).body.data.length, before)
++    const defaults = await request(client, base + '/browser-profiles', 'POST', { name: crypto.randomUUID(), browser: 'chromium', baseUrl: 'https://ui.example.test', enabled: true }); assert.equal(defaults.status, 200); assert.equal(defaults.body.data.viewportWidth, 1440); assert.equal(defaults.body.data.viewportHeight, 900)
++  })
++  await step('TC-D16WEB-08/10/12/13/15/16', 'WAIT和其他步骤保持不同超时规则', async () => {
++    for (const type of ['WAIT', 'FILL']) for (const token of ['1000', '1000.0', '1e3']) { const r = await rawRequest(client, base + '/scenarios', 'POST', scene(p.body.data.id, type, 'timeoutMillis', token)); assert.equal(r.status, 200); assert.equal(r.body.data.steps[0].timeoutMillis, 1000); created = r.body.data }
++    const before = (await request(client, base + '/scenarios')).body.data.length
++    for (const type of ['WAIT', 'FILL']) for (const token of ['1000.5', '1000.0000000000000001', '"1000"', 'true']) assert.equal((await rawRequest(client, base + '/scenarios', 'POST', scene(p.body.data.id, type, 'timeoutMillis', token))).status, 400)
++    assert.equal((await request(client, base + '/scenarios')).body.data.length, before)
++    assert.equal((await rawRequest(client, base + '/scenarios', 'POST', scene(p.body.data.id, 'WAIT', 'timeoutMillis', 'null'))).status, 400)
++    const optional = await rawRequest(client, base + '/scenarios', 'POST', scene(p.body.data.id, 'FILL', 'timeoutMillis', 'null')); assert.equal(optional.status, 200); assert.equal(optional.body.data.steps[0].timeoutMillis, null)
++  })
++  await step('TC-D16WEB-17/19/20', '执行超时原始JSON拒绝及默认300', async () => {
++    const route = base + '/scenarios/' + created.id + '/executions'
++    for (const token of ['300', '300.0', '3e2']) assert.equal((await rawRequest(client, route, 'POST', '{"timeoutSeconds":' + token + '}')).status, 200)
++    const before = (await request(client, base + '/executions')).body.data.length
++    for (const token of ['300.5', '300.0000000000000001', '"300"', 'true', 'NaN']) assert.equal((await rawRequest(client, route, 'POST', '{"timeoutSeconds":' + token + '}')).status, 400)
++    assert.equal((await request(client, base + '/executions')).body.data.length, before)
++    const empty = await request(client, route, 'POST', {}); assert.equal(empty.status, 200); assert.equal(Date.parse(empty.body.data.deadlineAt) - Date.parse(empty.body.data.requestedAt), 300000)
++  })
++  await step('TC-D16WEB-22/23/24/25/26/43', '显式文本保真及字段错误隐私', async () => {
++    const good = await rawRequest(client, base + '/scenarios', 'POST', scene(p.body.data.id, 'FILL', 'variables', '{"id":"001","flag":"false","literal":"null"}')); assert.equal(good.status, 200); assert.equal(good.body.data.variables.id, '001'); assert.equal(good.body.data.steps[0].value, '001')
++    for (const field of ['value', 'expectedText']) { const r = await rawRequest(client, base + '/scenarios', 'POST', scene(p.body.data.id, field === 'value' ? 'FILL' : 'ASSERT_TEXT', field, '{"D16_PRIVATE_MARKER":true}')); assert.equal(r.status, 400); assert.ok(JSON.stringify(r.body).includes(field)); assert.ok(!JSON.stringify(r.body).includes('D16_PRIVATE_MARKER')) }
++    for (const token of ['1', 'true', '[]', '{}']) assert.equal((await rawRequest(client, base + '/scenarios', 'POST', scene(p.body.data.id, 'FILL', 'variables', '{"id":' + token + '}'))).status, 400)
++    const nullable = await rawRequest(client, base + '/scenarios', 'POST', scene(p.body.data.id, 'FILL', 'variables', '{"id":null}')); assert.equal(nullable.status, 200); assert.equal(nullable.body.data.variables.id, '')
++  })
++  await step('TC-D16WEB-29/30', '非法编辑不改配置和场景版本', async () => {
++    assert.equal((await rawRequest(client, base + '/browser-profiles/' + p.body.data.id, 'PUT', profile('viewportWidth', '800.5'))).status, 400)
++    assert.equal((await rawRequest(client, base + '/scenarios/' + created.id, 'PUT', scene(p.body.data.id, 'FILL', 'timeoutMillis', '1000.5'))).status, 400)
++    assert.equal((await request(client, base + '/browser-profiles')).body.data.find(x => x.id === p.body.data.id).version, 1)
++    assert.equal((await request(client, base + '/scenarios')).body.data.find(x => x.id === created.id).version, 1)
++  })
++  await step('TC-D16WEB-33/34/35', '迁移拒绝且完整同步只允许精确等值数字', async () => {
++    const snapshot = (await request(client, base + '/transfer')).body.data
++    const imported = JSON.stringify({ requestKey: crypto.randomUUID(), expectedUserId: me.id, snapshot }).replace(/"viewportWidth":\d+/, '"viewportWidth":800.5'); assert.equal((await rawRequest(client, base + '/transfer', 'POST', imported)).status, 400)
++    let sync = (await request(client, base + '/sync?expectedUserId=' + me.id)).body.data
++    const body = () => JSON.stringify({ requestKey: crypto.randomUUID(), expectedUserId: me.id, expectedRevision: sync.revision, operations: sync.items.map(item => ({ operationId: crypto.randomUUID(), item })) })
++    const exact = body().replace(/("(?:viewportWidth|viewportHeight|timeoutMillis)":)(\d+)/g, '$1$2.0'); assert.equal((await rawRequest(client, base + '/sync', 'POST', exact)).status, 200)
++    sync = (await request(client, base + '/sync?expectedUserId=' + me.id)).body.data
++    const before = sync.revision; const invalid = body().replace(/"viewportWidth":\d+/, '"viewportWidth":800.0000000000000001'); assert.equal((await rawRequest(client, base + '/sync', 'POST', invalid)).status, 400)
++    assert.equal((await request(client, base + '/sync?expectedUserId=' + me.id)).body.data.revision, before)
++  })
++  await stop(); await start()
++  await step('TC-D16WEB-39', '自有JVM重启后记录会话保持（非升级复验）', async () => { assert.equal((await request(client, '/api/v1/auth/me')).status, 200); const kept = (await request(client, base + '/scenarios')).body.data.find(x => x.id === created.id); assert.equal(kept.steps[0].value, '001'); assert.equal(kept.steps[0].timeoutMillis, 1000) })
++} catch (error) { result.error = error.message; process.exitCode = 1 }
++finally {
++  try { await stop() } catch (error) { result.cleanupError = error.message; process.exitCode = 1 }
++  await fs.rm(directory, { recursive: true, force: true }); result.cleanup = true
++  result.passed = result.cases.length; result.failed = result.error ? 1 : 0
++  await fs.mkdir(out, { recursive: true }); await fs.writeFile(path.join(out, 'native-http.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n')
++}

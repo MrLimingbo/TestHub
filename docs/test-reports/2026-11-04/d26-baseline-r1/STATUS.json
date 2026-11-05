@@ -1,0 +1,23 @@
+{
+  "status": "INCOMPLETE",
+  "supervisorPid": 51116,
+  "startedAt": "2026-11-04T07:38:05.979Z",
+  "phase": "AWAITING_REVIEW",
+  "completedWindows": 0,
+  "requiredWindows": 2,
+  "updatedAt": "2026-11-04T08:35:39.677Z",
+  "attempt": 1,
+  "expectedFinishAt": "2026-11-04T10:08:05.979Z",
+  "elapsedSeconds": 1620.2335305000001,
+  "sampledSlots": 324,
+  "violation": null,
+  "lastAttempt": 1,
+  "lastViolation": "EXTERNAL_CPU_POLLUTION",
+  "quietSeconds": 0,
+  "error": {
+    "code": "Error",
+    "message": "No quiet 120-second interval within 30 minutes"
+  },
+  "finishedAt": "2026-11-04T08:35:39.110Z",
+  "cleanup": "COMPLETE"
+}

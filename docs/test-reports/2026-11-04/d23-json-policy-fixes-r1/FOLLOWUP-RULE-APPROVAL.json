@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-04",
+  "status": "BUG_FIX_RULE_APPROVED",
+  "bugId": "BUG-D23-001",
+  "selectedDuplicateStatus": 409,
+  "basis": "用户：BUG-D23-001 按推荐的409规则处理，先设计用例，再修复并后台回归，更新D23测试报告后发我审核，暂时不要进入下一模块。12项环境补齐继续暂缓，升级关闭超时的未确认风险单独保留。",
+  "resultReviewApproved": false,
+  "scope": "企业适配器创建/更新的重复类型与名称冲突、原记录保留原名、并发冲突及无部分写入；原D23-A兼容政策保持",
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

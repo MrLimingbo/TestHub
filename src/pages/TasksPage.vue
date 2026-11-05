@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { webIntegerInput, webIntegerError } from '@/utils/webIntegerInput'
 import UnifiedExecutionsPanel from '@/components/UnifiedExecutionsPanel.vue'
 import { useSessionStore } from '@/stores/session'
 import { isLocalDesktop, isAccountDesktop, openTaskSync } from '@/utils/desktopWorkspace'
@@ -21,6 +22,7 @@ const tasks = ref<ExecutionTask[]>([]), loading = ref(true), saving = ref(false)
 const visible = ref(false), editingId = ref<string | null>(null), keyword = ref(''), pendingTasks = ref(new Map<string, symbol>())
 let taskRequest = 0, formRequest = 0, formProjectId = '', disposed = false, actionScope = 0
 const form = reactive({ taskType: 'API', name: '', status: 'QUEUED', progress: 0, expectedVersion: null as number | null })
+const progressText = ref('0')
 const taskTypes = ['API', 'FUNCTIONAL', 'PERFORMANCE', 'UI', 'MOBILE', 'OTHER']
 const desktop = isLocalDesktop() || isAccountDesktop()
 async function syncSettings() {
@@ -74,19 +76,22 @@ async function load() {
 function closeForm() { formRequest++; saving.value = false; visible.value = false }
 function create() {
   if (disposed || !selectedProject.value) return
-  formRequest++; saving.value = false; formProjectId = projectId.value; editingId.value = null
+  formRequest++; saving.value = false; formProjectId = projectId.value; editingId.value = null; progressText.value = '0'
   Object.assign(form, { taskType: 'API', name: '', status: 'QUEUED', progress: 0, expectedVersion: null }); visible.value = true
 }
 function edit(task: ExecutionTask) {
   if (task.projectId !== projectId.value || pendingTasks.value.has(task.id)) return
-  formRequest++; saving.value = false; formProjectId = task.projectId; editingId.value = task.id
+  formRequest++; saving.value = false; formProjectId = task.projectId; editingId.value = task.id; progressText.value = String(task.progress)
   Object.assign(form, { taskType: task.taskType, name: task.name, status: task.status, progress: task.progress, expectedVersion: task.version }); visible.value = true
 }
 async function save() {
   if (saving.value || disposed || formProjectId !== projectId.value || !visible.value) return false
   const request = formRequest, project = formProjectId, id = editingId.value
   const current = () => !disposed && request === formRequest && project === projectId.value
-  const input = id ? { name: form.name, status: form.status, progress: form.progress, expectedVersion: form.expectedVersion } : { taskType: form.taskType, name: form.name }
+  let progress: number | undefined
+  try { if (id) progress = webIntegerInput(progressText.value, 0, 100, 'progress') }
+  catch (error) { Message.error(error instanceof Error ? error.message : '进度不合法'); return false }
+  const input = id ? { name: form.name, status: form.status, progress, expectedVersion: form.expectedVersion } : { taskType: form.taskType, name: form.name }
   saving.value = true
   try {
     await mutate(`/api/v1/projects/${project}/tasks${id ? '/' + id : ''}`, id ? 'PUT' : 'POST', input, current)
@@ -130,7 +135,7 @@ onBeforeUnmount(() => { disposed = true; taskRequest++; formRequest++ })
     <UnifiedExecutionsPanel :project-id="context && selectedProject ? projectId : ''" />
     <section class="panel task-summary"><div><span>当前项目</span><strong>{{ selectedProject?.name ?? '未分配项目' }}</strong><small>{{ selectedProject?.code }}</small></div><a-select v-model="projectId" :style="{ width: '240px' }"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select><div><span>活动登记</span><strong>{{ activeCount }}</strong></div><div><span>已结束</span><strong>{{ finishedCount }}</strong></div></section>
     <section class="panel data-panel"><h2 class="registration-heading">手工任务登记</h2><div class="task-toolbar"><div><a-input-search v-model="keyword" placeholder="搜索任务名称" :style="{ width: '260px' }" allow-clear /><a-tag color="arcoblue">{{ tasks.length }} 个任务</a-tag></div><a-space><a-button v-if="desktop" @click="syncSettings">任务登记同步</a-button><a-button :loading="loading" :disabled="!selectedProject" @click="loadTasks">刷新</a-button><a-button type="primary" :disabled="!selectedProject" @click="create"><icon-plus /> 新建任务</a-button></a-space></div><a-alert v-if="loadError" type="error">{{ loadError }}</a-alert><a-spin :loading="loading"><a-table :data="filteredTasks" :pagination="false" row-key="id"><template #columns><a-table-column title="任务名称" data-index="name"><template #cell="{ record }"><div class="task-name"><span class="task-icon"><icon-play-circle /></span><div><strong>{{ record.name }}</strong><small>{{ typeLabel(record.taskType) }}登记 · {{ date(record.createdAt) }}</small><small v-if="record.sourceTaskId" class="task-source">迁入登记 · 来源{{ statusLabel(record.sourceStatus) }} · 来源第 {{ record.sourceVersion }} 版<span v-if="record.sourceCreatedAt"> · {{ date(record.sourceCreatedAt) }}</span></small></div></div></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag></template></a-table-column><a-table-column title="进度" data-index="progress"><template #cell="{ record }"><div class="progress-cell"><a-progress :percent="record.progress / 100" :show-text="false" size="small" :stroke-width="6" /><span>{{ record.progress }}%</span></div></template></a-table-column><a-table-column title="最近更新" data-index="updatedAt" :width="165"><template #cell="{ record }"><time class="task-date" :datetime="record.updatedAt">{{ date(record.updatedAt) }}</time></template></a-table-column><a-table-column title="操作"><template #cell="{ record }"><a-space><a-button v-if="record.status === 'QUEUED'" type="text" :disabled="pendingTasks.has(record.id)" @click="updateTask(record, 'RUNNING', 1)">标记执行中</a-button><a-button v-if="record.status === 'RUNNING'" type="text" :disabled="pendingTasks.has(record.id)" status="success" @click="updateTask(record, 'SUCCEEDED', 100)">标记成功</a-button><a-button v-if="['QUEUED','RUNNING'].includes(record.status)" type="text" :loading="pendingTasks.has(record.id)" status="danger" @click="cancel(record)">取消</a-button><a-button type="text" :disabled="pendingTasks.has(record.id)" @click="edit(record)">编辑</a-button></a-space></template></a-table-column></template></a-table></a-spin><a-empty v-if="!loading && !loadError && filteredTasks.length === 0" description="当前筛选范围没有任务登记。" /></section>
-    <a-modal v-model:visible="visible" :title="editingId ? '编辑执行任务' : '新建执行任务'" width="600px" :ok-loading="saving" :on-before-ok="save" @cancel="closeForm"><a-form :model="form" layout="vertical"><a-alert type="info">在此保存任务登记及状态；测试执行请前往对应测试模块。</a-alert><a-form-item v-if="!editingId" label="任务类型" required><a-select v-model="form.taskType"><a-option v-for="type in taskTypes" :key="type" :value="type">{{ typeLabel(type) }}</a-option></a-select></a-form-item><a-form-item label="任务名称" required><a-input v-model="form.name" placeholder="例如：交易中台接口回归" /></a-form-item><template v-if="editingId"><a-form-item label="状态"><a-select v-model="form.status"><a-option v-for="status in statusOptions" :key="status" :value="status">{{ statusLabel(status) }}</a-option></a-select></a-form-item><a-form-item label="进度"><a-input-number v-model="form.progress" :min="0" :max="100" :style="{ width: '180px' }" /> %</a-form-item></template></a-form></a-modal>
+    <a-modal v-model:visible="visible" :title="editingId ? '编辑执行任务' : '新建执行任务'" width="600px" :ok-loading="saving" :on-before-ok="save" @cancel="closeForm"><a-form :model="form" layout="vertical"><a-alert type="info">在此保存任务登记及状态；测试执行请前往对应测试模块。</a-alert><a-form-item v-if="!editingId" label="任务类型" required><a-select v-model="form.taskType"><a-option v-for="type in taskTypes" :key="type" :value="type">{{ typeLabel(type) }}</a-option></a-select></a-form-item><a-form-item label="任务名称" required><a-input v-model="form.name" placeholder="例如：交易中台接口回归" /></a-form-item><template v-if="editingId"><a-form-item label="状态"><a-select v-model="form.status"><a-option v-for="status in statusOptions" :key="status" :value="status">{{ statusLabel(status) }}</a-option></a-select></a-form-item><a-form-item label="进度"><a-input v-model="progressText" aria-label="任务进度" :style="{ width: '180px' }" /> % <small v-if="webIntegerError(progressText, 0, 100, 'progress')">{{ webIntegerError(progressText, 0, 100, 'progress') }}</small></a-form-item></template></a-form></a-modal>
   </div>
 </template>
 

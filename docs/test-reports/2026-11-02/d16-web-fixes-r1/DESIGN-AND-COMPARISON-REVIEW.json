@@ -1,0 +1,39 @@
+{
+  "inputCount": 6,
+  "allExtracted": true,
+  "requirements": 7,
+  "acceptanceCriteria": 56,
+  "coverageItems": 56,
+  "requirementsCovered": 7,
+  "acceptanceCriteriaCovered": 56,
+  "coverageItemsCovered": 56,
+  "quality": {
+    "case_quality_score": 99.89,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 99.29
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "exactDuplicates": 0,
+  "nearDuplicatePairs": 2,
+  "unresolvedDuplicates": 0,
+  "documentFindings": 0,
+  "invalidAnchors": 0,
+  "untraceableCases": 0,
+  "comparisonSummary": {
+    "changed_dependency_count": 135,
+    "review_required_case_count": 56,
+    "stale_candidate_case_count": 0,
+    "removed_case_count": 63
+  },
+  "comparisonDisposition": "独立模块由性能63切换Web56；旧63条及文件未删除或改写，新56条已核对六输入。相似宽高按不同字段/边界保留。",
+  "techniqueReview": "等价/明示边界、类型条件、生命周期、状态、权限、恢复幂等与兼容；没有完整独立值域模型则不冒称pairwise。"
+}

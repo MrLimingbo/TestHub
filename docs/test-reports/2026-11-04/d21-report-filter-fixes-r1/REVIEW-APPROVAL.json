@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-04",
+  "status": "RESULTS_APPROVED",
+  "basis": "用户：D21 修复和回归审核通过，继续推进D23；结果审核后再进入下一模块。",
+  "reportSha256": "c4d7e2ba2393c1fd63276aa085b781c6051a9fed6deb10a7eb44c596e8b2840e",
+  "caseResultsSha256": "f4c3656b45580c407ed210386ec0c5d470fa675aa6fc8fa182a41d584566825f",
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

@@ -1,0 +1,158 @@
+{
+  "date": "2026-11-03",
+  "sourceCount": 22,
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-03/d16-overall-summary-r1/REVIEW-APPROVAL.json",
+      "line": 3,
+      "purpose": "D16整体报告审批",
+      "sha256": "20f87680ecde74e0c9a024d372cb7dd87031fb438090ccd1eed7c3040f5f7fba",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-overall-summary-r1/DEFERRED-OBSERVATIONS.json",
+      "line": 6,
+      "purpose": "剩余9项原始台账",
+      "sha256": "8fdfc8655f2960d834e8a3294536a3d873658110db27b7e7a919cc4e995bddeb",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "docs/test-reports/2026-10-29/RULE-DECISIONS.md",
+      "line": 117,
+      "purpose": "8组历史选项和待确认规格",
+      "sha256": "ddfa03c67a4a9da2422b8797f0de1cdce1d90fded434bf4ca3eaf0a05c09039c",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "docs/test-reports/2026-10-29/OBSERVATION-DETAILS.md",
+      "line": 145,
+      "purpose": "观察事实及证据来源",
+      "sha256": "16320afc5f104f1aa14d8a5b6a4117c2fefac7eb841841eb9393262a56105caf",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/OVERALL-TEST-REPORT.md",
+      "line": 102,
+      "purpose": "原资源窗口及风险验证边界",
+      "sha256": "3007eff0cfcea14a9a70fcb2e8b7663fe428bffca461022219afb90062324093",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestExecutionRepository.java",
+      "line": 156,
+      "purpose": "D08当前历史标题引用",
+      "sha256": "0510b43086cc417ce1971483895dbababa9ecac052270b8ddbfddfadb961fd13",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestExecutionService.java",
+      "line": 78,
+      "purpose": "D08批次创建与D07更新/规范化",
+      "sha256": "2e257e724c3f26498c88934718f495491c2292edecc88b5db981ae7b06dc3b21",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestExecutionController.java",
+      "line": 112,
+      "purpose": "D07 PUT必填编号",
+      "sha256": "c8f09841864b9e7a3222141f7f1bb5aa62a106360373021f1b3e9290cf4745ee",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTransferHistory.java",
+      "line": 17,
+      "purpose": "D08历史交换边界",
+      "sha256": "d2eb9bca4107394a7fa7c7b3239d03b8e9582b4c20b5df58f5243858bdaf4139",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileAutomationService.java",
+      "line": 371,
+      "purpose": "D19平台/策略联合校验现状",
+      "sha256": "938f2864ccf00382956d052a27a5e3c119a9c9f7fb9cc92a9423c8c18d6ca056",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/appium-runner/src/runner.js",
+      "line": 8,
+      "purpose": "D19 Runner统一策略映射",
+      "sha256": "99748cac0a9190a1e2419d0d728fec71a4b49fc44f316f7bf0a36ea03e4750b1",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "apps/desktop/app/src/project-sync-ipc.cjs",
+      "line": 56,
+      "purpose": "D24 preview exclusive及请求超时",
+      "sha256": "1cd02184009376f2b3a58f82ffd5b8369d16923ef16c4442f78429f811e13350",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "apps/desktop/app/src/main.cjs",
+      "line": 354,
+      "purpose": "D24关闭与锁关系",
+      "sha256": "11e7cbc53dd64159e0d30cdeafd87774ec6789b35c1f071844e935334e839858",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/account/UserAccountRepository.java",
+      "line": 83,
+      "purpose": "D06分页与count LIKE",
+      "sha256": "6e51864f00e9825c170826f0fd43fb574c33ab95a027e49e19e7be40582eb185",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportService.java",
+      "line": 87,
+      "purpose": "D21默认范围与空段规范化",
+      "sha256": "4d7dba5ffcafa857308004a76921a86de6fe4401660ab04b51240ff63c07313b",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportController.java",
+      "line": 29,
+      "purpose": "D21查询/导出绑定",
+      "sha256": "7b13225164c5c440c9dbc0e44a8117efa65ec70212a8b604a2b241e6c76e7584",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/notification/NotificationTemplateController.java",
+      "line": 58,
+      "purpose": "D23普通外层DTO",
+      "sha256": "a2276d5864452f7afb6580b9a44251b9a4b0fb30250e81adf9ee2d0f216d6aeb",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryController.java",
+      "line": 104,
+      "purpose": "D23普通外层DTO",
+      "sha256": "00eba65b1d167f470473613044d47f82ad76255e340aa334f715ff317b08fc36",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryService.java",
+      "line": 187,
+      "purpose": "D23签名原文与manifest解析",
+      "sha256": "8089fb4ce4570d609c5a0eb14691aec70388e3da49bbc141a4afab2ad7b84d90",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/PluginManifest.java",
+      "line": 8,
+      "purpose": "D23内层契约范围",
+      "sha256": "124c44b08f318716c06fc6a4831939620b1d01b2e8573c4fe3b3b3e617500541",
+      "review": "STATIC_ONLY_NOT_DYNAMIC_EXECUTION"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-overall-summary-r1/ENVIRONMENT-BLOCKERS.json",
+      "purpose": "原字节继承，不准备或复验",
+      "sha256": "e957d72701b0ab230744231872b3f07339e22284f4510f23614c35545b1afa00"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-overall-summary-r1/UNCONFIRMED-RISK.json",
+      "purpose": "原字节继承，不准备或复验",
+      "sha256": "0124f934bbc71e61718ee1675960fc43c228ce834e94b1773bf557c66448a5a9"
+    }
+  ],
+  "currentDynamicReproductionPerformed": false,
+  "currentProductTestExecutions": 0
+}

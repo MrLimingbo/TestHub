@@ -1,0 +1,398 @@
+{
+  "attempt": 1,
+  "initialDatabaseSha256": "52cc5403ac908f77ae5dabf954610d5d3dad87a37d99f541c153c4da9a003554",
+  "startedAt": "2026-11-04T07:38:05.979Z",
+  "durationSpecification": {
+    "warmup": 900,
+    "measurement": 7200,
+    "cooldown": 900
+  },
+  "valid": false,
+  "initialCounts": {
+    "tasks": 200,
+    "plans": 20,
+    "cases": 200
+  },
+  "expectedFinishAt": "2026-11-04T10:08:05.979Z",
+  "partialCycle": {
+    "phase": "measurement",
+    "cycle": 16,
+    "completed": 45
+  },
+  "actualDurationSeconds": 1650.000353458,
+  "clockDifferenceSeconds": 0.0016465419998894504,
+  "finalCounts": {
+    "tasks": 200,
+    "plans": 20,
+    "pendingPlans": 0
+  },
+  "metricsIntegrity": {
+    "expected": 1800,
+    "present": 329,
+    "ratio": 0.1827777777777778,
+    "longestGapSeconds": 7355,
+    "valid": false
+  },
+  "violation": "EXTERNAL_CPU_POLLUTION",
+  "operationStatistics": {
+    "taskList": {
+      "n": 320,
+      "p50": 9.200000047683716,
+      "p95": 14.200000047683716,
+      "p99": 20.200000047683716,
+      "max": 57.799999952316284,
+      "p95SampleSufficient": true,
+      "p99SampleSufficient": false,
+      "complianceAssessed": false,
+      "errors": 0,
+      "errorsByType": {},
+      "throughputPerSecond": 0.044444444444444446
+    },
+    "planDetail": {
+      "n": 145,
+      "p50": 7.099999904632568,
+      "p95": 10.799999952316284,
+      "p99": 27.90000009536743,
+      "max": 212.89999985694885,
+      "p95SampleSufficient": true,
+      "p99SampleSufficient": false,
+      "complianceAssessed": false,
+      "errors": 0,
+      "errorsByType": {},
+      "throughputPerSecond": 0.02013888888888889
+    },
+    "qualityReport": {
+      "n": 140,
+      "p50": 7.8999998569488525,
+      "p95": 12.200000047683716,
+      "p99": 19.799999952316284,
+      "max": 36.799999952316284,
+      "p95SampleSufficient": true,
+      "p99SampleSufficient": false,
+      "complianceAssessed": false,
+      "errors": 0,
+      "errorsByType": {},
+      "throughputPerSecond": 0.019444444444444445
+    },
+    "taskUpdate": {
+      "n": 70,
+      "p50": 6.5,
+      "p95": 14.399999856948853,
+      "p99": 113.5,
+      "max": 113.5,
+      "p95SampleSufficient": false,
+      "p99SampleSufficient": false,
+      "complianceAssessed": false,
+      "errors": 0,
+      "errorsByType": {},
+      "throughputPerSecond": 0.009722222222222222
+    },
+    "planCreate": {
+      "n": 35,
+      "p50": 9.399999856948853,
+      "p95": 15,
+      "p99": 16.200000047683716,
+      "max": 16.200000047683716,
+      "p95SampleSufficient": false,
+      "p99SampleSufficient": false,
+      "complianceAssessed": false,
+      "errors": 0,
+      "errorsByType": {},
+      "throughputPerSecond": 0.004861111111111111
+    },
+    "planDelete": {
+      "n": 35,
+      "p50": 7.299999952316284,
+      "p95": 15.900000095367432,
+      "p99": 18.200000047683716,
+      "max": 18.200000047683716,
+      "p95SampleSufficient": false,
+      "p99SampleSufficient": false,
+      "complianceAssessed": false,
+      "errors": 0,
+      "errorsByType": {},
+      "throughputPerSecond": 0.004861111111111111
+    }
+  },
+  "resourceCohorts": {
+    "measurementFirst15": {
+      "main": {
+        "rssMiB": {
+          "n": 150,
+          "median": 82.71875,
+          "peak": 86.890625,
+          "slopePerMinute": -0.28580216521613017
+        },
+        "cpuPercent": {
+          "n": 150,
+          "median": 0.3997231517451097,
+          "peak": 0.6000585006633226,
+          "slopePerMinute": 0.0017141770865664718
+        },
+        "fileDescriptors": {
+          "n": 150,
+          "median": 79,
+          "peak": 80,
+          "slopePerMinute": -0.00426683698346392
+        }
+      },
+      "renderer": {
+        "rssMiB": {
+          "n": 150,
+          "median": 74.546875,
+          "peak": 102.765625,
+          "slopePerMinute": -0.017214223413284727
+        },
+        "cpuPercent": {
+          "n": 150,
+          "median": 0.39998687043098113,
+          "peak": 1.6003514771931797,
+          "slopePerMinute": 0.004816781567270734
+        },
+        "fileDescriptors": {
+          "n": 150,
+          "median": 15,
+          "peak": 15,
+          "slopePerMinute": 0
+        }
+      },
+      "jvm": {
+        "rssMiB": {
+          "n": 150,
+          "median": 207.75,
+          "peak": 288.8125,
+          "slopePerMinute": -0.7447264993415679
+        },
+        "cpuPercent": {
+          "n": 150,
+          "median": 5.401161430106135,
+          "peak": 10.400587373172307,
+          "slopePerMinute": -0.06874413366330612
+        },
+        "fileDescriptors": {
+          "n": 150,
+          "median": 30,
+          "peak": 32,
+          "slopePerMinute": -0.05062624294347732
+        }
+      },
+      "tree": {
+        "rssMiB": {
+          "n": 150,
+          "median": 532.25,
+          "peak": 674.578125,
+          "slopePerMinute": -1.2063004840378473
+        },
+        "cpuPercent": {
+          "n": 150,
+          "median": 9.600092640894083,
+          "peak": 15.005725308443374,
+          "slopePerMinute": -0.06488887434834993
+        },
+        "fileDescriptors": {
+          "n": 150,
+          "median": 185,
+          "peak": 189,
+          "slopePerMinute": -0.10325791568051236
+        }
+      }
+    },
+    "measurementLast15": {
+      "main": {
+        "rssMiB": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "cpuPercent": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "fileDescriptors": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        }
+      },
+      "renderer": {
+        "rssMiB": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "cpuPercent": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "fileDescriptors": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        }
+      },
+      "jvm": {
+        "rssMiB": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "cpuPercent": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "fileDescriptors": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        }
+      },
+      "tree": {
+        "rssMiB": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "cpuPercent": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "fileDescriptors": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        }
+      }
+    },
+    "cooldown15": {
+      "main": {
+        "rssMiB": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "cpuPercent": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "fileDescriptors": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        }
+      },
+      "renderer": {
+        "rssMiB": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "cpuPercent": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "fileDescriptors": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        }
+      },
+      "jvm": {
+        "rssMiB": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "cpuPercent": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "fileDescriptors": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        }
+      },
+      "tree": {
+        "rssMiB": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "cpuPercent": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        },
+        "fileDescriptors": {
+          "n": 0,
+          "median": null,
+          "peak": null,
+          "slopePerMinute": null
+        }
+      }
+    }
+  },
+  "externalCpu": {
+    "n": 329,
+    "p50": 25.279947589433437,
+    "p95": 36.90648012926934,
+    "p99": 43.855209226563865,
+    "max": 58.90922599694624,
+    "p95SampleSufficient": true,
+    "p99SampleSufficient": false,
+    "complianceAssessed": false
+  },
+  "sampleCount": 329,
+  "probes": {
+    "count": 108,
+    "errors": 0,
+    "n": 108,
+    "p50": 4.7279160000616685,
+    "p95": 10.333165999967605,
+    "p99": 12.012250000145286,
+    "max": 14.435417000000598,
+    "p95SampleSufficient": true,
+    "p99SampleSufficient": false,
+    "complianceAssessed": false
+  },
+  "errorCount": 0,
+  "measurementRequests": 745,
+  "teardown": {
+    "ordinaryTeardown": true,
+    "upgradeShutdownRecheck": false,
+    "elapsedSeconds": 1.3451341249999587,
+    "fallbackUsed": false,
+    "remainingOwnedProcesses": 0
+  },
+  "endedAt": "2026-11-04T08:05:37.410Z"
+}

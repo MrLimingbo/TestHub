@@ -1,0 +1,8 @@
+{
+  "taskCount": 200,
+  "basePlanCount": 20,
+  "caseCount": 200,
+  "casesPerPlan": 10,
+  "initialDatabaseSha256": "52cc5403ac908f77ae5dabf954610d5d3dad87a37d99f541c153c4da9a003554",
+  "pilotNotIncludedInFormalSamples": true
+}

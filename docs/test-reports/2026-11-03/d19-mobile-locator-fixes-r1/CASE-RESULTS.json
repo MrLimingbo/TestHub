@@ -1,0 +1,177 @@
+{
+  "unit": "AUTOMATED_TEST_METHOD",
+  "total": 18,
+  "positiveOnly": 8,
+  "negativeOnly": 8,
+  "mixed": 2,
+  "passed": 18,
+  "failed": 0,
+  "blocked": 0,
+  "variantsAndEnvironmentRunsNotAdded": true,
+  "cases": [
+    {
+      "id": "B01",
+      "method": "B01_matrixCreate",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B01_matrixCreate"
+      ]
+    },
+    {
+      "id": "B02",
+      "method": "B02_invalidCreateAndUpdateAtomic",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B02_invalidCreateAndUpdateAtomic"
+      ]
+    },
+    {
+      "id": "B03",
+      "method": "B03_legacyReadButScenarioWritesRejected",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B03_legacyReadButScenarioWritesRejected"
+      ]
+    },
+    {
+      "id": "B04",
+      "method": "B04_legacyNewQueueRejectedWithoutAssets",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B04_legacyNewQueueRejectedWithoutAssets"
+      ]
+    },
+    {
+      "id": "B05",
+      "method": "B05_matrixQueuesFrozenManifest",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B05_matrixQueuesFrozenManifest"
+      ]
+    },
+    {
+      "id": "B06",
+      "method": "B06_badQueuedManifestRejectedBeforeClaim",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B06_badQueuedManifestRejectedBeforeClaim"
+      ]
+    },
+    {
+      "id": "B07",
+      "method": "B07_frozenValidManifestIgnoresLaterSourceEdit",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B07_frozenValidManifestIgnoresLaterSourceEdit"
+      ]
+    },
+    {
+      "id": "B08",
+      "method": "B08_transferMatrixAndLaterInvalidAtomic",
+      "polarity": "mixed",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B08_transferMatrixAndLaterInvalidAtomic"
+      ]
+    },
+    {
+      "id": "B09",
+      "method": "B09_syncMatrixAndLaterInvalidAtomic",
+      "polarity": "mixed",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B09_syncMatrixAndLaterInvalidAtomic"
+      ]
+    },
+    {
+      "id": "B10",
+      "method": "B10_permissionAndStaleTimestamp",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        "backend-h2.json: P2D19MobileLocatorTests 10/10",
+        "backend-mysql.json: B10_permissionAndStaleTimestamp"
+      ]
+    },
+    {
+      "id": "R01",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        "d19-locator.test.js 4/4; AppiumRunner full 21/21"
+      ]
+    },
+    {
+      "id": "R02",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        "d19-locator.test.js 4/4; AppiumRunner full 21/21"
+      ]
+    },
+    {
+      "id": "R03",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        "d19-locator.test.js 4/4; AppiumRunner full 21/21"
+      ]
+    },
+    {
+      "id": "R04",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        "d19-locator.test.js 4/4; AppiumRunner full 21/21"
+      ]
+    },
+    {
+      "id": "U01",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        "d19MobileLocatorPage.test.ts 4/4; Vitest full 935/935"
+      ]
+    },
+    {
+      "id": "U02",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        "d19MobileLocatorPage.test.ts 4/4; Vitest full 935/935"
+      ]
+    },
+    {
+      "id": "U03",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        "d19MobileLocatorPage.test.ts 4/4; Vitest full 935/935"
+      ]
+    },
+    {
+      "id": "U04",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        "d19MobileLocatorPage.test.ts 4/4; Vitest full 935/935"
+      ]
+    }
+  ]
+}

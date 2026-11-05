@@ -1,0 +1,23 @@
+{
+  "frozenAt": "2026-11-04T08:55:28.008Z",
+  "os": "Darwin",
+  "release": "25.5.0",
+  "architecture": "arm64",
+  "logicalCpuCount": 8,
+  "physicalMemoryBytes": 17179869184,
+  "javaVersion": "openjdk version \"21.0.12.1\" 2026-08-18 LTS\nOpenJDK Runtime Environment Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS)\nOpenJDK 64-Bit Server VM Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS, mixed mode)",
+  "nodeVersion": "v24.14.1",
+  "electronVersion": "43.2.0",
+  "backendSha256": "6a86753dea49be6e786b7fc1615dfa2a2742b4ba31fe35078e920b79bff0e695",
+  "runtimeSha256": "e4ddc330be23a21503bd4b4129c47f762e792414a99c49eebca67c3def5f249a",
+  "desktopAppSha256": "ae4416d9768e1819e808a003fe0ed52c42a9beb03ee81ac578c31533bb4d12aa",
+  "electronSha256": "bb1821a6cdae3772b09dc5cdf315e8251a1508614f505c0417caee461ffb3778",
+  "binaryKinds": [
+    "Mach-O 64-bit executable arm64",
+    "Mach-O 64-bit executable arm64",
+    "Mach-O 64-bit executable arm64"
+  ],
+  "collectorSha256": "001938ce9f3a755931885c1a317a452ee66b874ff41350ee249cdcae7551d180",
+  "nativeEntrySha256": "84d66bdfe24973ff515c232e8e2a71855a3b32fc8c2ad07389e804497765f550",
+  "distributionReady": false
+}

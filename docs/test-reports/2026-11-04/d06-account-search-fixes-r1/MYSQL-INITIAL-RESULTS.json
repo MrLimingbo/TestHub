@@ -1,0 +1,50 @@
+{
+  "total": 56,
+  "passed": 55,
+  "failed": 1,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "io.testhub.platform.AccountConfigFixesFlowTests",
+      "total": 24,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.P1SessionRulesFlowTests",
+      "total": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.P1CompatibilityTests",
+      "total": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.P2D06AccountSearchTests",
+      "total": 12,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.SystemSettingsFlowTests",
+      "total": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "failedMethod": "B11_explicitEscapeAcrossDatabaseModesAndLongInput",
+  "failure": "Existing connection was changed to NO_BACKSLASH_ESCAPES mid-session; literal query expected4/actual0",
+  "classification": "TEST_CONNECTION_STATE_MISMATCH_CONFIRMED",
+  "rawLogSha256": "8bc4a891fef2cc02c97a0d5825029f998de01669cfbe929c1637354be50324f9",
+  "resolution": "Mid-session parameter round-trip differs; fresh connections configured through sessionVariables pass both modes with original 4-row/count assertions. Production repository unchanged after initial fix.",
+  "evidence": "backend-mysql.json:modeDiagnostics"
+}

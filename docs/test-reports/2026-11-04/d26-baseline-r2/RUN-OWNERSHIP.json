@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-04T08:55:13.946Z",
+  "ownedDirectory": "/Users/limingbo/Documents/codeXProject/testHub/.testhub/d26-owned-0b17ecec-8d15-457f-b54f-4dd6c4acef95",
+  "qaName": "TestHub-QA-0b17ecec-8d15-457f-b54f-4dd6c4acef95",
+  "cleanupStatus": "COMPLETE_VERIFIED",
+  "supervisorPid": 91829,
+  "verifiedAt": "2026-11-04T16:06:34.441Z",
+  "privateDirectoryExists": false,
+  "ownedProcessesRemaining": 0,
+  "qaKeychainPresent": false,
+  "supervisorPresent": false,
+  "completionMonitorStatus": "DELETED_AFTER_TERMINAL_RUN",
+  "monitorDeletedAt": "2026-11-04T16:07:22.224Z"
+}

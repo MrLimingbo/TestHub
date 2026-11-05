@@ -1,0 +1,40 @@
+{
+  "headless": true,
+  "isolatedHttpFixtures": true,
+  "realBackendAcceptance": false,
+  "cases": [
+    {
+      "id": "TC-D16WEB-46",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16WEB-47",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16WEB-48",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16WEB-49",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16WEB-50",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16WEB-51",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16WEB-55",
+      "status": "PASS",
+      "mode": "real Chrome plus actual Runner.step; not a deployed queue service"
+    }
+  ],
+  "cleanup": true,
+  "browserVersion": "156.0.8078.76",
+  "passed": 7,
+  "failed": 0
+}

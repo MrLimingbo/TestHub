@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-03",
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/RULES-AND-ACCEPTANCE.md",
+      "sha256": "f90c859b9bf5294cddf313680517893949d4e832a83bf9f55d063e11cf022904"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "aa1736e229adee1500d5e4eda0cf152568e63343b24966a7de405e322d738824"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/REVIEW-APPROVAL.json",
+      "sha256": "5f79aef3ea32caacadf682b8e41efd7d50614c5c8b794274a243211f04f2a944"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/TEST-PLAN.md",
+      "sha256": "dd812ce0ab25d66dea0ab1970f78c83f0d76116519925ed94f505e1862c71b34"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/ENTRY-INVENTORY.json",
+      "sha256": "d07d1d0db732dacb1b3ddc26db453f89519d8110995950db3ed083630c0fbbaa"
+    },
+    {
+      "path": "docs/desktop-preview-cancellation.md",
+      "sha256": "c496ea1169c007c832d4ce04210f414e8c05a036aade7e562e223d1196133265"
+    },
+    {
+      "path": "apps/desktop/test/api-transfer.test.cjs",
+      "sha256": "fdfecfb6d69b38181c36b5ebd0c89ce2abeece5c538f759d8916f5dc84c67fc5"
+    },
+    {
+      "path": "apps/desktop/app/src/project-sync-ipc.cjs",
+      "sha256": "9c8dfb8ef4cf9277fd7d75f29fdb50a31c09e69eb1d399cf3fff084c83e518d5"
+    },
+    {
+      "path": "apps/desktop/app/src/main.cjs",
+      "sha256": "f4819d893de0f7f9a738bf62370ada859401d5de00f3831d6a98061d4781feb9"
+    },
+    {
+      "path": "apps/desktop/app/src/functional-transfer.cjs",
+      "sha256": "a2647b03b3460fd084473c1abdd2d787879e8e388cecd0565ecbb16c7d6bcc35"
+    },
+    {
+      "path": "apps/desktop/app/src/setup-preload.cjs",
+      "sha256": "473a9e2f46086e2120a7ad5dfce81eb943d1e8f7cb89dc2ea625a8c006ca4343"
+    },
+    {
+      "path": "apps/desktop/test/d24-preview.test.cjs",
+      "sha256": "80f4b98c868c71c00fc74c7803cec57a93dc39ad6f00646968e7c46b86c93393"
+    },
+    {
+      "path": "apps/desktop/test/d24-preview-offscreen.cjs",
+      "sha256": "86bea62fac9600bfe4f98fa4964b422ce0867eb3dd2d65e434bcefc1d793c37a"
+    },
+    {
+      "path": "apps/desktop/app/src/read-operation.cjs",
+      "sha256": "6c1d0a0f064afc8e8280e1c7f19d747b35aeb1125afcd85899b38cbacdcb8d97"
+    },
+    {
+      "path": "apps/desktop/app/src/ui/read-operation.js",
+      "sha256": "d0936b2b2db2968f2362203047e250b43f732d7e16a3b14f7cdf6bacb71fd3c8"
+    },
+    {
+      "path": "src/test/d24ReadOperation.test.ts",
+      "sha256": "440854a441a2a3f54793c8ced7b6392814a9f213e6dbb67c93707ce6707c11a6"
+    }
+  ],
+  "officialApiReference": "https://www.electronjs.org/docs/latest/api/web-contents#event-did-start-navigation",
+  "evidenceTypes": [
+    "Node transport/lifecycle tests",
+    "45 native entry groups in installer/main VM matrices",
+    "happy-dom renderer tests",
+    "Real offscreen Electron with production helper/IPC/preload/page and controlled transport"
+  ],
+  "notInstalledAppAcceptance": true,
+  "shutdownTimeoutNotRechecked": true
+}

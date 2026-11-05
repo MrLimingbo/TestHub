@@ -1,0 +1,25 @@
+{
+  "status": "INCOMPLETE",
+  "observations": [
+    {
+      "id": "D26-R",
+      "status": "SPEC_RETAINED"
+    },
+    {
+      "id": "D26-L",
+      "status": "SPEC_RETAINED"
+    }
+  ],
+  "productComplianceAssessed": false,
+  "validWindowCount": 0,
+  "attemptedWindowCount": 0,
+  "summaries": [],
+  "error": {
+    "code": "Error",
+    "message": "Pilot operation failed: planDelete/AUTH_FORBIDDEN"
+  },
+  "completedAt": "2026-11-04T07:37:10.822Z",
+  "environmentBlockersDeferred": 12,
+  "upgradeShutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

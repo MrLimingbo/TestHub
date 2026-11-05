@@ -1,0 +1,64 @@
+{
+  "phase": "VALID_BEFORE",
+  "total": 11,
+  "passed": 5,
+  "failed": 6,
+  "errors": 0,
+  "skipped": 0,
+  "scope": "New backend methods C01..C11;frontend C12 not a product red test",
+  "cases": [
+    {
+      "method": "C11_concurrentRenamesPreserveTheLosingRecord",
+      "status": "FAIL",
+      "message": "one winner and one controlled conflict ==> expected: <[200, 409]> but was: <[200, 500]>"
+    },
+    {
+      "method": "C02_duplicateCreateWithOrWithoutUnknownFieldsReturns409",
+      "status": "FAIL",
+      "message": "duplicate adapter is a controlled conflict ==> expected: <409> but was: <500>"
+    },
+    {
+      "method": "C03_conflictingRenamePreservesBothRowsAndReplacementSecret",
+      "status": "FAIL",
+      "message": "duplicate adapter is a controlled conflict ==> expected: <409> but was: <500>"
+    },
+    {
+      "method": "C06_differentTypesMayUseTheSameName",
+      "status": "PASS"
+    },
+    {
+      "method": "C05_freeRenameAndConfigurationReplacementStillWork",
+      "status": "PASS"
+    },
+    {
+      "method": "C10_concurrentCreatesHaveOneWinnerAndOneAudit",
+      "status": "FAIL",
+      "message": "one winner and one controlled conflict ==> expected: <[200, 409]> but was: <[200, 500]>"
+    },
+    {
+      "method": "C01_freeCombinationCreatesNormally",
+      "status": "PASS"
+    },
+    {
+      "method": "C08_conflictEnvelopeIsActionableWithoutEchoingInputOrSql",
+      "status": "FAIL",
+      "message": "expected: <409> but was: <500>"
+    },
+    {
+      "method": "C07_existingTrimNormalizationStillProduces409",
+      "status": "FAIL",
+      "message": "duplicate adapter is a controlled conflict ==> expected: <409> but was: <500>"
+    },
+    {
+      "method": "C09_authenticationAndCsrfStillPrecedeConflictHandling",
+      "status": "PASS"
+    },
+    {
+      "method": "C04_sameRecordCanKeepItsNameAndCiphertext",
+      "status": "PASS"
+    }
+  ],
+  "rawLogSha256": "11398f56e9a06dc39fdb2bc1bbf0d60662fe81af44c1e11ba744ac2f51be1ad7",
+  "failedRequestDumpDisabled": true,
+  "sameMethodVariantsAfterFirstFailureNotPresumedExecuted": true
+}

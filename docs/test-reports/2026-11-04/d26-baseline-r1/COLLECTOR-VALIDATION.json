@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-04T07:39:59.440Z",
+  "metricTests": {
+    "command": "node --test scripts/qa/d26-metrics.test.mjs",
+    "passed": 5,
+    "failed": 0
+  },
+  "lint": {
+    "command": "node_modules/.bin/eslint scripts/qa/d26-baseline.mjs scripts/qa/d26-metrics.mjs scripts/qa/d26-metrics.test.mjs scripts/qa/d26-native.cjs",
+    "errors": 0
+  },
+  "syntaxChecks": [
+    "d26-baseline.mjs",
+    "d26-native.cjs"
+  ],
+  "electronInstallation": {
+    "pinnedPnpm": "10.13.1",
+    "command": "pnpm --filter @testhub/desktop exec install-electron",
+    "exitCode": 0,
+    "priorNpxNetworkAttemptFailed": true
+  },
+  "formalBusinessCasesNotCountedAsCollectorTests": true
+}

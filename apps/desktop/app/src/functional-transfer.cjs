@@ -1,14 +1,16 @@
 'use strict'
 const crypto = require('node:crypto')
 const { Buffer } = require('node:buffer')
+const { requestSignal, readResponse } = require('./read-operation.cjs')
 async function jsonRequest(fetcher, url, options = {}, maxBytes = 9 * 1024 * 1024) {
-  const response = await fetcher(url, { ...options, redirect: 'error', signal: globalThis.AbortSignal.timeout(60000) })
+  const signal = requestSignal(60000, options.signal, options.method)
+  const response = await fetcher(url, { ...options, redirect: 'error', signal })
   const chunks = []; let length = 0
-  for await (const bytes of response.body) {
+  await readResponse(response, signal, bytes => {
     length += bytes.length
     if (length > maxBytes) throw new Error('迁移数据超过大小限制，请减少项目中的资料后重试。')
     chunks.push(Buffer.from(bytes))
-  }
+  })
   let result
   try { result = JSON.parse(Buffer.concat(chunks).toString('utf8')) } catch { throw new Error('服务未返回有效迁移数据，请确认服务版本支持本地资料迁移。') }
   if (!response.ok) throw new Error(result.message || `迁移请求失败（HTTP ${response.status}）。`)
@@ -40,13 +42,14 @@ class FunctionalTransfer {
     if (!includeGovernanceCatalogs && !includeProjectVersions && !includeHistory && includePlans && !includeGovernance && !includeDefects && !includeFiles && (!Array.isArray(capabilities.versions) || !capabilities.versions.includes(2))) throw new Error('目标服务尚不支持测试计划迁移，请更新服务，或取消勾选测试计划。')
     const version = includeGovernanceCatalogs ? 8 : includeProjectVersions ? 7 : includeHistory ? 6 : includeFiles ? 5 : includeDefects ? 4 : includeGovernance ? 3 : includePlans ? 2 : 1
     const query = includeGovernanceCatalogs ? `?version=8&includePlans=${includePlans}&includeGovernance=${includeGovernance}&includeDefects=${includeDefects}&includeFiles=${includeFiles}&includeHistory=${includeHistory}&includeProjectVersions=${includeProjectVersions}&includeGovernanceCatalogs=true` : includeProjectVersions ? `?version=7&includePlans=${includePlans}&includeGovernance=${includeGovernance}&includeDefects=${includeDefects}&includeFiles=${includeFiles}&includeHistory=${includeHistory}&includeProjectVersions=true` : includeHistory ? `?version=6&includePlans=true&includeGovernance=${includeGovernance}&includeDefects=${includeDefects}&includeFiles=${includeFiles}&includeHistory=true` : includeFiles ? `?version=5&includePlans=${includePlans}&includeGovernance=${includeGovernance}&includeDefects=${includeDefects}` : includeDefects ? `?version=4&includePlans=${includePlans}&includeGovernance=${includeGovernance}` : includeGovernance ? `?version=3&includePlans=${includePlans}` : includePlans ? '?version=2' : ''
-    const snapshot = await this.local(`/api/v1/projects/${sourceId}/functional/transfer${query}`)
+    const snapshot = await this.local(`/api/v1/projects/${sourceId}/functional/transfer${query}${includeHistory && capabilities.historyTitleSnapshots === true ? '&titleSnapshots=true' : ''}`)
     const governanceCatalogs = Array.isArray(snapshot?.catalogs) ? snapshot.catalogs.filter(item => item?.scope === 'GOVERNANCE') : []
     if (!includeGovernanceCatalogs && governanceCatalogs?.length) throw new Error('治理目录超出所选迁移范围。')
     const projectVersions = snapshot?.projectVersions
     if (includeProjectVersions ? !projectVersions || !Array.isArray(projectVersions.items) || projectVersions.items.length > 5000 : projectVersions != null) throw new Error('项目版本资料不完整或超出所选范围。')
     const history = snapshot?.history
     if (includeHistory ? !history || !Array.isArray(history.runs) || history.runs.length > 1000 || history.runs.some(run => !Array.isArray(run?.cases) || run.cases.some(item => !Array.isArray(item?.steps))) : history != null) throw new Error('执行历史资料不完整或超出所选范围。')
+    if (history?.runs.some(run => run.cases.some(c => c.titleSnapshot != null)) && capabilities.historyTitleSnapshots !== true) throw new Error('目标服务不支持历史标题快照，请更新服务后再迁移。')
     const historyCounts = history ? { runs: history.runs.length, cases: history.runs.reduce((sum, run) => sum + run.cases.length, 0), steps: history.runs.reduce((sum, run) => sum + run.cases.reduce((total, item) => total + item.steps.length, 0), 0) } : undefined
     if (historyCounts && (historyCounts.cases > 10000 || historyCounts.steps > 50000)) throw new Error('执行历史超过 10000 条用例或 50000 条步骤限制。')
     const files = snapshot?.files

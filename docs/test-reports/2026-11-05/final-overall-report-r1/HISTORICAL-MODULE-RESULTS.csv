@@ -1,0 +1,20 @@
+﻿模块,名称,检查项次,正例,反例,最终通过,未关闭失败,观察,阻塞,原批次历史失败,后续复核通过,产品Bug修复数,来源
+01,登录、注册与会话,105,46,59,105,0,0,0,0,0,4,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-01-auth/TEST-REPORT.md
+02,工作台,103,74,29,103,0,0,0,0,0,4,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-02-dashboard/TEST-REPORT.md
+03A,项目管理与成员权限,120,65,55,120,0,0,0,0,0,4,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-03a-projects/TEST-REPORT.md
+03B,项目环境、参数与密钥,132,62,70,129,0,3,0,6,6,3,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261023/module-03b-environments/TEST-REPORT.md
+03C,文件管理与操作日志,109,57,52,107,0,2,0,5,5,5,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-03c-files-audit/TEST-REPORT.md
+03D,账号管理与系统参数,139,75,64,137,0,2,0,0,0,4,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-03d-accounts-config/regression-r1/TEST-REPORT.md
+04,功能测试资产与治理,159,91,68,159,0,0,0,0,0,6,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-04-functional-assets/regression-r1/TEST-REPORT.md
+05,测试计划与交付,181,104,77,179,0,2,0,0,0,11,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-05-plans-delivery/regression-r1/TEST-REPORT.md
+06,接口设计与导入,190,112,78,188,0,2,0,0,0,9,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-06-api-design/regression-r1/TEST-REPORT.md
+07,接口调试,217,122,95,211,0,6,0,0,0,10,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261024/module-07-api-debug/regression-r1/TEST-REPORT.md
+08,接口自动化,214,117,97,211,0,3,0,0,0,12,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261026/module-08-api-automation/regression-r1/TEST-REPORT.md
+09,Mock,162,90,72,160,0,2,0,0,0,8,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261026/module-09-mock-regression/TEST-REPORT.md
+10,性能测试,214,125,89,212,0,2,0,0,0,4,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261026/module-10-performance-regression/TEST-REPORT.md
+11,Web UI自动化,220,116,104,217,0,3,0,0,0,6,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-11-web-ui-regression/TEST-REPORT.md
+12,移动端自动化,179,77,102,173,0,2,4,0,0,8,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-12-mobile-regression/TEST-REPORT.md
+13,质量报告与任务,158,90,68,151,0,7,0,0,0,5,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-13-quality-tasks-regression/TEST-REPORT.md
+14,通知、集成、插件与运维,187,86,101,180,0,7,0,0,0,5,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261027/module-14-notifications-extensions-operations-regression/TEST-REPORT.md
+15,桌面工作区与跨端,218,82,136,213,0,1,4,0,0,0,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-15-desktop-workspace-cross-end/TEST-REPORT.md
+16,横向回归,83,52,31,76,0,3,4,0,0,0,/Users/limingbo/Documents/codeXProject/testHub/output/qa-20261028/module-16-cross-regression-fixed/TEST-REPORT.md

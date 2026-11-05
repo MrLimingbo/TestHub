@@ -1,0 +1,318 @@
+{
+  "date": "2026-11-04",
+  "unit": "FORMAL_CASE_WITH_ONE_AUTOMATED_METHOD",
+  "total": 20,
+  "positive": 9,
+  "negative": 11,
+  "passed": 20,
+  "failed": 0,
+  "blocked": 0,
+  "backendMethods": 20,
+  "newFrontendMethods": 0,
+  "diagnosticMethodsNotInFormalDenominator": 1,
+  "extraDiagnostic": "X01_observeDuplicateAdapterResponsesWithoutSettingANewPolicy",
+  "diagnosticDoesNotCloseBug": "BUG-D23-001 remains OPEN_PENDING_RULE_REVIEW even though collection method completed",
+  "variantsAndDatabaseRerunsNotAdded": true,
+  "cases": [
+    {
+      "id": "TC-D23-B01",
+      "method": "B01_templateCreateIgnoresScalarObjectAndArray",
+      "polarity": "positive",
+      "title": "通知模板创建兼容未知字段",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B01"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B02",
+      "method": "B02_templateUpdateIgnoresUnknownFields",
+      "polarity": "positive",
+      "title": "通知模板更新兼容未知字段",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B02"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B03",
+      "method": "B03_adapterCreateIgnoresOuterFields",
+      "polarity": "positive",
+      "title": "适配器创建兼容未知字段",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B03"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B04",
+      "method": "B04_adapterUpdatePreservesEncryptedConfiguration",
+      "polarity": "positive",
+      "title": "适配器更新兼容未知字段",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B04"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B05",
+      "method": "B05_signingKeyUnknownFieldsCannotChangeTrustOrCreator",
+      "polarity": "positive",
+      "title": "隔离管理员登记公钥兼容未知字段",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B05"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B06",
+      "method": "B06_packageInstallAndUpgradeIgnoreOuterFields",
+      "polarity": "positive",
+      "title": "包登记和升级兼容未知字段",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B06"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B07",
+      "method": "B07_misspelledMissingNullAndBlankRequiredFieldsStillFail",
+      "polarity": "negative",
+      "title": "拼错必填字段不能绕过校验",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B07"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B08",
+      "method": "B08_wrongKnownStringTypesStillFail",
+      "polarity": "negative",
+      "title": "已知字段错误类型仍拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B08"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B09",
+      "method": "B09_knownBusinessRulesStillFail",
+      "polarity": "negative",
+      "title": "已知业务规则不能用附加字段覆盖",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B09"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B10",
+      "method": "B10_dynamicConfigurationKeysAreNotOuterUnknownFields",
+      "polarity": "positive",
+      "title": "动态configuration合法键保留",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B10"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B11",
+      "method": "B11_dynamicMapValidationIsNotWeakened",
+      "polarity": "negative",
+      "title": "动态Map原值校验保持",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B11"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B12",
+      "method": "B12_forgedScopeAndActorCannotOverrideServerValues",
+      "polarity": "negative",
+      "title": "伪造主体字段不能覆盖路径和登录用户",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B12"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B13",
+      "method": "B13_ordinaryUserCannotCreateTrustAdaptersOrPackages",
+      "polarity": "negative",
+      "title": "普通账号不能伪造扩展管理权限",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B13"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B14",
+      "method": "B14_viewerCannotForgeTemplateWriterRole",
+      "polarity": "negative",
+      "title": "项目只读用户不能伪造通知写权限",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B14"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B15",
+      "method": "B15_loginAndCsrfChecksRemainRequired",
+      "polarity": "negative",
+      "title": "登录和CSRF边界保持",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B15"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B16",
+      "method": "B16_transferRejectsUnknownAtEveryPayloadLevel",
+      "polarity": "negative",
+      "title": "通知迁移未知字段保持严格拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B16"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B17",
+      "method": "B17_syncRejectsUnknownAtEveryPayloadLevel",
+      "polarity": "negative",
+      "title": "通知同步未知字段保持严格拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B17"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B18",
+      "method": "B18_manifestOriginalCharactersAndInnerProjectionArePreserved",
+      "polarity": "positive",
+      "title": "manifest签名原文与独立内层内容保持",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B18"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B19",
+      "method": "B19_outerFieldsCannotBypassOriginalSignature",
+      "polarity": "negative",
+      "title": "外层字段不能绕过原文签名拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B19"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    },
+    {
+      "id": "TC-D23-B20",
+      "method": "B20_openApiDescribesTheFourDtosAndContentBoundaries",
+      "polarity": "positive",
+      "title": "四类DTO接口说明明确范围",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D23-B20"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,872 @@
+--- a/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceSyncService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceSyncService.java
+@@ -80,7 +80,7 @@
+         try {
+             return json.readerFor(Request.class).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                     DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(body);
+-        } catch (java.io.IOException error) { throw invalid("性能同步 JSON 格式不合法或包含不支持的字段"); }
++        } catch (java.io.IOException error) { throw PerformanceJson.rejected(error, "性能同步 JSON 格式不合法或包含不支持的字段"); }
+     }
+ 
+     @Transactional(isolation = Isolation.READ_COMMITTED)
+--- a/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestExecutionService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestExecutionService.java
+@@ -32,16 +32,18 @@
+     private final PerformanceRunnerStatusService runners;
+     private final AccessService access;
+     private final AuditService audit;
++    private final PerformanceTestPlanService definitions;
+ 
+     public PerformanceTestExecutionService(PerformanceTestExecutionRepository executions, PerformanceTestPlanRepository plans,
+                                            PerformanceTestExecutionArtifactRepository artifacts, PerformanceRunnerStatusService runners,
+-                                           AccessService access, AuditService audit) {
++                                           AccessService access, AuditService audit, PerformanceTestPlanService definitions) {
+         this.executions = executions;
+         this.plans = plans;
+         this.artifacts = artifacts;
+         this.runners = runners;
+         this.access = access;
+         this.audit = audit;
++        this.definitions = definitions;
+     }
+ 
+     public List<PerformanceTestExecution> list(AuthenticatedPrincipal principal, String projectId) {
+@@ -247,6 +249,7 @@
+                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "压测计划不存在"));
+         if (!"READY".equals(plan.status())) throw new ResponseStatusException(HttpStatus.CONFLICT, "只有待执行状态的压测计划可以提交任务");
+         if (plan.threadGroups().isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "压测计划缺少线程组");
++        definitions.validateForExecution(projectId, plan);
+         int timeout = timeout(timeoutSeconds);
+         Instant requestedAt = Instant.now();
+         String executionId = UlidCreator.getUlid().toString();
+--- a/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanController.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanController.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.performance;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import io.testhub.platform.security.AuthenticatedPrincipal;
+ import io.testhub.platform.shared.api.ApiResponse;
+@@ -83,17 +85,17 @@
+     }
+ 
+     public record ThreadGroupRequest(@NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 2_048) String targetUrl,
+-                                     @Size(max = 24) String loadModel, @NotNull @Min(1) Integer threadCount,
+-                                     @NotNull @Min(0) Integer rampUpSeconds, @Min(2) @Max(20) Integer stepCount,
+-                                     @Min(1) @Max(86_400) Integer stepIntervalSeconds, @NotNull @Min(10) Integer durationSeconds,
+-                                     @Min(1) Integer targetTps, @Min(1) Integer p95ThresholdMillis,
+-                                     @DecimalMin("0.0") @DecimalMax("100.0") BigDecimal errorThresholdPercent,
++                                     @Size(max = 24) String loadModel, @NotNull @Min(1) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer threadCount,
++                                     @NotNull @Min(0) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer rampUpSeconds, @Min(2) @Max(20) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer stepCount,
++                                     @Min(1) @Max(86_400) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer stepIntervalSeconds, @NotNull @Min(10) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer durationSeconds,
++                                     @Min(1) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer targetTps, @Min(1) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer p95ThresholdMillis,
++                                     @DecimalMin("0.0") @DecimalMax("100.0") @JsonDeserialize(using = PerformanceJson.DecimalValue.class) BigDecimal errorThresholdPercent,
+                                      @Size(max = 10) String requestMethod,
+-                                     @Size(max = 16) Map<@NotBlank @Size(max = 128) String, @Size(max = 1_024) String> requestHeaders,
+-                                     @Size(max = 16) Map<@NotBlank @Size(max = 128) String, @Size(max = 1_024) String> queryParameters,
+-                                     @Size(max = 65_536) String requestBody, @Min(100) @Max(599) Integer expectedStatusCode,
+-                                     @Size(max = 1_000) String responseContains, @Size(max = 65_536) String dataSetCsv,
+-                                     @Min(2) Integer rendezvousUsers) {
++                                     @Size(max = 16) @JsonDeserialize(contentUsing = PerformanceJson.Text.class) Map<@NotBlank @Size(max = 128) String, @Size(max = 1_024) String> requestHeaders,
++                                     @Size(max = 16) @JsonDeserialize(contentUsing = PerformanceJson.Text.class) Map<@NotBlank @Size(max = 128) String, @Size(max = 1_024) String> queryParameters,
++                                     @Size(max = 65_536) @JsonDeserialize(using = PerformanceJson.Text.class) String requestBody, @Min(100) @Max(599) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer expectedStatusCode,
++                                     @Size(max = 1_000) @JsonDeserialize(using = PerformanceJson.Text.class) String responseContains, @Size(max = 65_536) @JsonDeserialize(using = PerformanceJson.Text.class) String dataSetCsv,
++                                     @Min(2) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer rendezvousUsers) {
+         PerformanceTestPlanService.ThreadGroupInput toInput() {
+             return new PerformanceTestPlanService.ThreadGroupInput(name, targetUrl, loadModel, threadCount, rampUpSeconds,
+                     stepCount, stepIntervalSeconds, durationSeconds, targetTps, p95ThresholdMillis, errorThresholdPercent, requestMethod, requestHeaders,
+--- a/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanRepository.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanRepository.java
+@@ -121,6 +121,15 @@
+                 .param("projectId", projectId).param("planId", planId).update();
+     }
+ 
++    void requireExecutableTextTypes(String projectId, String planId) {
++        jdbc.sql("SELECT request_headers,query_parameters FROM performance_test_thread_group WHERE project_id=:project AND plan_id=:plan")
++                .param("project", projectId).param("plan", planId).query((rs, row) -> {
++                    PerformanceJson.requireStoredTextMap(json, rs.getString("request_headers"), "requestHeaders");
++                    PerformanceJson.requireStoredTextMap(json, rs.getString("query_parameters"), "queryParameters");
++                    return true;
++                }).list();
++    }
++
+     private List<PerformanceTestThreadGroup> findThreadGroups(String planId) {
+         return jdbc.sql("""
+                 SELECT id, plan_id, organization_id, project_id, name, target_url, load_model, thread_count,
+--- a/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java
+@@ -1,4 +1,6 @@
+ package io.testhub.platform.performance;
++
++import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ 
+ import com.github.f4b6a3.ulid.UlidCreator;
+ import io.testhub.platform.access.AccessService;
+@@ -132,6 +134,16 @@
+                         group.targetTps(), group.p95ThresholdMillis(), group.errorThresholdPercent(), group.requestMethod(),
+                         group.requestHeaders(), group.queryParameters(), group.requestBody(), group.expectedStatusCode(),
+                         group.responseContains(), group.dataSetCsv(), group.rendezvousUsers())).toList(), null);
++    }
++
++    void validateForExecution(String projectId, PerformanceTestPlanDetail plan) {
++        plans.requireExecutableTextTypes(projectId, plan.id());
++        normalizeDefinition(plan.name(), plan.description(), plan.threadGroups().stream().map(group ->
++                new ThreadGroupInput(group.name(), group.targetUrl(), group.loadModel(), group.threadCount(),
++                        group.rampUpSeconds(), group.stepCount(), group.stepIntervalSeconds(), group.durationSeconds(),
++                        group.targetTps(), group.p95ThresholdMillis(), group.errorThresholdPercent(), group.requestMethod(),
++                        group.requestHeaders(), group.queryParameters(), group.requestBody(), group.expectedStatusCode(),
++                        group.responseContains(), group.dataSetCsv(), group.rendezvousUsers())).toList());
+     }
+ 
+     private List<ThreadGroupPayload> groups(List<ThreadGroupInput> source) {
+@@ -406,11 +418,11 @@
+                             Integer expectedVersion) {
+     }
+ 
+-    public record ThreadGroupInput(String name, String targetUrl, String loadModel, Integer threadCount,
+-                                   Integer rampUpSeconds, Integer stepCount, Integer stepIntervalSeconds, Integer durationSeconds, Integer targetTps,
+-                                   Integer p95ThresholdMillis, BigDecimal errorThresholdPercent, String requestMethod,
+-                                   Map<String, String> requestHeaders, Map<String, String> queryParameters, String requestBody, Integer expectedStatusCode,
+-                                   String responseContains, String dataSetCsv, Integer rendezvousUsers) {
++    public record ThreadGroupInput(String name, String targetUrl, String loadModel, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer threadCount,
++                                   @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer rampUpSeconds, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer stepCount, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer stepIntervalSeconds, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer durationSeconds, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer targetTps,
++                                   @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer p95ThresholdMillis, @JsonDeserialize(using = PerformanceJson.DecimalValue.class) BigDecimal errorThresholdPercent, String requestMethod,
++                                   @JsonDeserialize(contentUsing = PerformanceJson.Text.class) Map<String, String> requestHeaders, @JsonDeserialize(contentUsing = PerformanceJson.Text.class) Map<String, String> queryParameters, @JsonDeserialize(using = PerformanceJson.Text.class) String requestBody, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer expectedStatusCode,
++                                   @JsonDeserialize(using = PerformanceJson.Text.class) String responseContains, @JsonDeserialize(using = PerformanceJson.Text.class) String dataSetCsv, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer rendezvousUsers) {
+     }
+ 
+     record ThreadGroupPayload(String name, String targetUrl, String loadModel, int threadCount, int rampUpSeconds,
+--- a/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTransferService.java
++++ b/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTransferService.java
+@@ -73,7 +73,7 @@
+                     .readValue(body);
+             if (request == null || request.snapshot() == null) throw invalid("性能迁移资料不能为空");
+             return request;
+-        } catch (java.io.IOException error) { throw invalid("性能迁移请求 JSON 格式不合法或包含不支持的字段"); }
++        } catch (java.io.IOException error) { throw PerformanceJson.rejected(error, "性能迁移请求 JSON 格式不合法或包含不支持的字段"); }
+     }
+ 
+     @Transactional(isolation = Isolation.READ_COMMITTED)
+--- a/src/pages/PerformancePage.vue
++++ b/src/pages/PerformancePage.vue
+@@ -1,4 +1,5 @@
+ <script setup lang="ts">
++import { performanceGroupNumbers, performanceNumberText, performanceNumberError, performanceIntegerInput, type PerformanceNumberText, type PerformanceNumberField } from '@/utils/performanceNumberInput'
+ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+ import { Message } from '@arco-design/web-vue'
+ import PageHeader from '@/components/PageHeader.vue'
+@@ -46,6 +47,7 @@
+ }
+ interface PlanDetail extends Omit<Plan, 'threadGroupCount'> { threadGroups: ThreadGroup[] }
+ interface ThreadGroupInput {
++  numberText: PerformanceNumberText
+   name: string
+   targetUrl: string
+   loadModel: 'STEADY' | 'RAMP_UP' | 'STEPPED_RAMP'
+@@ -264,13 +266,15 @@
+ const latestResource = (resources: PerformanceResourceMetric[]) => resources.at(-1) ?? null
+ 
+ function defaultThreadGroup(): ThreadGroupInput {
+-  return { name: '默认线程组', targetUrl: 'https://api.example.test/health', loadModel: 'RAMP_UP', threadCount: 100, rampUpSeconds: 60, durationSeconds: 600, p95ThresholdMillis: 500, errorThresholdPercent: 1, requestMethod: 'GET', requestHeadersText: '{}', queryParametersText: '{}', expectedStatusCode: 200 }
++  const group: Omit<ThreadGroupInput, 'numberText'> = { name: '默认线程组', targetUrl: 'https://api.example.test/health', loadModel: 'RAMP_UP', threadCount: 100, rampUpSeconds: 60, durationSeconds: 600, p95ThresholdMillis: 500, errorThresholdPercent: 1, requestMethod: 'GET', requestHeadersText: '{}', queryParametersText: '{}', expectedStatusCode: 200 }
++  return { ...group, numberText: performanceNumberText(group) }
+ }
+ function resetForm() {
+   Object.assign(planForm, { name: '', description: '', status: 'DRAFT', threadGroups: [defaultThreadGroup()] })
+ }
+ function copyGroup(group: ThreadGroup): ThreadGroupInput {
+-  return { name: group.name, targetUrl: group.targetUrl, loadModel: group.loadModel, threadCount: group.threadCount, rampUpSeconds: group.rampUpSeconds, stepCount: group.stepCount ?? undefined, stepIntervalSeconds: group.stepIntervalSeconds ?? undefined, durationSeconds: group.durationSeconds, targetTps: group.targetTps ?? undefined, p95ThresholdMillis: group.p95ThresholdMillis ?? undefined, errorThresholdPercent: group.errorThresholdPercent ?? undefined, requestMethod: group.requestMethod ?? 'GET', requestHeadersText: JSON.stringify(group.requestHeaders ?? {}, null, 2), queryParametersText: JSON.stringify(group.queryParameters ?? {}, null, 2), requestBody: group.requestBody ?? undefined, expectedStatusCode: group.expectedStatusCode ?? undefined, responseContains: group.responseContains ?? undefined, dataSetCsv: group.dataSetCsv ?? undefined, rendezvousUsers: group.rendezvousUsers ?? undefined }
++  const draft: Omit<ThreadGroupInput, 'numberText'> = { name: group.name, targetUrl: group.targetUrl, loadModel: group.loadModel, threadCount: group.threadCount, rampUpSeconds: group.rampUpSeconds, stepCount: group.stepCount ?? undefined, stepIntervalSeconds: group.stepIntervalSeconds ?? undefined, durationSeconds: group.durationSeconds, targetTps: group.targetTps ?? undefined, p95ThresholdMillis: group.p95ThresholdMillis ?? undefined, errorThresholdPercent: group.errorThresholdPercent ?? undefined, requestMethod: group.requestMethod ?? 'GET', requestHeadersText: JSON.stringify(group.requestHeaders ?? {}, null, 2), queryParametersText: JSON.stringify(group.queryParameters ?? {}, null, 2), requestBody: group.requestBody ?? undefined, expectedStatusCode: group.expectedStatusCode ?? undefined, responseContains: group.responseContains ?? undefined, dataSetCsv: group.dataSetCsv ?? undefined, rendezvousUsers: group.rendezvousUsers ?? undefined }
++  return { ...draft, numberText: performanceNumberText(draft) }
+ }
+ 
+ function requestParameters(value: string, label: string): Record<string, string> {
+@@ -291,17 +295,17 @@
+   return requestParameters(value, '查询参数')
+ }
+ 
+-function groupPayload(group: ThreadGroupInput) {
++function numberError(group: ThreadGroupInput, field: PerformanceNumberField) {
++  return performanceNumberError(group.numberText, field, group.loadModel)
++}
++function groupPayload(group: ThreadGroupInput, index: number) {
++  const numbers = performanceGroupNumbers(group.numberText, group.loadModel, index)
+   return {
+-    name: group.name, targetUrl: group.targetUrl, loadModel: group.loadModel, threadCount: group.threadCount,
+-    rampUpSeconds: group.rampUpSeconds, stepCount: group.stepCount, stepIntervalSeconds: group.stepIntervalSeconds,
+-    durationSeconds: group.durationSeconds, targetTps: group.targetTps,
+-    p95ThresholdMillis: group.p95ThresholdMillis, errorThresholdPercent: group.errorThresholdPercent,
++    name: group.name, targetUrl: group.targetUrl, loadModel: group.loadModel, ...numbers,
+     requestMethod: group.requestMethod, requestHeaders: requestHeaders(group.requestHeadersText),
+     queryParameters: queryParameters(group.queryParametersText),
+-    requestBody: group.requestBody?.trim() ? group.requestBody : undefined, expectedStatusCode: group.expectedStatusCode,
++    requestBody: group.requestBody?.trim() ? group.requestBody : undefined,
+     responseContains: group.responseContains?.trim() || undefined, dataSetCsv: group.dataSetCsv || undefined,
+-    rendezvousUsers: group.rendezvousUsers,
+   }
+ }
+ 
+@@ -309,12 +313,20 @@
+   if (group.loadModel !== 'STEPPED_RAMP') {
+     group.stepCount = undefined
+     group.stepIntervalSeconds = undefined
++    group.numberText.stepCount = ''
++    group.numberText.stepIntervalSeconds = ''
+     return
+   }
+   group.rampUpSeconds = 0
+-  group.stepCount = Math.min(4, group.threadCount)
++  group.numberText.rampUpSeconds = '0'
++  let threads = group.threadCount
++  try { threads = performanceIntegerInput(group.numberText.threadCount, 1, 100000, 'threadCount') } catch { /* Keep invalid text visible for save validation. */ }
++  group.stepCount = Math.min(4, threads)
+   group.stepIntervalSeconds = 15
+   group.rendezvousUsers = undefined
++  group.numberText.stepCount = String(group.stepCount)
++  group.numberText.stepIntervalSeconds = '15'
++  group.numberText.rendezvousUsers = ''
+ }
+ function executionDuration(group: Pick<ThreadGroup, 'loadModel' | 'durationSeconds' | 'stepCount' | 'stepIntervalSeconds'>) {
+   return group.loadModel === 'STEPPED_RAMP' ? group.durationSeconds + ((group.stepCount ?? 1) - 1) * (group.stepIntervalSeconds ?? 0) : group.durationSeconds
+@@ -683,11 +695,11 @@
+           <header><strong>线程组 {{ index + 1 }}</strong><a-button type="text" status="danger" size="small" :disabled="planForm.threadGroups.length === 1" @click="removeThreadGroup(index)"><icon-delete /> 删除</a-button></header>
+           <div class="form-grid group-title-grid"><a-form-item label="线程组名称" required><a-input v-model="group.name" placeholder="例如：下单主链路" /></a-form-item><a-form-item label="负载模型"><a-select v-model="group.loadModel" @change="loadModelChanged(group)"><a-option value="RAMP_UP">线性加压</a-option><a-option value="STEADY">恒定负载</a-option><a-option value="STEPPED_RAMP">阶梯加压</a-option></a-select></a-form-item></div>
+           <a-form-item label="目标 URL" required><a-input v-model="group.targetUrl" placeholder="https://api.example.test/orders" /></a-form-item>
+-          <div class="request-grid"><a-form-item label="请求方法"><a-select v-model="group.requestMethod"><a-option value="GET">GET</a-option><a-option value="POST">POST</a-option><a-option value="PUT">PUT</a-option><a-option value="PATCH">PATCH</a-option><a-option value="DELETE">DELETE</a-option><a-option value="HEAD">HEAD</a-option></a-select></a-form-item><a-form-item label="预期状态码"><a-input-number v-model="group.expectedStatusCode" :min="100" :max="599" placeholder="可选" /></a-form-item><a-form-item label="响应包含文本"><a-input v-model="group.responseContains" :max-length="1000" placeholder="可选，使用大小写敏感文本" /></a-form-item></div>
++          <div class="request-grid"><a-form-item label="请求方法"><a-select v-model="group.requestMethod"><a-option value="GET">GET</a-option><a-option value="POST">POST</a-option><a-option value="PUT">PUT</a-option><a-option value="PATCH">PATCH</a-option><a-option value="DELETE">DELETE</a-option><a-option value="HEAD">HEAD</a-option></a-select></a-form-item><a-form-item label="预期状态码" :validate-status="numberError(group, 'expectedStatusCode') ? 'error' : undefined" :help="numberError(group, 'expectedStatusCode')"><a-input v-model="group.numberText.expectedStatusCode" aria-label="性能 expectedStatusCode" inputmode="decimal" /></a-form-item><a-form-item label="响应包含文本"><a-input v-model="group.responseContains" :max-length="1000" placeholder="可选，使用大小写敏感文本" /></a-form-item></div>
+           <div class="request-content-grid"><a-form-item label="请求头（JSON 对象）"><a-textarea v-model="group.requestHeadersText" :auto-size="{ minRows: 3, maxRows: 7 }" placeholder="{&quot;Content-Type&quot;:&quot;application/json&quot;}" /></a-form-item><a-form-item label="查询参数（JSON 对象）"><a-textarea v-model="group.queryParametersText" :auto-size="{ minRows: 3, maxRows: 7 }" placeholder="{&quot;page&quot;:&quot;1&quot;,&quot;source&quot;:&quot;${source}&quot;}" /><template #extra>目标 URL 不可直接携带 <code>?query</code>；参数会由 Runner 安全编码，值可引用当前 CSV 数据集变量。</template></a-form-item><a-form-item label="请求正文"><a-textarea v-model="group.requestBody" :auto-size="{ minRows: 3, maxRows: 7 }" :max-length="65536" :disabled="group.requestMethod === 'GET' || group.requestMethod === 'HEAD'" placeholder="POST / PUT / PATCH / DELETE 可使用原始请求正文" /></a-form-item></div>
+           <a-form-item label="内联 CSV 数据集"><a-textarea v-model="group.dataSetCsv" :auto-size="{ minRows: 3, maxRows: 8 }" :max-length="65536" placeholder="orderId,quantity&#10;A-100,1&#10;B-200,2" /><template #extra>首行为变量名，最多 20 列、500 行；可在目标路径、请求头、正文和响应断言中使用 <code>${variable}</code>。</template></a-form-item>
+-          <a-form-item label="集合点等待线程"><a-input-number v-model="group.rendezvousUsers" :min="2" :max="group.threadCount" :disabled="group.loadModel === 'STEPPED_RAMP'" placeholder="可选" /><template #extra>{{ group.loadModel === 'STEPPED_RAMP' ? '阶梯加压会展开为多个 JMeter 核心线程组，暂不支持跨阶段集合点同步。' : '达到指定线程数后同时放行；Runner 固定最多等待 30 秒，适用于单个隔离 JMeter 进程内的突发压力。' }}</template></a-form-item>
+-          <div class="number-grid"><a-form-item label="并发线程" required><a-input-number v-model="group.threadCount" :min="1" :max="100000" /></a-form-item><a-form-item v-if="group.loadModel !== 'STEPPED_RAMP'" label="加压时长（秒）" required><a-input-number v-model="group.rampUpSeconds" :min="0" :max="86400" /></a-form-item><a-form-item v-else label="阶梯阶段数" required><a-input-number v-model="group.stepCount" :min="2" :max="Math.min(group.threadCount, 20)" /></a-form-item><a-form-item v-if="group.loadModel === 'STEPPED_RAMP'" label="阶梯间隔（秒）" required><a-input-number v-model="group.stepIntervalSeconds" :min="1" :max="86400" /><template #extra>每个阶段新增一批线程；最后一阶启动后保持下方配置的持续时长。</template></a-form-item><a-form-item label="持续时长（秒）" required><a-input-number v-model="group.durationSeconds" :min="10" :max="86400" /></a-form-item><a-form-item label="目标 TPS"><a-input-number v-model="group.targetTps" :min="group.loadModel === 'STEPPED_RAMP' ? (group.stepCount ?? 2) : 1" :max="1000000" placeholder="可选" /></a-form-item><a-form-item label="P95 阈值（毫秒）"><a-input-number v-model="group.p95ThresholdMillis" :min="1" :max="600000" placeholder="可选" /></a-form-item><a-form-item label="错误率阈值（%）"><a-input-number v-model="group.errorThresholdPercent" :min="0" :max="100" :precision="2" placeholder="可选" /></a-form-item></div>
++          <a-form-item label="集合点等待线程" :validate-status="numberError(group, 'rendezvousUsers') ? 'error' : undefined" :help="numberError(group, 'rendezvousUsers')"><a-input v-model="group.numberText.rendezvousUsers" aria-label="性能 rendezvousUsers" inputmode="decimal" :disabled="group.loadModel === 'STEPPED_RAMP'" /><template #extra>{{ group.loadModel === 'STEPPED_RAMP' ? '阶梯加压会展开为多个 JMeter 核心线程组，暂不支持跨阶段集合点同步。' : '达到指定线程数后同时放行；Runner 固定最多等待 30 秒，适用于单个隔离 JMeter 进程内的突发压力。' }}</template></a-form-item>
++          <div class="number-grid"><a-form-item label="并发线程" required :validate-status="numberError(group, 'threadCount') ? 'error' : undefined" :help="numberError(group, 'threadCount')"><a-input v-model="group.numberText.threadCount" aria-label="性能 threadCount" inputmode="decimal" /></a-form-item><a-form-item v-if="group.loadModel !== 'STEPPED_RAMP'" label="加压时长（秒）" required :validate-status="numberError(group, 'rampUpSeconds') ? 'error' : undefined" :help="numberError(group, 'rampUpSeconds')"><a-input v-model="group.numberText.rampUpSeconds" aria-label="性能 rampUpSeconds" inputmode="decimal" /></a-form-item><a-form-item v-else label="阶梯阶段数" required :validate-status="numberError(group, 'stepCount') ? 'error' : undefined" :help="numberError(group, 'stepCount')"><a-input v-model="group.numberText.stepCount" aria-label="性能 stepCount" inputmode="decimal" /></a-form-item><a-form-item v-if="group.loadModel === 'STEPPED_RAMP'" label="阶梯间隔（秒）" required :validate-status="numberError(group, 'stepIntervalSeconds') ? 'error' : undefined" :help="numberError(group, 'stepIntervalSeconds')"><a-input v-model="group.numberText.stepIntervalSeconds" aria-label="性能 stepIntervalSeconds" inputmode="decimal" /><template #extra>每个阶段新增一批线程；最后一阶启动后保持下方配置的持续时长。</template></a-form-item><a-form-item label="持续时长（秒）" required :validate-status="numberError(group, 'durationSeconds') ? 'error' : undefined" :help="numberError(group, 'durationSeconds')"><a-input v-model="group.numberText.durationSeconds" aria-label="性能 durationSeconds" inputmode="decimal" /></a-form-item><a-form-item label="目标 TPS" :validate-status="numberError(group, 'targetTps') ? 'error' : undefined" :help="numberError(group, 'targetTps')"><a-input v-model="group.numberText.targetTps" aria-label="性能 targetTps" inputmode="decimal" /></a-form-item><a-form-item label="P95 阈值（毫秒）" :validate-status="numberError(group, 'p95ThresholdMillis') ? 'error' : undefined" :help="numberError(group, 'p95ThresholdMillis')"><a-input v-model="group.numberText.p95ThresholdMillis" aria-label="性能 p95ThresholdMillis" inputmode="decimal" /></a-form-item><a-form-item label="错误率阈值（%）" :validate-status="numberError(group, 'errorThresholdPercent') ? 'error' : undefined" :help="numberError(group, 'errorThresholdPercent')"><a-input v-model="group.numberText.errorThresholdPercent" aria-label="性能 errorThresholdPercent" inputmode="decimal" /></a-form-item></div>
+         </article>
+       </a-form>
+     </a-modal>
+--- /dev/null
++++ b/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceJson.java
+@@ -0,0 +1,72 @@
++package io.testhub.platform.performance;
++
++import com.fasterxml.jackson.core.JsonParser;
++import com.fasterxml.jackson.core.JsonToken;
++import com.fasterxml.jackson.databind.DeserializationContext;
++import com.fasterxml.jackson.databind.JsonMappingException;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
++import java.io.IOException;
++import java.math.BigDecimal;
++import java.util.Set;
++import org.springframework.http.HttpStatus;
++import org.springframework.web.server.ResponseStatusException;
++
++/** Scoped wire rules: validate original JSON values before narrowing or coercion. */
++public final class PerformanceJson {
++    private PerformanceJson() { }
++    private static final Set<String> FIELDS = Set.of("threadCount", "rampUpSeconds", "durationSeconds", "stepCount",
++            "stepIntervalSeconds", "targetTps", "p95ThresholdMillis", "expectedStatusCode", "rendezvousUsers",
++            "errorThresholdPercent", "requestHeaders", "queryParameters", "requestBody", "responseContains", "dataSetCsv");
++    public static final class IntegerValue extends StdDeserializer<Integer> {
++        public IntegerValue() { super(Integer.class); }
++        @Override public Integer deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            if (parser.currentToken().isNumeric()) {
++                try { return parser.getDecimalValue().intValueExact(); }
++                catch (ArithmeticException | NumberFormatException ignored) { /* Reject without discarding precision. */ }
++            }
++            return context.reportInputMismatch(Integer.class, "性能整数字段必须是精确整数 JSON 数值");
++        }
++    }
++    public static final class DecimalValue extends StdDeserializer<BigDecimal> {
++        public DecimalValue() { super(BigDecimal.class); }
++        @Override public BigDecimal deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            if (parser.currentToken().isNumeric()) return parser.getDecimalValue();
++            return context.reportInputMismatch(BigDecimal.class, "错误率必须是 JSON 数值");
++        }
++    }
++    public static final class Text extends StdDeserializer<String> {
++        public Text() { super(String.class); }
++        @Override public String deserialize(JsonParser parser, DeserializationContext context) throws IOException {
++            if (parser.hasToken(JsonToken.VALUE_STRING)) return parser.getText();
++            return context.reportInputMismatch(String.class, "性能文本或条件值必须是 JSON 字符串");
++        }
++    }
++    static String field(Throwable error) {
++        for (int depth = 0; error != null && depth < 12; depth++, error = error.getCause()) {
++            if (error instanceof JsonMappingException mapping) {
++                int index = -1;
++                for (var reference : mapping.getPath()) {
++                    if (reference.getIndex() >= 0) index = reference.getIndex();
++                    String field = reference.getFieldName();
++                    if (field != null && FIELDS.contains(field)) return "threadGroups" + (index < 0 ? "" : "[" + index + "]") + "." + field;
++                }
++            }
++        }
++        return null;
++    }
++    static ResponseStatusException rejected(IOException error, String fallback) {
++        String field = field(error);
++        return new ResponseStatusException(HttpStatus.BAD_REQUEST, field == null ? fallback : "性能字段 " + field + " 类型或数值不合法");
++    }
++    static void requireStoredTextMap(ObjectMapper json, String source, String field) {
++        if (source == null || source.isBlank()) return;
++        try {
++            var value = json.readTree(source);
++            if (!value.isObject()) throw new IOException();
++            for (var item : value) if (!item.isTextual() && !item.isNull()) throw new IOException();
++        } catch (IOException error) {
++            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已保存的性能字段 " + field + " 包含非字符串值，请先编辑修复");
++        }
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceInputExceptionHandler.java
+@@ -0,0 +1,32 @@
++package io.testhub.platform.performance;
++
++import io.testhub.platform.shared.api.ApiError;
++import io.testhub.platform.shared.api.ApiExceptionHandler;
++import io.testhub.platform.shared.api.RequestIdFilter;
++import jakarta.servlet.http.HttpServletRequest;
++import java.util.Map;
++import org.springframework.core.Ordered;
++import org.springframework.core.annotation.Order;
++import org.springframework.http.ResponseEntity;
++import org.springframework.http.converter.HttpMessageNotReadableException;
++import org.springframework.web.bind.annotation.ExceptionHandler;
++import org.springframework.web.bind.annotation.RestControllerAdvice;
++
++/** Expose only fixed field names, never Jackson's raw input/value messages. */
++@Order(Ordered.HIGHEST_PRECEDENCE)
++@RestControllerAdvice(assignableTypes = PerformanceTestPlanController.class)
++public class PerformanceInputExceptionHandler {
++    @ExceptionHandler(HttpMessageNotReadableException.class)
++    ResponseEntity<ApiError> unreadable(HttpServletRequest request, HttpMessageNotReadableException error) {
++        String requestId = (String) request.getAttribute(RequestIdFilter.REQUEST_ID_ATTRIBUTE);
++        if (Boolean.TRUE.equals(request.getAttribute(ApiExceptionHandler.BODY_TOO_LARGE_ATTRIBUTE))) {
++            String message = request.getAttribute(ApiExceptionHandler.BODY_TOO_LARGE_MESSAGE_ATTRIBUTE) instanceof String value
++                    ? value : "迁移请求不能超过 33 MiB。";
++            return ResponseEntity.status(413).body(new ApiError("REQUEST_REJECTED", message, requestId, Map.of()));
++        }
++        String field = PerformanceJson.field(error);
++        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_FAILED",
++                field == null ? "请求正文缺失或 JSON 格式不合法" : "性能字段 " + field + " 类型或数值不合法",
++                requestId, field == null ? Map.of() : Map.of(field, "应使用字段要求的 JSON 类型和取值范围")));
++    }
++}
+--- /dev/null
++++ b/services/platform-api/src/test/java/io/testhub/platform/P2D16PerformanceFlowTests.java
+@@ -0,0 +1,108 @@
++package io.testhub.platform;
++
++import static org.junit.jupiter.api.Assertions.*;
++import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++import com.fasterxml.jackson.databind.JsonNode;
++import io.testhub.platform.account.PlatformUserPrincipal;
++import io.testhub.platform.performance.*;
++import java.util.*;
++import java.nio.charset.StandardCharsets;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.DisplayName;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.http.MediaType;
++import org.springframework.test.web.servlet.MvcResult;
++import org.springframework.web.server.ResponseStatusException;
++
++class P2D16PerformanceFlowTests extends P1FlowTestSupport {
++    @Autowired PerformanceTestPlanService plans;
++    @Autowired PerformanceSyncService sync;
++    @Autowired PerformanceTransferService transfer;
++    @Autowired PerformanceTestExecutionService executions;
++    @Autowired PerformanceTestExecutionRepository executionRows;
++    record F(PlatformUserPrincipal actor,String project) { }
++    F fixture(){var a=actor();return new F(a,project(a));}
++    static final List<String> INTS=List.of("threadCount","rampUpSeconds","durationSeconds","stepCount","stepIntervalSeconds","targetTps","p95ThresholdMillis","expectedStatusCode","rendezvousUsers");
++    Map<String,Object> group(String field){var g=new LinkedHashMap<String,Object>();g.put("name","Group");g.put("targetUrl","https://qa.example.test/qa");g.put("loadModel","RAMP_UP");g.put("threadCount",10);g.put("rampUpSeconds",0);g.put("durationSeconds",10);g.put("targetTps",10);g.put("p95ThresholdMillis",10);g.put("errorThresholdPercent",new java.math.BigDecimal("2.50"));g.put("requestMethod","POST");g.put("requestHeaders",Map.of());g.put("queryParameters",Map.of());g.put("requestBody","{}");g.put("expectedStatusCode",200);g.put("responseContains","ok");g.put("dataSetCsv",null);g.put("rendezvousUsers",null);
++        if(field.equals("stepCount")||field.equals("stepIntervalSeconds")){g.put("loadModel","STEPPED_RAMP");g.put("threadCount",100000);g.put("stepCount",2);g.put("stepIntervalSeconds",1);g.put("targetTps",100000);}return g;}
++    Map<String,Object> definition(Map<String,Object> g){var p=new LinkedHashMap<String,Object>();p.put("name",unique());p.put("description","");p.put("status","READY");p.put("threadGroups",List.of(g));return p;}
++    String raw(String f,String token)throws Exception{var g=group(f);g.put(f,"RAW_TOKEN");return json.writeValueAsString(definition(g)).replace("\"RAW_TOKEN\"",token);}
++    String base(F f){return "/api/v1/projects/"+f.project+"/performance/plans";}
++    MvcResult submit(F f,String body)throws Exception{return mvc.perform(post(base(f)).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andReturn();}
++    MvcResult edit(F f,String id,String body)throws Exception{return mvc.perform(put(base(f)+"/"+id).with(user(f.actor)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andReturn();}
++    JsonNode data(MvcResult r)throws Exception{return json.readTree(r.getResponse().getContentAsString()).path("data");}
++    void status(int expected,MvcResult r)throws Exception{assertEquals(expected,r.getResponse().getStatus(),r.getResponse().getContentAsString());}
++    Map<String,Long> counts(){var r=new LinkedHashMap<String,Long>();for(String t:List.of("performance_test_plan","performance_test_thread_group","performance_test_execution","performance_test_execution_manifest","performance_runner_outbox","performance_transfer_receipt","performance_sync_receipt","audit_log"))r.put(t,jdbc.sql("SELECT COUNT(*) FROM "+t).query(Long.class).single());return r;}
++    void bad(F f,String field,String token)throws Exception{var b=counts();status(400,submit(f,raw(field,token)));assertEquals(b,counts());}
++    void rejected(Runnable r){assertEquals(400,assertThrows(ResponseStatusException.class,r::run).getStatusCode().value());}
++    PerformanceTestPlanDetail create(F f)throws Exception {var r=submit(f,json.writeValueAsString(definition(group(""))));status(200,r);return plans.detail(f.actor,f.project,data(r).path("id").asText());}
++    void good(F f,Map<String,Object> g)throws Exception{status(200,submit(f,json.writeValueAsString(definition(g))));}
++    void badGroup(F f,Map<String,Object> g)throws Exception{var b=counts();status(400,submit(f,json.writeValueAsString(definition(g))));assertEquals(b,counts());}
++    void exact(String field)throws Exception{var f=fixture();String n=field.equals("expectedStatusCode")?"200":"10";for(String t:List.of(n,n+".0",n+"e0")){var r=submit(f,raw(field,t));status(200,r);assertEquals(Integer.parseInt(n),data(r).path("threadGroups").get(0).path(field).asInt());}}
++    void boundary(String field,int min,int max)throws Exception{var f=fixture();for(int n:List.of(min,max)){if(field.equals("stepIntervalSeconds")&&n==86400){bad(f,field,"86400");continue;}status(200,submit(f,raw(field,Integer.toString(n))));}bad(f,field,Integer.toString(min-1));bad(f,field,Integer.toString(max+1));if(field.equals("stepCount")){var g=group(field);g.put("threadCount",3);g.put("stepCount",4);badGroup(f,g);}}
++    PerformanceSyncService.Request request(F source,F target){var items=sync.snapshot(source.actor,source.project,source.actor.userId()).items();return new PerformanceSyncService.Request(UUID.randomUUID().toString(),target.actor.userId(),sync.snapshot(target.actor,target.project,target.actor.userId()).revision(),items.stream().map(x->new PerformanceSyncService.Operation(UUID.randomUUID().toString(),x)).toList());}
++    F exchangeSource()throws Exception{var f=fixture();var g=group("");g.put("rendezvousUsers",2);good(f,g);good(f,group("stepCount"));return f;}
++    String equivalent(String raw,int kind){if(kind==0)return raw;String pattern="(\"(?:"+String.join("|",INTS)+")\":)([0-9]+)";return raw.replaceAll(pattern,"$1$2"+(kind==1?".0":"e0"));}
++    List<String> invalidPayloads(String original){var result=new ArrayList<String>();for(String field:INTS)for(String token:List.of("1.5","1.0000000000000001","\"10\"","true")){String r=original.replaceAll("\""+field+"\":[0-9]+","\""+field+"\":"+token);assertNotEquals(original,r,field);result.add(r);}
++        result.add(original.replace("\"errorThresholdPercent\":2.50","\"errorThresholdPercent\":\"2.50\""));
++        for(String field:List.of("requestHeaders","queryParameters"))for(String t:List.of("1","true","[]","{}")){String r=original.replaceAll("\""+field+"\":\\{[^}]*\\}","\""+field+"\":{\"X-Code\":"+t+"}");assertNotEquals(original,r);result.add(r);}
++        for(String field:List.of("requestBody","responseContains","dataSetCsv"))for(String t:List.of("1","true","{}")){String old=field.equals("dataSetCsv")?"null":field.equals("requestBody")?"\"{}\"":"\"ok\"";String r=original.replace("\""+field+"\":"+old,"\""+field+"\":"+t);assertNotEquals(original,r);result.add(r);}return result;}
++
++    @Test @DisplayName("TC-D16PERF-01") void threadCountExact()throws Exception{exact("threadCount");}
++    @Test @DisplayName("TC-D16PERF-02") void rampUpSecondsExact()throws Exception{exact("rampUpSeconds");}
++    @Test @DisplayName("TC-D16PERF-03") void durationSecondsExact()throws Exception{exact("durationSeconds");}
++    @Test @DisplayName("TC-D16PERF-04") void stepCountExact()throws Exception{exact("stepCount");}
++    @Test @DisplayName("TC-D16PERF-05") void stepIntervalSecondsExact()throws Exception{exact("stepIntervalSeconds");}
++    @Test @DisplayName("TC-D16PERF-06") void targetTpsExact()throws Exception{exact("targetTps");}
++    @Test @DisplayName("TC-D16PERF-07") void p95ThresholdMillisExact()throws Exception{exact("p95ThresholdMillis");}
++    @Test @DisplayName("TC-D16PERF-08") void expectedStatusCodeExact()throws Exception{exact("expectedStatusCode");}
++    @Test @DisplayName("TC-D16PERF-09") void rendezvousUsersExact()throws Exception{exact("rendezvousUsers");}
++    @Test @DisplayName("TC-D16PERF-10") void threadCountBoundary()throws Exception{boundary("threadCount",1,100000);}
++    @Test @DisplayName("TC-D16PERF-11") void rampUpSecondsBoundary()throws Exception{boundary("rampUpSeconds",0,86400);}
++    @Test @DisplayName("TC-D16PERF-12") void durationSecondsBoundary()throws Exception{boundary("durationSeconds",10,86400);}
++    @Test @DisplayName("TC-D16PERF-13") void stepCountBoundary()throws Exception{boundary("stepCount",2,20);}
++    @Test @DisplayName("TC-D16PERF-14") void stepIntervalSecondsBoundary()throws Exception{boundary("stepIntervalSeconds",1,86400);}
++    @Test @DisplayName("TC-D16PERF-15") void targetTpsBoundary()throws Exception{boundary("targetTps",1,1000000);}
++    @Test @DisplayName("TC-D16PERF-16") void p95ThresholdMillisBoundary()throws Exception{boundary("p95ThresholdMillis",1,600000);}
++    @Test @DisplayName("TC-D16PERF-17") void expectedStatusCodeBoundary()throws Exception{boundary("expectedStatusCode",100,599);}
++    @Test @DisplayName("TC-D16PERF-18") void rendezvousUsersBoundary()throws Exception{boundary("rendezvousUsers",2,10);}
++    @Test @DisplayName("TC-D16PERF-19") void fractions()throws Exception{var f=fixture();for(String field:INTS)for(String t:List.of("1.5","1.0000000000000001"))bad(f,field,t);}
++    @Test @DisplayName("TC-D16PERF-20") void numericStrings()throws Exception{var f=fixture();for(String field:INTS)for(String t:List.of("\"10\"","\" 10 \""))bad(f,field,t);}
++    @Test @DisplayName("TC-D16PERF-21") void wrongTypes()throws Exception{var f=fixture();for(String field:INTS)for(String t:List.of("true","[]","{}"))bad(f,field,t);}
++    @Test @DisplayName("TC-D16PERF-22") void overflow()throws Exception{var f=fixture();for(String field:INTS)for(String t:List.of("18446744073709551616","1e10000","NaN","Infinity","-Infinity"))bad(f,field,t);}
++    @Test @DisplayName("TC-D16PERF-23") void requiredNull()throws Exception{var f=fixture();for(String field:List.of("threadCount","rampUpSeconds","durationSeconds")){bad(f,field,"null");var g=group(field);g.remove(field);badGroup(f,g);}}
++    @Test @DisplayName("TC-D16PERF-24") void optionalNull()throws Exception{var f=fixture();for(boolean missing:List.of(true,false)){var g=group("");for(String field:List.of("targetTps","p95ThresholdMillis","expectedStatusCode","rendezvousUsers","errorThresholdPercent","stepCount","stepIntervalSeconds")){if(missing)g.remove(field);else g.put(field,null);}var r=submit(f,json.writeValueAsString(definition(g)));status(200,r);assertTrue(data(r).path("threadGroups").get(0).path("targetTps").isNull());}}
++    @Test @DisplayName("TC-D16PERF-25") void steppedRequired()throws Exception{var f=fixture();for(String field:List.of("stepCount","stepIntervalSeconds")){var g=group("stepCount");g.put(field,null);badGroup(f,g);g.remove(field);badGroup(f,g);}}
++    @Test @DisplayName("TC-D16PERF-26") void nonSteppedFields()throws Exception{var f=fixture();for(String model:List.of("RAMP_UP","STEADY"))for(String field:List.of("stepCount","stepIntervalSeconds")){var g=group("");g.put("loadModel",model);g.put(field,2);badGroup(f,g);}}
++    @Test @DisplayName("TC-D16PERF-27") void steppedDuration()throws Exception{var f=fixture();var g=group("stepCount");g.put("stepCount",2);g.put("stepIntervalSeconds",86390);good(f,g);g.put("stepIntervalSeconds",86391);badGroup(f,g);}
++    @Test @DisplayName("TC-D16PERF-28") void steppedTps()throws Exception{var f=fixture();var g=group("stepCount");g.put("targetTps",2);good(f,g);g.put("targetTps",1);badGroup(f,g);}
++    @Test @DisplayName("TC-D16PERF-29") void steppedMutualExclusion()throws Exception{var f=fixture();var g=group("stepCount");g.put("rampUpSeconds",1);badGroup(f,g);g.put("rampUpSeconds",0);g.put("rendezvousUsers",2);badGroup(f,g);}
++    @Test @DisplayName("TC-D16PERF-30") void decimalValid()throws Exception{var f=fixture();for(String token:List.of("2.50","2.5","25e-1")){var r=submit(f,raw("errorThresholdPercent",token));status(200,r);assertEquals(0,data(r).path("threadGroups").get(0).path("errorThresholdPercent").decimalValue().compareTo(new java.math.BigDecimal("2.50")));}}
++    @Test @DisplayName("TC-D16PERF-31") void decimalPrecision()throws Exception{var f=fixture();for(String token:List.of("2.501","2.500","0.0000000000000001"))bad(f,"errorThresholdPercent",token);}
++    @Test @DisplayName("TC-D16PERF-32") void decimalBoundary()throws Exception{var f=fixture();for(String t:List.of("0","100"))status(200,submit(f,raw("errorThresholdPercent",t)));for(String t:List.of("-0.01","100.01"))bad(f,"errorThresholdPercent",t);}
++    @Test @DisplayName("TC-D16PERF-33") void decimalTypes()throws Exception{var f=fixture();for(String t:List.of("\"2.50\"","true","[]","{}","NaN","Infinity"))bad(f,"errorThresholdPercent",t);}
++    @Test @DisplayName("TC-D16PERF-34") void decimalNull()throws Exception{var f=fixture();for(boolean missing:List.of(true,false)){var g=group("");if(missing)g.remove("errorThresholdPercent");else g.put("errorThresholdPercent",null);var r=submit(f,json.writeValueAsString(definition(g)));status(200,r);assertTrue(data(r).path("threadGroups").get(0).path("errorThresholdPercent").isNull());}}
++    @Test @DisplayName("TC-D16PERF-35") void headerStrings()throws Exception{var f=fixture();var r=submit(f,raw("requestHeaders","{\"X-Code\":\"001\",\"X-Flag\":\"false\",\"X-Null\":\"null\"}"));status(200,r);assertEquals("001",data(r).path("threadGroups").get(0).path("requestHeaders").path("X-Code").asText());}
++    @Test @DisplayName("TC-D16PERF-36") void queryStrings()throws Exception{var f=fixture();var r=submit(f,raw("queryParameters","{\"id\":\"001\",\"flag\":\"false\",\"literal\":\"null\",\"blank\":\"\"}"));status(200,r);assertEquals("001",data(r).path("threadGroups").get(0).path("queryParameters").path("id").asText());}
++    @Test @DisplayName("TC-D16PERF-37") void bodyStrings()throws Exception{var f=fixture();var g=group("");g.put("requestBody","{\"n\":1}");good(f,g);g.put("requestMethod","GET");badGroup(f,g);}
++    @Test @DisplayName("TC-D16PERF-38") void containsStrings()throws Exception{var f=fixture();var r=submit(f,raw("responseContains","\" 001 \""));status(200,r);assertEquals("001",data(r).path("threadGroups").get(0).path("responseContains").asText());}
++    @Test @DisplayName("TC-D16PERF-39") void csvStrings()throws Exception{var f=fixture();var g=group("");g.put("dataSetCsv","id,name\r\n001,false");g.put("requestBody","${id}");var r=submit(f,json.writeValueAsString(definition(g)));status(200,r);assertEquals("id,name\n001,false",data(r).path("threadGroups").get(0).path("dataSetCsv").asText());}
++    @Test @DisplayName("TC-D16PERF-40") void mapTypes()throws Exception{var f=fixture();for(String field:List.of("requestHeaders","queryParameters"))for(String t:List.of("1","true","[]","{}"))bad(f,field,"{\"X-Code\":"+t+"}");}
++    @Test @DisplayName("TC-D16PERF-41") void textTypes()throws Exception{var f=fixture();for(String field:List.of("requestBody","responseContains","dataSetCsv"))for(String t:List.of("1","true","[]","{}"))bad(f,field,t);}
++    @Test @DisplayName("TC-D16PERF-42") void textNull()throws Exception{var f=fixture();var g=group("");for(String field:List.of("requestBody","responseContains","dataSetCsv"))g.put(field,null);g.put("requestHeaders",Collections.singletonMap("X-Null",null));g.put("queryParameters",Collections.singletonMap("id",null));var r=submit(f,json.writeValueAsString(definition(g)));status(200,r);assertEquals("",data(r).path("threadGroups").get(0).path("requestHeaders").path("X-Null").asText());assertTrue(data(r).path("threadGroups").get(0).path("requestBody").isNull());}
++    @Test @DisplayName("TC-D16PERF-43") void editValid()throws Exception{var f=fixture();var p=create(f);var x=executions.create(f.actor,f.project,p.id(),60);var frozen=executionRows.findManifest(f.project,x.id()).orElseThrow();var r=edit(f,p.id(),"{\"expectedVersion\":1,\"plan\":"+raw("threadCount","20.0")+"}");status(200,r);assertEquals(2,data(r).path("version").asInt());assertEquals(frozen,executionRows.findManifest(f.project,x.id()).orElseThrow());}
++    @Test @DisplayName("TC-D16PERF-44") void editInvalid()throws Exception{var f=fixture();var p=create(f);var before=counts();status(400,edit(f,p.id(),"{\"expectedVersion\":1,\"plan\":"+raw("threadCount","1.5")+"}"));assertEquals(p,plans.detail(f.actor,f.project,p.id()));assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16PERF-45") void multiGroupAtomic()throws Exception{var f=fixture();var g=group("");g.put("name","Second");g.put("threadCount","RAW_TOKEN");var d=definition(group(""));d.put("threadGroups",List.of(group(""),g));var b=counts();status(400,submit(f,json.writeValueAsString(d).replace("\"RAW_TOKEN\"","1.5")));assertEquals(b,counts());}
++    @Test @DisplayName("TC-D16PERF-46") void transferValid()throws Exception{var source=exchangeSource();for(int n=0;n<3;n++){var target=fixture();String raw=equivalent(json.writeValueAsString(new PerformanceTransferService.ImportRequest(UUID.randomUUID().toString(),target.actor.userId(),transfer.export(source.actor,source.project))),n);var receipt=transfer.transfer(target.actor,target.project,transfer.decode(raw.getBytes(StandardCharsets.UTF_8)));assertEquals(2,receipt.plans());assertTrue(plans.list(target.actor,target.project).stream().allMatch(p->p.status().equals("DRAFT")));}}
++    @Test @DisplayName("TC-D16PERF-47") void transferInvalid()throws Exception{var source=exchangeSource();var target=fixture();String raw=json.writeValueAsString(new PerformanceTransferService.ImportRequest(UUID.randomUUID().toString(),target.actor.userId(),transfer.export(source.actor,source.project)));for(String value:invalidPayloads(raw)){var before=counts();rejected(()->transfer.transfer(target.actor,target.project,transfer.decode(value.getBytes(StandardCharsets.UTF_8))));assertEquals(before,counts());}}
++    @Test @DisplayName("TC-D16PERF-48") void syncValid()throws Exception{var source=exchangeSource();for(int n=0;n<3;n++){var target=fixture();String raw=equivalent(json.writeValueAsString(request(source,target)),n);assertEquals(2,sync.apply(target.actor,target.project,sync.decode(raw.getBytes(StandardCharsets.UTF_8))).results().size());}}
++    @Test @DisplayName("TC-D16PERF-49") void syncInvalid()throws Exception{var source=exchangeSource();var target=fixture();String raw=json.writeValueAsString(request(source,target));for(String value:invalidPayloads(raw)){var before=counts();rejected(()->sync.apply(target.actor,target.project,sync.decode(value.getBytes(StandardCharsets.UTF_8))));assertEquals(before,counts());}}
++    @Test @DisplayName("TC-D16PERF-50") void oldReadOnly()throws Exception{var f=fixture();var p=create(f);var x=executions.create(f.actor,f.project,p.id(),60);var frozen=executionRows.findManifest(f.project,x.id()).orElseThrow();var before=counts();assertEquals(p,plans.detail(f.actor,f.project,p.id()));transfer.export(f.actor,f.project);sync.snapshot(f.actor,f.project,f.actor.userId());assertEquals(before,counts());assertEquals(frozen,executionRows.findManifest(f.project,x.id()).orElseThrow());}
++    @Test @DisplayName("TC-D16PERF-51") void oldInvalidQueue()throws Exception{var f=fixture();var p=create(f);var x=executions.create(f.actor,f.project,p.id(),60);var frozen=executionRows.findManifest(f.project,x.id()).orElseThrow();jdbc.sql("UPDATE performance_test_thread_group SET thread_count=0 WHERE plan_id=:p").param("p",p.id()).update();var before=counts();rejected(()->executions.create(f.actor,f.project,p.id(),60));assertEquals(before,counts());jdbc.sql("UPDATE performance_test_thread_group SET thread_count=10,query_parameters=:q WHERE plan_id=:p").param("q","{\"id\":123}").param("p",p.id()).update();assertEquals("123",plans.detail(f.actor,f.project,p.id()).threadGroups().getFirst().queryParameters().get("id"));rejected(()->executions.create(f.actor,f.project,p.id(),60));assertEquals(before,counts());assertEquals(frozen,executionRows.findManifest(f.project,x.id()).orElseThrow());}
++    @Test @DisplayName("TC-D16PERF-52") void permission()throws Exception{var f=fixture();var other=actor();var before=counts();var r=mvc.perform(post(base(f)).with(user(other)).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(raw("threadCount","10"))).andReturn();status(403,r);assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16PERF-53") void versionConflict()throws Exception{var f=fixture();var p=create(f);var before=counts();for(String prefix:List.of("{}","{\"expectedVersion\":null}","{\"expectedVersion\":2}")){var d=(com.fasterxml.jackson.databind.node.ObjectNode)json.readTree(prefix);d.set("plan",json.readTree(raw("threadCount","20")));status(prefix.contains(":2")?409:400,edit(f,p.id(),json.writeValueAsString(d)));}assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16PERF-54") void syncConflict()throws Exception{var source=exchangeSource();var target=fixture();var r=request(source,target);create(target);var before=counts();assertEquals(409,assertThrows(ResponseStatusException.class,()->sync.apply(target.actor,target.project,r)).getStatusCode().value());assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16PERF-55") void replay()throws Exception{var source=exchangeSource();var target=fixture();var r=request(source,target);var receipt=sync.apply(target.actor,target.project,r);var before=counts();assertEquals(receipt,sync.apply(target.actor,target.project,r));assertEquals(before,counts());var other=fixture();var tr=new PerformanceTransferService.ImportRequest(UUID.randomUUID().toString(),other.actor.userId(),transfer.export(source.actor,source.project));var got=transfer.transfer(other.actor,other.project,tr);before=counts();assertEquals(got,transfer.transfer(other.actor,other.project,tr));assertEquals(before,counts());}
++    @Test @DisplayName("TC-D16PERF-56") void errorLocation()throws Exception{var f=fixture();var r=submit(f,raw("threadCount","\"D16_PRIVATE_MARKER\""));status(400,r);var b=json.readTree(r.getResponse().getContentAsString());assertTrue(b.path("details").has("threadGroups[0].threadCount"));assertFalse(b.toString().contains("D16_PRIVATE_MARKER"));var g=group("");g.put("name","Second");g.put("queryParameters",Map.of("D16_PRIVATE_KEY",true));var d=definition(group(""));d.put("threadGroups",List.of(group(""),g));r=submit(f,json.writeValueAsString(d));status(400,r);b=json.readTree(r.getResponse().getContentAsString());assertTrue(b.path("details").has("threadGroups[1].queryParameters"));assertFalse(b.toString().contains("D16_PRIVATE_KEY"));}
++}
+--- /dev/null
++++ b/src/utils/performanceNumberInput.ts
+@@ -0,0 +1,78 @@
++const integerFields = ['threadCount', 'rampUpSeconds', 'durationSeconds', 'stepCount', 'stepIntervalSeconds', 'targetTps', 'p95ThresholdMillis', 'expectedStatusCode', 'rendezvousUsers'] as const
++export type PerformanceNumberField = typeof integerFields[number] | 'errorThresholdPercent'
++export type PerformanceNumberText = Record<PerformanceNumberField, string>
++const fields: PerformanceNumberField[] = [...integerFields, 'errorThresholdPercent']
++const parts = (raw: string, field: string) => {
++  const match = /^(-?)(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(raw.trim())
++  if (!match) throw new Error(`${field} 必须是精确数值`)
++  return { negative: match[1] === '-', digits: (match[2]! + (match[3] ?? '')).replace(/^0+/, '') || '0', scale: BigInt((match[3] ?? '').length) - BigInt(match[4] ?? '0') }
++}
++export function performanceIntegerInput(raw: string, minimum: number, maximum: number, field: string): number {
++  const fail = () => new Error(`${field} 必须是 ${minimum} 到 ${maximum} 之间的精确整数数值`)
++  const value = parts(raw, field); let digits = value.digits
++  if (digits === '0') { if (minimum === 0) return 0; throw fail() }
++  if (value.negative) throw fail()
++  if (value.scale > 0n) {
++    if (value.scale >= BigInt(digits.length)) throw fail()
++    const removed = Number(value.scale)
++    if (!/^0+$/.test(digits.slice(-removed))) throw fail()
++    digits = digits.slice(0, -removed)
++  } else if (value.scale < 0n) {
++    if (BigInt(digits.length) - value.scale > BigInt(String(maximum).length)) throw fail()
++    digits += '0'.repeat(Number(-value.scale))
++  }
++  if (digits.length > String(maximum).length) throw fail()
++  const result = Number(digits)
++  if (result < minimum || result > maximum) throw fail()
++  return result
++}
++export function performancePercentInput(raw: string): number {
++  const fail = () => new Error('errorThresholdPercent 必须是 0 到 100 之间、最多两位小数的数值')
++  const value = parts(raw, 'errorThresholdPercent')
++  if (value.scale > 2n || (value.negative && value.digits !== '0')) throw fail()
++  if (value.digits === '0') return 0
++  const zeros = 2n - value.scale
++  if (BigInt(value.digits.length) + zeros > 5n) throw fail()
++  const scaled = BigInt(value.digits + '0'.repeat(Number(zeros)))
++  if (scaled > 10000n) throw fail()
++  return Number(scaled) / 100
++}
++export function performanceNumberText(source: Partial<Record<PerformanceNumberField, number | null>>): PerformanceNumberText {
++  return Object.fromEntries(fields.map(field => [field, source[field] == null ? '' : String(source[field])])) as PerformanceNumberText
++}
++function range(raw: PerformanceNumberText, field: PerformanceNumberField): [number, number] {
++  const bounded = (value: string, fallback: number) => { try { return performanceIntegerInput(value, 1, 100000, field) } catch { return fallback } }
++  switch (field) {
++    case 'threadCount': return [1, 100000]
++    case 'rampUpSeconds': return [0, 86400]
++    case 'durationSeconds': return [10, 86400]
++    case 'stepCount': return [2, Math.min(bounded(raw.threadCount, 100000), 20)]
++    case 'stepIntervalSeconds': return [1, 86400]
++    case 'targetTps': return [1, 1000000]
++    case 'p95ThresholdMillis': return [1, 600000]
++    case 'expectedStatusCode': return [100, 599]
++    case 'rendezvousUsers': return [2, bounded(raw.threadCount, 100000)]
++    case 'errorThresholdPercent': return [0, 100]
++  }
++}
++function value(raw: PerformanceNumberText, field: PerformanceNumberField, model: string): number | undefined {
++  if ((field === 'stepCount' || field === 'stepIntervalSeconds') && model !== 'STEPPED_RAMP') return undefined
++  if (field === 'rendezvousUsers' && model === 'STEPPED_RAMP') return undefined
++  const required = ['threadCount', 'rampUpSeconds', 'durationSeconds', ...(model === 'STEPPED_RAMP' ? ['stepCount', 'stepIntervalSeconds'] : [])].includes(field)
++  if (!raw[field].trim() && !required) return undefined
++  if (field === 'errorThresholdPercent') return performancePercentInput(raw[field])
++  const [minimum, maximum] = range(raw, field)
++  return performanceIntegerInput(raw[field], minimum, maximum, field)
++}
++export function performanceNumberError(raw: PerformanceNumberText, field: PerformanceNumberField, model: string): string {
++  try { value(raw, field, model); return '' }
++  catch (error) { return error instanceof Error ? error.message : `${field} 不合法` }
++}
++export function performanceGroupNumbers(raw: PerformanceNumberText, model: string, index: number) {
++  const result: Partial<Record<PerformanceNumberField, number>> = {}
++  for (const field of fields) {
++    try { result[field] = value(raw, field, model) }
++    catch (error) { throw new Error(`线程组 ${index + 1}：${error instanceof Error ? error.message : field + ' 不合法'}`) }
++  }
++  return result
++}
+--- /dev/null
++++ b/src/test/d16PerformancePage.test.ts
+@@ -0,0 +1,65 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { createPinia } from 'pinia'
++import { flushPromises, shallowMount, type VueWrapper } from '@vue/test-utils'
++import ArcoVue, { Message } from '@arco-design/web-vue'
++import PerformancePage from '@/pages/PerformancePage.vue'
++import PageHeader from '@/components/PageHeader.vue'
++import { useSessionStore } from '@/stores/session'
++const wrappers: VueWrapper[] = []
++afterEach(() => { wrappers.splice(0).forEach(w => w.unmount()); vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear() })
++async function setup() {
++  for (const kind of ['success', 'error'] as const) vi.spyOn(Message, kind).mockImplementation(() => ({ close: vi.fn() }))
++  const pinia = createPinia(); useSessionStore(pinia).projectId = 'p'
++  const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
++    let data: unknown = []
++    if (init?.method === 'POST') data = { id: 'saved', ...JSON.parse(String(init.body)), version: 1, threadGroupCount: 1 }
++    else if (url.endsWith('/csrf')) data = { token: 'fixture', headerName: 'X-CSRF' }
++    else if (url.endsWith('/context')) data = { organizations: [{ id: 'o' }], projects: { o: [{ id: 'p', name: 'QA', code: 'QA' }] } }
++    return new Response(JSON.stringify({ data }))
++  }); vi.stubGlobal('fetch', fetcher)
++  const w = shallowMount(PerformancePage, { global: { plugins: [pinia, ArcoVue], renderStubDefaultSlot: true, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises()
++  w.findComponent(PageHeader).vm.$emit('action'); await flushPromises()
++  const d = w.findComponent({ name: 'Modal' }); d.findAllComponents({ name: 'Input' }).find(i => i.props('placeholder') === '例如：订单核心链路基准压测')!.vm.$emit('update:modelValue', 'QA'); await flushPromises()
++  return { w, d, fetcher }
++}
++const writes = (q: Awaited<ReturnType<typeof setup>>) => q.fetcher.mock.calls.filter(([, i]) => i?.method === 'POST')
++const labels: Record<string, string> = { threadCount: '并发线程', rampUpSeconds: '加压时长（秒）', durationSeconds: '持续时长（秒）', targetTps: '目标 TPS', p95ThresholdMillis: 'P95 阈值（毫秒）', errorThresholdPercent: '错误率阈值（%）', expectedStatusCode: '预期状态码', rendezvousUsers: '集合点等待线程', stepCount: '阶梯阶段数', stepIntervalSeconds: '阶梯间隔（秒）' }
++async function numeric(q: Awaited<ReturnType<typeof setup>>, field: string, raw: string, group = 0) {
++  const item = q.d.findAllComponents({ name: 'FormItem' }).filter(i => i.props('label') === labels[field])[group]!
++  const old = item.findComponent({ name: 'InputNumber' })
++  if (old.exists()) old.vm.$emit('update:modelValue', raw === '' ? undefined : Number(raw))
++  else item.findComponent({ name: 'Input' }).vm.$emit('update:modelValue', raw)
++  await flushPromises()
++}
++async function save(q: Awaited<ReturnType<typeof setup>>) { await ((q.d.props() as Record<string, unknown>).onBeforeOk as () => Promise<boolean>)(); await flushPromises() }
++async function model(q: Awaited<ReturnType<typeof setup>>, value: string) { const s = q.d.findAllComponents({ name: 'FormItem' }).find(i => i.props('label') === '负载模型')!.findComponent({ name: 'Select' }); s.vm.$emit('update:modelValue', value); s.vm.$emit('change', value); await flushPromises() }
++it('TC-D16PERF-57: invalid integer text blocks submission and keeps the dialog', async () => {
++  const q = await setup()
++  for (const field of ['threadCount', 'rampUpSeconds', 'durationSeconds', 'targetTps', 'p95ThresholdMillis', 'expectedStatusCode', 'rendezvousUsers']) {
++    const valid = field === 'expectedStatusCode' ? '200' : '10'
++    for (const raw of ['1.5', '1.0000000000000001']) { await numeric(q, field, raw); await save(q); expect(writes(q)).toHaveLength(0); expect(q.d.props('visible')).toBe(true) }
++    await numeric(q, field, valid)
++  }
++  await model(q, 'STEPPED_RAMP')
++  for (const field of ['stepCount', 'stepIntervalSeconds']) { await numeric(q, field, '2.5'); await save(q); expect(writes(q)).toHaveLength(0); await numeric(q, field, '2') }
++})
++it('TC-D16PERF-58: exact integer spellings submit numbers', async () => {
++  const q = await setup(); await numeric(q, 'threadCount', '1e1'); await numeric(q, 'durationSeconds', '10.0'); await numeric(q, 'expectedStatusCode', '2e2'); await save(q)
++  const g = JSON.parse(String(writes(q)[0]![1]!.body)).threadGroups[0]; expect(g.threadCount).toBe(10); expect(g.durationSeconds).toBe(10); expect(g.expectedStatusCode).toBe(200)
++})
++it('TC-D16PERF-59: error percent is not rounded before validation', async () => {
++  const q = await setup(); await numeric(q, 'errorThresholdPercent', '2.501'); await save(q); expect(writes(q)).toHaveLength(0); expect(Message.error).toHaveBeenCalledWith(expect.stringContaining('errorThresholdPercent'))
++  await numeric(q, 'errorThresholdPercent', '2.50'); await save(q); expect(JSON.parse(String(writes(q)[0]![1]!.body)).threadGroups[0].errorThresholdPercent).toBe(2.5)
++})
++it('TC-D16PERF-60: optional blanks and model changes keep null policy', async () => {
++  const q = await setup(); await model(q, 'STEPPED_RAMP'); await model(q, 'RAMP_UP')
++  for (const field of ['targetTps', 'p95ThresholdMillis', 'expectedStatusCode', 'rendezvousUsers', 'errorThresholdPercent']) await numeric(q, field, '')
++  await save(q); const g = JSON.parse(String(writes(q)[0]![1]!.body)).threadGroups[0]
++  for (const field of ['targetTps', 'p95ThresholdMillis', 'expectedStatusCode', 'rendezvousUsers', 'errorThresholdPercent', 'stepCount', 'stepIntervalSeconds']) expect(g[field]).toBeUndefined()
++})
++it('TC-D16PERF-61: removing a group retains the surviving group raw values', async () => {
++  const q = await setup(); await numeric(q, 'threadCount', '1.5')
++  q.d.findAllComponents({ name: 'Button' }).find(b => b.text().includes('添加线程组'))!.vm.$emit('click'); await flushPromises(); await numeric(q, 'threadCount', '20.0', 1)
++  q.d.findAllComponents({ name: 'Button' }).find(b => b.text().includes('删除'))!.vm.$emit('click'); await flushPromises(); await save(q)
++  expect(JSON.parse(String(writes(q)[0]![1]!.body)).threadGroups[0].threadCount).toBe(20)
++})
+--- /dev/null
++++ b/src/test/d16PerformanceNumbers.test.ts
+@@ -0,0 +1,15 @@
++import { expect, it } from 'vitest'
++import { performanceIntegerInput, performancePercentInput, performanceNumberText, performanceGroupNumbers, performanceNumberError } from '@/utils/performanceNumberInput'
++it('TC-D16PERF-57/58: integer text is checked before rounding', () => {
++  for (const raw of ['10', '10.0', '1e1', '100e-1']) expect(performanceIntegerInput(raw, 1, 100000, 'threadCount')).toBe(10)
++  for (const raw of ['1.5', '1.0000000000000001', '1e10000', '1e-10000', '100001', '-1', 'NaN', '"10"']) expect(() => performanceIntegerInput(raw, 1, 100000, 'threadCount')).toThrow()
++  const text = performanceNumberText({ threadCount: 10, rampUpSeconds: 0, durationSeconds: 10 })
++  expect(performanceGroupNumbers(text, 'RAMP_UP', 1).targetTps).toBeUndefined()
++  text.threadCount = ''; expect(() => performanceGroupNumbers(text, 'RAMP_UP', 1)).toThrow('线程组 2')
++  text.stepCount = '1.5'; expect(performanceNumberError(text, 'stepCount', 'RAMP_UP')).toBe('')
++})
++it('TC-D16PERF-59/60: decimal percentage precision and optional semantics remain distinct', () => {
++  for (const [raw, expected] of [['2.50', 2.5], ['25e-1', 2.5], ['0', 0], ['100', 100], ['-0', 0]] as const) expect(performancePercentInput(raw)).toBe(expected)
++  for (const raw of ['2.501', '2.500', '0.000', '100.01', '-0.01', '1e10000', '1e-10000', 'NaN', '"2.5"']) expect(() => performancePercentInput(raw)).toThrow('errorThresholdPercent')
++  const text = performanceNumberText({ threadCount: 10, rampUpSeconds: 0, durationSeconds: 10 }); expect(performanceGroupNumbers(text, 'RAMP_UP', 0).errorThresholdPercent).toBeUndefined()
++})
+--- /dev/null
++++ b/services/jmeter-runner/test/d16-input.test.js
+@@ -0,0 +1,17 @@
++import assert from 'node:assert/strict'
++import test from 'node:test'
++import { validateRuntimeConfiguration } from '../src/protocol.js'
++const task = { taskId: '01J00000000000000000000001', executionId: '01J00000000000000000000002' }
++const group = { name: 'QA', targetUrl: 'http://127.0.0.1:18081/qa', loadModel: 'RAMP_UP', threadCount: 10, rampUpSeconds: 0, durationSeconds: 10, targetTps: 10, requestMethod: 'POST', requestHeaders: { 'X-Code': '001' }, queryParameters: { id: '001' }, requestBody: '{"n":1}', expectedStatusCode: 200, responseContains: '001', dataSetCsv: null, rendezvousUsers: 2 }
++const artifact = g => ({ contract: 'testhub.jmeter-runner.runtime-configuration', artifactVersion: 6, ...task, deadlineAt: '2026-11-02T00:00:00Z', threadGroups: [g] })
++const validate = g => validateRuntimeConfiguration(task, artifact(g), ['http://127.0.0.1:18081'])
++test('TC-D16PERF-62: invalid input fails pure preflight before JMeter or target requests', () => {
++  for (const field of ['threadCount', 'rampUpSeconds', 'durationSeconds', 'targetTps', 'expectedStatusCode', 'rendezvousUsers']) for (const value of [1.5, '10', true, [], {}]) assert.throws(() => validate({ ...group, [field]: value }))
++  for (const field of ['stepCount', 'stepIntervalSeconds']) for (const value of [2.5, '2', true, []]) assert.throws(() => validate({ ...group, loadModel: 'STEPPED_RAMP', rendezvousUsers: null, stepCount: 2, stepIntervalSeconds: 1, [field]: value }))
++  for (const field of ['requestHeaders', 'queryParameters']) for (const value of [1, true, [], {}]) assert.throws(() => validate({ ...group, [field]: { 'X-Code': value } }))
++  for (const field of ['requestBody', 'responseContains', 'dataSetCsv']) for (const value of [1, true, {}]) assert.throws(() => validate({ ...group, [field]: value }))
++})
++test('TC-D16PERF-63: existing normalized and short internal protocol values stay readable', () => {
++  for (const raw of ['10', '10.0', '1e1']) { const g = { ...group, threadCount: JSON.parse(raw) }; const result = validate(g).threadGroups[0]; assert.equal(result.threadCount, 10); assert.equal(result.queryParameters.id, '001') }
++  assert.equal(validate({ ...group, durationSeconds: 3 }).threadGroups[0].durationSeconds, 3)
++})
+--- /dev/null
++++ b/scripts/qa/d16-performance-ui.mjs
+@@ -0,0 +1,83 @@
++// Headless performance page acceptance uses controlled API fixtures; native HTTP has a separate QA script.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import http from 'node:http'
++import path from 'node:path'
++import process from 'node:process'
++import { fileURLToPath, URL } from 'node:url'
++import { chromium } from '../../services/playwright-runner/node_modules/playwright/index.mjs'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261102/d16-performance-fixes-r1'), dist = path.join(root, 'dist')
++const stamp = '2026-10-30T00:00:00Z'
++const result = { headless: true, isolatedHttpFixtures: true, realBackendAcceptance: false, cases: [], cleanup: false }
++const server = http.createServer(async (req, res) => {
++  try {
++    let file = path.resolve(dist, '.' + decodeURIComponent(new URL(req.url, 'http://qa.invalid').pathname))
++    if (!file.startsWith(dist + path.sep) || !path.extname(file)) file = path.join(dist, 'index.html')
++    res.writeHead(200, { 'Content-Type': { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }[path.extname(file)] || 'application/octet-stream' })
++    res.end(await fs.readFile(file))
++  } catch { res.writeHead(404); res.end() }
++})
++await fs.mkdir(out, { recursive: true }); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
++const origin = `http://127.0.0.1:${server.address().port}`
++let browser
++async function run(id, operation) {
++  const context = await browser.newContext({ viewport: { width: 1600, height: 1100 } }), writes = [], errors = []
++  await context.route('**/api/**', async route => {
++    const r = route.request(), p = new URL(r.url()).pathname; let data
++    if (r.method() === 'POST') { const input = r.postDataJSON(); writes.push(input); data = { id: 'saved', ...input, version: 1, threadGroupCount: input.threadGroups.length } }
++    else if (p.endsWith('/auth/me')) data = { id: 'qa', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: stamp }
++    else if (p.endsWith('/auth/csrf')) data = { token: 'fixture', headerName: 'X-CSRF' }
++    else if (p.endsWith('/auth/capabilities')) data = { registrationEnabled: true }
++    else if (p.endsWith('/access/context')) data = { organizations: [{ id: 'o', name: 'QA', code: 'QA' }], projects: { o: [{ id: 'p', name: 'QA项目', code: 'QA', status: 'ACTIVE', createdAt: stamp, updatedAt: stamp }] } }
++    else if (p.endsWith('/capabilities')) data = { systemAdministration: true }
++    else data = []
++    await route.fulfill({ json: { data } })
++  })
++  const page = await context.newPage(); page.setDefaultTimeout(10_000); page.on('pageerror', error => errors.push(error.message))
++  try {
++    await page.goto(origin + '/performance')
++    await page.getByRole('button', { name: '新建压测计划', exact: true }).click()
++    await page.getByPlaceholder('例如：订单核心链路基准压测').fill('QA')
++    const dialog = page.locator('.arco-modal').filter({ has: page.getByPlaceholder('例如：订单核心链路基准压测') })
++    const save = () => dialog.locator('.arco-modal-footer .arco-btn-primary').click()
++    const field = (name, index = 0) => page.getByLabel('性能 ' + name, { exact: true }).nth(index).locator('input')
++    await operation(page, dialog, save, field, writes); assert.deepEqual(errors, []); result.cases.push({ id, status: 'PASS' })
++  } catch (error) { result.cases.push({ id, status: 'FAIL', error: error.message, browserErrors: errors }) }
++  finally { await context.close() }
++}
++try {
++  browser = await chromium.launch({ headless: true, channel: 'chrome' }); result.browserVersion = browser.version()
++  await run('TC-D16PERF-57', async (page, dialog, save, field, writes) => {
++    for (const raw of ['1.5', '1.0000000000000001', '100001']) {
++      await field('threadCount').fill(raw); await save(); await page.locator('.arco-message').filter({ hasText: 'threadCount' }).first().waitFor()
++      assert.equal(writes.length, 0); assert.equal(await field('threadCount').inputValue(), raw)
++    }
++    await field('threadCount').fill('10'); await field('expectedStatusCode').fill('200.5'); await save()
++    await page.locator('.arco-message').filter({ hasText: 'expectedStatusCode' }).first().waitFor(); assert.equal(writes.length, 0)
++  })
++  await run('TC-D16PERF-58', async (page, dialog, save, field, writes) => {
++    await field('threadCount').fill('1e1'); await field('durationSeconds').fill('10.0'); await field('expectedStatusCode').fill('2e2')
++    await Promise.all([page.waitForResponse(r => r.url().endsWith('/plans') && r.request().method() === 'POST'), save()])
++    const g = writes.at(-1).threadGroups[0]; assert.equal(g.threadCount, 10); assert.equal(g.durationSeconds, 10); assert.equal(g.expectedStatusCode, 200)
++  })
++  await run('TC-D16PERF-59', async (page, dialog, save, field, writes) => {
++    await field('errorThresholdPercent').fill('2.501'); await save()
++    await page.locator('.arco-message').filter({ hasText: 'errorThresholdPercent' }).first().waitFor(); assert.equal(writes.length, 0); assert.equal(await field('errorThresholdPercent').inputValue(), '2.501')
++    await field('errorThresholdPercent').fill('2.50'); await Promise.all([page.waitForResponse(r => r.url().endsWith('/plans') && r.request().method() === 'POST'), save()]); assert.equal(writes.at(-1).threadGroups[0].errorThresholdPercent, 2.5)
++  })
++  await run('TC-D16PERF-60', async (page, dialog, save, field, writes) => {
++    for (const name of ['targetTps', 'p95ThresholdMillis', 'expectedStatusCode', 'rendezvousUsers', 'errorThresholdPercent']) await field(name).fill('')
++    await Promise.all([page.waitForResponse(r => r.url().endsWith('/plans') && r.request().method() === 'POST'), save()])
++    const g = writes.at(-1).threadGroups[0]; for (const name of ['targetTps', 'p95ThresholdMillis', 'expectedStatusCode', 'rendezvousUsers', 'errorThresholdPercent']) assert.equal(g[name], undefined)
++  })
++  await run('TC-D16PERF-61', async (page, dialog, save, field, writes) => {
++    await field('threadCount').fill('1.5'); await dialog.getByRole('button', { name: '添加线程组' }).click(); await field('threadCount', 1).fill('20.0')
++    await dialog.locator('.thread-group-form').first().getByRole('button', { name: '删除', exact: true }).click()
++    await Promise.all([page.waitForResponse(r => r.url().endsWith('/plans') && r.request().method() === 'POST'), save()]); assert.equal(writes.at(-1).threadGroups[0].threadCount, 20)
++  })
++} finally {
++  await browser?.close(); await new Promise(resolve => server.close(resolve)); result.cleanup = true
++  result.passed = result.cases.filter(c => c.status === 'PASS').length; result.failed = result.cases.length - result.passed
++  await fs.writeFile(path.join(out, 'headless-ui.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n'); if (result.failed) process.exitCode = 1
++}
+--- /dev/null
++++ b/scripts/qa/d16-performance-http.mjs
+@@ -0,0 +1,129 @@
++/* global fetch, AbortSignal */
++// Native JVM acceptance in a new filesystem workspace; no Electron window or user workspace is used.
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import path from 'node:path'
++import crypto from 'node:crypto'
++import process from 'node:process'
++import { spawn } from 'node:child_process'
++import { fileURLToPath } from 'node:url'
++import { setTimeout as delay } from 'node:timers/promises'
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
++const out = path.join(root, 'output/qa-20261102/d16-performance-fixes-r1'), directory = await fs.mkdtemp(path.join(root, '.testhub/d16-performance-http-qa-'))
++const java = path.join(process.env.JAVA_HOME, 'bin/java'), jar = path.join(root, 'services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar')
++const result = { headless: true, realPackagedJvm: true, desktopProfile: true, electronUpgradeTest: false, realTargetLoad: false, cases: [], cleanup: false }
++const env = { ...process.env }
++for (const key of Object.keys(env)) if (key.startsWith('TESTHUB_') || key.startsWith('SPRING_')) delete env[key]
++Object.assign(env, { SPRING_PROFILES_ACTIVE: 'desktop', TESTHUB_DESKTOP_DATA_DIRECTORY: directory, TESTHUB_LOCAL_DB_PASSWORD: crypto.randomBytes(24).toString('hex'),
++  TESTHUB_DESKTOP_ALLOWED_ORIGINS: 'https://ui.example.test', TESTHUB_REGISTRATION_ENABLED: 'true' })
++let child, origin, logHandle, launch = 0
++async function start() {
++  const file = path.join(directory, `backend-${++launch}.log`); logHandle = await fs.open(file, 'w')
++  child = spawn(java, ['-jar', jar, '--server.port=0', '--testhub.registration.enabled=true', '--testhub.bootstrap.demo-enabled=false'], { cwd: root, env, stdio: ['ignore', logHandle.fd, logHandle.fd] })
++  child.on('error', error => { result.launchError = error.message })
++  for (let n = 0; n < 300; n++) {
++    if (child.exitCode !== null || child.signalCode !== null || result.launchError) throw new Error('Owned QA JVM failed to start')
++    const match = /Tomcat started on port (\d+)/.exec(await fs.readFile(file, 'utf8'))
++    if (match) {
++      origin = 'http://127.0.0.1:' + match[1]
++      try { if ((await fetch(origin + '/actuator/health/readiness', { signal: AbortSignal.timeout(5_500) })).status === 200) return } catch { /* Wait for ApplicationReadyEvent. */ }
++    }
++    await delay(250)
++  }
++  throw new Error('Owned QA JVM did not become ready within 75 seconds')
++}
++async function stop() {
++  if (!child) return
++  const running = child; child = null
++  if (running.exitCode === null && running.signalCode === null) {
++    running.kill('SIGTERM')
++    for (let n = 0; n < 150 && running.exitCode === null && running.signalCode === null; n++) await delay(100)
++    if (running.exitCode === null && running.signalCode === null) { running.kill('SIGKILL'); await new Promise(resolve => running.once('exit', resolve)); throw new Error('Owned JVM failed to stop within 15 seconds') }
++  }
++  await logHandle?.close(); logHandle = null
++}
++function browser() { return { cookies: new Map() } }
++async function request(client, url, method = 'GET', payload) {
++  const headers = { Cookie: [...client.cookies].map(([key, value]) => key + '=' + value).join('; ') }
++  if (payload !== undefined) {
++    const csrf = await request(client, '/api/v1/auth/csrf')
++    assert.equal(csrf.status, 200); headers[csrf.body.data.headerName] = csrf.body.data.token
++    headers.Cookie = [...client.cookies].map(([key, value]) => key + '=' + value).join('; '); headers['Content-Type'] = 'application/json'
++  }
++  const response = await fetch(origin + url, { method, headers, body: payload === undefined ? undefined : JSON.stringify(payload), signal: AbortSignal.timeout(8_000) })
++  for (const cookie of response.headers.getSetCookie()) {
++    const [pair] = cookie.split(';'), equals = pair.indexOf('='); client.cookies.set(pair.slice(0, equals), pair.slice(equals + 1))
++  }
++  return { status: response.status, body: response.status === 204 ? null : await response.json() }
++}
++async function step(id, title, operation) { await operation(); result.cases.push({ id, title, status: 'PASS' }) }
++async function rawRequest(client, url, method, body) {
++  const csrf = await request(client, '/api/v1/auth/csrf'); assert.equal(csrf.status, 200)
++  const headers = { Cookie: [...client.cookies].map(([k,v]) => k + '=' + v).join('; '), 'Content-Type': 'application/json', [csrf.body.data.headerName]: csrf.body.data.token }
++  const response = await fetch(origin + url, { method, headers, body, signal: AbortSignal.timeout(8_000) })
++  return { status: response.status, body: await response.json() }
++}
++const integers = ['threadCount', 'rampUpSeconds', 'durationSeconds', 'stepCount', 'stepIntervalSeconds', 'targetTps', 'p95ThresholdMillis', 'expectedStatusCode', 'rendezvousUsers']
++const definition = (field, token) => {
++  const stepped = ['stepCount', 'stepIntervalSeconds'].includes(field)
++  const group = { name: 'QA', targetUrl: 'https://qa.example.test/qa', loadModel: stepped ? 'STEPPED_RAMP' : 'RAMP_UP', threadCount: 10, rampUpSeconds: 0, durationSeconds: 10, stepCount: stepped ? 2 : null, stepIntervalSeconds: stepped ? 1 : null, targetTps: 10, p95ThresholdMillis: 500, errorThresholdPercent: 2.5, expectedStatusCode: 200, rendezvousUsers: null, requestMethod: 'POST', requestHeaders: {}, queryParameters: {}, requestBody: '{"n":1}', responseContains: '001', dataSetCsv: null, [field]: 'RAW_TOKEN' }
++  return JSON.stringify({ name: crypto.randomUUID(), description: '', status: 'READY', threadGroups: [group] }).replace('"RAW_TOKEN"', token)
++}
++try {
++  await start()
++  const client = browser(), account = 'd16-' + crypto.randomUUID(), password = crypto.randomUUID() + 'Aa1!'
++  assert.equal((await request(client, '/api/v1/auth/register', 'POST', { account, email: crypto.randomUUID() + '@example.test', displayName: 'D16隔离验收', password })).status, 201)
++  const me = (await request(client, '/api/v1/auth/me')).body.data
++  const project = Object.values((await request(client, '/api/v1/access/context')).body.data.projects).flat()[0].id
++  const rootPath = '/api/v1/projects/' + project + '/performance', plans = rootPath + '/plans'
++  let created
++  await step('TC-D16PERF-01/02/03/04/05/06/07/08/09', '真实HTTP九字段等值整数规范化', async () => {
++    for (const field of integers) {
++      const value = field === 'expectedStatusCode' ? '200' : '10'
++      for (const token of [value, value + '.0', value + 'e0']) { const r = await rawRequest(client, plans, 'POST', definition(field, token)); assert.equal(r.status, 200); assert.equal(r.body.data.threadGroups[0][field], Number(value)); if (field === 'threadCount') created = r.body.data }
++    }
++  })
++  await step('TC-D16PERF-19/20/21/22/40/41/56', '小数错误类型和文本值拒绝且字段错误不泄露', async () => {
++    const before = (await request(client, plans)).body.data.length
++    for (const field of integers) for (const token of ['1.5', '1.0000000000000001', '"10"', 'true', '1e10000', 'NaN', 'Infinity']) assert.equal((await rawRequest(client, plans, 'POST', definition(field, token))).status, 400)
++    for (const field of ['requestHeaders', 'queryParameters']) {
++      const r = await rawRequest(client, plans, 'POST', definition(field, '{"D16_PRIVATE_KEY":true}')); assert.equal(r.status, 400); assert.ok(JSON.stringify(r.body).includes(field)); assert.ok(!JSON.stringify(r.body).includes('D16_PRIVATE_KEY'))
++    }
++    for (const field of ['requestBody', 'responseContains', 'dataSetCsv']) assert.equal((await rawRequest(client, plans, 'POST', definition(field, '123'))).status, 400)
++    assert.equal((await request(client, plans)).body.data.length, before)
++  })
++  await step('TC-D16PERF-30/31/32/33/34', '错误率真小数和精度语义保持', async () => {
++    const r = await rawRequest(client, plans, 'POST', definition('errorThresholdPercent', '2.50')); assert.equal(r.status, 200); assert.equal(r.body.data.threadGroups[0].errorThresholdPercent, 2.5)
++    const before = (await request(client, plans)).body.data.length
++    for (const token of ['2.501', '2.500', '100.01', '-0.01', '"2.50"']) assert.equal((await rawRequest(client, plans, 'POST', definition('errorThresholdPercent', token))).status, 400)
++    assert.equal((await request(client, plans)).body.data.length, before)
++    const empty = await rawRequest(client, plans, 'POST', definition('errorThresholdPercent', 'null')); assert.equal(empty.status, 200); assert.equal(empty.body.data.threadGroups[0].errorThresholdPercent, null)
++  })
++  await step('TC-D16PERF-35/36/37/44', '字符串保持且非法更新不改版本', async () => {
++    const r = await rawRequest(client, plans, 'POST', definition('queryParameters', '{"id":"001","flag":"false","literal":"null"}')); assert.equal(r.status, 200); assert.equal(r.body.data.threadGroups[0].queryParameters.id, '001'); assert.equal(r.body.data.threadGroups[0].requestBody, '{"n":1}')
++    const header = await rawRequest(client, plans, 'POST', definition('requestHeaders', '{"X-Code":"001"}')); assert.equal(header.status, 200); assert.equal(header.body.data.threadGroups[0].requestHeaders['X-Code'], '001')
++    assert.equal((await rawRequest(client, plans + '/' + created.id, 'PUT', '{"expectedVersion":1,"plan":' + definition('threadCount', '1.5') + '}')).status, 400)
++    const kept = (await request(client, plans + '/' + created.id)).body.data; assert.equal(kept.version, 1); assert.equal(kept.threadGroups[0].threadCount, 10)
++  })
++  await step('TC-D16PERF-47/49', '原始HTTP迁移及同步不能绕过', async () => {
++    const before = (await request(client, plans)).body.data.length
++    const snapshot = (await request(client, rootPath + '/transfer')).body.data
++    const imported = JSON.stringify({ requestKey: crypto.randomUUID(), expectedUserId: me.id, snapshot }).replace('"threadCount":10', '"threadCount":1.5')
++    assert.equal((await rawRequest(client, rootPath + '/transfer', 'POST', imported)).status, 400)
++    const sync = (await request(client, rootPath + '/sync?expectedUserId=' + me.id)).body.data
++    const synced = JSON.stringify({ requestKey: crypto.randomUUID(), expectedUserId: me.id, expectedRevision: sync.revision, operations: [{ operationId: crypto.randomUUID(), item: sync.items[0] }] }).replace(/"threadCount":\d+/, '"threadCount":1.5')
++    assert.equal((await rawRequest(client, rootPath + '/sync', 'POST', synced)).status, 400)
++    assert.equal((await request(client, plans)).body.data.length, before)
++  })
++  await stop(); await start()
++  await step('TC-D16PERF-50', '自有JVM重启记录会话保持（非升级复验）', async () => {
++    assert.equal((await request(client, '/api/v1/auth/me')).status, 200)
++    const kept = (await request(client, plans + '/' + created.id)).body.data; assert.equal(kept.threadGroups[0].threadCount, 10); assert.equal(kept.threadGroups[0].errorThresholdPercent, 2.5)
++  })
++} catch (error) { result.error = error.message; process.exitCode = 1 }
++finally {
++  try { await stop() } catch (error) { result.cleanupError = error.message; process.exitCode = 1 }
++  await fs.rm(directory, { recursive: true, force: true }); result.cleanup = true
++  result.passed = result.cases.length; result.failed = result.error ? 1 : 0
++  await fs.mkdir(out, { recursive: true }); await fs.writeFile(path.join(out, 'native-http.json'), JSON.stringify(result, null, 2) + '\n'); process.stdout.write(JSON.stringify(result) + '\n')
++}

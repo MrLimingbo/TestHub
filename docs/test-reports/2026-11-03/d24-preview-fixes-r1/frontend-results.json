@@ -1,0 +1,19 @@
+{
+  "command": "node_modules/.bin/vitest run --maxWorkers=2",
+  "exitCode": 0,
+  "files": 97,
+  "total": 941,
+  "passed": 941,
+  "failed": 0,
+  "newD24MethodsIncluded": 3,
+  "testTimeoutUnchangedMilliseconds": 5000,
+  "initialDefaultConcurrencyRun": {
+    "total": 941,
+    "passed": 892,
+    "failed": 49,
+    "failureType": "Test timed out in 5000ms",
+    "filesFailed": 10
+  },
+  "rootCauseMeasured": false,
+  "note": "并行工程检查时首轮出现49项超时；其他检查结束后限制2个worker、保持源码/原断言/原超时重跑全部通过。未据此登记已确认产品Bug，资源竞争为推测。"
+}

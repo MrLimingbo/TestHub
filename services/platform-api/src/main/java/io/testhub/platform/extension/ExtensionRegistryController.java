@@ -2,6 +2,7 @@ package io.testhub.platform.extension;
 
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -101,18 +102,25 @@ public class ExtensionRegistryController {
         return (AuthenticatedPrincipal) authentication.getPrincipal();
     }
 
+    @Schema(description = "本DTO外层未知字段兼容忽略，不入库、不生效、不产生权限提升。已知字段及Ed25519公钥仍校验，创建者取登录身份，仅原系统管理员可管理信任。")
     public record SigningKeyRequest(@NotBlank @Size(max = 80) String keyId, @NotBlank @Size(max = 120) String displayName,
                                     @NotBlank @Size(max = 1024) String publicKeyBase64) {
         ExtensionRegistryService.SigningKeyInput toInput() { return new ExtensionRegistryService.SigningKeyInput(keyId, displayName, publicKeyBase64); }
     }
 
-    public record PackageRequest(@NotBlank @Size(max = 80) String signerKeyId, @NotBlank @Size(max = 50_000) String manifestJson,
+    @Schema(description = "本DTO外层未知字段兼容忽略，不入库、不生效、不产生权限提升。已知字段及原授权、版本和签名校验保持；manifestJson内层遵循独立清单契约。")
+    public record PackageRequest(@NotBlank @Size(max = 80) String signerKeyId,
+                                 @Schema(description = "签名原文：按提交的原始UTF-8字符验证签名和校验和，包括首尾空白；不要重新序列化或trim。内层字段遵循独立PluginManifest契约。")
+                                 @NotBlank @Size(max = 50_000) String manifestJson,
                                  @NotBlank @Size(max = 4096) String signatureBase64) {
         ExtensionRegistryService.PackageInput toInput() { return new ExtensionRegistryService.PackageInput(signerKeyId, manifestJson, signatureBase64); }
     }
 
+    @Schema(description = "本DTO外层未知字段兼容忽略，不入库、不生效、不产生权限提升。已知字段和原系统管理员授权保持；configuration是独立校验的动态Map。")
     public record AdapterRequest(@NotBlank @Size(max = 32) String adapterType, @NotBlank @Size(max = 120) String displayName,
-                                 @NotBlank @Size(max = 1024) String endpoint, Map<String, String> configuration, boolean enabled) {
+                                 @NotBlank @Size(max = 1024) String endpoint,
+                                 @Schema(description = "动态Map：合法自定义键遵循原配置校验和加密保存规则；更新省略或null保留既有配置，创建须填写完整配置。Map键不按外层未知DTO字段丢弃。")
+                                 Map<String, String> configuration, boolean enabled) {
         ExtensionRegistryService.AdapterInput toInput() {
             return new ExtensionRegistryService.AdapterInput(adapterType, displayName, endpoint, configuration, enabled);
         }

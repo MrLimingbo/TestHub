@@ -1,5 +1,6 @@
 package io.testhub.platform.mobileautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.*;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
@@ -144,7 +145,7 @@ public class MobileAutomationSyncService {
                 normalized=new Scenario(d.deviceName(),d.applicationName(),description(d.description(),2000),d.failureStrategy(),automation.normalizeSyncVariables(d.variables()),steps);}
             default -> throw invalid("移动端类型无效");
         }
-        if(!json.valueToTree(normalized).equals(json.valueToTree(item.definition()))) throw invalid("移动端字段不合法或尚未规范化");
+        if(!MobileInput.equivalent(item.kind(),json.valueToTree(item.definition()),json.valueToTree(normalized))) throw invalid("移动端字段不合法或尚未规范化");
     }
     private void validateReferences(List<Item> items) {
         var names=new HashMap<String,Item>();items.forEach(i->names.put(i.kind()+"\n"+i.name(),i));
@@ -167,7 +168,7 @@ public class MobileAutomationSyncService {
     private String uuid(String v) {if(v==null||!v.matches("[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")) throw invalid("同步请求标识必须是 UUID"); return UUID.fromString(v).toString();}
     private Item item(String kind,String name,Object definition) {return new Item(kind,name,json.convertValue(definition,new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){}));}
     private <T> T definition(Item item,Class<T> type) {return decodeValue(encoded(item.definition()),type);}
-    private <T> T decodeValue(byte[] bytes,Class<T> type) {try{return json.readerFor(type).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(bytes);}catch(java.io.IOException e){throw invalid("移动端同步 JSON 不合法或包含不支持的字段");}}
+    private <T> T decodeValue(byte[] bytes,Class<T> type) {try{return json.readerFor(type).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS,DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).readValue(bytes);}catch(java.io.IOException e){throw invalid("移动端同步 JSON 不合法或包含不支持的字段");}}
     private byte[] encoded(Object value) {try{return json.writer().with(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).writeValueAsBytes(value);}catch(java.io.IOException e){throw new IllegalStateException("移动端同步序列化失败",e);}}
     private String hash(byte[] bytes) {try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));}catch(java.security.NoSuchAlgorithmException e){throw new IllegalStateException(e);}}
     private ResponseStatusException invalid(String message) {return new ResponseStatusException(HttpStatus.BAD_REQUEST,message);}
@@ -176,8 +177,8 @@ public class MobileAutomationSyncService {
     public record Device(String platform,String udid,String automationName,Map<String,String> capabilities) { }
     public record Application(String platform,String appIdentifier,String versionName) { }
     public record Element(String platform,String locatorStrategy,String locatorValue,String description) { }
-    public record Scenario(String deviceName,String applicationName,String description,String failureStrategy,Map<String,String> variables,List<Step> steps) { }
-    public record Step(String id,String type,String name,String elementName,String value,String expectedText,Integer timeoutMillis) { }
+    public record Scenario(String deviceName,String applicationName,String description,String failureStrategy,@JsonDeserialize(contentUsing=MobileInput.Text.class) Map<String,String> variables,List<Step> steps) { }
+    public record Step(String id,String type,String name,String elementName,@JsonDeserialize(using=MobileInput.Text.class) String value,@JsonDeserialize(using=MobileInput.Text.class) String expectedText,@JsonDeserialize(using=MobileInput.IntegerValue.class) Integer timeoutMillis) { }
     public record Snapshot(int version,String scope,String projectId,String actorId,String revision,List<Item> items,long excludedExecutions,long excludedFiles) { }
     public record Operation(String operationId,Item item) { }
     public record Request(String requestKey,String expectedUserId,String expectedRevision,List<Operation> operations) { }

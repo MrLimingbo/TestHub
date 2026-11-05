@@ -1,0 +1,204 @@
+{
+  "unit": "AUTOMATED_TEST_METHOD",
+  "total": 16,
+  "positiveOnly": 7,
+  "negativeOnly": 7,
+  "mixed": 2,
+  "passed": 16,
+  "failed": 0,
+  "blocked": 0,
+  "backendMethods": 12,
+  "frontendMethods": 4,
+  "variantsAndCrossEnvironmentRunsNotAdded": true,
+  "modeCoverage": "B11 MySQL branch uses2 configured fresh connection modes; H2 executes only ordinary branch",
+  "cases": [
+    {
+      "id": "B01",
+      "method": "B01_plainTrimCaseAndUnicode",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "四列普通子串、首尾空白及ASCII大小写搜索按原规则命中；中文子串可查。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B01_plainTrimCaseAndUnicode"
+      ]
+    },
+    {
+      "id": "B02",
+      "method": "B02_percentIsLiteralAcrossFields",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "单个百分号只匹配含百分号的四列资料，不能匹配全部账号。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B02_percentIsLiteralAcrossFields"
+      ]
+    },
+    {
+      "id": "B03",
+      "method": "B03_underscoreIsLiteralAcrossFields",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "单个下划线只匹配字面下划线，不作为任意一字符。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B03_underscoreIsLiteralAcrossFields"
+      ]
+    },
+    {
+      "id": "B04",
+      "method": "B04_backslashAndTrailingBackslash",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "反斜杠及尾反斜杠按字面命中，不吞字符、不报SQL错误。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B04_backslashAndTrailingBackslash"
+      ]
+    },
+    {
+      "id": "B05",
+      "method": "B05_combinedRepeatedAndEscapeCharacter",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "mixed",
+      "status": "PASS",
+      "coverage": "连续及组合%/_/反斜杠/感叹号正确匹配；相近普通字符串不误命中。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B05_combinedRepeatedAndEscapeCharacter"
+      ]
+    },
+    {
+      "id": "B06",
+      "method": "B06_quoteAndSqlTextRemainData",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "引号、SQL片段按参数值字面查询，无额外行、SQL执行或业务写入；不把原观察称为SQL注入。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B06_quoteAndSqlTextRemainData"
+      ]
+    },
+    {
+      "id": "B07",
+      "method": "B07_emptyDisabledDeletedAndNullPhone",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "mixed",
+      "status": "PASS",
+      "coverage": "null/省略/空串/全空白沿用全部未删除账号；停用账号仍可查询，软删除过滤，null电话安全。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B07_emptyDisabledDeletedAndNullPhone"
+      ]
+    },
+    {
+      "id": "B08",
+      "method": "B08_listCountAndPageBoundaries",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "含特殊字符的13条结果按稳定排序分成5/5/3，越界页空、total仍13，列表和count一致。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B08_listCountAndPageBoundaries"
+      ]
+    },
+    {
+      "id": "B09",
+      "method": "B09_originalPageClamping",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "page和pageSize原有上下限归一化保持，无新增越界读取或溢出。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B09_originalPageClamping"
+      ]
+    },
+    {
+      "id": "B10",
+      "method": "B10_unauthorizedAndProjectTokensCannotSearch",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "匿名401、普通账号403、项目PAT即便底层账号有系统角色仍403；只读请求不改变审计/账号。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B10_unauthorizedAndProjectTokensCannotSearch"
+      ]
+    },
+    {
+      "id": "B11",
+      "method": "B11_explicitEscapeAcrossDatabaseModesAndLongInput",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "长keyword及特殊字符查询不报错；MySQL默认与NO_BACKSLASH_ESCAPES会话模式下都为字面，测试后恢复会话设置。H2执行普通模式分支。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B11_explicitEscapeAcrossDatabaseModesAndLongInput"
+      ]
+    },
+    {
+      "id": "B12",
+      "method": "B12_encodedHttpResponseAndReadOnlyFields",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "真实编码HTTP query可查询特殊字面，响应仅原公开字段，无passwordHash/securityVersion；查询不写审计或业务表。",
+      "evidence": [
+        "backend-h2.json:P2D06AccountSearchTests12/12",
+        "backend-mysql.json:B12_encodedHttpResponseAndReadOnlyFields"
+      ]
+    },
+    {
+      "id": "U01",
+      "method": "U01 special search characters reach the query literally once and render the returned row",
+      "source": "src/test/d06AccountSearch.test.ts",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "特殊字符与引号/加号/连接号通过URLSearchParams传递一次，不在客户端添加LIKE转义；表格与总数正确显示。",
+      "evidence": [
+        "frontend-results.json:new4/4 included in945/945"
+      ]
+    },
+    {
+      "id": "U02",
+      "method": "U02 pagination retains the literal keyword while search and clear reset to page one",
+      "source": "src/test/d06AccountSearch.test.ts",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "翻页保留字面keyword；新搜索回第1页，清空去掉keyword参数。",
+      "evidence": [
+        "frontend-results.json:new4/4 included in945/945"
+      ]
+    },
+    {
+      "id": "U03",
+      "method": "U03 a late percent search cannot replace newer underscore results or total",
+      "source": "src/test/d06AccountSearch.test.ts",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "旧特殊字符搜索迟到不能覆盖较新搜索的行及总数。",
+      "evidence": [
+        "frontend-results.json:new4/4 included in945/945"
+      ]
+    },
+    {
+      "id": "U04",
+      "method": "U04 failed literal search shows its error and retry retains the same keyword",
+      "source": "src/test/d06AccountSearch.test.ts",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "搜索失败显示错误；重试保留字面关键词，成功后恢复行和总数。",
+      "evidence": [
+        "frontend-results.json:new4/4 included in945/945"
+      ]
+    }
+  ]
+}

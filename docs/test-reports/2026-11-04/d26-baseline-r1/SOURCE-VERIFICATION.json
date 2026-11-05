@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-04T07:41:08.836Z",
+  "baselineFileCount": 1430,
+  "preExistingSourceChangedCount": 0,
+  "changes": [],
+  "newAssets": [
+    "scripts/qa/d26-baseline.mjs",
+    "scripts/qa/d26-native.cjs",
+    "scripts/qa/d26-metrics.mjs",
+    "scripts/qa/d26-metrics.test.mjs"
+  ],
+  "productFilesModifiedThisBatch": false
+}

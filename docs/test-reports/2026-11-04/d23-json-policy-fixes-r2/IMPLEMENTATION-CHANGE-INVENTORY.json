@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-04",
+  "baselineFiles": 1428,
+  "modified": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryService.java",
+      "beforeSha256": "8089fb4ce4570d609c5a0eb14691aec70388e3da49bbc141a4afab2ad7b84d90",
+      "afterSha256": "511c0f62ec00ea121227d1100d190111693b272bb7c7b48d5cc290843bcef6eb"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "beforeSha256": "e5c9a3e53cf08068b75aa2e6c87c989ed2c672ee3f643e634e3567be3704f7a0",
+      "afterSha256": "88a6e04c000e6cdc98b7f487dcd837efe42a9bf4358867fee81a8973b03a466f"
+    }
+  ],
+  "added": [
+    {
+      "path": "src/test/d23AdapterConflict.test.ts",
+      "sha256": "5871e332d2b4cf7b543ad261c93514f6a474a6335c4d13cf3396be9bbb259b8b"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D23AdapterConflictTests.java",
+      "sha256": "7ae048d6f9cb1f8738856773930e752560d7f4feb7f20df3b07d07b418cbbefc"
+    }
+  ],
+  "removed": [],
+  "otherBaselineFilesUnchanged": 1426,
+  "productionFilesModified": 1,
+  "existingTestFilesModified": 1,
+  "newTestFiles": 2,
+  "unrelatedChangesPreserved": true,
+  "uiProductChanged": false,
+  "schemaChanged": false,
+  "duplicateRuleAuthorized": 409,
+  "implementation": "Local catch around adapter insert/update only;existing unique constraint arbitrates races;no precheck or global error mapping"
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-02",
+  "ownedQaNodeProcessesRemaining": 0,
+  "ownedNativeJvmStopped": true,
+  "headlessBrowserClosed": true,
+  "staticFixtureServerClosed": true,
+  "nativeHttpTemporaryWorkspacesRemaining": 0,
+  "H2WrapperWorkspaceRemovalConfirmed": true,
+  "capturedH2WorkspacePathsAbsent": 1,
+  "targetedH2CleanupInFinally": true,
+  "MySQLOwnedContainersNetworkVolumesRemoved": true,
+  "MySQLTemporaryFilesRemoved": true,
+  "rawSurefireXmlAndTxtRemoved": 298,
+  "sanitizedOutputFilesRetained": [
+    "summary.json",
+    "VERIFICATION-MANIFEST.json",
+    "CLEANUP.json"
+  ],
+  "rawLogsScreenshotsAndBaselineCopiesRetained": false,
+  "currentJarDistAndRuntimeRetained": true,
+  "desktopRuntimePreviousCopies": 0,
+  "userOrSharedWorkspacesTouched": false,
+  "unrelatedOldQaWorkspacesTouched": false,
+  "sharedServicesStopped": false,
+  "scope": "Only current batch owned temporary data/files/processes; original twelve environment blockers remain deferred."
+}

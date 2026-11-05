@@ -1,0 +1,109 @@
+{
+  "date": "2026-11-03",
+  "commands": [
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D08D07PlanTests",
+      "phase": "BEFORE",
+      "exitCode": 1,
+      "result": "3 passed / 7 failed / 0 errors"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D08D07PlanTests",
+      "phase": "FOCUSED_AFTER",
+      "exitCode": 0,
+      "result": "10/10; final HTTP export opt-in variant added later and verified in full H2"
+    },
+    {
+      "command": "node_modules/.bin/vitest run src/test/d08D07Plans.test.ts",
+      "exitCode": 0,
+      "result": "3/3"
+    },
+    {
+      "command": "node_modules/.bin/vitest run",
+      "exitCode": 0,
+      "result": "938/938; 96 files"
+    },
+    {
+      "command": "node_modules/.bin/eslint .",
+      "exitCode": 0,
+      "result": "0 errors; 2 existing Vue prop warnings"
+    },
+    {
+      "command": "node_modules/.bin/eslint apps/desktop/app/src/functional-history-sync.cjs apps/desktop/app/src/functional-transfer.cjs apps/desktop/test/d08-history-title.test.cjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node_modules/.bin/vue-tsc --noEmit && node_modules/.bin/vite build",
+      "exitCode": 0,
+      "result": "PASS; existing chunk-size notices"
+    },
+    {
+      "command": "node --test apps/desktop/test/functional*.test.cjs apps/desktop/test/d08-history-title.test.cjs",
+      "exitCode": 0,
+      "result": "222/222"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-local-backend.mjs",
+      "phase": "FINAL_AFTER",
+      "exitCode": 0,
+      "result": "1314 passed / 3 skipped; JAR BUILD SUCCESS"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D08D07PlanTests,FunctionalExecution*Tests,FunctionalHistorySyncFlowTests,FunctionalTransferFlowTests,FunctionalDefectExecutionSyncFlowTests'",
+      "status": "NOT_EXECUTED",
+      "exitCode": null,
+      "result": "Two automatic approval service failures: 403 Forbidden; no process started"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "projectJdk21": ".testhub/desktop-runtime/darwin-arm64/jre",
+  "backendJarSha256": "b640702328589c268d62787c8a8d84c8ff3d87021a8eac7ed868647993ecea60",
+  "noInstalledRuntimeReplaced": true,
+  "rawLogs": [
+    {
+      "name": "testhub-d08-before.log",
+      "sha256": "8edea1bdfbf84e5383b14839febe9172d33e2963b62044d7da3a8a80cf782b93"
+    },
+    {
+      "name": "testhub-d08-build.log",
+      "sha256": "ccacec4ef5378d4f7a3f1da6950b89939946481f798b6239b95b332b6a137595"
+    },
+    {
+      "name": "testhub-d08-desktop.log",
+      "sha256": "e57fa2c5a4940beee1c630dd67c3e514784d06f29c117fa6f806f80bbf4a0eea"
+    },
+    {
+      "name": "testhub-d08-focused.log",
+      "sha256": "4f88639b5f5536f9759476381cc30da1e29fe3563677829d71224ec2f5290c14"
+    },
+    {
+      "name": "testhub-d08-h2-final.log",
+      "sha256": "85b8c38065a26751ad16ddb61b8f650a83d8e717394626398187c5236c203161"
+    },
+    {
+      "name": "testhub-d08-h2.log",
+      "sha256": "8ddaceb70129d104a0052ae1a483095691f478e5c9fbaa05a3cd62f0c1240ae1"
+    },
+    {
+      "name": "testhub-d08-lint.log",
+      "sha256": "e4c232b1eac58282cfb7d513810a316a15f3ea0fd7a63a87b37be7aa44750fa6"
+    },
+    {
+      "name": "testhub-d08-node.log",
+      "sha256": "8ae3bc9fb182b8c067d903d3f71f8a00b82f745f2e87c1be4dc6e3c3251eadb5"
+    },
+    {
+      "name": "testhub-d08-ui.log",
+      "sha256": "758cd1897af1613019fd38efc4e7146f9fb57ca6dee5411bbf81f28ff148cfaa"
+    },
+    {
+      "name": "testhub-d08-vitest.log",
+      "sha256": "1b297d6ef1851406d430bbd76316b55a4d62a546e91e3020874428aac6ebd935"
+    }
+  ]
+}

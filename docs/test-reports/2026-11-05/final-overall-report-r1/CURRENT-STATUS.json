@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-05T06:09:12.572427+00:00",
+  "status": "APPROVED_WITH_EXPLICIT_SKIPS_AND_UNCONFIRMED_RISK",
+  "approval": "REVIEW-APPROVAL.json",
+  "frozenReport": "OVERALL-TEST-REPORT.md",
+  "snapshotStatusNote": "原summary/README/报告中的待审状态是冻结生成时状态；本独立审批生效，不回写已审文件。",
+  "remainingExecutableUntestedModules": 0,
+  "d26": "SKIPPED_BY_USER_SPEC_RETAINED",
+  "d26ValidWindows": 0,
+  "d26RequiredWindows": 2,
+  "environmentCasesSkipped": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "productExecutionRestored": false,
+  "followupState": "AWAITING_NEW_SCOPE"
+}

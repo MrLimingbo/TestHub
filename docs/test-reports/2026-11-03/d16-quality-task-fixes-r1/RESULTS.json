@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-03",
+  "status": "PENDING_USER_REVIEW",
+  "observation": "OBS-13-E018",
+  "newTestMethods": {"total": 25, "positiveOnly": 7, "negativeOnly": 13, "mixed": 5, "passed": 25, "failed": 0, "blocked": 0},
+  "methodCountsAreNotInputVariantCounts": true,
+  "layers": {"taskBackend": 9, "qualityScheduleBackend": 7, "frontend": 9},
+  "checks": {"frontend": {"passed": 931}, "h2": {"total": 1297, "passed": 1294, "skipped": 3, "failed": 0, "errors": 0}, "mysqlAffected": {"suites": 8, "passed": 54, "failed": 0}, "lint": "PASS_WITH_2_EXISTING_WARNINGS", "typecheck": "PASS", "build": "PASS", "diffCheck": "PASS"},
+  "beforeFix": {"task": {"methods": 5, "passed": 2, "failed": 3}, "frontend": {"methods": 4, "passed": 2, "failed": 2}, "qualitySchedule": "NO_INDEPENDENT_RED_RUN"},
+  "environmentBlockersDeferred": 12,
+  "otherObservationsDeferred": 9,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

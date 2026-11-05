@@ -1,0 +1,2 @@
+{"at":"2026-11-04T07:53:05.892Z","event":"BUSINESS_PHASE_FINISHED","phase":"warmup","elapsedSeconds":899.91182875,"completedCycles":9,"tailIdleSeconds":0.08814708300008078}
+{"at":"2026-11-04T08:05:31.473Z","event":"BUSINESS_PHASE_FINISHED","phase":"measurement","elapsedSeconds":1645.4915566670002,"completedCycles":16,"tailIdleSeconds":6454.508411083}

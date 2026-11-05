@@ -2,6 +2,7 @@ package io.testhub.platform.execution;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.audit.AuditService;
@@ -54,7 +55,10 @@ public class TaskTransferService {
                     DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(body);
             if (request == null || request.snapshot() == null) throw invalid("任务登记资料不能为空");
             return request;
-        } catch (java.io.IOException error) { throw invalid("任务登记迁移 JSON 格式不合法或包含不支持的字段"); }
+        } catch (java.io.IOException error) {
+            String field = TaskProgressInput.location(error);
+            throw invalid(field == null ? "任务登记迁移 JSON 格式不合法或包含不支持的字段" : field + " 必须是精确整数 JSON 数值");
+        }
     }
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Receipt transfer(AuthenticatedPrincipal actor, String projectId, ImportRequest request) {
@@ -124,7 +128,8 @@ public class TaskTransferService {
     }
     private ResponseStatusException invalid(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, message); }
     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
-    public record Task(String id, String taskType, String name, String status, Integer progress, long version, Instant createdAt, Instant updatedAt) { }
+    public record Task(String id, String taskType, String name, String status,
+                       @JsonDeserialize(using = TaskProgressInput.class) Integer progress, long version, Instant createdAt, Instant updatedAt) { }
     public record Snapshot(int version, String sourceProjectId, List<Task> tasks) { }
     public record ImportRequest(String requestKey, String expectedUserId, Snapshot snapshot) { }
     public record Receipt(String id, int tasks, int cancelledActiveTasks) { }

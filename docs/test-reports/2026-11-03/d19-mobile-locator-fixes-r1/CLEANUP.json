@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-03",
+  "h2OwnedWorkspaceRemoved": true,
+  "h2OwnedPath": ".testhub/backend-qa-fb2cc05a-26b1-46a8-9028-2668b7bfaeaa",
+  "mysqlOwnedContainersNetworkVolumesAndFilesRemoved": true,
+  "source": "Successful wrapper exit and cleanup messages",
+  "focusedWrapperRemovesItsOwnDirectoryInFinally": true,
+  "realDevicesTouched": false,
+  "sharedServicesTouched": false,
+  "rawTemporaryLogsRemoved": true,
+  "capturedSuiteRawSurefireFilesRemoved": 304,
+  "unrelatedFilesNotCleaned": true
+}

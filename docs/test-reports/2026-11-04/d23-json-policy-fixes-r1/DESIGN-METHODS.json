@@ -1,0 +1,15 @@
+{
+  "equivalence-partitioning": "适用：未知标量/对象/数组与已知非法字段分区",
+  "role-permission": "适用：路径/主体及管理员/项目写权限边界",
+  "data-lifecycle": "适用：更新、密文保留、签名包升级及审计不变",
+  "compatibility-configuration": "适用：普通DTO与严格迁移/同步、签名原文独立契约",
+  "error-guessing": "仅已有签名原文trim历史及D23-AC-04，验证原文更改拒绝",
+  "acceptance-criteria": "适用：限定清单和接口说明",
+  "boundary-value-2/3": "无本项新数值界限；既有D16数值及长度在全量回归保留，不额外生成本项边界",
+  "decision-table/cause-effect": "授权和输入类型按已有明确规则分区，不增加未规定优先级的组合",
+  "state-transition": "没有新增状态机；默认安装状态/升级属于原业务契约保持",
+  "pairwise/classification-tree": "四种DTO和明确类型矩阵直接覆盖，非配对抽样",
+  "recovery-idempotency": "无新重试/恢复政策，不扩展",
+  "scenario/use-case/exploratory/checklist": "正式项按已批准AC推导；探索性manifest扩展字段如采集只另列事实，不添加未指定验收规则",
+  "formalCount": "20条，正9/反11；跨端点和数据库变体不重复计数。"
+}

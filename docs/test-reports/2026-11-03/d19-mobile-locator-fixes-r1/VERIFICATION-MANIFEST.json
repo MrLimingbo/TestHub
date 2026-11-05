@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-03",
+  "commands": [
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D19MobileLocatorTests",
+      "exitCode": 1,
+      "result": "before:4 passed/6 failed"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs 'P2D19MobileLocatorTests,P2D16Mobile*Tests'",
+      "exitCode": 0,
+      "result": "23/23"
+    },
+    {
+      "command": "node_modules/.bin/vitest run",
+      "exitCode": 0,
+      "result": "935/935"
+    },
+    {
+      "command": "node_modules/.bin/eslint .",
+      "exitCode": 0,
+      "result": "2 existing warnings"
+    },
+    {
+      "command": "node_modules/.bin/vue-tsc --noEmit && node_modules/.bin/vite build",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "result": "1304 passed/3 skipped"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D19MobileLocatorTests,P2D16Mobile*Tests,MobileAutomation*FlowTests,MobileApplicationFileSyncFlowTests'",
+      "exitCode": 0,
+      "result": "79/79;10 suites"
+    },
+    {
+      "command": "npm test --prefix services/appium-runner && npm run lint --prefix services/appium-runner",
+      "exitCode": 0,
+      "result": "21/21"
+    }
+  ],
+  "backendJarSha256": "f11c5b150b50d21dc6f91f8e40dd22ab9a6f62adf93cd20f3ad6c888cf90438a",
+  "noInstalledRuntimeReplaced": true
+}

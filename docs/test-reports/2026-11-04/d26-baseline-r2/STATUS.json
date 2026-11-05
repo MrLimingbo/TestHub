@@ -1,0 +1,18 @@
+{
+  "status": "INCOMPLETE",
+  "supervisorPid": 91829,
+  "startedAt": "2026-11-04T08:55:13.986Z",
+  "phase": "AWAITING_REVIEW",
+  "completedWindows": 0,
+  "requiredWindows": 2,
+  "updatedAt": "2026-11-04T12:59:20.196Z",
+  "quietSeconds": 10.009011041000122,
+  "hostBusyCapacityPercent": 22.25295448830777,
+  "expectedFinishAt": null,
+  "error": {
+    "code": "Error",
+    "message": "No quiet 120-second interval within 30 minutes"
+  },
+  "finishedAt": "2026-11-04T12:59:18.694Z",
+  "cleanup": "COMPLETE"
+}

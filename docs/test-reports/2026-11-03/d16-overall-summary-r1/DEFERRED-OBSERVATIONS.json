@@ -1,0 +1,107 @@
+{
+  "date": "2026-11-03",
+  "count": 9,
+  "status": "DEFERRED_BY_USER",
+  "executionAuthorized": false,
+  "records": [
+    {
+      "id": "OBS-05-E003",
+      "module": "05",
+      "moduleName": "测试计划与交付",
+      "title": "历史执行用例标题是否跟随源资产",
+      "fact": "历史执行用例标题跟随源资产改名，步骤快照仍保留。",
+      "decisionId": "D08",
+      "priority": "P2",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    },
+    {
+      "id": "OBS-12-E022",
+      "module": "12",
+      "moduleName": "移动端自动化",
+      "title": "跨平台定位策略使用",
+      "fact": "Android资产可保存iOS定位策略。",
+      "decisionId": "D19",
+      "priority": "P2",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    },
+    {
+      "id": "OBS-15-E001",
+      "module": "15",
+      "moduleName": "桌面工作区与跨端",
+      "title": "原生同步预览在离页后的旧响应",
+      "fact": "原生同步预览为只读，但持有工作区锁，预览返回前不能关闭窗口。",
+      "decisionId": "D24",
+      "priority": "P2",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    },
+    {
+      "id": "OBS-16-E001",
+      "module": "16",
+      "moduleName": "横向回归",
+      "title": "进程RSS/CPU/句柄持续观察",
+      "fact": "真实30分钟进程RSS、CPU和句柄采样已保存，未提供泄漏或资源阈值。",
+      "decisionId": "D26",
+      "priority": "P2",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    },
+    {
+      "id": "OBS-16-E002",
+      "module": "16",
+      "moduleName": "横向回归",
+      "title": "业务与健康延迟持续观察",
+      "fact": "31轮业务和健康延迟已采样，缺少业务SLA；窗口与其他独立验收有重叠。",
+      "decisionId": "D26",
+      "priority": "P2",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    },
+    {
+      "id": "OBS-03D-E007",
+      "module": "03D",
+      "moduleName": "账号管理与系统参数",
+      "title": "搜索SQL通配符语义",
+      "fact": "搜索百分号和下划线按SQL通配符匹配。",
+      "decisionId": "D06",
+      "priority": "P3",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    },
+    {
+      "id": "OBS-05-E002",
+      "module": "05",
+      "moduleName": "测试计划与交付",
+      "title": "计划PUT变更编号的响应语义",
+      "fact": "PUT中发送的新计划编号未应用，仍返回旧编号。",
+      "decisionId": "D07",
+      "priority": "P3",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    },
+    {
+      "id": "OBS-13-E019",
+      "module": "13",
+      "moduleName": "质量报告与任务",
+      "title": "报告项目参数末尾逗号",
+      "fact": "报告项目参数末尾逗号返回400，空筛选按默认项目集合处理。",
+      "decisionId": "D21",
+      "priority": "P3",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    },
+    {
+      "id": "OBS-14-E024",
+      "module": "14",
+      "moduleName": "通知、集成、插件与运维",
+      "title": "普通JSON额外字段策略",
+      "fact": "普通JSON请求接受额外未知字段。",
+      "decisionId": "D23",
+      "priority": "P3",
+      "status": "DEFERRED_NOT_IMPLEMENTED",
+      "currentImplementationApproved": false
+    }
+  ]
+}

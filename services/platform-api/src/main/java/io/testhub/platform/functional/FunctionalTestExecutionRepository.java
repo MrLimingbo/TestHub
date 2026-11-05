@@ -144,16 +144,20 @@ public class FunctionalTestExecutionRepository {
     }
 
     public void insertRunCase(String id, String runId, String caseId, String status, String note) {
+        insertRunCase(id, runId, caseId, status, note, null);
+    }
+
+    public void insertRunCase(String id, String runId, String caseId, String status, String note, String titleSnapshot) {
         jdbc.sql("""
-                INSERT INTO functional_test_run_case (id, run_id, case_id, status, note)
-                VALUES (:id, :runId, :caseId, :status, :note)
+                INSERT INTO functional_test_run_case (id, run_id, case_id, status, note, title_snapshot)
+                VALUES (:id, :runId, :caseId, :status, :note, :titleSnapshot)
                 """).param("id", id).param("runId", runId).param("caseId", caseId).param("status", status)
-                .param("note", note).update();
+                .param("note", note).param("titleSnapshot", titleSnapshot).update();
     }
 
     public List<FunctionalTestRunCase> findRunCases(String projectId, String runId) {
         return jdbc.sql("""
-                SELECT rc.id, rc.run_id, rc.case_id, c.case_code, c.title, rc.status, rc.note
+                SELECT rc.id, rc.run_id, rc.case_id, c.case_code, COALESCE(rc.title_snapshot, c.title) AS title, rc.title_snapshot, rc.status, rc.note
                 FROM functional_test_run_case rc
                 JOIN functional_test_run r ON r.id = rc.run_id
                 JOIN functional_case c ON c.id = rc.case_id
@@ -161,31 +165,31 @@ public class FunctionalTestExecutionRepository {
                 ORDER BY c.case_code
                 """).param("projectId", projectId).param("runId", runId).query((rs, row) -> new FunctionalTestRunCase(
                 rs.getString("id"), rs.getString("run_id"), rs.getString("case_id"), rs.getString("case_code"),
-                rs.getString("title"), rs.getString("status"), rs.getString("note"))).list();
+                rs.getString("title"), rs.getString("status"), rs.getString("note"), rs.getString("title_snapshot"))).list();
     }
 
     public List<FunctionalTestRunCase> findRunCasesByRunId(String runId) {
         return jdbc.sql("""
-                SELECT rc.id, rc.run_id, rc.case_id, c.case_code, c.title, rc.status, rc.note
+                SELECT rc.id, rc.run_id, rc.case_id, c.case_code, COALESCE(rc.title_snapshot, c.title) AS title, rc.title_snapshot, rc.status, rc.note
                 FROM functional_test_run_case rc
                 JOIN functional_case c ON c.id = rc.case_id
                 WHERE rc.run_id = :runId
                 ORDER BY c.case_code
                 """).param("runId", runId).query((rs, row) -> new FunctionalTestRunCase(
                 rs.getString("id"), rs.getString("run_id"), rs.getString("case_id"), rs.getString("case_code"),
-                rs.getString("title"), rs.getString("status"), rs.getString("note"))).list();
+                rs.getString("title"), rs.getString("status"), rs.getString("note"), rs.getString("title_snapshot"))).list();
     }
 
     public Optional<FunctionalTestRunCase> findRunCase(String projectId, String runCaseId) {
         return jdbc.sql("""
-                SELECT rc.id, rc.run_id, rc.case_id, c.case_code, c.title, rc.status, rc.note
+                SELECT rc.id, rc.run_id, rc.case_id, c.case_code, COALESCE(rc.title_snapshot, c.title) AS title, rc.title_snapshot, rc.status, rc.note
                 FROM functional_test_run_case rc
                 JOIN functional_test_run r ON r.id = rc.run_id
                 JOIN functional_case c ON c.id = rc.case_id
                 WHERE r.project_id = :projectId AND rc.id = :runCaseId
                 """).param("projectId", projectId).param("runCaseId", runCaseId).query((rs, row) -> new FunctionalTestRunCase(
                 rs.getString("id"), rs.getString("run_id"), rs.getString("case_id"), rs.getString("case_code"),
-                rs.getString("title"), rs.getString("status"), rs.getString("note"))).optional();
+                rs.getString("title"), rs.getString("status"), rs.getString("note"), rs.getString("title_snapshot"))).optional();
     }
 
     public int updateRunCase(String runCaseId, String status, String note, String userId, Instant executedAt) {

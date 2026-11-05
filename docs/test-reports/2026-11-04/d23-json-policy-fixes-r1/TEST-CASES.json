@@ -1,0 +1,1384 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "name": "D23普通JSON外层DTO兼容政策",
+    "version": "D23-A 2026-11-04",
+    "scope": "OBS-14-E024；两份规则证据仅取D23小节。4类DTO6个写入口及通知迁移/同步边界，其他接口不外推。",
+    "generated_at": "2026-11-04T11:54:20.641176+08:00"
+  },
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "RULES-AND-ACCEPTANCE.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-03/remaining-nine-rule-review/RULES-AND-ACCEPTANCE.md",
+      "sha256": "f90c859b9bf5294cddf313680517893949d4e832a83bf9f55d063e11cf022904",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-002",
+      "name": "REVIEW-APPROVAL.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-03/remaining-nine-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "aa1736e229adee1500d5e4eda0cf152568e63343b24966a7de405e322d738824",
+      "type": "requirement"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-D23-01",
+      "title": "普通外层字段兼容",
+      "description": "已知字段合法时附加未知标量/对象/数组，与无附加字段结果相同，不保存或执行未知字段。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23-01",
+          "source_acceptance_id": "D23-AC-01",
+          "text": "已知字段合法时附加未知标量/对象/数组，与无附加字段结果相同，不保存或执行未知字段。",
+          "source_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D23-02",
+      "title": "已知字段校验保持",
+      "description": "拼错已知必填字段、错误类型、已知业务规则继续校验，不用忽略未知字段绕过。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23-02",
+          "source_acceptance_id": "D23-AC-02",
+          "text": "拼错已知必填字段、错误类型、已知业务规则继续校验，不用忽略未知字段绕过。",
+          "source_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D23-03",
+      "title": "主体与权限保持",
+      "description": "附加组织/项目/管理员/角色等字段不影响路径、登录主体或原授权。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23-03",
+          "source_acceptance_id": "D23-AC-03",
+          "text": "附加组织/项目/管理员/角色等字段不影响路径、登录主体或原授权。",
+          "source_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D23-04",
+      "title": "动态内容及严格边界",
+      "description": "合法动态Map保留；严格迁移/同步拒绝未知字段；manifest签名原文及内层独立契约保持。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23-04",
+          "source_acceptance_id": "D23-AC-04",
+          "text": "合法动态Map保留；严格迁移/同步拒绝未知字段；manifest签名原文及内层独立契约保持。",
+          "source_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D23-05",
+      "title": "限定清单和接口说明",
+      "description": "先列明2个控制器4类DTO6个写入口；补齐接口说明，仅对本清单给兼容结论。",
+      "risk": "low",
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D23-05",
+          "source_acceptance_id": "D23-AC-05",
+          "text": "先列明2个控制器4类DTO6个写入口；补齐接口说明，仅对本清单给兼容结论。",
+          "source_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ]
+        }
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "id": "COV-D23-B01",
+      "title": "通知模板创建兼容未知字段",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B02",
+      "title": "通知模板更新兼容未知字段",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B03",
+      "title": "适配器创建兼容未知字段",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B04",
+      "title": "适配器更新兼容未知字段",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B05",
+      "title": "隔离管理员登记公钥兼容未知字段",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B06",
+      "title": "包登记和升级兼容未知字段",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B07",
+      "title": "拼错必填字段不能绕过校验",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B08",
+      "title": "已知字段错误类型仍拒绝",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B09",
+      "title": "已知业务规则不能用附加字段覆盖",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B10",
+      "title": "动态configuration合法键保留",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B11",
+      "title": "动态Map原值校验保持",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B12",
+      "title": "伪造主体字段不能覆盖路径和登录用户",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D23-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B13",
+      "title": "普通账号不能伪造扩展管理权限",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D23-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B14",
+      "title": "项目只读用户不能伪造通知写权限",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D23-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B15",
+      "title": "登录和CSRF边界保持",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D23-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B16",
+      "title": "通知迁移未知字段保持严格拒绝",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B17",
+      "title": "通知同步未知字段保持严格拒绝",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B18",
+      "title": "manifest签名原文与独立内层内容保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B19",
+      "title": "外层字段不能绕过原文签名拒绝",
+      "technique": "error-guessing",
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    },
+    {
+      "id": "COV-D23-B20",
+      "title": "四类DTO接口说明明确范围",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D23-05"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-05"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "document_review": [
+    {
+      "id": "DOC-D23-001",
+      "type": "gap",
+      "severity": "low",
+      "description": "重复登记同类型同名适配器触发唯一约束并返回500；D23-A未规定重复键受控返回码，本批兼容正式用例保持已知字段合法前提，新增发现另案呈审。",
+      "requirement_refs": [
+        "REQ-D23-02"
+      ],
+      "acceptance_criteria_refs": [],
+      "coverage_item_refs": [],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "suggested_clarification": "另案明确重复键返回409（推荐）或400，并验收无写入和无成功审计；不变更D23已批准的未知字段兼容规则。"
+    }
+  ],
+  "cases": [
+    {
+      "id": "TC-D23-B01",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "通知模板创建兼容未知字段",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B01"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对合法模板分别附加未知标量、对象、数组后创建",
+          "expected": "结果与已知字段投影相同；数据库及成功审计不包含未知字段",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "已知字段合法的请求附加未知标量/对象/数组"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B01",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B02",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "通知模板更新兼容未知字段",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B02"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "用合法模板修改请求附加同三类未知字段后更新",
+          "expected": "已知修改生效，未知字段不落库、不影响其他项目记录",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "不入库、不生效、不产生权限提升"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B02",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B03",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "适配器创建兼容未知字段",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B03"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "以管理员提交合法适配器配置并附加未知标量/对象/数组",
+          "expected": "按原已知字段加密保存并给出脱敏投影，未知外层字段不进入配置或审计",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "已知字段合法的请求附加未知标量/对象/数组"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B03",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B04",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "适配器更新兼容未知字段",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B04"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在已有适配器上附加未知字段更新元数据且configuration为空",
+          "expected": "元数据按原规则更新，既有密文配置保持，未知字段不入库",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "A与无附加字段的结果相同且不保存未知字段"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B04",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B05",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "隔离管理员登记公钥兼容未知字段",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B05"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在隔离管理员事务内提交合法公钥并附加未知字段",
+          "expected": "按原规则登记公钥及当前创建者，未知字段不影响信任状态或审计",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "不入库、不生效、不产生权限提升"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B05",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B06",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "包登记和升级兼容未知字段",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B06"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交正确签名包及升级包，同时附加未知标量/对象/数组",
+          "expected": "已知包字段、版本与默认状态保持，未知外层字段不进入manifest或成功审计",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "A与无附加字段的结果相同且不保存未知字段"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-01"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-01"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B06",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B07",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "拼错必填字段不能绕过校验",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B07"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对四类DTO逐个删除或拼错已知必填字段并附加未知字段",
+          "expected": "仍被必填校验拒绝，无业务或成功审计写入",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "拼错已知必填字段不能靠兼容忽略逃过必填校验"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B07",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B08",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "已知字段错误类型仍拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B08"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "把四类DTO已知字符串字段换成对象或数组后请求",
+          "expected": "仍按原类型校验拒绝，无业务或成功审计写入",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "错误类型、D16数值校验及已知字段业务规则保持"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B08",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B09",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "已知业务规则不能用附加字段覆盖",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B09"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别提交非法通知渠道、适配器类型、公钥及manifest权限，并附加伪造校验开关",
+          "expected": "原已知业务规则继续拒绝，未知开关不使非法输入生效",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "已知字段业务规则保持"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-02"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-02"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B09",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B10",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "动态configuration合法键保留",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B10"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在合法configuration中加入合法自定义键，同时附加外层未知字段",
+          "expected": "动态Map键和值按原契约保留及加密，外层未知字段不混入Map",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "合法configuration等动态Map保留原契约"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B10",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B11",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "动态Map原值校验保持",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B11"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "把configuration值换成非法结构或删除原必填键",
+          "expected": "按原配置规则拒绝，无成功写入；动态Map不是免校验字段",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "合法configuration等动态Map保留原契约"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B11",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B12",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "伪造主体字段不能覆盖路径和登录用户",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B12"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "合法模板请求附加其他组织/项目/用户及角色字段",
+          "expected": "仅按原路径和登录用户保存，伪造字段不生效、不提升权限",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "附加伪造组织、项目、管理员、角色等字段不影响服务端主体与权限"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B12",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B13",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "普通账号不能伪造扩展管理权限",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B13"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "未登记任何可信密钥的普通账号对扩展写入口附加管理员/角色字段",
+          "expected": "仍按原授权拒绝，不创建信任密钥、适配器或插件",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "检查普通用户请求时不借测试创建真实信任密钥"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B13",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B14",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "项目只读用户不能伪造通知写权限",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B14"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "项目只读用户提交模板创建和更新并附加写角色字段",
+          "expected": "仍受路径和原授权限制，原模板及成功审计不变",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "仍受路径、登录账号和原授权检查控制"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B14",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B15",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "登录和CSRF边界保持",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B15"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对四类DTO入口分别进行匿名及缺失CSRF请求",
+          "expected": "仍由原登录/CSRF检查拒绝，附加字段无写入效果",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "仍受路径、登录账号和原授权检查控制"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-03"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-03"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B15",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B16",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "通知迁移未知字段保持严格拒绝",
+      "type": "compatibility",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B16"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在迁移请求顶层、snapshot及模板内分别加入未知字段",
+          "expected": "原严格入口拒绝所有变体，无模板、回执或成功审计写入",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "迁移和同步等既有严格入口保持拒绝未知字段"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B16",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B17",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "通知同步未知字段保持严格拒绝",
+      "type": "compatibility",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B17"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在同步请求顶层、operation及item内分别加入未知字段",
+          "expected": "原严格入口拒绝所有变体，无模板、回执或成功审计写入",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "迁移和同步等既有严格入口保持拒绝未知字段"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B17",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B18",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "manifest签名原文与独立内层内容保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B18"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对含首尾空白及合法内层字段的manifest签名，外层加未知字段后登记",
+          "expected": "按原始UTF-8字符验证签名及checksum，已知内层字段不被外层兼容策略重写",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "签名原文逐字节校验及manifest内层遵循独立契约"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B18",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B19",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "外层字段不能绕过原文签名拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P3",
+      "design_techniques": [
+        "error-guessing"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B19"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对manifest原文增改空白但沿用原签名，同时附加伪造签名通过字段",
+          "expected": "原签名校验拒绝，插件、发行记录及成功审计不变",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "不因外层兼容忽略而重写、丢弃签名内容或全局放宽"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-04"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-04"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B19",
+        "D23-A"
+      ]
+    },
+    {
+      "id": "TC-D23-B20",
+      "module": "通知、集成、插件与运维/D23",
+      "title": "四类DTO接口说明明确范围",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P3",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "来自D23-A独立DTO写入口、校验分区、授权边界或签名/严格契约目标；字符或数据变体不另计用例。",
+      "coverage_item_refs": [
+        "COV-D23-B20"
+      ],
+      "preconditions": [
+        "{具有本用例所需原权限的隔离账号和自有数据；管理员信任夹具仅在隔离事务中}"
+      ],
+      "test_data": "{四类DTO的合法已知字段、原始签名或标题所述非法分区；具体动态数据映射见可复用测试}",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取OpenAPI的四类DTO和动态Map/manifest字段说明",
+          "expected": "说明普通外层兼容忽略、不入库不生效；动态Map及签名原文边界明确",
+          "evidence_refs": [
+            "SRC-001#heading/D23：普通CRUD未知JSON字段"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-001#heading/D23：普通CRUD未知JSON字段",
+              "quote": "补齐接口说明和回归"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D23-05"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D23-05"
+      ],
+      "source_refs": [
+        "SRC-001#heading/D23：普通CRUD未知JSON字段"
+      ],
+      "tags": [
+        "B20",
+        "D23-A"
+      ]
+    }
+  ]
+}

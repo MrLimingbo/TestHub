@@ -1,0 +1,243 @@
+{
+  "total": 44,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": 44,
+  "suiteCount": 6,
+  "exitCode": 0,
+  "suites": [
+    {
+      "name": "io.testhub.platform.P2D21ReportScopeTests",
+      "total": 13,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "B01_omittedUsesExistingDefault",
+          "status": "PASS"
+        },
+        {
+          "name": "B02_explicitEmptyAndBlankAreRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "B09_fiftyOneUniqueIdsRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "B07_mixedKeysCsvTrimAndDedupKeepOrder",
+          "status": "PASS"
+        },
+        {
+          "name": "B03_commaOnlyIsRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "B05_emptyRepeatedKeysAreRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "B04_emptyCsvSegmentsAreRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "B10_limitIsAppliedAfterDedup",
+          "status": "PASS"
+        },
+        {
+          "name": "B12_crossOrganizationCannotLeakOrAudit",
+          "status": "PASS"
+        },
+        {
+          "name": "B06_singleIdRestrictsBothOutputs",
+          "status": "PASS"
+        },
+        {
+          "name": "B11_defaultOverFiftyIsNotNewlyLimited",
+          "status": "PASS"
+        },
+        {
+          "name": "B08_fiftyUniqueIdsAccepted",
+          "status": "PASS"
+        },
+        {
+          "name": "B13_projectMembershipBoundaryIsPreserved",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.QualityReportFlowTests",
+      "total": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "reportsSelectedProjectsAndExportsFormulaSafeCsv",
+          "status": "PASS"
+        },
+        {
+          "name": "enforcesDateRangeAndProjectAccess",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.QualityReportScheduleFlowTests",
+      "total": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "runsPersistedQualityScheduleAndQueuesOneIdempotentWebhookDelivery",
+          "status": "PASS"
+        },
+        {
+          "name": "quartzWorkerRecordsSuccessfulReportAndActorWithoutServletRequest",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.QualityReportTransferFlowTests",
+      "total": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "strictPayloadReferenceAndActorValidation",
+          "status": "PASS"
+        },
+        {
+          "name": "copiesOrderedProjectScopeAndRulesDisabledWithoutRunsJobsOrNotifications",
+          "status": "PASS"
+        },
+        {
+          "name": "replayIsIdempotentAndNamesConflictWithoutOverwrite",
+          "status": "PASS"
+        },
+        {
+          "name": "missingRelatedProjectFailsRatherThanNarrowingOrGuessingNames",
+          "status": "PASS"
+        },
+        {
+          "name": "projectAndReadOnlyRolesEnforcedAtHttpBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "lateInvalidRuleRollsBackEntireImportAndReceipt",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.QualityReportSyncFlowTests",
+      "total": 14,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "concurrentRequestsSerializeCasAndExactUuidReplay",
+          "status": "PASS"
+        },
+        {
+          "name": "lateOccupiedNameRollsBackChangesReceiptVersionAndKeepsOldQuartzJob",
+          "status": "PASS"
+        },
+        {
+          "name": "strictProtocolRejectsUnknownActivationHistoryAndInvalidRules",
+          "status": "PASS"
+        },
+        {
+          "name": "copiesExplicitOrderedProjectsDisabledWithoutRunsNotificationsOrDuplicateReceipt",
+          "status": "PASS"
+        },
+        {
+          "name": "receiptReplayNeverRedisablesManuallyEnabledOrRecreatedTarget",
+          "status": "PASS"
+        },
+        {
+          "name": "crossOrganizationMissingAnchorUnknownProjectsAndDuplicateScopesNeverWrite",
+          "status": "PASS"
+        },
+        {
+          "name": "explicitTransactionRollbackDoesNotRemoveQuartzJob",
+          "status": "PASS"
+        },
+        {
+          "name": "boundedBatchAndOrganizationCapacityRejectWithoutTruncation",
+          "status": "PASS"
+        },
+        {
+          "name": "validationCsrfActorProjectAndReadOnlyRolesAreEnforced",
+          "status": "PASS"
+        },
+        {
+          "name": "committedUuidCannotChangePayloadAndDeletedCopyCannotBeRebuilt",
+          "status": "PASS"
+        },
+        {
+          "name": "changedDestinationDisablesQuartzAndPreservesLocalRunsCreatorAndLastResult",
+          "status": "PASS"
+        },
+        {
+          "name": "unchangedConfigurationKeepsNativeActivationAndManualEnableStillRunsLocalReports",
+          "status": "PASS"
+        },
+        {
+          "name": "scalarCoercionsNullFieldsAndDuplicateJsonKeysCannotChangePlan",
+          "status": "PASS"
+        },
+        {
+          "name": "nativeConfigurationVersionProtectsConcurrentActivationAndCrossAnchorEdits",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.P2D16QualityScheduleTests",
+      "total": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "invalidCreateAndUpdateDoNotChangePlanVersionQuartzOrAudit",
+          "status": "PASS"
+        },
+        {
+          "name": "exactPeriodBoundsAndNumericForms",
+          "status": "PASS"
+        },
+        {
+          "name": "exchangeBatchWithLaterInvalidPeriodLeavesNoPartialWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "controllerErrorLocatesFieldWithoutEchoingValue",
+          "status": "PASS"
+        },
+        {
+          "name": "transferHttpUsesExactPeriodAndRejectsWithoutWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "syncHttpUsesExactPeriodAndRejectsWithoutWrites",
+          "status": "PASS"
+        },
+        {
+          "name": "validEditAcceptsExactNumericFormsAndIncrementsVersion",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "ownedInfrastructureCleanupConfirmed": true,
+  "d21Evidence": "Real loopback HTTP, Servlet binding, session login, both report and CSV; per-class isolated MySQL schema"
+}

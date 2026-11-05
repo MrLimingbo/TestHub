@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-04",
+  "checks": {
+    "formalCases": 32,
+    "positiveNegative": [
+      13,
+      19
+    ],
+    "priorFormalCases": 20,
+    "newFormalCases": 12,
+    "newPositiveNegative": [
+      4,
+      8
+    ],
+    "backendFormalMethods": 31,
+    "frontendFormalMethods": 1,
+    "extraX01WithApproved409Assertions": 1,
+    "bugFixedPendingReview": 1,
+    "unfixedNewBugs": 0,
+    "newCaseModelRequirementsCriteriaCoverageItems": [
+      4,
+      4,
+      12
+    ],
+    "documentRuleGapResolved": "DOC-D23-001",
+    "newCaseModelReadinessScore": 100,
+    "jsonFilesParsed": 22,
+    "sourceHashesVerified": 14,
+    "productionFilesModified": 1,
+    "existingTestFilesModified": 1,
+    "newTestFiles": 2,
+    "otherBaselineSourcesUnchanged": 1426,
+    "priorFrozenArtifactsUnchanged": 125,
+    "historicalObservationCounts": [
+      44,
+      1,
+      2
+    ],
+    "deferredEnvironmentBlockers": 12,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "h2TotalPassedSkipped": [
+      1374,
+      1371,
+      3
+    ],
+    "mysqlTotalPassedSkipped": [
+      65,
+      65,
+      0
+    ],
+    "frontendAffectedPassed": 67,
+    "concurrentRoundsPerDatabase": {
+      "create": 3,
+      "update": 3
+    },
+    "localReportLinksChecked": 80,
+    "rawLogsRemoved": 10,
+    "rawSurefireFilesRemoved": 320,
+    "diffCheck": "PASS"
+  },
+  "errors": [],
+  "validationIsNotAdditionalProductTests": true
+}

@@ -1,0 +1,17 @@
+{
+  "total": 66,
+  "passed": 66,
+  "failed": 0,
+  "files": 3,
+  "scope": [
+    "src/test/notificationExtensionsFixes.test.ts",
+    "src/test/notificationsPage.test.ts",
+    "src/test/extensionsOperationsPages.test.ts"
+  ],
+  "newMethods": 0,
+  "productUiChanged": false,
+  "command": "vitest run <3module files> --maxWorkers=2",
+  "exitCode": 0,
+  "evidenceType": "Existing Vue/Arco component regression,controlled fetch and lifecycle fixtures",
+  "fullFrontendRerun": false
+}

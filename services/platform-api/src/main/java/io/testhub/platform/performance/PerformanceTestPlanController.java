@@ -1,5 +1,7 @@
 package io.testhub.platform.performance;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
@@ -83,17 +85,17 @@ public class PerformanceTestPlanController {
     }
 
     public record ThreadGroupRequest(@NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 2_048) String targetUrl,
-                                     @Size(max = 24) String loadModel, @NotNull @Min(1) Integer threadCount,
-                                     @NotNull @Min(0) Integer rampUpSeconds, @Min(2) @Max(20) Integer stepCount,
-                                     @Min(1) @Max(86_400) Integer stepIntervalSeconds, @NotNull @Min(10) Integer durationSeconds,
-                                     @Min(1) Integer targetTps, @Min(1) Integer p95ThresholdMillis,
-                                     @DecimalMin("0.0") @DecimalMax("100.0") BigDecimal errorThresholdPercent,
+                                     @Size(max = 24) String loadModel, @NotNull @Min(1) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer threadCount,
+                                     @NotNull @Min(0) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer rampUpSeconds, @Min(2) @Max(20) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer stepCount,
+                                     @Min(1) @Max(86_400) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer stepIntervalSeconds, @NotNull @Min(10) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer durationSeconds,
+                                     @Min(1) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer targetTps, @Min(1) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer p95ThresholdMillis,
+                                     @DecimalMin("0.0") @DecimalMax("100.0") @JsonDeserialize(using = PerformanceJson.DecimalValue.class) BigDecimal errorThresholdPercent,
                                      @Size(max = 10) String requestMethod,
-                                     @Size(max = 16) Map<@NotBlank @Size(max = 128) String, @Size(max = 1_024) String> requestHeaders,
-                                     @Size(max = 16) Map<@NotBlank @Size(max = 128) String, @Size(max = 1_024) String> queryParameters,
-                                     @Size(max = 65_536) String requestBody, @Min(100) @Max(599) Integer expectedStatusCode,
-                                     @Size(max = 1_000) String responseContains, @Size(max = 65_536) String dataSetCsv,
-                                     @Min(2) Integer rendezvousUsers) {
+                                     @Size(max = 16) @JsonDeserialize(contentUsing = PerformanceJson.Text.class) Map<@NotBlank @Size(max = 128) String, @Size(max = 1_024) String> requestHeaders,
+                                     @Size(max = 16) @JsonDeserialize(contentUsing = PerformanceJson.Text.class) Map<@NotBlank @Size(max = 128) String, @Size(max = 1_024) String> queryParameters,
+                                     @Size(max = 65_536) @JsonDeserialize(using = PerformanceJson.Text.class) String requestBody, @Min(100) @Max(599) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer expectedStatusCode,
+                                     @Size(max = 1_000) @JsonDeserialize(using = PerformanceJson.Text.class) String responseContains, @Size(max = 65_536) @JsonDeserialize(using = PerformanceJson.Text.class) String dataSetCsv,
+                                     @Min(2) @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer rendezvousUsers) {
         PerformanceTestPlanService.ThreadGroupInput toInput() {
             return new PerformanceTestPlanService.ThreadGroupInput(name, targetUrl, loadModel, threadCount, rampUpSeconds,
                     stepCount, stepIntervalSeconds, durationSeconds, targetTps, p95ThresholdMillis, errorThresholdPercent, requestMethod, requestHeaders,

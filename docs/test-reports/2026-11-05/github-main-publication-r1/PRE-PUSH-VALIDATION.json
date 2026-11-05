@@ -1,0 +1,107 @@
+{
+  "at": "2026-11-05T06:32:41.012005+00:00",
+  "scope": "用户授权将已审核修复代码、测试资产和最终报告提交并推送GitHub main的提交前校验，不替代既有审核报告",
+  "targetRepository": "https://github.com/MrLimingbo/TestHub",
+  "targetBranch": "main",
+  "parentCommit": "526d7f186d1f9ba03484d872d71df74b32663abf",
+  "approvedReport": "docs/test-reports/2026-11-05/final-overall-report-r1/OVERALL-TEST-REPORT.md",
+  "approvedReportSha256": "989b9ed139866a9ed7b64b378bbd6d0379c2341aa7c36f305a5b700c19d8ae8d",
+  "approvedCodeBaselineFiles": 1430,
+  "changedOrNewAppServiceFrontendFilesMatchedApprovedBaseline": 102,
+  "checks": {
+    "lint": {
+      "exitCode": 0,
+      "errors": 0,
+      "preExistingWarnings": 2
+    },
+    "frontend": {
+      "command": "pnpm test -- --maxWorkers=2",
+      "files": 100,
+      "passed": 950,
+      "failed": 0
+    },
+    "typecheckAndBuild": {
+      "command": "pnpm build",
+      "exitCode": 0
+    },
+    "isolatedH2AndJar": {
+      "command": "JAVA_HOME=<existing native Java21> node scripts/desktop/test-local-backend.mjs",
+      "suiteCount": 160,
+      "total": 1374,
+      "passed": 1371,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 3,
+      "jarBuild": "SUCCESS",
+      "ownedWorkspaceRemoved": true
+    },
+    "affectedDesktop": {
+      "passed": 37,
+      "failed": 0
+    },
+    "affectedRunners": {
+      "passed": 16,
+      "failed": 0
+    },
+    "collectorUnitTestsOnly": {
+      "passed": 6,
+      "failed": 0,
+      "formalD26CollectionStarted": false
+    },
+    "approvedFrozenArtifactEntriesChecked": 47,
+    "credentialScan": {
+      "candidateFiles": 542,
+      "highConfidenceFindings": 0,
+      "binaries": 0,
+      "prohibitedBuildOrPrivateWorkspacePaths": 0
+    },
+    "structuredAssets": {
+      "validJsonDocuments": 327,
+      "validJsonlRecords": 6196
+    },
+    "stagedWhitespace": {
+      "fullCheckExitCode": 2,
+      "expectedEvidenceWhitespaceLines": 68,
+      "files": [
+        {
+          "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/incremental-source.patch",
+          "classification": "REQUIRED_PATCH_CONTEXT_MARKER",
+          "lines": 15
+        },
+        {
+          "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/incremental-source.patch",
+          "classification": "REQUIRED_PATCH_CONTEXT_MARKER",
+          "lines": 13
+        },
+        {
+          "path": "docs/test-reports/2026-11-05/final-overall-report-r1/HISTORICAL-MODULE-RESULTS.csv",
+          "classification": "PRESERVED_HISTORICAL_CSV_CRLF",
+          "lines": 20
+        },
+        {
+          "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/HISTORICAL-MODULE-RESULTS.csv",
+          "classification": "PRESERVED_HISTORICAL_CSV_CRLF",
+          "lines": 20
+        }
+      ],
+      "allOtherStagedFilesWhitespaceCheckExitCode": 0,
+      "approvedEvidenceBytesPreserved": true,
+      "commitHooksBypassed": false
+    }
+  },
+  "constraints": {
+    "D26": "SKIPPED_BY_USER_SPEC_RETAINED",
+    "D26ValidWindows": 0,
+    "environmentCasesSkipped": 12,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "rootCauseConfirmed": false,
+    "skippedWorkRestored": false
+  },
+  "warningsRetained": [
+    "既有Vue属性类型提示",
+    "测试夹具Vue/Router提示及Monaco缺失source map提示",
+    "Vite构建体积建议"
+  ],
+  "newProductAcceptanceCasesAdded": 0,
+  "historicalDenominatorsRewritten": false
+}

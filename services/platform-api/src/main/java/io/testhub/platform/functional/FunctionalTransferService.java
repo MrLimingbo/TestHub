@@ -38,7 +38,7 @@ public class FunctionalTransferService {
     }
     public Map<String, Object> capabilities(AuthenticatedPrincipal principal, String projectId) {
         access.requireProjectParameterWrite(principal, projectId, WRITERS);
-        return Map.of("version", 1, "versions", List.of(1, 2, 3, 4, 5, 6, 7, 8), "maxBytes", 8 * 1024 * 1024, "scope", "FUNCTIONAL_DEFINITIONS", "fileSnapshotMaxBytes", 32*1024*1024, "maxFileBytes", FunctionalTransferFiles.MAX_BYTES, "maxFiles", 100);
+        return Map.of("version", 1, "versions", List.of(1, 2, 3, 4, 5, 6, 7, 8), "maxBytes", 8 * 1024 * 1024, "scope", "FUNCTIONAL_DEFINITIONS", "fileSnapshotMaxBytes", 32*1024*1024, "maxFileBytes", FunctionalTransferFiles.MAX_BYTES, "maxFiles", 100, "historyTitleSnapshots", true);
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)

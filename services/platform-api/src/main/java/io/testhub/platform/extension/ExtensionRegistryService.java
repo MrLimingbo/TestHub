@@ -155,9 +155,11 @@ public class ExtensionRegistryService {
         }
         String adapterId = id == null ? UlidCreator.getUlid().toString() : id;
         boolean creating = id == null;
-        if (creating) registry.insertAdapter(adapterId, type, displayName, endpoint, ciphertext, input.enabled(), principal.userId());
-        else {
-            registry.updateAdapter(adapterId, type, displayName, endpoint, ciphertext, input.enabled(), principal.userId());
+        try {
+            if (creating) registry.insertAdapter(adapterId, type, displayName, endpoint, ciphertext, input.enabled(), principal.userId());
+            else registry.updateAdapter(adapterId, type, displayName, endpoint, ciphertext, input.enabled(), principal.userId());
+        } catch (org.springframework.dao.DuplicateKeyException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "同类型的适配器名称已存在，请使用其他名称");
         }
         audit.record(principal, null, null, creating ? "ENTERPRISE_ADAPTER_CREATED" : "ENTERPRISE_ADAPTER_UPDATED",
                 "ENTERPRISE_ADAPTER", adapterId, Map.of("type", type, "enabled", input.enabled()));

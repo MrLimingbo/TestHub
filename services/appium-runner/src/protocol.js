@@ -2,6 +2,8 @@ import { createHash, createHmac, randomBytes } from 'node:crypto'
 export const TASK_STREAM = 'testhub:runner:appium:tasks:v1'; export const CANCEL_STREAM = 'testhub:runner:appium:cancellations:v1'; export const EVENT_STREAM = 'testhub:runner:appium:events:v1'; export const STEP_STREAM = 'testhub:runner:appium:step-results:v1'; export const GROUP = 'testhub-appium-runner-v1'; export const CANCEL_GROUP = 'testhub-appium-runner-cancellations-v1'
 export const TASK_CONTRACT = 'testhub.appium-runner.task'; export const CANCEL_CONTRACT = 'testhub.appium-runner.cancel'; export const EVENT_CONTRACT = 'testhub.appium-runner.event'; export const STEP_CONTRACT = 'testhub.appium-runner.step-result'; export const RUNTIME_PATH = '/internal/mobile-automation-runner/v1/runtime-configuration'; export const ARTIFACT_PATH = '/internal/mobile-automation-runner/v1/artifacts'
 const TASK_FIELDS = ['contract', 'protocolVersion', 'taskId', 'executionId', 'organizationId', 'projectId', 'scenarioId', 'scenarioVersion', 'requestedAt', 'deadlineAt', 'manifestRef', 'traceId']; const CANCEL_FIELDS = ['contract', 'protocolVersion', 'commandId', 'taskId', 'executionId', 'requestedAt', 'reasonCode']; const ULID = /^[0-9A-HJKMNP-TV-Z]{26}$/
+const COMMON_LOCATORS = new Set(['ACCESSIBILITY_ID', 'ID', 'XPATH'])
+const ELEMENT_STEPS = new Set(['TAP', 'INPUT', 'ASSERT_VISIBLE', 'ASSERT_TEXT'])
 function invalid(message) { const error = new Error(message); error.code = 'INVALID_APPIUM_PROTOCOL'; return error }
 function exact(value, fields, label) { const keys = value && typeof value === 'object' ? Object.keys(value).sort() : []; if (keys.length !== fields.length || keys.some((key, index) => key !== [...fields].sort()[index])) throw invalid(`${label}字段不兼容`) }
 export function decodeTask(value) { exact(value, TASK_FIELDS, 'Appium 任务'); if (value.contract !== TASK_CONTRACT || value.protocolVersion !== '1') throw invalid('Appium 任务协议不兼容'); for (const key of ['taskId', 'executionId', 'organizationId', 'projectId', 'scenarioId', 'traceId']) if (!ULID.test(value[key])) throw invalid(`${key} 必须为 ULID`); if (!/^mobile-automation\/manifests\/[0-9A-HJKMNP-TV-Z]{26}\/v1\.json$/.test(value.manifestRef) || !Number.isFinite(Date.parse(value.requestedAt)) || !Number.isFinite(Date.parse(value.deadlineAt)) || Date.parse(value.deadlineAt) <= Date.parse(value.requestedAt)) throw invalid('Appium 任务清单或时间不合法'); return Object.freeze({ ...value }) }
@@ -12,4 +14,26 @@ export function heartbeat(config, activeTaskCount, startedAt, now = new Date()) 
 function signed(config, path, bindings, now = new Date(), nonce = randomBytes(24).toString('base64url')) { const timestamp = now.toISOString(); const signature = createHmac('sha256', config.heartbeatSigningKey).update(['testhub.mobile-automation-runner.internal-auth.v1', 'POST', path, config.runnerId, timestamp, nonce, ...bindings].join('\n'), 'utf8').digest('hex'); return { 'X-TestHub-Runner-Id': config.runnerId, 'X-TestHub-Runner-Timestamp': timestamp, 'X-TestHub-Runner-Nonce': nonce, 'X-TestHub-Runner-Signature': signature } }
 export function runtimeRequest(config, task) { const body = JSON.stringify({ taskId: task.taskId, executionId: task.executionId }); return { path: RUNTIME_PATH, headers: { 'Content-Type': 'application/json', ...signed(config, RUNTIME_PATH, [task.taskId, task.executionId]) }, body } }
 export function artifactRequest(config, task, bytes) { const checksum = createHash('sha256').update(bytes).digest('hex'); return { path: ARTIFACT_PATH, headers: { 'Content-Type': 'image/png', 'Content-Length': String(bytes.length), ...signed(config, ARTIFACT_PATH, [task.taskId, task.executionId, 'SCREENSHOT', String(bytes.length), checksum]), 'X-TestHub-Task-Id': task.taskId, 'X-TestHub-Execution-Id': task.executionId, 'X-TestHub-Artifact-Type': 'SCREENSHOT', 'X-TestHub-Artifact-Size': String(bytes.length), 'X-TestHub-Artifact-SHA256': checksum }, body: bytes } }
-export function runtime(task, value) { if (!value || value.contract !== 'testhub.appium-runner.runtime-configuration' || value.version !== 1 || value.taskId !== task.taskId || value.executionId !== task.executionId || !value.deadlineAt || !value.manifest?.device || !value.manifest?.application || !Array.isArray(value.manifest?.scenario?.steps)) throw invalid('Appium 运行时配置不兼容'); if (Date.parse(value.deadlineAt) <= Date.now()) throw invalid('Appium 任务已超时'); return value }
+export function runtime(task, value) {
+  if (!value || value.contract !== 'testhub.appium-runner.runtime-configuration' || value.version !== 1 || value.taskId !== task.taskId || value.executionId !== task.executionId || !value.deadlineAt || !value.manifest?.device || !value.manifest?.application || !Array.isArray(value.manifest?.scenario?.steps)) throw invalid('Appium 运行时配置不兼容')
+  if (Date.parse(value.deadlineAt) <= Date.now()) throw invalid('Appium 任务已超时')
+  const scenario = value.manifest.scenario
+  const variables = scenario.variables ?? {}
+  if (typeof variables !== 'object' || Array.isArray(variables) || Object.keys(variables).length > 50 || Object.entries(variables).some(([key, entry]) => !/^[A-Za-z_][A-Za-z0-9_]{0,63}$/.test(key) || typeof entry !== 'string' || entry.length > 4096)) throw invalid('scenario.variables 值必须是合法字符串')
+  for (const [index, step] of scenario.steps.entries()) {
+    if (!step || typeof step !== 'object' || Array.isArray(step)) throw invalid(`steps[${index}] 不合法`)
+    if (ELEMENT_STEPS.has(step.type) || step.locatorStrategy != null || step.locatorValue != null) {
+      const platform = value.manifest.device.platform, strategy = step.locatorStrategy
+      if (!['ANDROID', 'IOS'].includes(platform) || !(COMMON_LOCATORS.has(strategy)
+        || platform === 'ANDROID' && strategy === 'ANDROID_UIAUTOMATOR' || platform === 'IOS' && strategy === 'IOS_PREDICATE')) throw invalid(`steps[${index}].locatorStrategy 与设备平台不匹配`)
+      if (typeof step.locatorValue !== 'string' || !step.locatorValue.trim() || step.locatorValue.length > 1024) throw invalid(`steps[${index}].locatorValue 不合法`)
+    }
+    const timeout = step.timeoutMillis
+    if (timeout != null && (!Number.isSafeInteger(timeout) || timeout < 1 || timeout > 60000)) throw invalid(`steps[${index}].timeoutMillis 不合法`)
+    for (const field of ['value', 'expectedText']) {
+      const text = step[field]
+      if (text != null && (typeof text !== 'string' || text.length > 4096)) throw invalid(`steps[${index}].${field} 必须是字符串`)
+    }
+  }
+  return value
+}

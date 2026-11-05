@@ -1,0 +1,93 @@
+{
+  "baselineFiles": 1438,
+  "modified": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationController.java",
+      "beforeSha256": "d8a2f5ff2083ca9c0088fe97a3b66a729178b7027818c0bd261d82c35d106b6f",
+      "afterSha256": "38c7c6685cfc17e47816fb43f4820987c0b0aaf7d05873776ebfe0044b03a6d6"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationRepository.java",
+      "beforeSha256": "0fab6fa3b98383f0451fcb61d92f3295c2bb59d4c4903d05f0eb98f9ab514391",
+      "afterSha256": "db3d3dbe2ca8d88cb5dba510a002b10af1e6ead262c1c8f6971e2002dea42101"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleController.java",
+      "beforeSha256": "1ec43a7ef8478945d7c7cbe0b406d8208b04f4d25566e0f29434fae929fa60c7",
+      "afterSha256": "25ca5ea3a44cddcb9a9a4da044f155e5b3b9ba3ccb80e88afef739967004d52f"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleService.java",
+      "beforeSha256": "a727c96cfe487b77da627213bdee025dc7f53bdcf22e79bd1cdd79a812119220",
+      "afterSha256": "1c9cebba6a9d25a6523ea1fc3062a3768887d79291c256f703a65007b47aa3aa"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java",
+      "beforeSha256": "b83d7409cf640402da1bd72fd598508271b3f51a92412b52ca7d1b45a6e65010",
+      "afterSha256": "08109ca3e1aae6cd597fc69daac15c6cf6ecfecf51f16f3d0901105e0b2f6b3c"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationSyncService.java",
+      "beforeSha256": "be942b5e5296999aa6269f62ecabea3c6eaf560c3949b8ed129ea1cd40bea84b",
+      "afterSha256": "77bbee4b92d0c05b4b981e57518f9f3781690bb1e19e6a9b63817143700f61c4"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationTransferService.java",
+      "beforeSha256": "3eb5dc3236b22cd673a8c1421704e849fc6d148fc8b4d927171f12cca05e13c2",
+      "afterSha256": "1f17e9d9c0054718781791ef242d1de2054e01c4798cc8a0a416e261a218394c"
+    },
+    {
+      "path": "services/playwright-runner/src/protocol.js",
+      "beforeSha256": "b00ec7172de707db24ce175ab206588ec838e757e9ecaf64ad0ce467d2619406",
+      "afterSha256": "13229b07f0a75bc2c426f329f5dedfcd5d198d64d68109e5e01307f0e776bd61"
+    },
+    {
+      "path": "src/pages/UiAutomationPage.vue",
+      "beforeSha256": "ff1f3b6ffe01986459a4603198063d361f39a4ededfa99ec95a725e95eb39f18",
+      "afterSha256": "912b92895359a789d5a58e05e678f3ce5e77ccb4f4a1e224c0c2d024acc7a211"
+    }
+  ],
+  "added": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiJson.java",
+      "sha256": "2b000fb8f9d8d3742d6bd46fa7f959893f5cd385b8b020b475adec53a4a649b8"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiInputExceptionHandler.java",
+      "sha256": "6115b65c0571895ca31911338d14aff7ec90d9d7e649da71aeb3f100d2cdf698"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D16WebFlowTests.java",
+      "sha256": "798f7fa245c2f5b4f905357fcc2f4e8db56f62092969b7be88aaee4bc453f5f0"
+    },
+    {
+      "path": "src/utils/webIntegerInput.ts",
+      "sha256": "6a2ad13453f768feb9b71664c4500fb940184db517f9618b1b6711dd139bda03"
+    },
+    {
+      "path": "src/test/d16WebPage.test.ts",
+      "sha256": "928b9fc8331d6fbda9836309b03fe509b25143230c78f73fd76a295da29af21f"
+    },
+    {
+      "path": "src/test/d16WebNumbers.test.ts",
+      "sha256": "f7cab3c41f1d54389abfc008889d75447decd813b8d0c3b7f763472294f265b7"
+    },
+    {
+      "path": "services/playwright-runner/test/d16-input.test.js",
+      "sha256": "894be7004244139432ed8089fabef04ed80096f723f57a91753eb40dafb06627"
+    },
+    {
+      "path": "scripts/qa/d16-web-ui.mjs",
+      "sha256": "51def0eafeae12967ddc6688b2e516230e6bc371e45537a08b93df1be7a01c48"
+    },
+    {
+      "path": "scripts/qa/d16-web-http.mjs",
+      "sha256": "c53d0fa986dc6d7c9ee7bf27ede82f41f137c5e73d18b45c6cff4fdc5c83b388"
+    }
+  ],
+  "unchangedBaselineFiles": 1429,
+  "dependencyFilesChanged": false,
+  "globalMapperChanged": false,
+  "storedDomainStepAndManifestChanged": false,
+  "newCommitPushOrPr": false
+}

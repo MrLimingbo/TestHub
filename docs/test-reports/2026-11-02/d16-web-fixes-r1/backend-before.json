@@ -1,0 +1,188 @@
+{
+  "total": 45,
+  "failed": 17,
+  "errors": 0,
+  "passed": 28,
+  "cases": [
+    {
+      "name": "transferValid",
+      "status": "PASS"
+    },
+    {
+      "name": "widthExact",
+      "status": "PASS"
+    },
+    {
+      "name": "viewportTypes",
+      "status": "FAIL"
+    },
+    {
+      "name": "executeExact",
+      "status": "PASS"
+    },
+    {
+      "name": "actionDefault",
+      "status": "PASS"
+    },
+    {
+      "name": "executeTypes",
+      "status": "FAIL"
+    },
+    {
+      "name": "objectReference",
+      "status": "PASS"
+    },
+    {
+      "name": "heightExact",
+      "status": "PASS"
+    },
+    {
+      "name": "waitExact",
+      "status": "PASS"
+    },
+    {
+      "name": "waitBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "stepFractions",
+      "status": "FAIL"
+    },
+    {
+      "name": "replay",
+      "status": "PASS"
+    },
+    {
+      "name": "variableStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "transferInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "oldRuntime",
+      "status": "FAIL"
+    },
+    {
+      "name": "executeDefaults",
+      "status": "PASS"
+    },
+    {
+      "name": "viewportDefaults",
+      "status": "PASS"
+    },
+    {
+      "name": "revisionConflict",
+      "status": "PASS"
+    },
+    {
+      "name": "oldManualQueue",
+      "status": "FAIL"
+    },
+    {
+      "name": "permission",
+      "status": "PASS"
+    },
+    {
+      "name": "variableNull",
+      "status": "PASS"
+    },
+    {
+      "name": "editScenarioInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "syncInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "executeBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "syncValid",
+      "status": "FAIL"
+    },
+    {
+      "name": "overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "errorLocation",
+      "status": "FAIL"
+    },
+    {
+      "name": "actionBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "oldOtherQueue",
+      "status": "FAIL"
+    },
+    {
+      "name": "waitRequired",
+      "status": "PASS"
+    },
+    {
+      "name": "variableTypes",
+      "status": "FAIL"
+    },
+    {
+      "name": "stepTypes",
+      "status": "FAIL"
+    },
+    {
+      "name": "editProfileInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "nonTargetContract",
+      "status": "PASS"
+    },
+    {
+      "name": "oldReadOnly",
+      "status": "PASS"
+    },
+    {
+      "name": "widthBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "heightBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "viewportFractions",
+      "status": "FAIL"
+    },
+    {
+      "name": "lateStepInvalid",
+      "status": "FAIL"
+    },
+    {
+      "name": "actionExact",
+      "status": "PASS"
+    },
+    {
+      "name": "editFreeze",
+      "status": "PASS"
+    },
+    {
+      "name": "scheduleAlias",
+      "status": "FAIL"
+    },
+    {
+      "name": "stepTextRequired",
+      "status": "PASS"
+    },
+    {
+      "name": "stepStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "stepTextTypes",
+      "status": "FAIL"
+    }
+  ]
+}

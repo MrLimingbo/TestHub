@@ -1,0 +1,421 @@
+{
+  "command": "JAVA_HOME=<JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D16WebFlowTests,UiAutomation*Tests'",
+  "buildSuccess": true,
+  "suiteCount": 7,
+  "suites": [
+    {
+      "name": "io.testhub.platform.P2D16WebFlowTests",
+      "total": 45,
+      "passed": 45,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "name": "widthExact",
+          "status": "PASS"
+        },
+        {
+          "name": "viewportTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "executeExact",
+          "status": "PASS"
+        },
+        {
+          "name": "actionDefault",
+          "status": "PASS"
+        },
+        {
+          "name": "executeTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "objectReference",
+          "status": "PASS"
+        },
+        {
+          "name": "heightExact",
+          "status": "PASS"
+        },
+        {
+          "name": "waitExact",
+          "status": "PASS"
+        },
+        {
+          "name": "waitBounds",
+          "status": "PASS"
+        },
+        {
+          "name": "stepFractions",
+          "status": "PASS"
+        },
+        {
+          "name": "replay",
+          "status": "PASS"
+        },
+        {
+          "name": "variableStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "oldRuntime",
+          "status": "PASS"
+        },
+        {
+          "name": "executeDefaults",
+          "status": "PASS"
+        },
+        {
+          "name": "viewportDefaults",
+          "status": "PASS"
+        },
+        {
+          "name": "revisionConflict",
+          "status": "PASS"
+        },
+        {
+          "name": "oldManualQueue",
+          "status": "PASS"
+        },
+        {
+          "name": "permission",
+          "status": "PASS"
+        },
+        {
+          "name": "variableNull",
+          "status": "PASS"
+        },
+        {
+          "name": "editScenarioInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "executeBounds",
+          "status": "PASS"
+        },
+        {
+          "name": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "name": "overflow",
+          "status": "PASS"
+        },
+        {
+          "name": "errorLocation",
+          "status": "PASS"
+        },
+        {
+          "name": "actionBounds",
+          "status": "PASS"
+        },
+        {
+          "name": "oldOtherQueue",
+          "status": "PASS"
+        },
+        {
+          "name": "waitRequired",
+          "status": "PASS"
+        },
+        {
+          "name": "variableTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "stepTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "editProfileInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "nonTargetContract",
+          "status": "PASS"
+        },
+        {
+          "name": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "name": "widthBounds",
+          "status": "PASS"
+        },
+        {
+          "name": "heightBounds",
+          "status": "PASS"
+        },
+        {
+          "name": "viewportFractions",
+          "status": "PASS"
+        },
+        {
+          "name": "lateStepInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "actionExact",
+          "status": "PASS"
+        },
+        {
+          "name": "editFreeze",
+          "status": "PASS"
+        },
+        {
+          "name": "scheduleAlias",
+          "status": "PASS"
+        },
+        {
+          "name": "stepTextRequired",
+          "status": "PASS"
+        },
+        {
+          "name": "stepStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "stepTextTypes",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationSyncFlowTests",
+      "total": 11,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "unorderedDefinitionsRemapReferencesWithoutExecutionOrActivation",
+          "status": "PASS"
+        },
+        {
+          "name": "existingIdentityEnabledStateAndQueuedManifestStayLocal",
+          "status": "PASS"
+        },
+        {
+          "name": "perKindCountMergeAndFinalBytesHaveAtomicBounds",
+          "status": "PASS"
+        },
+        {
+          "name": "activeProfileTargetUpdatesRequireExistingAuthorityAndRollbackEveryKind",
+          "status": "PASS"
+        },
+        {
+          "name": "functionalPlanNamesMustExistAndUseTargetIdentity",
+          "status": "PASS"
+        },
+        {
+          "name": "parallelAndLostResponseReplayNeverDuplicatesOrOverwritesLaterEdits",
+          "status": "PASS"
+        },
+        {
+          "name": "staleSnapshotsCaseAndDatabaseCollationsRejectWholeBatch",
+          "status": "PASS"
+        },
+        {
+          "name": "auditRollbackCannotChangeQuartzOrPartialVersionsAndReceipts",
+          "status": "PASS"
+        },
+        {
+          "name": "roleProjectActorCsrfAndTransferBodyLimitAreEnforced",
+          "status": "PASS"
+        },
+        {
+          "name": "unknownFieldsScriptStepsInvalidCronAndForeignReferencesNeverWrite",
+          "status": "PASS"
+        },
+        {
+          "name": "derivedObjectSelectorIsNotASeparateScenarioEdit",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "corruptStorageCannotBeDownloadedAndOriginalMetadataIsRetained",
+          "status": "PASS"
+        },
+        {
+          "name": "confirmationAccountCsrfAndProjectPermissionsAreRequired",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsUnknownFieldsBadBytesStaleRevisionsAndNativeOverwrite",
+          "status": "PASS"
+        },
+        {
+          "name": "copiesExactOriginalBytesAndMetadataWithoutCreatingRunnerRecords",
+          "status": "PASS"
+        },
+        {
+          "name": "twentyFiveMiBBase64BodyDecodesAndPersistsWhileLargerFilesAndBodiesFail",
+          "status": "PASS"
+        },
+        {
+          "name": "failedObjectWriteIsRecoveredBeforeAnotherRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "emptyArtifactIsPreservedAndDifferentContentCanNeverOverwriteIt",
+          "status": "PASS"
+        },
+        {
+          "name": "receiptKeyCannotBeReusedAndMissingCommittedMetadataIsNotRecreated",
+          "status": "PASS"
+        },
+        {
+          "name": "runningArtifactsRemainAtOriginAndMissingHistoryBlocksImport",
+          "status": "PASS"
+        },
+        {
+          "name": "staleIntentRecoversOrphansAndNeverDeletesCommittedBytes",
+          "status": "PASS"
+        },
+        {
+          "name": "databaseRollbackRemovesOnlyNewObjectAndLeavesRetrySafe",
+          "status": "PASS"
+        },
+        {
+          "name": "multipleScreenshotsAndAllThreeKindsPreserveIndependentIdsAndViewPolicy",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationFlowTests",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "createsProjectScopedBrowserAssetsAndProducesStepReportFromRunnerEvents",
+          "status": "PASS"
+        },
+        {
+          "name": "schedulesRetriesAndCancelsUiAutomationWithFunctionalPlanTraceability",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationTransferFlowTests",
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "preservesVersionsStepsReferencesAndDisabledSchedules",
+          "status": "PASS"
+        },
+        {
+          "name": "inactiveImportedLocalTargetsNeverGrantAuthorization",
+          "status": "PASS"
+        },
+        {
+          "name": "strictHttpProjectAndAccountChecks",
+          "status": "PASS"
+        },
+        {
+          "name": "idempotencyNameConflictsAndPayloadChangesDoNotOverwrite",
+          "status": "PASS"
+        },
+        {
+          "name": "lateMalformedScheduleAndDanglingReferencesRollbackWholeBatch",
+          "status": "PASS"
+        },
+        {
+          "name": "requiresTargetFunctionalPlanCodeAndRemapsToItsOwnIdentity",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.uiautomation.UiAutomationTargetPolicyTests",
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "enterpriseStillRequiresSystemConfigurationAndRejectsIpLiterals",
+          "status": "PASS"
+        },
+        {
+          "name": "desktopUsesOnlyNativeApprovedExactOriginsIncludingLocalIpTargets",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "inventoryIncludesBeyondLegacyHundredAndRejectsThousandAndOne",
+          "status": "PASS"
+        },
+        {
+          "name": "copiesSafeTerminalStepsWithoutCurrentScenarioOrRunnerSideEffects",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidSourceDigestUnknownFieldsAndSummaryMismatchAreRejected",
+          "status": "PASS"
+        },
+        {
+          "name": "downloadHasVerifiedDigestAndOriginalSourceAndNoRawFields",
+          "status": "PASS"
+        },
+        {
+          "name": "lateStepUpsertsChangeSourceRevisionEvenAtIdenticalTimestamp",
+          "status": "PASS"
+        },
+        {
+          "name": "accountCsrfProjectAndViewerPermissionsAreEnforced",
+          "status": "PASS"
+        },
+        {
+          "name": "ignoresActiveTasksAndRetainsOriginalVersionAfterScenarioEdits",
+          "status": "PASS"
+        },
+        {
+          "name": "nativeRecordsStaleRevisionsAndReusedRequestKeysCannotBeOverwritten",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "total": 86,
+    "passed": 86,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ownedDataRemoved": true
+}

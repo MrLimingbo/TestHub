@@ -1,0 +1,495 @@
+{
+  "command": "JAVA_HOME=<native JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D16PerformanceFlowTests,Performance*Tests'",
+  "buildSuccess": true,
+  "suiteCount": 9,
+  "suites": [
+    {
+      "name": "io.testhub.platform.PerformanceTestPlanFlowTests",
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "managesProjectScopedPlanAndThreadGroups",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsSensitiveHeadersAndBodiesForSafeMethods",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsUnsafeSteppedRampConfiguration",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsRendezvousAboveThreadCount",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsUnsafeQueryParameterConfiguration",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsUndeclaredDataSetVariables",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+      "total": 11,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "corruptStorageCannotBeDownloadedAndOriginalMetadataIsRetained",
+          "status": "PASS"
+        },
+        {
+          "name": "emptyLogIsPreservedAndDifferentContentCanNeverOverwriteIt",
+          "status": "PASS"
+        },
+        {
+          "name": "twentyMiBBase64BodyDecodesAndPersistsWhileLargerFilesAndBodiesFail",
+          "status": "PASS"
+        },
+        {
+          "name": "confirmationAccountCsrfAndProjectPermissionsAreRequired",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsUnknownFieldsBadBytesStaleRevisionsAndNativeOverwrite",
+          "status": "PASS"
+        },
+        {
+          "name": "copiesExactOriginalBytesAndMetadataWithoutCreatingRunnerRecords",
+          "status": "PASS"
+        },
+        {
+          "name": "failedObjectWriteIsRecoveredBeforeAnotherRetry",
+          "status": "PASS"
+        },
+        {
+          "name": "receiptKeyCannotBeReusedAndMissingCommittedMetadataIsNotRecreated",
+          "status": "PASS"
+        },
+        {
+          "name": "runningArtifactsRemainAtOriginAndMissingHistoryBlocksImport",
+          "status": "PASS"
+        },
+        {
+          "name": "staleIntentRecoversOrphansAndNeverDeletesCommittedBytes",
+          "status": "PASS"
+        },
+        {
+          "name": "databaseRollbackRemovesOnlyNewObjectAndLeavesRetrySafe",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.P2D16PerformanceFlowTests",
+      "total": 56,
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "expectedStatusCodeBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "name": "steppedRequired",
+          "status": "PASS"
+        },
+        {
+          "name": "editValid",
+          "status": "PASS"
+        },
+        {
+          "name": "oldInvalidQueue",
+          "status": "PASS"
+        },
+        {
+          "name": "containsStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "requiredNull",
+          "status": "PASS"
+        },
+        {
+          "name": "steppedMutualExclusion",
+          "status": "PASS"
+        },
+        {
+          "name": "targetTpsExact",
+          "status": "PASS"
+        },
+        {
+          "name": "decimalBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "decimalPrecision",
+          "status": "PASS"
+        },
+        {
+          "name": "rendezvousUsersBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "decimalNull",
+          "status": "PASS"
+        },
+        {
+          "name": "threadCountExact",
+          "status": "PASS"
+        },
+        {
+          "name": "threadCountBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "textTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "rampUpSecondsBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "textNull",
+          "status": "PASS"
+        },
+        {
+          "name": "versionConflict",
+          "status": "PASS"
+        },
+        {
+          "name": "replay",
+          "status": "PASS"
+        },
+        {
+          "name": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "numericStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "steppedTps",
+          "status": "PASS"
+        },
+        {
+          "name": "rampUpSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "name": "stepIntervalSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "name": "permission",
+          "status": "PASS"
+        },
+        {
+          "name": "bodyStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "editInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "queryStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "durationSecondsBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "csvStrings",
+          "status": "PASS"
+        },
+        {
+          "name": "stepCountExact",
+          "status": "PASS"
+        },
+        {
+          "name": "syncConflict",
+          "status": "PASS"
+        },
+        {
+          "name": "p95ThresholdMillisBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "mapTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "decimalTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "decimalValid",
+          "status": "PASS"
+        },
+        {
+          "name": "rendezvousUsersExact",
+          "status": "PASS"
+        },
+        {
+          "name": "wrongTypes",
+          "status": "PASS"
+        },
+        {
+          "name": "fractions",
+          "status": "PASS"
+        },
+        {
+          "name": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "name": "multiGroupAtomic",
+          "status": "PASS"
+        },
+        {
+          "name": "expectedStatusCodeExact",
+          "status": "PASS"
+        },
+        {
+          "name": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "name": "overflow",
+          "status": "PASS"
+        },
+        {
+          "name": "durationSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "name": "steppedDuration",
+          "status": "PASS"
+        },
+        {
+          "name": "p95ThresholdMillisExact",
+          "status": "PASS"
+        },
+        {
+          "name": "stepCountBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "errorLocation",
+          "status": "PASS"
+        },
+        {
+          "name": "stepIntervalSecondsBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "name": "targetTpsBoundary",
+          "status": "PASS"
+        },
+        {
+          "name": "nonSteppedFields",
+          "status": "PASS"
+        },
+        {
+          "name": "optionalNull",
+          "status": "PASS"
+        },
+        {
+          "name": "headerStrings",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.PerformanceTestExecutionFlowTests",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "queuesImmutablePlanSnapshotAndAcceptsCancellationEvents",
+          "status": "PASS"
+        },
+        {
+          "name": "evaluatesFrozenThresholdsAndComparesWithThePreviousSuccessfulExecution",
+          "status": "PASS"
+        },
+        {
+          "name": "acceptsOnlyBoundedRunnerErrorAttributionFields",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.PerformanceTestExecutionArtifactFlowTests",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "archivesSignedRunnerOutputInMinioAndAllowsOnlyProjectScopedDownloads",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "copiesSafeTerminalReportWithoutCurrentPlanOrRunnerSideEffectsAndPreservesOrigin",
+          "status": "PASS"
+        },
+        {
+          "name": "ignoresActiveTasksAndIncludesMoreThanLegacyHundredWithoutTruncation",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidResourceAndSummaryCountersRollBackWithoutAnArchive",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsSameSourceRevisionWithDifferentContentAndRollsBackEarlierInsert",
+          "status": "PASS"
+        },
+        {
+          "name": "lateMetricsAndResourcesUpdateArchiveOnceWithCanonicalDecimals",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsMissingNumericFieldsAndNullPrimitiveValuesInsteadOfDefaultingToZero",
+          "status": "PASS"
+        },
+        {
+          "name": "accountPermissionCsrfReplayAndExportIntegrityAreProjectScoped",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsActiveReportsBadDigestUnknownFieldsAndNativeOverwrite",
+          "status": "PASS"
+        },
+        {
+          "name": "preservesOneMillisecondTimestampRoundingButRejectsLargerReversals",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.PerformanceTransferFlowTests",
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "httpEnforcesProjectAccountAndStrictPayloadScope",
+          "status": "PASS"
+        },
+        {
+          "name": "repeatedRequestReturnsSameReceiptAndNameConflictDoesNotOverwrite",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidSecondPlanRollsBackEarlierPlanAndReceipt",
+          "status": "PASS"
+        },
+        {
+          "name": "copiesAllLoadModelsAndInlineCsvAsEditableDraftWithoutExecution",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.PerformanceSyncFlowTests",
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "versionOrReadinessChangeAndDeleteInvalidateEntireOldBatch",
+          "status": "PASS"
+        },
+        {
+          "name": "auditFailureRollsBackPlanVersionThreadsAndReceipt",
+          "status": "PASS"
+        },
+        {
+          "name": "allDefinitionsPreserveIdentityStatusAndFrozenExecutionWithoutQueueingCopies",
+          "status": "PASS"
+        },
+        {
+          "name": "writersExactActorProjectAndCsrfRequired",
+          "status": "PASS"
+        },
+        {
+          "name": "mergedCountAndFinalBytesAreBoundedBeforeAnyDefinitionWrite",
+          "status": "PASS"
+        },
+        {
+          "name": "caseAndDatabaseCollationConflictsRollbackWholeBatch",
+          "status": "PASS"
+        },
+        {
+          "name": "archivedAndDraftStayIndependentAndVersionIncrementsOnlyOnWrittenTarget",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentAndLostResponseRetriesDoNotDuplicateIncrementOrOverwriteLaterEdits",
+          "status": "PASS"
+        },
+        {
+          "name": "unknownFieldsInvalidCsvTemplateHeaderAndDuplicateGroupsNeverWrite",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.PerformanceRunnerCapacityRecoveryFlowTests",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "exposesVerifiedCapacityAndSafelyHandlesDeferralAndRunnerLoss",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "total": 100,
+    "passed": 100,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ownedDataRemoved": true
+}

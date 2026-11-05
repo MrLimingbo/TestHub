@@ -1,6 +1,7 @@
 package io.testhub.platform.functional;
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.audit.AuditService;
@@ -53,12 +54,12 @@ public class FunctionalHistorySyncService {
         for(var run:history.export(project).runs()) {
             var row=rows.stream().filter(r->run.id().equals(r.get("id"))).findFirst().orElseThrow();String name=row.get("sync_key")==null?run.id():(String)row.get("sync_key");
             if(!planCodes.containsKey(run.planId())||run.cases().stream().anyMatch(c->!caseCodes.containsKey(c.caseId())))throw conflict("执行历史含项目外或失效的计划／用例，请先核对");
-            var d=new Definition(planCodes.get(run.planId()),run.name(),run.status(),run.startedAt(),run.finishedAt(),run.cases().stream().map(c->new CaseResult(caseCodes.get(c.caseId()),c.status(),c.note(),c.executedAt(),c.steps().stream().map(step->new StepResult(step.number(),step.text(),step.status(),step.actualResult(),step.updatedAt())).toList())).sorted(Comparator.comparing(CaseResult::caseCode)).toList());
+            var d=new Definition(planCodes.get(run.planId()),run.name(),run.status(),run.startedAt(),run.finishedAt(),run.cases().stream().map(c->new CaseResult(caseCodes.get(c.caseId()),c.status(),c.note(),c.executedAt(),c.steps().stream().map(step->new StepResult(step.number(),step.text(),step.status(),step.actualResult(),step.updatedAt())).toList(),c.titleSnapshot())).sorted(Comparator.comparing(CaseResult::caseCode)).toList());
             var item=new Item("RUN",name,json.convertValue(d,new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){}));validate(item);items.add(item);createdAt.put(key(item),run.createdAt());if(itemIds.put(key(item),run.id())!=null)throw conflict("执行历史来源标识重复，请先核对");
             var caseIds=new TreeMap<String,String>();var stepIds=new TreeMap<String,Map<Integer,String>>();for(var c:run.cases()){String code=caseCodes.get(c.caseId());caseIds.put(code,c.id());var map=new TreeMap<Integer,String>();for(var step:c.steps())map.put(step.number(),step.id());stepIds.put(code,map);}layouts.put(key(item),new Layout(run.planId(),caseIds,stepIds));
         }
         var raw=new ArrayList<Object>();for(var query:List.of("SELECT * FROM functional_test_run WHERE project_id=:p ORDER BY id","SELECT c.* FROM functional_test_run_case c JOIN functional_test_run r ON r.id=c.run_id WHERE r.project_id=:p ORDER BY c.id","SELECT s.* FROM functional_test_run_step s JOIN functional_test_run_case c ON c.id=s.run_case_id JOIN functional_test_run r ON r.id=c.run_id WHERE r.project_id=:p ORDER BY s.id"))raw.add(jdbc.sql(query).param("p",project).query().listOfRows());
-        var result=new Snapshot(1,"FUNCTIONAL_HISTORY_SYNC",project,actor.userId(),hash(encoded(List.of(raw,plans,cases))),items.stream().sorted(Comparator.comparing(this::key)).toList(),itemIds,plans,cases,layouts,createdAt);
+        var result=new Snapshot(1,"FUNCTIONAL_HISTORY_SYNC",project,actor.userId(),hash(encoded(List.of(raw,plans,cases))),items.stream().sorted(Comparator.comparing(this::key)).toList(),itemIds,plans,cases,layouts,createdAt,true);
         if(encoded(result).length>SNAPSHOT_BYTES)throw invalid("执行历史快照超过 3 MiB");return result;
     }
     private Map<String,String> assetIds(String project,String table,String column){var result=new TreeMap<String,String>();for(var row:jdbc.sql("SELECT id,"+column+" FROM "+table+" WHERE project_id=:p ORDER BY id").param("p",project).query().listOfRows())if(result.put((String)row.get(column),(String)row.get("id"))!=null)throw conflict("依赖编号重复，请先核对");return result;}
@@ -111,7 +112,7 @@ public class FunctionalHistorySyncService {
         else jdbc.sql("UPDATE functional_test_run SET name=:n,status=:s,started_at=:a,finished_at=:b,updated_at=GREATEST(CURRENT_TIMESTAMP(3),created_at) WHERE id=:i AND project_id=:p").param("n",d.title()).param("s",d.status()).param("a",d.startedAt()).param("b",d.finishedAt()).param("i",run).param("p",project).update();
         for(var c:d.cases()){
             String rc=layout==null?null:layout.caseIds().get(c.caseCode());var oldCase=before==null?null:before.cases().stream().filter(v->v.caseCode().equals(c.caseCode())).findFirst().orElseThrow();
-            if(rc==null){rc=UlidCreator.getUlid().toString();jdbc.sql("INSERT INTO functional_test_run_case(id,run_id,case_id,status,note,executed_at) VALUES(:i,:r,:c,:s,:n,:t)").param("i",rc).param("r",run).param("c",current.caseIds().get(c.caseCode())).param("s",c.status()).param("n",c.note()).param("t",c.executedAt()).update();}
+            if(rc==null){rc=UlidCreator.getUlid().toString();jdbc.sql("INSERT INTO functional_test_run_case(id,run_id,case_id,status,note,executed_at,title_snapshot) VALUES(:i,:r,:c,:s,:n,:t,:title)").param("i",rc).param("r",run).param("c",current.caseIds().get(c.caseCode())).param("s",c.status()).param("n",c.note()).param("t",c.executedAt()).param("title",c.titleSnapshot()).update();}
             else if(!List.of(c.status(),c.note(),Optional.ofNullable(c.executedAt())).equals(List.of(oldCase.status(),oldCase.note(),Optional.ofNullable(oldCase.executedAt()))))jdbc.sql("UPDATE functional_test_run_case SET status=:s,note=:n,executed_by=NULL,executed_at=:t WHERE id=:i").param("s",c.status()).param("n",c.note()).param("t",c.executedAt()).param("i",rc).update();
             for(var step:c.steps()){
                 String sid=layout==null?null:layout.stepIds().get(c.caseCode()).get(step.number());var old=oldCase==null?null:oldCase.steps().stream().filter(v->v.number()==step.number()).findFirst().orElseThrow();
@@ -121,7 +122,7 @@ public class FunctionalHistorySyncService {
         }
     }
     private Map<String,String> usedAssets(Item item,Snapshot snapshot){var d=definition(item);var m=new TreeMap<String,String>();m.put("PLAN\n"+d.planCode(),snapshot.planIds().get(d.planCode()));for(var c:d.cases())m.put("CASE\n"+c.caseCode(),snapshot.caseIds().get(c.caseCode()));return m;}
-    private List<Object> layout(Definition d){return List.of(d.planCode(),d.cases().stream().map(c->List.of(c.caseCode(),c.steps().stream().map(s->List.of(s.number(),s.text())).toList())).toList());}
+    private List<Object> layout(Definition d){return List.of(d.planCode(),d.cases().stream().map(c->List.of(c.caseCode(),Optional.ofNullable(c.titleSnapshot()),c.steps().stream().map(s->List.of(s.number(),s.text())).toList())).toList());}
     private void validateItems(List<Item> items) {
         if(items.size()>100) throw invalid("每项目最多同步 100 个执行批次");
         if(items.stream().mapToInt(i->definition(i).cases().size()).sum()>1000||items.stream().flatMap(i->definition(i).cases().stream()).mapToInt(c->c.steps().size()).sum()>5000)throw invalid("合并历史超过 1000 个用例或 5000 条步骤");
@@ -131,7 +132,7 @@ public class FunctionalHistorySyncService {
         if(item==null||!"RUN".equals(item.kind())||item.name()==null||!item.name().matches("[A-Z0-9]{26}")||item.definition()==null)throw invalid("执行历史来源标识无效");
         var d=definition(item);if(!code(d.planCode())||d.title()==null||d.title().isBlank()||d.title().length()>200||!Set.of("NOT_STARTED","RUNNING","COMPLETED").contains(d.status()==null?"":d.status())||d.cases()==null||d.cases().isEmpty()||d.cases().size()>1000)throw invalid("执行历史内容无效");
         var codes=new TreeSet<String>();int terminal=0,steps=0;time(d.startedAt());time(d.finishedAt());for(var c:d.cases()){
-            if(c==null||!code(c.caseCode())||!codes.add(c.caseCode())||!result(c.status())||c.note()==null||c.note().length()>20000||c.steps()==null||c.steps().size()>5000)throw invalid("历史用例无效");time(c.executedAt());if(!"NOT_RUN".equals(c.status()))terminal++;
+            if(c==null||!code(c.caseCode())||!codes.add(c.caseCode())||!result(c.status())||c.note()==null||c.note().length()>20000||c.steps()==null||c.steps().size()>5000)throw invalid("历史用例无效");if(c.titleSnapshot()!=null&&(c.titleSnapshot().isBlank()||c.titleSnapshot().length()>200))throw invalid("历史标题快照无效");time(c.executedAt());if(!"NOT_RUN".equals(c.status()))terminal++;
             int previous=0;for(var step:c.steps()){if(step==null||step.number()<=previous||step.number()>9999||step.text()==null||step.text().isBlank()||step.text().length()>20000||!result(step.status())||step.actualResult()==null||step.actualResult().length()>20000||("PASSED".equals(c.status())&&!"PASSED".equals(step.status())))throw invalid("历史步骤无效或通过结果不一致");previous=step.number();time(step.updatedAt());steps++;}
         }
         if(!d.cases().stream().map(CaseResult::caseCode).toList().equals(List.copyOf(codes))||steps>5000)throw invalid("历史用例须按编号排序且步骤不能超过 5000 条");
@@ -150,7 +151,7 @@ public class FunctionalHistorySyncService {
     private String hash(byte[] bytes) {try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));}catch(java.security.NoSuchAlgorithmException e){throw new IllegalStateException(e);}}
     private ResponseStatusException invalid(String message) {return new ResponseStatusException(HttpStatus.BAD_REQUEST,message);}
     private ResponseStatusException conflict(String message) {return new ResponseStatusException(HttpStatus.CONFLICT,message);}
-    public record Snapshot(int version,String scope,String projectId,String actorId,String revision,List<Item> items,Map<String,String> itemIds,Map<String,String> planIds,Map<String,String> caseIds,Map<String,Layout> layouts,Map<String,java.time.Instant> createdAt) { }
+    public record Snapshot(int version,String scope,String projectId,String actorId,String revision,List<Item> items,Map<String,String> itemIds,Map<String,String> planIds,Map<String,String> caseIds,Map<String,Layout> layouts,Map<String,java.time.Instant> createdAt,boolean titleSnapshotsSupported) { }
     public record Item(String kind,String name,Map<String,Object> definition) { }
     public record Operation(String operationId,Item item,java.time.Instant createdAt) { }
     public record Request(String requestKey,String expectedUserId,String expectedRevision,List<Operation> operations) { }
@@ -158,6 +159,11 @@ public class FunctionalHistorySyncService {
     public record Receipt(String requestKey,List<Result> results) { }
     public record Layout(String planId,Map<String,String> caseIds,Map<String,Map<Integer,String>> stepIds) { }
     public record Definition(String planCode,String title,String status,java.time.Instant startedAt,java.time.Instant finishedAt,List<CaseResult> cases) { }
-    public record CaseResult(String caseCode,String status,String note,java.time.Instant executedAt,List<StepResult> steps) { }
+    public record CaseResult(String caseCode,String status,String note,java.time.Instant executedAt,List<StepResult> steps,
+                             @JsonInclude(JsonInclude.Include.NON_NULL) @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using=FunctionalTitleSnapshot.class) String titleSnapshot) {
+        public CaseResult(String caseCode,String status,String note,java.time.Instant executedAt,List<StepResult> steps) {
+            this(caseCode,status,note,executedAt,steps,null);
+        }
+    }
     public record StepResult(int number,String text,String status,String actualResult,java.time.Instant updatedAt) { }
 }

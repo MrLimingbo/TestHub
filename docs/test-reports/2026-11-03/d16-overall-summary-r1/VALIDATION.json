@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-03",
+  "scope": "Document aggregation only; not product tests",
+  "checks": {
+    "approvalRecords": 6,
+    "approvedModules": 6,
+    "formalCaseRecordsChecked": 189,
+    "formalCaseRecordFailures": 0,
+    "testMethodCountSourcesChecked": 2,
+    "frozenArtifactHashChecks": [
+      {
+        "module": "接口自动化",
+        "frozenArtifactEntries": 35,
+        "mismatches": 0
+      },
+      {
+        "module": "Mock",
+        "frozenArtifactEntries": 36,
+        "mismatches": 0
+      },
+      {
+        "module": "性能测试",
+        "frozenArtifactEntries": 35,
+        "mismatches": 0
+      },
+      {
+        "module": "Web UI自动化",
+        "frozenArtifactEntries": 38,
+        "mismatches": 0
+      }
+    ],
+    "totalFrozenArtifactHashesMatched": 144,
+    "observationRecords": 47,
+    "resultsApproved": 38,
+    "deferredObservations": 9,
+    "environmentBlockers": 12,
+    "riskStatus": "UNCONFIRMED_RETAINED",
+    "riskRootCauseConfirmed": false,
+    "sourceFileHashesMatched": 45,
+    "localReportLinksChecked": 42,
+    "missingLocalReportLinks": 0,
+    "documentDiffCheck": "PASS"
+  },
+  "errors": []
+}

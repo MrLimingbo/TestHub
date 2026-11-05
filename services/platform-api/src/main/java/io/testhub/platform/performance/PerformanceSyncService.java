@@ -80,7 +80,7 @@ public class PerformanceSyncService {
         try {
             return json.readerFor(Request.class).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                     DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(body);
-        } catch (java.io.IOException error) { throw invalid("性能同步 JSON 格式不合法或包含不支持的字段"); }
+        } catch (java.io.IOException error) { throw PerformanceJson.rejected(error, "性能同步 JSON 格式不合法或包含不支持的字段"); }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)

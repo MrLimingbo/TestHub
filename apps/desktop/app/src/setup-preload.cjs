@@ -3,6 +3,8 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('testhubDesktop', Object.freeze({
+  readOperationStatus: () => ipcRenderer.invoke('testhub-desktop:read-operation:status'),
+  cancelReadOperation: id => ipcRenderer.invoke('testhub-desktop:read-operation:cancel', id),
   openProjectFileSync: () => ipcRenderer.invoke('testhub-desktop:project-file-sync:open'),
   projectFileSyncStatus: () => ipcRenderer.invoke('testhub-desktop:project-file-sync:status'),
   projectFileSyncContext: () => ipcRenderer.invoke('testhub-desktop:project-file-sync:context'),
@@ -355,3 +357,12 @@ contextBridge.exposeInMainWorld('testhubDesktop', Object.freeze({
   loadExecutionOrigins: () => ipcRenderer.invoke('testhub-desktop:execution:load'),
   saveExecutionOrigins: value => ipcRenderer.invoke('testhub-desktop:execution:save', value),
 }))
+
+// The shared control is available only on native preview pages, under the page's existing CSP.
+if (process.isMainFrame) globalThis.addEventListener('DOMContentLoaded', () => {
+  const page = globalThis.location.pathname
+  if (page !== '/transfer.html' && !page.endsWith('-transfer.html') && !page.endsWith('-sync.html')) return
+  const script = globalThis.document.createElement('script')
+  script.src = 'testhub-desktop://setup/read-operation.js'
+  globalThis.document.head.append(script)
+}, { once: true })

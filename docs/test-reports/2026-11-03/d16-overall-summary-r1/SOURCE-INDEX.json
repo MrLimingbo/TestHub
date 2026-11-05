@@ -1,0 +1,187 @@
+{
+  "date": "2026-11-03",
+  "evidencePeriod": "2026-11-02..2026-11-03 (D16); original baseline 2026-10-23..2026-10-28",
+  "newProductTestExecutionThisSummary": false,
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/FINAL-REPORT.md",
+      "sha256": "ed518a9d728901d02863dba7a6769f56316ac1ab502b6e36429ac95dda053877"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "981095537fc1a9c0c89e0a02fc3452aaca5fb0dabea5000690be2e088e3c6346"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/REPRODUCTION-AND-REGRESSION.md",
+      "sha256": "0f6d7f00b99e765d958e089dc81250677c685a8ae04c12f60976b869c9ff896e"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/CASE-RESULTS.json",
+      "sha256": "01e28284c02a87df2ca2e61f3ba5593ad3e6bbd95998d6a3aa20667f3e300fcf"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/ENGINEERING-RESULTS.json",
+      "sha256": "36cf359523f4854563af5aca74b24d4378961f0035a2e8a6202aa841a6530d61"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/VERIFICATION-MANIFEST.json",
+      "sha256": "50e44c54dd7e802b0d3df3224889934b3f216ff2ae738b2950395eacec47b4b7"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "b22c3244fdbcfbb9c2b85033104a6a015e2aff409d96ca33acae830583a42f30"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/FINAL-REPORT.md",
+      "sha256": "cc480236ab33b57581b651597e0814a3366f3a455b37be99c248eed90d63db91"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "c38ffab6245d2fbc045a009650df5c8ca65ba61e721fb5442cb76225b3e7a2d6"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/REPRODUCTION-AND-REGRESSION.md",
+      "sha256": "042efaad9362c3c717ccb84da7559c7d3fc402cc7acd706ce0584909bc973650"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/CASE-RESULTS.json",
+      "sha256": "38b208680b6fb9f8dfc2c8ec862b99056c07b6c46357ae740246ba4f76ce5b78"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/ENGINEERING-RESULTS.json",
+      "sha256": "522e4f6e2e943269f817b394accf088f887470034bc892fa9fcdc523e067b7a8"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/VERIFICATION-MANIFEST.json",
+      "sha256": "acb5730024ffe3c5b936ee42093e8936d4117191a0bc12ee66e8337540d0dc24"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "f98d59e94bce620922d33e63b90eb5437364f37c88d61e238084667ef038cc23"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/FINAL-REPORT.md",
+      "sha256": "924a646c5bcab978338714a64f5a7fa089b15f6b5dfa687a4920e80eb0409ac6"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "5c93915fccae84befb19324c11a9d9a18a96611876d46db7113b1e14aae94ba9"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/REPRODUCTION-AND-REGRESSION.md",
+      "sha256": "0445333b48508fbd0b43d5044f70f231b684bf5fa9742ca7dda03852b48654ed"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/CASE-RESULTS.json",
+      "sha256": "a88d0fda2d43c2375f4f6d526d0e5089eb9da69fc09856a3ae7a9bd0aab2deef"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/ENGINEERING-RESULTS.json",
+      "sha256": "28665fdabcc6162fb6f9f5a04aad388538cec7b4e2aba62daefdeb2f88153eb8"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/VERIFICATION-MANIFEST.json",
+      "sha256": "b1298eb337d66051870bfb6c63cfab8c90108c24ed3d4c0effe36ab7f872ef90"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "dd497b6fcbdd73a72a50883d0b11061bdbf42625f7d3bfc660f573108b58a808"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/FINAL-REPORT.md",
+      "sha256": "2349d16b949430f2b24c27055a61b0dcf65623a39d7f36eaf3744a1e388ea002"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "8becc29e32d6c01d6b922659586bd6cf5e34aa2dc4b9f5827c55bd10bc43f1e7"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/REPRODUCTION-AND-REGRESSION.md",
+      "sha256": "d9d7bee8d2154e0552b9392c031c81adfe2235f60373eaacf68b0fb516c51ca0"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/CASE-RESULTS.json",
+      "sha256": "d6732ed8f4396fcd333fe0adc5573f7f84aaa23adbf08c18b2be5df86c1ca3bb"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/ENGINEERING-RESULTS.json",
+      "sha256": "0e5f63714dd22f451ab8440dc85dc2b6ad8b66957bd80e3e8980681acc9b427d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/VERIFICATION-MANIFEST.json",
+      "sha256": "2e74279636ddfd8dbd19cbb22ae945f9ea6fe08b16a30515b8a82846bcd4c0f5"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "42bf7c5dd0a747d4d967e1e293956e7e35b0607aacd36b041f329d4068742c55"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-mobile-fixes-r1/FINAL-REPORT.md",
+      "sha256": "b9b5c4a633f7d2efc1ce66c8d72f2bee9338b36df72a41bc772fba6cc9722444"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-mobile-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "400748799cac0af7ee556e52ca47a23f404020157ac052c1f44fe7d718f22464"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-mobile-fixes-r1/REPRODUCTION-AND-REGRESSION.md",
+      "sha256": "c4fd07fcfd4cfd7b64990df9dfcfeefc39f8a03d52decb2aa416c33a6aefdd1f"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-mobile-fixes-r1/RESULTS.json",
+      "sha256": "862db836c0794b79439a187f395c8d36027df467f4a6a788a0c763f97664d5d1"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-mobile-fixes-r1/TEST-PLAN.md",
+      "sha256": "d1608b5bd174a0a9c54379d2d066a19aff2710cc4bd0f30349a7dc22f3d51a58"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-quality-task-fixes-r1/FINAL-REPORT.md",
+      "sha256": "ed16183defba5de2be7a9e42939f08feefeec2ec73d121a78c94a1c0a272e3ac"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-quality-task-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "d64a440469a44a1950bbd90ba2dc02496ebfebefa593f1aae97d52b736797ab3"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-quality-task-fixes-r1/REPRODUCTION-AND-REGRESSION.md",
+      "sha256": "e20d6583ec4e5625cc994b526dcec1ab0c5c49aeebe6d11a91a93d26be1d1549"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-quality-task-fixes-r1/RESULTS.json",
+      "sha256": "aa5ffdb1f48be13909d7d33c922feeb53bab453c0314f791aa254434f08161a0"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-quality-task-fixes-r1/TEST-PLAN.md",
+      "sha256": "bd0cf7b5a9f4adfeb5730f02d71a2bdcd2e3666ed601b34727798baf26216252"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/ENVIRONMENT-BLOCKERS.json",
+      "sha256": "e957d72701b0ab230744231872b3f07339e22284f4510f23614c35545b1afa00"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/UNCONFIRMED-RISK.json",
+      "sha256": "0124f934bbc71e61718ee1675960fc43c228ce834e94b1773bf557c66448a5a9"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/OVERALL-TEST-REPORT.md",
+      "sha256": "3007eff0cfcea14a9a70fcb2e8b7663fe428bffca461022219afb90062324093"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/MODULE-RESULTS.csv",
+      "sha256": "a71c3591931b1435b4db4484792179d8b4eb024e60d9383055be5d1425ef1b6d"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv",
+      "sha256": "9fe3a04a490dba8008ecbf06b0d69440326dcbb2d87206c78193a3fad2234a7c"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "ff13bab3a7282612746835ad181ee82f23b813be54a4119d079cc879e523e0ad"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/OBSERVATION-STATUS.json",
+      "sha256": "1846629d896ceb4edefb5355a2f23614862d12cbe2c104ea70a78d30950cbe8f"
+    }
+  ]
+}

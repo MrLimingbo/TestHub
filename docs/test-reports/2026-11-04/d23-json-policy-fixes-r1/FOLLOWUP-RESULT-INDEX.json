@@ -1,0 +1,8 @@
+{
+  "date": "2026-11-04",
+  "latestReport": "../d23-json-policy-fixes-r2/FINAL-REPORT.md",
+  "latestReportSha256": "ebfed0724175ad10cf6042a6585682bc01346c8ef511ec6d6e89a13707acfdc3",
+  "bugStatus": "FIXED_PENDING_USER_REVIEW",
+  "resultReviewApproved": false,
+  "r1SnapshotUnchanged": true
+}

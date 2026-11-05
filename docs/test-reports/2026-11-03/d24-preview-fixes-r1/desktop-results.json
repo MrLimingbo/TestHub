@@ -1,0 +1,12 @@
+{
+  "command": "node --test apps/desktop/test/*.test.cjs",
+  "exitCode": 0,
+  "total": 756,
+  "passed": 755,
+  "failed": 0,
+  "skipped": 1,
+  "newD24MethodsIncluded": 17,
+  "skippedTest": "Windows PowerShell loads signature and installation cmdlets under a PS7 parent",
+  "skipReason": "Platform-specific Windows test skipped on current macOS host",
+  "doesNotCloseHistoricalEnvironmentBlockers": true
+}

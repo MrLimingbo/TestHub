@@ -1,0 +1,1296 @@
+{
+  "formalCases": 63,
+  "positive": 27,
+  "negative": 36,
+  "passed": 63,
+  "failed": 0,
+  "blocked": 0,
+  "notExecuted": 0,
+  "countsNotAdditive": true,
+  "cases": [
+    {
+      "id": "TC-D16PERF-01",
+      "title": "threadCount精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "threadCountExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "threadCountExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-02",
+      "title": "rampUpSeconds精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "rampUpSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "rampUpSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-03",
+      "title": "durationSeconds精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "durationSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "durationSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-04",
+      "title": "stepCount精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepCountExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepCountExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-05",
+      "title": "stepIntervalSeconds精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepIntervalSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepIntervalSecondsExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-06",
+      "title": "targetTps精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "targetTpsExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "targetTpsExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-07",
+      "title": "p95ThresholdMillis精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "p95ThresholdMillisExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "p95ThresholdMillisExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-08",
+      "title": "expectedStatusCode精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "expectedStatusCodeExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "expectedStatusCodeExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-09",
+      "title": "rendezvousUsers精确整数等值写法",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "rendezvousUsersExact",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "rendezvousUsersExact",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-10",
+      "title": "threadCount边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "threadCountBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "threadCountBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-11",
+      "title": "rampUpSeconds边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "rampUpSecondsBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "rampUpSecondsBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-12",
+      "title": "durationSeconds边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "durationSecondsBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "durationSecondsBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-13",
+      "title": "stepCount边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepCountBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepCountBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-14",
+      "title": "stepIntervalSeconds边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "stepIntervalSecondsBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "stepIntervalSecondsBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-15",
+      "title": "targetTps边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "targetTpsBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "targetTpsBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-16",
+      "title": "p95ThresholdMillis边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "p95ThresholdMillisBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "p95ThresholdMillisBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-17",
+      "title": "expectedStatusCode边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "expectedStatusCodeBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "expectedStatusCodeBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-18",
+      "title": "rendezvousUsers边界及关联可行上限",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "rendezvousUsersBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "rendezvousUsersBoundary",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-19",
+      "title": "九类整数字段非整数拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "fractions",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "fractions",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-19/20/21/22/40/41/56",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-20",
+      "title": "数值字符串不能绕过九整数约束",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "numericStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "numericStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-19/20/21/22/40/41/56",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-21",
+      "title": "数值字段布尔和容器错误类型",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "wrongTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "wrongTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-19/20/21/22/40/41/56",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-22",
+      "title": "大整数指数及原始非有限JSON拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "overflow",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "overflow",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-19/20/21/22/40/41/56",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-23",
+      "title": "三必填整数缺失和真实null",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "requiredNull",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "requiredNull",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-24",
+      "title": "可选数值缺失和null保持无设置",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "optionalNull",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "optionalNull",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-25",
+      "title": "阶梯阶段及间隔必须提供",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "steppedRequired",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "steppedRequired",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-26",
+      "title": "非阶梯禁止阶段参数",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "nonSteppedFields",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "nonSteppedFields",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-27",
+      "title": "阶梯总时长临界与溢出",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "steppedDuration",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "steppedDuration",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-28",
+      "title": "阶梯TPS与阶段数关系",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "steppedTps",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "steppedTps",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-29",
+      "title": "阶梯加压时长与集合点互斥",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "steppedMutualExclusion",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "steppedMutualExclusion",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-30",
+      "title": "错误率真小数保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "decimalValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "decimalValid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-30/31/32/33/34",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-31",
+      "title": "错误率超过两位精度不舍入",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "decimalPrecision",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "decimalPrecision",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-30/31/32/33/34",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-32",
+      "title": "错误率0与100边界",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "decimalBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "decimalBoundary",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-30/31/32/33/34",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-33",
+      "title": "错误率数字字符串和类型错误",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "decimalTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "decimalTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-30/31/32/33/34",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-34",
+      "title": "错误率缺失null无阈值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "decimalNull",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "decimalNull",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-30/31/32/33/34",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-35",
+      "title": "请求头显式字符串保真",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "headerStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "headerStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-35/36/37/44",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-36",
+      "title": "query显式字符串保真",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "queryStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "queryStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-35/36/37/44",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-37",
+      "title": "请求正文JSON字符串可用",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "bodyStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "bodyStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-35/36/37/44",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-38",
+      "title": "响应包含断言字符串与trim保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "containsStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "containsStrings",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-39",
+      "title": "CSV模板与字符串数据保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "csvStrings",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "csvStrings",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-40",
+      "title": "Header和query非字符串值拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "mapTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "mapTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-19/20/21/22/40/41/56",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-41",
+      "title": "正文断言CSV非字符串拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "textTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "textTypes",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-19/20/21/22/40/41/56",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-42",
+      "title": "文本真实null及缺失语义保持",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "textNull",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "textNull",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-43",
+      "title": "合法编辑版本与历史清单冻结",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "editValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "editValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-44",
+      "title": "非法编辑不动原计划版本",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "editInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "editInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-35/36/37/44",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-45",
+      "title": "多线程组晚项非法整批原子",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "multiGroupAtomic",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "multiGroupAtomic",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-46",
+      "title": "合法迁移精确整数与小数",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "transferValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "transferValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-47",
+      "title": "非法迁移类型不得转换后入库",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "transferInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-47/49",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-48",
+      "title": "合法同步等值数字保持规范协议",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "syncValid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "syncValid",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-49",
+      "title": "非法同步不得绕过字段类型",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "syncInvalid",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-47/49",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-50",
+      "title": "存量读取不批量改写",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "oldReadOnly",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-50",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-51",
+      "title": "旧非法定义新入队前拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "oldInvalidQueue",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "oldInvalidQueue",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-52",
+      "title": "项目写权限与范围保持",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "permission",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "permission",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-53",
+      "title": "更新版本必填与冲突保持",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "versionConflict",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "versionConflict",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-54",
+      "title": "同步过期revision保持",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "syncConflict",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "syncConflict",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-55",
+      "title": "迁移同步回执重放幂等",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "replay",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "replay",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-56",
+      "title": "字段及线程组索引定位且不泄密",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "backend-h2.json",
+          "test": "errorLocation",
+          "status": "PASS"
+        },
+        {
+          "file": "backend-mysql.json",
+          "test": "errorLocation",
+          "status": "PASS"
+        },
+        {
+          "file": "native-http.json",
+          "test": "TC-D16PERF-19/20/21/22/40/41/56",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-57",
+      "title": "页面九整数非法输入保留并阻止保存",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-57/58: integer text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-57: invalid integer text blocks submission and keeps the dialog",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16PERF-57",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-58",
+      "title": "页面精确整数写法转JSON数值",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-57/58: integer text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-58: exact integer spellings submit numbers",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16PERF-58",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-59",
+      "title": "页面错误率不四舍五入",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-59/60: decimal percentage precision and optional semantics remain distinct",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-59: error percent is not rounded before validation",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16PERF-59",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-60",
+      "title": "页面可选清空和模型切换",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-59/60: decimal percentage precision and optional semantics remain distinct",
+          "status": "PASS"
+        },
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-60: optional blanks and model changes keep null policy",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16PERF-60",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-61",
+      "title": "页面多组原输入独立",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "frontend-final.json",
+          "test": "TC-D16PERF-61: removing a group retains the surviving group raw values",
+          "status": "PASS"
+        },
+        {
+          "file": "headless-ui.json",
+          "test": "TC-D16PERF-61",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-62",
+      "title": "Runner坏数字文本受控预检拒绝",
+      "polarity": "negative",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "runner-final.json",
+          "test": "TC-D16PERF-62",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "TC-D16PERF-63",
+      "title": "Runner原协议精确合法值兼容",
+      "polarity": "positive",
+      "status": "PASS",
+      "evidence": [
+        {
+          "file": "runner-final.json",
+          "test": "TC-D16PERF-63",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

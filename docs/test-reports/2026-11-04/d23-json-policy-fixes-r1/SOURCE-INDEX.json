@@ -1,0 +1,77 @@
+{
+  "date": "2026-11-04",
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/RULES-AND-ACCEPTANCE.md",
+      "sha256": "f90c859b9bf5294cddf313680517893949d4e832a83bf9f55d063e11cf022904"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "aa1736e229adee1500d5e4eda0cf152568e63343b24966a7de405e322d738824"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "08400708ae511537417337c2590441d32ddacf4f8b27455ae440df713a437c1d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r1/TEST-CASES.json",
+      "sha256": "1d66cc67df5cc0ecb23c42ddadbeb4f8b1f315d42776782916d1602f06e10b0b"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r1/TEST-PLAN.md",
+      "sha256": "62459747241d121e22908e51a1b6ef43df46e1745f84a579a65a448097125955"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r1/SCOPE-INVENTORY.md",
+      "sha256": "29b94266c10537d55ea1956688bb4542c73f1ebeb95247ed4f54a888705ac748"
+    },
+    {
+      "path": "docs/notification-extension-json-contract.md",
+      "sha256": "c3286b3dc41788c1fc1d85a2ad4e4064600a21473fb17c82d7bd1dd56b6cf17c"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryController.java",
+      "sha256": "3503c5510704c64c5e945208131c14f68799a2713bf40e1b36ef8ecc9c5f43fb"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/notification/NotificationTemplateController.java",
+      "sha256": "55d4334358a09650eb5ca8fb31bd376e57304b637f649e148f01c4d11b6560de"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "sha256": "e5c9a3e53cf08068b75aa2e6c87c989ed2c672ee3f643e634e3567be3704f7a0"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryService.java",
+      "sha256": "8089fb4ce4570d609c5a0eb14691aec70388e3da49bbc141a4afab2ad7b84d90"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryRepository.java",
+      "sha256": "43cbc486ae4b2b551102f4c885b099b0568732a72484470ce547fc51e5468fee"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/PluginManifest.java",
+      "sha256": "124c44b08f318716c06fc6a4831939620b1d01b2e8573c4fe3b3b3e617500541"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/notification/NotificationTransferService.java",
+      "sha256": "60da40c13945b08f590a9cca1181e45617bc1cf894b472690062edd0b2e49738"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/notification/NotificationSyncService.java",
+      "sha256": "62dee64cce967ae514ab84c0226b45494afb7a1f20236211ad735ef5895dabad"
+    },
+    {
+      "path": "services/platform-api/src/main/resources/application.yml",
+      "sha256": "9a8e12e20e2c7ff787dfad2d700b9dc16991c04056c58036a8418695e8d6cff6"
+    }
+  ],
+  "testBasisInputs": 2,
+  "extractionStatus": "2_EXTRACTED_0_WARNINGS",
+  "ruleScope": "D23 section only,4outer DTOs6write routes;no arbitrary inner manifest policy",
+  "backendEvidence": "MockMvc with real MVC converter, validation, authentication,CSRF and business services;isolated per-class databases and per-method rollback",
+  "frontendEvidence": "Existing module component suites only,no newUI methods",
+  "standaloneDuplicateObservation": "X01 collected separately;500 is an open defect,not accepted merely because diagnostic method completes",
+  "shutdownRiskRechecked": false,
+  "installedDesktopUpgradeExecuted": false
+}

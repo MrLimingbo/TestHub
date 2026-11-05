@@ -1,0 +1,88 @@
+{
+  "before": {
+    "backend": {
+      "total": 45,
+      "passed": 28,
+      "failed": 17,
+      "errors": 0
+    },
+    "page": {
+      "total": 6,
+      "passed": 2,
+      "failed": 4
+    },
+    "RunnerNewPreflight": {
+      "total": 5,
+      "passed": 1,
+      "failed": 4
+    }
+  },
+  "after": {
+    "frontend": {
+      "total": 917,
+      "passed": 917,
+      "failed": 0
+    },
+    "H2": {
+      "total": 1268,
+      "passed": 1265,
+      "failed": 0,
+      "skipped": 3
+    },
+    "H2FinalFixtureFollowup": {
+      "total": 45,
+      "passed": 45
+    },
+    "MySQLAffected": {
+      "suites": 7,
+      "total": 86,
+      "passed": 86,
+      "failed": 0,
+      "skipped": 0
+    },
+    "Runner": {
+      "total": 20,
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browserGroups": {
+      "total": 7,
+      "passed": 7
+    },
+    "nativeHttpGroups": {
+      "total": 7,
+      "passed": 7
+    },
+    "lintTypecheckBuild": true
+  },
+  "formalCases": 56,
+  "countsNotAdditive": true,
+  "automaticRetryIntermediateRegression": {
+    "total": 45,
+    "passed": 44,
+    "failed": 1,
+    "errors": 0,
+    "final": "PASS: failure audit and original FAILED preserved without new retry assets"
+  },
+  "finalFrontendFollowup": {
+    "total": 8,
+    "passed": 8
+  },
+  "observationFixed": "OBS-11-E021",
+  "newConfirmedProductBugs": 0,
+  "historical108BugsAnd1AssetFrozen": true,
+  "redLoopCaveat": "首个断言失败后的后续变体不冒称修复前全部动态运行；最终变体已执行。",
+  "syncBaselineNote": "原完整规范化比较已拒绝不少非法同步，原精确浮点等值也被拒绝；本次仅允许批准数字节点等值并保留解析精度，避免新策略引入舍入绕过。不宣称原非法同步全部可通过。",
+  "fixtureCorrections": [
+    "MySQL使用企业来源策略，测试类显式配置自有库来源白名单，不改产品来源授权规则。",
+    "存量无效小数用可精确表示的1000.5并断言持久化前提；无法保留原精度的旧数据不反推。原始微小小数仍在新写入/同步/HTTP测试拒绝。补充旧数字变量及越界视口入队验证。",
+    "后台浏览器夹具采用真实Arco标签文本定位，静态服务先读文件再发响应头；失败调试不计产品Bug。"
+  ],
+  "browserScope": "UI6组受控HTTP夹具 +1组真实Chrome/实际Runner.step本机loopback流程；不是部署远端队列服务。",
+  "warnings": [
+    "既有两条vue/require-prop-types警告",
+    "Monaco依赖source map提示",
+    "Vite大块建议"
+  ]
+}

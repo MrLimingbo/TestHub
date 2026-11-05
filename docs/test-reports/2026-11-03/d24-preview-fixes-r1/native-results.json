@@ -1,0 +1,37 @@
+{
+  "passed": 4,
+  "failed": 0,
+  "cases": [
+    {
+      "id": "E01",
+      "status": "PASS",
+      "feedbackMilliseconds": 6,
+      "terminationMilliseconds": 6
+    },
+    {
+      "id": "E02",
+      "status": "PASS",
+      "closeMilliseconds": 28
+    },
+    {
+      "id": "E03",
+      "status": "PASS",
+      "feedbackMilliseconds": 1,
+      "waitingMilliseconds": 5257,
+      "terminationMilliseconds": 6499
+    },
+    {
+      "id": "E04",
+      "status": "PASS",
+      "latePlanDiscarded": true,
+      "newWindowDraftPreserved": true,
+      "freshTokenValid": true
+    }
+  ],
+  "windowsCreated": 5,
+  "visibleViolations": 0,
+  "unexpectedDialogs": 0,
+  "businessWrites": 0,
+  "scope": "Production helper + IPC + preload + page in real offscreen Electron, controlled transports; not an installed app upgrade",
+  "ownedWorkspaceRemoved": true
+}

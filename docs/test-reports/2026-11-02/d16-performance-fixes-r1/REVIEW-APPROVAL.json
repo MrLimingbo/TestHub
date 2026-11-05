@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-02",
+  "status": "APPROVED",
+  "basis": "用户消息：审核通过 继续；批准性能结果并进入Web，不预先批准Web结果。",
+  "approvedObservation": "OBS-10-E011",
+  "acceptedResults": {
+    "formalCases": 63,
+    "positive": 27,
+    "negative": 36,
+    "passed": 63,
+    "failed": 0,
+    "blocked": 0
+  },
+  "snapshotSha256": "68f0cd2a3a131db64818466cd52c7c0e305ebfc99344ce8470aa2486b652d20b",
+  "nextModule": "Web UI自动化",
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

@@ -1,0 +1,41 @@
+{
+  "status": "SKIPPED_BY_USER_SPEC_RETAINED",
+  "validCompleteWindows": 0,
+  "requiredCompleteWindows": 2,
+  "restoreExecuted": false,
+  "observations": [
+    "OBS-16-E001",
+    "OBS-16-E002"
+  ],
+  "attemptHistory": [
+    {
+      "batch": "R1",
+      "formalAttempts": 1,
+      "valid": false,
+      "actualDurationSeconds": 1650.000353458,
+      "reason": "EXTERNAL_CPU_POLLUTION",
+      "businessRequests": 1645,
+      "businessErrors": 0,
+      "probes": 108,
+      "probeErrors": 0,
+      "formalFunctionalCaseCountAdded": 0
+    },
+    {
+      "batch": "R2",
+      "formalAttempts": 0,
+      "valid": false,
+      "reason": "No quiet 120-second interval within 30 minutes",
+      "precheckOperationClassesPassed": 6
+    },
+    {
+      "batch": "R3",
+      "formalAttempts": 0,
+      "valid": false,
+      "reason": "用户要求所有阻塞流程先跳过，推进非阻塞未完成工作",
+      "standbySamplesRetained": 1183,
+      "maximumQuietSeconds": 115.10695837499998
+    }
+  ],
+  "ownedCleanupComplete": true,
+  "budgetLeakSlaComplianceAssessed": false
+}

@@ -1,5 +1,7 @@
 package io.testhub.platform.uiautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
@@ -293,7 +295,12 @@ public class UiAutomationService {
     public UiAutomationRunnerRuntimeConfiguration runtimeConfiguration(String runnerId, String taskId, String executionId) {
         UiAutomationExecution execution = automation.findExecutionByTask(taskId, executionId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.FORBIDDEN, "Playwright Runner 运行时工件不可用"));
+        automation.requireRuntimeTypes(execution.projectId(), execution.id());
         UiAutomationManifest manifest = automation.findManifest(execution.projectId(), execution.id()).orElseThrow();
+        variables(manifest.snapshot().scenario().variables());
+        steps(execution.projectId(), manifest.snapshot().scenario().steps().stream().map(step -> new UiAutomationStep(
+                step.id(), step.type(), step.name(), step.selector(), null, step.value(), step.url(),
+                step.expectedText(), step.timeoutMillis())).toList());
         UiAutomationManifest.BrowserProfile profile = manifest.snapshot().browserProfile();
         String baseUrl = targets.normalizeAndAssertAllowed(profile.baseUrl());
         if (automation.markRuntimeClaimed(taskId, executionId, runnerId) == 0) {
@@ -330,9 +337,11 @@ public class UiAutomationService {
     private UiAutomationExecution queueExecution(String organizationId, String projectId, String requestedBy, String scenarioId,
                                                  int timeout, UiAutomationSchedule schedule, FunctionalTestPlan plan,
                                                  UiAutomationExecution retryOf, int retryAttempt, Instant requestedAt) {
-        UiAutomationScenario scenario = scenario(projectId, scenarioId);
+        UiAutomationScenario scenario = executableScenario(projectId, scenarioId);
         UiAutomationBrowserProfile profile = profile(projectId, scenario.browserProfileId());
         if (!profile.enabled()) throw conflict("浏览器配置已停用，不能执行场景");
+        validateExecutionDefinition(projectId, scenario, profile);
+        timeout(timeout);
         String executionId = UlidCreator.getUlid().toString();
         String taskId = UlidCreator.getUlid().toString();
         Instant deadlineAt = requestedAt.plusSeconds(timeout);
@@ -348,6 +357,19 @@ public class UiAutomationService {
         return execution;
     }
 
+    private void validateExecutionDefinition(String projectId, UiAutomationScenario scenario, UiAutomationBrowserProfile profile) {
+        integer(profile.viewportWidth(), 1440, 320, 3840, "视口宽度");
+        integer(profile.viewportHeight(), 900, 320, 2160, "视口高度");
+        variables(scenario.variables());
+        steps(projectId, scenario.steps());
+    }
+
+    private UiAutomationScenario executableScenario(String projectId, String scenarioId) {
+        // Inspect raw JSON before the legacy reader can coerce values or reject them without a field error.
+        automation.requireExecutableTypes(projectId, scenarioId);
+        return scenario(projectId, scenarioId);
+    }
+
     private void onTerminal(UiAutomationExecution execution) {
         if (execution.scheduleId() == null) return;
         UiAutomationSchedule schedule = schedules.findById(execution.scheduleId()).orElse(null);
@@ -355,6 +377,18 @@ public class UiAutomationService {
         schedules.markOutcome(schedule.id(), execution.id(), execution.status());
         if (!Set.of("FAILED", "REJECTED", "TIMED_OUT").contains(execution.status()) || !schedule.enabled()
                 || execution.retryAttempt() >= schedule.maxRetryAttempts()) return;
+        try {
+            UiAutomationScenario current = executableScenario(schedule.projectId(), schedule.scenarioId());
+            validateExecutionDefinition(schedule.projectId(), current, profile(schedule.projectId(), current.browserProfileId()));
+            timeout(schedule.timeoutSeconds());
+        } catch (ResponseStatusException error) {
+            if (error.getStatusCode().value() != 400) throw error;
+            // An invalid next definition must not roll back the completed execution's outcome.
+            audit.recordSystem(schedule.organizationId(), schedule.projectId(), "UI_AUTOMATION_RETRY_PRECHECK_REJECTED",
+                    "UI_AUTOMATION_EXECUTION", execution.id(), Map.of("scheduleId", schedule.id(),
+                            "retryOfExecutionId", execution.id(), "code", "INVALID_CURRENT_DEFINITION"));
+            return;
+        }
         FunctionalTestPlan plan = functionalPlan(execution.projectId(), schedule.functionalPlanId());
         Instant requestedAt = Instant.now().plusSeconds(schedule.retryBackoffSeconds());
         UiAutomationExecution retry = queueExecution(schedule.organizationId(), schedule.projectId(), schedule.createdBy(),
@@ -534,8 +568,8 @@ public class UiAutomationService {
     private ResponseStatusException notFound(String message) { return new ResponseStatusException(HttpStatus.NOT_FOUND, message); }
     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
 
-    public record ProfileRequest(String name, String browser, String baseUrl, Integer viewportWidth, Integer viewportHeight, Boolean enabled) { }
+    public record ProfileRequest(String name, String browser, String baseUrl, @JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportWidth, @JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportHeight, Boolean enabled) { }
     public record PageObjectRequest(String name, String selectorValue, String description) { }
     public record ScenarioRequest(String browserProfileId, String name, String description, String failureStrategy,
-                                  Map<String, String> variables, List<UiAutomationStep> steps) { }
+                                  @JsonDeserialize(contentUsing = UiJson.Text.class) Map<String, String> variables, List<UiAutomationStep> steps) { }
 }

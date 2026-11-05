@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-04",
+  "count": 1,
+  "records": [
+    {
+      "id": "BUG-D23-001",
+      "priority": "P3",
+      "title": "重复登记同类型同名企业适配器返回500",
+      "status": "FIXED_PENDING_USER_REVIEW",
+      "classification": "Approved duplicate-name409 fix,old unknown-field policy unchanged",
+      "firstSeen": "B03 initial fixture reused unique key;separately reproduced by X01 with and without unknown field",
+      "dataOrSuccessAuditChanged": false,
+      "constraint": "uk_enterprise_adapter_name(adapter_type,display_name)",
+      "observedException": "DuplicateKeyException",
+      "expectedRecommendation": "409 rule approved and implemented;waiting for result review",
+      "formalCaseCountImpact": 12,
+      "historical47ObservationCountImpact": 0,
+      "historical108FixedBugCountImpact": 0,
+      "fixExecuted": true,
+      "reproduction": "REPRODUCTION-AND-REGRESSION.md",
+      "expectedStatus": 409,
+      "ruleApproval": "../d23-json-policy-fixes-r1/FOLLOWUP-RULE-APPROVAL.json",
+      "resultReviewApproved": false,
+      "beforeEvidence": "../d23-json-policy-fixes-r1/BUGS.json",
+      "beforeRecordPreserved": true,
+      "h2After": {
+        "withUnknownStatus": 409,
+        "withoutUnknownStatus": 409,
+        "writesUnchanged": true
+      },
+      "mysqlAfter": {
+        "writesUnchanged": true,
+        "withoutUnknownStatus": 409,
+        "withUnknownStatus": 409
+      },
+      "concurrentRoundsPerDatabase": {
+        "create": 3,
+        "update": 3
+      },
+      "mysqlDiagnosticBefore": {
+        "withoutUnknownStatus": 500,
+        "writesUnchanged": true,
+        "withUnknownStatus": 500
+      },
+      "h2FocusedDiagnosticBefore": {
+        "writesUnchanged": true,
+        "withoutUnknownStatus": 500,
+        "withUnknownStatus": 500
+      },
+      "priorDiagnosticFormalCountImpact": 0
+    }
+  ],
+  "d23PolicyDocumentationGapResolved": true,
+  "unknownFieldPolicyRuntimeDefectsConfirmed": 0,
+  "newUnfixedConfirmedProductBugs": 0,
+  "fixedPendingResultReview": 1
+}

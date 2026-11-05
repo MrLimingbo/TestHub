@@ -1,0 +1,94 @@
+{
+  "historicalFrozenAssetCount": 1,
+  "laterCloseoutAssetCount": 1,
+  "registeredAssetIssues": 2,
+  "fixedRegisteredAssetIssues": 2,
+  "records": [
+    {
+      "id": "QA-XREG-TEST-001",
+      "origin": "HISTORICAL",
+      "title": "Mock重名测试仍断言旧数据库异常",
+      "status": "FIXED_VERIFIED",
+      "fix": "断言改为公开409及原快照保持，MockSyncFlowTests 9/9通过，并有独立HTTP复核",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-CLOSEOUT-001",
+      "title": "跨日期复制台账后审批相对路径失效",
+      "status": "FIXED_CURRENT_DELIVERY_VERIFIED",
+      "affectedReferences": 9,
+      "distinctTargets": 2,
+      "productBug": false,
+      "reproduction": [
+        "打开BEFORE-CURRENT-LEDGER.json的resultApprovalEvidence及additionalNewFindings.evidence。",
+        "将../p2-fixes-r1/REVIEW-APPROVAL.json相对R3报告目录解析，得到2026-11-05/p2-fixes-r1，目标不存在。",
+        "将../d23-json-policy-fixes-r2/REVIEW-APPROVAL.json相对R3目录解析，同样得到错误日期目录。"
+      ],
+      "expected": "分别定位2026-10-30/p2-fixes-r1及2026-11-04/d23-json-policy-fixes-r2的真实审批记录",
+      "fix": "当前收尾台账及已停止R3台账使用明确的仓库相对路径；R1/R2等冻结历史记录保持原字节",
+      "referenceChanges": [
+        {
+          "id": "OBS-03B-E001",
+          "field": "resultApprovalEvidence",
+          "before": "../p2-fixes-r1/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json"
+        },
+        {
+          "id": "OBS-03B-E005",
+          "field": "resultApprovalEvidence",
+          "before": "../p2-fixes-r1/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json"
+        },
+        {
+          "id": "OBS-06-E006",
+          "field": "resultApprovalEvidence",
+          "before": "../p2-fixes-r1/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json"
+        },
+        {
+          "id": "OBS-06-E012",
+          "field": "resultApprovalEvidence",
+          "before": "../p2-fixes-r1/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json"
+        },
+        {
+          "id": "OBS-10-E010",
+          "field": "resultApprovalEvidence",
+          "before": "../p2-fixes-r1/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json"
+        },
+        {
+          "id": "OBS-11-E020",
+          "field": "resultApprovalEvidence",
+          "before": "../p2-fixes-r1/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json"
+        },
+        {
+          "id": "OBS-13-E020",
+          "field": "resultApprovalEvidence",
+          "before": "../p2-fixes-r1/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json"
+        },
+        {
+          "id": "OBS-14-E025",
+          "field": "resultApprovalEvidence",
+          "before": "../p2-fixes-r1/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json"
+        },
+        {
+          "id": "BUG-D23-001",
+          "field": "evidence",
+          "before": "../d23-json-policy-fixes-r2/REVIEW-APPROVAL.json",
+          "after": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/REVIEW-APPROVAL.json"
+        }
+      ]
+    }
+  ],
+  "maintenanceExcludedFromRegisteredIssueCounts": [
+    "D26候选复制保留相对链接",
+    "D26无正文DELETE补充CSRF头",
+    "版本/夹具维护及执行准备修正",
+    "一次性清理命令改用Promise API并复核",
+    "收尾核验先登记结果文件再校验链接"
+  ]
+}

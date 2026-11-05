@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-04",
+  "status": "APPROVED",
+  "basis": "用户明确审核通过D24修复回归，授权D06先设计用例、再修复和后台回归，完成后审核再进入下一模块。",
+  "approvedObservation": "OBS-15-E001",
+  "reportSha256": "06123389f9a0c0173f56e5414b77991a1c2ed9dd9b100355750f9e196fbc13eb",
+  "acceptedResults": {
+    "acceptanceScenarios": 24,
+    "positiveOnly": 13,
+    "negativeOnly": 8,
+    "mixed": 3,
+    "passed": 24,
+    "desktopPassed": 755,
+    "desktopSkipped": 1,
+    "frontendPassed": 941,
+    "offscreenPassed": 4
+  },
+  "nextModule": "账号管理与系统参数 D06",
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

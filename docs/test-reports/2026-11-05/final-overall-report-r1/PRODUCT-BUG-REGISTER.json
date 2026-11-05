@@ -1,0 +1,883 @@
+{
+  "historicalFrozenCount": 108,
+  "postBaselineRegisteredCount": 1,
+  "uniqueRegisteredTotal": 109,
+  "fixedVerifiedOrApproved": 109,
+  "unfixedConfirmed": 0,
+  "observationsNotAutomaticallyCountedAsBugs": true,
+  "records": [
+    {
+      "id": "QA-AUTH-001",
+      "title": "合法长邮箱登录触发会话字段溢出",
+      "scope": "01",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTH-002",
+      "title": "退出失败仍清空客户端身份",
+      "scope": "01",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTH-003",
+      "title": "初始化失败导致登录页不可用",
+      "scope": "01",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTH-004",
+      "title": "缓存认证状态阻止失效会话重新登录",
+      "scope": "01",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DASH-001",
+      "title": "UTC 下汇总有执行，趋势却漏计",
+      "scope": "02",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DASH-002",
+      "title": "旧30天请求晚到，覆盖当前7天数据",
+      "scope": "02",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DASH-003",
+      "title": "非法周期参数被错误归类为500",
+      "scope": "02",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DASH-004",
+      "title": "图表绘图区宽度不随容器变化",
+      "scope": "02",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-PROJ-001",
+      "title": "撤销或停用不能使PAT派生会话立即失效",
+      "scope": "03A",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-PROJ-002",
+      "title": "新成员账号长度与姓名上限冲突",
+      "scope": "03A",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-PROJ-003",
+      "title": "scope数组含null时返回500",
+      "scope": "03A",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-PROJ-004",
+      "title": "同标识并发创建项目返回内部错误",
+      "scope": "03A",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-ENV-001",
+      "title": "合法名称长度触发500",
+      "scope": "03B",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-ENV-002",
+      "title": "参数删除可移除环境派生BASE_URL",
+      "scope": "03B",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-ENV-003",
+      "title": "同名密钥可替换派生BASE_URL",
+      "scope": "03B",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUDIT-001",
+      "title": "迟到请求覆盖当前筛选",
+      "scope": "03C",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FILE-001",
+      "title": "上传请求结构错误被归为500",
+      "scope": "03C",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FILE-002",
+      "title": "保存成功的文件随后无法下载",
+      "scope": "03C",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FILE-003",
+      "title": "上传审计失败后保留文件",
+      "scope": "03C",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FILE-004",
+      "title": "删除失败后元数据仍在、原字节已失",
+      "scope": "03C",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-ACCOUNT-001",
+      "title": "账号邮箱交叉重名与歧义登录",
+      "scope": "03D",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-ACCOUNT-002",
+      "title": "长账号生成默认姓名超出80字符",
+      "scope": "03D",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-ACCOUNT-003",
+      "title": "停用账号登录返回内部错误",
+      "scope": "03D",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-CONFIG-001",
+      "title": "普通配置空值无法保存",
+      "scope": "03D",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FUNC-001",
+      "title": "同项目同Tab根目录允许同名新增、重命名及并发创建",
+      "scope": "04",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FUNC-002",
+      "title": "删除被用例引用的需求返回500",
+      "scope": "04",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FUNC-003",
+      "title": "标签绑定查询缺少必填参数被归类为500",
+      "scope": "04",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FUNC-004",
+      "title": "迟到的需求保存关闭后来打开的新草稿",
+      "scope": "04",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FUNC-005",
+      "title": "下拉字段切换为文本后隐藏选项仍提交，导致无法保存",
+      "scope": "04",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-FUNC-006",
+      "title": "部分批删失败后保留已删除行与选择，重试重复删除",
+      "scope": "04",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-001",
+      "title": "合法长计划名生成默认批次返回500",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-002",
+      "title": "Excel导入缺少file返回500",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-003",
+      "title": "Excel导入绕过需求说明20000字符约束",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-004",
+      "title": "迟到计划详情覆盖当前选中计划的用例范围",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-005",
+      "title": "迟到步骤响应覆盖新选执行用例",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-006",
+      "title": "迟到缺陷关联覆盖另一缺陷的详情抽屉",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-007",
+      "title": "旧计划保存回调关闭新草稿",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-008",
+      "title": "旧缺陷保存回调关闭新草稿",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-009",
+      "title": "旧版本保存回调关闭新草稿",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-010",
+      "title": "测试计划部分批删失败后仍显示已删除记录",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DELIVERY-011",
+      "title": "缺陷部分批删失败后仍显示已删除记录",
+      "scope": "05",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-001",
+      "title": "请求参数数组含null项返回500",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-002",
+      "title": "并发创建同名根目录产生重复记录",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-003",
+      "title": "OpenAPI4.0被当作支持格式导入",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-004",
+      "title": "导出cURL对单引号转义错误，无法往返导入",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-005",
+      "title": "显式GET加data时被错误改为POST，且结果依赖选项顺序",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-006",
+      "title": "旧目录保存回调关闭新目录草稿",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-007",
+      "title": "旧接口保存回调关闭新接口草稿",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-008",
+      "title": "旧版本保存回调关闭新版本快照草稿",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DESIGN-009",
+      "title": "旧导入结果覆盖新导入会话，未提交却显示导入完成",
+      "scope": "06",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-001",
+      "title": "Query API Key重复编码，改变查询值和已有编码路径",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-002",
+      "title": "WebSocket仍允许使用停用环境建立真实连接",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-003",
+      "title": "gRPC Unary仍允许使用停用环境执行",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-004",
+      "title": "客户端流/双向流发送上限行为与“自动取消”声明不一致",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-005",
+      "title": "载入非默认环境历史后，变量列表仍显示默认环境数据",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-006",
+      "title": "旧“保存为接口”响应关闭新接口草稿",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-007",
+      "title": "旧在线反射结果覆盖新离线描述符的成功发现结果",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-008",
+      "title": "旧WS连接完成后跨项目读取错误会话并误报已连接",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-009",
+      "title": "gRPC历史回放把Metadata key丢失为“: trace”",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-DEBUG-010",
+      "title": "正式接口必填Query/Header为空仍发送且被静默省略",
+      "scope": "07",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-001",
+      "title": "场景步骤数组包含null时返回500",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-002",
+      "title": "未引用的环境密钥也会阻断合法HTTP执行",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-003",
+      "title": "Runner发送DELETE/OPTIONS正文缺少消息长度边界",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-004",
+      "title": "条件跳过请求后丢失最近HTTP状态，后续合法条件失败",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-005",
+      "title": "旧新建场景响应清空重新打开的场景草稿",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-006",
+      "title": "旧场景保存响应覆盖后来选中的场景B",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-007",
+      "title": "较早的场景A详情覆盖已经加载完成的B",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-008",
+      "title": "旧数据集保存响应关闭新数据集草稿并打开旧预览",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-009",
+      "title": "旧运行配置创建响应关闭新配置草稿",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-010",
+      "title": "旧计划保存响应关闭重新打开的新计划草稿",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-011",
+      "title": "切换项目后旧列表回调用新项目路径读取旧场景",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-AUTO-012",
+      "title": "变量覆盖修改后迟到的旧来源预览重新出现",
+      "scope": "08",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOCK-001",
+      "title": "JSON子集接受尾随垃圾或多个根，非法JSON仍可命中",
+      "scope": "09",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOCK-002",
+      "title": "条件或响应头map包含null值时触发500",
+      "scope": "09",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOCK-003",
+      "title": "同项目重复创建同名服务返回内部500",
+      "scope": "09",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOCK-004",
+      "title": "旧新建服务响应关闭新草稿，切项目后仍读取旧服务",
+      "scope": "09",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOCK-005",
+      "title": "旧分享创建响应关闭新草稿或混入后来选中的服务",
+      "scope": "09",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOCK-006",
+      "title": "A/B/A切换后，较早的规则列表覆盖新规则",
+      "scope": "09",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOCK-007",
+      "title": "A/B/A切换后，较早的智能来源覆盖新发布接口",
+      "scope": "09",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOCK-008",
+      "title": "A/B/A切换后，较早的分享列表覆盖新分享",
+      "scope": "09",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-PERF-001",
+      "title": "计划保存缺少会话与生命周期校验，取消或切换后的旧操作仍生效",
+      "scope": "10",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-PERF-002",
+      "title": "旧删除响应重置后来选中的计划",
+      "scope": "10",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-PERF-003",
+      "title": "旧计划详情失败在新选择上弹出过期错误",
+      "scope": "10",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-PERF-004",
+      "title": "页面保存时裁剪原始请求正文首尾空白",
+      "scope": "10",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-UI-001",
+      "title": "浏览器项目保存缺少会话归属，取消后的旧操作影响新草稿或继续加载资源",
+      "scope": "11",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-UI-002",
+      "title": "页面对象取消保存后仍写入，迟到成功还会关闭新草稿",
+      "scope": "11",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-UI-003",
+      "title": "场景新建和编辑的旧保存回调关闭新草稿，CSRF取消仍创建场景",
+      "scope": "11",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-UI-004",
+      "title": "定时计划取消后的旧保存仍生效并关闭后来打开的计划表单",
+      "scope": "11",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-UI-005",
+      "title": "取消执行弹窗后仍在CSRF返回时补发场景排队",
+      "scope": "11",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-UI-006",
+      "title": "首次加载尚未完成时离页，旧组件仍重新加载七类资产",
+      "scope": "11",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOB-001",
+      "title": "设备保存缺少操作归属：取消后仍提交，旧响应关闭新草稿",
+      "scope": "12",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOB-002",
+      "title": "应用保存缺少操作归属：取消后仍提交，旧响应关闭新草稿",
+      "scope": "12",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOB-003",
+      "title": "元素对象保存缺少操作归属：取消后仍提交，旧响应关闭新草稿",
+      "scope": "12",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOB-004",
+      "title": "场景保存缺少操作归属：取消后仍提交，旧响应关闭新草稿",
+      "scope": "12",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOB-005",
+      "title": "取消执行后等待中的CSRF仍触发入队，旧执行响应关闭新执行窗口",
+      "scope": "12",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOB-006",
+      "title": "离开移动端页面后，初始context迟到响应仍触发资产请求",
+      "scope": "12",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOB-007",
+      "title": "切换项目后，旧项目轮询失败仍显示全局错误",
+      "scope": "12",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-MOB-008",
+      "title": "引擎首尾空白绕过Android/iOS平台不匹配校验",
+      "scope": "12",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-QT-001",
+      "title": "报告计划保存等待CSRF时取消，旧草稿仍被创建",
+      "scope": "13",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-QT-002",
+      "title": "旧计划保存后的列表刷新回调关闭新草稿",
+      "scope": "13",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-QT-003",
+      "title": "手工任务保存等待CSRF时取消，旧登记仍被创建",
+      "scope": "13",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-QT-004",
+      "title": "报告计划运行或删除的迟到回调在离页后继续刷新并提示",
+      "scope": "13",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-QT-005",
+      "title": "CSV导出失败在离页后仍显示旧错误提示",
+      "scope": "13",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-NIO-001",
+      "title": "通知模板取消保存后仍提交旧草稿",
+      "scope": "14",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-NIO-002",
+      "title": "取消可信签名密钥登记后仍建立信任记录",
+      "scope": "14",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-NIO-003",
+      "title": "取消插件清单安装后仍登记插件及版本",
+      "scope": "14",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-NIO-004",
+      "title": "取消适配器保存后仍保存旧加密配置",
+      "scope": "14",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "QA-NIO-005",
+      "title": "存储不可用时readiness仍返回UP",
+      "scope": "14",
+      "status": "FIXED_VERIFIED",
+      "origin": "HISTORICAL_108",
+      "sourceRegistry": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv"
+    },
+    {
+      "id": "BUG-D23-001",
+      "title": "同类型同名企业适配器重复登记由500改为受控409",
+      "scope": "14",
+      "status": "FIXED_APPROVED",
+      "origin": "POST_BASELINE",
+      "approval": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/REVIEW-APPROVAL.json",
+      "regression": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/REPRODUCTION-AND-REGRESSION.md"
+    }
+  ]
+}

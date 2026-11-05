@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-04",
+  "status": "RESULTS_APPROVED",
+  "basis": "用户：D06 修复和回归审核通过；继续推进 D21，完成后等审核。",
+  "reportSha256": "2675c0acd7c9d2e6a6cc73939decda12349bdd4aff657c7fd02a592d370d79ee",
+  "caseResultsSha256": "36d01713f31d1a2f3b5ffbc34df7031614e9e7e2c7d9db3ea4219874ad6006c1",
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

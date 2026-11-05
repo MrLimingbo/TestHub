@@ -1,0 +1,160 @@
+{
+  "unit": "AUTOMATED_TEST_METHOD_REEXECUTION",
+  "newMethods": 0,
+  "total": 10,
+  "positiveOnly": 4,
+  "negativeOnly": 4,
+  "mixed": 2,
+  "passed": 10,
+  "failed": 0,
+  "blocked": 0,
+  "skipped": 0,
+  "includedIn98": true,
+  "variantsAndEnvironmentRunsNotAdded": true,
+  "coverageLimits": [
+    "B10为跨项目PUT和名称前置校验；未在该新方法中加入跨项目GET或落库中途故障注入。",
+    "新增方法不是生产部署、完整桌面升级或真实跨端验证。"
+  ],
+  "cases": [
+    {
+      "id": "B01",
+      "method": "B01_equivalentCodeUpdates",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "同编号/空白大小写等价更新及原执行批次保持",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B01_equivalentCodeUpdates"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B02",
+      "method": "B02_differentCodeAtomic",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "不同编号400；计划完整对象、成员及各表数量保持",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B02_differentCodeAtomic"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B03",
+      "method": "B03_invalidCodes",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "null/空/空白/非法格式/缺失编号400",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B03_invalidCodes"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B04",
+      "method": "B04_newRunFreezesTitleAndSteps",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "源标题及步骤改名后旧批次冻结、新批次用新标题",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B04_newRunFreezesTitleAndSteps"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B05",
+      "method": "B05_legacyMissingIsExplicit",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "旧缺失快照记录返回CURRENT_ASSET",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B05_legacyMissingIsExplicit"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B06",
+      "method": "B06_transferPreservesSnapshotAndMissing",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "mixed",
+      "status": "PASS",
+      "coverage": "迁移有/无快照及空白/数字/布尔/数组/对象非法资料；HTTP导出声明握手",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B06_transferPreservesSnapshotAndMissing"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B07",
+      "method": "B07_syncPreservesSnapshotAndMissing",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "mixed",
+      "status": "PASS",
+      "coverage": "同步有/无快照及空白非法资料，无新增回执",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B07_syncPreservesSnapshotAndMissing"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B08",
+      "method": "B08_snapshotCannotBeOverwrittenOrRemoved",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "已有历史快照改写/移除409",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B08_snapshotCannotBeOverwrittenOrRemoved"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B09",
+      "method": "B09_concurrentRenameAndRunAreConsistent",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "项目锁下改名与批次创建串行，标题/步骤自洽",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B09_concurrentRenameAndRunAreConsistent"
+      ],
+      "executionRound": "R2"
+    },
+    {
+      "id": "B10",
+      "method": "B10_permissionAndFailedRunNoPartialWrites",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "跨项目PUT403；批次名称超长在创建前拒绝且各表数量保持",
+      "executedEnvironment": "isolated MySQL / MockMvc",
+      "mysqlStatus": "PASS",
+      "evidence": [
+        "backend-mysql.json: B10_permissionAndFailedRunNoPartialWrites"
+      ],
+      "executionRound": "R2"
+    }
+  ]
+}

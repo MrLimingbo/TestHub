@@ -1,0 +1,12 @@
+{
+  "baselineFiles": 1429,
+  "modified": 7,
+  "added": 9,
+  "unchanged": 1422,
+  "missingBaselineFiles": [],
+  "previousMockArtifactsVerified": 36,
+  "previousMockArtifactMismatches": [],
+  "priorSnapshotNotRewritten": true,
+  "approvalCompanionAdded": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-mock-fixes-r1/REVIEW-APPROVAL.json",
+  "dependenciesAndRunnerProductionUntouched": true
+}

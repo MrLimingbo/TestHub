@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-02",
+  "observation": "OBS-10-E011",
+  "module": "性能测试",
+  "ruleApproval": "../d16-rule-review/REVIEW-APPROVAL.json",
+  "previousModuleApproval": "../d16-mock-fixes-r1/REVIEW-APPROVAL.json",
+  "selectedRules": {
+    "D16-I": "A",
+    "D16-N": "A",
+    "D16-S": "A",
+    "D16-NULL": "A",
+    "D16-OLD": "A"
+  },
+  "scope": "仅矩阵列明9整数、错误率DECIMAL及5组文本字段的新建/编辑/导入/同步/新入队与后台UI；Runner既有协议回归，不运行真实目标负载。",
+  "preserve": [
+    "原阶梯关联、版本冲突及权限",
+    "旧计划与清单可读无批量修改",
+    "旧协议Runner短时内部验证不改时长下界",
+    "原32位整数域错误与数值约束",
+    "原null/trim/CSV/模板规则"
+  ],
+  "gate": "完成后等待性能模块结果审核，不进入Web",
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "newShutdownInvestigation": false
+}

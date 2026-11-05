@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-04",
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "aa1736e229adee1500d5e4eda0cf152568e63343b24966a7de405e322d738824"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/RULES-AND-ACCEPTANCE.md",
+      "sha256": "f90c859b9bf5294cddf313680517893949d4e832a83bf9f55d063e11cf022904"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "91423731920061f49b621fe7eb819c7c4e145a1844297e03a5294e8c491102c9"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/TEST-PLAN.md",
+      "sha256": "7a9104d5da7c21ed5abeb31a29a875aecfc2384caee8f89bdd54b60461b84d7c"
+    },
+    {
+      "path": "docs/account-search-contract.md",
+      "sha256": "e90ba30a8ea67ba81aac797f3ac886c243600832a1f1ac24b4fb3bebfb5e1da8"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/account/UserAccountRepository.java",
+      "sha256": "89b245907413c6f2b40de7bb9df48d023a141a927d56cef70124df65a9b32cb5"
+    },
+    {
+      "path": "src/test/d06AccountSearch.test.ts",
+      "sha256": "9157f4e38b64f2bcb144fe7f230a2d15fbaef0c64bb6269012f1b4183aec12e8"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "sha256": "7de754854ac79bdde45364f6863a9fb9168fbb843340b232ad92ea69b51bcb21"
+    }
+  ],
+  "references": [
+    "https://dev.mysql.com/doc/refman/8.4/en/string-comparison-functions.html",
+    "https://h2database.com/html/grammar.html",
+    "https://dev.mysql.com/doc/connector-j/en/connector-j-connp-props-session.html",
+    "https://github.com/mysql/mysql-connector-j/blob/9.7.0/src/main/protocol-impl/java/com/mysql/cj/protocol/a/NativeServerSession.java"
+  ],
+  "evidenceTypes": [
+    "Isolated H2 and MockMvc",
+    "Isolated MySQL and fresh configured connection modes",
+    "Vue/Arco component DOM fixtures"
+  ],
+  "installedDesktopUpgradeExecuted": false,
+  "shutdownRiskRechecked": false
+}

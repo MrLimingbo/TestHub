@@ -1,0 +1,202 @@
+{
+  "at": "2026-11-05T03:49:48.794031+00:00",
+  "scope": "DOCUMENT_AND_EVIDENCE_AUDIT_ONLY",
+  "total": 16,
+  "passed": 16,
+  "failed": 0,
+  "newProductPositiveCases": 0,
+  "newProductNegativeCases": 0,
+  "results": [
+    {
+      "id": "AC01",
+      "result": "PASS"
+    },
+    {
+      "id": "AC02",
+      "result": "PASS"
+    },
+    {
+      "id": "AC03",
+      "result": "PASS"
+    },
+    {
+      "id": "AC04",
+      "result": "PASS"
+    },
+    {
+      "id": "AC05",
+      "result": "PASS"
+    },
+    {
+      "id": "AC06",
+      "result": "PASS"
+    },
+    {
+      "id": "AC07",
+      "result": "PASS"
+    },
+    {
+      "id": "AC08",
+      "result": "PASS"
+    },
+    {
+      "id": "AC09",
+      "result": "PASS"
+    },
+    {
+      "id": "AC10",
+      "result": "PASS"
+    },
+    {
+      "id": "AC11",
+      "result": "PASS"
+    },
+    {
+      "id": "AC12",
+      "result": "PASS"
+    },
+    {
+      "id": "AC13",
+      "result": "PASS"
+    },
+    {
+      "id": "AC14",
+      "result": "PASS"
+    },
+    {
+      "id": "AC15",
+      "result": "PASS"
+    },
+    {
+      "id": "AC16",
+      "result": "PASS"
+    }
+  ],
+  "details": {
+    "AC01": {
+      "mainModules": 16,
+      "acceptanceScopes": 19,
+      "sourceReportsExist": 19
+    },
+    "AC02": {
+      "检查项次": 3090,
+      "正例": 1643,
+      "反例": 1447,
+      "最终通过": 3031,
+      "未关闭失败": 0,
+      "观察": 47,
+      "阻塞": 12
+    },
+    "AC03": {
+      "historicalProductBugs": 108,
+      "historicalAssets": 1
+    },
+    "AC04": {
+      "approved": 45,
+      "skippedSpecRetained": 2
+    },
+    "AC05": {
+      "coveredObservationResults": 45,
+      "resultApprovalFiles": 18,
+      "additionalExplicitSources": [
+        "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/REVIEW-APPROVAL.json",
+        "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/REVIEW-APPROVAL.json",
+        "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/REVIEW-APPROVAL.json"
+      ]
+    },
+    "AC06": {
+      "approvedModules": 6
+    },
+    "AC07": {
+      "formalCasesAlreadyExecuted": 32,
+      "bug": "BUG-D23-001",
+      "status": "FIXED_APPROVED"
+    },
+    "AC08": {
+      "frozenFilesMatched": 387,
+      "manifests": [
+        {
+          "file": "docs/test-reports/2026-10-30/p2-round2-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 31
+        },
+        {
+          "file": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 35
+        },
+        {
+          "file": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 36
+        },
+        {
+          "file": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 35
+        },
+        {
+          "file": "docs/test-reports/2026-11-02/d16-web-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 38
+        },
+        {
+          "file": "docs/test-reports/2026-11-03/d08-d07-plan-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 18
+        },
+        {
+          "file": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/ARTIFACT-HASHES.json",
+          "entries": 14
+        },
+        {
+          "file": "docs/test-reports/2026-11-03/d16-overall-summary-r1/ARTIFACT-HASHES.json",
+          "entries": 10
+        },
+        {
+          "file": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 18
+        },
+        {
+          "file": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 20
+        },
+        {
+          "file": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 20
+        },
+        {
+          "file": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/ARTIFACT-HASHES.json",
+          "entries": 25
+        },
+        {
+          "file": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/ARTIFACT-HASHES.json",
+          "entries": 28
+        },
+        {
+          "file": "docs/test-reports/2026-11-04/d26-baseline-r1/ARTIFACT-HASHES.json",
+          "entries": 33
+        },
+        {
+          "file": "docs/test-reports/2026-11-04/d26-baseline-r2/ARTIFACT-HASHES.json",
+          "entries": 26
+        }
+      ]
+    },
+    "AC09": {
+      "currentReferencesVerified": 72,
+      "fixedReferences": 9
+    },
+    "AC10": {
+      "formalAttempts": 0,
+      "validWindows": 0,
+      "standbySamplesRetained": 1183,
+      "cleanupVerified": true
+    },
+    "AC11": {
+      "environmentSkippedThisRound": 12,
+      "notConvertedToPass": true
+    },
+    "AC13": {
+      "existingSourceFilesUnchanged": 1430
+    },
+    "AC15": {
+      "routedPagesMapped": 25,
+      "newProductFunctionTests": 0
+    }
+  }
+}

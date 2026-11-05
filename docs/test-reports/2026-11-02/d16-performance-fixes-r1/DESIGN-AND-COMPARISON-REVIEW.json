@@ -1,0 +1,39 @@
+{
+  "inputCount": 6,
+  "allExtracted": true,
+  "requirements": 7,
+  "acceptanceCriteria": 63,
+  "coverageItems": 63,
+  "requirementsCovered": 7,
+  "acceptanceCriteriaCovered": 63,
+  "coverageItemsCovered": 63,
+  "caseQuality": {
+    "case_quality_score": 99.33,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 95.56
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "exactDuplicates": 0,
+  "nearDuplicatePairs": 14,
+  "unresolvedDuplicates": 0,
+  "documentFindings": 0,
+  "invalidAnchors": 0,
+  "untraceableCases": 0,
+  "comparisonSummary": {
+    "changed_dependency_count": 87,
+    "review_required_case_count": 63,
+    "stale_candidate_case_count": 0,
+    "removed_case_count": 40
+  },
+  "comparisonDisposition": "独立范围从Mock40切换性能63；旧40条及文件未删除或改写，63条已核对六输入。原提案状态不改，批准依据独立审批。",
+  "techniqueReview": "单字段等价/边界、明示阶梯决策关系、生命周期/权限/幂等/兼容与历史错误。无独立参数完整值模型，未冒称pairwise；仅有明确结果的关联组合为正式案例。"
+}

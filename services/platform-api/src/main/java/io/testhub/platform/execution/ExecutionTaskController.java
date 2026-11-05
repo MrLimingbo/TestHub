@@ -1,10 +1,13 @@
 package io.testhub.platform.execution;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +59,7 @@ public class ExecutionTaskController {
     }
 
     public record TaskRequest(@NotBlank String taskType, @NotBlank @Size(max = 160) String name) {}
-    public record TaskUpdateRequest(@NotBlank @Size(max = 160) String name, @NotBlank String status, int progress, @Min(1) Long expectedVersion) {}
+    public record TaskUpdateRequest(@NotBlank @Size(max = 160) String name, @NotBlank String status,
+            @NotNull @Min(0) @Max(100) @JsonDeserialize(using = TaskProgressInput.class) Integer progress, @Min(1) Long expectedVersion) {}
     public record TaskCancelRequest(@Min(1) Long expectedVersion) {}
 }

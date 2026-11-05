@@ -4,12 +4,14 @@ const crypto = require('node:crypto')
 const fs = require('node:fs/promises')
 const path = require('node:path')
 const { normalizeServerUrl } = require('./desktop-core.cjs')
+const { checkpoint, requestSignal, readResponse } = require('./read-operation.cjs')
 
 async function ensureSyncSession(runtime, fetcher) {
   let response
-  try { response = await fetcher(runtime.url + '/api/v1/auth/me', { credentials: 'include', redirect: 'error', signal: globalThis.AbortSignal.timeout(10000) }) }
-  catch { throw new Error('本地工作区会话暂时不可达，请稍后重试。') }
+  try { response = await fetcher(runtime.url + '/api/v1/auth/me', { credentials: 'include', redirect: 'error', signal: requestSignal(10000) }) }
+  catch { checkpoint(); throw new Error('本地工作区会话暂时不可达，请稍后重试。') }
   await response.body?.cancel()
+  checkpoint()
   // Rotating an already authenticated session invalidates CSRF captured by the UI or another sync module.
   if (response.ok) return
   if (response.status !== 401) throw new Error(`本地工作区会话校验失败（HTTP ${response.status}）。`)
@@ -18,8 +20,9 @@ async function ensureSyncSession(runtime, fetcher) {
 
 async function syncRequest(fetcher, url, options = {}, { label = '任务', limit = 1024 * 1024, timeoutMs = 30000 } = {}) {
   let response
-  try { response = await fetcher(url, { ...options, credentials: 'include', redirect: 'error', signal: globalThis.AbortSignal.timeout(timeoutMs) }) }
-  catch { throw new Error('同步服务暂时不可达，本地编辑可继续；联网后会自动重试。') }
+  const signal = requestSignal(timeoutMs, options.signal, options.method)
+  try { response = await fetcher(url, { ...options, credentials: 'include', redirect: 'error', signal }) }
+  catch { checkpoint(); options.signal?.throwIfAborted(); throw new Error('同步服务暂时不可达，本地编辑可继续；联网后会自动重试。') }
   if (!response.ok) {
     const message = response.status === 409 ? `账号或${label}版本已变化，请重新同步并核对冲突。`
       : [401, 403].includes(response.status) ? '同步会话已失效或项目无写入权限，请重新登录绑定账号并核对权限。'
@@ -27,40 +30,41 @@ async function syncRequest(fetcher, url, options = {}, { label = '任务', limit
     await response.body?.cancel(); const error = new Error(message); error.status = response.status; throw error
   }
   const chunks = []; let bytes = 0
-  for await (const chunk of response.body) {
+  await readResponse(response, signal, chunk => {
     bytes += chunk.length
     if (bytes > limit) throw new Error(`${label}同步响应超过 ${limit / (1024 * 1024)} MiB 限制。`)
     chunks.push(Buffer.from(chunk))
-  }
+  })
   try { const envelope = JSON.parse(Buffer.concat(chunks).toString('utf8')); if (!envelope.data) throw new Error(); return envelope.data }
   catch { throw new Error('同步服务返回的数据无效，请核对服务版本。') }
 }
 
-async function syncBinary(fetcher, url, size, digest, { label = '文件', timeoutMs = 120000, allowEmpty = false, maxBytes = 20 * 1024 * 1024 } = {}) {
+async function syncBinary(fetcher, url, size, digest, { label = '文件', timeoutMs = 120000, allowEmpty = false, maxBytes = 20 * 1024 * 1024, signal: caller } = {}) {
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 25 * 1024 * 1024 || !Number.isSafeInteger(size) || size < (allowEmpty ? 0 : 1) || size > maxBytes || !/^[a-f0-9]{64}$/.test(digest))
     throw new Error('文件大小或摘要无效。')
   let response
-  try { response = await fetcher(url, { credentials: 'include', redirect: 'error', signal: globalThis.AbortSignal.timeout(timeoutMs) }) }
-  catch { throw new Error('文件来源暂时不可达，联网后可重试。') }
+  const signal = requestSignal(timeoutMs, caller)
+  try { response = await fetcher(url, { credentials: 'include', redirect: 'error', signal }) }
+  catch { checkpoint(); caller?.throwIfAborted(); throw new Error('文件来源暂时不可达，联网后可重试。') }
   if (!response.ok) { await response.body?.cancel(); const error = new Error(`${label}下载失败（HTTP ${response.status}），请核对来源文件。`); error.status = response.status; throw error }
   const chunks = []; let length = 0; const hash = crypto.createHash('sha256')
-  for await (const chunk of response.body) {
+  await readResponse(response, signal, chunk => {
     length += chunk.length
     if (length > size) { const error = new Error('文件内容超过记录大小，同步已停止。'); error.code = 'SYNC_BINARY_INTEGRITY'; throw error }
     hash.update(chunk); chunks.push(Buffer.from(chunk))
-  }
+  })
   if (length !== size || hash.digest('hex') !== digest) { const error = new Error('来源文件大小或 SHA-256 已变化，同步已停止。'); error.code = 'SYNC_BINARY_INTEGRITY'; throw error }
   return Buffer.concat(chunks)
 }
 
-function installProjectSync({ ipcMain, dialog, session, directory, origin, windows, runtime, server, exclusive, available, openWindow, trusted, fileLinkContext, descriptorLinkContext }, definition) {
+function installProjectSync({ ipcMain, dialog, session, directory, origin, windows, runtime, statusRuntime, server, exclusive, available, openWindow, trusted, fileLinkContext, descriptorLinkContext, readOperations }, definition) {
   const { Client, Store, channel, page, filename, title, transport } = definition
   let client, initializing, lastError = '', disposed = false
   const remoteSession = url => session.fromPartition('persist:testhub-server-' + crypto.createHash('sha256').update(url).digest('hex').slice(0, 24))
-  async function get() {
+  async function get(initialize = runtime) {
     if (!client) {
       if (!initializing) initializing = (async () => {
-        const local = await runtime()
+        const local = await initialize()
         client = new Client({ store: new Store(directory, local.codec), fileLinkContext, descriptorLinkContext,
           guard: async binding => {
             if (disposed || normalizeServerUrl(await server()) !== binding.server) throw new Error('账号服务已切换，同步已停止；请切回绑定服务。')
@@ -82,8 +86,16 @@ function installProjectSync({ ipcMain, dialog, session, directory, origin, windo
   }
   const invoke = (name, operation) => ipcMain.handle(`testhub-desktop:${channel}:${name}`, (event, value) => {
     requireSender(event)
-    return exclusive(async () => { try { const result = await operation(await get(), value); lastError = ''; return result }
-      catch (error) { lastError = error.message; throw error } })
+    const execute = async () => {
+      try {
+        // Pause/unbind only edit local metadata; they must stay available while the backend is offline.
+        const local = ['context', 'preview', 'bind', 'resolve'].includes(name) ? await runtime() : undefined
+        const result = await operation(await get(local ? () => local : statusRuntime || runtime), value)
+        lastError = ''; return result
+      } catch (error) { lastError = error.message; throw error }
+    }
+    return readOperations && ['context', 'preview'].includes(name)
+      ? readOperations.run(event, exclusive, execute, () => { if (client) client.plan = undefined }) : exclusive(execute)
   })
   async function open(event) {
     if (event && !trusted(event)) throw new Error(`不受信任的${title}入口。`)
@@ -92,9 +104,10 @@ function installProjectSync({ ipcMain, dialog, session, directory, origin, windo
   ipcMain.handle(`testhub-desktop:${channel}:open`, open)
   ipcMain.handle(`testhub-desktop:${channel}:status`, event => {
     requireSender(event)
-    const read = async () => ({ ...(await (await get()).status()), error: lastError })
+    const read = async () => ({ ...(await (await get(statusRuntime || runtime)).status()), error: lastError })
     // A loaded status only clones memory; polling must remain readable during a long sync or backup.
-    return client?.state ? read() : exclusive(read)
+    return client?.state ? read() : readOperations
+      ? readOperations.run(event, exclusive, read, () => { if (client) client.plan = undefined }) : exclusive(read)
   })
   invoke('context', async c => {
     const status = await c.status()

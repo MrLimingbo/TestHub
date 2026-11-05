@@ -1,0 +1,73 @@
+{
+  "at": "2026-11-04T12:29:15.504Z",
+  "checks": [
+    {
+      "operation": "taskList",
+      "status": 200,
+      "error": null,
+      "elapsedMs": 5.400000095367432,
+      "timeoutLimitMs": 10000,
+      "expectedStatus": 200
+    },
+    {
+      "operation": "planDetail",
+      "status": 200,
+      "error": null,
+      "elapsedMs": 3.4000000953674316,
+      "timeoutLimitMs": 10000,
+      "expectedStatus": 200
+    },
+    {
+      "operation": "qualityReport",
+      "status": 200,
+      "error": null,
+      "elapsedMs": 9.700000047683716,
+      "timeoutLimitMs": 10000,
+      "expectedStatus": 200
+    },
+    {
+      "operation": "taskUpdate",
+      "status": 200,
+      "error": null,
+      "elapsedMs": 11.200000047683716,
+      "timeoutLimitMs": 10000,
+      "expectedStatus": 200
+    },
+    {
+      "operation": "planCreate",
+      "status": 200,
+      "error": null,
+      "elapsedMs": 4,
+      "timeoutLimitMs": 10000,
+      "expectedStatus": 200
+    },
+    {
+      "operation": "planDelete",
+      "status": 204,
+      "error": null,
+      "elapsedMs": 3.5,
+      "timeoutLimitMs": 10000,
+      "expectedStatus": 204
+    }
+  ],
+  "counts": {
+    "tasks": 200,
+    "plans": 20,
+    "pendingPlans": 0
+  },
+  "resourceMetricsValid": true,
+  "optionalHeap": null,
+  "optionalFd": null,
+  "safety": {
+    "created": 2,
+    "visibleViolations": 0,
+    "unexpectedDialogs": 0,
+    "suppressedActivations": 0
+  },
+  "nativeVersions": {
+    "electron": "43.2.0",
+    "node": "24.18.0",
+    "chrome": "150.0.7871.129"
+  },
+  "formalSamples": false
+}

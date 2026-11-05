@@ -1,0 +1,8 @@
+{
+  "total": 45,
+  "passed": 44,
+  "failed": 1,
+  "errors": 0,
+  "failedTest": "oldOtherQueue",
+  "finding": "After strict queue validation, an automatic retry precheck exception could roll back the original FAILED event. Final regression requires FAILED to persist, no new execution/outbox, and an explicit failure audit."
+}

@@ -1,0 +1,14 @@
+{
+  "baseCommit": "526d7f186d1f9ba03484d872d71df74b32663abf",
+  "files": {
+    "src/pages/PerformancePage.vue": "0c5781032617a6eceb2881d52e3d8bb191d4bb84629fd7fc8b78febc3c9a694f",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanController.java": "68bdc1f777babcda5ae49ac1cfe48490e8f28a14a82e651389c45334c3721b0d",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java": "a89d27aa046f573928dff7e167f0defe52b161504c8a6130bef57e521ad76af3",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceSyncService.java": "0ae278687c5ee1d0e0acbf24884d0d57adabba719aced86e253a45b8ca26a3c8",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTransferService.java": "09e863e8ac4d21c8edf85c4f21deede46d7c3c93a59e619bfdb077a985f259ba",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestExecutionService.java": "1fcbabdf0904b63281dd7a11a445feb7ab056473920d7f21ce9a9403b491eace",
+    "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanRepository.java": "7031d3ad671eb0014a4cce498caf45c81fc43ded983f7eeaf6fcb0349106619a"
+  },
+  "runner": "services/jmeter-runner/src/protocol.js",
+  "runnerSha256": "3d0c10d05dd43ed1000594080f866eb05573d746a4748f0153f7b30a08e8881a"
+}

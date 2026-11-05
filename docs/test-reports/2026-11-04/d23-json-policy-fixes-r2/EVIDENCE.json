@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-04T04:45:08.462110+00:00",
+  "source_count": 2,
+  "status_counts": {
+    "extracted": 2
+  },
+  "warnings": [],
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "RULE-AND-ACCEPTANCE.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/RULE-AND-ACCEPTANCE.md",
+      "extension": ".md",
+      "mime_type": "application/octet-stream",
+      "role": "requirement",
+      "size": 2666,
+      "sha256": "a613fbc06bfe6dfffd90bbc671d09ec5dc1b2763c1266b271844a04ed9e95cc3",
+      "status": "extracted",
+      "encoding": "utf-8-sig",
+      "content": "# BUG-D23-001 已批准修复规则\n\n2026-11-04。用户原话：“BUG-D23-001 按推荐的409规则处理，先设计用例，再修复并后台回归，更新D23测试报告后发我审核，暂时不要进入下一模块。12项环境补齐继续暂缓，升级关闭超时的未确认风险单独保留。”\n\n推荐方案来源：[D23初轮报告](../d23-json-policy-fixes-r1/FINAL-REPORT.md)及[独立规则审批](../d23-json-policy-fixes-r1/FOLLOWUP-RULE-APPROVAL.json)。本次批准的是409规则与修复工作，不将初轮整体结果标成已审核。\n\n## AC-C01 重复创建\n\n同类型同名称的企业适配器创建冲突返回409，原记录及配置密文保持，不增加业务行或成功审计。普通外层未知标量/对象/数组仍按D23-A忽略，不能使重复登记成功，也不能让冲突重新变成500。\n\n## AC-C02 更新及唯一性边界\n\n更新为其他记录已占用的同类型同名称返回409，不部分修改名称、地址、启用状态、凭据密文或成功审计。配置为null保留和提供完整替换配置两条路径均验证。原记录保留原类型和名称允许更新；自由名称允许创建和改名；不同适配器类型可使用相同名称。既有trim/类型归一化和数据库排序规则保持，不新增大小写归一化或改造唯一约束。\n\n## AC-C03 并发冲突\n\n两个并发创建请求争用同一个类型和名称，或两个不同记录并发改为同一空闲类型和名称，应只有一个成功、另一个409。数据库最终只有一个占用者，只为成功请求增加一条成功审计；失败请求不得部分写入，原记录/密文不丢失。仍由现有唯一约束仲裁，不依靠存在性预查询作为唯一保障。\n\n## AC-C04 错误、权限与兼容\n\n409沿用/api/v1共享错误封装，给出可操作的重复名称提示，不回显SQL、冲突输入或配置值。只转换适配器写入阶段的重复键错误，其他校验、权限、CSRF、缺失记录及审计失败规则保持；不得把其他异常或所有数据库错误一概转换为409。前端409显示服务端冲突提示并保留草稿，改为自由名称后可重试成功，沿用原失败保留输入契约。既有D23的20条正式用例继续回归，独立X01采集方法增加明确409断言，不将历史500当作通过条件。\n\n## 执行门槛\n\n先冻结源码并设计新用例，再保留修复前证据、最小修复、后台隔离H2/MySQL及相关前端回归。完成后仅提交D23更新报告审核。D26不启动，12项环境补齐暂缓；升级关闭超时继续UNCONFIRMED_RETAINED、rootCauseConfirmed=false，不调查或复验。\n",
+      "sections": [
+        {
+          "anchor": "#document",
+          "title": "RULE-AND-ACCEPTANCE.md",
+          "text": "# BUG-D23-001 已批准修复规则\n\n2026-11-04。用户原话：“BUG-D23-001 按推荐的409规则处理，先设计用例，再修复并后台回归，更新D23测试报告后发我审核，暂时不要进入下一模块。12项环境补齐继续暂缓，升级关闭超时的未确认风险单独保留。”\n\n推荐方案来源：[D23初轮报告](../d23-json-policy-fixes-r1/FINAL-REPORT.md)及[独立规则审批](../d23-json-policy-fixes-r1/FOLLOWUP-RULE-APPROVAL.json)。本次批准的是409规则与修复工作，不将初轮整体结果标成已审核。\n\n## AC-C01 重复创建\n\n同类型同名称的企业适配器创建冲突返回409，原记录及配置密文保持，不增加业务行或成功审计。普通外层未知标量/对象/数组仍按D23-A忽略，不能使重复登记成功，也不能让冲突重新变成500。\n\n## AC-C02 更新及唯一性边界\n\n更新为其他记录已占用的同类型同名称返回409，不部分修改名称、地址、启用状态、凭据密文或成功审计。配置为null保留和提供完整替换配置两条路径均验证。原记录保留原类型和名称允许更新；自由名称允许创建和改名；不同适配器类型可使用相同名称。既有trim/类型归一化和数据库排序规则保持，不新增大小写归一化或改造唯一约束。\n\n## AC-C03 并发冲突\n\n两个并发创建请求争用同一个类型和名称，或两个不同记录并发改为同一空闲类型和名称，应只有一个成功、另一个409。数据库最终只有一个占用者，只为成功请求增加一条成功审计；失败请求不得部分写入，原记录/密文不丢失。仍由现有唯一约束仲裁，不依靠存在性预查询作为唯一保障。\n\n## AC-C04 错误、权限与兼容\n\n409沿用/api/v1共享错误封装，给出可操作的重复名称提示，不回显SQL、冲突输入或配置值。只转换适配器写入阶段的重复键错误，其他校验、权限、CSRF、缺失记录及审计失败规则保持；不得把其他异常或所有数据库错误一概转换为409。前端409显示服务端冲突提示并保留草稿，改为自由名称后可重试成功，沿用原失败保留输入契约。既有D23的20条正式用例继续回归，独立X01采集方法增加明确409断言，不将历史500当作通过条件。\n\n## 执行门槛\n\n先冻结源码并设计新用例，再保留修复前证据、最小修复、后台隔离H2/MySQL及相关前端回归。完成后仅提交D23更新报告审核。D26不启动，12项环境补齐暂缓；升级关闭超时继续UNCONFIRMED_RETAINED、rootCauseConfirmed=false，不调查或复验。",
+          "char_count": 1121,
+          "sha256": "de8d989af970b320904c3b1cd5ed62b4e7f10392ee04821b7dc27d2516dd7b7a"
+        },
+        {
+          "anchor": "#heading/BUG-D23-001-已批准修复规则",
+          "title": "BUG-D23-001 已批准修复规则",
+          "text": "# BUG-D23-001 已批准修复规则\n\n2026-11-04。用户原话：“BUG-D23-001 按推荐的409规则处理，先设计用例，再修复并后台回归，更新D23测试报告后发我审核，暂时不要进入下一模块。12项环境补齐继续暂缓，升级关闭超时的未确认风险单独保留。”\n\n推荐方案来源：[D23初轮报告](../d23-json-policy-fixes-r1/FINAL-REPORT.md)及[独立规则审批](../d23-json-policy-fixes-r1/FOLLOWUP-RULE-APPROVAL.json)。本次批准的是409规则与修复工作，不将初轮整体结果标成已审核。",
+          "char_count": 296,
+          "sha256": "ca4e487612844ad5110832ffff677c6f75eae808434f6c8f8d55ce06ea8bd909"
+        },
+        {
+          "anchor": "#heading/AC-C01-重复创建",
+          "title": "AC-C01 重复创建",
+          "text": "## AC-C01 重复创建\n\n同类型同名称的企业适配器创建冲突返回409，原记录及配置密文保持，不增加业务行或成功审计。普通外层未知标量/对象/数组仍按D23-A忽略，不能使重复登记成功，也不能让冲突重新变成500。",
+          "char_count": 109,
+          "sha256": "40f5bc0e4c657f487ae138b05226e2fc52db27ee99db7090615adb4700b84435"
+        },
+        {
+          "anchor": "#heading/AC-C02-更新及唯一性边界",
+          "title": "AC-C02 更新及唯一性边界",
+          "text": "## AC-C02 更新及唯一性边界\n\n更新为其他记录已占用的同类型同名称返回409，不部分修改名称、地址、启用状态、凭据密文或成功审计。配置为null保留和提供完整替换配置两条路径均验证。原记录保留原类型和名称允许更新；自由名称允许创建和改名；不同适配器类型可使用相同名称。既有trim/类型归一化和数据库排序规则保持，不新增大小写归一化或改造唯一约束。",
+          "char_count": 178,
+          "sha256": "f3f7da1f49ff616f049d9f7feef9cbbdf3905359db8446cd26d415dd474bfdfa"
+        },
+        {
+          "anchor": "#heading/AC-C03-并发冲突",
+          "title": "AC-C03 并发冲突",
+          "text": "## AC-C03 并发冲突\n\n两个并发创建请求争用同一个类型和名称，或两个不同记录并发改为同一空闲类型和名称，应只有一个成功、另一个409。数据库最终只有一个占用者，只为成功请求增加一条成功审计；失败请求不得部分写入，原记录/密文不丢失。仍由现有唯一约束仲裁，不依靠存在性预查询作为唯一保障。",
+          "char_count": 147,
+          "sha256": "a65a5289e5799b13ce5753b1c1a404bf9e66b599c67e3c7837b473a7925834d3"
+        },
+        {
+          "anchor": "#heading/AC-C04-错误、权限与兼容",
+          "title": "AC-C04 错误、权限与兼容",
+          "text": "## AC-C04 错误、权限与兼容\n\n409沿用/api/v1共享错误封装，给出可操作的重复名称提示，不回显SQL、冲突输入或配置值。只转换适配器写入阶段的重复键错误，其他校验、权限、CSRF、缺失记录及审计失败规则保持；不得把其他异常或所有数据库错误一概转换为409。前端409显示服务端冲突提示并保留草稿，改为自由名称后可重试成功，沿用原失败保留输入契约。既有D23的20条正式用例继续回归，独立X01采集方法增加明确409断言，不将历史500当作通过条件。",
+          "char_count": 232,
+          "sha256": "165d8a5872b10b0e44c71fe8b13b1064c611b3f6ae498927167aea861e009405"
+        },
+        {
+          "anchor": "#heading/执行门槛",
+          "title": "执行门槛",
+          "text": "## 执行门槛\n\n先冻结源码并设计新用例，再保留修复前证据、最小修复、后台隔离H2/MySQL及相关前端回归。完成后仅提交D23更新报告审核。D26不启动，12项环境补齐暂缓；升级关闭超时继续UNCONFIRMED_RETAINED、rootCauseConfirmed=false，不调查或复验。",
+          "char_count": 149,
+          "sha256": "49127b1b81f2543d9f611e434a54953e3f5c59c276938b0d29a86329bfef3ac1"
+        }
+      ],
+      "media": [],
+      "warnings": [],
+      "anchor_index": [
+        "#document",
+        "#heading/BUG-D23-001-已批准修复规则",
+        "#heading/AC-C01-重复创建",
+        "#heading/AC-C02-更新及唯一性边界",
+        "#heading/AC-C03-并发冲突",
+        "#heading/AC-C04-错误、权限与兼容",
+        "#heading/执行门槛"
+      ],
+      "content_sha256": "a613fbc06bfe6dfffd90bbc671d09ec5dc1b2763c1266b271844a04ed9e95cc3",
+      "content_char_count": 1122
+    },
+    {
+      "id": "SRC-002",
+      "name": "FOLLOWUP-RULE-APPROVAL.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-04/d23-json-policy-fixes-r1/FOLLOWUP-RULE-APPROVAL.json",
+      "extension": ".json",
+      "mime_type": "application/json",
+      "role": "requirement",
+      "size": 692,
+      "sha256": "b442c45bc82ae60f250758fd3b171009193793211c238d2940208bee02856d91",
+      "status": "extracted",
+      "encoding": "utf-8-sig",
+      "content": "{\n  \"date\": \"2026-11-04\",\n  \"status\": \"BUG_FIX_RULE_APPROVED\",\n  \"bugId\": \"BUG-D23-001\",\n  \"selectedDuplicateStatus\": 409,\n  \"basis\": \"用户：BUG-D23-001 按推荐的409规则处理，先设计用例，再修复并后台回归，更新D23测试报告后发我审核，暂时不要进入下一模块。12项环境补齐继续暂缓，升级关闭超时的未确认风险单独保留。\",\n  \"resultReviewApproved\": false,\n  \"scope\": \"企业适配器创建/更新的重复类型与名称冲突、原记录保留原名、并发冲突及无部分写入；原D23-A兼容政策保持\",\n  \"environmentBlockersDeferred\": 12,\n  \"shutdownRisk\": \"UNCONFIRMED_RETAINED\",\n  \"rootCauseConfirmed\": false\n}",
+      "sections": [
+        {
+          "anchor": "#json-root",
+          "title": "FOLLOWUP-RULE-APPROVAL.json",
+          "text": "{\n  \"date\": \"2026-11-04\",\n  \"status\": \"BUG_FIX_RULE_APPROVED\",\n  \"bugId\": \"BUG-D23-001\",\n  \"selectedDuplicateStatus\": 409,\n  \"basis\": \"用户：BUG-D23-001 按推荐的409规则处理，先设计用例，再修复并后台回归，更新D23测试报告后发我审核，暂时不要进入下一模块。12项环境补齐继续暂缓，升级关闭超时的未确认风险单独保留。\",\n  \"resultReviewApproved\": false,\n  \"scope\": \"企业适配器创建/更新的重复类型与名称冲突、原记录保留原名、并发冲突及无部分写入；原D23-A兼容政策保持\",\n  \"environmentBlockersDeferred\": 12,\n  \"shutdownRisk\": \"UNCONFIRMED_RETAINED\",\n  \"rootCauseConfirmed\": false\n}",
+          "char_count": 445,
+          "sha256": "e3cec7f967778039d95c98cb29132770531d5576c5aec67e14a9f250fef4df6a"
+        }
+      ],
+      "media": [],
+      "warnings": [],
+      "anchor_index": [
+        "#json-root"
+      ],
+      "content_sha256": "e3cec7f967778039d95c98cb29132770531d5576c5aec67e14a9f250fef4df6a",
+      "content_char_count": 445
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-04",
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/RULES-AND-ACCEPTANCE.md",
+      "sha256": "f90c859b9bf5294cddf313680517893949d4e832a83bf9f55d063e11cf022904"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "aa1736e229adee1500d5e4eda0cf152568e63343b24966a7de405e322d738824"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "21807f4af073fb04f8b8be0100df4682bcab0af1d6fe7956c6d3da6622c9f4de"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/TEST-CASES.json",
+      "sha256": "4b5682124edac457190b50c410d39d964c2e3b55c5c0c2f887bcd990ae1b6042"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/TEST-PLAN.md",
+      "sha256": "6dda28a3aad3c649de01ebda44072c151281813946647cb368b50324e5c06780"
+    },
+    {
+      "path": "docs/quality-report-project-scope.md",
+      "sha256": "5c5a83ae4f895bd0afa6762ada045df5623b9f6dea5643f5ded7d3de0fe06fa3"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportController.java",
+      "sha256": "0f568885cfc5b4504f614ac02d8c75824e0f36007731153a41d2e31f46c533db"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportService.java",
+      "sha256": "d79b702f791dc71255b418c17d746abf44ed753d6928c6542e34dd5673e8d470"
+    },
+    {
+      "path": "src/test/d21ReportScope.test.ts",
+      "sha256": "90afc435381eec22b7373bfee18928cd6810cb5768aaf55101218a2eafc89a56"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java",
+      "sha256": "62d007dbd71c54125f738261bd4e708c29839e9b8b86dc142efcb8f4d326c118"
+    }
+  ],
+  "testBasisInputs": 2,
+  "extractionStatus": "2_EXTRACTED_0_WARNINGS",
+  "evidenceBundle": "EVIDENCE.json",
+  "canonicalCases": "TEST-CASES.json",
+  "acceptanceMapping": "Source D21-AC-01..04 -> schema AC-D21-01..04",
+  "ruleScope": "D21 section only; other8 observations not cases for this module",
+  "backendEvidence": "Real HTTP through loopback embedded server, owned sessions and isolated data",
+  "frontendEvidence": "Vue/Arco happy-dom, declared selection events and DOM refresh, controlled data",
+  "shutdownRiskRechecked": false,
+  "installedDesktopUpgradeExecuted": false
+}

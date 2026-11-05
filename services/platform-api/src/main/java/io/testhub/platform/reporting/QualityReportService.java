@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -85,16 +84,21 @@ public class QualityReportService {
     }
 
     private List<String> normalizeProjectIds(List<String> rawProjectIds) {
-        if (rawProjectIds == null || rawProjectIds.isEmpty()) return List.of();
+        if (rawProjectIds == null) return List.of();
+        if (rawProjectIds.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "项目筛选参数不能为空");
+        }
         LinkedHashSet<String> result = new LinkedHashSet<>();
         for (String raw : rawProjectIds) {
             if (raw == null || raw.isBlank()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "项目筛选参数不能为空");
             }
-            Arrays.stream(raw.split(",")).map(String::trim).forEach(projectId -> {
+            // Preserve trailing empty tokens, including CSV inside repeated query keys.
+            for (String token : raw.split(",", -1)) {
+                String projectId = token.trim();
                 if (projectId.isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "项目筛选参数不能为空");
                 result.add(projectId);
-            });
+            }
         }
         return List.copyOf(result);
     }

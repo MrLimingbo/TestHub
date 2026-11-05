@@ -1,0 +1,111 @@
+{
+  "date": "2026-11-03",
+  "approvedReportHashesVerified": true,
+  "sourceHashesMatchApprovedR1": true,
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "aa1736e229adee1500d5e4eda0cf152568e63343b24966a7de405e322d738824"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/RULES-AND-ACCEPTANCE.md",
+      "sha256": "f90c859b9bf5294cddf313680517893949d4e832a83bf9f55d063e11cf022904"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "0e8c274d94c9b9a6c6dc376da5e257fe322d26a19ed23a0a3ece18248fc00781"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d08-d07-plan-fixes-r1/TEST-PLAN.md",
+      "sha256": "2c31dabfef7fbb7f6a19705585e96cfa3074be22a1f1ded269382390fb4bb2f5"
+    },
+    {
+      "path": "docs/functional-execution-history-contract.md",
+      "sha256": "e19f8ef3023375e5618230dfe6360ef5e2ab5e869d3b97c477fd95483d2763e2"
+    },
+    {
+      "path": "src/pages/FunctionalPlansPage.vue",
+      "sha256": "b6f26c5674cb3fc027925c801ac2cbf623898dfe0b0ff94829a10e85d93553a3"
+    },
+    {
+      "path": "apps/desktop/app/src/functional-transfer.cjs",
+      "sha256": "95c75a4be3fe0819b3f02b4b2e9e0a63ce73ad01723f757a94ed942ed974c922"
+    },
+    {
+      "path": "apps/desktop/app/src/functional-history-sync.cjs",
+      "sha256": "9542d2dec8aaff763a01431d39fc268faca3e52654464c44aa21a7c67a6e6f9a"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestRunCase.java",
+      "sha256": "e3b439e67913dad37212f8e07e2fff8d4c1366cc7d16a98a75a098225ce69523"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTransferController.java",
+      "sha256": "2e709a2897c068bbe49c5006d9b96ced55317bc2bfed2b3fdffabd1660ac7ed3"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestExecutionRepository.java",
+      "sha256": "5e5e00678b6b147fe3086ab98cdbc68687282dde06a2323f41decc854fb618e9"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalHistorySyncService.java",
+      "sha256": "a081c5b3e3d39cf3cccac10ebcf6e5b80a3641188f7a68bd931ca4ee2321055a"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestExecutionService.java",
+      "sha256": "59babbd5a473196637e845d992d1853bd73b5b567750f3148310468d45443128"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTransferService.java",
+      "sha256": "8ab2965a688da220c3a853470a1c0bc839955b8db0382bd9167f8db34bdf5a0b"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTransferHistory.java",
+      "sha256": "f3fe56eee76f3a067058868e03be1beab93a04a4c09c9eb71f19cc92ddbfb7db"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/FunctionalTransferFlowTests.java",
+      "sha256": "1a7cc0c59342103ac5d7381a7ce7a6a55b36162c02d7bc7460725a2fcbe188d6"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/desktop/DesktopBackupToolTests.java",
+      "sha256": "9e42bbdb232a4536c1705a62c9587f52877398eb8bd5276c70d657eb67153870"
+    },
+    {
+      "path": "src/test/d08D07Plans.test.ts",
+      "sha256": "74b1ae065e3e4edd3f7d59574f97dc40f1d9f694020b88864e14dd6bd29d4d06"
+    },
+    {
+      "path": "apps/desktop/test/d08-history-title.test.cjs",
+      "sha256": "b3e6cf614355a2613df84ebd2ba5a81f4bed628fede3b1b03bb3be5bc0d5bcc2"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTitleSnapshot.java",
+      "sha256": "a97539a13b4e2c4fb52f8a9d8c78603421c10ca001ae57d57c782316d4d8c122"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "sha256": "8703978e432db243754253ccce9314b2a40a0823a3f12a5eedd5defcbb4c63d4"
+    },
+    {
+      "path": "services/platform-api/src/main/resources/db/migration/V113__functional_run_case_title_snapshot.sql",
+      "sha256": "fb97577639fb9c389ee5dea14814eea93eda70550a363637c1c32dd2b90d9d77"
+    },
+    {
+      "path": "services/platform-api/src/main/resources/db/desktop/V57__functional_run_case_title_snapshot.sql",
+      "sha256": "fb97577639fb9c389ee5dea14814eea93eda70550a363637c1c32dd2b90d9d77"
+    },
+    {
+      "path": "scripts/desktop/test-mysql-backend.mjs",
+      "sha256": "649d411c65480fc5614af2ccf8e1b22d01c02ad0c9a8791b8d58feb1b5c36e3c"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "b5614748b24f5a46f051d15e9e0648097ce6b97d9fdb70b267e204f947ff3c25"
+    }
+  ],
+  "priorReportSha256": "68ef8162ab37cbc1bc9c9c4517fb3a9381e5dadcba314258b5c73c5ac3ad4003",
+  "priorArtifactManifestSha256": "0db02926de9768b2f16aa79c1120a5f6712717aff5c94393000f559151b6549b",
+  "priorApprovalSha256": "a8083386c4dfb036ca7b7cd52296e15abef0a6169804f356f4d7761e3e2c861c",
+  "scope": "MySQL supplemental only"
+}

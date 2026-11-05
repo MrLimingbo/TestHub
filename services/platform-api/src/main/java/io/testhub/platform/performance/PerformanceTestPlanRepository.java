@@ -121,6 +121,15 @@ public class PerformanceTestPlanRepository {
                 .param("projectId", projectId).param("planId", planId).update();
     }
 
+    void requireExecutableTextTypes(String projectId, String planId) {
+        jdbc.sql("SELECT request_headers,query_parameters FROM performance_test_thread_group WHERE project_id=:project AND plan_id=:plan")
+                .param("project", projectId).param("plan", planId).query((rs, row) -> {
+                    PerformanceJson.requireStoredTextMap(json, rs.getString("request_headers"), "requestHeaders");
+                    PerformanceJson.requireStoredTextMap(json, rs.getString("query_parameters"), "queryParameters");
+                    return true;
+                }).list();
+    }
+
     private List<PerformanceTestThreadGroup> findThreadGroups(String planId) {
         return jdbc.sql("""
                 SELECT id, plan_id, organization_id, project_id, name, target_url, load_model, thread_count,

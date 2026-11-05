@@ -1,0 +1,78 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "near_duplicates": [],
+  "quality": {
+    "case_quality_score": 100.0,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 100.0
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "stats": {
+    "case_count": 12,
+    "requirement_count": 4,
+    "covered_requirement_count": 4,
+    "requirement_coverage_percent": 100.0,
+    "acceptance_criteria_count": 4,
+    "covered_acceptance_criteria_count": 4,
+    "acceptance_criteria_coverage_percent": 100.0,
+    "coverage_item_count": 12,
+    "covered_coverage_item_count": 12,
+    "design_coverage_percent": 100.0,
+    "positive_count": 4,
+    "negative_count": 8,
+    "polarity_counts": {
+      "negative": 8,
+      "positive": 4
+    },
+    "priority_counts": {
+      "P3": 12
+    },
+    "type_counts": {
+      "negative": 4,
+      "permission": 1,
+      "positive": 4,
+      "recovery": 3
+    },
+    "technique_counts": {
+      "acceptance-criteria": 1,
+      "data-lifecycle": 3,
+      "equivalence-partitioning": 4,
+      "recovery-idempotency": 3,
+      "role-permission": 1
+    },
+    "module_counts": {
+      "通知、集成、插件与运维/BUG-D23-001": 12
+    },
+    "document_review_count": 0,
+    "document_review_type_counts": {},
+    "document_review_severity_counts": {},
+    "evidence_bundle_verified": true,
+    "evidence_reference_count": 44,
+    "unique_evidence_reference_count": 4,
+    "invalid_evidence_reference_count": 0,
+    "verified_evidence_quote_count": 12,
+    "invalid_evidence_quote_count": 0,
+    "visual_observation_count": 0,
+    "confirmed_visual_evidence_count": 0,
+    "exact_duplicate_group_count": 0,
+    "near_duplicate_pair_count": 0,
+    "untraceable_case_count": 0,
+    "case_quality_score": 100.0,
+    "case_quality_gate": "pass",
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "error_count": 0,
+    "warning_count": 0
+  }
+}

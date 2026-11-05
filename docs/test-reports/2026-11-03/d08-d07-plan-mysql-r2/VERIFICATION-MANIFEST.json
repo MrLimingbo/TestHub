@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-03",
+  "commands": [
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D08D07PlanTests,FunctionalExecution*Tests,FunctionalHistorySyncFlowTests,FunctionalTransferFlowTests,FunctionalDefectExecutionSyncFlowTests'",
+      "exitCode": 0,
+      "result": "98/98;6 suites;0 failures/errors/skips",
+      "approval": "Escalated request approved; isolated infrastructure only"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "sourceHashesMatchR1": true,
+  "frontendAndH2NotRerun": "No implementation/test changes; accepted R1 results referenced, not claimed as current executions",
+  "rawLog": {
+    "name": "testhub-d08-mysql-r2.log",
+    "sha256": "c9b9c276bdbda7bac4631a27d531c99ffd6dc6d97ed19c99507a796e05141625"
+  },
+  "backendJarSha256": "b640702328589c268d62787c8a8d84c8ff3d87021a8eac7ed868647993ecea60",
+  "jarRebuilt": false,
+  "noInstalledRuntimeReplaced": true
+}

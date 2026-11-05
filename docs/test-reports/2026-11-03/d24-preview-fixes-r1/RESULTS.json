@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-03",
+  "status": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+  "observation": "OBS-15-E001",
+  "rule": "D24-A",
+  "acceptance": {
+    "total": 24,
+    "positiveOnly": 13,
+    "negativeOnly": 8,
+    "mixed": 3,
+    "passed": 24,
+    "failed": 0,
+    "blocked": 0
+  },
+  "checks": {
+    "desktop": {
+      "total": 756,
+      "passed": 755,
+      "failed": 0,
+      "skipped": 1
+    },
+    "frontend": {
+      "total": 941,
+      "passed": 941,
+      "failed": 0
+    },
+    "lint": "PASS_WITH_2_EXISTING_WARNINGS",
+    "finalAffectedLint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "offscreen": "4/4_PASS",
+    "diffCheck": "PASS"
+  },
+  "entryGroups": 45,
+  "readHandlers": 124,
+  "coldStatusBranches": 34,
+  "newConfirmedProductBugs": 0,
+  "priorObservationImplemented": 1,
+  "backendNotRerun": "No backend source or schema change",
+  "historicalEnvironmentBlockersDeferred": 12,
+  "otherObservationsWaitingForModuleGate": 5,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "noNextModuleExecuted": true
+}

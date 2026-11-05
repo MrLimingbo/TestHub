@@ -67,5 +67,26 @@ export function validateRuntime(task, value, allowedOrigins) {
   if (!value || value.contract !== 'testhub.playwright-runner.runtime-configuration' || value.version !== 1 || value.executionId !== task.executionId || value.taskId !== task.taskId || !value.browser || !value.scenario) throw invalid('运行时配置不兼容')
   const base = new URL(value.browser.baseUrl)
   if (!allowedOrigins.includes(base.origin) || !['chromium', 'firefox', 'webkit'].includes(value.browser.browser) || !Array.isArray(value.scenario.steps) || value.scenario.steps.length === 0 || value.scenario.steps.length > 300) throw invalid('运行时配置超出 Runner 安全边界')
+  for (const [field, maximum] of [['viewportWidth', 3840], ['viewportHeight', 2160]]) {
+    const number = value.browser[field]
+    if (!Number.isSafeInteger(number) || number < 320 || number > maximum) throw invalid(`browser.${field} 不合法`)
+  }
+  const variables = value.scenario.variables ?? {}
+  if (typeof variables !== 'object' || Array.isArray(variables) || Object.keys(variables).length > 50
+    || Object.entries(variables).some(([key, entry]) => !/^[A-Za-z_][A-Za-z0-9_]{0,63}$/.test(key)
+      || (entry !== null && (typeof entry !== 'string' || entry.length > 4096 || /[\r\n]/.test(entry))))) throw invalid('scenario.variables 值必须是合法字符串')
+  for (const [index, step] of value.scenario.steps.entries()) {
+    if (!step || typeof step !== 'object' || !STEP_TYPES.has(step.type)) throw invalid(`steps[${index}] 不合法`)
+    const timeout = step.timeoutMillis
+    if ((step.type === 'WAIT' && timeout == null) || (timeout != null
+      && (!Number.isSafeInteger(timeout) || timeout < (step.type === 'WAIT' ? 1 : 100) || timeout > 60000))) throw invalid(`steps[${index}].timeoutMillis 不合法`)
+    for (const field of ['value', 'expectedText']) {
+      const text = step[field]
+      if (text != null && (typeof text !== 'string' || text.length > 4096)) throw invalid(`steps[${index}].${field} 必须是字符串`)
+    }
+    if (step.type === 'FILL' && !step.value?.trim()) throw invalid(`steps[${index}].value 必填`)
+    if (step.type === 'ASSERT_TEXT' && !step.expectedText?.trim()) throw invalid(`steps[${index}].expectedText 必填`)
+    if ((step.type === 'FILL' && /[\r\n]/.test(step.value)) || (step.type === 'ASSERT_TEXT' && /[\r\n]/.test(step.expectedText))) throw invalid(`steps[${index}] 文本不能换行`)
+  }
   return Object.freeze(value)
 }

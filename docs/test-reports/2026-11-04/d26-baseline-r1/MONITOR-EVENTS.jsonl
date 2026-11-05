@@ -1,0 +1,2 @@
+{"at":"2026-11-04T08:10:43.681Z","event":"INVALID_WINDOW_AWAITING_QUIET","attempt":1,"violation":"EXTERNAL_CPU_POLLUTION","validWindows":0,"requests":1645,"businessErrors":0,"probes":108,"probeErrors":0,"userProcessesTouched":false}
+{"at":"2026-11-04T08:43:16.104Z","event":"TERMINAL_INCOMPLETE_REVIEW_READY","validWindows":0,"requiredWindows":2,"cleanupVerified":true,"completionMonitorDeleted":true,"nextModuleStarted":false}

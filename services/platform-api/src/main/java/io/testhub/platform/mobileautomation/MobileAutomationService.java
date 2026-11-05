@@ -215,7 +215,11 @@ public class MobileAutomationService {
     }
     @Transactional(isolation=Isolation.READ_COMMITTED)
     public Execution execute(AuthenticatedPrincipal principal, String projectId, String scenarioId, Integer timeoutSeconds) {
-        ProjectSummary project = writable(principal, projectId); Scenario scenario = scenario(projectId, scenarioId); Device device = device(projectId, scenario.deviceId()); Application application = application(projectId, scenario.applicationId());
+        ProjectSummary project = writable(principal, projectId);
+        jdbc.sql("SELECT variables,steps FROM mobile_automation_scenario WHERE project_id=:project AND id=:id").param("project",projectId).param("id",scenarioId).query((rs,row) -> { MobileInput.requireStored(json,rs.getString(1),rs.getString(2)); return true; }).optional();
+        Scenario scenario = scenario(projectId, scenarioId);
+        scenarioInput(projectId,new ScenarioRequest(scenario.deviceId(),scenario.applicationId(),scenario.name(),scenario.description(),scenario.failureStrategy(),scenario.variables(),scenario.steps()));
+        Device device = device(projectId, scenario.deviceId()); Application application = application(projectId, scenario.applicationId());
         if (!device.enabled() || !application.enabled()) throw conflict("设备或应用已停用，不能执行场景");
         int timeout = timeout(timeoutSeconds); String executionId = id(), taskId = id(); Instant requested = Instant.now(), deadline = requested.plusSeconds(timeout);
         String manifestRef = "mobile-automation/manifests/" + executionId + "/v1.json";
@@ -247,13 +251,14 @@ public class MobileAutomationService {
         Execution execution = executionByTask(taskId, executionId);
         if (execution == null || terminal(execution.status())) throw rejected("移动端执行已结束或不存在");
         if (execution.runnerId() != null && !runnerId.equals(execution.runnerId())) throw rejected("移动端执行已被其他 Runner 接收");
+        String content = jdbc.sql("SELECT content FROM mobile_automation_execution_manifest WHERE execution_id=:execution")
+                .param("execution", executionId).query(String.class).optional().orElseThrow(() -> rejected("移动端执行清单不存在"));
+        MobileInput.requireManifest(json, content);
+        Manifest manifest = read(content, new TypeReference<Manifest>() { });
         if (execution.runnerId() == null || "QUEUED".equals(execution.status())) {
             jdbc.sql("UPDATE mobile_automation_execution SET runner_id=COALESCE(runner_id,:runner),status=CASE WHEN status='QUEUED' THEN 'ACCEPTED' ELSE status END,status_code=CASE WHEN status='QUEUED' THEN 'TASK_ACCEPTED' ELSE status_code END,status_message=CASE WHEN status='QUEUED' THEN '受信任 Appium Runner 已接收任务' ELSE status_message END,started_at=COALESCE(started_at,CURRENT_TIMESTAMP(3)) WHERE id=:id")
                     .param("runner", runnerId).param("id", executionId).update();
         }
-        String content = jdbc.sql("SELECT content FROM mobile_automation_execution_manifest WHERE execution_id=:execution")
-                .param("execution", executionId).query(String.class).optional().orElseThrow(() -> rejected("移动端执行清单不存在"));
-        Manifest manifest = read(content, new TypeReference<Manifest>() { });
         return new RunnerRuntimeConfiguration("testhub.appium-runner.runtime-configuration", 1, taskId, executionId, execution.deadlineAt(), manifest);
     }
     @Transactional(isolation=Isolation.READ_COMMITTED)
@@ -352,7 +357,7 @@ public class MobileAutomationService {
     private Execution execution(String projectId,String id) { return jdbc.sql("SELECT * FROM mobile_automation_execution WHERE project_id=:p AND id=:id").param("p",projectId).param("id",id).query((rs,row)->execution(rs)).optional().orElseThrow(()->notFound("移动端执行记录不存在")); }
     private Execution executionByTask(String task,String execution) { return jdbc.sql("SELECT * FROM mobile_automation_execution WHERE task_id=:task AND id=:execution").param("task",task).param("execution",execution).query((rs,row)->execution(rs)).optional().orElse(null); }
     private Execution execution(java.sql.ResultSet rs) throws java.sql.SQLException { return new Execution(rs.getString("id"),rs.getString("task_id"),rs.getString("organization_id"),rs.getString("project_id"),rs.getString("scenario_id"),rs.getString("scenario_name"),rs.getInt("scenario_version"),rs.getString("device_id"),rs.getString("device_name"),rs.getString("platform"),rs.getString("application_id"),rs.getString("application_name"),rs.getString("status"),rs.getString("status_code"),rs.getString("status_message"),rs.getString("runner_id"),rs.getString("manifest_ref"),rs.getString("requested_by"),instant(rs.getTimestamp("requested_at")),instant(rs.getTimestamp("deadline_at")),instant(rs.getTimestamp("cancel_requested_at")),instant(rs.getTimestamp("started_at")),instant(rs.getTimestamp("finished_at")),instant(rs.getTimestamp("created_at")),instant(rs.getTimestamp("updated_at"))); }
-    private ScenarioInput scenarioInput(String projectId,ScenarioRequest request) { if(request==null) throw invalid("场景不能为空"); Device device=device(projectId,trim(request.deviceId())); Application application=application(projectId,trim(request.applicationId())); if(!device.platform().equals(application.platform())) throw invalid("设备与应用的平台必须一致"); List<Step> steps=request.steps()==null?List.of():request.steps().stream().map(this::stepInput).toList(); if(steps.isEmpty()||steps.size()>300) throw invalid("场景步骤数应在 1 到 300 之间"); if (steps.stream().map(Step::id).distinct().count() != steps.size()) throw invalid("步骤标识不能重复"); for (Step step : steps) if (step.elementId()!=null&&!device.platform().equals(element(projectId,step.elementId()).platform())) throw invalid("步骤元素与目标设备的平台必须一致"); return new ScenarioInput(device.id(),application.id(),required(request.name(),160,"场景名称"),nullable(request.description(),2000),choice(request.failureStrategy(),Set.of("STOP","CONTINUE"),"失败策略"),variables(request.variables()),steps); }
+    private ScenarioInput scenarioInput(String projectId,ScenarioRequest request) { if(request==null) throw invalid("场景不能为空"); Device device=device(projectId,trim(request.deviceId())); Application application=application(projectId,trim(request.applicationId())); if(!device.platform().equals(application.platform())) throw invalid("设备与应用的平台必须一致"); List<Step> steps=request.steps()==null?List.of():request.steps().stream().map(this::stepInput).toList(); if(steps.isEmpty()||steps.size()>300) throw invalid("场景步骤数应在 1 到 300 之间"); if (steps.stream().map(Step::id).distinct().count() != steps.size()) throw invalid("步骤标识不能重复"); for (Step step : steps) if (step.elementId()!=null) { Element referenced=element(projectId,step.elementId()); if(!device.platform().equals(referenced.platform())) throw invalid("步骤元素与目标设备的平台必须一致"); MobileLocatorPolicy.require(device.platform(),referenced.locatorStrategy()); } return new ScenarioInput(device.id(),application.id(),required(request.name(),160,"场景名称"),nullable(request.description(),2000),choice(request.failureStrategy(),Set.of("STOP","CONTINUE"),"失败策略"),variables(request.variables()),steps); }
     private Step stepInput(Step value) { if (value == null) throw invalid("步骤不能为空"); String type=choice(value.type(),STEP_TYPES,"步骤类型"); String elementId=blank(value.elementId()); if(Set.of("TAP","INPUT","ASSERT_VISIBLE","ASSERT_TEXT").contains(type)&&elementId==null) throw invalid(type+" 步骤必须引用元素"); if(elementId!=null&&!elementId.matches("[0-9A-HJKMNP-TV-Z]{26}")) throw invalid("元素标识不合法"); return new Step(required(value.id(),64,"步骤标识"),type,required(value.name(),160,"步骤名称"),elementId,nullable(value.value(),4096),nullable(value.expectedText(),4096),timeoutMillis(value.timeoutMillis())); }
     private List<Manifest.ResolvedStep> resolveSteps(String projectId,List<Step> steps) { return steps.stream().map(step->{ Element element=step.elementId()==null?null:element(projectId,step.elementId()); return new Manifest.ResolvedStep(step.id(),step.type(),step.name(),element==null?null:element.locatorStrategy(),element==null?null:element.locatorValue(),step.value(),step.expectedText(),step.timeoutMillis()); }).toList(); }
     private DeviceInput deviceInput(DeviceRequest value) { if(value==null) throw invalid("设备不能为空");
@@ -363,7 +368,12 @@ public class MobileAutomationService {
         }
         return new DeviceInput(required(value.name(),120,"设备名称"),platform,required(value.udid(),255,"UDID"),automationName,capabilities(value.capabilities()),Boolean.TRUE.equals(value.enabled())); }
     private ApplicationInput applicationInput(ApplicationRequest value) { if(value==null) throw invalid("应用不能为空"); String file=blank(value.appFileId()); if(file!=null&&!file.matches("[0-9A-HJKMNP-TV-Z]{26}")) throw invalid("应用包文件标识不合法"); return new ApplicationInput(required(value.name(),120,"应用名称"),choice(value.platform(),PLATFORMS,"应用平台"),required(value.appIdentifier(),255,"应用标识"),nullable(value.versionName(),120),file,Boolean.TRUE.equals(value.enabled())); }
-    private ElementInput elementInput(ElementRequest value) { if(value==null) throw invalid("元素不能为空"); return new ElementInput(required(value.name(),120,"元素名称"),choice(value.platform(),PLATFORMS,"元素平台"),choice(value.locatorStrategy(),LOCATORS,"定位策略"),required(value.locatorValue(),1024,"定位值"),nullable(value.description(),1000)); }
+    private ElementInput elementInput(ElementRequest value) {
+        if(value==null) throw invalid("元素不能为空");
+        String platform=choice(value.platform(),PLATFORMS,"元素平台"), strategy=choice(value.locatorStrategy(),LOCATORS,"定位策略");
+        MobileLocatorPolicy.require(platform,strategy);
+        return new ElementInput(required(value.name(),120,"元素名称"),platform,strategy,required(value.locatorValue(),1024,"定位值"),nullable(value.description(),1000));
+    }
     private Map<String,String> variables(Map<String,String> value) { if(value==null) return Map.of(); if(value.size()>50||value.entrySet().stream().anyMatch(entry->entry.getKey()==null||!entry.getKey().matches("[A-Za-z_][A-Za-z0-9_]{0,63}")||entry.getValue()==null||entry.getValue().length()>4096)) throw invalid("变量或能力参数不合法"); return Map.copyOf(value); }
     private Map<String,String> capabilities(Map<String,String> value) { if(value==null) return Map.of(); if(value.size()>50||value.entrySet().stream().anyMatch(entry->entry.getKey()==null||!SAFE_DEVICE_CAPABILITIES.contains(entry.getKey())||entry.getValue()==null||entry.getValue().length()>4096)) throw invalid("设备能力参数不合法或不在白名单内"); return Map.copyOf(value); }
     private int timeout(Integer value) { int valueOrDefault=value==null?300:value; if(valueOrDefault<10||valueOrDefault>3600) throw invalid("执行超时应在 10 到 3600 秒之间"); return valueOrDefault; }

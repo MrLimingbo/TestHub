@@ -1,0 +1,226 @@
+{
+  "unit": "AUTOMATED_TEST_METHOD",
+  "total": 16,
+  "positiveOnly": 8,
+  "negativeOnly": 6,
+  "mixed": 2,
+  "passed": 16,
+  "failed": 0,
+  "blocked": 0,
+  "variantsAndEnvironmentRunsNotAdded": true,
+  "mysqlParityNotAsserted": true,
+  "coverageLimits": [
+    "B10为跨项目PUT和名称前置校验；未在该新方法中加入跨项目GET或落库中途故障注入。",
+    "新增方法不是生产部署、完整桌面升级或真实跨端验证。"
+  ],
+  "cases": [
+    {
+      "id": "B01",
+      "method": "B01_equivalentCodeUpdates",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "同编号/空白大小写等价更新及原执行批次保持",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B02",
+      "method": "B02_differentCodeAtomic",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "不同编号400；计划完整对象、成员及各表数量保持",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B03",
+      "method": "B03_invalidCodes",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "null/空/空白/非法格式/缺失编号400",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B04",
+      "method": "B04_newRunFreezesTitleAndSteps",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "源标题及步骤改名后旧批次冻结、新批次用新标题",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B05",
+      "method": "B05_legacyMissingIsExplicit",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "旧缺失快照记录返回CURRENT_ASSET",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B06",
+      "method": "B06_transferPreservesSnapshotAndMissing",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "mixed",
+      "status": "PASS",
+      "coverage": "迁移有/无快照及空白/数字/布尔/数组/对象非法资料；HTTP导出声明握手",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B07",
+      "method": "B07_syncPreservesSnapshotAndMissing",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "mixed",
+      "status": "PASS",
+      "coverage": "同步有/无快照及空白非法资料，无新增回执",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B08",
+      "method": "B08_snapshotCannotBeOverwrittenOrRemoved",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "已有历史快照改写/移除409",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B09",
+      "method": "B09_concurrentRenameAndRunAreConsistent",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "项目锁下改名与批次创建串行，标题/步骤自洽",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "B10",
+      "method": "B10_permissionAndFailedRunNoPartialWrites",
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "跨项目PUT403；批次名称超长在创建前拒绝且各表数量保持",
+      "executedEnvironment": "isolated H2 / MockMvc",
+      "mysqlStatus": "NOT_EXECUTED_APPROVAL_SERVICE_BLOCKED",
+      "evidence": [
+        "backend-h2.json: P2D08D07PlanTests 10/10"
+      ]
+    },
+    {
+      "id": "U01",
+      "method": "U01 missing historical snapshot is explicitly labelled as current title",
+      "source": "src/test/d08D07Plans.test.ts",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "旧历史当前标题及缺快照提示",
+      "executedEnvironment": "Vue/Arco component fixtures",
+      "mysqlStatus": "NOT_APPLICABLE",
+      "evidence": [
+        "VERIFICATION-MANIFEST.json: vitest 938/938 includes 3 new methods"
+      ]
+    },
+    {
+      "id": "U02",
+      "method": "U02 new history displays its snapshot source and original title",
+      "source": "src/test/d08D07Plans.test.ts",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "冻结标题及快照来源提示",
+      "executedEnvironment": "Vue/Arco component fixtures",
+      "mysqlStatus": "NOT_APPLICABLE",
+      "evidence": [
+        "VERIFICATION-MANIFEST.json: vitest 938/938 includes 3 new methods"
+      ]
+    },
+    {
+      "id": "U03",
+      "method": "U03 plan code is readonly and original code accompanies edit",
+      "source": "src/test/d08D07Plans.test.ts",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "编辑编号只读并发送原编号",
+      "executedEnvironment": "Vue/Arco component fixtures",
+      "mysqlStatus": "NOT_APPLICABLE",
+      "evidence": [
+        "VERIFICATION-MANIFEST.json: vitest 938/938 includes 3 new methods"
+      ]
+    },
+    {
+      "id": "N01",
+      "method": "N01 title snapshots survive real client transport while legacy data stays missing",
+      "source": "apps/desktop/test/d08-history-title.test.cjs",
+      "polarity": "positive",
+      "status": "PASS",
+      "coverage": "真实桌面同步客户端传输保留快照及旧格式缺失",
+      "executedEnvironment": "Node controlled transport",
+      "mysqlStatus": "NOT_APPLICABLE",
+      "evidence": [
+        "VERIFICATION-MANIFEST.json: Node 222/222 includes 3 new methods"
+      ]
+    },
+    {
+      "id": "N02",
+      "method": "N02 unsupported peers stop sync and transfer before sending snapshot data",
+      "source": "apps/desktop/test/d08-history-title.test.cjs",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "不支持能力的对端停止同步/迁移",
+      "executedEnvironment": "Node controlled transport",
+      "mysqlStatus": "NOT_APPLICABLE",
+      "evidence": [
+        "VERIFICATION-MANIFEST.json: Node 222/222 includes 3 new methods"
+      ]
+    },
+    {
+      "id": "N03",
+      "method": "N03 different immutable titles produce a non-resolvable layout conflict",
+      "source": "apps/desktop/test/d08-history-title.test.cjs",
+      "polarity": "negative",
+      "status": "PASS",
+      "coverage": "不同标题快照产生不可覆盖布局冲突",
+      "executedEnvironment": "Node controlled transport",
+      "mysqlStatus": "NOT_APPLICABLE",
+      "evidence": [
+        "VERIFICATION-MANIFEST.json: Node 222/222 includes 3 new methods"
+      ]
+    }
+  ]
+}

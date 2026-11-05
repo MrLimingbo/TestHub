@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-04",
+  "count": 1,
+  "records": [
+    {
+      "id": "BUG-D23-001",
+      "priority": "P3",
+      "title": "重复登记同类型同名企业适配器返回500",
+      "status": "OPEN_PENDING_RULE_REVIEW",
+      "classification": "New error-handling defect outside D23-A unknown-field policy implementation",
+      "firstSeen": "B03 initial fixture reused unique key;separately reproduced by X01 with and without unknown field",
+      "h2FocusedDiagnostic": {
+        "writesUnchanged": true,
+        "withoutUnknownStatus": 500,
+        "withUnknownStatus": 500
+      },
+      "mysqlDiagnostic": {
+        "withoutUnknownStatus": 500,
+        "writesUnchanged": true,
+        "withUnknownStatus": 500
+      },
+      "dataOrSuccessAuditChanged": false,
+      "constraint": "uk_enterprise_adapter_name(adapter_type,display_name)",
+      "observedException": "DuplicateKeyException",
+      "expectedRecommendation": "Controlled duplicate-name rejection;409 recommended,final code/range to be reviewed",
+      "formalCaseCountImpact": 0,
+      "historical47ObservationCountImpact": 0,
+      "historical108FixedBugCountImpact": 0,
+      "fixExecuted": false,
+      "reproduction": "REPRODUCTION-AND-REGRESSION.md"
+    }
+  ],
+  "d23PolicyDocumentationGapResolved": true,
+  "unknownFieldPolicyRuntimeDefectsConfirmed": 0
+}

@@ -1,0 +1,21 @@
+{
+  "historicalEnvironmentBlockerCount": 12,
+  "historicalEnvironmentPreparationExecuted": false,
+  "currentExecutionBlockerCount": 1,
+  "records": [
+    {
+      "id": "D26-BLOCK-FORMAL-ADMISSION",
+      "status": "BLOCKED_PENDING_REVIEW",
+      "reason": "调度准入通过后，预检已完成，但正式窗口前30分钟等待中最长连续低负载仅100.104秒，未达到120秒。",
+      "schedulingAdmittedAt": "2026-11-04T12:28:56.609Z",
+      "formalAdmissionEndedAt": "2026-11-04T12:59:18.679Z",
+      "validWindows": 0,
+      "requiredWindows": 2,
+      "formalAttempts": 0,
+      "productDefectConfirmed": false,
+      "userProcessesStopped": false,
+      "thresholdOrDurationChanged": false,
+      "recommendedNextStep": "本轮结果审核后安排可持续约5小时的低干扰主机时段或已批准等效隔离主机，再新建批次从原规格执行；保留R1/R2全部证据，不将预检计正式样本。"
+    }
+  ]
+}

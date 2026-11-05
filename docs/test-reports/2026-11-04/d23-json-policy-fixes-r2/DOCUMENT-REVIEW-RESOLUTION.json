@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-04",
+  "sourceDocumentFinding": "DOC-D23-001",
+  "source": "../d23-json-policy-fixes-r1/TEST-CASES.json",
+  "ruleStatus": "APPROVED_409",
+  "approval": "../d23-json-policy-fixes-r1/FOLLOWUP-RULE-APPROVAL.json",
+  "implementationStatus": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+  "oldFrozenReadinessScore": 99,
+  "oldSnapshotRewritten": false,
+  "newCaseModelReadinessScore": 100,
+  "oldDiagnosticX01": "Now explicitly asserts409 for both variants;not counted again as a formal newcase",
+  "resultReviewApproved": false
+}

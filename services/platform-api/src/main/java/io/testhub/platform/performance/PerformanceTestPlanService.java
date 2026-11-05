@@ -1,5 +1,7 @@
 package io.testhub.platform.performance;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
@@ -132,6 +134,16 @@ public class PerformanceTestPlanService {
                         group.targetTps(), group.p95ThresholdMillis(), group.errorThresholdPercent(), group.requestMethod(),
                         group.requestHeaders(), group.queryParameters(), group.requestBody(), group.expectedStatusCode(),
                         group.responseContains(), group.dataSetCsv(), group.rendezvousUsers())).toList(), null);
+    }
+
+    void validateForExecution(String projectId, PerformanceTestPlanDetail plan) {
+        plans.requireExecutableTextTypes(projectId, plan.id());
+        normalizeDefinition(plan.name(), plan.description(), plan.threadGroups().stream().map(group ->
+                new ThreadGroupInput(group.name(), group.targetUrl(), group.loadModel(), group.threadCount(),
+                        group.rampUpSeconds(), group.stepCount(), group.stepIntervalSeconds(), group.durationSeconds(),
+                        group.targetTps(), group.p95ThresholdMillis(), group.errorThresholdPercent(), group.requestMethod(),
+                        group.requestHeaders(), group.queryParameters(), group.requestBody(), group.expectedStatusCode(),
+                        group.responseContains(), group.dataSetCsv(), group.rendezvousUsers())).toList());
     }
 
     private List<ThreadGroupPayload> groups(List<ThreadGroupInput> source) {
@@ -406,11 +418,11 @@ public class PerformanceTestPlanService {
                             Integer expectedVersion) {
     }
 
-    public record ThreadGroupInput(String name, String targetUrl, String loadModel, Integer threadCount,
-                                   Integer rampUpSeconds, Integer stepCount, Integer stepIntervalSeconds, Integer durationSeconds, Integer targetTps,
-                                   Integer p95ThresholdMillis, BigDecimal errorThresholdPercent, String requestMethod,
-                                   Map<String, String> requestHeaders, Map<String, String> queryParameters, String requestBody, Integer expectedStatusCode,
-                                   String responseContains, String dataSetCsv, Integer rendezvousUsers) {
+    public record ThreadGroupInput(String name, String targetUrl, String loadModel, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer threadCount,
+                                   @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer rampUpSeconds, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer stepCount, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer stepIntervalSeconds, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer durationSeconds, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer targetTps,
+                                   @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer p95ThresholdMillis, @JsonDeserialize(using = PerformanceJson.DecimalValue.class) BigDecimal errorThresholdPercent, String requestMethod,
+                                   @JsonDeserialize(contentUsing = PerformanceJson.Text.class) Map<String, String> requestHeaders, @JsonDeserialize(contentUsing = PerformanceJson.Text.class) Map<String, String> queryParameters, @JsonDeserialize(using = PerformanceJson.Text.class) String requestBody, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer expectedStatusCode,
+                                   @JsonDeserialize(using = PerformanceJson.Text.class) String responseContains, @JsonDeserialize(using = PerformanceJson.Text.class) String dataSetCsv, @JsonDeserialize(using = PerformanceJson.IntegerValue.class) Integer rendezvousUsers) {
     }
 
     record ThreadGroupPayload(String name, String targetUrl, String loadModel, int threadCount, int rampUpSeconds,

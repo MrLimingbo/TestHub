@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-04T08:55:06.282Z",
+  "status": "BLOCKED_EXECUTION_REPORT_APPROVED",
+  "userInstruction": "本轮阻塞报告审核通过，继续在低干扰时段后台重采D26，按原方案完成两个有效窗口后更新测试报告发我审核。",
+  "approvedReportSha256": "cd2ce0ed4903ad0eacdb8b8025a81f2616b1f74ea652cac3f2d9bf4a381c9dd6",
+  "approvedEvidenceManifestSha256": "72b1de2bf6d9c4e1974922a366dd2db1c61be5f52ab4e185dc2295b09153a23a",
+  "validWindowsApprovedAsCompleted": 0,
+  "recollectionAuthorized": true,
+  "priorInvalidAttemptRetained": true,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

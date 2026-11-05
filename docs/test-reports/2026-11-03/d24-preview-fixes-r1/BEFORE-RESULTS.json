@@ -1,0 +1,47 @@
+{
+  "validRedRun": {
+    "total": 2,
+    "passed": 0,
+    "failed": 2,
+    "errors": 0,
+    "command": "node --test apps/desktop/test/d24-preview.test.cjs",
+    "failures": [
+      {
+        "id": "N10",
+        "expected": "fetch signal aborted=true",
+        "actual": false
+      },
+      {
+        "id": "N13",
+        "expected": "shared read lifecycle invoked once",
+        "actual": 0
+      }
+    ],
+    "logSha256": "94f97bd10f8f907cf00eccee4cb7a6c0dd2ce72dab022ff615ef3ef3aa280e19"
+  },
+  "remaining22IndependentRedNotRetained": true,
+  "notTwoNewProductBugs": true,
+  "originalObservation": "OBS-15-E001",
+  "initialDesktopDefaultSandbox": {
+    "total": 756,
+    "passed": 748,
+    "failed": 7,
+    "skipped": 1,
+    "reason": "listen EPERM: 127.0.0.1",
+    "resolvedBy": "Authorized isolated loopback rerun:755 pass/1 skip"
+  },
+  "initialFrontendTimeouts": 49,
+  "fixtureMaintenance": [
+    "API迁移VM补入读取包装函数，原断言保持",
+    "happy-dom中按磁盘路径读脚本，修复非file URL准备错误",
+    "补齐legacy transfer客户端引用",
+    "真实离屏夹具等待当前操作ID，手工释放迟到步骤；没有放宽取消ID校验",
+    "CJS离屏脚本移至桌面测试目录以沿用现有lint规则"
+  ],
+  "scopeAmendment": {
+    "initialReadHandlers": 90,
+    "finalReadHandlers": 124,
+    "added": "34 cold status branches",
+    "newScenarios": 0
+  }
+}

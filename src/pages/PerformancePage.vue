@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { performanceGroupNumbers, performanceNumberText, performanceNumberError, performanceIntegerInput, type PerformanceNumberText, type PerformanceNumberField } from '@/utils/performanceNumberInput'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -46,6 +47,7 @@ interface Plan {
 }
 interface PlanDetail extends Omit<Plan, 'threadGroupCount'> { threadGroups: ThreadGroup[] }
 interface ThreadGroupInput {
+  numberText: PerformanceNumberText
   name: string
   targetUrl: string
   loadModel: 'STEADY' | 'RAMP_UP' | 'STEPPED_RAMP'
@@ -264,13 +266,15 @@ const peakResourceMemory = (resources: PerformanceResourceMetric[]) => resources
 const latestResource = (resources: PerformanceResourceMetric[]) => resources.at(-1) ?? null
 
 function defaultThreadGroup(): ThreadGroupInput {
-  return { name: '默认线程组', targetUrl: 'https://api.example.test/health', loadModel: 'RAMP_UP', threadCount: 100, rampUpSeconds: 60, durationSeconds: 600, p95ThresholdMillis: 500, errorThresholdPercent: 1, requestMethod: 'GET', requestHeadersText: '{}', queryParametersText: '{}', expectedStatusCode: 200 }
+  const group: Omit<ThreadGroupInput, 'numberText'> = { name: '默认线程组', targetUrl: 'https://api.example.test/health', loadModel: 'RAMP_UP', threadCount: 100, rampUpSeconds: 60, durationSeconds: 600, p95ThresholdMillis: 500, errorThresholdPercent: 1, requestMethod: 'GET', requestHeadersText: '{}', queryParametersText: '{}', expectedStatusCode: 200 }
+  return { ...group, numberText: performanceNumberText(group) }
 }
 function resetForm() {
   Object.assign(planForm, { name: '', description: '', status: 'DRAFT', threadGroups: [defaultThreadGroup()] })
 }
 function copyGroup(group: ThreadGroup): ThreadGroupInput {
-  return { name: group.name, targetUrl: group.targetUrl, loadModel: group.loadModel, threadCount: group.threadCount, rampUpSeconds: group.rampUpSeconds, stepCount: group.stepCount ?? undefined, stepIntervalSeconds: group.stepIntervalSeconds ?? undefined, durationSeconds: group.durationSeconds, targetTps: group.targetTps ?? undefined, p95ThresholdMillis: group.p95ThresholdMillis ?? undefined, errorThresholdPercent: group.errorThresholdPercent ?? undefined, requestMethod: group.requestMethod ?? 'GET', requestHeadersText: JSON.stringify(group.requestHeaders ?? {}, null, 2), queryParametersText: JSON.stringify(group.queryParameters ?? {}, null, 2), requestBody: group.requestBody ?? undefined, expectedStatusCode: group.expectedStatusCode ?? undefined, responseContains: group.responseContains ?? undefined, dataSetCsv: group.dataSetCsv ?? undefined, rendezvousUsers: group.rendezvousUsers ?? undefined }
+  const draft: Omit<ThreadGroupInput, 'numberText'> = { name: group.name, targetUrl: group.targetUrl, loadModel: group.loadModel, threadCount: group.threadCount, rampUpSeconds: group.rampUpSeconds, stepCount: group.stepCount ?? undefined, stepIntervalSeconds: group.stepIntervalSeconds ?? undefined, durationSeconds: group.durationSeconds, targetTps: group.targetTps ?? undefined, p95ThresholdMillis: group.p95ThresholdMillis ?? undefined, errorThresholdPercent: group.errorThresholdPercent ?? undefined, requestMethod: group.requestMethod ?? 'GET', requestHeadersText: JSON.stringify(group.requestHeaders ?? {}, null, 2), queryParametersText: JSON.stringify(group.queryParameters ?? {}, null, 2), requestBody: group.requestBody ?? undefined, expectedStatusCode: group.expectedStatusCode ?? undefined, responseContains: group.responseContains ?? undefined, dataSetCsv: group.dataSetCsv ?? undefined, rendezvousUsers: group.rendezvousUsers ?? undefined }
+  return { ...draft, numberText: performanceNumberText(draft) }
 }
 
 function requestParameters(value: string, label: string): Record<string, string> {
@@ -291,17 +295,17 @@ function queryParameters(value: string) {
   return requestParameters(value, '查询参数')
 }
 
-function groupPayload(group: ThreadGroupInput) {
+function numberError(group: ThreadGroupInput, field: PerformanceNumberField) {
+  return performanceNumberError(group.numberText, field, group.loadModel)
+}
+function groupPayload(group: ThreadGroupInput, index: number) {
+  const numbers = performanceGroupNumbers(group.numberText, group.loadModel, index)
   return {
-    name: group.name, targetUrl: group.targetUrl, loadModel: group.loadModel, threadCount: group.threadCount,
-    rampUpSeconds: group.rampUpSeconds, stepCount: group.stepCount, stepIntervalSeconds: group.stepIntervalSeconds,
-    durationSeconds: group.durationSeconds, targetTps: group.targetTps,
-    p95ThresholdMillis: group.p95ThresholdMillis, errorThresholdPercent: group.errorThresholdPercent,
+    name: group.name, targetUrl: group.targetUrl, loadModel: group.loadModel, ...numbers,
     requestMethod: group.requestMethod, requestHeaders: requestHeaders(group.requestHeadersText),
     queryParameters: queryParameters(group.queryParametersText),
-    requestBody: group.requestBody?.trim() ? group.requestBody : undefined, expectedStatusCode: group.expectedStatusCode,
+    requestBody: group.requestBody?.trim() ? group.requestBody : undefined,
     responseContains: group.responseContains?.trim() || undefined, dataSetCsv: group.dataSetCsv || undefined,
-    rendezvousUsers: group.rendezvousUsers,
   }
 }
 
@@ -309,12 +313,20 @@ function loadModelChanged(group: ThreadGroupInput) {
   if (group.loadModel !== 'STEPPED_RAMP') {
     group.stepCount = undefined
     group.stepIntervalSeconds = undefined
+    group.numberText.stepCount = ''
+    group.numberText.stepIntervalSeconds = ''
     return
   }
   group.rampUpSeconds = 0
-  group.stepCount = Math.min(4, group.threadCount)
+  group.numberText.rampUpSeconds = '0'
+  let threads = group.threadCount
+  try { threads = performanceIntegerInput(group.numberText.threadCount, 1, 100000, 'threadCount') } catch { /* Keep invalid text visible for save validation. */ }
+  group.stepCount = Math.min(4, threads)
   group.stepIntervalSeconds = 15
   group.rendezvousUsers = undefined
+  group.numberText.stepCount = String(group.stepCount)
+  group.numberText.stepIntervalSeconds = '15'
+  group.numberText.rendezvousUsers = ''
 }
 function executionDuration(group: Pick<ThreadGroup, 'loadModel' | 'durationSeconds' | 'stepCount' | 'stepIntervalSeconds'>) {
   return group.loadModel === 'STEPPED_RAMP' ? group.durationSeconds + ((group.stepCount ?? 1) - 1) * (group.stepIntervalSeconds ?? 0) : group.durationSeconds
@@ -683,11 +695,11 @@ onBeforeUnmount(() => {
           <header><strong>线程组 {{ index + 1 }}</strong><a-button type="text" status="danger" size="small" :disabled="planForm.threadGroups.length === 1" @click="removeThreadGroup(index)"><icon-delete /> 删除</a-button></header>
           <div class="form-grid group-title-grid"><a-form-item label="线程组名称" required><a-input v-model="group.name" placeholder="例如：下单主链路" /></a-form-item><a-form-item label="负载模型"><a-select v-model="group.loadModel" @change="loadModelChanged(group)"><a-option value="RAMP_UP">线性加压</a-option><a-option value="STEADY">恒定负载</a-option><a-option value="STEPPED_RAMP">阶梯加压</a-option></a-select></a-form-item></div>
           <a-form-item label="目标 URL" required><a-input v-model="group.targetUrl" placeholder="https://api.example.test/orders" /></a-form-item>
-          <div class="request-grid"><a-form-item label="请求方法"><a-select v-model="group.requestMethod"><a-option value="GET">GET</a-option><a-option value="POST">POST</a-option><a-option value="PUT">PUT</a-option><a-option value="PATCH">PATCH</a-option><a-option value="DELETE">DELETE</a-option><a-option value="HEAD">HEAD</a-option></a-select></a-form-item><a-form-item label="预期状态码"><a-input-number v-model="group.expectedStatusCode" :min="100" :max="599" placeholder="可选" /></a-form-item><a-form-item label="响应包含文本"><a-input v-model="group.responseContains" :max-length="1000" placeholder="可选，使用大小写敏感文本" /></a-form-item></div>
+          <div class="request-grid"><a-form-item label="请求方法"><a-select v-model="group.requestMethod"><a-option value="GET">GET</a-option><a-option value="POST">POST</a-option><a-option value="PUT">PUT</a-option><a-option value="PATCH">PATCH</a-option><a-option value="DELETE">DELETE</a-option><a-option value="HEAD">HEAD</a-option></a-select></a-form-item><a-form-item label="预期状态码" :validate-status="numberError(group, 'expectedStatusCode') ? 'error' : undefined" :help="numberError(group, 'expectedStatusCode')"><a-input v-model="group.numberText.expectedStatusCode" aria-label="性能 expectedStatusCode" inputmode="decimal" /></a-form-item><a-form-item label="响应包含文本"><a-input v-model="group.responseContains" :max-length="1000" placeholder="可选，使用大小写敏感文本" /></a-form-item></div>
           <div class="request-content-grid"><a-form-item label="请求头（JSON 对象）"><a-textarea v-model="group.requestHeadersText" :auto-size="{ minRows: 3, maxRows: 7 }" placeholder="{&quot;Content-Type&quot;:&quot;application/json&quot;}" /></a-form-item><a-form-item label="查询参数（JSON 对象）"><a-textarea v-model="group.queryParametersText" :auto-size="{ minRows: 3, maxRows: 7 }" placeholder="{&quot;page&quot;:&quot;1&quot;,&quot;source&quot;:&quot;${source}&quot;}" /><template #extra>目标 URL 不可直接携带 <code>?query</code>；参数会由 Runner 安全编码，值可引用当前 CSV 数据集变量。</template></a-form-item><a-form-item label="请求正文"><a-textarea v-model="group.requestBody" :auto-size="{ minRows: 3, maxRows: 7 }" :max-length="65536" :disabled="group.requestMethod === 'GET' || group.requestMethod === 'HEAD'" placeholder="POST / PUT / PATCH / DELETE 可使用原始请求正文" /></a-form-item></div>
           <a-form-item label="内联 CSV 数据集"><a-textarea v-model="group.dataSetCsv" :auto-size="{ minRows: 3, maxRows: 8 }" :max-length="65536" placeholder="orderId,quantity&#10;A-100,1&#10;B-200,2" /><template #extra>首行为变量名，最多 20 列、500 行；可在目标路径、请求头、正文和响应断言中使用 <code>${variable}</code>。</template></a-form-item>
-          <a-form-item label="集合点等待线程"><a-input-number v-model="group.rendezvousUsers" :min="2" :max="group.threadCount" :disabled="group.loadModel === 'STEPPED_RAMP'" placeholder="可选" /><template #extra>{{ group.loadModel === 'STEPPED_RAMP' ? '阶梯加压会展开为多个 JMeter 核心线程组，暂不支持跨阶段集合点同步。' : '达到指定线程数后同时放行；Runner 固定最多等待 30 秒，适用于单个隔离 JMeter 进程内的突发压力。' }}</template></a-form-item>
-          <div class="number-grid"><a-form-item label="并发线程" required><a-input-number v-model="group.threadCount" :min="1" :max="100000" /></a-form-item><a-form-item v-if="group.loadModel !== 'STEPPED_RAMP'" label="加压时长（秒）" required><a-input-number v-model="group.rampUpSeconds" :min="0" :max="86400" /></a-form-item><a-form-item v-else label="阶梯阶段数" required><a-input-number v-model="group.stepCount" :min="2" :max="Math.min(group.threadCount, 20)" /></a-form-item><a-form-item v-if="group.loadModel === 'STEPPED_RAMP'" label="阶梯间隔（秒）" required><a-input-number v-model="group.stepIntervalSeconds" :min="1" :max="86400" /><template #extra>每个阶段新增一批线程；最后一阶启动后保持下方配置的持续时长。</template></a-form-item><a-form-item label="持续时长（秒）" required><a-input-number v-model="group.durationSeconds" :min="10" :max="86400" /></a-form-item><a-form-item label="目标 TPS"><a-input-number v-model="group.targetTps" :min="group.loadModel === 'STEPPED_RAMP' ? (group.stepCount ?? 2) : 1" :max="1000000" placeholder="可选" /></a-form-item><a-form-item label="P95 阈值（毫秒）"><a-input-number v-model="group.p95ThresholdMillis" :min="1" :max="600000" placeholder="可选" /></a-form-item><a-form-item label="错误率阈值（%）"><a-input-number v-model="group.errorThresholdPercent" :min="0" :max="100" :precision="2" placeholder="可选" /></a-form-item></div>
+          <a-form-item label="集合点等待线程" :validate-status="numberError(group, 'rendezvousUsers') ? 'error' : undefined" :help="numberError(group, 'rendezvousUsers')"><a-input v-model="group.numberText.rendezvousUsers" aria-label="性能 rendezvousUsers" inputmode="decimal" :disabled="group.loadModel === 'STEPPED_RAMP'" /><template #extra>{{ group.loadModel === 'STEPPED_RAMP' ? '阶梯加压会展开为多个 JMeter 核心线程组，暂不支持跨阶段集合点同步。' : '达到指定线程数后同时放行；Runner 固定最多等待 30 秒，适用于单个隔离 JMeter 进程内的突发压力。' }}</template></a-form-item>
+          <div class="number-grid"><a-form-item label="并发线程" required :validate-status="numberError(group, 'threadCount') ? 'error' : undefined" :help="numberError(group, 'threadCount')"><a-input v-model="group.numberText.threadCount" aria-label="性能 threadCount" inputmode="decimal" /></a-form-item><a-form-item v-if="group.loadModel !== 'STEPPED_RAMP'" label="加压时长（秒）" required :validate-status="numberError(group, 'rampUpSeconds') ? 'error' : undefined" :help="numberError(group, 'rampUpSeconds')"><a-input v-model="group.numberText.rampUpSeconds" aria-label="性能 rampUpSeconds" inputmode="decimal" /></a-form-item><a-form-item v-else label="阶梯阶段数" required :validate-status="numberError(group, 'stepCount') ? 'error' : undefined" :help="numberError(group, 'stepCount')"><a-input v-model="group.numberText.stepCount" aria-label="性能 stepCount" inputmode="decimal" /></a-form-item><a-form-item v-if="group.loadModel === 'STEPPED_RAMP'" label="阶梯间隔（秒）" required :validate-status="numberError(group, 'stepIntervalSeconds') ? 'error' : undefined" :help="numberError(group, 'stepIntervalSeconds')"><a-input v-model="group.numberText.stepIntervalSeconds" aria-label="性能 stepIntervalSeconds" inputmode="decimal" /><template #extra>每个阶段新增一批线程；最后一阶启动后保持下方配置的持续时长。</template></a-form-item><a-form-item label="持续时长（秒）" required :validate-status="numberError(group, 'durationSeconds') ? 'error' : undefined" :help="numberError(group, 'durationSeconds')"><a-input v-model="group.numberText.durationSeconds" aria-label="性能 durationSeconds" inputmode="decimal" /></a-form-item><a-form-item label="目标 TPS" :validate-status="numberError(group, 'targetTps') ? 'error' : undefined" :help="numberError(group, 'targetTps')"><a-input v-model="group.numberText.targetTps" aria-label="性能 targetTps" inputmode="decimal" /></a-form-item><a-form-item label="P95 阈值（毫秒）" :validate-status="numberError(group, 'p95ThresholdMillis') ? 'error' : undefined" :help="numberError(group, 'p95ThresholdMillis')"><a-input v-model="group.numberText.p95ThresholdMillis" aria-label="性能 p95ThresholdMillis" inputmode="decimal" /></a-form-item><a-form-item label="错误率阈值（%）" :validate-status="numberError(group, 'errorThresholdPercent') ? 'error' : undefined" :help="numberError(group, 'errorThresholdPercent')"><a-input v-model="group.numberText.errorThresholdPercent" aria-label="性能 errorThresholdPercent" inputmode="decimal" /></a-form-item></div>
         </article>
       </a-form>
     </a-modal>

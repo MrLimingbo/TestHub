@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-03",
+  "status": "PENDING_USER_REVIEW",
+  "observation": "OBS-12-E020",
+  "newTestMethods": {"total": 23, "positiveOnly": 4, "negativeOnly": 5, "mixed": 14, "passed": 23, "failed": 0, "blocked": 0},
+  "methodCountsAreNotInputVariantCounts": true,
+  "layers": {"backendInput": 8, "backendFlow": 5, "frontend": 5, "runner": 5},
+  "checks": {"frontend": {"passed": 922}, "h2": {"total": 1281, "passed": 1278, "skipped": 3, "failed": 0, "errors": 0}, "mysqlAffected": {"suites": 9, "passed": 69, "failed": 0}, "runner": {"passed": 17}, "lint": "PASS_WITH_2_EXISTING_WARNINGS", "typecheck": "PASS", "build": "PASS", "diffCheck": "PASS"},
+  "priorSandboxH2": {"total": 1279, "errors": 30, "skipped": 3, "note": "Loopback bind denied; rerun succeeded outside sandbox."},
+  "deviceAcceptance": "NOT_EXECUTED_EXISTING_4_BLOCKERS",
+  "environmentBlockersDeferred": 12,
+  "otherObservationsDeferred": 9,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

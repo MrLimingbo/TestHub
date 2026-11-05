@@ -1,0 +1,16 @@
+{
+  "status": "SKIPPED_BY_USER",
+  "supervisorPid": 92129,
+  "startedAt": "2026-11-05T02:00:46.204Z",
+  "phase": "STOPPED_AND_CLEANED",
+  "completedWindows": 0,
+  "requiredWindows": 2,
+  "updatedAt": "2026-11-05T03:39:48.179Z",
+  "quietSeconds": 0,
+  "hostBusyCapacityPercent": 40.60283687943262,
+  "expectedFinishAt": null,
+  "finishedAt": "2026-11-05T03:39:48.179Z",
+  "cleanup": "COMPLETE",
+  "stopReason": "用户要求所有阻塞流程先跳过，推进非阻塞未完成工作",
+  "formalAttempts": 0
+}

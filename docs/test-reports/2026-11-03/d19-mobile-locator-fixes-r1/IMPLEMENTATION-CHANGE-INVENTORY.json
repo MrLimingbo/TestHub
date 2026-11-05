@@ -1,0 +1,45 @@
+{
+  "modified": [
+    {
+      "path": "src/pages/MobileAutomationPage.vue",
+      "beforeSha256": "76bdf0367be7e5e74a0d6c69b09fe3da1db6030f203958cb9c37948f72f99841",
+      "afterSha256": "e2a6e7ff8d2d6eaa6c8723e2e98624ee520710f6c76faef538d8624aa12e60b2"
+    },
+    {
+      "path": "services/appium-runner/src/protocol.js",
+      "beforeSha256": "de4b6d830720987074a90934f2d3c8a4017237381b08036a376e172be37711b7",
+      "afterSha256": "92a08796cb38563635620c689abd7e88508e0b999014a1d95588ea2e2f77f920"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileAutomationService.java",
+      "beforeSha256": "938f2864ccf00382956d052a27a5e3c119a9c9f7fb9cc92a9423c8c18d6ca056",
+      "afterSha256": "0bdcdf146060821c1f7093f12de7efb8f1f7b75a649164fbbd804c91b654024f"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileInput.java",
+      "beforeSha256": "45463d55aa31cd1f4bc9e6052a550055f309f935ecea3be2eea3bafc805d71a6",
+      "afterSha256": "f589bbe33503b3323ec03d9dc85ddaeab1f18061d0988bbc72c6deb0bc87c008"
+    }
+  ],
+  "added": [
+    {
+      "path": "services/appium-runner/test/d19-locator.test.js",
+      "sha256": "de03f49dae067aa7350a31e2cf36c5711c6d4902a22deb2559a6d838e9a3bb24"
+    },
+    {
+      "path": "src/test/d19MobileLocatorPage.test.ts",
+      "sha256": "d03aaf60dbaa2fa108986af69ccc0d06ef789ccb25cbf48f660c00e3d53d0392"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileLocatorPolicy.java",
+      "sha256": "0a00b415f48468c8de14a79bd5df02981db720783d46c5513d44024a6f21a919"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D19MobileLocatorTests.java",
+      "sha256": "516aad7bdeaaa712d68fab6dfd162e1423315931f5e51da245d55de1e5444171"
+    }
+  ],
+  "deleted": [],
+  "unchangedBaselineFiles": 1404,
+  "baselineFiles": 1408
+}

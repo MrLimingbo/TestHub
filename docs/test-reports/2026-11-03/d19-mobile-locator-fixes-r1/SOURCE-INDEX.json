@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-03",
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "aa1736e229adee1500d5e4eda0cf152568e63343b24966a7de405e322d738824"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/remaining-nine-rule-review/RULES-AND-ACCEPTANCE.md",
+      "sha256": "f90c859b9bf5294cddf313680517893949d4e832a83bf9f55d063e11cf022904"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/TEST-PLAN.md",
+      "sha256": "caf90c5dbb7beafc1c40484a604e6468e235e66069947f89397281b6ce3f29b8"
+    },
+    {
+      "path": "src/pages/MobileAutomationPage.vue",
+      "sha256": "e2a6e7ff8d2d6eaa6c8723e2e98624ee520710f6c76faef538d8624aa12e60b2"
+    },
+    {
+      "path": "services/appium-runner/src/protocol.js",
+      "sha256": "92a08796cb38563635620c689abd7e88508e0b999014a1d95588ea2e2f77f920"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileAutomationService.java",
+      "sha256": "0bdcdf146060821c1f7093f12de7efb8f1f7b75a649164fbbd804c91b654024f"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileInput.java",
+      "sha256": "f589bbe33503b3323ec03d9dc85ddaeab1f18061d0988bbc72c6deb0bc87c008"
+    },
+    {
+      "path": "services/appium-runner/test/d19-locator.test.js",
+      "sha256": "de03f49dae067aa7350a31e2cf36c5711c6d4902a22deb2559a6d838e9a3bb24"
+    },
+    {
+      "path": "src/test/d19MobileLocatorPage.test.ts",
+      "sha256": "d03aaf60dbaa2fa108986af69ccc0d06ef789ccb25cbf48f660c00e3d53d0392"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/mobileautomation/MobileLocatorPolicy.java",
+      "sha256": "0a00b415f48468c8de14a79bd5df02981db720783d46c5513d44024a6f21a919"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D19MobileLocatorTests.java",
+      "sha256": "516aad7bdeaaa712d68fab6dfd162e1423315931f5e51da245d55de1e5444171"
+    }
+  ],
+  "evidenceTypes": [
+    "Isolated H2 and MySQL",
+    "MockMvc raw JSON requests",
+    "Vue/Arco component fixtures",
+    "Runner protocol and handle fixtures"
+  ],
+  "realDeviceExecutions": 0
+}

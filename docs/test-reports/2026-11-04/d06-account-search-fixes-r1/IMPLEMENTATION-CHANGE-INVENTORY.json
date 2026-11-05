@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-04",
+  "baselineFiles": 1423,
+  "modified": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/account/UserAccountRepository.java",
+      "beforeSha256": "6e51864f00e9825c170826f0fd43fb574c33ab95a027e49e19e7be40582eb185",
+      "afterSha256": "89b245907413c6f2b40de7bb9df48d023a141a927d56cef70124df65a9b32cb5"
+    }
+  ],
+  "added": [
+    {
+      "path": "src/test/d06AccountSearch.test.ts",
+      "sha256": "9157f4e38b64f2bcb144fe7f230a2d15fbaef0c64bb6269012f1b4183aec12e8"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D06AccountSearchTests.java",
+      "sha256": "7de754854ac79bdde45364f6863a9fb9168fbb843340b232ad92ea69b51bcb21"
+    }
+  ],
+  "removed": [],
+  "otherBaselineFilesUnchanged": 1422,
+  "unrelatedChangesPreserved": true
+}

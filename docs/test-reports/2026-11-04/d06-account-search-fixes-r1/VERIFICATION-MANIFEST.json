@@ -1,0 +1,126 @@
+{
+  "date": "2026-11-04",
+  "commands": [
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D06AccountSearchTests",
+      "phase": "VALID_BEFORE",
+      "exitCode": 1,
+      "result": "7passed/5failed/0errors"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D06AccountSearchTests",
+      "phase": "FOCUSED_AFTER_AND_FINAL_FIXTURE_CHECK",
+      "exitCode": 0,
+      "result": "12/12;H2 branch unchanged after MySQL setup correction"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "result": "1326pass/3skip;JAR BUILD SUCCESS",
+      "note": "Only MySQL test fixture branch was adjusted afterward; production unchanged and H2 focused12/12 rechecked"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D06AccountSearchTests,AccountConfigFixesFlowTests,SystemSettingsFlowTests,P1SessionRulesFlowTests,P1CompatibilityTests'",
+      "phase": "INITIAL_MYSQL",
+      "exitCode": 1,
+      "result": "55pass/1failure in mid-session mode test preparation"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D06AccountSearchTests,AccountConfigFixesFlowTests,SystemSettingsFlowTests,P1SessionRulesFlowTests,P1CompatibilityTests'",
+      "phase": "FINAL_MYSQL",
+      "exitCode": 0,
+      "result": "56/56;5suites;2fresh connection modes verified"
+    },
+    {
+      "command": "./node_modules/.bin/vitest run src/test/d06AccountSearch.test.ts",
+      "exitCode": 0,
+      "result": "4/4"
+    },
+    {
+      "command": "./node_modules/.bin/vitest run --maxWorkers=2",
+      "exitCode": 0,
+      "result": "945/945;98files"
+    },
+    {
+      "command": "./node_modules/.bin/eslint .",
+      "exitCode": 0,
+      "result": "0errors/2existing Vue prop warnings"
+    },
+    {
+      "command": "./node_modules/.bin/vue-tsc --noEmit",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "./node_modules/.bin/vite build",
+      "exitCode": 0,
+      "result": "PASS;existing chunk-size notices"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "backendJarSha256": "39b0044a17f93c4724a8f5e1c68a2eeb621f6881a11571e7c11a9009a435e01a",
+  "noInstalledRuntimeReplaced": true,
+  "noSchemaMigrationAdded": true,
+  "rawLogs": [
+    {
+      "name": "testhub-d06-before.log",
+      "sha256": "948f0f49cd5c4289b303e523b5734e4f730f2c477c806c107e6fc795fca99c7e"
+    },
+    {
+      "name": "testhub-d06-build.log",
+      "sha256": "df8a2b9e3a51bc540f1e3aad6bda24e598ecb1c3eda7b276780fc687677b3dec"
+    },
+    {
+      "name": "testhub-d06-fixture-compile.log",
+      "sha256": "96638e2e868c390f2955ce5510604b13161321c1e09148cf58efc73d442e655b"
+    },
+    {
+      "name": "testhub-d06-fixture-pat.log",
+      "sha256": "cede387008ec8d77f581be54c8eb3324dfd367c4e3796a54ed0153d378fce444"
+    },
+    {
+      "name": "testhub-d06-focused-final.log",
+      "sha256": "5c52908e4645c46f5ed8dbf5535d6b3c8fb63b7ca1d44a5cb75e51d33745285f"
+    },
+    {
+      "name": "testhub-d06-focused.log",
+      "sha256": "d05215d36b79d6cfe85ee9b756ce41915e34405b615b99737dfd019621eaaaab"
+    },
+    {
+      "name": "testhub-d06-h2.log",
+      "sha256": "0657ec27abad27656a893096d31a04363980ff753a55d26c524c92a0e7dd8417"
+    },
+    {
+      "name": "testhub-d06-lint.log",
+      "sha256": "e4c232b1eac58282cfb7d513810a316a15f3ea0fd7a63a87b37be7aa44750fa6"
+    },
+    {
+      "name": "testhub-d06-mysql-final.log",
+      "sha256": "ffe6a6a8357d6f11a47e4e6937455bc94e18b68fff5a6daee72a80c3a60337e4"
+    },
+    {
+      "name": "testhub-d06-mysql-initial.log",
+      "sha256": "8bc4a891fef2cc02c97a0d5825029f998de01669cfbe929c1637354be50324f9"
+    },
+    {
+      "name": "testhub-d06-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "testhub-d06-ui-final.log",
+      "sha256": "375fd34c48d26f4098da6dfca3eed1b9357b05811633baf7b771f31b4705fb3f"
+    },
+    {
+      "name": "testhub-d06-ui.log",
+      "sha256": "0cd820ccab2809aac7c47ecbe4bb6c094cb167b4d514e120654ae47d94ca20bb"
+    },
+    {
+      "name": "testhub-d06-vitest.log",
+      "sha256": "111731b0e4a79e356fa4fcccc3572692c7c914c9e5a347e637ba7154de1a6d43"
+    }
+  ]
+}

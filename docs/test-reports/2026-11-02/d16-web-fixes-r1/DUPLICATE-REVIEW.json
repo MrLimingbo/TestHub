@@ -1,0 +1,17 @@
+{
+  "exactDuplicates": 0,
+  "nearDuplicatePairs": 2,
+  "unresolved": 0,
+  "pairs": [
+    {
+      "left": "TC-D16WEB-01",
+      "right": "TC-D16WEB-02",
+      "disposition": "视口宽/高具有不同业务字段及上界3840/2160，独立COV保留；等值和相邻越界目标分别明确，不按字面相似合并。"
+    },
+    {
+      "left": "TC-D16WEB-03",
+      "right": "TC-D16WEB-04",
+      "disposition": "视口宽/高具有不同业务字段及上界3840/2160，独立COV保留；等值和相邻越界目标分别明确，不按字面相似合并。"
+    }
+  ]
+}

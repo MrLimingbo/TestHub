@@ -1,0 +1,14 @@
+{
+  "equivalence-partitioning": "适用：自由/占用组合、trim及不同类型同名",
+  "data-lifecycle": "适用：保留原名、改名和更新失败保持行/密文/审计",
+  "role-permission": "适用：冲突存在时保留原登录/角色/CSRF检查",
+  "acceptance-criteria": "适用：共享409错误封装及不泄密",
+  "recovery-idempotency": "适用：并发唯一占用及前端失败改名重试",
+  "boundary-value-2/3": "无新增数量/时间/长度阈值，保持既有限制",
+  "decision-table/cause-effect": "已按允许/冲突/权限独立明确分区，不扩展未批准组合",
+  "state-transition": "不新增状态机，记录变化由生命周期覆盖",
+  "pairwise/classification-tree": "单一唯一键仲裁采用明确分区与直接并发，不抽样组合",
+  "compatibility-configuration": "H2/MySQL重复执行验证同契约，不重复生成正式用例",
+  "error-guessing/exploratory/checklist": "已有BUG-D23-001作为修复依据；X01由采集转为明确409断言，独立工程方法不加正式分母",
+  "scope": "新12条正4反8；既有20条正9反11继续执行；合计32条正13反19。"
+}

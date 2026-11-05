@@ -1,5 +1,7 @@
 package io.testhub.platform.uiautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
@@ -50,7 +52,7 @@ public class UiAutomationScheduleController {
 
     public record ScheduleRequest(@NotBlank @Size(max = 26) String scenarioId, @Size(max = 26) String functionalPlanId,
                                   @NotBlank @Size(max = 160) String name, @NotBlank @Size(max = 160) String cronExpression,
-                                  @NotBlank @Size(max = 64) String timezone, @Min(10) @Max(3600) Integer timeoutSeconds,
+                                  @NotBlank @Size(max = 64) String timezone, @Min(10) @Max(3600) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutSeconds,
                                   @Min(0) @Max(5) Integer maxRetryAttempts, @Min(5) @Max(3600) Integer retryBackoffSeconds,
                                   Boolean enabled) {
         UiAutomationScheduleService.ScheduleInput input() { return new UiAutomationScheduleService.ScheduleInput(scenarioId, functionalPlanId,

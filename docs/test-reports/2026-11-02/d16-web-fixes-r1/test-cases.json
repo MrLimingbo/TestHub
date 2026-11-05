@@ -1,0 +1,4233 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "name": "TestHub D16 Web修复回归",
+    "version": "2026-11-02 五项A",
+    "scope": "仅OBS-11-E021；移动与质量不推进，其他9项/12环境/升级退出调查暂缓。",
+    "generated_at": "2026-11-02T00:00:00+08:00"
+  },
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "DECISIONS.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/DECISIONS.json",
+      "sha256": "ba93f52672a1e239258a9cbf5dfd2fb74a2ec1eedef196d8c717323e6e722039",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-002",
+      "name": "D16-RULES-AND-ACCEPTANCE.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/D16-RULES-AND-ACCEPTANCE.md",
+      "sha256": "72d76f9f0cccc63de4a9d8e0e2dd4dec1130a990a4c69b9e4df52ca9a005da3a",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-003",
+      "name": "FIELD-MATRIX.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/FIELD-MATRIX.md",
+      "sha256": "06ba7b080ea0b5d2d12bbe034fd53182a7e90427d5832a460cfc04cf3fbb31a1",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-004",
+      "name": "REVIEW-APPROVAL.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "ff13bab3a7282612746835ad181ee82f23b813be54a4119d079cc879e523e0ad",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-005",
+      "name": "APPROVED-SCOPE.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-web-fixes-r1/APPROVED-SCOPE.json",
+      "sha256": "0c1d4e7286548d74d49ffdb505f198fbc347236cc8940a2786457f8e27a9d9da",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-006",
+      "name": "BASELINE-CONTRACT.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-web-fixes-r1/BASELINE-CONTRACT.md",
+      "sha256": "c4b2bf28596eea9237a520c76e74bfbf35053aab937c1d2f3d188460db3a7c99",
+      "type": "requirement"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-D16WEB-NUM",
+      "title": "Web D16 NUM",
+      "description": "批准范围的NUM规则",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16WEB-01",
+          "text": "200，精确保存同一宽度整数",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-02",
+          "text": "200，精确保存同一高度整数",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-03",
+          "text": "边界200，越界400，无部分资产",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-04",
+          "text": "边界200，越界400，无部分资产",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-05",
+          "text": "400，不截断、不新增配置",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-06",
+          "text": "400，不隐式转换JSON类型",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-07",
+          "text": "200，默认宽1440高900",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-08",
+          "text": "200，同一整数保存",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-09",
+          "text": "边界200，越界400且无场景写入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-10",
+          "text": "200，精确保存毫秒值",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-11",
+          "text": "边界200，越界400，不借WAIT下界绕过",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-12",
+          "text": "400，步骤/场景/审计未写入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-13",
+          "text": "400，不解析为整数",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-14",
+          "text": "受控400，不回绕或500，无写入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-15",
+          "text": "400，不默认为0或30000",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-16",
+          "text": "仍存null，Runner执行采用30000",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-17",
+          "text": "200，新执行deadline与整数超时一致",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-18",
+          "text": "边界入队，越界400且无执行资产",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-19",
+          "text": "400，无execution/manifest/outbox",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-20",
+          "text": "200，默认执行300秒",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-21",
+          "text": "合法200，非法400，原定时/Quartz/审计未改变",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16WEB-TEXT",
+      "title": "Web D16 TEXT",
+      "description": "批准范围的TEXT规则",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16WEB-22",
+          "text": "200，原文本保留",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-23",
+          "text": "400，不自动字符串化",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-24",
+          "text": "集合空Map，值null归空串",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-25",
+          "text": "200，保留文本和原trim规则",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-26",
+          "text": "400，无步骤或场景写入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-27",
+          "text": "必需内容400，其他按既有可选空值规则保存",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16WEB-LIFE",
+      "title": "Web D16 LIFE",
+      "description": "批准范围的LIFE规则",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16WEB-28",
+          "text": "版本+1，旧manifest保持原内容",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-29",
+          "text": "400，旧版本和配置不变",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-30",
+          "text": "400，旧场景/步骤/版本未改",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-31",
+          "text": "400，无部分场景，定位后步骤索引",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-38",
+          "text": "403，不跨项目写入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-43",
+          "text": "400只定位固定字段/索引，不回显值或变量键",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-44",
+          "text": "原行为保持，不扩大新类型政策",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-45",
+          "text": "定位器按原引用解析，旧manifest仍冻结",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16WEB-EXCHANGE",
+      "title": "Web D16 EXCHANGE",
+      "description": "批准范围的EXCHANGE规则",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16WEB-32",
+          "text": "导入正常，配置/定时停用、不复制执行历史",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-33",
+          "text": "400，整批资产及成功回执/审计未写入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-34",
+          "text": "正常同步，保持其他完整规范化约束",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-35",
+          "text": "400，原精度先判断、不改资产/版本/回执",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-36",
+          "text": "返回原回执，无重复资产或版本",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-37",
+          "text": "409且无同步写入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16WEB-OLD",
+      "title": "Web D16 OLD",
+      "description": "批准范围的OLD规则",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16WEB-39",
+          "text": "保持原读契约，无批量转换或重写",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-40",
+          "text": "400，无新执行/清单/outbox，旧清单不变",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-41",
+          "text": "拒绝创建新执行，不绕过共享预检",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-42",
+          "text": "400，未签发可用工件或成功审计，旧manifest不重写",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16WEB-UI",
+      "title": "Web D16 UI",
+      "description": "批准范围的UI规则",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16WEB-46",
+          "text": "保留原文/字段错误，业务写请求0",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-47",
+          "text": "发送精确JSON number",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-48",
+          "text": "非法不提交且保留原文，合法值精确发送",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-49",
+          "text": "不调用prepareBrowser、不发业务POST",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-50",
+          "text": "可选值无设置，WAIT空拒绝，类型切换不复用旧原文",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-51",
+          "text": "变量沿原字符串防线；保留步骤使用自身原输入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16WEB-RUN",
+      "title": "Web D16 RUN",
+      "description": "批准范围的RUN规则",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16WEB-52",
+          "text": "拒绝，不准备或启动浏览器",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-53",
+          "text": "预检拒绝，非WAIT null仍默认30000",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-54",
+          "text": "非法类型预检拒绝，原null/必填语义保持",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-55",
+          "text": "等值整数/文本保持；NAVIGATE/FILL/ASSERT_TEXT/WAIT受控完成",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16WEB-56",
+          "text": "失败且prepareBrowser计数0，无工作区或浏览器资源",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "id": "COV-D16WEB-01",
+      "title": "视口宽精确等值",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-01"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-02",
+      "title": "视口高精确等值",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-02"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-03",
+      "title": "宽边界及相邻越界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-03"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-04",
+      "title": "高边界及相邻越界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-04"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-05",
+      "title": "视口普通及微小小数",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-05"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-06",
+      "title": "视口字符串和错误类型",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-06"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-07",
+      "title": "视口缺失null默认",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-07"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-08",
+      "title": "WAIT精确等值超时",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-08"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-09",
+      "title": "WAIT毫秒边界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-09"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-10",
+      "title": "非WAIT精确等值超时",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-10"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-11",
+      "title": "非WAIT不同下界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-11"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-12",
+      "title": "步骤小数原始精度",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-12"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-13",
+      "title": "步骤数字字符串和容器",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-13"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-14",
+      "title": "大整数指数及原始非有限JSON",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-14"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-15",
+      "title": "WAIT缺失null必须拒绝",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-15"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-16",
+      "title": "非WAIT可选超时默认",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-16"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-17",
+      "title": "执行超时精确等值",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-17"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-18",
+      "title": "执行秒数边界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-18"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-19",
+      "title": "执行小数字符串类型拒绝",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-19"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-20",
+      "title": "缺失执行正文及null默认",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-20"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-21",
+      "title": "定时同一执行超时入口",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-21"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-22",
+      "title": "变量显式字符串保真",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-22"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-23",
+      "title": "变量非字符串值",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-23"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-24",
+      "title": "变量真实null兼容",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-24"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-25",
+      "title": "步骤value和expectedText字符串",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-25"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-26",
+      "title": "步骤文本错误类型",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-26"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-27",
+      "title": "步骤文本null和必填关系",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-27"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-28",
+      "title": "合法编辑与旧清单冻结",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-28"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-29",
+      "title": "非法配置编辑原子性",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-29"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-30",
+      "title": "非法场景编辑原子性",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-30"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-31",
+      "title": "后步骤非法整批拒绝",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-31"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-32",
+      "title": "合法完整迁移等值",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-32"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-33",
+      "title": "非法完整迁移不得绕过",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-33"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-34",
+      "title": "同步等值数字精确规范化",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-34"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-35",
+      "title": "同步原始微小小数及文本错误",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-35"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-36",
+      "title": "交换回执幂等重放",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-36"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-37",
+      "title": "同步过期revision",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-37"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-38",
+      "title": "写权限与项目隔离",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-38"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-39",
+      "title": "存量只读无批量改写",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-39"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-40",
+      "title": "旧非法新手动入队",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-40"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-41",
+      "title": "旧非法定时和重试入队",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-41"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-42",
+      "title": "旧排队运行工件预检",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-42"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-43",
+      "title": "字段索引与隐私错误",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-43"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-44",
+      "title": "非目标字段契约保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-44"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-45",
+      "title": "页面对象引用保持",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-45"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-46",
+      "title": "页面视口非法原文",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-46"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-47",
+      "title": "页面视口等值写法",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-47"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-48",
+      "title": "页面WAIT及非WAIT超时",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-48"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-49",
+      "title": "页面执行在浏览器准备前拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-49"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-50",
+      "title": "页面清空及类型切换",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-50"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-51",
+      "title": "页面变量和步骤移除归属",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-51"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-52",
+      "title": "Runner视口在资源前拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-52"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-53",
+      "title": "Runner超时类型及边界",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-53"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-54",
+      "title": "Runner变量与步骤文本",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-54"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-55",
+      "title": "Runner合法工件与受控真实步骤",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-55"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16WEB-56",
+      "title": "Runner运行请求拒绝先于准备",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-56"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "document_review": [],
+  "cases": [
+    {
+      "id": "TC-D16WEB-01",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "视口宽精确等值",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-01"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "按原始JSON提交合法整数、等值小数、指数宽度",
+          "expected": "200，精确保存同一宽度整数",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "viewportWidth 320..3840"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-01"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-02",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "视口高精确等值",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-02"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "按原始JSON提交合法整数、等值小数、指数高度",
+          "expected": "200，精确保存同一高度整数",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "viewportHeight 320..2160"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-02"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-03",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "宽边界及相邻越界",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-03"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交320/3840及319/3841宽度",
+          "expected": "边界200，越界400，无部分资产",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "viewportWidth 320..3840"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-03"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-04",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "高边界及相邻越界",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-04"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交320/2160及319/2161高度",
+          "expected": "边界200，越界400，无部分资产",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "viewportHeight 320..2160"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-04"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-05",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "视口普通及微小小数",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-05"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交有小数部分的原始宽高JSON",
+          "expected": "400，不截断、不新增配置",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "页面在转换Number前检查原始文本"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-05"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-06",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "视口字符串和错误类型",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-06"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交数字字符串、布尔、数组、对象宽高",
+          "expected": "400，不隐式转换JSON类型",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "类型规则只对D16矩阵字段生效"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-06"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-07",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "视口缺失null默认",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-07"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别缺失或置null视口宽高",
+          "expected": "200，默认宽1440高900",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "省略/null为1440/900"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-07"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-08",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "WAIT精确等值超时",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-08"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "WAIT使用精确等值JSON整数超时",
+          "expected": "200，同一整数保存",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "WAIT timeoutMillis必填1..60000"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-08"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-09",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "WAIT毫秒边界",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-09"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交WAIT 1/60000及0/60001",
+          "expected": "边界200，越界400且无场景写入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "WAIT timeoutMillis必填1..60000"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-09"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-10",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "非WAIT精确等值超时",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-10"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "非WAIT步骤使用精确等值整数超时",
+          "expected": "200，精确保存毫秒值",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "其他类型有值时100..60000"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-10"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-11",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "非WAIT不同下界",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-11"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "非WAIT提交100/60000及99/60001",
+          "expected": "边界200，越界400，不借WAIT下界绕过",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "其他类型有值时100..60000"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-11"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-12",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "步骤小数原始精度",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-12"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "WAIT/非WAIT分别提交普通和微小小数",
+          "expected": "400，步骤/场景/审计未写入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "原始微小小数在控制面/原始存储读取边界检查"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-12"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-13",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "步骤数字字符串和容器",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-13"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "两类步骤传数字字符串、布尔或容器超时",
+          "expected": "400，不解析为整数",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "类型规则只对D16矩阵字段生效"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-13"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-14",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "大整数指数及原始非有限JSON",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-14"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "目标数字字段提交溢出、大指数、原始NaN/Infinity",
+          "expected": "受控400，不回绕或500，无写入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "原始微小小数在控制面/原始存储读取边界检查"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-14"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-15",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "WAIT缺失null必须拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-15"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "省略或置null WAIT超时",
+          "expected": "400，不默认为0或30000",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "WAIT清空不能变为0或默认等待"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-15"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-16",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "非WAIT可选超时默认",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-16"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "省略或置null非WAIT超时并读取/入队",
+          "expected": "仍存null，Runner执行采用30000",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "缺失/null保持null并由Runner默认30000"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-16"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-17",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "执行超时精确等值",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-17"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "执行请求使用精确等值数字超时",
+          "expected": "200，新执行deadline与整数超时一致",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "execute timeoutSeconds 10..3600"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-17"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-18",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "执行秒数边界",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-18"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交执行10/3600及9/3601",
+          "expected": "边界入队，越界400且无执行资产",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "execute timeoutSeconds 10..3600"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-18"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-19",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "执行小数字符串类型拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-19"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "执行提交小数、微小小数、数字字符串及容器",
+          "expected": "400，无execution/manifest/outbox",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "execute timeoutSeconds 10..3600"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-19"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-20",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "缺失执行正文及null默认",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-20"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "执行时缺失正文、空对象或超时null",
+          "expected": "200，默认执行300秒",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "缺失正文、空对象或null值均默认300"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-20"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-21",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "定时同一执行超时入口",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-21"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "定时配置提交合法等值数字再提交小数/数字字符串",
+          "expected": "合法200，非法400，原定时/Quartz/审计未改变",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "定时计划的timeoutSeconds是执行超时相同值的另一写入口"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-21"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-22",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "变量显式字符串保真",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-22"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交001/false/null/空串及合法占位符变量值",
+          "expected": "200，原文本保留",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "值为字符串001/false/null按原文本保留"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-22"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-23",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "变量非字符串值",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-23"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "变量值依次提交数值、布尔、数组、对象",
+          "expected": "400，不自动字符串化",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "variables缺失/null为空Map"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-23"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-24",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "变量真实null兼容",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-24"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "缺失/null变量集合及变量值真实null",
+          "expected": "集合空Map，值null归空串",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "variables缺失/null为空Map，值null归空串"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-24"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-25",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "步骤value和expectedText字符串",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-25"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "FILL/ASSERT_TEXT提交显式字符串及变量占位符",
+          "expected": "200，保留文本和原trim规则",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "步骤value/expectedText按原blankToNull trim处理"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-25"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-26",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "步骤文本错误类型",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-26"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "步骤value/expectedText传数值、布尔、容器",
+          "expected": "400，无步骤或场景写入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "类型规则只对D16矩阵字段生效"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-26"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-27",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "步骤文本null和必填关系",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-27"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "FILL值或ASSERT_TEXT期望缺失/null，另试非要求类型可选空值",
+          "expected": "必需内容400，其他按既有可选空值规则保存",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "FILL值必填、ASSERT_TEXT期望必填且禁止换行"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-27"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-28",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "合法编辑与旧清单冻结",
+      "type": "state",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-28"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "修改配置及场景合法数值并核对旧manifest",
+          "expected": "版本+1，旧manifest保持原内容",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "合法编辑版本+1，旧执行manifest冻结"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-28"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-29",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "非法配置编辑原子性",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-29"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "已有配置PUT非法宽/高小数",
+          "expected": "400，旧版本和配置不变",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "创建/编辑拒绝不写部分资产或成功审计"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-29"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-30",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "非法场景编辑原子性",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-30"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "已有场景PUT非法步骤或变量类型",
+          "expected": "400，旧场景/步骤/版本未改",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "创建/编辑拒绝不写部分资产或成功审计"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-30"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-31",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "后步骤非法整批拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-31"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "前步骤合法、后步骤含非法超时/文本",
+          "expected": "400，无部分场景，定位后步骤索引",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "页面在转换Number前检查原始文本"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-31"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-32",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "合法完整迁移等值",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-32"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对完整迁移快照中目标整数用等值写法",
+          "expected": "导入正常，配置/定时停用、不复制执行历史",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "导入配置/定时计划停用，不复制执行历史"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-32"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-33",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "非法完整迁移不得绕过",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-33"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "迁移中的目标数字/变量/文本逐项错误类型",
+          "expected": "400，整批资产及成功回执/审计未写入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "迁移为完整版本1快照"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-33"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-34",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "同步等值数字精确规范化",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-34"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "完整同步Item用目标整数的.0/指数等值写法",
+          "expected": "正常同步，保持其他完整规范化约束",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "仅目标数字字段的精确等值写法可规范为整数"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-34"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-35",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "同步原始微小小数及文本错误",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-35"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "definition通用Map内放原始微小小数或非字符串值",
+          "expected": "400，原精度先判断、不改资产/版本/回执",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "解析原始浮点时需保留精度，再检查目标字段"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-35"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-36",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "交换回执幂等重放",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-36"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "重放同一迁移/同步请求",
+          "expected": "返回原回执，无重复资产或版本",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "事务和回执重放均保留"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-36"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-37",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "同步过期revision",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-37"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取revision后修改目标，提交旧revision",
+          "expected": "409且无同步写入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "同步旧revision409"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-EXCHANGE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-37"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-38",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "写权限与项目隔离",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-38"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "其他账号/只读角色发起合法写入或执行",
+          "expected": "403，不跨项目写入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "组织/项目权限"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-38"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-39",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "存量只读无批量改写",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-39"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取旧场景与manifest并核对原始数据库内容",
+          "expected": "保持原读契约，无批量转换或重写",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "旧定义及旧manifest可读无批量重写"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-39"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-40",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "旧非法新手动入队",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-40"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "旧配置注入越界视口/步骤原始小数或数字变量，再手动执行",
+          "expected": "400，无新执行/清单/outbox，旧清单不变",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "旧非法定义新入队不得生成execution/manifest/outbox"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-40"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-41",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "旧非法定时和重试入队",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-41"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "准备旧非法定义，从定时与重试入口触发",
+          "expected": "拒绝创建新执行，不绕过共享预检",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "手动/定时/重试新入队使用同一目标规则"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-41"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-42",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "旧排队运行工件预检",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-42"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "旧排队manifest原始目标类型改坏后申请运行配置",
+          "expected": "400，未签发可用工件或成功审计，旧manifest不重写",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "不先发可用运行工件或成功签发审计"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-OLD"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-42"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-43",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "字段索引与隐私错误",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-43"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "后步骤目标字段提交合成私有标记",
+          "expected": "400只定位固定字段/索引，不回显值或变量键",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "非法数值保留并定位字段/步骤"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-43"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-44",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "非目标字段契约保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-44"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对metadata及非目标重试参数执行原可用写法",
+          "expected": "原行为保持，不扩大新类型政策",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "maxRetryAttempts和retryBackoffSeconds不改"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-44"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-45",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "页面对象引用保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-45"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "场景通过pageObjectId引用既有对象并入队",
+          "expected": "定位器按原引用解析，旧manifest仍冻结",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "引用页面对象的解析与功能计划关联保持"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-45"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-46",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "页面视口非法原文",
+      "type": "usability",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-46"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "输入宽高小数/越界并保存",
+          "expected": "保留原文/字段错误，业务写请求0",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "页面在转换Number前检查原始文本"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-46"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-47",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "页面视口等值写法",
+      "type": "usability",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-47"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "输入合法.0/指数宽高并保存",
+          "expected": "发送精确JSON number",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "页面在转换Number前检查原始文本"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-47"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-48",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "页面WAIT及非WAIT超时",
+      "type": "usability",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-48"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "两类步骤输入小数/错误下界，后改合法整数",
+          "expected": "非法不提交且保留原文，合法值精确发送",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "WAIT timeoutMillis必填1..60000"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-48"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-49",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "页面执行在浏览器准备前拒绝",
+      "type": "usability",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-49"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "执行输入非法小数或数字溢出并提交",
+          "expected": "不调用prepareBrowser、不发业务POST",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "执行非法输入在prepareBrowser前拒绝"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-49"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-50",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "页面清空及类型切换",
+      "type": "state",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-50"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "非WAIT超时清空、WAIT必填及类型切换",
+          "expected": "可选值无设置，WAIT空拒绝，类型切换不复用旧原文",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "类型切换/步骤删除不串用原输入"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-50"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-51",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "页面变量和步骤移除归属",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-51"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "变量非字符串校验，删除旧步骤后保存另一合法超时步骤",
+          "expected": "变量沿原字符串防线；保留步骤使用自身原输入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "类型切换/步骤删除不串用原输入"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-51"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-52",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "Runner视口在资源前拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-52"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "向纯运行预检提供视口小数/字符串/越界",
+          "expected": "拒绝，不准备或启动浏览器",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "在prepareBrowser/browser.launch前检查目标视口"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-52"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-53",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "Runner超时类型及边界",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-53"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "给WAIT/非WAIT提供非法超时/必填null",
+          "expected": "预检拒绝，非WAIT null仍默认30000",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "WAIT必填及非WAIT null默认30000保持"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-53"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-54",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "Runner变量与步骤文本",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-54"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "传非字符串变量或步骤值/期望，另试允许null",
+          "expected": "非法类型预检拒绝，原null/必填语义保持",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "变量/文本类型"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-54"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-55",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "Runner合法工件与受控真实步骤",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-55"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "验证合法工件并在自有loopback真实headless Chrome跑受控步骤",
+          "expected": "等值整数/文本保持；NAVIGATE/FILL/ASSERT_TEXT/WAIT受控完成",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "自有loopback/headless实际NAVIGATE/FILL/ASSERT_TEXT/WAIT步骤验收"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-55"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16WEB-56",
+      "module": "Web UI自动化 / D16类型规则",
+      "title": "Runner运行请求拒绝先于准备",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "每个字段、入口、状态或资源前拒绝目标独立COV；同一分区变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16WEB-56"
+      ],
+      "preconditions": [
+        "自有隔离账号/项目；按场景准备合法浏览器配置、步骤、版本及必要旧数据夹具。"
+      ],
+      "test_data": "{合法隔离配置和场景}；只修改本案例目标字段，其他字段和作用域保持合法。",
+      "steps": [
+        {
+          "no": 1,
+          "action": "Runner从受控HTTP收到非法运行工件后调用run",
+          "expected": "失败且prepareBrowser计数0，无工作区或浏览器资源",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "Runner运行工件在prepareBrowser/browser.launch前检查"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16WEB-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16WEB-56"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-11-E021",
+        "D16-A"
+      ],
+      "notes": "先行设计无执行状态；工程层、变体及环境次数不加正式分母。"
+    }
+  ]
+}

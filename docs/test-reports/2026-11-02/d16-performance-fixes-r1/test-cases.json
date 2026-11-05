@@ -1,0 +1,4688 @@
+{
+  "schema_version": "1.1",
+  "project": {
+    "name": "TestHub D16性能修复回归",
+    "version": "2026-11-02 五项A",
+    "scope": "仅OBS-10-E011；不推进Web，不补齐原12环境，不调查升级关闭；六输入先行冻结。",
+    "generated_at": "2026-11-02T00:00:00+08:00"
+  },
+  "sources": [
+    {
+      "id": "SRC-001",
+      "name": "DECISIONS.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/DECISIONS.json",
+      "sha256": "ba93f52672a1e239258a9cbf5dfd2fb74a2ec1eedef196d8c717323e6e722039",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-002",
+      "name": "D16-RULES-AND-ACCEPTANCE.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/D16-RULES-AND-ACCEPTANCE.md",
+      "sha256": "72d76f9f0cccc63de4a9d8e0e2dd4dec1130a990a4c69b9e4df52ca9a005da3a",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-003",
+      "name": "FIELD-MATRIX.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/FIELD-MATRIX.md",
+      "sha256": "06ba7b080ea0b5d2d12bbe034fd53182a7e90427d5832a460cfc04cf3fbb31a1",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-004",
+      "name": "REVIEW-APPROVAL.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-rule-review/REVIEW-APPROVAL.json",
+      "sha256": "ff13bab3a7282612746835ad181ee82f23b813be54a4119d079cc879e523e0ad",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-005",
+      "name": "APPROVED-SCOPE.json",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-performance-fixes-r1/APPROVED-SCOPE.json",
+      "sha256": "820cc6cf6caf6f0d075c14f0bd9254189751ce978a68255ed2e37b0206c9cbaa",
+      "type": "requirement"
+    },
+    {
+      "id": "SRC-006",
+      "name": "BASELINE-CONTRACT.md",
+      "path": "/Users/limingbo/Documents/codeXProject/testHub/docs/test-reports/2026-11-02/d16-performance-fixes-r1/BASELINE-CONTRACT.md",
+      "sha256": "64f4d9ec0a78305ff7723aaf79e2bd96562ed44da51742c6045bd39203204052",
+      "type": "requirement"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-D16PERF-NUM",
+      "title": "性能D16 NUM",
+      "description": "批准范围内NUM约束；细分验收如下",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-003#document",
+        "SRC-006#document"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16PERF-01",
+          "text": "threadCount保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-02",
+          "text": "rampUpSeconds保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-03",
+          "text": "durationSeconds保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-04",
+          "text": "stepCount保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-05",
+          "text": "stepIntervalSeconds保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-06",
+          "text": "targetTps保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-07",
+          "text": "p95ThresholdMillis保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-08",
+          "text": "expectedStatusCode保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-09",
+          "text": "rendezvousUsers保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-10",
+          "text": "threadCount范围1..100000内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-11",
+          "text": "rampUpSeconds范围0..86400内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-12",
+          "text": "durationSeconds范围10..86400内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-13",
+          "text": "stepCount范围2..20内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-14",
+          "text": "stepIntervalSeconds范围1..86400内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-15",
+          "text": "targetTps范围1..1000000内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-16",
+          "text": "p95ThresholdMillis范围1..600000内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-17",
+          "text": "expectedStatusCode范围100..599内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-18",
+          "text": "rendezvousUsers范围2..10内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-19",
+          "text": "全部400且计划、线程组、审计计数不变",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-20",
+          "text": "全部400，不把字符串绑定为Integer",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-21",
+          "text": "全部400，不创建部分计划或线程组",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-22",
+          "text": "受控400，无int回绕或500，无业务写入",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-23",
+          "text": "400，无计划/线程组/审计写入",
+          "source_refs": [
+            "SRC-002#heading/D16-NULL：缺失-null与任务进度"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-24",
+          "text": "200，保持无阈值/无设置，非阶梯阶段字段仍null",
+          "source_refs": [
+            "SRC-003#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16PERF-REL",
+      "title": "性能D16 REL",
+      "description": "批准范围内REL约束；细分验收如下",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-003#document",
+        "SRC-006#document"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16PERF-25",
+          "text": "400，不生成不完整阶梯定义",
+          "source_refs": [
+            "SRC-003#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-26",
+          "text": "400；不给非阶梯套用阶梯参数",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-27",
+          "text": "临界接受，超过400，原计划和回执不变",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-28",
+          "text": "相等接受，小于400；非法资料不写入",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-29",
+          "text": "均400，不绕过原关联条件",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16PERF-DEC",
+      "title": "性能D16 DEC",
+      "description": "批准范围内DEC约束；细分验收如下",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-003#document",
+        "SRC-006#document"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16PERF-30",
+          "text": "200并保存精确数值2.50，不取整也不因整数规则拒绝",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-31",
+          "text": "400，已存阈值不变；冗余尾零仍遵守原BigDecimal scale规则",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-32",
+          "text": "0和100接受，范围外400，无部分数据",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-33",
+          "text": "全部400，不自动解析字符串或非数值类型",
+          "source_refs": [
+            "SRC-002#heading/D16-N：数字字符串是否兼容"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-34",
+          "text": "200，errorThresholdPercent为null而不是0阈值",
+          "source_refs": [
+            "SRC-003#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16PERF-TEXT",
+      "title": "性能D16 TEXT",
+      "description": "批准范围内TEXT约束；细分验收如下",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-003#document",
+        "SRC-006#document"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16PERF-35",
+          "text": "返回200，按既有trim保留字符串内容",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-36",
+          "text": "返回200，字符串及原空白语义保持",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-37",
+          "text": "保存文本不把内部JSON数字视为字段类型错误；GET/HEAD正文限制保持",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-38",
+          "text": "返回200，内容按原非空trim规则保留",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-39",
+          "text": "200，保持CSV换行、变量及字符串含义，不新增模板语义",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-40",
+          "text": "全部400，不将值自动字符串化",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-41",
+          "text": "全部400且没有业务写入",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-42",
+          "text": "200；Map空集合、Map值空串、可选文本null遵循原规则",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16PERF-LIFE",
+      "title": "性能D16 LIFE",
+      "description": "批准范围内LIFE约束；细分验收如下",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-003#document",
+        "SRC-006#document"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16PERF-43",
+          "text": "版本+1，先前manifest不变，合法值保存",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-44",
+          "text": "400，版本、线程组、审计及原数据不变",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-45",
+          "text": "400，所有计划/线程组均未写入，字段错误能指向后组",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-46",
+          "text": "200，新目标DRAFT，合法值保留且无执行副本",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-47",
+          "text": "400，整批资产与成功回执/审计未写入",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-48",
+          "text": "同步正常，旧目标id/status保持、版本+1，新目标DRAFT",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-49",
+          "text": "400，无计划版本、线程组、回执或审计变化",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-50",
+          "text": "读取可用，没有批量转换或重写",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-51",
+          "text": "400，无新执行/manifest/outbox；旧已排队清单和状态不变",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-52",
+          "text": "沿用原403，目标数据未改变，不跨项目写入",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-53",
+          "text": "缺失/null400，旧版本409，无版本或子记录改变",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-54",
+          "text": "409，旧同步不写入新内容",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-55",
+          "text": "返回原回执，不重复新增资产、版本或审计",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-56",
+          "text": "400错误可定位字段/索引，不回显合成提交值、条件键或正文",
+          "source_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16PERF-UI",
+      "title": "性能D16 UI",
+      "description": "批准范围内UI约束；细分验收如下",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-003#document",
+        "SRC-006#document"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16PERF-57",
+          "text": "保留原文并显示线程组/字段错误，业务POST为0",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-58",
+          "text": "发出合法JSON number，后端获得同一精确整数",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-59",
+          "text": "非法值保留且不POST，合法值数值2.5成功发送，不取整",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-60",
+          "text": "清空为无设置，不把空串变0；非适用字段按原清理语义",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-61",
+          "text": "保留组的数字来自自身，非法输入不会串到其他组",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REQ-D16PERF-RUN",
+      "title": "性能D16 RUN",
+      "description": "批准范围内RUN约束；细分验收如下",
+      "risk": "medium",
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-003#document",
+        "SRC-006#document"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC-D16PERF-62",
+          "text": "预检失败，不启动JMeter或创建目标请求",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        },
+        {
+          "id": "AC-D16PERF-63",
+          "text": "返回规范化工件，控制面仍要求持续至少10秒，原Runner内部短时兼容保留",
+          "source_refs": [
+            "SRC-006#document"
+          ]
+        }
+      ]
+    }
+  ],
+  "coverage_items": [
+    {
+      "id": "COV-D16PERF-01",
+      "title": "threadCount精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-02",
+      "title": "rampUpSeconds精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-03",
+      "title": "durationSeconds精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-04",
+      "title": "stepCount精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-05",
+      "title": "stepIntervalSeconds精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-06",
+      "title": "targetTps精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-07",
+      "title": "p95ThresholdMillis精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-08",
+      "title": "expectedStatusCode精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-09",
+      "title": "rendezvousUsers精确整数等值写法",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-09"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-10",
+      "title": "threadCount边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-10"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-11",
+      "title": "rampUpSeconds边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-11"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-12",
+      "title": "durationSeconds边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-12"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-13",
+      "title": "stepCount边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-13"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-14",
+      "title": "stepIntervalSeconds边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-14"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-15",
+      "title": "targetTps边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-15"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-16",
+      "title": "p95ThresholdMillis边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-16"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-17",
+      "title": "expectedStatusCode边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-17"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-18",
+      "title": "rendezvousUsers边界及关联可行上限",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-18"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-19",
+      "title": "九类整数字段非整数拒绝",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-19"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-20",
+      "title": "数值字符串不能绕过九整数约束",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-20"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-21",
+      "title": "数值字段布尔和容器错误类型",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-21"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-22",
+      "title": "大整数指数及原始非有限JSON拒绝",
+      "technique": "error-guessing",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-22"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-23",
+      "title": "三必填整数缺失和真实null",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-23"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D16-NULL：缺失-null与任务进度"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-24",
+      "title": "可选数值缺失和null保持无设置",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-24"
+      ],
+      "source_refs": [
+        "SRC-003#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-25",
+      "title": "阶梯阶段及间隔必须提供",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-25"
+      ],
+      "source_refs": [
+        "SRC-003#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-26",
+      "title": "非阶梯禁止阶段参数",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-26"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-27",
+      "title": "阶梯总时长临界与溢出",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-27"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-28",
+      "title": "阶梯TPS与阶段数关系",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-28"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-29",
+      "title": "阶梯加压时长与集合点互斥",
+      "technique": "decision-table",
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-29"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-30",
+      "title": "错误率真小数保持",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-30"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-31",
+      "title": "错误率超过两位精度不舍入",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-31"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-32",
+      "title": "错误率0与100边界",
+      "technique": "boundary-value-2",
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-32"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-33",
+      "title": "错误率数字字符串和类型错误",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-33"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D16-N：数字字符串是否兼容"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-34",
+      "title": "错误率缺失null无阈值",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-34"
+      ],
+      "source_refs": [
+        "SRC-003#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-35",
+      "title": "请求头显式字符串保真",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-35"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-36",
+      "title": "query显式字符串保真",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-36"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-37",
+      "title": "请求正文JSON字符串可用",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-37"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-38",
+      "title": "响应包含断言字符串与trim保持",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-38"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-39",
+      "title": "CSV模板与字符串数据保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-39"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-40",
+      "title": "Header和query非字符串值拒绝",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-40"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-41",
+      "title": "正文断言CSV非字符串拒绝",
+      "technique": "equivalence-partitioning",
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-41"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-42",
+      "title": "文本真实null及缺失语义保持",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-42"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-43",
+      "title": "合法编辑版本与历史清单冻结",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-43"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-44",
+      "title": "非法编辑不动原计划版本",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-44"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-45",
+      "title": "多线程组晚项非法整批原子",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-45"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-46",
+      "title": "合法迁移精确整数与小数",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-46"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-47",
+      "title": "非法迁移类型不得转换后入库",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-47"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-48",
+      "title": "合法同步等值数字保持规范协议",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-48"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-49",
+      "title": "非法同步不得绕过字段类型",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-49"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-50",
+      "title": "存量读取不批量改写",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-50"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-51",
+      "title": "旧非法定义新入队前拒绝",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-51"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-52",
+      "title": "项目写权限与范围保持",
+      "technique": "role-permission",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-52"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-53",
+      "title": "更新版本必填与冲突保持",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-53"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-54",
+      "title": "同步过期revision保持",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-54"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-55",
+      "title": "迁移同步回执重放幂等",
+      "technique": "recovery-idempotency",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-55"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-56",
+      "title": "字段及线程组索引定位且不泄密",
+      "technique": "error-guessing",
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-56"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-57",
+      "title": "页面九整数非法输入保留并阻止保存",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-57"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-58",
+      "title": "页面精确整数写法转JSON数值",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-58"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-59",
+      "title": "页面错误率不四舍五入",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-59"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-60",
+      "title": "页面可选清空和模型切换",
+      "technique": "state-transition",
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-60"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-61",
+      "title": "页面多组原输入独立",
+      "technique": "data-lifecycle",
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-61"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-62",
+      "title": "Runner坏数字文本受控预检拒绝",
+      "technique": "acceptance-criteria",
+      "requirement_refs": [
+        "REQ-D16PERF-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-62"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    },
+    {
+      "id": "COV-D16PERF-63",
+      "title": "Runner原协议精确合法值兼容",
+      "technique": "compatibility-configuration",
+      "requirement_refs": [
+        "REQ-D16PERF-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-63"
+      ],
+      "source_refs": [
+        "SRC-006#document"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "document_review": [],
+  "cases": [
+    {
+      "id": "TC-D16PERF-01",
+      "module": "性能测试 / D16类型规则",
+      "title": "threadCount精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-01"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交threadCount的合法JSON整数、等值小数和指数写法",
+          "expected": "threadCount保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-01"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-02",
+      "module": "性能测试 / D16类型规则",
+      "title": "rampUpSeconds精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-02"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交rampUpSeconds的合法JSON整数、等值小数和指数写法",
+          "expected": "rampUpSeconds保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-02"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-03",
+      "module": "性能测试 / D16类型规则",
+      "title": "durationSeconds精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-03"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交durationSeconds的合法JSON整数、等值小数和指数写法",
+          "expected": "durationSeconds保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-03"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-04",
+      "module": "性能测试 / D16类型规则",
+      "title": "stepCount精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-04"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交stepCount的合法JSON整数、等值小数和指数写法",
+          "expected": "stepCount保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-04"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-05",
+      "module": "性能测试 / D16类型规则",
+      "title": "stepIntervalSeconds精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-05"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交stepIntervalSeconds的合法JSON整数、等值小数和指数写法",
+          "expected": "stepIntervalSeconds保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-05"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-06",
+      "module": "性能测试 / D16类型规则",
+      "title": "targetTps精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-06"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交targetTps的合法JSON整数、等值小数和指数写法",
+          "expected": "targetTps保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-06"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-07",
+      "module": "性能测试 / D16类型规则",
+      "title": "p95ThresholdMillis精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-07"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交p95ThresholdMillis的合法JSON整数、等值小数和指数写法",
+          "expected": "p95ThresholdMillis保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-07"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-08",
+      "module": "性能测试 / D16类型规则",
+      "title": "expectedStatusCode精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-08"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交expectedStatusCode的合法JSON整数、等值小数和指数写法",
+          "expected": "expectedStatusCode保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-08"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-09",
+      "module": "性能测试 / D16类型规则",
+      "title": "rendezvousUsers精确整数等值写法",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-09"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交rendezvousUsers的合法JSON整数、等值小数和指数写法",
+          "expected": "rendezvousUsers保存为相同数学整数，返回200；没有截断小数部分，其他字段保留原语义",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "10、10.0、1e1按推荐I-A均精确得到10；按各字段边界允许或拒绝。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-09"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-10",
+      "module": "性能测试 / D16类型规则",
+      "title": "threadCount边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-10"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交threadCount上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "threadCount范围1..100000内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-10"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-11",
+      "module": "性能测试 / D16类型规则",
+      "title": "rampUpSeconds边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-11"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交rampUpSeconds上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "rampUpSeconds范围0..86400内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-11"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-12",
+      "module": "性能测试 / D16类型规则",
+      "title": "durationSeconds边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-12"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交durationSeconds上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "durationSeconds范围10..86400内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-12"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-13",
+      "module": "性能测试 / D16类型规则",
+      "title": "stepCount边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-13"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交stepCount上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "stepCount范围2..20内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-13"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-14",
+      "module": "性能测试 / D16类型规则",
+      "title": "stepIntervalSeconds边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-14"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交stepIntervalSeconds上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "stepIntervalSeconds范围1..86400内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-14"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-15",
+      "module": "性能测试 / D16类型规则",
+      "title": "targetTps边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-15"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交targetTps上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "targetTps范围1..1000000内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-15"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-16",
+      "module": "性能测试 / D16类型规则",
+      "title": "p95ThresholdMillis边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-16"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交p95ThresholdMillis上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "p95ThresholdMillis范围1..600000内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-16"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-17",
+      "module": "性能测试 / D16类型规则",
+      "title": "expectedStatusCode边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-17"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交expectedStatusCode上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "expectedStatusCode范围100..599内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-17"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-18",
+      "module": "性能测试 / D16类型规则",
+      "title": "rendezvousUsers边界及关联可行上限",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-18"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交rendezvousUsers上下界和各自相邻越界值；阶段/集合点按线程数准备，间隔同时验证总时长",
+          "expected": "rendezvousUsers范围2..10内且关联可行的边界返回200；相邻越界或总时长超限400，计划/线程组/审计未新增",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "线程/加压/持续/TPS/P95/状态/集合点逐字段边界及小数、类型错误验证，拒绝不创建计划。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-18"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-19",
+      "module": "性能测试 / D16类型规则",
+      "title": "九类整数字段非整数拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-19"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "逐字段发送普通小数与可被double舍入的微小小数原始JSON",
+          "expected": "全部400且计划、线程组、审计计数不变",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "1.5、负小数、1.0000000000000001原精度判非整数，400且业务未写入。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-19"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-20",
+      "module": "性能测试 / D16类型规则",
+      "title": "数值字符串不能绕过九整数约束",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-20"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对九字段发送数字字符串和带空白数字字符串",
+          "expected": "全部400，不把字符串绑定为Integer",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "按N-A拒绝整数字段\"10\"、\" 10 \"、\"10.0\"和错误率\"2.50\"；若选B按明示白名单验收。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-20"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-21",
+      "module": "性能测试 / D16类型规则",
+      "title": "数值字段布尔和容器错误类型",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-21"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对九字段提交true、数组和对象",
+          "expected": "全部400，不创建部分计划或线程组",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "数值字段true、[]、{}、空串拒绝；缺失/null分别按字段矩阵。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-21"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-22",
+      "module": "性能测试 / D16类型规则",
+      "title": "大整数指数及原始非有限JSON拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "error-guessing"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-22"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "逐字段发送溢出值、大指数和原始NaN/Infinity/-Infinity",
+          "expected": "受控400，无int回绕或500，无业务写入",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "18446744073709551616、1e10000及超范围值受控拒绝；不得long/int回绕或500。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-22"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-23",
+      "module": "性能测试 / D16类型规则",
+      "title": "三必填整数缺失和真实null",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-23"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别省略或置null线程数、加压时长和持续时长",
+          "expected": "400，无计划/线程组/审计写入",
+          "evidence_refs": [
+            "SRC-002#heading/D16-NULL：缺失-null与任务进度"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D16-NULL：缺失-null与任务进度",
+              "quote": "保留矩阵中既有可选字段的默认值、无阈值或永久有效语义；必填字段缺失/null返回400。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-23"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D16-NULL：缺失-null与任务进度",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-24",
+      "module": "性能测试 / D16类型规则",
+      "title": "可选数值缺失和null保持无设置",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-24"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "省略或置null可选TPS/P95/状态/集合点/错误率及非阶梯阶段字段",
+          "expected": "200，保持无阈值/无设置，非阶梯阶段字段仍null",
+          "evidence_refs": [
+            "SRC-003#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-003#document",
+              "quote": "省略/null无对应设置，既有关联约束保持"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-NUM"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-24"
+      ],
+      "source_refs": [
+        "SRC-003#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-25",
+      "module": "性能测试 / D16类型规则",
+      "title": "阶梯阶段及间隔必须提供",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-25"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "STEPPED_RAMP分别缺失或置null阶段数、间隔",
+          "expected": "400，不生成不完整阶梯定义",
+          "evidence_refs": [
+            "SRC-003#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-003#document",
+              "quote": "仅STEPPED_RAMP必填；其他模型不允许配置"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-25"
+      ],
+      "source_refs": [
+        "SRC-003#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-26",
+      "module": "性能测试 / D16类型规则",
+      "title": "非阶梯禁止阶段参数",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-26"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "STEADY/RAMP_UP传入阶段数或间隔",
+          "expected": "400；不给非阶梯套用阶梯参数",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "非阶梯禁止阶段字段"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-26"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-27",
+      "module": "性能测试 / D16类型规则",
+      "title": "阶梯总时长临界与溢出",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-27"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "构造总时长恰好86400和刚超过86400的阶梯计划",
+          "expected": "临界接受，超过400，原计划和回执不变",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "阶梯总时长<=86400"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-27"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-28",
+      "module": "性能测试 / D16类型规则",
+      "title": "阶梯TPS与阶段数关系",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-28"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "设置TPS等于阶段数及小于阶段数；保持其他参数合法",
+          "expected": "相等接受，小于400；非法资料不写入",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "TPS>=阶段数"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-28"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-29",
+      "module": "性能测试 / D16类型规则",
+      "title": "阶梯加压时长与集合点互斥",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "decision-table"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-29"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对阶梯分别设置非0加压时长及非空集合点",
+          "expected": "均400，不绕过原关联条件",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "阶梯禁止集合点"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-REL"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-29"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-30",
+      "module": "性能测试 / D16类型规则",
+      "title": "错误率真小数保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-30"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "发送数值2.50及可行等值写法",
+          "expected": "200并保存精确数值2.50，不取整也不因整数规则拒绝",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "Header/Query/CSV/文本契约按S；errorThresholdPercent数值2.50允许，2.501拒绝，不能取整。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-30"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-31",
+      "module": "性能测试 / D16类型规则",
+      "title": "错误率超过两位精度不舍入",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-31"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "发送2.501、2.500和超过2位的微小小数",
+          "expected": "400，已存阈值不变；冗余尾零仍遵守原BigDecimal scale规则",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "2.50接受，2.501和2.500拒绝，不静默舍入。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-31"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-32",
+      "module": "性能测试 / D16类型规则",
+      "title": "错误率0与100边界",
+      "type": "boundary",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "boundary-value-2"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-32"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交0/100及刚小于0、刚大于100数值",
+          "expected": "0和100接受，范围外400，无部分数据",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "errorThresholdPercent沿用BigDecimal.scale()<=2、0..100"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-32"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-33",
+      "module": "性能测试 / D16类型规则",
+      "title": "错误率数字字符串和类型错误",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-33"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "发送\"2.50\"、布尔、数组、对象、原始非有限JSON",
+          "expected": "全部400，不自动解析字符串或非数值类型",
+          "evidence_refs": [
+            "SRC-002#heading/D16-N：数字字符串是否兼容"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/D16-N：数字字符串是否兼容",
+              "quote": "错误率仍允许数值小数，但不接受数字字符串。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-33"
+      ],
+      "source_refs": [
+        "SRC-002#heading/D16-N：数字字符串是否兼容",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-34",
+      "module": "性能测试 / D16类型规则",
+      "title": "错误率缺失null无阈值",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-34"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "省略或置null错误率",
+          "expected": "200，errorThresholdPercent为null而不是0阈值",
+          "evidence_refs": [
+            "SRC-003#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-003#document",
+              "quote": "省略/null无阈值"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-DEC"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-34"
+      ],
+      "source_refs": [
+        "SRC-003#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-35",
+      "module": "性能测试 / D16类型规则",
+      "title": "请求头显式字符串保真",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-35"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存合法Header中字符串001、false、null及空串",
+          "expected": "返回200，按既有trim保留字符串内容",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "requestHeaders值真实null归空串且trim"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-35"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-36",
+      "module": "性能测试 / D16类型规则",
+      "title": "query显式字符串保真",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-36"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存query中字符串001、false、null和空串",
+          "expected": "返回200，字符串及原空白语义保持",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "queryParameters值真实null归空串且保留其他空白"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-36"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-37",
+      "module": "性能测试 / D16类型规则",
+      "title": "请求正文JSON字符串可用",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-37"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "POST正文显式使用包含JSON数字的字符串",
+          "expected": "保存文本不把内部JSON数字视为字段类型错误；GET/HEAD正文限制保持",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "非空正文仅非GET/HEAD允许"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-37"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-38",
+      "module": "性能测试 / D16类型规则",
+      "title": "响应包含断言字符串与trim保持",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-38"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存显式响应包含字符串",
+          "expected": "返回200，内容按原非空trim规则保留",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "responseContains缺失/null/空白为null、非空trim"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-38"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-39",
+      "module": "性能测试 / D16类型规则",
+      "title": "CSV模板与字符串数据保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-39"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "保存合法CSV字符串及引用该变量的正文/参数",
+          "expected": "200，保持CSV换行、变量及字符串含义，不新增模板语义",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "CSV换行规范化，保留唯一变量名、行列、模板检查。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-39"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-40",
+      "module": "性能测试 / D16类型规则",
+      "title": "Header和query非字符串值拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-40"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "两类Map逐个发送数值/布尔/数组/对象值",
+          "expected": "全部400，不将值自动字符串化",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-40"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-41",
+      "module": "性能测试 / D16类型规则",
+      "title": "正文断言CSV非字符串拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "equivalence-partitioning"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-41"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "三类文本字段逐个发送数值/布尔/容器",
+          "expected": "全部400且没有业务写入",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "列明文本字段拒绝数字/布尔/容器；\"001\"、\"false\"、\"null\"、模板引用及合法空串保留，真实null按矩阵。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-41"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-42",
+      "module": "性能测试 / D16类型规则",
+      "title": "文本真实null及缺失语义保持",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-42"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "分别缺失/null两类Map和三类正文/断言/CSV及Map内null值",
+          "expected": "200；Map空集合、Map值空串、可选文本null遵循原规则",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "两类Map缺失/null为空Map"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-TEXT"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-42"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-43",
+      "module": "性能测试 / D16类型规则",
+      "title": "合法编辑版本与历史清单冻结",
+      "type": "state",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-43"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "编辑既有计划的合法整数，读取版本及先前执行清单",
+          "expected": "版本+1，先前manifest不变，合法值保存",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "合法更新版本+1且原执行清单冻结"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-43"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-44",
+      "module": "性能测试 / D16类型规则",
+      "title": "非法编辑不动原计划版本",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-44"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "对既有计划PUT小数或非字符串值",
+          "expected": "400，版本、线程组、审计及原数据不变",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "拒绝不新增计划/线程组、执行/manifest/outbox、成功回执或审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-44"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-45",
+      "module": "性能测试 / D16类型规则",
+      "title": "多线程组晚项非法整批原子",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-45"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交前组合法、后组含非法数值的计划",
+          "expected": "400，所有计划/线程组均未写入，字段错误能指向后组",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "创建/编辑/相应预览或保存入口同一字段规则，拒绝不产生部分子记录。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-45"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-46",
+      "module": "性能测试 / D16类型规则",
+      "title": "合法迁移精确整数与小数",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-46"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "迁移完整快照中九整数等价数字、合法错误率与文本",
+          "expected": "200，新目标DRAFT，合法值保留且无执行副本",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "性能迁移使用完整版本1 snapshot/plans/threadGroups并新建DRAFT"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-46"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-47",
+      "module": "性能测试 / D16类型规则",
+      "title": "非法迁移类型不得转换后入库",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-47"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "完整迁移资料逐字段放入非法整数、错误率字符串或非字符串文本",
+          "expected": "400，整批资产与成功回执/审计未写入",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-47"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-48",
+      "module": "性能测试 / D16类型规则",
+      "title": "合法同步等值数字保持规范协议",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-48"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "提交完整规范化同步Item，整数用精确等值数字，错误率保持合法scale",
+          "expected": "同步正常，旧目标id/status保持、版本+1，新目标DRAFT",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "已存目标保持id/status并版本+1，新计划DRAFT"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-48"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-49",
+      "module": "性能测试 / D16类型规则",
+      "title": "非法同步不得绕过字段类型",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-49"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "同步Item逐字段提交非法数字或非字符串文本",
+          "expected": "400，无计划版本、线程组、回执或审计变化",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "本字段可达的导入/同步用同一类型规则；按既有事务或逐项回执契约处理，非法项不写入、不计成功，保留原有明示的部分成功语义。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-49"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-50",
+      "module": "性能测试 / D16类型规则",
+      "title": "存量读取不批量改写",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-50"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取旧定义和清单并核对数据库行与内容",
+          "expected": "读取可用，没有批量转换或重写",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "旧记录与旧清单只读可见；不批量改值，不推断被截断前原值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-50"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-51",
+      "module": "性能测试 / D16类型规则",
+      "title": "旧非法定义新入队前拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-51"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "自有测试旧计划注入越界整数或原始数字Map，尝试新执行",
+          "expected": "400，无新执行/manifest/outbox；旧已排队清单和状态不变",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "旧非法配置新入队按批准D16-OLD预检拒绝，旧已排队manifest和已运行状态不得由本次拒绝改写。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-51"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-52",
+      "module": "性能测试 / D16类型规则",
+      "title": "项目写权限与范围保持",
+      "type": "permission",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "role-permission"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-52"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "无写权限账号提交合法计划",
+          "expected": "沿用原403，目标数据未改变，不跨项目写入",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "原项目/账号权限和版本冲突回归；拒绝不跨项目、不产生成功业务审计。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-52"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-53",
+      "module": "性能测试 / D16类型规则",
+      "title": "更新版本必填与冲突保持",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-53"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "省略/null版本及过期版本编辑合法计划",
+          "expected": "缺失/null400，旧版本409，无版本或子记录改变",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "缺失/null400、旧版本409"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-53"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-54",
+      "module": "性能测试 / D16类型规则",
+      "title": "同步过期revision保持",
+      "type": "state",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-54"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "读取revision后合法修改目标，再提交旧revision",
+          "expected": "409，旧同步不写入新内容",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "校验目标revision/actor"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-54"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-55",
+      "module": "性能测试 / D16类型规则",
+      "title": "迁移同步回执重放幂等",
+      "type": "recovery",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "recovery-idempotency"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-55"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "重复提交同一成功迁移和同步请求",
+          "expected": "返回原回执，不重复新增资产、版本或审计",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "重放返回原回执"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-55"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-56",
+      "module": "性能测试 / D16类型规则",
+      "title": "字段及线程组索引定位且不泄密",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "error-guessing"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-56"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "在后线程组的数值/条件值提交合成私有标记",
+          "expected": "400错误可定位字段/索引，不回显合成提交值、条件键或正文",
+          "evidence_refs": [
+            "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+              "quote": "UI小数提示并阻止提交，不先四舍五入；HTTP400沿用错误信封并可定位字段/索引，不回显认证或正文值。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-LIFE"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-56"
+      ],
+      "source_refs": [
+        "SRC-002#heading/35组验收目标（全部NOT_EXECUTED）",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-57",
+      "module": "性能测试 / D16类型规则",
+      "title": "页面九整数非法输入保留并阻止保存",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-57"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "各可见整数控件输入小数/越界值点击保存",
+          "expected": "保留原文并显示线程组/字段错误，业务POST为0",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "UI应校验原始文本再转Number，拒绝不舍入、不发业务POST，保留草稿且可定位线程组/字段"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-57"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-58",
+      "module": "性能测试 / D16类型规则",
+      "title": "页面精确整数写法转JSON数值",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-58"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "各可见整数字段输入精确等值写法，保存合法计划",
+          "expected": "发出合法JSON number，后端获得同一精确整数",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "UI应校验原始文本再转Number"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-58"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-59",
+      "module": "性能测试 / D16类型规则",
+      "title": "页面错误率不四舍五入",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-59"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "输入错误率2.501点击保存，再改为2.50",
+          "expected": "非法值保留且不POST，合法值数值2.5成功发送，不取整",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "2.50接受，2.501和2.500拒绝，不静默舍入。"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-59"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-60",
+      "module": "性能测试 / D16类型规则",
+      "title": "页面可选清空和模型切换",
+      "type": "state",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "state-transition"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-60"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "清空可选数值，切换阶梯/非阶梯并保存",
+          "expected": "清空为无设置，不把空串变0；非适用字段按原清理语义",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "可选字段留空为无设置，禁用的非适用字段遵循原loadModelChanged清理"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-60"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-61",
+      "module": "性能测试 / D16类型规则",
+      "title": "页面多组原输入独立",
+      "type": "positive",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "data-lifecycle"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-61"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "新增线程组并修改不同数字，再移除一组后保存",
+          "expected": "保留组的数字来自自身，非法输入不会串到其他组",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "不串用其他线程组的原输入"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-UI"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-61"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-62",
+      "module": "性能测试 / D16类型规则",
+      "title": "Runner坏数字文本受控预检拒绝",
+      "type": "negative",
+      "polarity": "negative",
+      "priority": "P2",
+      "design_techniques": [
+        "acceptance-criteria"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-62"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "给受控Runner预检提供非法数值或非字符串参数",
+          "expected": "预检失败，不启动JMeter或创建目标请求",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "JMeter runtime协议版本1..6已有Number.isSafeInteger和STRING参数检查"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-62"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    },
+    {
+      "id": "TC-D16PERF-63",
+      "module": "性能测试 / D16类型规则",
+      "title": "Runner原协议精确合法值兼容",
+      "type": "compatibility",
+      "polarity": "positive",
+      "priority": "P2",
+      "design_techniques": [
+        "compatibility-configuration"
+      ],
+      "design_rationale": "逐字段或独立入口/关联结果建立COV；同一目标的数据变体不重复计数。",
+      "coverage_item_refs": [
+        "COV-D16PERF-63"
+      ],
+      "preconditions": [
+        "自有全新隔离账号和项目，按本案例准备所需合法计划、版本或线程组。"
+      ],
+      "test_data": "{其余字段合法的自有隔离计划}；各变体保持其他字段/版本不变",
+      "steps": [
+        {
+          "no": 1,
+          "action": "用原协议合法工件进行纯校验，不启动负载",
+          "expected": "返回规范化工件，控制面仍要求持续至少10秒，原Runner内部短时兼容保留",
+          "evidence_refs": [
+            "SRC-006#document"
+          ],
+          "evidence_quotes": [
+            {
+              "source_ref": "SRC-006#document",
+              "quote": "本轮保持既有Runner协议短时兼容，不放宽控制面10秒下界"
+            }
+          ]
+        }
+      ],
+      "requirement_refs": [
+        "REQ-D16PERF-RUN"
+      ],
+      "acceptance_criteria_refs": [
+        "AC-D16PERF-63"
+      ],
+      "source_refs": [
+        "SRC-006#document",
+        "SRC-004#json-root",
+        "SRC-005#json-root"
+      ],
+      "tags": [
+        "OBS-10-E011",
+        "D16-A"
+      ],
+      "notes": "先行设计不写执行状态；工程变体/环境次数不加正式分母。"
+    }
+  ]
+}

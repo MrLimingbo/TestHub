@@ -1,0 +1,232 @@
+{
+  "total": 56,
+  "passed": 56,
+  "failed": 0,
+  "errors": 0,
+  "cases": [
+    {
+      "name": "expectedStatusCodeBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "transferValid",
+      "status": "PASS"
+    },
+    {
+      "name": "steppedRequired",
+      "status": "PASS"
+    },
+    {
+      "name": "editValid",
+      "status": "PASS"
+    },
+    {
+      "name": "oldInvalidQueue",
+      "status": "PASS"
+    },
+    {
+      "name": "containsStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "requiredNull",
+      "status": "PASS"
+    },
+    {
+      "name": "steppedMutualExclusion",
+      "status": "PASS"
+    },
+    {
+      "name": "targetTpsExact",
+      "status": "PASS"
+    },
+    {
+      "name": "decimalBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "decimalPrecision",
+      "status": "PASS"
+    },
+    {
+      "name": "rendezvousUsersBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "decimalNull",
+      "status": "PASS"
+    },
+    {
+      "name": "threadCountExact",
+      "status": "PASS"
+    },
+    {
+      "name": "threadCountBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "textTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "rampUpSecondsBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "textNull",
+      "status": "PASS"
+    },
+    {
+      "name": "versionConflict",
+      "status": "PASS"
+    },
+    {
+      "name": "replay",
+      "status": "PASS"
+    },
+    {
+      "name": "transferInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "numericStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "steppedTps",
+      "status": "PASS"
+    },
+    {
+      "name": "rampUpSecondsExact",
+      "status": "PASS"
+    },
+    {
+      "name": "stepIntervalSecondsExact",
+      "status": "PASS"
+    },
+    {
+      "name": "permission",
+      "status": "PASS"
+    },
+    {
+      "name": "bodyStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "editInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "queryStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "durationSecondsBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "csvStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "stepCountExact",
+      "status": "PASS"
+    },
+    {
+      "name": "syncConflict",
+      "status": "PASS"
+    },
+    {
+      "name": "p95ThresholdMillisBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "mapTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "decimalTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "decimalValid",
+      "status": "PASS"
+    },
+    {
+      "name": "rendezvousUsersExact",
+      "status": "PASS"
+    },
+    {
+      "name": "wrongTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "fractions",
+      "status": "PASS"
+    },
+    {
+      "name": "syncInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "multiGroupAtomic",
+      "status": "PASS"
+    },
+    {
+      "name": "expectedStatusCodeExact",
+      "status": "PASS"
+    },
+    {
+      "name": "syncValid",
+      "status": "PASS"
+    },
+    {
+      "name": "overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "durationSecondsExact",
+      "status": "PASS"
+    },
+    {
+      "name": "steppedDuration",
+      "status": "PASS"
+    },
+    {
+      "name": "p95ThresholdMillisExact",
+      "status": "PASS"
+    },
+    {
+      "name": "stepCountBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "errorLocation",
+      "status": "PASS"
+    },
+    {
+      "name": "stepIntervalSecondsBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "oldReadOnly",
+      "status": "PASS"
+    },
+    {
+      "name": "targetTpsBoundary",
+      "status": "PASS"
+    },
+    {
+      "name": "nonSteppedFields",
+      "status": "PASS"
+    },
+    {
+      "name": "optionalNull",
+      "status": "PASS"
+    },
+    {
+      "name": "headerStrings",
+      "status": "PASS"
+    }
+  ]
+}

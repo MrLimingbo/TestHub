@@ -57,7 +57,7 @@ export class AppiumRunner {
       await this.publishStep(stepResult(active.task, this.config.runnerId, step, index + 1, failure ? 'FAILED' : 'PASSED', Date.now() - started, failure, this.now()))
       if (failure && scenario.failureStrategy !== 'CONTINUE') throw error(failure.includes('deadline') ? 'TIMED_OUT' : 'STEP_FAILED', failure)
     } if (failed) throw error('STEP_FAILED', 'One or more mobile steps failed'); }
-  async step(active, step, variables) { const timeout = Math.min(Math.max(Number(step.timeoutMillis) || 30000, 1), 60000); if (step.type === 'LAUNCH') return
+  async step(active, step, variables) { const timeout = step.timeoutMillis ?? 30000; if (step.type === 'LAUNCH') return
     if (step.type === 'WAIT') {
       const end = Date.now() + timeout
       while (Date.now() < end) { this.assertActive(active); if (active.deadlineAt) this.assertDeadline(active, active.deadlineAt); await new Promise(resolve => setTimeout(resolve, Math.min(100, end - Date.now()))) }

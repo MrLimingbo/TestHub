@@ -1,0 +1,23 @@
+{
+  "newConfirmedProductBugs": 0,
+  "fullModulePassed": false,
+  "conclusion": "本次1645条业务样本未见错误，不代表完整D26基线或长期稳定性通过；当前问题为主机负载采集阻塞。",
+  "collectorAssetIssues": [
+    {
+      "id": "D26-ASSET-01",
+      "title": "隔离复制时相对链接被转换为源目录路径",
+      "status": "FIXED_PRECHECK_PASSED",
+      "formalWindowStartedBeforeFix": false
+    },
+    {
+      "id": "D26-ASSET-02",
+      "title": "采集器无请求正文的DELETE遗漏CSRF头",
+      "status": "FIXED_PRECHECK_PASSED",
+      "formalWindowStartedBeforeFix": false
+    }
+  ],
+  "loadAdjustment": {
+    "status": "USER_APPROVED_AND_PRECHECK_PASSED",
+    "productTaskDeleteEndpointAdded": false
+  }
+}

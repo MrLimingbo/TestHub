@@ -1,0 +1,15 @@
+{
+  "newProductTests": 0,
+  "newProductBugs": 0,
+  "assetIssues": 1,
+  "cleanupHelperMaintenance": "一次性停止清理命令误用Node回调式fs.rm，已用fs/promises正确重试并独立复核目录/进程均不存在；未触碰用户数据。",
+  "cleanupEvidence": "docs/test-reports/2026-11-05/d26-baseline-r3/CLEANUP.json",
+  "existingSourceChangesExpected": 0,
+  "initialAudit": {
+    "passed": 15,
+    "failed": 1,
+    "reason": "报告链接核验先于本轮结果文件生成，AC16发现该文件尚不存在",
+    "fix": "先写入RUNNING结果登记，再执行全部检查并替换为最终结果；不跳过链接验证",
+    "evidence": "FIRST-AUDIT-RESULTS.json"
+  }
+}

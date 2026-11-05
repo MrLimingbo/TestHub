@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-05T04:55:20.410721+00:00",
+  "status": "RESULTS_APPROVED",
+  "basis": "用户：收尾报告审核通过，更新最终整体测试报告；D26、12项环境补验和升级关闭超时风险单列，暂不恢复。",
+  "reportSha256": "db72485d7f26199b78ec111bffad60a45fe9f775c235910ab1ddffff8dbe5fed",
+  "auditResultsSha256": "5479d96a3917f4b13a74ecbb1e5b0ddf1e09e45a73d20e8053cd90af54de883b",
+  "artifactManifestSha256": "03b16dbdd36ceef048d16a3a2fa98358681d752bc8300aff40d51e3ddc2ace66",
+  "auditChecksApproved": 16,
+  "productExecutionRestorationAuthorized": false,
+  "skippedD26Observations": 2,
+  "skippedEnvironmentCases": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

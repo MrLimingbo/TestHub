@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-05T02:00:35.062Z",
+  "status": "BLOCKED_EXECUTION_REPORT_APPROVED",
+  "basis": "用户：R2阻塞报告审核通过，继续在低干扰时段后台重采D26，保持原阈值、负载和时长，完成两个有效窗口后更新报告发审。",
+  "approvedReportSha256": "73bcfd98460eec8e30a89532dcb064706b6f4de4d99d6bf94e13f60bd3f95f37",
+  "approvedManifestSha256": "a5163b08557dca244cea68df57866fdd5db3e9e7fff432c07d0ee133c2dbd40c",
+  "validWindowsApprovedAsCompleted": 0,
+  "formalAttemptsInR2": 0,
+  "recollectionAuthorized": true,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

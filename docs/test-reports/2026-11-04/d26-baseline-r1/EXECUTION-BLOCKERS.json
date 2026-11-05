@@ -1,0 +1,19 @@
+{
+  "historicalEnvironmentBlockerCount": 12,
+  "historicalEnvironmentPreparationExecuted": false,
+  "currentExecutionBlockerCount": 1,
+  "records": [
+    {
+      "id": "D26-BLOCK-HOST-LOAD",
+      "status": "BLOCKED_PENDING_REVIEW",
+      "reason": "外部CPU占总核容量连续60秒达到25%，该次窗口作废；随后30分钟内未能取得连续120秒低负载窗口。",
+      "firstAttempt": 1,
+      "validWindows": 0,
+      "requiredWindows": 2,
+      "productDefectConfirmed": false,
+      "userProcessesStopped": false,
+      "thresholdChanged": false,
+      "recommendedNextStep": "审核本次阻塞结果后，在主机能提供约5小时连续低干扰时段时，另建批次从相同已批准配置和新隔离初始数据开始，保留本轮无效证据；不缩短正式窗口或放宽污染规则。"
+    }
+  ]
+}

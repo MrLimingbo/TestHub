@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-04",
+  "baselineFiles": 1425,
+  "modified": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportController.java",
+      "beforeSha256": "7b13225164c5c440c9dbc0e44a8117efa65ec70212a8b604a2b241e6c76e7584",
+      "afterSha256": "0f568885cfc5b4504f614ac02d8c75824e0f36007731153a41d2e31f46c533db"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/reporting/QualityReportService.java",
+      "beforeSha256": "4d7dba5ffcafa857308004a76921a86de6fe4401660ab04b51240ff63c07313b",
+      "afterSha256": "d79b702f791dc71255b418c17d746abf44ed753d6928c6542e34dd5673e8d470"
+    }
+  ],
+  "added": [
+    {
+      "path": "src/test/d21ReportScope.test.ts",
+      "sha256": "90afc435381eec22b7373bfee18928cd6810cb5768aaf55101218a2eafc89a56"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java",
+      "sha256": "62d007dbd71c54125f738261bd4e708c29839e9b8b86dc142efcb8f4d326c118"
+    }
+  ],
+  "removed": [],
+  "otherBaselineFilesUnchanged": 1423,
+  "unrelatedChangesPreserved": true
+}

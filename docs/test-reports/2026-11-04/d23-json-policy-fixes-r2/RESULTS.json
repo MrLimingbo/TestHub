@@ -1,0 +1,65 @@
+{
+  "date": "2026-11-04",
+  "status": "FIX_IMPLEMENTED_PENDING_USER_REVIEW",
+  "module": "D23",
+  "bugId": "BUG-D23-001",
+  "expectedDuplicateStatus": 409,
+  "formalCases": {
+    "total": 32,
+    "positive": 13,
+    "negative": 19,
+    "passed": 32,
+    "failed": 0,
+    "blocked": 0,
+    "prior": 20,
+    "new": 12,
+    "newPositive": 4,
+    "newNegative": 8
+  },
+  "additionalX01BackendRegressionMethod": 1,
+  "x01ExplicitlyAsserts409": true,
+  "checks": {
+    "h2": {
+      "total": 1374,
+      "passed": 1371,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 3,
+      "suiteCount": 160
+    },
+    "mysqlAffected": {
+      "total": 65,
+      "passed": 65,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 7
+    },
+    "frontendAffectedPassed": 67,
+    "frontendFiles": 4,
+    "lint": "PASS_WITH_2_EXISTING_WARNINGS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "backendJar": "PASS",
+    "diffCheck": "PASS"
+  },
+  "concurrentRoundsPerDatabase": {
+    "create": 3,
+    "update": 3
+  },
+  "bugsFixedThisRound": 1,
+  "fixedBugStatus": "FIXED_PENDING_USER_REVIEW",
+  "resultReviewApproved": false,
+  "newConfirmedProductBugs": 0,
+  "unfixedConfirmedAdditionalProductBugs": 0,
+  "productionFilesChanged": 1,
+  "existingTestFilesChanged": 1,
+  "newTestFiles": 2,
+  "uiProductChanged": false,
+  "schemaChanged": false,
+  "historicalEnvironmentBlockersDeferred": 12,
+  "otherHistoricalObservationsWaitingForModuleGate": 2,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "noNextModuleExecuted": true
+}

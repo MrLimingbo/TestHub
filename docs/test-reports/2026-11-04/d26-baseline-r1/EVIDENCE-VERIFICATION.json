@@ -1,0 +1,60 @@
+{
+  "verifiedAt": "2026-11-04T08:42:23.618Z",
+  "status": "INCOMPLETE_VERIFIED",
+  "validWindows": 0,
+  "requiredWindows": 2,
+  "formalAttempts": 1,
+  "preExistingSourceFiles": 1430,
+  "preExistingSourceFilesChanged": 0,
+  "originalWorkerManifestEntries": 20,
+  "originalWorkerManifestAllHashesMatched": true,
+  "initialDatabaseMatchesSeed": true,
+  "secondWindowExecuted": false,
+  "sameCandidateTwoWindowComparisonAvailable": false,
+  "requests": {
+    "total": 1645,
+    "warmup": 900,
+    "measurement": 745,
+    "errors": 0,
+    "operationCounts": {
+      "taskList": 680,
+      "planDetail": 325,
+      "qualityReport": 320,
+      "taskUpdate": 160,
+      "planCreate": 80,
+      "planDelete": 80
+    }
+  },
+  "partialCycle": {
+    "phase": "measurement",
+    "completedOperations": 45,
+    "expectedOperations": 100
+  },
+  "probes": {
+    "total": 108,
+    "errors": 0
+  },
+  "resources": {
+    "totalIncludingPriming": 330,
+    "intervalSamples": 329,
+    "mandatoryMissingDuringObservedPortion": 0,
+    "maximumObservedGapSeconds": 5.0101071249999904,
+    "fullWindowExpectedSlots": 1800,
+    "fullWindowRecordedSlots": 329,
+    "fullWindowCompleteness": 0.1827777777777778,
+    "unexecutedTailMustNotBeReadAsObservedSamplerOutage": true,
+    "optionalHeapMissing": 0,
+    "optionalFileDescriptorMissing": 0,
+    "safetyViolations": 0
+  },
+  "cleanup": {
+    "ownedProcessesRemaining": 0,
+    "ownedPrivateDirectoryAbsent": true,
+    "ownedQaKeychainAbsent": true,
+    "supervisorAbsent": true
+  },
+  "historicalEnvironmentFilesUnchanged": true,
+  "upgradeShutdownRiskFileUnchanged": true,
+  "upgradeShutdownRecheckExecuted": false,
+  "productBudgetLeakOrSlaComplianceAssessed": false
+}

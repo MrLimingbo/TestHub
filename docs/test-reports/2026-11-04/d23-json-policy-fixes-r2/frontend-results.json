@@ -1,0 +1,18 @@
+{
+  "total": 67,
+  "passed": 67,
+  "failed": 0,
+  "files": 4,
+  "focusedNewPassed": 1,
+  "newFormalMethods": 1,
+  "scope": [
+    "src/test/d23AdapterConflict.test.ts",
+    "src/test/notificationExtensionsFixes.test.ts",
+    "src/test/notificationsPage.test.ts",
+    "src/test/extensionsOperationsPages.test.ts"
+  ],
+  "evidenceType": "Vue/Arco component recovery with controlled409/200 responses,create/edit variants inone formal method",
+  "productUiChanged": false,
+  "fullFrontendRerun": false,
+  "exitCode": 0
+}

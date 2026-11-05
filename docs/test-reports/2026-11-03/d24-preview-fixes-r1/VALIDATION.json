@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-03",
+  "checks": {
+    "acceptanceScenarios": 24,
+    "positiveNegativeMixed": [
+      13,
+      8,
+      3
+    ],
+    "entryGroups": 45,
+    "conditionalReadHandlers": 124,
+    "coldStatusBranches": 34,
+    "sourceHashesVerified": 16,
+    "existingSourcesModified": 5,
+    "sourcesAdded": 5,
+    "otherBaselineSourcesUnchanged": 1413,
+    "priorFrozenArtifactsUnchanged": 50,
+    "observationCounts": [
+      41,
+      1,
+      5
+    ],
+    "deferredEnvironmentBlockers": 12,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "nativeFeedbackMilliseconds": 6,
+    "nativeTerminationMilliseconds": 6,
+    "nativeOffscreenWindows": 5,
+    "localReportLinksChecked": 54,
+    "diffCheck": "PASS",
+    "rawLogsRemoved": 21
+  },
+  "errors": [],
+  "validationIsNotAdditionalProductTests": true
+}

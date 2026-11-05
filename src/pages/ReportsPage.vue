@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { webIntegerInput, webIntegerError } from '@/utils/webIntegerInput'
 import { ApiRequestError, toApiRequestError } from '@/composables/useApiFormErrors'
 import { Message } from '@arco-design/web-vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -83,6 +84,7 @@ const runsVisible = ref(false)
 const editingScheduleId = ref<string | null>(null)
 const selectedSchedule = ref<QualityReportSchedule | null>(null)
 const scheduleRuns = ref<QualityReportScheduleRun[]>([])
+const periodDaysText = ref('7')
 const scheduleForm = ref({ name: '', projectIds: [] as string[], cronExpression: '0 0 9 ? * MON', timezone: 'Asia/Shanghai', periodDays: 7, enabled: true })
 
 const projects = computed(() => context.value?.organizations.flatMap((organization) => context.value?.projects[organization.id] ?? []) ?? [])
@@ -199,6 +201,7 @@ function createSchedule() {
   editingScheduleId.value = null
   scheduleVersion.value = null; scheduleConflict.value = false; latestSchedule.value = null
   scheduleForm.value = { name: '', projectIds: projectScopeError.value ? [] : selectedProjectIds.value.length ? [...selectedProjectIds.value] : projects.value.map((project) => project.id), cronExpression: '0 0 9 ? * MON', timezone: 'Asia/Shanghai', periodDays: 7, enabled: true }
+  periodDaysText.value = '7'
   scheduleVisible.value = true
 }
 function editSchedule(schedule: QualityReportSchedule) {
@@ -206,6 +209,7 @@ function editSchedule(schedule: QualityReportSchedule) {
   editingScheduleId.value = schedule.id
   scheduleVersion.value = schedule.version; scheduleConflict.value = false; latestSchedule.value = null
   scheduleForm.value = { name: schedule.name, projectIds: [...schedule.projectIds], cronExpression: schedule.cronExpression, timezone: schedule.timezone, periodDays: schedule.periodDays, enabled: schedule.enabled }
+  periodDaysText.value = String(schedule.periodDays)
   scheduleVisible.value = true
 }
 function closeSchedule() { formRequest++; scheduleVisible.value = false }
@@ -216,7 +220,10 @@ async function saveSchedule() {
   }
   const request = formRequest, id = editingScheduleId.value
   const current = () => !disposed && request === formRequest
-  const input = { ...scheduleForm.value, projectIds: [...scheduleForm.value.projectIds], ...(id ? { expectedVersion: scheduleVersion.value } : {}) }
+  let periodDays: number
+  try { periodDays = webIntegerInput(periodDaysText.value, 1, 90, 'periodDays') }
+  catch (error) { Message.error(error instanceof Error ? error.message : '统计周期不合法'); return false }
+  const input = { ...scheduleForm.value, periodDays, projectIds: [...scheduleForm.value.projectIds], ...(id ? { expectedVersion: scheduleVersion.value } : {}) }
   savingSchedule.value = true
   try {
     const url = id ? `/api/v1/reports/quality/schedules/${id}` : '/api/v1/reports/quality/schedules'
@@ -362,7 +369,7 @@ onBeforeUnmount(() => { disposed = true; reportRequest++; schedulesRequest++; ru
       <a-empty v-else-if="!loading" description="未能生成质量报表，请调整筛选范围后重试" />
     </a-spin>
     <section class="panel schedule-panel"><div class="panel-title"><div><h3>定时质量报告</h3><p>按 Quartz Cron 与时区生成跨项目质量报告；通知模板可订阅 ready / risk 事件。</p></div><a-space><a-button v-if="syncAvailable" type="text" @click="openPlanSync">质量报告计划同步</a-button><a-button type="text" @click="createSchedule"><icon-plus /> 新建计划</a-button></a-space></div><a-table :data="schedules" :pagination="false" row-key="id"><template #columns><a-table-column title="计划"><template #cell="{ record }"><strong>{{ record.name }}</strong><small class="schedule-meta">{{ record.projectIds.length }} 个项目 · {{ record.periodDays }} 天周期</small></template></a-table-column><a-table-column title="触发规则"><template #cell="{ record }"><code>{{ record.cronExpression }}</code><small class="schedule-meta">{{ record.timezone }}</small></template></a-table-column><a-table-column title="上次运行"><template #cell="{ record }"><a-tag v-if="record.lastRunStatus" :color="record.lastRunStatus === 'SUCCEEDED' ? 'green' : 'red'">{{ record.lastRunStatus }}</a-tag><span v-else class="schedule-meta">尚未运行</span><small class="schedule-meta">{{ date(record.lastRunAt) }}</small></template></a-table-column><a-table-column title="状态"><template #cell="{ record }"><a-badge :status="record.enabled ? 'success' : 'normal'" :text="record.enabled ? '已启用' : '已停用'" /></template></a-table-column><a-table-column title="操作" :width="230"><template #cell="{ record }"><a-space><a-button type="text" :disabled="!record.enabled" @click="runSchedule(record)">立即运行</a-button><a-button type="text" @click="viewRuns(record)">记录</a-button><a-button type="text" @click="editSchedule(record)">编辑</a-button><a-popconfirm content="删除后历史运行记录也会移除，确认继续？" @ok="removeSchedule(record)"><a-button type="text" status="danger">删除</a-button></a-popconfirm></a-space></template></a-table-column></template></a-table><a-empty v-if="schedules.length === 0" description="尚未创建定时质量报告，可先选择项目和周报周期。" /></section>
-    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑定时质量报告' : '新建定时质量报告'" width="640px" :ok-loading="savingSchedule" :on-before-ok="saveSchedule" @cancel="closeSchedule"><a-alert v-if="scheduleConflict" type="warning">保存未完成，草稿已保留。<a-button size="small" :loading="refreshingScheduleVersion" :disabled="savingSchedule" @click="refreshScheduleVersion">读取最新版本</a-button><div v-if="latestSchedule">最新版本 {{ latestSchedule.version }}：名称 {{ latestSchedule.name }}；项目 {{ latestSchedule.projectIds.join('、') }}；Cron {{ latestSchedule.cronExpression }}；时区 {{ latestSchedule.timezone }}；周期 {{ latestSchedule.periodDays }} 天；{{ latestSchedule.enabled ? '启用' : '停用' }}。请核对下面草稿后再次保存。</div></a-alert><a-form :model="scheduleForm" layout="vertical"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" placeholder="例如：每周项目质量报告" /></a-form-item><a-form-item label="项目范围" required extra="选择需要纳入质量汇总且你有管理权限的项目。"><a-select v-model="scheduleForm.projectIds" multiple :limit="projectLimit" :max-tag-count="3" placeholder="选择项目" @exceed-limit="projectLimitWarning"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select></a-form-item><a-form-item label="Quartz Cron" required extra="采用六或七段 Quartz 表达式，例如每周一 09:00：0 0 9 ? * MON。"><a-input v-model="scheduleForm.cronExpression" /></a-form-item><div class="schedule-form-row"><a-form-item label="时区" required><a-select v-model="scheduleForm.timezone"><a-option value="Asia/Shanghai">Asia/Shanghai</a-option><a-option value="UTC">UTC</a-option></a-select></a-form-item><a-form-item label="统计周期（天）" required><a-input-number v-model="scheduleForm.periodDays" :min="1" :max="90" /></a-form-item></div><a-form-item label="启用计划"><a-switch v-model="scheduleForm.enabled"><template #checked>启用</template><template #unchecked>停用</template></a-switch></a-form-item></a-form></a-modal>
+    <a-modal v-model:visible="scheduleVisible" :title="editingScheduleId ? '编辑定时质量报告' : '新建定时质量报告'" width="640px" :ok-loading="savingSchedule" :on-before-ok="saveSchedule" @cancel="closeSchedule"><a-alert v-if="scheduleConflict" type="warning">保存未完成，草稿已保留。<a-button size="small" :loading="refreshingScheduleVersion" :disabled="savingSchedule" @click="refreshScheduleVersion">读取最新版本</a-button><div v-if="latestSchedule">最新版本 {{ latestSchedule.version }}：名称 {{ latestSchedule.name }}；项目 {{ latestSchedule.projectIds.join('、') }}；Cron {{ latestSchedule.cronExpression }}；时区 {{ latestSchedule.timezone }}；周期 {{ latestSchedule.periodDays }} 天；{{ latestSchedule.enabled ? '启用' : '停用' }}。请核对下面草稿后再次保存。</div></a-alert><a-form :model="scheduleForm" layout="vertical"><a-form-item label="计划名称" required><a-input v-model="scheduleForm.name" placeholder="例如：每周项目质量报告" /></a-form-item><a-form-item label="项目范围" required extra="选择需要纳入质量汇总且你有管理权限的项目。"><a-select v-model="scheduleForm.projectIds" multiple :limit="projectLimit" :max-tag-count="3" placeholder="选择项目" @exceed-limit="projectLimitWarning"><a-option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</a-option></a-select></a-form-item><a-form-item label="Quartz Cron" required extra="采用六或七段 Quartz 表达式，例如每周一 09:00：0 0 9 ? * MON。"><a-input v-model="scheduleForm.cronExpression" /></a-form-item><div class="schedule-form-row"><a-form-item label="时区" required><a-select v-model="scheduleForm.timezone"><a-option value="Asia/Shanghai">Asia/Shanghai</a-option><a-option value="UTC">UTC</a-option></a-select></a-form-item><a-form-item label="统计周期（天）" required><a-input v-model="periodDaysText" aria-label="报告统计周期" /><small v-if="webIntegerError(periodDaysText, 1, 90, 'periodDays')">{{ webIntegerError(periodDaysText, 1, 90, 'periodDays') }}</small></a-form-item></div><a-form-item label="启用计划"><a-switch v-model="scheduleForm.enabled"><template #checked>启用</template><template #unchecked>停用</template></a-switch></a-form-item></a-form></a-modal>
     <a-modal v-model:visible="runsVisible" :title="`${selectedSchedule?.name ?? ''} · 运行记录`" width="760px" :footer="false" @cancel="closeRuns"><a-alert v-if="runsError" type="error">{{ runsError }}</a-alert><a-table :data="scheduleRuns" :pagination="false" row-key="id"><template #columns><a-table-column title="状态"><template #cell="{ record }"><a-tag :color="record.status === 'SUCCEEDED' ? 'green' : 'red'">{{ record.status }}</a-tag></template></a-table-column><a-table-column title="统计范围"><template #cell="{ record }">{{ record.from }} 至 {{ record.to }}</template></a-table-column><a-table-column title="通知投递" data-index="deliveryCount" /><a-table-column title="开始时间"><template #cell="{ record }">{{ date(record.startedAt) }}</template></a-table-column><a-table-column title="结果"><template #cell="{ record }"><span class="schedule-error">{{ record.errorMessage ?? '质量报告已生成' }}</span></template></a-table-column></template></a-table><a-empty v-if="scheduleRuns.length === 0" description="暂无运行记录" /></a-modal>
   </div>
 </template>

@@ -1,5 +1,7 @@
 package io.testhub.platform.uiautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import com.fasterxml.jackson.databind.*;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
@@ -171,7 +173,7 @@ public class UiAutomationSyncService {
                 normalized=new Schedule(d.scenarioName(),d.functionalPlanCode()==null?null:d.functionalPlanCode().toUpperCase(Locale.ROOT),p.cronExpression(),p.timezone(),p.timeoutSeconds(),p.maxRetryAttempts(),p.retryBackoffSeconds());}
             default -> throw invalid("Web UI 类型无效");
         }
-        if(!json.valueToTree(normalized).equals(json.valueToTree(item.definition()))) throw invalid("Web UI 字段不合法或尚未规范化");
+        if(!UiJson.equivalentDefinition(item.kind(),json.valueToTree(item.definition()),json.valueToTree(normalized))) throw invalid("Web UI 字段不合法或尚未规范化");
     }
     private void validateReferences(List<Item> items,List<String> codes) {
         var names=new HashSet<String>();items.forEach(i->names.add(i.kind()+"\n"+i.name()));
@@ -188,17 +190,17 @@ public class UiAutomationSyncService {
     private String uuid(String v) {if(v==null||!v.matches("[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")) throw invalid("同步请求标识必须是 UUID"); return UUID.fromString(v).toString();}
     private Item item(String kind,String name,Object definition) {return new Item(kind,name,json.convertValue(definition,new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){}));}
     private <T> T definition(Item item,Class<T> type) {return decodeValue(encoded(item.definition()),type);}
-    private <T> T decodeValue(byte[] bytes,Class<T> type) {try{return json.readerFor(type).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(bytes);}catch(java.io.IOException e){throw invalid("Web UI 同步 JSON 不合法或包含不支持的字段");}}
+    private <T> T decodeValue(byte[] bytes,Class<T> type) {try{return json.readerFor(type).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS, DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).readValue(bytes);}catch(java.io.IOException e){throw UiJson.rejected(e, "Web UI 同步 JSON 不合法或包含不支持的字段");}}
     private byte[] encoded(Object value) {try{return json.writer().with(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).writeValueAsBytes(value);}catch(java.io.IOException e){throw new IllegalStateException("Web UI 同步序列化失败",e);}}
     private String hash(byte[] bytes) {try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));}catch(java.security.NoSuchAlgorithmException e){throw new IllegalStateException(e);}}
     private ResponseStatusException invalid(String message) {return new ResponseStatusException(HttpStatus.BAD_REQUEST,message);}
     private ResponseStatusException conflict(String message) {return new ResponseStatusException(HttpStatus.CONFLICT,message);}
     public record Item(String kind,String name,Map<String,Object> definition) { }
-    public record Profile(String browser,String baseUrl,Integer viewportWidth,Integer viewportHeight) { }
+    public record Profile(String browser,String baseUrl,@JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportWidth,@JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportHeight) { }
     public record PageObject(String selectorValue,String description) { }
-    public record Scenario(String browserProfileName,String description,String failureStrategy,Map<String,String> variables,List<Step> steps) { }
-    public record Step(String id,String type,String name,String selector,String pageObjectName,String value,String url,String expectedText,Integer timeoutMillis) { }
-    public record Schedule(String scenarioName,String functionalPlanCode,String cronExpression,String timezone,Integer timeoutSeconds,Integer maxRetryAttempts,Integer retryBackoffSeconds) { }
+    public record Scenario(String browserProfileName,String description,String failureStrategy,@JsonDeserialize(contentUsing = UiJson.Text.class) Map<String,String> variables,List<Step> steps) { }
+    public record Step(String id,String type,String name,String selector,String pageObjectName,@JsonDeserialize(using = UiJson.Text.class) String value,String url,@JsonDeserialize(using = UiJson.Text.class) String expectedText,@JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutMillis) { }
+    public record Schedule(String scenarioName,String functionalPlanCode,String cronExpression,String timezone,@JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutSeconds,Integer maxRetryAttempts,Integer retryBackoffSeconds) { }
     public record Snapshot(int version,String scope,String projectId,String actorId,String revision,List<Item> items,List<String> functionalPlanCodes,long excludedExecutions) { }
     public record Operation(String operationId,Item item) { }
     public record Request(String requestKey,String expectedUserId,String expectedRevision,List<Operation> operations) { }

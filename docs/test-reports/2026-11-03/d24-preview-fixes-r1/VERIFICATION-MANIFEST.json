@@ -1,0 +1,154 @@
+{
+  "date": "2026-11-03",
+  "commands": [
+    {
+      "command": "node --test apps/desktop/test/d24-preview.test.cjs",
+      "phase": "BEFORE",
+      "exitCode": 1,
+      "result": "0/2 pass,2 failures"
+    },
+    {
+      "command": "node --test apps/desktop/test/d24-preview.test.cjs apps/desktop/test/settings-sync.test.cjs",
+      "phase": "TARGETED",
+      "exitCode": 0,
+      "result": "34/34"
+    },
+    {
+      "command": "node --test apps/desktop/test/*.test.cjs",
+      "phase": "FINAL",
+      "exitCode": 0,
+      "result": "755 pass/1 skip;17 D24 methods included"
+    },
+    {
+      "command": "node_modules/.bin/vitest run src/test/d24ReadOperation.test.ts",
+      "exitCode": 0,
+      "result": "3/3"
+    },
+    {
+      "command": "node_modules/.bin/vitest run",
+      "phase": "INITIAL_FULL",
+      "exitCode": 1,
+      "result": "892 pass/49 timeout failures"
+    },
+    {
+      "command": "node_modules/.bin/vitest run --maxWorkers=2",
+      "phase": "FINAL_FULL",
+      "exitCode": 0,
+      "result": "941/941;original5second timeout unchanged"
+    },
+    {
+      "command": "node_modules/.bin/eslint .",
+      "exitCode": 0,
+      "result": "0 errors/2 existing Vue prop warnings"
+    },
+    {
+      "command": "./node_modules/.bin/eslint apps/desktop/app/src/read-operation.cjs apps/desktop/app/src/project-sync-ipc.cjs apps/desktop/app/src/functional-transfer.cjs apps/desktop/app/src/main.cjs apps/desktop/app/src/setup-preload.cjs apps/desktop/app/src/ui/read-operation.js apps/desktop/test/d24-preview.test.cjs apps/desktop/test/d24-preview-offscreen.cjs apps/desktop/test/api-transfer.test.cjs",
+      "exitCode": 0,
+      "result": "PASS;final targeted lint"
+    },
+    {
+      "command": "node_modules/.bin/vue-tsc --noEmit && node_modules/.bin/vite build",
+      "exitCode": 0,
+      "result": "PASS;existing chunk-size notices"
+    },
+    {
+      "command": "node apps/desktop/test/d24-preview-offscreen.cjs docs/test-reports/2026-11-03/d24-preview-fixes-r1/native-results.json",
+      "exitCode": 0,
+      "result": "4/4;5 hidden unfocused offscreen windows;0 unexpected dialogs/0 business writes"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "rawLogs": [
+    {
+      "name": "testhub-d24-before.log",
+      "sha256": "94f97bd10f8f907cf00eccee4cb7a6c0dd2ce72dab022ff615ef3ef3aa280e19"
+    },
+    {
+      "name": "testhub-d24-build.log",
+      "sha256": "e25d3503396046900eb9a100ed89ddd9f0f0f25b92b3b94542a460b8e2529c7d"
+    },
+    {
+      "name": "testhub-d24-cold-status.log",
+      "sha256": "a7487ae9b6f85ce47a222076796bc550ed13fa4c395b1f085e057b3890e9827a"
+    },
+    {
+      "name": "testhub-d24-desktop-complete.log",
+      "sha256": "d230caa28f4ad334321c9473a9ab5a6648f02ccd602b15d88fc13ef4fc493c61"
+    },
+    {
+      "name": "testhub-d24-desktop-final.log",
+      "sha256": "9240fead7fad35191733ed30460c88485ae15fcc007bc4a5e833c44d74863952"
+    },
+    {
+      "name": "testhub-d24-desktop-verified.log",
+      "sha256": "acd5d2b677a1d93ec6d791b5882ffef48a031c0b7e5d78b1c2bdda8a6c939da0"
+    },
+    {
+      "name": "testhub-d24-desktop.log",
+      "sha256": "10d6f096a3167b01acb9c766c9f33456d61bba2a52e6648d506b0981ef7eb2aa"
+    },
+    {
+      "name": "testhub-d24-focused.log",
+      "sha256": "05d72513a7b054ee93301896891103faca06be1abf7d0b90b9417d46c420d39a"
+    },
+    {
+      "name": "testhub-d24-lint-complete.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "testhub-d24-lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "testhub-d24-lint.log",
+      "sha256": "e4c232b1eac58282cfb7d513810a316a15f3ea0fd7a63a87b37be7aa44750fa6"
+    },
+    {
+      "name": "testhub-d24-native-cold-status.log",
+      "sha256": "6ffc5e2a00a7de3fd2672f7c75a4a9e9fd3d672c4f0ba1f3e09184e714556c0b"
+    },
+    {
+      "name": "testhub-d24-native-complete.log",
+      "sha256": "0d7427ad1f91638bdfc525cb276e8ab7e48caa8376e278b3cc70eb023d4b0ddc"
+    },
+    {
+      "name": "testhub-d24-native-final.log",
+      "sha256": "9506949b35c92a2ddddf478af0a5752cb6809b6ea9490e13a902e2b140b984b4"
+    },
+    {
+      "name": "testhub-d24-native-verified.log",
+      "sha256": "368d20df48d733afdd99344f08a89a4c7a2e466077183b46a5f78302876537d5"
+    },
+    {
+      "name": "testhub-d24-native.log",
+      "sha256": "0f5a5151a4e762ae10df2667443922c2173f61b9c0ca058c09bb316c0a162875"
+    },
+    {
+      "name": "testhub-d24-node-final.log",
+      "sha256": "ef2e646f230ed80db929016853ae59d4763a99f327d6efa9509236f083e91ae6"
+    },
+    {
+      "name": "testhub-d24-node.log",
+      "sha256": "f825beff046460d669baf2b55f7e4e230df824c492013d7ca3da2580ef1b2e01"
+    },
+    {
+      "name": "testhub-d24-ui.log",
+      "sha256": "11f002866c201bb02b75a9f29e9a14a1725375305721f2bc2de26ce9ee0f08b2"
+    },
+    {
+      "name": "testhub-d24-vitest-final.log",
+      "sha256": "85fd30864a904535d782ed47d457fa511d2cb625ae26dac4a02255a1c7d67ab7"
+    },
+    {
+      "name": "testhub-d24-vitest.log",
+      "sha256": "0f69612f31da3f1a0d3e0ca8f1e74ba3b956ca77a2ec0e84600038895a99b5e1"
+    }
+  ],
+  "noInstalledRuntimeReplaced": true,
+  "noBackendJarRebuild": true,
+  "noPackagedDistributionCreated": true
+}

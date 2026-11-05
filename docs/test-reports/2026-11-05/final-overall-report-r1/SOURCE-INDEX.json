@@ -1,0 +1,374 @@
+{
+  "at": "2026-11-05T04:57:53.345638+00:00",
+  "newProductExecution": false,
+  "files": [
+    {
+      "path": "docs/test-reports/2026-10-28/BUG-FIX-REGISTER.csv",
+      "sha256": "9fe3a04a490dba8008ecbf06b0d69440326dcbb2d87206c78193a3fad2234a7c"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/MODULE-RESULTS.csv",
+      "sha256": "a71c3591931b1435b4db4484792179d8b4eb024e60d9383055be5d1425ef1b6d"
+    },
+    {
+      "path": "docs/test-reports/2026-10-28/summary.json",
+      "sha256": "72d237ba2e4f0a0e9729b41384efdf66e0dbcc457bad7be17c84612559ad7294"
+    },
+    {
+      "path": "docs/test-reports/2026-10-29/direct-fixes-r1/REPORT.md",
+      "sha256": "88322561420dce3031d59799d688a7819e844363548db6de7a42838c557c5ed0"
+    },
+    {
+      "path": "docs/test-reports/2026-10-29/direct-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "ce8e02016ce4b721b93f05a1085051b2929958fcbbaf352dea412b614df2d582"
+    },
+    {
+      "path": "docs/test-reports/2026-10-29/direct-fixes-r1/summary.json",
+      "sha256": "b10658a3de17679c6bcffe262e4d9c89537bc2b964fef53ccefbb28fb58589da"
+    },
+    {
+      "path": "docs/test-reports/2026-10-29/p1-fixes-r1/REPORT.md",
+      "sha256": "60f8931c1457688d1b9b118c3e05dfac2c47f6c843d7aebe1a2cf4d5fefc8756"
+    },
+    {
+      "path": "docs/test-reports/2026-10-29/p1-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "c5a935a99c87d18bdc19c2ded20806207d0540c9ca8f246a25b4ea657a59b1e0"
+    },
+    {
+      "path": "docs/test-reports/2026-10-29/p1-fixes-r1/summary.json",
+      "sha256": "35d0a653f7d76864f92d0c6fdc79a89f299b59b69ce000d3e00509fcf833c3a0"
+    },
+    {
+      "path": "docs/test-reports/2026-10-30/PROGRESS-AND-REMAINING.md",
+      "sha256": "d86531a20b139b7830e18bfcc65dbdf07fe64050021006465b262ff30761ac71"
+    },
+    {
+      "path": "docs/test-reports/2026-10-30/p2-fixes-r1/FINAL-REPORT.md",
+      "sha256": "64c64a99a334215f37a4670ce02d0a8de214daa6f8fba77d077c5f0bb0010dd7"
+    },
+    {
+      "path": "docs/test-reports/2026-10-30/p2-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "fa3ea55938075aa8408a780b22a4161a269e437d1b276afc00f48414af9b68d6"
+    },
+    {
+      "path": "docs/test-reports/2026-10-30/p2-fixes-r1/summary.json",
+      "sha256": "934aae6c7f0a09001a5b2713bd55bc4a2125cf637aa9fac3e1fad932e4c1ac5b"
+    },
+    {
+      "path": "docs/test-reports/2026-10-30/p2-round2-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "986c94cb112b30cf57bd0a2c8b403306dd5f4cd0e73f1816e218d28d0594ef19"
+    },
+    {
+      "path": "docs/test-reports/2026-10-30/p2-round2-fixes-r1/FINAL-REPORT.md",
+      "sha256": "f8acc272d730dce99718993526c9851bafceeb24c6892f1b55facf36c40f5e30"
+    },
+    {
+      "path": "docs/test-reports/2026-10-30/p2-round2-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "6f4e48ea582abfc312b3217f5a65ef5dd629f4d08b9499c223eba93876fec7c8"
+    },
+    {
+      "path": "docs/test-reports/2026-10-30/p2-round2-fixes-r1/summary.json",
+      "sha256": "56a754dd8176315aa81df44ffcf953f664f3bad3be2b30319052f829685f4f80"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/README.md",
+      "sha256": "244d61fcd172c769b1e4f177f00a9d5b1bb492cd6ea652d3ac85abf90e1a0d55"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-api-automation-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "b22c3244fdbcfbb9c2b85033104a6a015e2aff409d96ca33acae830583a42f30"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-mock-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "f98d59e94bce620922d33e63b90eb5437364f37c88d61e238084667ef038cc23"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-performance-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "dd497b6fcbdd73a72a50883d0b11061bdbf42625f7d3bfc660f573108b58a808"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/d16-web-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "42bf7c5dd0a747d4d967e1e293956e7e35b0607aacd36b041f329d4068742c55"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/README.md",
+      "sha256": "8288b51f242f13831016edff53995de7a3fd311ffeffb68e86aa8eab152ebef2"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d08-d07-plan-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "0db02926de9768b2f16aa79c1120a5f6712717aff5c94393000f559151b6549b"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/ARTIFACT-HASHES.json",
+      "sha256": "dc00eb779998d9dde5e2f42bd6920e275e3aef5d5f381fc1ba9795405088792c"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/FINAL-REPORT.md",
+      "sha256": "85694858a3f064c3e9661ec7cda887a9dc506dc5115329e729535a682492761a"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/RESULTS.json",
+      "sha256": "414ab3088180241b3737943fbad643da29a1ad40d9cb72a870b8923241f58f20"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d08-d07-plan-mysql-r2/REVIEW-APPROVAL.json",
+      "sha256": "5f79aef3ea32caacadf682b8e41efd7d50614c5c8b794274a243211f04f2a944"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-overall-summary-r1/ARTIFACT-HASHES.json",
+      "sha256": "0aa20b31dbd3117bb001e965d3b70a999d38fd1cec39b82a533bf5f7754a0f76"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-overall-summary-r1/OVERALL-TEST-REPORT.md",
+      "sha256": "e63335d946dac8c1695dbc737418133b6e9b70d3bf2daec8e5ed55a4a699e5b9"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-overall-summary-r1/REVIEW-APPROVAL.json",
+      "sha256": "20f87680ecde74e0c9a024d372cb7dd87031fb438090ccd1eed7c3040f5f7fba"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d16-overall-summary-r1/summary.json",
+      "sha256": "d56e1dfb09c35a525dffcbb89da25bbc81b702e8adaf593b9710bc30347b2f41"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "cdac14454baf29665896282a1ddbeb73962a9075fbee827a73c90c55f74906e4"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/FINAL-REPORT.md",
+      "sha256": "fdea7e6bb21d1891939ca42a96004b1e1195e7b4908004422e44e3eee7c8218d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/RESULTS.json",
+      "sha256": "b225dcf4750775a64e80617da8cd5de186e1c949b9e96af93f76f1b4292752a1"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d19-mobile-locator-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "0e8c274d94c9b9a6c6dc376da5e257fe322d26a19ed23a0a3ece18248fc00781"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "70caa05daebc71d9e11137cf1242d9f880208f7bf4fd332657967c667b698550"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/FINAL-REPORT.md",
+      "sha256": "06123389f9a0c0173f56e5414b77991a1c2ed9dd9b100355750f9e196fbc13eb"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/RESULTS.json",
+      "sha256": "80bfb694ba420f8d9ee34976ddc9fd35304c42f1259e27147c6678edd7b6858b"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/d24-preview-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "91423731920061f49b621fe7eb819c7c4e145a1844297e03a5294e8c491102c9"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "ff2d2f1df5dbd26e273c3f0dab8ba206bd4a0e032afa9d8b85b515aa150fb7b8"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/FINAL-REPORT.md",
+      "sha256": "2675c0acd7c9d2e6a6cc73939decda12349bdd4aff657c7fd02a592d370d79ee"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/RESULTS.json",
+      "sha256": "0878eb6123633b4fc51831e129bc8904d98b3620dff3110e9e04cbecc3f1fb24"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d06-account-search-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "21807f4af073fb04f8b8be0100df4682bcab0af1d6fe7956c6d3da6622c9f4de"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/ARTIFACT-HASHES.json",
+      "sha256": "ce4a90a28c59b54a09eb0f6435a7ca93b99f19705326c11a7a681e1a823976bd"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/FINAL-REPORT.md",
+      "sha256": "c4d7e2ba2393c1fd63276aa085b781c6051a9fed6deb10a7eb44c596e8b2840e"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/RESULTS.json",
+      "sha256": "47a11c47e7321bf49ffbc88768be9988f7cd9de7d5f12f8660f2dba50b917a3e"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d21-report-filter-fixes-r1/REVIEW-APPROVAL.json",
+      "sha256": "08400708ae511537417337c2590441d32ddacf4f8b27455ae440df713a437c1d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/ARTIFACT-HASHES.json",
+      "sha256": "fbe4ee3c84637baed3e403081058a9299167eb94b5e622a7bbc145707b80bd9f"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/BUGS.json",
+      "sha256": "9b832288919fcf5eda4f6ee330afd1789de17c98c491c368cd744ab25bc8cde0"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/FINAL-REPORT.md",
+      "sha256": "ebfed0724175ad10cf6042a6585682bc01346c8ef511ec6d6e89a13707acfdc3"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/RESULTS.json",
+      "sha256": "eb184323348a59500ef0f9387ba1a32b28170276921458bc886b97c4bd0398ff"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/REVIEW-APPROVAL.json",
+      "sha256": "4bbbd779dffee4021fe24d4e3697e7337318f53a80a5b606b22d412d4e37e197"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d26-baseline-r1/ARTIFACT-HASHES.json",
+      "sha256": "72b1de2bf6d9c4e1974922a366dd2db1c61be5f52ab4e185dc2295b09153a23a"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d26-baseline-r1/attempt-1/SUMMARY.json",
+      "sha256": "470dac75f014774a6cd103552c2d4fd9697d31f3d6dbed49d93bcae9f0da184d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d26-baseline-r2/ARTIFACT-HASHES.json",
+      "sha256": "a5163b08557dca244cea68df57866fdd5db3e9e7fff432c07d0ee133c2dbd40c"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d26-baseline-r2/STATUS.json",
+      "sha256": "5bc9947ba563b71dbdc0434d53fca656cd7316cc92e7413003d531a3dc8cfa18"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/README.md",
+      "sha256": "4906ca64cc359381034fa1a8bac1d6ebb9b7ea101ff24b1b8cc8f9300af0e03b"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/d26-baseline-r3/ARTIFACT-HASHES.json",
+      "sha256": "0fa74e39291be007298c230ee011432cb133d561cc490240e2efe16aa48435be"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/d26-baseline-r3/CLEANUP.json",
+      "sha256": "a70c296a777200a7fc0847dcbbf830440ac058e1e9a940a1792f6e3253bbc2bb"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/d26-baseline-r3/STATUS.json",
+      "sha256": "19d67ca1b9403b6dffc42cd36983d93cbe0539075564c44dc48550c2675b7a6a"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/ENVIRONMENT-BLOCKERS.json",
+      "sha256": "e957d72701b0ab230744231872b3f07339e22284f4510f23614c35545b1afa00"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/ARTIFACT-HASHES.json",
+      "sha256": "03b16dbdd36ceef048d16a3a2fa98358681d752bc8300aff40d51e3ddc2ace66"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/ASSET-ISSUES.json",
+      "sha256": "0c8311d699590ec6eed1609b63557bf93a6b31bef116e5ebd0bbf021d76d6ee3"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/AUDIT-RESULTS.json",
+      "sha256": "5479d96a3917f4b13a74ecbb1e5b0ddf1e09e45a73d20e8053cd90af54de883b"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/ENVIRONMENT-BLOCKERS.json",
+      "sha256": "e957d72701b0ab230744231872b3f07339e22284f4510f23614c35545b1afa00"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/FINAL-REPORT.md",
+      "sha256": "db72485d7f26199b78ec111bffad60a45fe9f775c235910ab1ddffff8dbe5fed"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/OBSERVATION-STATUS.json",
+      "sha256": "b2361d809a9a0b94c072d13d03ae65421673558fe9e89c2cac8a5177663288d7"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/REVIEW-APPROVAL.json",
+      "sha256": "c122cdd537d5a967f8393c5fa62e3edb006dba82399abf1250ffb247a11a0b75"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/SKIPPED-WORK.json",
+      "sha256": "88401672dcd33ec3abbba94cd320e221740de8634e8814e31cecd4116f325d51"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/SOURCE-INDEX.json",
+      "sha256": "1e2e174b30074b9ff7e462f2221ef95b652efcfa634bd7599f1cc1054b788eda"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/SUMMARY.json",
+      "sha256": "7a1b19a4b0bf2fdae7295994a1bc3610fc0cec1e378ba585b8884afee3408e40"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/nonblocking-closeout-r1/UNCONFIRMED-RISK.json",
+      "sha256": "0124f934bbc71e61718ee1675960fc43c228ce834e94b1773bf557c66448a5a9"
+    },
+    {
+      "path": "output/qa-20261023/module-01-auth/TEST-REPORT.md",
+      "sha256": "c5a578343225479e6dfbffb2317ba33a4b72e2a7bfb25514f3893aba8f92e4e0"
+    },
+    {
+      "path": "output/qa-20261023/module-02-dashboard/TEST-REPORT.md",
+      "sha256": "d08098a7f8e14c1923e2b177c2266c7fac7f193c77077fce148a5a5e9f8e9698"
+    },
+    {
+      "path": "output/qa-20261023/module-03a-projects/TEST-REPORT.md",
+      "sha256": "e1abddc97cd7cd1a292c4b85c8dae9003e316c2bfd7e282a8c40be0228eaa480"
+    },
+    {
+      "path": "output/qa-20261023/module-03b-environments/TEST-REPORT.md",
+      "sha256": "fbe8896d44500082ae07e570d96aa42ccfc0bd4f4b6b34bd4cca5c601ba59b25"
+    },
+    {
+      "path": "output/qa-20261024/module-03c-files-audit/TEST-REPORT.md",
+      "sha256": "a847081c49937d4f789628535840957a08cddb551eeef9438ddff14da4e594b6"
+    },
+    {
+      "path": "output/qa-20261024/module-03d-accounts-config/regression-r1/TEST-REPORT.md",
+      "sha256": "e2d1f893e5273c0ffb49ed76b3d9fc88f2fbafd0a2b00382ed624ce69971f314"
+    },
+    {
+      "path": "output/qa-20261024/module-04-functional-assets/regression-r1/TEST-REPORT.md",
+      "sha256": "a15771e03e28a6872cd2093c8ddabae1bc5e4510092cd7ab8904483d28a988b2"
+    },
+    {
+      "path": "output/qa-20261024/module-05-plans-delivery/regression-r1/TEST-REPORT.md",
+      "sha256": "81621afe3f65223213b7288fc3409dd80314b7c4e371f1554183b0e3dd35fa9e"
+    },
+    {
+      "path": "output/qa-20261024/module-06-api-design/regression-r1/TEST-REPORT.md",
+      "sha256": "c243f072bbe4ba85a911b94537a43c6a2496fc58fab4cea08b028cfd4c054eb4"
+    },
+    {
+      "path": "output/qa-20261024/module-07-api-debug/regression-r1/TEST-REPORT.md",
+      "sha256": "f20af839255f52b96d78b051ce1906ca83d81fcd051f9d221b7ec62021d0c547"
+    },
+    {
+      "path": "output/qa-20261026/module-08-api-automation/regression-r1/TEST-REPORT.md",
+      "sha256": "0c98e17dc617292321cb67833432b297c9ebac54be744fad1055b1f4c0cb0961"
+    },
+    {
+      "path": "output/qa-20261026/module-09-mock-regression/TEST-REPORT.md",
+      "sha256": "d77853302ea2b751fa4dcaa0adad60bf9796f310a48bd98bf8280649491a3900"
+    },
+    {
+      "path": "output/qa-20261026/module-10-performance-regression/TEST-REPORT.md",
+      "sha256": "2f867831a2bab797ab35200ec104bf480e40a2595e4682112b6797afc26aee47"
+    },
+    {
+      "path": "output/qa-20261027/module-11-web-ui-regression/TEST-REPORT.md",
+      "sha256": "96f0d6ab897e4d296f1165e502185c96329b01f9d661806b84f65ac18f54d359"
+    },
+    {
+      "path": "output/qa-20261027/module-12-mobile-regression/TEST-REPORT.md",
+      "sha256": "5b01855fed1821a0462cb06cab7bd125ba503a77889c311eb5f1c65283151b29"
+    },
+    {
+      "path": "output/qa-20261027/module-13-quality-tasks-regression/TEST-REPORT.md",
+      "sha256": "cb363a4bb63585cea8527f1f7fdc2d42330c3bfe80b1e688cff50f167a118936"
+    },
+    {
+      "path": "output/qa-20261027/module-14-notifications-extensions-operations-regression/TEST-REPORT.md",
+      "sha256": "a6e76dec9fc5073e814063841917de8c46b9f7d8eb2e28e90833d62c9cbe2658"
+    },
+    {
+      "path": "output/qa-20261028/module-15-desktop-workspace-cross-end/TEST-REPORT.md",
+      "sha256": "bd5f3cc27d2aad387ca19c949d772d3c4e8b210b7bb3cda25655fc8061750022"
+    },
+    {
+      "path": "output/qa-20261028/module-16-cross-regression-fixed/TEST-REPORT.md",
+      "sha256": "bf4f912961632fc7b1a6d68fbece8a8ad9b078d6872033fbaba839e3d090f4f6"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "backend": {
+    "total": 10,
+    "passed": 4,
+    "failed": 6,
+    "errors": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "name": "io.testhub.platform.P2D19MobileLocatorTests",
+        "total": 10,
+        "failed": 6,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "page": {
+    "methods": 4,
+    "passed": 1,
+    "failed": 3
+  },
+  "runner": {
+    "methods": 4,
+    "passed": 2,
+    "failed": 2
+  },
+  "caveat": "Loops stopped at first failure; later variants were not all dynamically demonstrated. UI options TypeError occurred in test code. Runner factory defaults and event-code assertion corrected as fixture maintenance."
+}

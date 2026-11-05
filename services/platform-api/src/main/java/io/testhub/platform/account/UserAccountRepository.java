@@ -81,13 +81,13 @@ public class UserAccountRepository {
     }
 
     public List<ManagedAccount> findPage(String keyword, int offset, int limit) {
-        String search = keyword == null || keyword.isBlank() ? null : "%" + keyword.trim().toLowerCase() + "%";
+        String search = literalSearchPattern(keyword);
         return jdbc.sql("""
                 SELECT id, account, display_name, email, phone, enabled, created_at, updated_at
                 FROM user_account
                 WHERE deleted_at IS NULL
-                  AND (:keyword IS NULL OR LOWER(account) LIKE :keyword OR LOWER(display_name) LIKE :keyword
-                       OR LOWER(email) LIKE :keyword OR LOWER(COALESCE(phone, '')) LIKE :keyword)
+                  AND (:keyword IS NULL OR LOWER(account) LIKE :keyword ESCAPE '!' OR LOWER(display_name) LIKE :keyword ESCAPE '!'
+                       OR LOWER(email) LIKE :keyword ESCAPE '!' OR LOWER(COALESCE(phone, '')) LIKE :keyword ESCAPE '!')
                 ORDER BY created_at DESC, account
                 LIMIT :limit OFFSET :offset
                 """)
@@ -102,17 +102,23 @@ public class UserAccountRepository {
     }
 
     public long count(String keyword) {
-        String search = keyword == null || keyword.isBlank() ? null : "%" + keyword.trim().toLowerCase() + "%";
+        String search = literalSearchPattern(keyword);
         return jdbc.sql("""
                 SELECT COUNT(*)
                 FROM user_account
                 WHERE deleted_at IS NULL
-                  AND (:keyword IS NULL OR LOWER(account) LIKE :keyword OR LOWER(display_name) LIKE :keyword
-                       OR LOWER(email) LIKE :keyword OR LOWER(COALESCE(phone, '')) LIKE :keyword)
+                  AND (:keyword IS NULL OR LOWER(account) LIKE :keyword ESCAPE '!' OR LOWER(display_name) LIKE :keyword ESCAPE '!'
+                       OR LOWER(email) LIKE :keyword ESCAPE '!' OR LOWER(COALESCE(phone, '')) LIKE :keyword ESCAPE '!')
                 """)
                 .param("keyword", search)
                 .query(Long.class)
                 .single();
+    }
+
+    private String literalSearchPattern(String keyword) {
+        if (keyword == null || keyword.isBlank()) return null;
+        // An explicit non-backslash escape keeps literal backslashes independent of MySQL sql_mode.
+        return "%" + keyword.trim().toLowerCase().replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
     }
 
     public List<AccountOption> findEnabledOptions() {

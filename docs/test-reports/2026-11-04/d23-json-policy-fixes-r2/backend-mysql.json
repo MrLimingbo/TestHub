@@ -1,0 +1,409 @@
+{
+  "total": 65,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": 65,
+  "suiteCount": 7,
+  "exitCode": 0,
+  "suites": [
+    {
+      "name": "io.testhub.platform.P2D23AdapterConflictTests",
+      "total": 11,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "C11_concurrentRenamesPreserveTheLosingRecord",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C02_duplicateCreateWithOrWithoutUnknownFieldsReturns409",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C03_conflictingRenamePreservesBothRowsAndReplacementSecret",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C06_differentTypesMayUseTheSameName",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C05_freeRenameAndConfigurationReplacementStillWork",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C10_concurrentCreatesHaveOneWinnerAndOneAudit",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C01_freeCombinationCreatesNormally",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C08_conflictEnvelopeIsActionableWithoutEchoingInputOrSql",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C07_existingTrimNormalizationStillProduces409",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C09_authenticationAndCsrfStillPrecedeConflictHandling",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "C04_sameRecordCanKeepItsNameAndCiphertext",
+          "status": "PASS",
+          "d23Formal": true
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.P2D23JsonPolicyTests",
+      "total": 21,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "B13_ordinaryUserCannotCreateTrustAdaptersOrPackages",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B06_packageInstallAndUpgradeIgnoreOuterFields",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B03_adapterCreateIgnoresOuterFields",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B09_knownBusinessRulesStillFail",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B11_dynamicMapValidationIsNotWeakened",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B08_wrongKnownStringTypesStillFail",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B02_templateUpdateIgnoresUnknownFields",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B05_signingKeyUnknownFieldsCannotChangeTrustOrCreator",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B12_forgedScopeAndActorCannotOverrideServerValues",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B15_loginAndCsrfChecksRemainRequired",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B14_viewerCannotForgeTemplateWriterRole",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B19_outerFieldsCannotBypassOriginalSignature",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B01_templateCreateIgnoresScalarObjectAndArray",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B20_openApiDescribesTheFourDtosAndContentBoundaries",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B18_manifestOriginalCharactersAndInnerProjectionArePreserved",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B10_dynamicConfigurationKeysAreNotOuterUnknownFields",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B16_transferRejectsUnknownAtEveryPayloadLevel",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "X01_approvedDuplicateRuleReturns409WithoutWrites",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "B04_adapterUpdatePreservesEncryptedConfiguration",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B17_syncRejectsUnknownAtEveryPayloadLevel",
+          "status": "PASS",
+          "d23Formal": true
+        },
+        {
+          "name": "B07_misspelledMissingNullAndBlankRequiredFieldsStillFail",
+          "status": "PASS",
+          "d23Formal": true
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.ExtensionRegistryFlowTests",
+      "total": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "verifiesSignedPluginPackagesAndKeepsCredentialsEncrypted",
+          "status": "PASS",
+          "d23Formal": false
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.ExtensionsOperationsFlowTests",
+      "total": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "exactWhitespaceSignedManifestInstallsAndChecksumMatchesOriginalCharacters",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "administratorWritesRequireCsrfAndAuditFailureRollsBackAdapterChanges",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "adapterMetadataEditPreservesEncryptedConfigAndReplacementDoesNotExposePlaintext",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "revokedSignerBlocksNewInstallsWithoutChangingRegisteredPluginStatus",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "runtimeProjectionReflectsProfileAndRedactsStorageFailures",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "nullOrIncompleteConfigurationCannotCreateOrChangeAdapterType",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "largeSemanticVersionsUpgradeWithoutIntegerOverflowAndRemainDisabled",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "ordinaryRegisteredUsersReadProjectionsButCannotManageGlobalExtensionsOrOperations",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "concurrentMetadataEditCannotOverwriteAReplacementSecret",
+          "status": "PASS",
+          "d23Formal": false
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.NotificationTransferFlowTests",
+      "total": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "concurrentUncertainRetryKeepsSameReceiptAndDoesNotDuplicateOrOverwrite",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "actualHttpsTransportReceivesValidSignatureAndRenderedPayloadThenRetriesSameDelivery",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "strictUnknownFieldsInvalidCountsAndAuditFailureNeverWriteOrExposeSecrets",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "definitionsMigrateWithNewIdentityDisabledWithoutTargetsSecretsQueuesOrSourceChanges",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "oversizedRenderedSubjectFailsVisiblyInsteadOfSilentlyDroppingNotification",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "projectReadersCannotWriteTransferOrRetryAndHttpRequiresCsrf",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "lateNameConflictRollsBackEarlierTemplatesAndReceipt",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "interruptedDesktopDispatchBecomesManualFailureAndExistingPendingQueueIsNotReplayedByRecovery",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "renderedPayloadSignedDispatchAndRetryUseOriginalSnapshotWithoutExposingSecret",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "editedWebhookRetainsSecretWhileTemplateChannelChangesClearItAndPolicyIsStillEnforced",
+          "status": "PASS",
+          "d23Formal": false
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.NotificationSyncFlowTests",
+      "total": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "auditFailureRollsBackUpdatesNewTemplatesAndReceipt",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "snapshotByteLimitAndThousandTemplateLimitRejectWholeWrites",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "concurrentRetriesAndLostResponseReplayReturnOriginalReceiptWithoutDuplicateOrLaterOverwrite",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "writerScopeActorAndCsrfRequiredBeforeReadingOrApplyingEvenOldReceipts",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "channelAndCaseDifferencesRejectWholeBatchAndPreserveLocalDelivery",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "duplicateExistingNamesAreReportedWithoutPickingAnArbitraryRow",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "updatesPreserveIdentityDeliveryConfigurationCiphertextEnabledAndQueueHistory",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "existingCrudAndDeletionRecreationInvalidateWholeBatchWithoutPartialWrites",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "strictJsonInvalidDefinitionsAndDuplicateOperationsCannotWrite",
+          "status": "PASS",
+          "d23Formal": false
+        }
+      ]
+    },
+    {
+      "name": "io.testhub.platform.NotificationOperationsFixesFlowTests",
+      "total": 4,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "methods": [
+        {
+          "name": "aMissingLazyBucketRemainsReady",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "readinessRecoversWhenStorageReturns",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "unavailableStorageFailsReadinessWithoutExposingDetailsOrFailingLiveness",
+          "status": "PASS",
+          "d23Formal": false
+        },
+        {
+          "name": "anExistingBucketRemainsReady",
+          "status": "PASS",
+          "d23Formal": false
+        }
+      ]
+    }
+  ],
+  "duplicateDiagnostic": {
+    "writesUnchanged": true,
+    "withoutUnknownStatus": 409,
+    "withUnknownStatus": 409
+  },
+  "concurrentRounds": {
+    "create": 3,
+    "update": 3
+  },
+  "ownedInfrastructureCleanupConfirmed": true
+}

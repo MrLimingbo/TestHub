@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-04",
+  "sources": [
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r1/FOLLOWUP-RULE-APPROVAL.json",
+      "sha256": "b442c45bc82ae60f250758fd3b171009193793211c238d2940208bee02856d91"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r1/FINAL-REPORT.md",
+      "sha256": "c325bfb564be143e6a368e15dcaeac0679d45af7d489661c25a86a451bb19a6d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r1/BUGS.json",
+      "sha256": "8174ae5ac621fd4af95aaa5218bb355dba00fb9c293ab741e5b56070c5e5bfc7"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/RULE-AND-ACCEPTANCE.md",
+      "sha256": "a613fbc06bfe6dfffd90bbc671d09ec5dc1b2763c1266b271844a04ed9e95cc3"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/TEST-CASES.json",
+      "sha256": "21633b2fe6494763fc9da19b25dd698fb64c7d77e78435c54f233b09bcaaa6ed"
+    },
+    {
+      "path": "docs/test-reports/2026-11-04/d23-json-policy-fixes-r2/TEST-PLAN.md",
+      "sha256": "e6257e0710e543e0e5a22712e216d1c240b0f0bbdb9e7ca52dc179ec0b9f79ea"
+    },
+    {
+      "path": "docs/notification-extension-json-contract.md",
+      "sha256": "baf5f62c0a6d8caaf5e4e1303e1e5836f53406a71607bf94ebbe9c8d133681c7"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryService.java",
+      "sha256": "511c0f62ec00ea121227d1100d190111693b272bb7c7b48d5cc290843bcef6eb"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "sha256": "88a6e04c000e6cdc98b7f487dcd837efe42a9bf4358867fee81a8973b03a466f"
+    },
+    {
+      "path": "src/test/d23AdapterConflict.test.ts",
+      "sha256": "5871e332d2b4cf7b543ad261c93514f6a474a6335c4d13cf3396be9bbb259b8b"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D23AdapterConflictTests.java",
+      "sha256": "7ae048d6f9cb1f8738856773930e752560d7f4feb7f20df3b07d07b418cbbefc"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryRepository.java",
+      "sha256": "43cbc486ae4b2b551102f4c885b099b0568732a72484470ce547fc51e5468fee"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/shared/api/ApiExceptionHandler.java",
+      "sha256": "ea3ca8600b91bd4c5652d5584df5e84e55709227314ae4304ad632476c605060"
+    },
+    {
+      "path": "services/platform-api/src/main/resources/db/migration/V47__extension_registry_and_enterprise_adapter_foundation.sql",
+      "sha256": "44aef548f40028d1581c7d1e326a0ab65f60c8361d190a5165582398faac1c72"
+    }
+  ],
+  "newFormalCases": 12,
+  "priorFormalCasesReexecuted": 20,
+  "totalFormalCases": 32,
+  "sourceInputs": 2,
+  "extractionStatus": "2_EXTRACTED_0_WARNINGS",
+  "backendEvidence": "MockMvc,actual MVC/security/services/database;new class owns committed per-class isolated data for concurrency;old class rollback fixtures",
+  "frontendEvidence": "Vue/Arco controlled409 component recovery,one formal method covers create and edit",
+  "concurrentRoundsPerDatabase": {
+    "create": 3,
+    "update": 3
+  },
+  "globalObjectMapperChanged": false,
+  "databaseConstraintChanged": false,
+  "shutdownRiskRechecked": false,
+  "installedDesktopUpgradeExecuted": false
+}

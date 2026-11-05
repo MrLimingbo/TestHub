@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-03",
+  "ownedContainersNetworkVolumesRemoved": true,
+  "ownedInfrastructureCleanupEvidence": "Successful wrapper exit (0) plus cleanup messages",
+  "ownedWorkspaceFilesRemoved": true,
+  "remainingMysqlQaDirectories": [],
+  "rawLogRemoved": true,
+  "rawLogSha256": "c9b9c276bdbda7bac4631a27d531c99ffd6dc6d97ed19c99507a796e05141625",
+  "capturedSuiteRawSurefireFilesRemoved": 12,
+  "capturedSuiteRawSurefireNames": [
+    "TEST-io.testhub.platform.FunctionalExecutionLifecycleTests.xml",
+    "io.testhub.platform.FunctionalExecutionLifecycleTests.txt",
+    "TEST-io.testhub.platform.FunctionalDefectExecutionSyncFlowTests.xml",
+    "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests.txt",
+    "TEST-io.testhub.platform.FunctionalHistorySyncFlowTests.xml",
+    "io.testhub.platform.FunctionalHistorySyncFlowTests.txt",
+    "TEST-io.testhub.platform.P2D08D07PlanTests.xml",
+    "io.testhub.platform.P2D08D07PlanTests.txt",
+    "TEST-io.testhub.platform.FunctionalTransferFlowTests.xml",
+    "io.testhub.platform.FunctionalTransferFlowTests.txt",
+    "TEST-io.testhub.platform.FunctionalExecutionFlowTests.xml",
+    "io.testhub.platform.FunctionalExecutionFlowTests.txt"
+  ],
+  "onlyCurrentRecordedFilesRemoved": true,
+  "sharedServicesTouched": false,
+  "userWorkspacesTouched": false,
+  "installedRuntimeReplaced": false,
+  "noNextModuleExecuted": true
+}

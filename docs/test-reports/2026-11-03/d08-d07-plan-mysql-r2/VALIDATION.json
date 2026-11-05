@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-03",
+  "checks": {
+    "mysqlSuites": 6,
+    "mysqlTestsPassed": 98,
+    "v113AppliedSchemas": 6,
+    "backendMethodsReexecuted": 10,
+    "newTestMethods": 0,
+    "sourceHashesVerified": 29,
+    "existingSourceFilesUnchangedThisRound": 1418,
+    "r1FrozenArtifactsUnchanged": 18,
+    "environmentBlockersDeferred": 12,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "observationCounts": [
+      39,
+      2,
+      6
+    ],
+    "localReportLinksChecked": 52,
+    "diffCheck": "PASS",
+    "rawSurefireFilesRemoved": 12,
+    "currentMysqlQaDirectoriesRemaining": 0
+  },
+  "errors": [],
+  "validationIsNotAdditionalProductTests": true
+}

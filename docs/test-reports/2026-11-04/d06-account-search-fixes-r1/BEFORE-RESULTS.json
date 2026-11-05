@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-04",
+  "validRedRun": {
+    "total": 12,
+    "passed": 7,
+    "failed": 5,
+    "errors": 0,
+    "skipped": 0,
+    "exitCode": 1,
+    "failures": [
+      {
+        "method": "B02_percentIsLiteralAcrossFields",
+        "assertion": "total must use literal matching ==> expected: <4> but was: <6>"
+      },
+      {
+        "method": "B03_underscoreIsLiteralAcrossFields",
+        "assertion": "total must use literal matching ==> expected: <4> but was: <6>"
+      },
+      {
+        "method": "B04_backslashAndTrailingBackslash",
+        "assertion": "total must use literal matching ==> expected: <4> but was: <0>"
+      },
+      {
+        "method": "B05_combinedRepeatedAndEscapeCharacter",
+        "assertion": "total must use literal matching ==> expected: <4> but was: <5>"
+      },
+      {
+        "method": "B11_explicitEscapeAcrossDatabaseModesAndLongInput",
+        "assertion": "total must use literal matching ==> expected: <4> but was: <0>"
+      }
+    ],
+    "rawLogSha256": "948f0f49cd5c4289b303e523b5734e4f730f2c477c806c107e6fc795fca99c7e"
+  },
+  "observation": "OBS-03D-E007",
+  "notFiveProductBugs": true,
+  "remainingAssertionsAfterFirstFailureNotInferred": true,
+  "frontendIndependentRedNotRetained": true,
+  "fixturePreparationIssues": [
+    {
+      "kind": "compile",
+      "detail": "Java var复合声明不合法，拆为独立声明后运行；不是产品失败。"
+    },
+    {
+      "kind": "PAT authentication",
+      "detail": "会话注入ApiTokenPrincipal被原过滤器清除并401；改为真实有效Bearer后原实现403验证通过，不是生产权限修复。"
+    },
+    {
+      "kind": "component events",
+      "detail": "改用真实DOM输入/搜索/清除，避免组件未声明事件警告。"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 package io.testhub.platform.uiautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,7 +75,7 @@ public class UiAutomationTransferService {
                     .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readValue(body);
             if (request == null || request.snapshot() == null) throw invalid("Web UI 迁移资料不能为空");
             return request;
-        } catch (java.io.IOException error) { throw invalid("Web UI 迁移 JSON 格式不合法或包含不支持的字段"); }
+        } catch (java.io.IOException error) { throw UiJson.rejected(error, "Web UI 迁移 JSON 格式不合法或包含不支持的字段"); }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -196,10 +198,10 @@ public class UiAutomationTransferService {
     private ResponseStatusException invalid(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, message); }
     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }
     public record Snapshot(int version, String sourceProjectId, List<Profile> profiles, List<PageObject> pageObjects, List<Scenario> scenarios, List<Schedule> schedules) { }
-    public record Profile(String id, String name, String browser, String baseUrl, int viewportWidth, int viewportHeight, boolean enabled, int version) { }
+    public record Profile(String id, String name, String browser, String baseUrl, @JsonDeserialize(using = UiJson.PrimitiveInteger.class) int viewportWidth, @JsonDeserialize(using = UiJson.PrimitiveInteger.class) int viewportHeight, boolean enabled, int version) { }
     public record PageObject(String id, String name, String selectorValue, String description) { }
-    public record Scenario(String id, String browserProfileId, String name, String description, String failureStrategy, int version, Map<String, String> variables, List<UiAutomationStep> steps) { }
-    public record Schedule(String id, String scenarioId, String name, String cronExpression, String timezone, int timeoutSeconds, int maxRetryAttempts, int retryBackoffSeconds, boolean enabled, String functionalPlanCode) { }
+    public record Scenario(String id, String browserProfileId, String name, String description, String failureStrategy, int version, @JsonDeserialize(contentUsing = UiJson.Text.class) Map<String, String> variables, @JsonDeserialize(contentUsing = UiJson.StepInput.class) List<UiAutomationStep> steps) { }
+    public record Schedule(String id, String scenarioId, String name, String cronExpression, String timezone, @JsonDeserialize(using = UiJson.PrimitiveInteger.class) int timeoutSeconds, int maxRetryAttempts, int retryBackoffSeconds, boolean enabled, String functionalPlanCode) { }
     public record ImportRequest(String requestKey, String expectedUserId, Snapshot snapshot) { }
     public record Receipt(String id, int profiles, int pageObjects, int scenarios, int steps, int schedules) { }
 }

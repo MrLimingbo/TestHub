@@ -1,0 +1,99 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    "duplicates: near-duplicate cases TC-D16WEB-01 and TC-D16WEB-02 (similarity 0.911); consolidate unless coverage targets differ",
+    "duplicates: near-duplicate cases TC-D16WEB-03 and TC-D16WEB-04 (similarity 0.860); consolidate unless coverage targets differ"
+  ],
+  "near_duplicates": [
+    {
+      "left": "TC-D16WEB-01",
+      "right": "TC-D16WEB-02",
+      "similarity": 0.911
+    },
+    {
+      "left": "TC-D16WEB-03",
+      "right": "TC-D16WEB-04",
+      "similarity": 0.86
+    }
+  ],
+  "quality": {
+    "case_quality_score": 99.89,
+    "case_quality_gate": "pass",
+    "case_quality_dimensions": {
+      "traceability": 100.0,
+      "evidence_grounding": 100.0,
+      "oracle_specificity": 100.0,
+      "design_completeness": 100.0,
+      "uniqueness": 99.29
+    },
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "specification_review_penalty": 0,
+    "scoring_note": "Case quality measures generated-case integrity; specification readiness separately measures documented coverage and unresolved document findings."
+  },
+  "stats": {
+    "case_count": 56,
+    "requirement_count": 7,
+    "covered_requirement_count": 7,
+    "requirement_coverage_percent": 100.0,
+    "acceptance_criteria_count": 56,
+    "covered_acceptance_criteria_count": 56,
+    "acceptance_criteria_coverage_percent": 100.0,
+    "coverage_item_count": 56,
+    "covered_coverage_item_count": 56,
+    "design_coverage_percent": 100.0,
+    "positive_count": 22,
+    "negative_count": 34,
+    "polarity_counts": {
+      "negative": 34,
+      "positive": 22
+    },
+    "priority_counts": {
+      "P2": 56
+    },
+    "type_counts": {
+      "boundary": 5,
+      "compatibility": 9,
+      "negative": 24,
+      "permission": 1,
+      "positive": 9,
+      "recovery": 1,
+      "state": 3,
+      "usability": 4
+    },
+    "technique_counts": {
+      "acceptance-criteria": 8,
+      "boundary-value-2": 5,
+      "compatibility-configuration": 9,
+      "data-lifecycle": 10,
+      "equivalence-partitioning": 19,
+      "recovery-idempotency": 1,
+      "role-permission": 1,
+      "state-transition": 3
+    },
+    "module_counts": {
+      "Web UI自动化 / D16类型规则": 56
+    },
+    "document_review_count": 0,
+    "document_review_type_counts": {},
+    "document_review_severity_counts": {},
+    "evidence_bundle_verified": true,
+    "evidence_reference_count": 406,
+    "unique_evidence_reference_count": 4,
+    "invalid_evidence_reference_count": 0,
+    "verified_evidence_quote_count": 56,
+    "invalid_evidence_quote_count": 0,
+    "visual_observation_count": 0,
+    "confirmed_visual_evidence_count": 0,
+    "exact_duplicate_group_count": 0,
+    "near_duplicate_pair_count": 2,
+    "untraceable_case_count": 0,
+    "case_quality_score": 99.89,
+    "case_quality_gate": "pass",
+    "specification_readiness_score": 100.0,
+    "specification_readiness_gate": "ready",
+    "error_count": 0,
+    "warning_count": 2
+  }
+}

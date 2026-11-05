@@ -1,6 +1,7 @@
 package io.testhub.platform.reporting;
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
@@ -64,10 +65,11 @@ public class QualityReportSyncService {
         if(bytes==null||bytes.length==0)throw invalid("同步请求不能为空");
         if(bytes.length>MAX_BYTES)throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,"质量报告计划同步请求不能超过 4 MiB");
         try {
-            JsonNode body=json.readerFor(JsonNode.class).with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS,DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY).readValue(bytes);
+            JsonNode body=json.readerFor(JsonNode.class).with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS,DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY,DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).readValue(bytes);
             if(body!=null&&body.path("operations").isArray())for(var op:body.path("operations")) {
                 var i=op.path("item");var d=i.path("definition");
-                if(!op.path("operationId").isTextual()||!i.path("kind").isTextual()||!i.path("name").isTextual()||!d.path("cronExpression").isTextual()||!d.path("timezone").isTextual()||!d.path("periodDays").isIntegralNumber()||!d.path("periodDays").canConvertToInt()||!d.path("projectIds").isArray())throw invalid("计划 JSON 字段类型无效");
+                if(!op.path("operationId").isTextual()||!i.path("kind").isTextual()||!i.path("name").isTextual()||!d.path("cronExpression").isTextual()||!d.path("timezone").isTextual()||!d.path("projectIds").isArray())throw invalid("计划 JSON 字段类型无效");
+                if(!QualityReportPeriod.exactInteger(d.path("periodDays")))throw invalid("periodDays 必须是精确整数 JSON 数值");
                 for(var p:d.path("projectIds"))if(!p.isTextual())throw invalid("项目标识必须是字符串");
             }
             var value=json.readerFor(Request.class).with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,DeserializationFeature.FAIL_ON_TRAILING_TOKENS,
@@ -161,7 +163,7 @@ public class QualityReportSyncService {
     private boolean uuid(String v){try{return v!=null&&v.equals(UUID.fromString(v).toString());}catch(IllegalArgumentException error){return false;}}
     private ResponseStatusException invalid(String m){return new ResponseStatusException(HttpStatus.BAD_REQUEST,m);}
     private ResponseStatusException conflict(String m){return new ResponseStatusException(HttpStatus.CONFLICT,m);}
-    public record Definition(List<String> projectIds,String cronExpression,String timezone,Integer periodDays){}
+    public record Definition(List<String> projectIds,String cronExpression,String timezone,@JsonDeserialize(using=QualityReportPeriod.ExactInteger.class) Integer periodDays){}
     public record Item(String kind,String name,Definition definition){}
     public record Snapshot(int version,String scope,String projectId,String actorId,String revision,List<Item> items,Map<String,String> itemIds,Map<String,Long> itemVersions,List<String> projectIds,Map<String,String> blockedKeys){}
     public record Operation(String operationId,Item item){}

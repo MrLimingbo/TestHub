@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-03",
+  "ownedH2Workspaces": [
+    {
+      "path": ".testhub/backend-qa-58752a7f-3357-4320-9f9f-61e6dd3825ec",
+      "removed": true
+    },
+    {
+      "path": ".testhub/backend-qa-5dc1a44a-5498-4154-bb34-bb36d97eb75c",
+      "removed": true
+    }
+  ],
+  "allRecordedOwnedH2WorkspacesRemoved": true,
+  "focusedWrapperUsesFinallyCleanup": true,
+  "mysqlProcessStarted": false,
+  "mysqlInfrastructureCreated": false,
+  "capturedSuiteRawSurefireFilesRemoved": 312,
+  "rawLogNamesRemoved": [
+    "testhub-d08-before.log",
+    "testhub-d08-build.log",
+    "testhub-d08-desktop.log",
+    "testhub-d08-focused.log",
+    "testhub-d08-h2-final.log",
+    "testhub-d08-h2.log",
+    "testhub-d08-lint.log",
+    "testhub-d08-node.log",
+    "testhub-d08-ui.log",
+    "testhub-d08-vitest.log"
+  ],
+  "onlyRecordedRawFilesRemoved": true,
+  "sharedServicesTouched": false,
+  "installedRuntimeReplaced": false,
+  "desktopRuntimePreviousCopiesCreated": false,
+  "currentBuildOutputsRetained": [
+    "dist",
+    "services/platform-api/target/platform-api-0.1.0-SNAPSHOT.jar"
+  ],
+  "unrelatedUserFilesPreserved": true
+}

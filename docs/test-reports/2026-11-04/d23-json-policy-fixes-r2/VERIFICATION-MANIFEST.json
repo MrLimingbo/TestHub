@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-04",
+  "commands": [
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D23AdapterConflictTests",
+      "phase": "VALID_BEFORE",
+      "exitCode": 1,
+      "result": "11new backend:5pass/6fail,all failed status500 or[200,500]"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/qa/test-p2-backend.mjs P2D23AdapterConflictTests,P2D23JsonPolicyTests",
+      "phase": "FOCUSED_AFTER",
+      "exitCode": 0,
+      "result": "32/32 backend:31formal plusupdatedX01;concurrentcreate/update each3rounds"
+    },
+    {
+      "command": "./node_modules/.bin/vitest run src/test/d23AdapterConflict.test.ts",
+      "exitCode": 0,
+      "result": "1/1;create/edit409 drafts retained and renamed retry succeeds"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "result": "1371pass/3skip;1374total;JAR BUILD SUCCESS"
+    },
+    {
+      "command": "JAVA_HOME=<project JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D23AdapterConflictTests,P2D23JsonPolicyTests,ExtensionRegistryFlowTests,ExtensionsOperationsFlowTests,NotificationTransferFlowTests,NotificationSyncFlowTests,NotificationOperationsFixesFlowTests'",
+      "exitCode": 0,
+      "result": "65/65;7suites;new11andold21D23 methods;owned infrastructure cleaned"
+    },
+    {
+      "command": "./node_modules/.bin/vitest run src/test/d23AdapterConflict.test.ts src/test/notificationExtensionsFixes.test.ts src/test/notificationsPage.test.ts src/test/extensionsOperationsPages.test.ts --maxWorkers=2",
+      "exitCode": 0,
+      "result": "67/67;4files"
+    },
+    {
+      "command": "./node_modules/.bin/eslint .",
+      "exitCode": 0,
+      "result": "0errors/2existing prop warnings"
+    },
+    {
+      "command": "./node_modules/.bin/vue-tsc --noEmit",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "./node_modules/.bin/vite build",
+      "exitCode": 0,
+      "result": "PASS;existing chunk-size notice"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "requirements-to-test-cases/scripts/validate_cases.py TEST-CASES.json --evidence EVIDENCE.json",
+      "exitCode": 0,
+      "result": "Schema1.1 pass;new12,4requirements/4criteria/12coverage;0errors/warnings/gaps"
+    },
+    {
+      "command": "requirements-to-test-cases/scripts/export_cases.py TEST-CASES.json --evidence EVIDENCE.json --formats md --stem TEST-PLAN",
+      "exitCode": 0,
+      "result": "Markdown plus summary generated;12IDs present"
+    }
+  ],
+  "backendJarSha256": "6a86753dea49be6e786b7fc1615dfa2a2742b4ba31fe35078e920b79bff0e695",
+  "rawLogs": [
+    {
+      "name": "testhub-d23r2-before.log",
+      "sha256": "11398f56e9a06dc39fdb2bc1bbf0d60662fe81af44c1e11ba744ac2f51be1ad7"
+    },
+    {
+      "name": "testhub-d23r2-build.log",
+      "sha256": "84066fde7cedf974ec6b5468f52d66b36023d23ee629f79a3919c9424ca9b905"
+    },
+    {
+      "name": "testhub-d23r2-design-export.log",
+      "sha256": "8f2f474fdee933166bdf39a945526aa96153f1c30dd6873ff63ba4c506873a1e"
+    },
+    {
+      "name": "testhub-d23r2-focused.log",
+      "sha256": "8687b78bb3687387aaa9117de9112d97a8c05b2155449854bf6e2560c07c050a"
+    },
+    {
+      "name": "testhub-d23r2-frontend.log",
+      "sha256": "fd351fba9a51ae42233554f76dc536c9902f6c1781cb9ee20792ac6ae5c394f6"
+    },
+    {
+      "name": "testhub-d23r2-h2.log",
+      "sha256": "70d7022c369c8cc23847d1ec4e534c64ac492a4febb374b6c220db44b8e7304c"
+    },
+    {
+      "name": "testhub-d23r2-lint.log",
+      "sha256": "e4c232b1eac58282cfb7d513810a316a15f3ea0fd7a63a87b37be7aa44750fa6"
+    },
+    {
+      "name": "testhub-d23r2-mysql.log",
+      "sha256": "7f6241e805fa2af594b289d90c8cc7f4677b6c5ec4c7ad47991904b715cbea58"
+    },
+    {
+      "name": "testhub-d23r2-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "testhub-d23r2-ui-focused.log",
+      "sha256": "223139b1617e2626184eaf16706ba4da602d432df135d57c06aea8ee60d8ac00"
+    }
+  ],
+  "noInstalledRuntimeReplaced": true,
+  "noSchemaMigrationAdded": true,
+  "noUniqueConstraintChange": true,
+  "noGlobalExceptionHandlerChange": true
+}

@@ -1,0 +1,1157 @@
+{
+  "validBackendRedRun": {
+    "total": 10,
+    "passed": 3,
+    "failed": 7,
+    "errors": 0,
+    "skipped": 0,
+    "exitCode": 1,
+    "failures": [
+      {
+        "method": "B02_differentCodeAtomic",
+        "assertion": "expected: <400> but was: <200>"
+      },
+      {
+        "method": "B03_invalidCodes",
+        "assertion": "expected: <400> but was: <200>"
+      },
+      {
+        "method": "B04_newRunFreezesTitleAndSteps",
+        "assertion": "expected: <标题A> but was: <标题B>"
+      },
+      {
+        "method": "B05_legacyMissingIsExplicit",
+        "assertion": "expected: <CURRENT_ASSET> but was: <>"
+      },
+      {
+        "method": "B06_transferPreservesSnapshotAndMissing",
+        "assertion": "expected: <标题A> but was: <>"
+      },
+      {
+        "method": "B07_syncPreservesSnapshotAndMissing",
+        "assertion": "expected: <CURRENT_ASSET> but was: <>"
+      },
+      {
+        "method": "B08_snapshotCannotBeOverwrittenOrRemoved",
+        "assertion": "expected: <409> but was: <400>"
+      }
+    ],
+    "logSha256": "8edea1bdfbf84e5383b14839febe9172d33e2963b62044d7da3a8a80cf782b93"
+  },
+  "initialFullRun": {
+    "total": 1317,
+    "failed": 3,
+    "errors": 0,
+    "skipped": 3,
+    "passed": 1311,
+    "suites": [
+      {
+        "name": "io.testhub.platform.ProjectDashboardTimezoneTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationHistorySyncFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.TaskSyncFlowTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiDesignFixesFlowTests",
+        "total": 48,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P1HistoryPermissionFlowTests",
+        "total": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PerformanceTestPlanFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D19MobileLocatorTests",
+        "total": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2R2UiFreezeFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalDefectLinkSyncFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D16MockFlowTests",
+        "total": 35,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.OperationsFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalExecutionLifecycleTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalDefectExecutionSyncFlowTests",
+        "total": 14,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiDesignFlowTests",
+        "total": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D16QualityScheduleTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2NormalizedKeysFlowTests",
+        "total": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MockShareFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationExecutionFlowTests",
+        "total": 13,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.GrpcDescriptorSyncFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.mobileautomation.P2D16MobileInputTests",
+        "total": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalDefectPeopleSyncFlowTests",
+        "total": 14,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.apidebug.JdkApiDebugTransportTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.apidebug.ApiDebugFixesTests",
+        "total": 26,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.apidebug.P1ReplayFailureTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.apidebug.DesktopApiDebugTargetPolicyTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.apidebug.ApiDebugTargetPolicyTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D16WebFlowTests",
+        "total": 45,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PerformanceArtifactSyncFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiWorkspacePreferencesFlowTests",
+        "total": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2ScheduleVersionFlowTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiRunnerStatusFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.WebSocketDebugFlowTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2R2AuditActionsFlowTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P1DisabledEnvironmentFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalDefectWorkflowSyncFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ProjectFileSyncFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.QualityReportSyncFlowTests",
+        "total": 14,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.NotificationSyncFlowTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalDeliveryFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiInterchangeFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiDebugFlowTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.security.SecretCipherTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D16PerformanceFlowTests",
+        "total": 56,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.UiAutomationSyncFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P1ParameterRulesFlowTests",
+        "total": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.RunnerRegistryFlowTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.AuditResourceMysqlMigrationTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 1
+      },
+      {
+        "name": "io.testhub.platform.P1RedisHttpFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 1
+      },
+      {
+        "name": "io.testhub.platform.AccountConfigFixesFlowTests",
+        "total": 24,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.UnifiedExecutionFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiRunnerRuntimeLeaseFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.TransferPayloadLimitFilterTests",
+        "total": 31,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MockSyncFlowTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.QualityReportScheduleFlowTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalAssetTagSyncFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.QualityReportTransferFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.AuthenticationFlowTests",
+        "total": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P1SessionRulesFlowTests",
+        "total": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.UiAutomationArtifactSyncFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopRuntimeBrokerTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopBrokerControllerTests",
+        "total": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopExpiringStateStoreTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopEngineArchiveToolTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.AccountIdentityGuardMigrationTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopSessionPersistenceTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.AuditResourceIdentifierMigrationTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopBackupToolTests",
+        "total": 4,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopDatabaseConfigurationTests",
+        "total": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopWorkspaceFlowTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.PendingExecutionCancellationTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.desktop.DesktopDatabaseTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PerformanceTestExecutionFlowTests",
+        "total": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiRunnerInternalAuthenticationFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationExecutionProfileFlowTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.shared.api.ApiRequestBodyTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.shared.api.P1DependencyFailureTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.UiAutomationFlowTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MockTransferFlowTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalHistorySyncFlowTests",
+        "total": 16,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PerformanceTestExecutionArtifactFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiDesignSyncFlowTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalSyncFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P1CompatibilityTests",
+        "total": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 1
+      },
+      {
+        "name": "io.testhub.platform.CrossRegressionFixesFlowTests",
+        "total": 33,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ProjectSettingsSyncFlowTests",
+        "total": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ExtensionsOperationsFlowTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.storage.FilesystemObjectStorageTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.storage.ObjectStorageConfigurationTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.storage.P1StorageProbeTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P1HealthDeadlineFlowTests",
+        "total": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.NotificationTransferFlowTests",
+        "total": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationScenarioFlowTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ProjectSettingsTransferFlowTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.HarArchiveFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MobileAutomationTransferFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D16MobileFlowTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationExternalTriggerFlowTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalExchangeRoundTripTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PerformanceHistorySyncFlowTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MockServiceFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationScenarioReuseFlowTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiTransferFlowTests",
+        "total": 24,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MobileAutomationFixesFlowTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PerformanceTransferFlowTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.AccessControlFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MobileAutomationSyncFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationAssetSyncFlowTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ProjectEnvironmentFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MockRuntimeHttpFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ProjectAccessFixesFlowTests",
+        "total": 25,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PerformanceSyncFlowTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.TaskRegistrationFlowTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2ResponseCodeFlowTests",
+        "total": 13,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiRunnerTrustFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiRunnerRuntimeConfigurationFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PostmanCollectionFlowTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalGovernanceSyncFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.UiAutomationTransferFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.GrpcReflectionDebugTransportTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.QualityReportFlowTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.uiautomation.UiAutomationTargetPolicyTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2CatalogCopyFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalAssetFixesFlowTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D08D07PlanTests",
+        "total": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2EnvironmentRulesFlowTests",
+        "total": 16,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.UiAutomationHistorySyncFlowTests",
+        "total": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationDataSetFlowTests",
+        "total": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D16TaskFlowTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P1ReplayRulesFlowTests",
+        "total": 15,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.P2D16ApiWaitFlowTests",
+        "total": 26,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.SystemSettingsFlowTests",
+        "total": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ExtensionRegistryFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ProjectVersionSyncFlowTests",
+        "total": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalTransferFlowTests",
+        "total": 53,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalDefectSyncFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.GrpcDebugFlowTests",
+        "total": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+        "total": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ProjectVersionFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.SmartExampleMockFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PerformanceRunnerCapacityRecoveryFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalAssetFlowTests",
+        "total": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ProjectDashboardFlowTests",
+        "total": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.PlatformFoundationAcceptanceTests",
+        "total": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.MobileAutomationFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.RegistrationFlowTests",
+        "total": 5,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalGovernanceFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationTriggerSyncFlowTests",
+        "total": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationScheduleFlowTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalExecutionFlowTests",
+        "total": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationScenarioSyncFlowTests",
+        "total": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.FunctionalDeliveryFixesFlowTests",
+        "total": 18,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.NotificationOperationsFixesFlowTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiAutomationTransferFlowTests",
+        "total": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.testhub.platform.ApiDebugHistorySyncFlowTests",
+        "total": 13,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "initialFullRunExitCode": 1,
+  "assetCorrections": [
+    "DesktopBackupToolTests两处期望版本56更新为57；原恢复、状态和密钥校验保留。",
+    "FunctionalTransferFlowTests正常HTTP导出声明titleSnapshots=true；认证和嵌套资料校验保留。"
+  ],
+  "fixtureCorrections": [
+    "包私有锁方法改为测试内项目行锁",
+    "旧行夹具删除自身新批次后插入，避免run/case唯一键冲突",
+    "迁移目标使用独立账号的新空项目",
+    "非法类型测试走实际MockMvc POST而非不存在的decode方法",
+    "N03先运行客户端再读取冲突状态"
+  ],
+  "frontendAndDesktopIndependentRedNotRetained": true,
+  "notNewProductBugCount": true,
+  "interpretation": "B08旧版因不认识新字段400，不作为允许篡改快照的复现；失败断言后的代码未执行不推定为当时已验证。"
+}

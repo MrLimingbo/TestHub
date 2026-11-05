@@ -1,0 +1,30 @@
+{
+  "status": "INCOMPLETE",
+  "observations": [
+    {
+      "id": "D26-R",
+      "status": "SPEC_RETAINED"
+    },
+    {
+      "id": "D26-L",
+      "status": "SPEC_RETAINED"
+    }
+  ],
+  "productComplianceAssessed": false,
+  "validWindowCount": 0,
+  "attemptedWindowCount": 0,
+  "summaries": [],
+  "error": {
+    "code": "Error",
+    "message": "No quiet 120-second interval within 30 minutes"
+  },
+  "completedAt": "2026-11-04T12:59:20.195Z",
+  "environmentBlockersDeferred": 12,
+  "upgradeShutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "reviewStatus": "INCOMPLETE_PENDING_USER_REVIEW",
+  "evidenceVerification": "EVIDENCE-VERIFICATION.json",
+  "formalBusinessRequests": 0,
+  "currentExecutionBlockers": 1,
+  "comparisonAvailable": false
+}

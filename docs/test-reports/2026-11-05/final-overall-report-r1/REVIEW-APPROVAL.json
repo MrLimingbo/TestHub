@@ -1,0 +1,51 @@
+{
+  "at": "2026-11-05T06:09:12.572427+00:00",
+  "status": "RESULTS_APPROVED",
+  "reportType": "FINAL_OVERALL",
+  "basis": "用户针对最终整体测试报告明确回复：审核通过 继续",
+  "reportSha256": "989b9ed139866a9ed7b64b378bbd6d0379c2341aa7c36f305a5b700c19d8ae8d",
+  "summarySha256": "6ea5b346f9ace8b64eeeaaffc4a7a4b0c587a8fa12e80a2cb8b787e1740f475e",
+  "artifactManifestSha256": "ea378a1fff029d1cd2d54a5b1fdb6b75a2fe1ea148afe740ed198c7c5b0439c9",
+  "validationSha256": "296993acc34971edbee341976968a1c0db89041e4900c1461ac109261584b288",
+  "approvedScope": {
+    "mainModules": 16,
+    "acceptanceScopes": 19,
+    "historicalCaseOccurrences": 3090,
+    "observationResultsApproved": 45,
+    "registeredProductBugsFixed": 109,
+    "registeredTestAssetIssuesFixed": 2
+  },
+  "frozenArtifactEntries": 16,
+  "frozenArtifactsRewritten": false,
+  "sourceIndexSnapshotPreserved": true,
+  "mutableNavigationChangesAfterApproval": [
+    {
+      "path": "docs/test-reports/2026-10-30/PROGRESS-AND-REMAINING.md",
+      "snapshotSha256": "d86531a20b139b7830e18bfcc65dbdf07fe64050021006465b262ff30761ac71",
+      "currentSha256": "0ca3a8d6a0238b8b42678d6de12e7dfe32686a7303cb43196b1a1d3416766021"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/README.md",
+      "snapshotSha256": "244d61fcd172c769b1e4f177f00a9d5b1bb492cd6ea652d3ac85abf90e1a0d55",
+      "currentSha256": "050ea294bc269bbae49c5edba05ed9d901e394641ed5a736cb995a8eecc3a3ba"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/README.md",
+      "snapshotSha256": "8288b51f242f13831016edff53995de7a3fd311ffeffb68e86aa8eab152ebef2",
+      "currentSha256": "737a5f2a049e79ce4a673406319e74fa190e54b4b78a2e29091f835727f0dbae"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/README.md",
+      "snapshotSha256": "4906ca64cc359381034fa1a8bac1d6ebb9b7ea101ff24b1b8cc8f9300af0e03b",
+      "currentSha256": "064074f8edf3f834567a6ef5715852e6bfefd750f1b7533164031f526c8620d8"
+    }
+  ],
+  "newProductExecution": false,
+  "restoreSkippedWorkAuthorized": false,
+  "d26ObservationsSkippedSpecRetained": 2,
+  "environmentCasesSkipped": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "remainingExecutableUntestedModules": 0,
+  "followupState": "AWAITING_NEW_SCOPE"
+}

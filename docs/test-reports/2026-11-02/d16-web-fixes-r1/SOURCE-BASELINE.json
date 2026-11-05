@@ -1,0 +1,15 @@
+{
+  "files": {
+    "src/pages/UiAutomationPage.vue": "ff1f3b6ffe01986459a4603198063d361f39a4ededfa99ec95a725e95eb39f18",
+    "services/playwright-runner/src/protocol.js": "b00ec7172de707db24ce175ab206588ec838e757e9ecaf64ad0ce467d2619406",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationController.java": "d8a2f5ff2083ca9c0088fe97a3b66a729178b7027818c0bd261d82c35d106b6f",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java": "b83d7409cf640402da1bd72fd598508271b3f51a92412b52ca7d1b45a6e65010",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationRepository.java": "0fab6fa3b98383f0451fcb61d92f3295c2bb59d4c4903d05f0eb98f9ab514391",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationSyncService.java": "be942b5e5296999aa6269f62ecabea3c6eaf560c3949b8ed129ea1cd40bea84b",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationTransferService.java": "3eb5dc3236b22cd673a8c1421704e849fc6d148fc8b4d927171f12cca05e13c2",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleController.java": "1ec43a7ef8478945d7c7cbe0b406d8208b04f4d25566e0f29434fae929fa60c7",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleService.java": "a727c96cfe487b77da627213bdee025dc7f53bdcf22e79bd1cdd79a812119220"
+  },
+  "storedDomainStepUnchanged": "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationStep.java",
+  "storedDomainStepSha256": "b35751abe111b6f1da469c8750069fd3fef74b51b5d72168ee95d75573cf4200"
+}

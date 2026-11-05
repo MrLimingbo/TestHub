@@ -1,6 +1,7 @@
 package io.testhub.platform.reporting;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
@@ -75,5 +76,5 @@ public class QualityReportScheduleController {
 
     public record ScheduleRequest(@NotBlank @Size(max = 160) String name, @NotEmpty @Size(max = 50) List<@NotBlank @Size(max = 26) String> projectIds,
                                   @NotBlank @Size(max = 160) String cronExpression, @NotBlank @Size(max = 64) String timezone,
-                                  @NotNull @Min(1) @Max(90) Integer periodDays, @NotNull Boolean enabled, JsonNode expectedVersion) { }
+                                  @NotNull @Min(1) @Max(90) @JsonDeserialize(using=QualityReportPeriod.ExactInteger.class) Integer periodDays, @NotNull Boolean enabled, JsonNode expectedVersion) { }
 }

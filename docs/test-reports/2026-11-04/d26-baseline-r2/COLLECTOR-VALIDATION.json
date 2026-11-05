@@ -1,0 +1,28 @@
+{
+  "at": "2026-11-04T08:55:06.299Z",
+  "metricsTests": {
+    "passed": 6,
+    "failed": 0,
+    "command": "node --test scripts/qa/d26-metrics.test.mjs"
+  },
+  "staticChecks": {
+    "errors": 0,
+    "files": 4,
+    "command": "node_modules/.bin/eslint scripts/qa/d26-baseline.mjs scripts/qa/d26-metrics.mjs scripts/qa/d26-metrics.test.mjs scripts/qa/d26-native.cjs"
+  },
+  "syntaxChecksPassed": [
+    "d26-baseline.mjs",
+    "d26-native.cjs"
+  ],
+  "originalSourceBaseline": {
+    "files": 1430,
+    "changed": 0
+  },
+  "currentBackendMatchesR1": true,
+  "collectorFiles": {
+    "d26-baseline.mjs": "001938ce9f3a755931885c1a317a452ee66b874ff41350ee249cdcae7551d180",
+    "d26-metrics.mjs": "fb00566cbb85a247b6f22d2a25be17d1afea6a514e0977d0ead5b057141abbfc",
+    "d26-metrics.test.mjs": "e1c2cec9287939398f16d25815d34b9a5ab45c0d782777565a59d165570d9271",
+    "d26-native.cjs": "84d66bdfe24973ff515c232e8e2a71855a3b32fc8c2ad07389e804497765f550"
+  }
+}

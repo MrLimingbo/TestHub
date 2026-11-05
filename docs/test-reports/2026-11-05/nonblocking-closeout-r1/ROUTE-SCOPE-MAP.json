@@ -1,0 +1,160 @@
+{
+  "source": "src/router/index.ts",
+  "pages": [
+    {
+      "page": "LoginPage",
+      "historicalScopes": [
+        "01"
+      ]
+    },
+    {
+      "page": "MockSharePage",
+      "historicalScopes": [
+        "09"
+      ]
+    },
+    {
+      "page": "DashboardPage",
+      "historicalScopes": [
+        "02"
+      ]
+    },
+    {
+      "page": "FunctionalOverviewPage",
+      "historicalScopes": [
+        "04"
+      ]
+    },
+    {
+      "page": "FunctionalTestingPage",
+      "historicalScopes": [
+        "04"
+      ]
+    },
+    {
+      "page": "FunctionalPlansPage",
+      "historicalScopes": [
+        "05"
+      ]
+    },
+    {
+      "page": "FunctionalGovernancePage",
+      "historicalScopes": [
+        "04"
+      ]
+    },
+    {
+      "page": "FunctionalDeliveryPage",
+      "historicalScopes": [
+        "05"
+      ]
+    },
+    {
+      "page": "ProjectVersionsPage",
+      "historicalScopes": [
+        "05"
+      ]
+    },
+    {
+      "page": "ApiDesignPage",
+      "historicalScopes": [
+        "06",
+        "07"
+      ]
+    },
+    {
+      "page": "UiAutomationPage",
+      "historicalScopes": [
+        "11"
+      ]
+    },
+    {
+      "page": "MobileAutomationPage",
+      "historicalScopes": [
+        "12"
+      ]
+    },
+    {
+      "page": "PluginsPage",
+      "historicalScopes": [
+        "14"
+      ]
+    },
+    {
+      "page": "OperationsPage",
+      "historicalScopes": [
+        "14"
+      ]
+    },
+    {
+      "page": "MockServicePage",
+      "historicalScopes": [
+        "09"
+      ]
+    },
+    {
+      "page": "AutomationPage",
+      "historicalScopes": [
+        "08"
+      ]
+    },
+    {
+      "page": "PerformancePage",
+      "historicalScopes": [
+        "10"
+      ]
+    },
+    {
+      "page": "ReportsPage",
+      "historicalScopes": [
+        "13"
+      ]
+    },
+    {
+      "page": "ProjectSettingsPage",
+      "historicalScopes": [
+        "03A",
+        "03B",
+        "03C"
+      ]
+    },
+    {
+      "page": "AccountManagementPage",
+      "historicalScopes": [
+        "03D"
+      ]
+    },
+    {
+      "page": "EnvironmentManagementPage",
+      "historicalScopes": [
+        "03B"
+      ]
+    },
+    {
+      "page": "SystemSettingsPage",
+      "historicalScopes": [
+        "03D"
+      ]
+    },
+    {
+      "page": "AuditLogPage",
+      "historicalScopes": [
+        "03C"
+      ]
+    },
+    {
+      "page": "NotificationTemplatesPage",
+      "historicalScopes": [
+        "14"
+      ]
+    },
+    {
+      "page": "TasksPage",
+      "historicalScopes": [
+        "13"
+      ]
+    }
+  ],
+  "functionalCoverageProof": false,
+  "note": "用于识别是否存在范围之外的新独立页面，不替代各功能场景执行证据。"
+}

@@ -1,0 +1,84 @@
+{
+  "baseCommit": "526d7f186d1f9ba03484d872d71df74b32663abf",
+  "baselineFiles": 1429,
+  "modified": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceSyncService.java",
+      "beforeSha256": "0ae278687c5ee1d0e0acbf24884d0d57adabba719aced86e253a45b8ca26a3c8",
+      "afterSha256": "3b49bb41974cf35ea8eace7560d2bac87706530fa06138cc7471a4ad20000928"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestExecutionService.java",
+      "beforeSha256": "1fcbabdf0904b63281dd7a11a445feb7ab056473920d7f21ce9a9403b491eace",
+      "afterSha256": "ed2a4868730c041c964aa5208da460a0669f56d8ff3f1a3a57f65c4f7a6b9928"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanController.java",
+      "beforeSha256": "68bdc1f777babcda5ae49ac1cfe48490e8f28a14a82e651389c45334c3721b0d",
+      "afterSha256": "9a74aa7eeff7679547b4695d2a904836f1cd530f3dc2ebea1331fdf4a19cc304"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanRepository.java",
+      "beforeSha256": "7031d3ad671eb0014a4cce498caf45c81fc43ded983f7eeaf6fcb0349106619a",
+      "afterSha256": "e9f690a34369d624a76c63f98bc083249cd8a8c8c09417e868f4c3737d315e65"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTestPlanService.java",
+      "beforeSha256": "a89d27aa046f573928dff7e167f0defe52b161504c8a6130bef57e521ad76af3",
+      "afterSha256": "181367031468562754c6e40b287e32739024ec51ba14dd5106dc1543cc0b8323"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceTransferService.java",
+      "beforeSha256": "09e863e8ac4d21c8edf85c4f21deede46d7c3c93a59e619bfdb077a985f259ba",
+      "afterSha256": "9b979244d9d650492e295d96e9f057bb576efbd252a7eb3fedf6042f3882b363"
+    },
+    {
+      "path": "src/pages/PerformancePage.vue",
+      "beforeSha256": "0c5781032617a6eceb2881d52e3d8bb191d4bb84629fd7fc8b78febc3c9a694f",
+      "afterSha256": "282009c85193e00e82dd1cfcde77681020888e526713eea07f390e6a3a0e7622"
+    }
+  ],
+  "added": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceJson.java",
+      "sha256": "9d74897516e60f0bdcfe506f88427c5513fcb9221e2141a30af232566fedbb80"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/performance/PerformanceInputExceptionHandler.java",
+      "sha256": "9cb2da328c1f5b06423414f898f562b36bac384b5a0a71fd6f6f6967d4ef20e7"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D16PerformanceFlowTests.java",
+      "sha256": "0bb384c4bdda94ce8bf01516cebedd41fe900cf1313977da4adc5bc7ed246590"
+    },
+    {
+      "path": "src/utils/performanceNumberInput.ts",
+      "sha256": "f259b699fd376a845279ee9976d111f061b68aa0297870f48f7fb15ee7f43279"
+    },
+    {
+      "path": "src/test/d16PerformancePage.test.ts",
+      "sha256": "4512804b2742db3270429c97a5fbf7ec785b905cd7d1d85dbff54ae171ba6b38"
+    },
+    {
+      "path": "src/test/d16PerformanceNumbers.test.ts",
+      "sha256": "5333c05b05648bc5ea31236f1b6db10b289320edbfa63eb83324e6b4e6d2dad6"
+    },
+    {
+      "path": "services/jmeter-runner/test/d16-input.test.js",
+      "sha256": "c6a521d1b2885f6106462c51aaabebd8bcff2912f55465323ff1c2e5bf9af81d"
+    },
+    {
+      "path": "scripts/qa/d16-performance-ui.mjs",
+      "sha256": "dbb3d4f5ad70a283b38ceef41e042c393ff2da19e7f88d41243f08e4e8efeeb7"
+    },
+    {
+      "path": "scripts/qa/d16-performance-http.mjs",
+      "sha256": "9f5136513fccf476082979394cf99aab5f348b90d53d64f32c8e70e524189d31"
+    }
+  ],
+  "unchangedBaselineFiles": 1422,
+  "dependencyFilesChanged": false,
+  "globalMapperChanged": false,
+  "runnerProductionChanged": false,
+  "newCommitPushOrPr": false
+}

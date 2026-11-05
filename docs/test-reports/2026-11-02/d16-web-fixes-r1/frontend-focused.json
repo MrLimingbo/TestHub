@@ -1,0 +1,51 @@
+{
+  "numTotalTests": 8,
+  "numPassedTests": 8,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "success": true,
+  "suites": [
+    {
+      "name": "src/test/d16WebNumbers.test.ts",
+      "cases": [
+        {
+          "title": "TC-D16WEB-46/47/48: original decimal text is checked before rounding",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16WEB-49/50: optional defaults and WAIT required fields remain distinct",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "src/test/d16WebPage.test.ts",
+      "cases": [
+        {
+          "title": "TC-D16WEB-46: profile invalid raw values never submit",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16WEB-47: profile exact spellings send numeric dimensions",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16WEB-48: WAIT and action timeouts validate original text",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16WEB-49: invalid execution stops before local preparation",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16WEB-50: optional action blank and required WAIT stay distinct",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16WEB-51: variable guard and removed step input ownership remain",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

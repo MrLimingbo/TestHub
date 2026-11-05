@@ -1,5 +1,7 @@
 package io.testhub.platform.uiautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
@@ -132,16 +134,16 @@ public class UiAutomationController {
     private AuthenticatedPrincipal principal(Authentication authentication) { return (AuthenticatedPrincipal) authentication.getPrincipal(); }
 
     public record ProfileRequest(@NotBlank @Size(max = 120) String name, @NotBlank @Size(max = 16) String browser,
-                                 @NotBlank @Size(max = 2048) String baseUrl, @Min(320) @Max(3840) Integer viewportWidth,
-                                 @Min(320) @Max(2160) Integer viewportHeight, @NotNull Boolean enabled) { }
+                                 @NotBlank @Size(max = 2048) String baseUrl, @Min(320) @Max(3840) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportWidth,
+                                 @Min(320) @Max(2160) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer viewportHeight, @NotNull Boolean enabled) { }
     public record PageObjectRequest(@NotBlank @Size(max = 120) String name, @NotBlank @Size(max = 1024) String selectorValue,
                                     @Size(max = 1000) String description) { }
     public record ScenarioRequest(@NotBlank @Size(max = 26) String browserProfileId, @NotBlank @Size(max = 160) String name,
                                   @Size(max = 2000) String description, @NotBlank @Size(max = 16) String failureStrategy,
-                                  Map<String, String> variables, @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps) { }
+                                  @JsonDeserialize(contentUsing = UiJson.Text.class) Map<String, String> variables, @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps) { }
     public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 32) String type,
                               @NotBlank @Size(max = 160) String name, @Size(max = 1024) String selector,
-                              @Size(max = 26) String pageObjectId, @Size(max = 4096) String value, @Size(max = 2048) String url,
-                              @Size(max = 4096) String expectedText, @Min(1) @Max(60000) Integer timeoutMillis) { }
-    public record ExecuteRequest(@Min(10) @Max(3600) Integer timeoutSeconds, @Size(max = 26) String functionalPlanId) { }
+                              @Size(max = 26) String pageObjectId, @Size(max = 4096) @JsonDeserialize(using = UiJson.Text.class) String value, @Size(max = 2048) String url,
+                              @Size(max = 4096) @JsonDeserialize(using = UiJson.Text.class) String expectedText, @Min(1) @Max(60000) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutMillis) { }
+    public record ExecuteRequest(@Min(10) @Max(3600) @JsonDeserialize(using = UiJson.IntegerValue.class) Integer timeoutSeconds, @Size(max = 26) String functionalPlanId) { }
 }

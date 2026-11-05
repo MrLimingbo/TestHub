@@ -202,6 +202,21 @@ public class UiAutomationRepository {
                 .param("scenarioVersion", execution.scenarioVersion()).param("content", content).param("checksum", checksum).update();
     }
 
+    void requireExecutableTypes(String projectId, String scenarioId) {
+        jdbc.sql("SELECT variables,steps FROM ui_automation_scenario WHERE project_id=:p AND id=:i")
+                .param("p", projectId).param("i", scenarioId).query((rs, row) -> {
+                    UiJson.requireStoredScenario(json, rs.getString("variables"), rs.getString("steps"));
+                    return true;
+                }).optional();
+    }
+    void requireRuntimeTypes(String projectId, String executionId) {
+        jdbc.sql("SELECT content FROM ui_automation_execution_manifest WHERE project_id=:p AND execution_id=:i")
+                .param("p", projectId).param("i", executionId).query((rs, row) -> {
+                    UiJson.requireStoredManifest(json, rs.getString("content"));
+                    return true;
+                }).single();
+    }
+
     public Optional<UiAutomationManifest> findManifest(String projectId, String executionId) {
         return jdbc.sql("""
                 SELECT id, execution_id, scenario_id, scenario_version, content, checksum, created_at

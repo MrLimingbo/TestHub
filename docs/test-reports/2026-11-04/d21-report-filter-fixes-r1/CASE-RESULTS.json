@@ -1,0 +1,266 @@
+{
+  "date": "2026-11-04",
+  "unit": "FORMAL_CASE_WITH_ONE_AUTOMATED_METHOD",
+  "total": 17,
+  "positive": 8,
+  "negative": 9,
+  "passed": 17,
+  "failed": 0,
+  "blocked": 0,
+  "backendMethods": 13,
+  "frontendMethods": 4,
+  "endpointVariantsAndDatabaseRerunsNotAdded": true,
+  "cases": [
+    {
+      "id": "TC-D21-B01",
+      "method": "B01_omittedUsesExistingDefault",
+      "polarity": "positive",
+      "title": "省略参数沿用默认可访问集合",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B01"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B02",
+      "method": "B02_explicitEmptyAndBlankAreRejected",
+      "polarity": "negative",
+      "title": "显式空值和空白拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B02"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B03",
+      "method": "B03_commaOnlyIsRejected",
+      "polarity": "negative",
+      "title": "只有逗号的列表拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B03"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B04",
+      "method": "B04_emptyCsvSegmentsAreRejected",
+      "polarity": "negative",
+      "title": "合法ID旁的空CSV段拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B04"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B05",
+      "method": "B05_emptyRepeatedKeysAreRejected",
+      "polarity": "negative",
+      "title": "重复query键中的空值拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B05"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B06",
+      "method": "B06_singleIdRestrictsBothOutputs",
+      "polarity": "positive",
+      "title": "合法单项目只报告所选项目",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B06"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B07",
+      "method": "B07_mixedKeysCsvTrimAndDedupKeepOrder",
+      "polarity": "positive",
+      "title": "混合列表去重trim并保序",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B07"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B08",
+      "method": "B08_fiftyUniqueIdsAccepted",
+      "polarity": "positive",
+      "title": "50个唯一ID允许",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B08"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B09",
+      "method": "B09_fiftyOneUniqueIdsRejected",
+      "polarity": "negative",
+      "title": "51个唯一ID拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B09"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B10",
+      "method": "B10_limitIsAppliedAfterDedup",
+      "polarity": "positive",
+      "title": "上限在去重后判定",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B10"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B11",
+      "method": "B11_defaultOverFiftyIsNotNewlyLimited",
+      "polarity": "positive",
+      "title": "默认超过50项目不新增上限",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B11"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B12",
+      "method": "B12_crossOrganizationCannotLeakOrAudit",
+      "polarity": "negative",
+      "title": "跨组织无权限项目拒绝",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B12"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-B13",
+      "method": "B13_projectMembershipBoundaryIsPreserved",
+      "polarity": "negative",
+      "title": "同组织项目范围权限保持",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-B13"
+      ],
+      "evidence": [
+        "backend-h2.json",
+        "backend-mysql.json"
+      ],
+      "source": "services/platform-api/src/test/java/io/testhub/platform/P2D21ReportScopeTests.java"
+    },
+    {
+      "id": "TC-D21-U01",
+      "method": "U01 initial all selection and CSV send the explicit legal project scope",
+      "polarity": "positive",
+      "title": "页面全选发送显式合法范围",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-U01"
+      ],
+      "evidence": [
+        "frontend-results.json"
+      ],
+      "source": "src/test/d21ReportScope.test.ts"
+    },
+    {
+      "id": "TC-D21-U02",
+      "method": "U02 clearing a small scope omits the parameter and describes the default accessible range",
+      "polarity": "positive",
+      "title": "清空选择提示默认集合",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-U02"
+      ],
+      "evidence": [
+        "frontend-results.json"
+      ],
+      "source": "src/test/d21ReportScope.test.ts"
+    },
+    {
+      "id": "TC-D21-U03",
+      "method": "U03 over fifty accessible projects with no selection blocks query and export",
+      "polarity": "negative",
+      "title": "超过50时空选择阻止请求",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-U03"
+      ],
+      "evidence": [
+        "frontend-results.json"
+      ],
+      "source": "src/test/d21ReportScope.test.ts"
+    },
+    {
+      "id": "TC-D21-U04",
+      "method": "U04 fifty selected projects work and fifty one cannot query or export",
+      "polarity": "negative",
+      "title": "显式选择上限保持",
+      "status": "PASS",
+      "coverage_item_refs": [
+        "COV-D21-U04"
+      ],
+      "evidence": [
+        "frontend-results.json"
+      ],
+      "source": "src/test/d21ReportScope.test.ts"
+    }
+  ]
+}

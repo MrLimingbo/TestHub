@@ -1,0 +1,107 @@
+{
+  "date": "2026-11-02",
+  "platform": "darwin-arm64",
+  "commands": [
+    {
+      "id": "frontend",
+      "command": "npx pnpm@10.13.1 exec vitest run --maxWorkers=1",
+      "exitCode": 0,
+      "occurrences": 917
+    },
+    {
+      "id": "frontend-final-followup",
+      "command": "npx pnpm@10.13.1 exec vitest run src/test/d16WebPage.test.ts src/test/d16WebNumbers.test.ts --maxWorkers=1",
+      "exitCode": 0,
+      "occurrences": 8
+    },
+    {
+      "id": "H2-package",
+      "command": "JAVA_HOME=<JDK21> node scripts/desktop/test-local-backend.mjs",
+      "exitCode": 0,
+      "occurrences": 1268
+    },
+    {
+      "id": "final-H2-fixture-followup",
+      "command": "JAVA_HOME=<JDK21> node scripts/qa/test-p2-backend.mjs P2D16WebFlowTests",
+      "exitCode": 0,
+      "occurrences": 45
+    },
+    {
+      "id": "MySQL-affected",
+      "command": "JAVA_HOME=<JDK21> node scripts/desktop/test-mysql-backend.mjs '--tests=P2D16WebFlowTests,UiAutomation*Tests'",
+      "exitCode": 0,
+      "occurrences": 86
+    },
+    {
+      "id": "Playwright-Runner",
+      "command": "node --test services/playwright-runner/test/*.test.js",
+      "exitCode": 0,
+      "occurrences": 20
+    },
+    {
+      "id": "headless-browser",
+      "command": "node scripts/qa/d16-web-ui.mjs",
+      "exitCode": 0,
+      "occurrences": 7
+    },
+    {
+      "id": "native-http",
+      "command": "JAVA_HOME=<JDK21> node scripts/qa/d16-web-http.mjs",
+      "exitCode": 0,
+      "occurrences": 7
+    },
+    {
+      "id": "lint",
+      "command": "npx pnpm@10.13.1 lint",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "build-and-typecheck",
+      "command": "npx pnpm@10.13.1 build",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "final-typecheck",
+      "command": "npx pnpm@10.13.1 typecheck",
+      "exitCode": 0,
+      "occurrences": null
+    },
+    {
+      "id": "source-whitespace",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "occurrences": null
+    }
+  ],
+  "jarSha256": "a68a3c27e60f544650274ef9c125b05691c5a30fb06d3671b535deca99043633",
+  "distIndexSha256": "e575d7e2ba63c03aaeb4a1e8b3f28cf95b74a2221a63506faf42d6406c121a56",
+  "finalSourceHashes": {
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationController.java": "38c7c6685cfc17e47816fb43f4820987c0b0aaf7d05873776ebfe0044b03a6d6",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationRepository.java": "db3d3dbe2ca8d88cb5dba510a002b10af1e6ead262c1c8f6971e2002dea42101",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleController.java": "25ca5ea3a44cddcb9a9a4da044f155e5b3b9ba3ccb80e88afef739967004d52f",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationScheduleService.java": "1c9cebba6a9d25a6523ea1fc3062a3768887d79291c256f703a65007b47aa3aa",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationService.java": "08109ca3e1aae6cd597fc69daac15c6cf6ecfecf51f16f3d0901105e0b2f6b3c",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationSyncService.java": "77bbee4b92d0c05b4b981e57518f9f3781690bb1e19e6a9b63817143700f61c4",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiAutomationTransferService.java": "1f17e9d9c0054718781791ef242d1de2054e01c4798cc8a0a416e261a218394c",
+    "services/playwright-runner/src/protocol.js": "13229b07f0a75bc2c426f329f5dedfcd5d198d64d68109e5e01307f0e776bd61",
+    "src/pages/UiAutomationPage.vue": "912b92895359a789d5a58e05e678f3ce5e77ccb4f4a1e224c0c2d024acc7a211",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiJson.java": "2b000fb8f9d8d3742d6bd46fa7f959893f5cd385b8b020b475adec53a4a649b8",
+    "services/platform-api/src/main/java/io/testhub/platform/uiautomation/UiInputExceptionHandler.java": "6115b65c0571895ca31911338d14aff7ec90d9d7e649da71aeb3f100d2cdf698",
+    "services/platform-api/src/test/java/io/testhub/platform/P2D16WebFlowTests.java": "798f7fa245c2f5b4f905357fcc2f4e8db56f62092969b7be88aaee4bc453f5f0",
+    "src/utils/webIntegerInput.ts": "6a2ad13453f768feb9b71664c4500fb940184db517f9618b1b6711dd139bda03",
+    "src/test/d16WebPage.test.ts": "928b9fc8331d6fbda9836309b03fe509b25143230c78f73fd76a295da29af21f",
+    "src/test/d16WebNumbers.test.ts": "f7cab3c41f1d54389abfc008889d75447decd813b8d0c3b7f763472294f265b7",
+    "services/playwright-runner/test/d16-input.test.js": "894be7004244139432ed8089fabef04ed80096f723f57a91753eb40dafb06627",
+    "scripts/qa/d16-web-ui.mjs": "51def0eafeae12967ddc6688b2e516230e6bc371e45537a08b93df1be7a01c48",
+    "scripts/qa/d16-web-http.mjs": "c53d0fa986dc6d7c9ee7bf27ede82f41f137c5e73d18b45c6cff4fdc5c83b388"
+  },
+  "formalCases": 56,
+  "countsNotAdditive": true,
+  "productionChangedAfterFullH2Build": false,
+  "finalFollowup": "Automatic retry and raw-before-legacy-read checks included in the final full H2/JAR and MySQL runs; final fixture and UI type-switch followups passed. Raw tiny fractions still covered before storage.",
+  "upgradeExitRetested": false,
+  "installedRuntimeReplaced": false,
+  "originalEnvironmentBlockersPrepared": false
+}

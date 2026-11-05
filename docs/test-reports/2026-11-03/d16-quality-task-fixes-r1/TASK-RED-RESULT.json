@@ -1,0 +1,13 @@
+{
+  "scope": "P2D16TaskFlowTests before task D16 product changes",
+  "command": "JAVA_HOME=<project JDK 21> node scripts/qa/test-p2-backend.mjs P2D16TaskFlowTests",
+  "methods": 5,
+  "passed": 2,
+  "failed": 3,
+  "errors": 0,
+  "skipped": 0,
+  "firstFailures": ["task PUT missing progress returned 200", "task sync missing progress returned 200", "task transfer fractional progress returned 200"],
+  "executionLimit": "Each loop stopped at its first assertion failure; later variants were not demonstrated by this red run.",
+  "fixtureNote": "First attempt failed to compile due to a test helper name collision, corrected before the valid red run; not a product defect.",
+  "cleanup": "The wrapper removes its generated .testhub/p2-backend-qa-<UUID> directory in finally. Its random path was not printed. The explicitly owned raw /private/tmp/testhub-d16-task-before.log was removed after this sanitized summary."
+}

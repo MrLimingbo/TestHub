@@ -1,0 +1,57 @@
+{
+  "verifiedAt": "2026-11-04T16:06:34.441Z",
+  "status": "INCOMPLETE_VERIFIED",
+  "validWindows": 0,
+  "requiredWindows": 2,
+  "formalAttempts": 0,
+  "formalBusinessRequests": 0,
+  "formalResourceOrProbeSamples": 0,
+  "precheck": {
+    "businessOperationClasses": 6,
+    "allPassed": true,
+    "taskCount": 200,
+    "basePlanCount": 20,
+    "caseCount": 200,
+    "pendingTemporaryPlans": 0,
+    "mandatoryResourceMetricsAvailable": true,
+    "optionalHeapAvailable": true,
+    "optionalFileDescriptorsAvailable": true,
+    "visibilityOrDialogViolations": 0,
+    "formalSamples": false
+  },
+  "scheduling": {
+    "samples": 2559,
+    "firstSampleAt": "2026-11-04T08:55:35.052Z",
+    "lastSampleAt": "2026-11-04T12:28:56.605Z",
+    "admittedAt": "2026-11-04T12:28:56.609Z",
+    "continuousQuietSeconds": 120.11520491599731
+  },
+  "formalAdmission": {
+    "samples": 360,
+    "firstSampleAt": "2026-11-04T12:29:22.033Z",
+    "lastSampleAt": "2026-11-04T12:59:18.679Z",
+    "maximumContinuousQuietSeconds": 100.10421941700042,
+    "requiredContinuousQuietSeconds": 120,
+    "anyReady": false,
+    "busyCapacityPercentMin": 20.532797185222417,
+    "busyCapacityPercentMax": 44.24090338770389
+  },
+  "originalWorkerManifest": {
+    "entries": 18,
+    "allHashesMatchedBeforeReview": true
+  },
+  "sourceBaseline": {
+    "files": 1430,
+    "changed": 0
+  },
+  "cleanup": {
+    "ownedProcessesRemaining": 0,
+    "ownedPrivateDirectoryAbsent": true,
+    "ownedQaKeychainAbsent": true,
+    "supervisorAbsent": true
+  },
+  "historicalEnvironmentAndRiskFilesByteIdentical": true,
+  "twoWindowComparisonAvailable": false,
+  "resourceBudgetLeakOrSlaComplianceAssessed": false,
+  "upgradeShutdownRecheckExecuted": false
+}

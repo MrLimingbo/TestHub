@@ -1,5 +1,6 @@
 package io.testhub.platform.mobileautomation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.shared.api.ApiResponse;
 import jakarta.validation.Valid;
@@ -78,11 +79,11 @@ public class MobileAutomationController {
     public record DeviceRequest(@NotBlank @Size(max = 120) String name, @NotBlank @Size(max = 16) String platform, @NotBlank @Size(max = 255) String udid, @NotBlank @Size(max = 64) String automationName, Map<String, String> capabilities, @NotNull Boolean enabled) { }
     public record ApplicationRequest(@NotBlank @Size(max = 120) String name, @NotBlank @Size(max = 16) String platform, @NotBlank @Size(max = 255) String appIdentifier, @Size(max = 120) String versionName, @Size(max = 26) String appFileId, @NotNull Boolean enabled) { }
     public record ElementRequest(@NotBlank @Size(max = 120) String name, @NotBlank @Size(max = 16) String platform, @NotBlank @Size(max = 32) String locatorStrategy, @NotBlank @Size(max = 1024) String locatorValue, @Size(max = 1000) String description) { }
-    public record ScenarioRequest(@NotBlank @Size(max = 26) String deviceId, @NotBlank @Size(max = 26) String applicationId, @NotBlank @Size(max = 160) String name, @Size(max = 2000) String description, @NotBlank @Size(max = 16) String failureStrategy, Map<String, String> variables, @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps) { }
-    public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 32) String type, @NotBlank @Size(max = 160) String name, @Size(max = 26) String elementId, @Size(max = 4096) String value, @Size(max = 4096) String expectedText, @Min(1) @Max(60000) Integer timeoutMillis) { }
+    public record ScenarioRequest(@NotBlank @Size(max = 26) String deviceId, @NotBlank @Size(max = 26) String applicationId, @NotBlank @Size(max = 160) String name, @Size(max = 2000) String description, @NotBlank @Size(max = 16) String failureStrategy, @JsonDeserialize(contentUsing=MobileInput.Text.class) Map<String, String> variables, @NotEmpty @Size(max = 300) List<@NotNull @Valid StepRequest> steps) { }
+    public record StepRequest(@NotBlank @Size(max = 64) String id, @NotBlank @Size(max = 32) String type, @NotBlank @Size(max = 160) String name, @Size(max = 26) String elementId, @Size(max = 4096) @JsonDeserialize(using=MobileInput.Text.class) String value, @Size(max = 4096) @JsonDeserialize(using=MobileInput.Text.class) String expectedText, @Min(1) @Max(60000) @JsonDeserialize(using=MobileInput.IntegerValue.class) Integer timeoutMillis) { }
     public record DeviceUpdate(@Min(1) int expectedVersion, @NotNull @Valid DeviceRequest device) { }
     public record ApplicationUpdate(@Min(1) int expectedVersion, @NotNull @Valid ApplicationRequest application) { }
     public record ElementUpdate(@NotNull java.time.Instant expectedUpdatedAt, @NotNull @Valid ElementRequest element) { }
     public record ScenarioUpdate(@Min(1) int expectedVersion, @NotNull @Valid ScenarioRequest scenario) { }
-    public record ExecuteRequest(@Min(10) @Max(3600) Integer timeoutSeconds) { }
+    public record ExecuteRequest(@Min(10) @Max(3600) @JsonDeserialize(using=MobileInput.IntegerValue.class) Integer timeoutSeconds) { }
 }

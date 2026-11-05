@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-03",
+  "baselineFiles": 1412,
+  "modified": [
+    {
+      "path": "src/pages/FunctionalPlansPage.vue",
+      "beforeSha256": "83d32efb3040fd9ea1600d66584f15f566f646c889d535aaef6f167e7251186f",
+      "afterSha256": "b6f26c5674cb3fc027925c801ac2cbf623898dfe0b0ff94829a10e85d93553a3"
+    },
+    {
+      "path": "apps/desktop/app/src/functional-transfer.cjs",
+      "beforeSha256": "ed88896a849dec3622df6a3d6d8640d3eafd2c913e5b8735b5229c212d81430b",
+      "afterSha256": "95c75a4be3fe0819b3f02b4b2e9e0a63ce73ad01723f757a94ed942ed974c922"
+    },
+    {
+      "path": "apps/desktop/app/src/functional-history-sync.cjs",
+      "beforeSha256": "07bbc7212cfecb99cca2b9e17c1fdde6718b25f3779ef1b3f243239fbd5acb74",
+      "afterSha256": "9542d2dec8aaff763a01431d39fc268faca3e52654464c44aa21a7c67a6e6f9a"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestRunCase.java",
+      "beforeSha256": "7004e3879146696be6ab5ec1e35a55ac145a17e4bf04bb88206abf4c0a116bfa",
+      "afterSha256": "e3b439e67913dad37212f8e07e2fff8d4c1366cc7d16a98a75a098225ce69523"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTransferController.java",
+      "beforeSha256": "f3c8c9b5678ff1c8d0c3530936e162aec29c8f2156a53f4c28eeb5fd7e3146b2",
+      "afterSha256": "2e709a2897c068bbe49c5006d9b96ced55317bc2bfed2b3fdffabd1660ac7ed3"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestExecutionRepository.java",
+      "beforeSha256": "0510b43086cc417ce1971483895dbababa9ecac052270b8ddbfddfadb961fd13",
+      "afterSha256": "5e5e00678b6b147fe3086ab98cdbc68687282dde06a2323f41decc854fb618e9"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalHistorySyncService.java",
+      "beforeSha256": "8bae6714fa49abaaa693825e3fd88d9f609570672af25a0f07fa63e32ab0a842",
+      "afterSha256": "a081c5b3e3d39cf3cccac10ebcf6e5b80a3641188f7a68bd931ca4ee2321055a"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTestExecutionService.java",
+      "beforeSha256": "2e257e724c3f26498c88934718f495491c2292edecc88b5db981ae7b06dc3b21",
+      "afterSha256": "59babbd5a473196637e845d992d1853bd73b5b567750f3148310468d45443128"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTransferService.java",
+      "beforeSha256": "1cf4215d404673037f1bc10137030283c9f92d5aa2316c2ec2924d1420c0b599",
+      "afterSha256": "8ab2965a688da220c3a853470a1c0bc839955b8db0382bd9167f8db34bdf5a0b"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTransferHistory.java",
+      "beforeSha256": "d2eb9bca4107394a7fa7c7b3239d03b8e9582b4c20b5df58f5243858bdaf4139",
+      "afterSha256": "f3fe56eee76f3a067058868e03be1beab93a04a4c09c9eb71f19cc92ddbfb7db"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/FunctionalTransferFlowTests.java",
+      "beforeSha256": "477b0e9e9768721e97f1c7797d54e8043c01e20950b0648a035db74dce9a9e19",
+      "afterSha256": "1a7cc0c59342103ac5d7381a7ce7a6a55b36162c02d7bc7460725a2fcbe188d6"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/desktop/DesktopBackupToolTests.java",
+      "beforeSha256": "50fc67bdf63ef48d37ff7e76c00fba1b6c88d830f39a82657c229dc1f6942f79",
+      "afterSha256": "9e42bbdb232a4536c1705a62c9587f52877398eb8bd5276c70d657eb67153870"
+    }
+  ],
+  "added": [
+    {
+      "path": "src/test/d08D07Plans.test.ts",
+      "sha256": "74b1ae065e3e4edd3f7d59574f97dc40f1d9f694020b88864e14dd6bd29d4d06"
+    },
+    {
+      "path": "apps/desktop/test/d08-history-title.test.cjs",
+      "sha256": "b3e6cf614355a2613df84ebd2ba5a81f4bed628fede3b1b03bb3be5bc0d5bcc2"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/functional/FunctionalTitleSnapshot.java",
+      "sha256": "a97539a13b4e2c4fb52f8a9d8c78603421c10ca001ae57d57c782316d4d8c122"
+    },
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D08D07PlanTests.java",
+      "sha256": "8703978e432db243754253ccce9314b2a40a0823a3f12a5eedd5defcbb4c63d4"
+    },
+    {
+      "path": "services/platform-api/src/main/resources/db/migration/V113__functional_run_case_title_snapshot.sql",
+      "sha256": "fb97577639fb9c389ee5dea14814eea93eda70550a363637c1c32dd2b90d9d77"
+    },
+    {
+      "path": "services/platform-api/src/main/resources/db/desktop/V57__functional_run_case_title_snapshot.sql",
+      "sha256": "fb97577639fb9c389ee5dea14814eea93eda70550a363637c1c32dd2b90d9d77"
+    }
+  ],
+  "removed": [],
+  "otherBaselineFilesUnchanged": 1400,
+  "baselineSha256": "184d7b3da93e35d537a56872df78f11698a66b5a675aa8b9540323b40fb11377",
+  "unrelatedPreexistingChangesPreserved": true
+}

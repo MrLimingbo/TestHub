@@ -1,0 +1,104 @@
+{
+  "phase": "VALID_BEFORE",
+  "totalMethods": 21,
+  "formalCases": 20,
+  "formalPassed": 19,
+  "formalFailed": 1,
+  "diagnosticMethods": 1,
+  "errors": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "method": "B13_ordinaryUserCannotCreateTrustAdaptersOrPackages",
+      "status": "PASS"
+    },
+    {
+      "method": "B06_packageInstallAndUpgradeIgnoreOuterFields",
+      "status": "PASS"
+    },
+    {
+      "method": "B03_adapterCreateIgnoresOuterFields",
+      "status": "PASS"
+    },
+    {
+      "method": "B09_knownBusinessRulesStillFail",
+      "status": "PASS"
+    },
+    {
+      "method": "B11_dynamicMapValidationIsNotWeakened",
+      "status": "PASS"
+    },
+    {
+      "method": "B08_wrongKnownStringTypesStillFail",
+      "status": "PASS"
+    },
+    {
+      "method": "B02_templateUpdateIgnoresUnknownFields",
+      "status": "PASS"
+    },
+    {
+      "method": "B05_signingKeyUnknownFieldsCannotChangeTrustOrCreator",
+      "status": "PASS"
+    },
+    {
+      "method": "B12_forgedScopeAndActorCannotOverrideServerValues",
+      "status": "PASS"
+    },
+    {
+      "method": "B15_loginAndCsrfChecksRemainRequired",
+      "status": "PASS"
+    },
+    {
+      "method": "B14_viewerCannotForgeTemplateWriterRole",
+      "status": "PASS"
+    },
+    {
+      "method": "X01_observeDuplicateAdapterResponsesWithoutSettingANewPolicy",
+      "status": "PASS"
+    },
+    {
+      "method": "B19_outerFieldsCannotBypassOriginalSignature",
+      "status": "PASS"
+    },
+    {
+      "method": "B01_templateCreateIgnoresScalarObjectAndArray",
+      "status": "PASS"
+    },
+    {
+      "method": "B20_openApiDescribesTheFourDtosAndContentBoundaries",
+      "status": "FAIL",
+      "message": "Multiple Failures (4 failures)\n org.opentest4j.AssertionFailedError: TemplateRequest ==> expected: <true> but was: <false>\n org.opentest4j.AssertionFailedError: AdapterRequest ==> expected: <true> but was: <false>\n org.opentest4j.AssertionFailedError: SigningKeyRequest ==> expected: <true> but was: <false>\n org.opentest4j.AssertionFailedError: PackageRequest ==> expected: <true> but was: <false>"
+    },
+    {
+      "method": "B18_manifestOriginalCharactersAndInnerProjectionArePreserved",
+      "status": "PASS"
+    },
+    {
+      "method": "B10_dynamicConfigurationKeysAreNotOuterUnknownFields",
+      "status": "PASS"
+    },
+    {
+      "method": "B16_transferRejectsUnknownAtEveryPayloadLevel",
+      "status": "PASS"
+    },
+    {
+      "method": "B04_adapterUpdatePreservesEncryptedConfiguration",
+      "status": "PASS"
+    },
+    {
+      "method": "B17_syncRejectsUnknownAtEveryPayloadLevel",
+      "status": "PASS"
+    },
+    {
+      "method": "B07_misspelledMissingNullAndBlankRequiredFieldsStillFail",
+      "status": "PASS"
+    }
+  ],
+  "rawLogSha256": "396ca173231fa317225ef3c744d3137fcd0d697418bd61106558672801c2ecca",
+  "initialFixtureRun": "20methods:18pass/2fail;B03 reused unique adapter key,comparison fixture restored;B20 missing docs",
+  "duplicateDiagnostic": {
+    "writesUnchanged": true,
+    "withoutUnknownStatus": 500,
+    "withUnknownStatus": 500
+  }
+}

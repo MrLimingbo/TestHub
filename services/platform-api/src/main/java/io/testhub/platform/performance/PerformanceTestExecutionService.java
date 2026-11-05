@@ -32,16 +32,18 @@ public class PerformanceTestExecutionService {
     private final PerformanceRunnerStatusService runners;
     private final AccessService access;
     private final AuditService audit;
+    private final PerformanceTestPlanService definitions;
 
     public PerformanceTestExecutionService(PerformanceTestExecutionRepository executions, PerformanceTestPlanRepository plans,
                                            PerformanceTestExecutionArtifactRepository artifacts, PerformanceRunnerStatusService runners,
-                                           AccessService access, AuditService audit) {
+                                           AccessService access, AuditService audit, PerformanceTestPlanService definitions) {
         this.executions = executions;
         this.plans = plans;
         this.artifacts = artifacts;
         this.runners = runners;
         this.access = access;
         this.audit = audit;
+        this.definitions = definitions;
     }
 
     public List<PerformanceTestExecution> list(AuthenticatedPrincipal principal, String projectId) {
@@ -247,6 +249,7 @@ public class PerformanceTestExecutionService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "压测计划不存在"));
         if (!"READY".equals(plan.status())) throw new ResponseStatusException(HttpStatus.CONFLICT, "只有待执行状态的压测计划可以提交任务");
         if (plan.threadGroups().isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "压测计划缺少线程组");
+        definitions.validateForExecution(projectId, plan);
         int timeout = timeout(timeoutSeconds);
         Instant requestedAt = Instant.now();
         String executionId = UlidCreator.getUlid().toString();

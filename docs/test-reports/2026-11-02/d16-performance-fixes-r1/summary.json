@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-02",
+  "module": "性能测试",
+  "observation": "OBS-10-E011",
+  "status": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+  "formalCases": 63,
+  "positive": 27,
+  "negative": 36,
+  "passed": 63,
+  "failed": 0,
+  "blocked": 0,
+  "resultsApprovedOverall": 34,
+  "pendingModuleResults": 1,
+  "D16ModulesWaitingForGate": 3,
+  "otherObservationsDeferred": 9,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "nextModule": "Web UI自动化",
+  "nextModuleStarted": false,
+  "historicalStatisticsFrozen": true
+}

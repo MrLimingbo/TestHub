@@ -1,0 +1,62 @@
+{
+  "before": {
+    "backend": {
+      "total": 56,
+      "passed": 45,
+      "failed": 11,
+      "errors": 0
+    },
+    "page": {
+      "total": 5,
+      "passed": 3,
+      "failed": 2
+    }
+  },
+  "after": {
+    "frontend": {
+      "total": 909,
+      "passed": 909,
+      "failed": 0
+    },
+    "backendH2": {
+      "total": 1223,
+      "passed": 1220,
+      "failed": 0,
+      "skipped": 3
+    },
+    "backendMySQLAffected": {
+      "suites": 9,
+      "total": 100,
+      "passed": 100,
+      "failed": 0,
+      "skipped": 0
+    },
+    "JMeterRunner": {
+      "total": 26,
+      "passed": 25,
+      "failed": 0,
+      "skipped": 1
+    },
+    "browserGroups": {
+      "total": 5,
+      "passed": 5
+    },
+    "nativeHttpGroups": {
+      "total": 6,
+      "passed": 6
+    },
+    "lintTypecheckBuild": true
+  },
+  "formalCases": 63,
+  "countsNotAdditive": true,
+  "observationFixed": "OBS-10-E011",
+  "newConfirmedProductBugs": 0,
+  "historical108BugsAnd1AssetFrozen": true,
+  "redLoopCaveat": "修复前循环在首失败后停止，后续变体不冒称已逐项动态复现；最终所有变体运行。编译/选择器夹具调试不计产品Bug。",
+  "runnerScope": "纯协议预检和既有Runner回归；真实JMeter集成跳过1，无真实外部目标负载。运行工件原1秒内部下界保持，控制面计划仍10秒。",
+  "warnings": [
+    "既有两条vue/require-prop-types警告",
+    "Monaco依赖source map缺失提示",
+    "Vite大块建议"
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "at": "2026-11-05T03:46:18.153613+00:00",
+  "basis": "用户：所有阻塞流程全部先跳过，接着测试后续没有完成的工作，完成一个大模块后交由审核",
+  "d26Observations": 2,
+  "environmentCases": 12,
+  "records": [
+    {
+      "id": "OBS-16-E001",
+      "kind": "D26_BASELINE",
+      "status": "SKIPPED_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "OBS-16-E002",
+      "kind": "D26_BASELINE",
+      "status": "SKIPPED_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-12-D001",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-12-D002",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-12-D003",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-12-D004",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-15-F016",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-15-X001",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-15-X002",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-15-X003",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-16-Z001",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-16-Z002",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-16-Z003",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-16-Z004",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    }
+  ],
+  "independentRisk": "OBS-XREG-SHUTDOWN",
+  "riskUnconfirmedRetained": true,
+  "remainingExecutableUntestedModules": 0,
+  "newModuleCreated": false
+}

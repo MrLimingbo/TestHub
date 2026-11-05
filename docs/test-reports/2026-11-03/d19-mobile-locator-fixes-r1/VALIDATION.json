@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-03",
+  "checks": {
+    "resultMethods": 18,
+    "sourceModified": 4,
+    "sourceAdded": 4,
+    "otherBaselineFilesUnchanged": 1404,
+    "localReportLinksChecked": 21,
+    "environmentBlockers": 12,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "rawFilesRemoved": 304,
+    "diffCheck": "PASS"
+  },
+  "errors": [],
+  "validationIsNotAdditionalProductTests": true
+}

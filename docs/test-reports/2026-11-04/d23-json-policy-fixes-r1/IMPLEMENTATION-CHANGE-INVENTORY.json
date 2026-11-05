@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-04",
+  "baselineFiles": 1427,
+  "modified": [
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/extension/ExtensionRegistryController.java",
+      "beforeSha256": "00eba65b1d167f470473613044d47f82ad76255e340aa334f715ff317b08fc36",
+      "afterSha256": "3503c5510704c64c5e945208131c14f68799a2713bf40e1b36ef8ecc9c5f43fb"
+    },
+    {
+      "path": "services/platform-api/src/main/java/io/testhub/platform/notification/NotificationTemplateController.java",
+      "beforeSha256": "a2276d5864452f7afb6580b9a44251b9a4b0fb30250e81adf9ee2d0f216d6aeb",
+      "afterSha256": "55d4334358a09650eb5ca8fb31bd376e57304b637f649e148f01c4d11b6560de"
+    }
+  ],
+  "added": [
+    {
+      "path": "services/platform-api/src/test/java/io/testhub/platform/P2D23JsonPolicyTests.java",
+      "sha256": "e5c9a3e53cf08068b75aa2e6c87c989ed2c672ee3f643e634e3567be3704f7a0"
+    }
+  ],
+  "removed": [],
+  "otherBaselineFilesUnchanged": 1425,
+  "unrelatedChangesPreserved": true,
+  "runtimeBehaviorChanged": false,
+  "productionChangeKind": "OpenAPI descriptions only;4ordinary DTOs and2dynamic/signed fields",
+  "globalObjectMapperChanged": false,
+  "strictReadersChanged": false,
+  "extensionBusinessServicesChanged": false
+}

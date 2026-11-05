@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-04",
+  "status": "RESULTS_APPROVED",
+  "basis": "用户：D23 修复和回归审核通过，继续推进D26资源与延迟基线；先方案后后台执行，结果审核后再继续。",
+  "reportSha256": "ebfed0724175ad10cf6042a6585682bc01346c8ef511ec6d6e89a13707acfdc3",
+  "caseResultsSha256": "7e76fe62ba6e6ec27de3a4cce8be92cd10bb3af6f696ce08829f7e8bb2d1069c",
+  "bugId": "BUG-D23-001",
+  "bugResultApproved": true,
+  "environmentBlockersDeferred": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

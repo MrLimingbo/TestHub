@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-04",
+  "status": "IMPLEMENTED_PENDING_RESULT_REVIEW",
+  "observation": "OBS-03D-E007",
+  "rule": "D06-A",
+  "newMethods": {
+    "total": 16,
+    "positiveOnly": 7,
+    "negativeOnly": 7,
+    "mixed": 2,
+    "passed": 16,
+    "failed": 0,
+    "blocked": 0
+  },
+  "checks": {
+    "h2": {
+      "total": 1329,
+      "passed": 1326,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 3
+    },
+    "mysqlAffected": {
+      "total": 56,
+      "passed": 56,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 5
+    },
+    "frontendPassed": 945,
+    "frontendFiles": 98,
+    "lint": "PASS_WITH_2_EXISTING_WARNINGS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "backendJar": "PASS",
+    "diffCheck": "PASS"
+  },
+  "priorObservationImplemented": 1,
+  "newConfirmedProductBugs": 0,
+  "newFormalTestAssetIssues": 0,
+  "mysqlFirstRun": "55passed/1mode-setup failure;diagnosed and corrected test preparation,56/56final",
+  "productionFilesChanged": 1,
+  "schemaChanged": false,
+  "uiProductChanged": false,
+  "historicalEnvironmentBlockersDeferred": 12,
+  "otherObservationsWaitingForModuleGate": 4,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "noNextModuleExecuted": true
+}

@@ -1,0 +1,42 @@
+{
+  "headless": true,
+  "realPackagedJvm": true,
+  "desktopProfile": true,
+  "electronUpgradeTest": false,
+  "realTargetLoad": false,
+  "cases": [
+    {
+      "id": "TC-D16PERF-01/02/03/04/05/06/07/08/09",
+      "title": "真实HTTP九字段等值整数规范化",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16PERF-19/20/21/22/40/41/56",
+      "title": "小数错误类型和文本值拒绝且字段错误不泄露",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16PERF-30/31/32/33/34",
+      "title": "错误率真小数和精度语义保持",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16PERF-35/36/37/44",
+      "title": "字符串保持且非法更新不改版本",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16PERF-47/49",
+      "title": "原始HTTP迁移及同步不能绕过",
+      "status": "PASS"
+    },
+    {
+      "id": "TC-D16PERF-50",
+      "title": "自有JVM重启记录会话保持（非升级复验）",
+      "status": "PASS"
+    }
+  ],
+  "cleanup": true,
+  "passed": 6,
+  "failed": 0
+}

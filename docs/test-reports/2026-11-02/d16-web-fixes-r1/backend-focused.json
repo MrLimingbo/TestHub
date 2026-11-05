@@ -1,0 +1,189 @@
+{
+  "total": 45,
+  "passed": 45,
+  "failed": 0,
+  "errors": 0,
+  "cases": [
+    {
+      "name": "transferValid",
+      "status": "PASS"
+    },
+    {
+      "name": "widthExact",
+      "status": "PASS"
+    },
+    {
+      "name": "viewportTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "executeExact",
+      "status": "PASS"
+    },
+    {
+      "name": "actionDefault",
+      "status": "PASS"
+    },
+    {
+      "name": "executeTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "objectReference",
+      "status": "PASS"
+    },
+    {
+      "name": "heightExact",
+      "status": "PASS"
+    },
+    {
+      "name": "waitExact",
+      "status": "PASS"
+    },
+    {
+      "name": "waitBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "stepFractions",
+      "status": "PASS"
+    },
+    {
+      "name": "replay",
+      "status": "PASS"
+    },
+    {
+      "name": "variableStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "transferInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "oldRuntime",
+      "status": "PASS"
+    },
+    {
+      "name": "executeDefaults",
+      "status": "PASS"
+    },
+    {
+      "name": "viewportDefaults",
+      "status": "PASS"
+    },
+    {
+      "name": "revisionConflict",
+      "status": "PASS"
+    },
+    {
+      "name": "oldManualQueue",
+      "status": "PASS"
+    },
+    {
+      "name": "permission",
+      "status": "PASS"
+    },
+    {
+      "name": "variableNull",
+      "status": "PASS"
+    },
+    {
+      "name": "editScenarioInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "syncInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "executeBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "syncValid",
+      "status": "PASS"
+    },
+    {
+      "name": "overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "errorLocation",
+      "status": "PASS"
+    },
+    {
+      "name": "actionBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "oldOtherQueue",
+      "status": "PASS"
+    },
+    {
+      "name": "waitRequired",
+      "status": "PASS"
+    },
+    {
+      "name": "variableTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "stepTypes",
+      "status": "PASS"
+    },
+    {
+      "name": "editProfileInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "nonTargetContract",
+      "status": "PASS"
+    },
+    {
+      "name": "oldReadOnly",
+      "status": "PASS"
+    },
+    {
+      "name": "widthBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "heightBounds",
+      "status": "PASS"
+    },
+    {
+      "name": "viewportFractions",
+      "status": "PASS"
+    },
+    {
+      "name": "lateStepInvalid",
+      "status": "PASS"
+    },
+    {
+      "name": "actionExact",
+      "status": "PASS"
+    },
+    {
+      "name": "editFreeze",
+      "status": "PASS"
+    },
+    {
+      "name": "scheduleAlias",
+      "status": "PASS"
+    },
+    {
+      "name": "stepTextRequired",
+      "status": "PASS"
+    },
+    {
+      "name": "stepStrings",
+      "status": "PASS"
+    },
+    {
+      "name": "stepTextTypes",
+      "status": "PASS"
+    }
+  ],
+  "note": "Final fixture and expanded old-definition/manual/scheduled/manual-retry/automatic-retry checks. Automatic rejection preserves FAILED and records a failure audit without new execution assets."
+}

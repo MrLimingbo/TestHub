@@ -1,0 +1,79 @@
+{
+  "total": 79,
+  "passed": 79,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "io.testhub.platform.P2D19MobileLocatorTests",
+      "total": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.mobileautomation.P2D16MobileInputTests",
+      "total": 8,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationTransferFlowTests",
+      "total": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.P2D16MobileFlowTests",
+      "total": 5,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.MobileApplicationFileSyncFlowTests",
+      "total": 12,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationFixesFlowTests",
+      "total": 5,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationSyncFlowTests",
+      "total": 11,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationArtifactSyncFlowTests",
+      "total": 12,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationHistorySyncFlowTests",
+      "total": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "io.testhub.platform.MobileAutomationFlowTests",
+      "total": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}

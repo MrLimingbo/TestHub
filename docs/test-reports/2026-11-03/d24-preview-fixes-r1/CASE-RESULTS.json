@@ -1,0 +1,232 @@
+{
+  "unit": "AUTOMATED_ACCEPTANCE_SCENARIO",
+  "total": 24,
+  "positiveOnly": 13,
+  "negativeOnly": 8,
+  "mixed": 3,
+  "passed": 24,
+  "failed": 0,
+  "blocked": 0,
+  "nodeMethods": 17,
+  "rendererMethods": 3,
+  "offscreenScenarios": 4,
+  "variantsAndEngineeringRerunsNotAdded": true,
+  "cases": [
+    {
+      "id": "N01",
+      "method": "N01 context cancellation waits for fetch termination and releases its lock",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "context受控请求取消，终止确认后释放自有锁；无业务写入。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N02",
+      "method": "N02 preview cancellation invalidates its plan immediately and on termination",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "preview协作取消，操作信号传播；失效预览不可绑定。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N03",
+      "method": "N03 uncooperative work remains locked after the five second target",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "negative",
+      "coverage": "忽略取消的本地步骤超过5秒仍等待，锁定且拒绝并发写入；实际结束后释放。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N04",
+      "method": "N04 a late plan is discarded and a later preview stays independent",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "negative",
+      "coverage": "取消后迟到结果不能返回可用token或留下plan；下一次预览独立。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N05",
+      "method": "N05 success and cancellation publish exactly one terminal outcome",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "mixed",
+      "coverage": "取消/成功竞争只产生一个终态，成功赢时正常token可用，取消赢时拒绝。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N06",
+      "method": "N06 repeated cancellation is idempotent and cannot cancel the next operation",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "重复取消同一操作幂等，不取消后续操作。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N07",
+      "method": "N07 other senders frames pages and identifiers cannot cancel the owner",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "negative",
+      "coverage": "外窗口、子框架、错误页面及旧操作ID不能取消当前操作。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N08",
+      "method": "N08 successful preview retains its token and normal request result",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "正常context/preview完成，锁释放，预览及后续原确认流程可用。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N09",
+      "method": "N09 network errors and timeouts clean up before another read",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "mixed",
+      "coverage": "网络失败和超时受控失败，资源/监听器/锁清理，可再次执行。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N10",
+      "method": "N10 JSON request preserves caller cancellation through fetch",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "JSON读取期间取消，停止读流且释放reader；会话、重定向及大小限制保持。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N11",
+      "method": "N11 binary cancellation closes the reader and digest validation is retained",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "mixed",
+      "coverage": "二进制读取取消资源清理；原摘要、大小、空文件限制不放宽。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N12",
+      "method": "N12 writes keep their original exclusive flow and do not accept read cancellation",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "negative",
+      "coverage": "写操作不接受预览取消，也不能与取消未确认的预览并发。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N13",
+      "method": "N13 project sync context uses the shared read lifecycle",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "逐个安装全部同步入口，context及自定义preview参数使用同一取消契约和原发送者检查。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N14",
+      "method": "N14 every native transfer context and prepare uses cancellation and discards late tokens",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "全部迁移context/prepare使用同一契约，取消使对应客户端plan失效；commit保持原确认。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N15",
+      "method": "N15 navigation and close cannot release a still running operation",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "negative",
+      "coverage": "页面离开或窗口关闭触发取消；未终止前不关闭，不能提前清全局锁。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N16",
+      "method": "N16 normal transport retains caller signals redirect limits and write requests",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "无预览操作时传输正常，既有超时/调用者signal仍生效，不影响写请求。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "N17",
+      "method": "N17 each terminal outcome removes listeners and leaves no active owner reference",
+      "source": "apps/desktop/test/d24-preview.test.cjs",
+      "polarity": "positive",
+      "coverage": "成功、取消及失败后移除本操作监听器/状态引用，不撤销别的操作资源。",
+      "status": "PASS",
+      "evidence": "desktop-results.json"
+    },
+    {
+      "id": "U01",
+      "method": "U01 cancellation control announces progress immediately and waits for the real terminal state",
+      "source": "src/test/d24ReadOperation.test.ts",
+      "polarity": "positive",
+      "coverage": "取消控件可键盘使用，点击立即显示正在取消；终态提示准确。",
+      "status": "PASS",
+      "evidence": "frontend-results.json"
+    },
+    {
+      "id": "U02",
+      "method": "U02 late polling and pagehide cannot overwrite a newer operation or draft",
+      "source": "src/test/d24ReadOperation.test.ts",
+      "polarity": "negative",
+      "coverage": "旧轮询/离页后的响应不得覆盖新页面或新操作状态。",
+      "status": "PASS",
+      "evidence": "frontend-results.json"
+    },
+    {
+      "id": "U03",
+      "method": "U03 an ordinary write has no read cancellation control and existing disabled controls stay disabled",
+      "source": "src/test/d24ReadOperation.test.ts",
+      "polarity": "positive",
+      "coverage": "只读活动显示取消控件；写操作无可取消入口，原控件保护保持。",
+      "status": "PASS",
+      "evidence": "frontend-results.json"
+    },
+    {
+      "id": "E01",
+      "method": "E01",
+      "source": "apps/desktop/test/d24-preview-offscreen.cjs",
+      "polarity": "positive",
+      "coverage": "真实离屏Electron中受控读取可取消，反馈实测≤1秒、终止确认及释放≤5秒。",
+      "status": "PASS",
+      "evidence": "native-results.json:E01"
+    },
+    {
+      "id": "E02",
+      "method": "E02",
+      "source": "apps/desktop/test/d24-preview-offscreen.cjs",
+      "polarity": "positive",
+      "coverage": "真实窗口close请求在取消并释放锁后完成关闭，不显示/聚焦窗口。",
+      "status": "PASS",
+      "evidence": "native-results.json:E02"
+    },
+    {
+      "id": "E03",
+      "method": "E03",
+      "source": "apps/desktop/test/d24-preview-offscreen.cjs",
+      "polarity": "negative",
+      "coverage": "真实离屏不可立即中断夹具超过5秒显示终止未确认并继续锁定，结束后才可关闭。",
+      "status": "PASS",
+      "evidence": "native-results.json:E03"
+    },
+    {
+      "id": "E04",
+      "method": "E04",
+      "source": "apps/desktop/test/d24-preview-offscreen.cjs",
+      "polarity": "negative",
+      "coverage": "真实离屏迟到结果/失效token不能绑定；新窗口/新预览状态保持。",
+      "status": "PASS",
+      "evidence": "native-results.json:E04"
+    }
+  ]
+}

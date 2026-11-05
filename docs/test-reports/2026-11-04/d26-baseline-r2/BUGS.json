@@ -1,0 +1,11 @@
+{
+  "newConfirmedProductBugs": 0,
+  "formalBusinessRequests": 0,
+  "formalAttempts": 0,
+  "validWindows": 0,
+  "fullModulePassed": false,
+  "precheckOperationsPassed": 6,
+  "conclusion": "本次停于正式窗口准入，未形成正式性能样本；预检6类操作正常，不构成完整D26基线或长期稳定性通过。",
+  "currentExecutionBlocker": "D26-BLOCK-FORMAL-ADMISSION",
+  "priorCollectorFixesNotCountedAgain": true
+}

@@ -2,6 +2,7 @@ package io.testhub.platform.reporting;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.f4b6a3.ulid.UlidCreator;
 import io.testhub.platform.access.AccessService;
 import io.testhub.platform.access.ProjectSummary;
@@ -123,7 +124,7 @@ public class QualityReportTransferService {
     private ResponseStatusException invalid(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST,message); }
     private ResponseStatusException conflict(String message) { return new ResponseStatusException(HttpStatus.CONFLICT,message); }
     public record Project(String id,String code) { }
-    public record Schedule(String id,String name,List<String> projectIds,String cronExpression,String timezone,Integer periodDays) { }
+    public record Schedule(String id,String name,List<String> projectIds,String cronExpression,String timezone,@JsonDeserialize(using=QualityReportPeriod.ExactInteger.class) Integer periodDays) { }
     public record Snapshot(int version,String sourceProjectId,List<Project> projects,List<Schedule> schedules) { }
     public record ImportRequest(String requestKey,String expectedUserId,Snapshot snapshot) { }
     public record Receipt(String id,int schedules,int projects) { }

@@ -11,6 +11,7 @@ const { LocalRuntime, loadBundle, loadSecrets } = require('./local-runtime.cjs')
 const { LocalBrowsers } = require('./local-browsers.cjs')
 const { LocalEngines } = require('./local-engines.cjs')
 const { FunctionalTransfer, jsonRequest } = require('./functional-transfer.cjs')
+const { ReadOperations } = require('./read-operation.cjs')
 const { ApiTransfer, apiTransferResponseBudget } = require('./api-transfer.cjs')
 const { AutomationTransfer, automationTransferResponseBudget } = require('./automation-transfer.cjs')
 const { MockTransfer, mockTransferResponseBudget } = require('./mock-transfer.cjs')
@@ -110,6 +111,10 @@ let enteringLocalWorkspace
 const LOCAL_PARTITION = 'persist:testhub-local-workspace'
 const approvedTargetOrigins = new Set()
 const MAX_RESPONSE_BYTES = 512 * 1024
+const readOperations = new ReadOperations({ trusted: event => event.sender === setupWindow?.webContents
+  && event.senderFrame === event.sender.mainFrame && event.senderFrame?.url.startsWith(SETUP_PREFIX) })
+ipcMain.handle('testhub-desktop:read-operation:status', event => readOperations.status(event))
+ipcMain.handle('testhub-desktop:read-operation:cancel', (event, id) => readOperations.cancel(event, id))
 
 function desktopAssetUrl(requestUrl) {
   const request = new URL(requestUrl)
@@ -351,7 +356,9 @@ function openSetupWindow(page = 'setup.html') {
   })
   denyAllPermissions(setupWindow.webContents.session)
   setupWindow.webContents.on('will-attach-webview', (event) => event.preventDefault())
-  setupWindow.on('close', event => { if ((backupOperation || transferOperation) && !quitting) event.preventDefault() })
+  setupWindow.on('close', event => {
+    if ((backupOperation || transferOperation) && !quitting) { event.preventDefault(); readOperations.closeAfterCancellation(setupWindow) }
+  })
   setupWindow.on('closed', () => { setupWindow = undefined })
   void setupWindow.loadURL(`${SETUP_ORIGIN}/${page}`)
 }
@@ -660,8 +667,8 @@ ipcMain.handle('testhub-desktop:transfer:open', event => {
     || !isTrustedRemoteSender(event)) throw new Error('请从已登录的账号工作区打开迁移页面。')
   openSetupWindow('transfer.html')
 })
-ipcMain.handle('testhub-desktop:transfer:context', event => runTransfer(event, async () => ({ ...(await (await getTransferClient()).context()), server: activeServerUrl })))
-ipcMain.handle('testhub-desktop:transfer:prepare', (event, value) => runTransfer(event, async () => (await getTransferClient()).prepare(value?.sourceId, value?.targetId, value?.includePlans, value?.includeGovernance, value?.includeDefects, value?.includeFiles, value?.includeHistory, value?.includeProjectVersions, value?.includeGovernanceCatalogs)))
+ipcMain.handle('testhub-desktop:transfer:context', event => runTransferRead(event, async () => ({ ...(await (await getTransferClient()).context()), server: activeServerUrl })))
+ipcMain.handle('testhub-desktop:transfer:prepare', (event, value) => runTransferRead(event, async () => (await getTransferClient()).prepare(value?.sourceId, value?.targetId, value?.includePlans, value?.includeGovernance, value?.includeDefects, value?.includeFiles, value?.includeHistory, value?.includeProjectVersions, value?.includeGovernanceCatalogs)))
 ipcMain.handle('testhub-desktop:transfer:commit', (event, token) => runTransfer(event, async () => {
   const client = await getTransferClient(), plan = client.plan
   if (!plan || plan.token !== token) throw new Error('请重新预览迁移资料。')
@@ -672,6 +679,19 @@ ipcMain.handle('testhub-desktop:transfer:commit', (event, token) => runTransfer(
   if (decision.response !== 1) return { cancelled: true }
   return client.commit(token)
 }))
+function runTransferRead(event, operation) {
+  requireTransferSender(event)
+  return runReadTransfer(event, operation)
+}
+function runReadTransfer(event, operation) {
+  const clients = () => ({ 'transfer.html': transferClient, 'api-transfer.html': apiTransferClient,
+    'automation-transfer.html': automationTransferClient, 'mock-transfer.html': mockTransferClient,
+    'performance-transfer.html': performanceTransferClient, 'ui-automation-transfer.html': uiAutomationTransferClient,
+    'mobile-automation-transfer.html': mobileAutomationTransferClient, 'quality-report-transfer.html': qualityReportTransferClient,
+    'task-transfer.html': taskTransferClient, 'settings-transfer.html': settingsTransferClient, 'notification-transfer.html': notificationTransferClient })
+  const page = event.senderFrame.url.slice(SETUP_PREFIX.length)
+  return readOperations.run(event, runApiTransfer, operation, () => { const client = clients()[page]; if (client) client.plan = undefined })
+}
 function requireApiTransferSender(event) {
   if (event.sender !== setupWindow?.webContents || event.senderFrame !== event.sender.mainFrame
     || event.senderFrame?.url !== `${SETUP_ORIGIN}/api-transfer.html`) throw new Error('不受信任的接口迁移请求。')
@@ -722,11 +742,11 @@ ipcMain.handle('testhub-desktop:api-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:api-transfer:context', event => {
   requireApiTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getApiTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getApiTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:api-transfer:prepare', (event, value) => {
   requireApiTransferSender(event)
-  return runApiTransfer(async () => (await getApiTransferClient()).prepare(value?.sourceId, value?.targetId, value?.includeFiles, value?.includeGrpc, value?.includeHistory))
+  return runReadTransfer(event, async () => (await getApiTransferClient()).prepare(value?.sourceId, value?.targetId, value?.includeFiles, value?.includeGrpc, value?.includeHistory))
 })
 ipcMain.handle('testhub-desktop:api-transfer:commit', (event, token) => {
   requireApiTransferSender(event)
@@ -785,11 +805,11 @@ ipcMain.handle('testhub-desktop:automation-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:automation-transfer:context', event => {
   requireAutomationTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getAutomationTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getAutomationTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:automation-transfer:prepare', (event, value) => {
   requireAutomationTransferSender(event)
-  return runApiTransfer(async () => (await getAutomationTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getAutomationTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:automation-transfer:commit', (event, token) => {
   requireAutomationTransferSender(event)
@@ -848,11 +868,11 @@ ipcMain.handle('testhub-desktop:mock-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:mock-transfer:context', event => {
   requireMockTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getMockTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getMockTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:mock-transfer:prepare', (event, value) => {
   requireMockTransferSender(event)
-  return runApiTransfer(async () => (await getMockTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getMockTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:mock-transfer:commit', (event, token) => {
   requireMockTransferSender(event)
@@ -910,11 +930,11 @@ ipcMain.handle('testhub-desktop:performance-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:performance-transfer:context', event => {
   requirePerformanceTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getPerformanceTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getPerformanceTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:performance-transfer:prepare', (event, value) => {
   requirePerformanceTransferSender(event)
-  return runApiTransfer(async () => (await getPerformanceTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getPerformanceTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:performance-transfer:commit', (event, token) => {
   requirePerformanceTransferSender(event)
@@ -972,11 +992,11 @@ ipcMain.handle('testhub-desktop:ui-automation-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:ui-automation-transfer:context', event => {
   requireUiAutomationTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getUiAutomationTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getUiAutomationTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:ui-automation-transfer:prepare', (event, value) => {
   requireUiAutomationTransferSender(event)
-  return runApiTransfer(async () => (await getUiAutomationTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getUiAutomationTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:ui-automation-transfer:commit', (event, token) => {
   requireUiAutomationTransferSender(event)
@@ -1034,11 +1054,11 @@ ipcMain.handle('testhub-desktop:mobile-automation-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:mobile-automation-transfer:context', event => {
   requireMobileAutomationTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getMobileAutomationTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getMobileAutomationTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:mobile-automation-transfer:prepare', (event, value) => {
   requireMobileAutomationTransferSender(event)
-  return runApiTransfer(async () => (await getMobileAutomationTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getMobileAutomationTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:mobile-automation-transfer:commit', (event, token) => {
   requireMobileAutomationTransferSender(event)
@@ -1096,11 +1116,11 @@ ipcMain.handle('testhub-desktop:quality-report-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:quality-report-transfer:context', event => {
   requireQualityReportTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getQualityReportTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getQualityReportTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:quality-report-transfer:prepare', (event, value) => {
   requireQualityReportTransferSender(event)
-  return runApiTransfer(async () => (await getQualityReportTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getQualityReportTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:quality-report-transfer:commit', (event, token) => {
   requireQualityReportTransferSender(event)
@@ -1158,11 +1178,11 @@ ipcMain.handle('testhub-desktop:task-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:task-transfer:context', event => {
   requireTaskTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getTaskTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getTaskTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:task-transfer:prepare', (event, value) => {
   requireTaskTransferSender(event)
-  return runApiTransfer(async () => (await getTaskTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getTaskTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:task-transfer:commit', (event, token) => {
   requireTaskTransferSender(event)
@@ -1220,11 +1240,11 @@ ipcMain.handle('testhub-desktop:settings-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:settings-transfer:context', event => {
   requireSettingsTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getSettingsTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getSettingsTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:settings-transfer:prepare', (event, value) => {
   requireSettingsTransferSender(event)
-  return runApiTransfer(async () => (await getSettingsTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getSettingsTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:settings-transfer:commit', (event, token) => {
   requireSettingsTransferSender(event)
@@ -1282,11 +1302,11 @@ ipcMain.handle('testhub-desktop:notification-transfer:open', event => {
 })
 ipcMain.handle('testhub-desktop:notification-transfer:context', event => {
   requireNotificationTransferSender(event)
-  return runApiTransfer(async () => ({ ...(await (await getNotificationTransferClient()).context()), server: activeServerUrl }))
+  return runReadTransfer(event, async () => ({ ...(await (await getNotificationTransferClient()).context()), server: activeServerUrl }))
 })
 ipcMain.handle('testhub-desktop:notification-transfer:prepare', (event, value) => {
   requireNotificationTransferSender(event)
-  return runApiTransfer(async () => (await getNotificationTransferClient()).prepare(value?.sourceId, value?.targetId))
+  return runReadTransfer(event, async () => (await getNotificationTransferClient()).prepare(value?.sourceId, value?.targetId))
 })
 ipcMain.handle('testhub-desktop:notification-transfer:commit', (event, token) => {
   requireNotificationTransferSender(event)
@@ -1430,10 +1450,11 @@ ipcMain.handle('testhub-desktop:preferences:save', async (event, value) => {
 ipcMain.handle('testhub-desktop:api-debug:execute', executeHttpDebug)
 
 if (ownsWorkspace) app.whenReady().then(async () => {
-  const syncOptions = { ipcMain, dialog, session, directory: app.getPath('userData'), origin: SETUP_ORIGIN,
+  const syncOptions = { ipcMain, dialog, session, readOperations, directory: app.getPath('userData'), origin: SETUP_ORIGIN,
     fileLinkContext: binding => projectFileSync?.linkContext(binding) ?? null,
     descriptorLinkContext: binding => grpcDescriptorSync?.linkContext(binding) ?? null,
     windows: () => ({ main: mainWindow, setup: setupWindow }),
+    statusRuntime: async () => { await initializeLocalRuntime(); return localRuntime },
     runtime: async () => {
       await initializeLocalRuntime(); await localRuntime.start()
       await ensureSyncSession(localRuntime, (url, options) => session.fromPartition(LOCAL_PARTITION).fetch(url, options))

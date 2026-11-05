@@ -1,0 +1,34 @@
+{
+  "numTotalTests": 5,
+  "numPassedTests": 3,
+  "numFailedTests": 2,
+  "numPendingTests": 0,
+  "success": false,
+  "suites": [
+    {
+      "name": "src/test/d16PerformancePage.test.ts",
+      "cases": [
+        {
+          "title": "TC-D16PERF-57: invalid integer text blocks submission and keeps the dialog",
+          "status": "FAIL"
+        },
+        {
+          "title": "TC-D16PERF-58: exact integer spellings submit numbers",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16PERF-59: error percent is not rounded before validation",
+          "status": "FAIL"
+        },
+        {
+          "title": "TC-D16PERF-60: optional blanks and model changes keep null policy",
+          "status": "PASS"
+        },
+        {
+          "title": "TC-D16PERF-61: removing a group retains the surviving group raw values",
+          "status": "PASS"
+        }
+      ]
+    }
+  ]
+}

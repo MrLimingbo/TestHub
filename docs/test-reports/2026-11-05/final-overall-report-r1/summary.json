@@ -1,0 +1,48 @@
+{
+  "at": "2026-11-05T04:57:53.345638+00:00",
+  "status": "FINAL_AGGREGATION_PENDING_USER_REVIEW",
+  "closeoutResultsApproved": true,
+  "mainModules": 16,
+  "acceptanceScopes": 19,
+  "historicalCaseOccurrences": 3090,
+  "historicalPositive": 1643,
+  "historicalNegative": 1447,
+  "historicalDisposition": {
+    "PASS": 3031,
+    "FAIL": 0,
+    "OBSERVED": 47,
+    "BLOCKED": 12
+  },
+  "observationRecords": 47,
+  "observationResultsApproved": 45,
+  "d26ObservationsSkippedSpecRetained": 2,
+  "environmentCasesSkipped": 12,
+  "historicalProductBugsFixed": 108,
+  "postBaselineProductBugsFixedApproved": 1,
+  "totalUniqueRegisteredProductBugsFixed": 109,
+  "unfixedConfirmedProductBugs": 0,
+  "historicalTestAssetsFixed": 1,
+  "postBaselineCloseoutAssetsFixed": 1,
+  "totalRegisteredTestAssetIssuesFixed": 2,
+  "currentAssetReferencesFixed": 9,
+  "closeoutAudit": {
+    "passed": 16,
+    "failed": 0,
+    "frozenFilesMatched": 387,
+    "currentReferencesVerified": 72
+  },
+  "newProductTestExecution": false,
+  "restoreSkippedWork": false,
+  "sourceCodeChanged": false,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "remainingExecutableUntestedModules": 0,
+  "documentValidation": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "frozenFileEntriesMatched": 418,
+    "sourceFilesMatched": 92,
+    "localLinksChecked": 65
+  }
+}
