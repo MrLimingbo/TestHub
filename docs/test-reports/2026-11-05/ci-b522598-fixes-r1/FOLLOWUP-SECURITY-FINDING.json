@@ -1,0 +1,34 @@
+{
+  "firstFixCommit": "92385d2116c0b769b6aaf6231a482e577aa51a99",
+  "workflowRun": "https://github.com/MrLimingbo/TestHub/actions/runs/41989378859",
+  "javaGateFindingsAfterFix": 0,
+  "additionalFinding": {
+    "package": "libbrotli1",
+    "cve": "CVE-2026-111497",
+    "severity": "CRITICAL",
+    "installed": "1.1.0-2+b7",
+    "fixed": "1.1.0-2+deb13u1"
+  },
+  "baseImageChange": {
+    "family": "gcr.io/distroless/java21-debian13",
+    "before": "sha256:27ea9d33a1329dfa96a787e447f5caaf62ff2e21e496ca501fcb56ba3cedd5af",
+    "after": "sha256:1bc4eca3c3b351743be673d7109951b509d6f47a57648e5e2efe784a1b051c4a",
+    "verifiedPlatform": "linux/amd64",
+    "verifiedPackageVersion": "1.1.0-2+deb13u1",
+    "verification": "Pulled pinned official multiarch digest; copied dpkg status.d from an owned stopped amd64 container; container and temporary directory removed"
+  },
+  "upstreamSources": [
+    "https://security-tracker.debian.org/tracker/CVE-2026-111497",
+    "https://github.com/GoogleContainerTools/distroless"
+  ],
+  "unchanged": [
+    "Java 21",
+    "Debian 13",
+    "nonroot runtime",
+    "HIGH/CRITICAL gate",
+    "ignore-unfixed policy; no new ignores",
+    "D26 and 12 environment cases remain skipped",
+    "OBS-XREG-SHUTDOWN=UNCONFIRMED_RETAINED; rootCauseConfirmed=false"
+  ],
+  "githubFinalVerification": "CHECK_NEXT_FIX_COMMIT_VERIFY_RUN"
+}

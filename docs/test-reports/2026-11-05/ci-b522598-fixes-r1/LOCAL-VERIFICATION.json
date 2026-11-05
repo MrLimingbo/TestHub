@@ -36,7 +36,18 @@
     "sameMethodsAcrossTimezonesNotCountedAsNewCases": true,
     "resolvedDependenciesConfirmed": true,
     "gitDiffCheck": "PASS",
-    "ownedMysqlRedisS3CleanedAfterEachRun": true
+    "ownedMysqlRedisS3CleanedAfterEachRun": true,
+    "isolatedH2FullSuite": {
+      "timezone": "UTC",
+      "total": 1374,
+      "passed": 1371,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 3,
+      "skipReason": "MySQL-only compatibility methods; separately passed under isolated MySQL in UTC and Asia/Shanghai",
+      "jarBuild": "PASS",
+      "ownedWorkspaceCleaned": true
+    }
   },
   "securityGateThresholdsChanged": false,
   "vulnerabilityIgnoresAdded": false,
