@@ -1,0 +1,110 @@
+{
+  "at": "2026-11-06T06:40:19.438185+00:00",
+  "scope": "DOCUMENT_AGGREGATION_AND_EXISTING_CI_EVIDENCE_ONLY",
+  "total": 16,
+  "passed": 16,
+  "failed": 0,
+  "newProductTestExecution": false,
+  "restoreSkippedWork": false,
+  "results": [
+    {
+      "id": "V01_source_hashes",
+      "result": "PASS",
+      "details": {
+        "files": 24,
+        "mismatches": []
+      }
+    },
+    {
+      "id": "V02_prior_frozen_artifacts",
+      "result": "PASS",
+      "details": {
+        "files": 16,
+        "mismatches": []
+      }
+    },
+    {
+      "id": "V03_prior_approval_integrity",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V04_historical_counts_unchanged",
+      "result": "PASS",
+      "details": {
+        "historicalCases": 3090,
+        "registeredProductBugs": 109,
+        "historicalAssetIssues": 2
+      }
+    },
+    {
+      "id": "V05_module_table_preserved",
+      "result": "PASS",
+      "details": {
+        "scopes": 19
+      }
+    },
+    {
+      "id": "V06_ci_counts_separate",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V07_independent_risk_retained",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V08_skipped_work_not_restored",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V09_ci_candidate_and_job_results",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V10_security_fixes_and_gate_scope",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V11_ci_user_approval_binding",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V12_local_delivery_links",
+      "result": "PASS",
+      "details": {
+        "checked": 107,
+        "broken": []
+      }
+    },
+    {
+      "id": "V13_docs_only_scope",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V14_document_commit_not_misrepresented",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V15_diff_whitespace",
+      "result": "PASS",
+      "details": {
+        "output": ""
+      }
+    },
+    {
+      "id": "V16_json_syntax",
+      "result": "PASS",
+      "details": {
+        "files": 6
+      }
+    }
+  ]
+}

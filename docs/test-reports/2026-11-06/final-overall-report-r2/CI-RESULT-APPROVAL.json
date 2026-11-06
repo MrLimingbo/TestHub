@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-11-06T06:39:11.792186+00:00",
+  "status": "CI_FIX_AND_VERIFICATION_RESULTS_APPROVED",
+  "basis": "用户明确回复：CI修复和验证结果审核通过。把本次修复及CI通过结果更新到最终整体测试报告，并提交推送到GitHub主分支；D26和12项环境补验继续跳过，升级关闭超时的未确认风险继续保留。",
+  "approvedCiCommit": "cec6df1dd68c67fd6279d785c19a8c84d64a5e6f",
+  "approvedRunId": 41990603365,
+  "approvedFixCommits": [
+    "92385d2116c0b769b6aaf6231a482e577aa51a99",
+    "cec6df1dd68c67fd6279d785c19a8c84d64a5e6f"
+  ],
+  "priorOverallApproval": "docs/test-reports/2026-11-05/final-overall-report-r1/REVIEW-APPROVAL.json",
+  "authorizesReportUpdateAndMainPush": true,
+  "restoreSkippedWorkAuthorized": false,
+  "D26": "SKIPPED_BY_USER_SPEC_RETAINED",
+  "environmentCasesSkipped": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false,
+  "ciResultsSha256": "2b01bd634078259e7ad86e8574b95f4b6e9de78f23151b9fcc8591454caae4ed"
+}

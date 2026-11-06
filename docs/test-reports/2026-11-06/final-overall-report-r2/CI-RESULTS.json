@@ -1,0 +1,107 @@
+{
+  "updatedAt": "2026-11-05T08:11:42.309366+00:00",
+  "originalCommit": "b522598a641516bd46eb10ac4e55684d2ed01304",
+  "originalRun": "https://github.com/MrLimingbo/TestHub/actions/runs/41981648534",
+  "fixCommits": [
+    "92385d2116c0b769b6aaf6231a482e577aa51a99",
+    "cec6df1dd68c67fd6279d785c19a8c84d64a5e6f"
+  ],
+  "finalRun": "https://github.com/MrLimingbo/TestHub/actions/runs/41990603365",
+  "state": "PASS",
+  "releaseGate": "PASS",
+  "constraints": {
+    "D26": "SKIPPED_BY_USER_SPEC_RETAINED",
+    "environmentCasesSkipped": 12,
+    "OBS-XREG-SHUTDOWN": "UNCONFIRMED_RETAINED",
+    "rootCauseConfirmed": false
+  },
+  "builtJarDependencies": [
+    "BOOT-INF/lib/guava-33.8.0-jre.jar",
+    "BOOT-INF/lib/snappy-java-1.1.10.12.jar"
+  ],
+  "changedFiles": [
+    "docs/test-reports/2026-11-05/ci-b522598-fixes-r1/BEFORE-CI-RESULTS.json",
+    "docs/test-reports/2026-11-05/ci-b522598-fixes-r1/FIX-AND-VERIFICATION-PLAN.md",
+    "docs/test-reports/2026-11-05/ci-b522598-fixes-r1/FOLLOWUP-SECURITY-FINDING.json",
+    "docs/test-reports/2026-11-05/ci-b522598-fixes-r1/LOCAL-VERIFICATION.json",
+    "services/platform-api/Dockerfile",
+    "services/platform-api/pom.xml",
+    "services/platform-api/src/test/java/io/testhub/platform/P1CompatibilityTests.java"
+  ],
+  "firstFixGithubMysql": {
+    "runId": 41989378859,
+    "jobId": 127117690707,
+    "total": 1374,
+    "passed": 1374,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "migrationCompatibility": {
+      "total": 3,
+      "passed": 3
+    },
+    "build": "PASS",
+    "ownedCleanup": "PASS"
+  },
+  "latestJobs": {
+    "release-gate": {
+      "jobId": 127121658202,
+      "conclusion": "success",
+      "platformOsGateFindings": 0,
+      "platformJarGateFindings": 0,
+      "webOsGateFindings": 0,
+      "severityThreshold": [
+        "HIGH",
+        "CRITICAL"
+      ],
+      "newIgnores": false
+    },
+    "web": {
+      "jobId": 127121658436,
+      "conclusion": "success",
+      "lintErrors": 0,
+      "existingLintWarnings": 2,
+      "testsPassed": 950,
+      "startupTestsPassed": 15,
+      "startupFailures": 0,
+      "build": "PASS"
+    },
+    "platform-api": {
+      "jobId": 127121658588,
+      "conclusion": "success",
+      "total": 1374,
+      "passed": 1374,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "migrationCompatibility": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0
+      },
+      "build": "PASS",
+      "ownedContainersNetworkVolumesRemoved": true,
+      "ownedAcceptanceFilesRemoved": true
+    }
+  },
+  "finalWorkflow": {
+    "id": 41990603365,
+    "status": "completed",
+    "conclusion": "success",
+    "headSha": "cec6df1dd68c67fd6279d785c19a8c84d64a5e6f",
+    "completedAt": "2026-11-05T08:10:15Z"
+  },
+  "evidenceScope": "APPROVED_CI_RESULTS_FOR_CEC6DF1_NOT_A_RESULT_FOR_THE_DOCUMENTATION_COMMIT",
+  "recheckedAt": "2026-11-06T06:39:11.792186+00:00",
+  "recheckedVia": "GitHub workflow jobs and gh run view; all three jobs completed successfully",
+  "runtimeFamilyPreserved": [
+    "Java 21",
+    "Debian 13",
+    "nonroot"
+  ],
+  "securityGateWeakened": false,
+  "newVulnerabilityIgnores": false,
+  "historicalCountsRewritten": false,
+  "productExecutionInThisReportUpdate": false
+}

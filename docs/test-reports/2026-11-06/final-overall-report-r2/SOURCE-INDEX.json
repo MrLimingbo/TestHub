@@ -1,0 +1,129 @@
+{
+  "recordedAt": "2026-11-06T06:39:11.792186+00:00",
+  "scope": "R2_REPORT_ASSEMBLY_ONLY",
+  "priorR1FilesPreserved": true,
+  "files": [
+    {
+      "path": "docs/test-reports/2026-11-05/ci-b522598-fixes-r1/BEFORE-CI-RESULTS.json",
+      "sha256": "c1bab0b2acadde48bb54cee51c05d05bd5967eacff35bbec7b8abdd3a57367e5"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/ci-b522598-fixes-r1/FIX-AND-VERIFICATION-PLAN.md",
+      "sha256": "653481ae11d242114b36837dd4ecbaea1e4b8ee85eefbaca3908f2d2ff1a98f7"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/ci-b522598-fixes-r1/FOLLOWUP-SECURITY-FINDING.json",
+      "sha256": "1ad1d31c192ec1eb84b4a5a6799a218f26ffcb0e5a6ba553dcde0a8e1f9b1458"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/ci-b522598-fixes-r1/LOCAL-VERIFICATION.json",
+      "sha256": "938bb6d0e5bfc751230b8cc305554b2ebdb47f1ebe4c7c87d3b0d9d1b941433c"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/ARTIFACT-HASHES.json",
+      "sha256": "ea378a1fff029d1cd2d54a5b1fdb6b75a2fe1ea148afe740ed198c7c5b0439c9"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/ASSEMBLY-PLAN.json",
+      "sha256": "2d80915f6f009f947ade513c1945dd83cdafd9d644bcbc58e3a14522ff0536e9"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/CURRENT-STATUS.json",
+      "sha256": "0f20531a83f358c8874bbdca63f6d126e24813d2938342cddb975e84cd803e3b"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/CURRENT-STATUS.md",
+      "sha256": "5a1640b107a2978c58559073c3fb5cb33ab377ea916c067011f694b074a8ee47"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/D26-SKIPPED.json",
+      "sha256": "15bcad183268e5feba80ce77f0b0e7737dfa5ce35e785feca26a7ce4a174a129"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/ENVIRONMENT-BLOCKERS.json",
+      "sha256": "e957d72701b0ab230744231872b3f07339e22284f4510f23614c35545b1afa00"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/FOLLOWUP-RESULTS.json",
+      "sha256": "58b644689801a3c45bdd8c2a4dddfe964e538898742b20fca307810c06941777"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/HISTORICAL-MODULE-RESULTS.csv",
+      "sha256": "a71c3591931b1435b4db4484792179d8b4eb024e60d9383055be5d1425ef1b6d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/MODULE-RESULTS.json",
+      "sha256": "e568669228c85e3260f0fd0c14dca5708640e5039ecc9c7ac147263dda577737"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/OBSERVATION-STATUS.json",
+      "sha256": "8e6e618ac3697c72a6e81187fcd5ba22eec21f4ad61041a53505b7dd02e2e179"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/OVERALL-TEST-REPORT.md",
+      "sha256": "989b9ed139866a9ed7b64b378bbd6d0379c2341aa7c36f305a5b700c19d8ae8d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/PRODUCT-BUG-REGISTER.json",
+      "sha256": "b5541532d03350b4c040114edc09879ba8f2ef8e6808f32f42d2100854f3d866"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/README.md",
+      "sha256": "cdb83870ff785e11730f80716bfb4b2287e8bd47061e87b111b6b9748a02f1b2"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/REVIEW-APPROVAL.json",
+      "sha256": "39c726c7eac7823362cd2dbde8d953f029d062e42905ceaef28889300c80b708"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/SKIPPED-WORK.json",
+      "sha256": "88401672dcd33ec3abbba94cd320e221740de8634e8814e31cecd4116f325d51"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/SOURCE-INDEX.json",
+      "sha256": "d8d95725d707355991a90fab42a20cac45ce5f4f37a988676feddf55ffb9230e"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/TEST-ASSET-REGISTER.json",
+      "sha256": "cd9c888b28c1db938270c79041c36517c923839f96ae99bd9a3bf5917f95686c"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/UNCONFIRMED-RISK.json",
+      "sha256": "0124f934bbc71e61718ee1675960fc43c228ce834e94b1773bf557c66448a5a9"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/VALIDATION.json",
+      "sha256": "296993acc34971edbee341976968a1c0db89041e4900c1461ac109261584b288"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/final-overall-report-r1/summary.json",
+      "sha256": "6ea5b346f9ace8b64eeeaaffc4a7a4b0c587a8fa12e80a2cb8b787e1740f475e"
+    }
+  ],
+  "mutableNavigationUpdates": [
+    {
+      "path": "docs/test-reports/2026-10-30/PROGRESS-AND-REMAINING.md",
+      "beforeSha256": "0ca3a8d6a0238b8b42678d6de12e7dfe32686a7303cb43196b1a1d3416766021",
+      "afterSha256": "165d2d68fd3a2400df7f8230d6c6b1ac8dc424b60aa58389a97f130629039a12"
+    },
+    {
+      "path": "docs/test-reports/2026-11-02/README.md",
+      "beforeSha256": "050ea294bc269bbae49c5edba05ed9d901e394641ed5a736cb995a8eecc3a3ba",
+      "afterSha256": "68cf0c4475566a85769c3e449a951aca7c610d8a9f567c3b851e108df35c4e3d"
+    },
+    {
+      "path": "docs/test-reports/2026-11-03/README.md",
+      "beforeSha256": "737a5f2a049e79ce4a673406319e74fa190e54b4b78a2e29091f835727f0dbae",
+      "afterSha256": "b723550546543cf098860281536225541e489a3fb11fef1b922e8aac513c8604"
+    },
+    {
+      "path": "docs/test-reports/2026-11-05/README.md",
+      "beforeSha256": "064074f8edf3f834567a6ef5715852e6bfefd750f1b7533164031f526c8620d8",
+      "afterSha256": "84f2fb6674887d26136046c6bf89bf6facf2254b698b8e950c5e3dc46fc35b0a"
+    }
+  ],
+  "ciEvidence": "CI-RESULTS.json",
+  "ciRecheckedAt": "2026-11-06T06:39:11.792186+00:00",
+  "newProductExecution": false,
+  "restoreSkippedWork": false
+}

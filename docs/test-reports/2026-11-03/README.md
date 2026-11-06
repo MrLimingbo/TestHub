@@ -1,6 +1,8 @@
 # 2026-11-03 测试进度
 
-**最新状态（2026-11-05）：** D23及新增Bug结果均已审核；原16主模块/19范围已审，47观察45项结果已审。D26两项与12项环境按用户要求跳过，待机已停止，未确认关闭风险保留。[非阻塞收尾报告](../2026-11-05/nonblocking-closeout-r1/FINAL-REPORT.md)已审；当前[最终整体报告](../2026-11-05/final-overall-report-r1/OVERALL-TEST-REPORT.md)已审核通过，审批独立记录，跳过项及未确认风险继续保留，无其他未执行的非阻塞功能模块。以下为此前进度快照。
+**最新更新（2026-11-06）：** 已审核的CI修复及通过结果已汇入[最终整体报告R2](../2026-11-06/final-overall-report-r2/OVERALL-TEST-REPORT.md)，按用户授权提交主分支；cec6df1的[三个CI作业](https://github.com/MrLimingbo/TestHub/actions/runs/41990603365)全部成功。历史统计不回写，D26和12项环境补验继续跳过，升级关闭超时风险继续未确认。以下保留此前状态快照。
+
+**2026-11-05状态快照：** D23及新增Bug结果均已审核；原16主模块/19范围已审，47观察45项结果已审。D26两项与12项环境按用户要求跳过，待机已停止，未确认关闭风险保留。[非阻塞收尾报告](../2026-11-05/nonblocking-closeout-r1/FINAL-REPORT.md)已审；当前[最终整体报告](../2026-11-05/final-overall-report-r1/OVERALL-TEST-REPORT.md)已审核通过，审批独立记录，跳过项及未确认风险继续保留，无其他未执行的非阻塞功能模块。以下为此前进度快照。
 
 D16六模块修复及回归和[整体测试报告](d16-overall-summary-r1/OVERALL-TEST-REPORT.md)均已审核通过，见[独立审批](d16-overall-summary-r1/REVIEW-APPROVAL.json)。
 
