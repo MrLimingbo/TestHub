@@ -1,0 +1,112 @@
+{
+  "at": "2026-11-09T02:23:35.617555+00:00",
+  "scope": "REPORT_DOCUMENT_AND_APPROVED_CI_EVIDENCE_ONLY",
+  "total": 16,
+  "passed": 16,
+  "failed": 0,
+  "newProductTestExecution": false,
+  "restoreSkippedWork": false,
+  "results": [
+    {
+      "id": "V01_source_hashes",
+      "result": "PASS",
+      "details": {
+        "matched": 32,
+        "total": 32,
+        "mismatches": []
+      }
+    },
+    {
+      "id": "V02_prior_R1_R2_artifacts_unchanged",
+      "result": "PASS",
+      "details": {
+        "total": 23,
+        "mismatches": []
+      }
+    },
+    {
+      "id": "V03_prior_overall_approval_binding",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V04_historical_and_fix_counts_preserved",
+      "result": "PASS",
+      "details": {
+        "historicalCases": 3090,
+        "registeredProductBugs": 109,
+        "registeredHistoricalAssets": 2,
+        "ciFixesNotRecounted": true
+      }
+    },
+    {
+      "id": "V05_module_results_preserved",
+      "result": "PASS",
+      "details": {
+        "acceptanceScopes": 19
+      }
+    },
+    {
+      "id": "V06_environment_cases_preserved",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V07_D26_skipped_and_not_restored",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V08_shutdown_risk_retained",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V09_commit_and_CI_identity",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V10_test_build_security_results",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V11_user_approval_and_push_authorization",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V12_local_links",
+      "result": "PASS",
+      "details": {
+        "checked": 119,
+        "broken": []
+      }
+    },
+    {
+      "id": "V13_docs_only_no_new_execution",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V14_future_documentation_CI_not_assumed",
+      "result": "PASS",
+      "details": null
+    },
+    {
+      "id": "V15_whitespace",
+      "result": "PASS",
+      "details": {
+        "gitDiffCheck": ""
+      }
+    },
+    {
+      "id": "V16_JSON_syntax",
+      "result": "PASS",
+      "details": {
+        "files": 6
+      }
+    }
+  ]
+}

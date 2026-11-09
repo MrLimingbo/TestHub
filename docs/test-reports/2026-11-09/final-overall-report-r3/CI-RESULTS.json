@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-11-06T07:08:31.034432+00:00",
+  "commit": "5f0fd9b9f9b49b4302c9ee849b9461e9bef84151",
+  "branch": "main",
+  "workflow": {
+    "id": 42176021973,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "updatedAt": "2026-11-06T06:56:14Z",
+    "url": "https://github.com/MrLimingbo/TestHub/actions/runs/42176021973"
+  },
+  "jobs": {
+    "web": {
+      "id": 127754551352,
+      "conclusion": "success",
+      "lintErrors": 0,
+      "existingLintWarnings": 2,
+      "testFilesPassed": 100,
+      "testsPassed": 950,
+      "startupTests": 15,
+      "startupPassed": 15,
+      "startupFailed": 0,
+      "startupSkipped": 0,
+      "build": "PASS"
+    },
+    "platform-api": {
+      "id": 127754550933,
+      "conclusion": "success",
+      "total": 1374,
+      "passed": 1374,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "migrationCompatibilityPassed": 3,
+      "build": "PASS",
+      "ownedContainersNetworkVolumesCleaned": true,
+      "ownedAcceptanceFilesCleaned": true
+    },
+    "release-gate": {
+      "id": 127754551289,
+      "conclusion": "success",
+      "platformImageBuild": "PASS",
+      "webImageBuild": "PASS",
+      "sbomUploaded": true,
+      "artifactId": 13482917811,
+      "platformOsGateFindings": 0,
+      "platformJarGateFindings": 0,
+      "webOsGateFindings": 0,
+      "scope": "Existing HIGH/CRITICAL threshold with ignore-unfixed policy"
+    }
+  },
+  "failuresFound": 0,
+  "fixRequired": false,
+  "codeChanged": false,
+  "newCommitCreated": false,
+  "testsRerunByThisCheck": false,
+  "constraints": {
+    "D26": "SKIPPED_BY_USER_SPEC_RETAINED",
+    "environmentCasesSkipped": 12,
+    "shutdownRisk": "UNCONFIRMED_RETAINED",
+    "rootCauseConfirmed": false,
+    "restoreSkippedWork": false
+  },
+  "evidence": "GitHub push workflow metadata, all job steps and completed job logs; no raw request data or credentials retained",
+  "recheckedAt": "2026-11-09T02:22:23.009704+00:00",
+  "recheckedVia": "GitHub workflow job steps and gh run view for run42176021973",
+  "resultScope": "APPROVED_5F0FD9B_CI_RESULT_NOT_A_RESULT_FOR_THIS_NEW_REPORT_COMMIT",
+  "newProductExecutionInThisReportUpdate": false
+}

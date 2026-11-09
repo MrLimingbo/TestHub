@@ -1,0 +1,15 @@
+{
+  "recordedAt": "2026-11-09T02:22:23.009704+00:00",
+  "status": "CI_VERIFICATION_RESULTS_APPROVED",
+  "basis": "用户明确回复：5f0fd9b的CI核验结果审核通过。把构建、测试和安全门全部通过的结果更新到最终整体测试报告，并提交推送到GitHub主分支；D26和12项环境补验继续跳过，升级关闭超时的未确认风险继续保留。",
+  "approvedCiCommit": "5f0fd9b9f9b49b4302c9ee849b9461e9bef84151",
+  "approvedRunId": 42176021973,
+  "ciResultsSha256": "bf9a4592d7c196eba376087c870c28088910c4cdb014a2882a71293a0d118f7f",
+  "priorOverallReport": "docs/test-reports/2026-11-06/final-overall-report-r2/OVERALL-TEST-REPORT.md",
+  "authorizesReportUpdateAndMainPush": true,
+  "restoreSkippedWorkAuthorized": false,
+  "D26": "SKIPPED_BY_USER_SPEC_RETAINED",
+  "environmentCasesSkipped": 12,
+  "shutdownRisk": "UNCONFIRMED_RETAINED",
+  "rootCauseConfirmed": false
+}

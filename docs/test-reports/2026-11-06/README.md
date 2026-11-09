@@ -1,5 +1,7 @@
 # 2026-11-06最终整体测试报告更新
 
+**最新更新（2026-11-09）：** 5f0fd9b的[构建、测试和安全门](https://github.com/MrLimingbo/TestHub/actions/runs/42176021973)全部通过，核验结果已审核并汇入[最终整体报告R3](../2026-11-09/final-overall-report-r3/OVERALL-TEST-REPORT.md)，按用户授权提交主分支。历史统计不回写，D26及12项环境补验继续跳过，升级关闭超时风险仍未确认。以下保留此前状态快照。
+
 [最终整体报告R2](final-overall-report-r2/OVERALL-TEST-REPORT.md)已纳入用户审核通过的CI修复与通过结果，按授权提交推送主分支。
 
 cec6df1的[GitHub CI](https://github.com/MrLimingbo/TestHub/actions/runs/41990603365)三个作业全部成功：前端950项、启动15项、后端1374项全部通过；镜像构建、SBOM和安全门通过。详见[结构化结果](final-overall-report-r2/CI-RESULTS.json)及[审核授权](final-overall-report-r2/CI-RESULT-APPROVAL.json)。
