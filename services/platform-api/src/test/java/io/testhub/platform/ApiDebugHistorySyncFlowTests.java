@@ -10,13 +10,19 @@ import io.testhub.platform.account.*;
 import io.testhub.platform.apidebug.*;
 import io.testhub.platform.security.SecretCipher;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.*;
@@ -26,7 +32,19 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest(properties={"testhub.registration.enabled=true","testhub.bootstrap.demo-enabled=false"})
 @AutoConfigureMockMvc @ActiveProfiles(resolver=FunctionalDatabaseProfile.class) @DirtiesContext
+@Import(ApiDebugHistorySyncFlowTests.ReplayTimeConfiguration.class)
 class ApiDebugHistorySyncFlowTests {
+ private static final Instant TEST_NOW = Instant.parse("2026-10-21T01:00:00Z");
+ private static final Instant HISTORY_CREATED_AT = TEST_NOW.minus(1, ChronoUnit.DAYS);
+
+ @TestConfiguration
+ static class ReplayTimeConfiguration {
+  @Bean
+  Clock replayClock() {
+   return Clock.fixed(TEST_NOW, ZoneOffset.UTC);
+  }
+ }
+
  @TempDir static Path directory;
  @DynamicPropertySource static void properties(DynamicPropertyRegistry r){if(FunctionalDatabaseProfile.mysql())FunctionalDatabaseProfile.configure(r,directory,"debug-history-sync-fixture");else{r.add("testhub.desktop.data-directory",directory::toString);r.add("spring.datasource.url",()->"jdbc:h2:file:"+directory.resolve("workspace")+";MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE");r.add("spring.datasource.username",()->"sa");r.add("spring.datasource.password",()->"debug-history-sync-fixture");}}
  @Autowired ApiDebugService debug; @Autowired RegistrationService registration; @Autowired AccessService access; @Autowired ApiDebugHistorySyncService sync; @Autowired ApiDebugHistoryRepository history; @Autowired ApiReplayTemplateSanitizer sanitizer; @Autowired SecretCipher cipher; @Autowired JdbcClient jdbc; @Autowired ObjectMapper json; @Autowired MockMvc mvc; @Autowired PlatformTransactionManager transactions;
@@ -39,13 +57,13 @@ class ApiDebugHistorySyncFlowTests {
    else{request.putArray("subscriptions").add("{\"token\":\"subscription-private\",\"topic\":\"safe\"}");request.putObject("reconnect").put("enabled",true).put("maxAttempts",3).put("delayMs",1000);request.putArray("subprotocols").add("owned");}}
   request.put("timeoutMs",1000).put("environmentCode","dev");if(protocol.equals("WEBSOCKET"))request.remove("timeoutMs");request.putObject("auth").put("type","BEARER").put("token","auth-private-marker").put("username","").put("password","").put("key","").put("value","");var result=json.createObjectNode().put("protocol",protocol);result.set("request",request);return result;
  }
- String insert(Fixture f,String protocol)throws Exception{String id=identifier();history.insert(new ApiDebugHistory(id,access.context(f.actor()).organizations().getFirst().id(),f.project(),protocol.equals("GRPC")?"GRPC":"POST",protocol,"https://user:pass@example.test/private-path?token=private-query#private-fragment",200,12,34,"COMPLETED","private-error",cipher.encrypt(raw(protocol).toString()),f.actor().userId(),Instant.parse("2026-10-20T01:00:00Z")));return f.project()+"."+id;}
+ String insert(Fixture f,String protocol)throws Exception{String id=identifier();history.insert(new ApiDebugHistory(id,access.context(f.actor()).organizations().getFirst().id(),f.project(),protocol.equals("GRPC")?"GRPC":"POST",protocol,"https://user:pass@example.test/private-path?token=private-query#private-fragment",200,12,34,"COMPLETED","private-error",cipher.encrypt(raw(protocol).toString()),f.actor().userId(),HISTORY_CREATED_AT));return f.project()+"."+id;}
  ApiDebugHistorySyncService.Inventory inventory(Fixture f,String mode){return sync.inventory(f.actor(),f.project(),f.actor().userId(),mode);}
  ApiDebugHistorySyncService.Item item(Fixture f,String mode,String key){return sync.read(f.actor(),f.project(),f.actor().userId(),mode,key);}
  ApiDebugHistorySyncService.Request request(Fixture target,String mode,ApiDebugHistorySyncService.Item... items){return new ApiDebugHistorySyncService.Request(UUID.randomUUID().toString(),target.actor().userId(),inventory(target,mode).revision(),List.of(items));}
  void copy(Fixture s,Fixture t,String mode,String key){sync.apply(t.actor(),t.project(),mode,request(t,mode,item(s,mode,key)));}
  long count(Fixture f,String table){return jdbc.sql("SELECT COUNT(*) FROM "+table+" WHERE project_id=:p").param("p",f.project()).query(Long.class).single();}
- @Test void historySummaryCopiesWithoutPayloadCredentialsPathOrExecutionSideEffects()throws Exception{var s=fixture();var t=fixture();String key=insert(s,"HTTP");var value=item(s,"history",key);String encoded=new String(sync.encoded(value));for(String privateText:List.of("private-path","private-query","private-fragment","private-error","auth-private-marker","body-private-marker","user:pass"))assertFalse(encoded.contains(privateText),privateText);var request=request(t,"history",value);var receipt=sync.apply(t.actor(),t.project(),"history",request);assertEquals(receipt,sync.apply(t.actor(),t.project(),"history",request));assertEquals(value,item(t,"history",key));assertEquals(0,count(t,"api_debug_history"));assertEquals(1,count(t,"api_debug_sync_archive"));assertEquals("https://example.test/…",value.payload().path("target").asText());assertEquals(34,value.payload().path("responseSize").asInt());assertEquals("2026-10-20T01:00:00Z",value.payload().path("createdAt").asText());assertEquals(0,count(t,"api_automation_execution"));}
+ @Test void historySummaryCopiesWithoutPayloadCredentialsPathOrExecutionSideEffects()throws Exception{var s=fixture();var t=fixture();String key=insert(s,"HTTP");var value=item(s,"history",key);String encoded=new String(sync.encoded(value));for(String privateText:List.of("private-path","private-query","private-fragment","private-error","auth-private-marker","body-private-marker","user:pass"))assertFalse(encoded.contains(privateText),privateText);var request=request(t,"history",value);var receipt=sync.apply(t.actor(),t.project(),"history",request);assertEquals(receipt,sync.apply(t.actor(),t.project(),"history",request));assertEquals(value,item(t,"history",key));assertEquals(0,count(t,"api_debug_history"));assertEquals(1,count(t,"api_debug_sync_archive"));assertEquals("https://example.test/…",value.payload().path("target").asText());assertEquals(34,value.payload().path("responseSize").asInt());assertEquals(HISTORY_CREATED_AT.toString(),value.payload().path("createdAt").asText());assertEquals(0,count(t,"api_automation_execution"));}
  @Test void redactedTemplatesCoverAllProtocolsKeepNativeCiphertextAndEncryptCopies()throws Exception{for(String protocol:List.of("HTTP","GRAPHQL","SOAP","WEBSOCKET","GRPC")){var s=fixture();var t=fixture();String key=insert(s,protocol),before=history.findRecent(s.project(),1).getFirst().replayDraft();copy(s,t,"history",key);var draft=item(s,"replay-drafts",key);String serialized=draft.payload().toString();for(String marker:List.of("auth-private-marker","body-private-marker","query-private-marker","cookie-private-marker","variable-private-marker","graphql-private","xml-private","subscription-private","account-private","pass-private"))assertFalse(serialized.contains(marker),protocol+":"+marker);assertTrue(draft.payload().path("notices").toString().contains("MANUAL_REVIEW"));copy(s,t,"replay-drafts",key);assertEquals(draft,item(t,"replay-drafts",key));String encrypted=jdbc.sql("SELECT payload_ciphertext FROM api_debug_sync_archive WHERE project_id=:p AND sync_kind='replay-drafts'").param("p",t.project()).query(String.class).single();assertTrue(encrypted.startsWith("v2:"));assertFalse(encrypted.contains("safe"));assertEquals(before,history.findRecent(s.project(),1).getFirst().replayDraft());assertTrue(cipher.decrypt(before).contains("auth-private-marker"));assertEquals(0,count(t,"api_debug_history"));}}
  @Test void templateRequiresMatchingHistoryAndCannotBeUsedToRewriteOriginals()throws Exception{var s=fixture();var t=fixture();String key=insert(s,"HTTP");var draft=item(s,"replay-drafts",key);assertThrows(org.springframework.web.server.ResponseStatusException.class,()->sync.apply(t.actor(),t.project(),"replay-drafts",request(t,"replay-drafts",draft)));assertEquals(0,count(t,"api_debug_sync_archive"));assertThrows(org.springframework.web.server.ResponseStatusException.class,()->sync.apply(s.actor(),s.project(),"history",request(s,"history",item(s,"history",key))));copy(s,t,"history",key);copy(s,t,"replay-drafts",key);jdbc.sql("DELETE FROM api_debug_sync_archive WHERE project_id=:p AND sync_kind='history'").param("p",t.project()).update();assertThrows(org.springframework.web.server.ResponseStatusException.class,()->item(t,"replay-drafts",key));}
  @Test void receiptCannotRecreateDeletedRowsAndUuidCannotChangeBody()throws Exception{var s=fixture();var t=fixture();String key=insert(s,"HTTP");var request=request(t,"history",item(s,"history",key));sync.apply(t.actor(),t.project(),"history",request);var changed=new ApiDebugHistorySyncService.Request(request.requestKey(),request.expectedUserId(),"0".repeat(64),request.items());assertThrows(org.springframework.web.server.ResponseStatusException.class,()->sync.apply(t.actor(),t.project(),"history",changed));jdbc.sql("DELETE FROM api_debug_sync_archive WHERE project_id=:p").param("p",t.project()).update();assertThrows(org.springframework.web.server.ResponseStatusException.class,()->sync.apply(t.actor(),t.project(),"history",request));assertEquals(0,count(t,"api_debug_sync_archive"));}
