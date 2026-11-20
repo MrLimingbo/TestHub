@@ -218,6 +218,8 @@ def main():
     (ROOT / ".testhub").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="native-security-", dir=ROOT / ".testhub") as temporary:
         work = Path(temporary)
+        # The image user must be able to traverse the read-only /qa bind mount.
+        work.chmod(0o755)
         config = json.loads(run("docker", "image", "inspect", args.image).stdout)[0]
         require(config["Config"]["User"] in ("nonroot", "nonroot:nonroot", "65532", "65532:65532"), "Nonroot image required")
         require(config["Config"]["Entrypoint"][0] == "/app/testhub-runtime-guard", "Image must start through the runtime guard")
