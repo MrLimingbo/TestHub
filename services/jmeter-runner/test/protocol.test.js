@@ -106,3 +106,11 @@ test('binds JMeter archive requests to the task, artifact type, length and check
 })
 
 function decodedTask() { return decodeTask(task()) }
+
+test('rejects JMeter expressions in thread group names', () => {
+  const artifact = { contract: 'testhub.jmeter-runner.runtime-configuration', artifactVersion: 6,
+    taskId: ids.taskId, executionId: ids.executionId, deadlineAt: '2026-07-19T08:05:00.000Z',
+    threadGroups: [{ name: 'ordinary', targetUrl: 'http://127.0.0.1:18081/', loadModel: 'STEADY', threadCount: 1, rampUpSeconds: 0, durationSeconds: 1 }] }
+  artifact.threadGroups[0].name = '${__groovy(17*19)}'
+  assert.throws(() => validateRuntimeConfiguration(decodedTask(), artifact, ['http://127.0.0.1:18081']), /线程组/)
+})

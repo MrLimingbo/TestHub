@@ -122,7 +122,7 @@ Runner 可选使用运行环境变量 `RUNNER_HEARTBEAT_KEY` 对心跳进行 HMA
 
 脚本以短时、签名绑定的 `runtime-configuration` 响应交付给可信 Runner，仍不会进入 Redis Stream、Outbox、执行清单、运行时快照、浏览器接口、日志或报告。工件同时携带本次执行冻结的非敏感变量；后置脚本可读 `response.status`，前后脚本可读写 `variables`。响应正文、响应头、Cookie、请求头、环境密钥和异常详情均不可用。脚本对变量的变更只存在于单个 Runner 任务内存中，并受请求模板的 Origin 白名单和 SSRF 校验约束。
 
-Runner 使用没有宿主对象或回调的 Node `vm` 上下文，以 JSON 作为唯一跨边界格式，并禁用字符串/wasm 代码生成、模块、网络、文件、进程、计时器和异步 API；同步 CPU 时间上限为 150ms。Runner 容器以非 root 用户、只读根文件系统、无 Linux capability、`no-new-privileges`、64 个 PID 与 256 MiB 内存限制运行。容器级隔离是安全边界，VM 是额外的输入和资源防护层。脚本失败只产生固定的 `PRE_REQUEST_SCRIPT_FAILED` 或 `POST_RESPONSE_SCRIPT_FAILED` 日志，绝不回传脚本文本、变量值或异常详情。
+Runner 使用没有宿主对象或回调的 Node `vm` 上下文，以 JSON 作为唯一跨边界格式，并禁用字符串/wasm 代码生成及宿主模块、网络、文件、进程、计时器能力；CPU 与 Promise 微任务的执行时限为 150ms。每段脚本在独立 Node 子进程执行，V8 堆上限为 48 MiB，子进程总生命周期上限为 1500ms，且不继承 Runner 的环境凭据。异步拒绝和资源耗尽只会使该脚本失败。Runner 容器以非 root 用户、只读根文件系统、无 Linux capability、`no-new-privileges`、64 个 PID 与 256 MiB 内存限制运行。容器级隔离是安全边界，VM 是额外的输入和资源防护层。脚本失败只产生固定的 `PRE_REQUEST_SCRIPT_FAILED` 或 `POST_RESPONSE_SCRIPT_FAILED` 日志，绝不回传脚本文本、变量值或异常详情。
 
 能力发现将工件类型声明为 `HTTP_FLOW_CONTROL_SCRIPTS_V2`，并增加 `ISOLATED_SCRIPT_EXECUTION` 与 `PARALLEL_REQUEST_GROUP`。旧 Runner 不识别该类型时会保持安全预检，不会领取或执行 v5 工件。控制面仍拒绝环境密钥交接。
 

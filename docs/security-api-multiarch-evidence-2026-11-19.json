@@ -1,0 +1,3245 @@
+{
+  "updated_utc": "2026-11-19T10:55:41Z",
+  "state": "completed",
+  "isolated_context": "colima-testhub-api-ports-20261119",
+  "backend_platform": "linux/arm64",
+  "api_architectures": {
+    "amd64": {
+      "inventory": {
+        "image": "sha256:94dc3001821466d29449b93a917566fdaa5f7c3bdd8389108fa113a8770e58e0",
+        "architecture": "amd64",
+        "platform": "linux/amd64",
+        "image_config": "nonroot runtime guard, read-only acceptance",
+        "packages": {
+          "libc6": {
+            "version": "2.41-12+deb13u4+testhub1",
+            "verified_files": 284
+          },
+          "libstdc++6": {
+            "version": "16.2.0-4+testhub1",
+            "verified_files": 6
+          },
+          "libexpat1": {
+            "version": "2.10.0-1+testhub1",
+            "verified_files": 6
+          },
+          "libfreetype6": {
+            "version": "2.14.3+dfsg-3",
+            "verified_files": 5
+          }
+        },
+        "glibc_elf_sha256": {
+          "usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": "ad2d8fc4c8f135bd9f656f128747fe4ea7571d6bc3b0c9404521db439fe60195",
+          "usr/lib/x86_64-linux-gnu/libc.so.6": "9457725024d3ed4e127a1f9fbd11f151267fb16c2b275ea49979cb4e3df270ee"
+        },
+        "jar_sha256": "c0411b59776ca889ccac31340ed9e2e423fbdf28415ba4ca95d0496cfa99894f",
+        "conditional_gconv_module_sha256": {
+          "usr/lib/x86_64-linux-gnu/gconv/IBM1390.so": "f351a6491163142536db032d61de465c1d780571f6e0add6df6b2f11b2c02950",
+          "usr/lib/x86_64-linux-gnu/gconv/IBM1399.so": "eb156a2296ff5d9305a84df9d48708a0a24df9af3ea433d67e22ed7bfa5a4f15",
+          "usr/lib/x86_64-linux-gnu/gconv/ISO-2022-CN-EXT.so": "24d5bc05c04999eebdbe991f4b322944c3ec611bb69482f38c820e60069f7160",
+          "usr/lib/x86_64-linux-gnu/gconv/UHC.so": "ffddebb6d64d0b55094b248a6074b06b071e5c04ec0b36049f8d93b1021b9cf7"
+        }
+      },
+      "api_process": {
+        "mapped_elf": {
+          "usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": {
+            "permissions": [
+              "r-xp"
+            ],
+            "sha256": "ad2d8fc4c8f135bd9f656f128747fe4ea7571d6bc3b0c9404521db439fe60195",
+            "executable_file_ranges": [
+              [
+                4096,
+                164817
+              ]
+            ],
+            "mapping_mode": "executable_file_mapping"
+          },
+          "usr/lib/x86_64-linux-gnu/libc.so.6": {
+            "permissions": [
+              "r-xp"
+            ],
+            "sha256": "9457725024d3ed4e127a1f9fbd11f151267fb16c2b275ea49979cb4e3df270ee",
+            "executable_file_ranges": [
+              [
+                163840,
+                1615421
+              ]
+            ],
+            "mapping_mode": "executable_file_mapping"
+          }
+        },
+        "host_executor": "rosetta",
+        "loaded_gconv_modules": [],
+        "api_java_and_jar_arguments_verified": true
+      },
+      "protocol": {
+        "protocol_assertions": "passed"
+      },
+      "native": {
+        "image": "sha256:94dc3001821466d29449b93a917566fdaa5f7c3bdd8389108fa113a8770e58e0",
+        "architecture": "amd64",
+        "inventory": {
+          "expat": "2.10.0-1+testhub1",
+          "libuuid": "2.41.5-0+deb13u1",
+          "mount_nsenter_libmount_shell_suid_sgid_login_nscd_bzip2recover": "absent",
+          "package_file_checksums": "passed",
+          "glibc": "2.41-12+deb13u4+testhub1",
+          "freetype": "2.14.3+dfsg-3",
+          "gcc_runtime": "16.2.0-4",
+          "libstdcxx": "16.2.0-4+testhub1",
+          "jdk_freetype": "usr/lib/jvm/temurin-21-jre-amd64/lib/libfreetype.so",
+          "jdk_freetype_target": "/usr/lib/x86_64-linux-gnu/libfreetype.so.6",
+          "expat_xmlwf": "absent"
+        },
+        "native_cases": [
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "basic",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "reset",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "subparser",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "amplification",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "basic",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "reset",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "subparser",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "amplification",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+          }
+        ],
+        "compatibility": [
+          "custom encoding and input chunk compatibility: passed",
+          "custom encoding and input chunk compatibility: passed",
+          "FreeType 2.14.3 via libfreetype.so.6\nfont loading and glyph rasterization: passed",
+          "FreeType 2.14.3 via /usr/lib/jvm/temurin-21-jre-amd64/lib/libfreetype.so\nfont loading and glyph rasterization: passed"
+        ],
+        "runtime_checks": [
+          "runtime guard parser: 7 checks passed",
+          "C++ string ABI 1: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed",
+          "C++ string ABI 0: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed"
+        ],
+        "cxx_loader_path": "/lib/x86_64-linux-gnu/libstdc++.so.6",
+        "dns_environment_cases": [
+          {
+            "case": "resolver-file",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "environment-override",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "empty-override",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "last-directive",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "ignored-directives",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "oversize-environment-rejected",
+            "exit": 78,
+            "passed": true
+          },
+          {
+            "case": "oversize-file-rejected",
+            "exit": 78,
+            "passed": true
+          },
+          {
+            "case": "multiline-environment-rejected",
+            "exit": 78,
+            "passed": true
+          }
+        ],
+        "java": [
+          "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+          "XLSX round trip passed; native Expat not loaded by XLSX",
+          "Charset CP949 uses x-IBM949 from jdk.charsets",
+          "Charset MS949 uses x-windows-949 from jdk.charsets",
+          "Charset ISO-2022-CN-EXT uses UTF-8 from java.base",
+          "Charset IBM1390 uses UTF-8 from java.base",
+          "Charset IBM1399 uses UTF-8 from java.base",
+          "Font discovery, metrics and rendering passed; runtime restrictions passed",
+          "AWT mapped libfreetype.so.6.20.6 from the verified package"
+        ],
+        "fontconfig_loader_trace": "Expat and fontconfig initialization observed",
+        "dns_network": [
+          {
+            "case": "compose",
+            "passed": true,
+            "observed": [
+              "mysql DNS and TCP check passed",
+              "redis DNS and TCP check passed",
+              "minio DNS and TCP check passed"
+            ]
+          },
+          {
+            "case": "namespace-search",
+            "passed": true,
+            "observed": [
+              "mysql-svc DNS and TCP check passed",
+              "redis-svc DNS and TCP check passed",
+              "minio-svc DNS and TCP check passed"
+            ]
+          },
+          {
+            "case": "resolver-file-reload",
+            "passed": true,
+            "validated_search_snapshot_retained": true
+          }
+        ]
+      },
+      "final_abi_recheck": {
+        "image": "sha256:94dc3001821466d29449b93a917566fdaa5f7c3bdd8389108fa113a8770e58e0",
+        "original_debian_package_sha256": "967aa62605721081c3eb2a17650611a792aa802d76a6511d1840242623d204c9",
+        "final_elf_sha256": {
+          "usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": "ad2d8fc4c8f135bd9f656f128747fe4ea7571d6bc3b0c9404521db439fe60195",
+          "usr/lib/x86_64-linux-gnu/libc.so.6": "9457725024d3ed4e127a1f9fbd11f151267fb16c2b275ea49979cb4e3df270ee"
+        },
+        "abi_and_properties": [
+          "Verified 3141 versioned exports and ELF properties for libc.so.6",
+          "Verified 38 versioned exports and ELF properties for ld-linux-x86-64.so.2"
+        ]
+      },
+      "dns_library_comparison": {
+        "image": "sha256:94dc3001821466d29449b93a917566fdaa5f7c3bdd8389108fa113a8770e58e0",
+        "architecture": "amd64",
+        "network": "none",
+        "core_dump_limit": 0,
+        "init_process": true,
+        "execution": "explicit QEMU 10.2.3",
+        "cases": [
+          {
+            "case": "ordinary",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "ordinary",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "exact-first-boundary",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "exact-first-boundary",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "max-entries",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "max-entries",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "oversize-first",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver oversize-first: 0 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "oversize-first",
+            "library": "original Debian pair",
+            "exit": 134,
+            "expected_exit": 134,
+            "observed": "",
+            "resolver_assertion_reproduced": true
+          },
+          {
+            "case": "truncated-tail",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver truncated-tail: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "truncated-tail",
+            "library": "original Debian pair",
+            "exit": 134,
+            "expected_exit": 134,
+            "observed": "",
+            "resolver_assertion_reproduced": true
+          }
+        ]
+      },
+      "isolated_backend_acceptance": {
+        "image": "sha256:94dc3001821466d29449b93a917566fdaa5f7c3bdd8389108fa113a8770e58e0",
+        "readiness": "passed",
+        "mysql_metadata_and_audit": "passed",
+        "redis_session_across_api_restart_and_logout": "passed",
+        "s3_signed_read_and_deletion": "passed",
+        "api_download_byte_compare": "passed",
+        "owned_project_cleanup": "passed"
+      },
+      "scan": {
+        "image": "sha256:94dc3001821466d29449b93a917566fdaa5f7c3bdd8389108fa113a8770e58e0",
+        "records": 72,
+        "unique_cves": 45,
+        "by_severity": {
+          "MEDIUM": 34,
+          "LOW": 22,
+          "UNKNOWN": 8,
+          "HIGH": 8
+        },
+        "jar_records": 0,
+        "full_report_sha256": "c738064f0ca41d8d1b70f075e35f5302f2942c1a9f686e5632d8b7ff3f91d28a",
+        "fixable_high_critical_gate_exit": 0,
+        "records_detail": [
+          {
+            "VulnerabilityID": "CVE-2026-42250",
+            "PkgName": "libbz2-1.0",
+            "InstalledVersion": "1.0.8-6",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115819",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-18374",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19499",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19542",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-5435",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6238",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6368",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6791",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-77117",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-80489",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-84243",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-8674",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-86805",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-89092",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95818",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2010-4756",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2018-20796",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010022",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010023",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010024",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010025",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-9192",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-100290",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-97399",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121757",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121758",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124024",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115819",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-18374",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19499",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19542",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-5435",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6238",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6368",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6791",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-77117",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-80489",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-84243",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-8674",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-86805",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-89092",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95818",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2010-4756",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2018-20796",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010022",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010023",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010024",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010025",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-9192",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-100290",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-97399",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121757",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121758",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124024",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-113351",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115506",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-117610",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-118370",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2025-66382",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124317",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-128241",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95512",
+            "PkgName": "libfreetype6",
+            "InstalledVersion": "2.14.3+dfsg-3",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2025-29070",
+            "PkgName": "liblcms2-2",
+            "InstalledVersion": "2.16-2+deb13u2",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2021-4214",
+            "PkgName": "libpng16-16t64",
+            "InstalledVersion": "1.6.48-1+deb13u6",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-3713",
+            "PkgName": "libpng16-16t64",
+            "InstalledVersion": "1.6.48-1+deb13u6",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-76642",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78408",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78409",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78410",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-3184",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2022-0563",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "LOW"
+          }
+        ]
+      }
+    },
+    "s390x": {
+      "inventory": {
+        "image": "sha256:7b3614bbdad4c727e79083dac2500d0ab37a0aa44654c0c31bf38ae6b94ca1fe",
+        "architecture": "s390x",
+        "platform": "linux/s390x",
+        "image_config": "nonroot runtime guard, read-only acceptance",
+        "packages": {
+          "libc6": {
+            "version": "2.41-12+deb13u4+testhub1",
+            "verified_files": 288
+          },
+          "libstdc++6": {
+            "version": "16.2.0-4+testhub1",
+            "verified_files": 6
+          },
+          "libexpat1": {
+            "version": "2.10.0-1+testhub1",
+            "verified_files": 6
+          },
+          "libfreetype6": {
+            "version": "2.14.3+dfsg-3",
+            "verified_files": 5
+          }
+        },
+        "glibc_elf_sha256": {
+          "usr/lib/s390x-linux-gnu/ld64.so.1": "1d3a3ca0580b54c798c056bf59e371aa8abec8ca374f2f59ccf81ee993341926",
+          "usr/lib/s390x-linux-gnu/libc.so.6": "9f18fe28d5dcd7df5796b1f47b24c1a01e3cb1a46f5e1ebe4570f5ae2502535d"
+        },
+        "jar_sha256": "35e936a1b73b4167507cedf3a5f6e94a9579738f6a73d1964aad2cc268308de7",
+        "conditional_gconv_module_sha256": {
+          "usr/lib/s390x-linux-gnu/gconv/IBM1390.so": "f82b215ceefaf9bceadcf44587688559d28029102c83cf298d299228352fd095",
+          "usr/lib/s390x-linux-gnu/gconv/IBM1399.so": "ff62fae615fe1bb0a6468c1fdce8a3ca8b904417f1560b8fc88946b7d05560d1",
+          "usr/lib/s390x-linux-gnu/gconv/ISO-2022-CN-EXT.so": "5000268f449da70d50f14c77eff27aba8b31d0717a682597d56c5aadd0faaa0a",
+          "usr/lib/s390x-linux-gnu/gconv/UHC.so": "9f8d6079fc0598c002db88c2b2189b0baf67713a806487a11b0eb93794816059"
+        }
+      },
+      "api_process": {
+        "mapped_elf": {
+          "usr/lib/s390x-linux-gnu/ld64.so.1": {
+            "permissions": [
+              "r--p"
+            ],
+            "sha256": "1d3a3ca0580b54c798c056bf59e371aa8abec8ca374f2f59ccf81ee993341926",
+            "executable_file_ranges": [
+              [
+                0,
+                177000
+              ]
+            ],
+            "mapping_mode": "qemu_file_backed_code"
+          },
+          "usr/lib/s390x-linux-gnu/libc.so.6": {
+            "permissions": [
+              "r--p"
+            ],
+            "sha256": "9f18fe28d5dcd7df5796b1f47b24c1a01e3cb1a46f5e1ebe4570f5ae2502535d",
+            "executable_file_ranges": [
+              [
+                0,
+                1960156
+              ]
+            ],
+            "mapping_mode": "qemu_file_backed_code"
+          }
+        },
+        "host_executor": "qemu-s390x",
+        "loaded_gconv_modules": [],
+        "api_java_and_jar_arguments_verified": true
+      },
+      "protocol": {
+        "protocol_assertions": "passed"
+      },
+      "native": {
+        "image": "sha256:7b3614bbdad4c727e79083dac2500d0ab37a0aa44654c0c31bf38ae6b94ca1fe",
+        "architecture": "s390x",
+        "inventory": {
+          "expat": "2.10.0-1+testhub1",
+          "libuuid": "2.41.5-0+deb13u1",
+          "mount_nsenter_libmount_shell_suid_sgid_login_nscd_bzip2recover": "absent",
+          "package_file_checksums": "passed",
+          "glibc": "2.41-12+deb13u4+testhub1",
+          "freetype": "2.14.3+dfsg-3",
+          "gcc_runtime": "16.2.0-4",
+          "libstdcxx": "16.2.0-4+testhub1",
+          "jdk_freetype": "usr/lib/jvm/temurin-21-jre-s390x/lib/libfreetype.so",
+          "jdk_freetype_target": "/usr/lib/s390x-linux-gnu/libfreetype.so.6",
+          "expat_xmlwf": "absent"
+        },
+        "native_cases": [
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "basic",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "reset",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "subparser",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "amplification",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "basic",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "reset",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "subparser",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "amplification",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+          }
+        ],
+        "compatibility": [
+          "custom encoding and input chunk compatibility: passed",
+          "custom encoding and input chunk compatibility: passed",
+          "FreeType 2.14.3 via libfreetype.so.6\nfont loading and glyph rasterization: passed",
+          "FreeType 2.14.3 via /usr/lib/jvm/temurin-21-jre-s390x/lib/libfreetype.so\nfont loading and glyph rasterization: passed"
+        ],
+        "runtime_checks": [
+          "runtime guard parser: 7 checks passed",
+          "C++ string ABI 1: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed",
+          "C++ string ABI 0: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed"
+        ],
+        "cxx_loader_path": "/lib/s390x-linux-gnu/libstdc++.so.6",
+        "dns_environment_cases": [
+          {
+            "case": "resolver-file",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "environment-override",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "empty-override",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "last-directive",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "ignored-directives",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "oversize-environment-rejected",
+            "exit": 78,
+            "passed": true
+          },
+          {
+            "case": "oversize-file-rejected",
+            "exit": 78,
+            "passed": true
+          },
+          {
+            "case": "multiline-environment-rejected",
+            "exit": 78,
+            "passed": true
+          }
+        ],
+        "java": [
+          "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+          "XLSX round trip passed; native Expat not loaded by XLSX",
+          "Charset CP949 uses x-IBM949 from jdk.charsets",
+          "Charset MS949 uses x-windows-949 from jdk.charsets",
+          "Charset ISO-2022-CN-EXT uses UTF-8 from java.base",
+          "Charset IBM1390 uses UTF-8 from java.base",
+          "Charset IBM1399 uses UTF-8 from java.base",
+          "Font discovery, metrics and rendering passed; runtime restrictions passed",
+          "AWT mapped libfreetype.so.6.20.6 from the verified package"
+        ],
+        "fontconfig_loader_trace": "Expat and fontconfig initialization observed",
+        "dns_network": [
+          {
+            "case": "compose",
+            "passed": true,
+            "observed": [
+              "mysql DNS and TCP check passed",
+              "redis DNS and TCP check passed",
+              "minio DNS and TCP check passed"
+            ]
+          },
+          {
+            "case": "namespace-search",
+            "passed": true,
+            "observed": [
+              "mysql-svc DNS and TCP check passed",
+              "redis-svc DNS and TCP check passed",
+              "minio-svc DNS and TCP check passed"
+            ]
+          },
+          {
+            "case": "resolver-file-reload",
+            "passed": true,
+            "validated_search_snapshot_retained": true
+          }
+        ]
+      },
+      "final_abi_recheck": {
+        "image": "sha256:7b3614bbdad4c727e79083dac2500d0ab37a0aa44654c0c31bf38ae6b94ca1fe",
+        "original_debian_package_sha256": "c6e658d8e17d885c831ad1275501ef1abdadc6c93e9ac7758cfd1e5cde2d608b",
+        "final_elf_sha256": {
+          "usr/lib/s390x-linux-gnu/ld64.so.1": "1d3a3ca0580b54c798c056bf59e371aa8abec8ca374f2f59ccf81ee993341926",
+          "usr/lib/s390x-linux-gnu/libc.so.6": "9f18fe28d5dcd7df5796b1f47b24c1a01e3cb1a46f5e1ebe4570f5ae2502535d"
+        },
+        "abi_and_properties": [
+          "Verified 3349 versioned exports and ELF properties for libc.so.6",
+          "Verified 39 versioned exports and ELF properties for ld64.so.1"
+        ]
+      },
+      "dns_library_comparison": {
+        "image": "sha256:7b3614bbdad4c727e79083dac2500d0ab37a0aa44654c0c31bf38ae6b94ca1fe",
+        "architecture": "s390x",
+        "network": "none",
+        "core_dump_limit": 0,
+        "init_process": true,
+        "execution": "registered QEMU 10.2.3",
+        "cases": [
+          {
+            "case": "ordinary",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "ordinary",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "exact-first-boundary",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "exact-first-boundary",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "max-entries",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "max-entries",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "oversize-first",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver oversize-first: 0 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "oversize-first",
+            "library": "original Debian pair",
+            "exit": 134,
+            "expected_exit": 134,
+            "observed": "",
+            "resolver_assertion_reproduced": true
+          },
+          {
+            "case": "truncated-tail",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver truncated-tail: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "truncated-tail",
+            "library": "original Debian pair",
+            "exit": 134,
+            "expected_exit": 134,
+            "observed": "",
+            "resolver_assertion_reproduced": true
+          }
+        ]
+      },
+      "isolated_backend_acceptance": {
+        "image": "sha256:7b3614bbdad4c727e79083dac2500d0ab37a0aa44654c0c31bf38ae6b94ca1fe",
+        "readiness": "passed",
+        "mysql_metadata_and_audit": "passed",
+        "redis_session_across_api_restart_and_logout": "passed",
+        "s3_signed_read_and_deletion": "passed",
+        "api_download_byte_compare": "passed",
+        "owned_project_cleanup": "passed"
+      },
+      "scan": {
+        "image": "sha256:7b3614bbdad4c727e79083dac2500d0ab37a0aa44654c0c31bf38ae6b94ca1fe",
+        "records": 72,
+        "unique_cves": 45,
+        "by_severity": {
+          "MEDIUM": 34,
+          "LOW": 22,
+          "UNKNOWN": 8,
+          "HIGH": 8
+        },
+        "jar_records": 0,
+        "full_report_sha256": "c61a1c38798821ecf069d9653140df908d8e9df3a1774b155acdfb77d2f65064",
+        "fixable_high_critical_gate_exit": 0,
+        "records_detail": [
+          {
+            "VulnerabilityID": "CVE-2026-42250",
+            "PkgName": "libbz2-1.0",
+            "InstalledVersion": "1.0.8-6",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115819",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-18374",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19499",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19542",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-5435",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6238",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6368",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6791",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-77117",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-80489",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-84243",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-8674",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-86805",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-89092",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95818",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2010-4756",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2018-20796",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010022",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010023",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010024",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010025",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-9192",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-100290",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-97399",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121757",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121758",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124024",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115819",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-18374",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19499",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19542",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-5435",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6238",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6368",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6791",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-77117",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-80489",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-84243",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-8674",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-86805",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-89092",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95818",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2010-4756",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2018-20796",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010022",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010023",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010024",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010025",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-9192",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-100290",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-97399",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121757",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121758",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124024",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-113351",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115506",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-117610",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-118370",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2025-66382",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124317",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-128241",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95512",
+            "PkgName": "libfreetype6",
+            "InstalledVersion": "2.14.3+dfsg-3",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2025-29070",
+            "PkgName": "liblcms2-2",
+            "InstalledVersion": "2.16-2+deb13u2",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2021-4214",
+            "PkgName": "libpng16-16t64",
+            "InstalledVersion": "1.6.48-1+deb13u6",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-3713",
+            "PkgName": "libpng16-16t64",
+            "InstalledVersion": "1.6.48-1+deb13u6",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-76642",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78408",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78409",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78410",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-3184",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2022-0563",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "LOW"
+          }
+        ]
+      }
+    },
+    "ppc64le": {
+      "inventory": {
+        "image": "sha256:66ab62d1087636fe7107965150f6d8e69a1e61b140856048e8399b0eddaa0db4",
+        "architecture": "ppc64le",
+        "platform": "linux/ppc64le",
+        "image_config": "nonroot runtime guard, read-only acceptance",
+        "packages": {
+          "libc6": {
+            "version": "2.41-12+deb13u4+testhub1",
+            "verified_files": 283
+          },
+          "libstdc++6": {
+            "version": "16.2.0-4+testhub1",
+            "verified_files": 6
+          },
+          "libexpat1": {
+            "version": "2.10.0-1+testhub1",
+            "verified_files": 6
+          },
+          "libfreetype6": {
+            "version": "2.14.3+dfsg-3",
+            "verified_files": 5
+          }
+        },
+        "glibc_elf_sha256": {
+          "usr/lib/powerpc64le-linux-gnu/ld64.so.2": "4ff0839d40db5c88c1e2be70f162349e7bb1f60822b7942fb447e896f8ff775e",
+          "usr/lib/powerpc64le-linux-gnu/libc.so.6": "d89e79bbcf1e0c22b071d104fe861ae2b3ea76046b9839d22dbfc00f081b85ec"
+        },
+        "jar_sha256": "973f949d2cc7ef51bc26659ac7934475ff1600787852edf8255e42083e2e10d5",
+        "conditional_gconv_module_sha256": {
+          "usr/lib/powerpc64le-linux-gnu/gconv/IBM1390.so": "90a14d9f69307ad2432bc4dce1d2d69227a39e172359f3516dc301a9ae0eacb0",
+          "usr/lib/powerpc64le-linux-gnu/gconv/IBM1399.so": "56998249ced6977da1b2c17caf3cd0a5415b058406bf442f7089e8bbb8e6410c",
+          "usr/lib/powerpc64le-linux-gnu/gconv/ISO-2022-CN-EXT.so": "d871e489349140b1bc510d3e4cbde134bddb7b55a2cefde43a421a70e6bdaf42",
+          "usr/lib/powerpc64le-linux-gnu/gconv/UHC.so": "34eaba64ff3f5811848ea15d19d67f102e1a7c99161d99db52ba1dcfef171f1e"
+        }
+      },
+      "api_process": {
+        "mapped_elf": {
+          "usr/lib/powerpc64le-linux-gnu/ld64.so.2": {
+            "permissions": [
+              "r--p"
+            ],
+            "sha256": "4ff0839d40db5c88c1e2be70f162349e7bb1f60822b7942fb447e896f8ff775e",
+            "executable_file_ranges": [
+              [
+                0,
+                320496
+              ]
+            ],
+            "mapping_mode": "qemu_file_backed_code"
+          },
+          "usr/lib/powerpc64le-linux-gnu/libc.so.6": {
+            "permissions": [
+              "r--p"
+            ],
+            "sha256": "d89e79bbcf1e0c22b071d104fe861ae2b3ea76046b9839d22dbfc00f081b85ec",
+            "executable_file_ranges": [
+              [
+                0,
+                2368092
+              ]
+            ],
+            "mapping_mode": "qemu_file_backed_code"
+          }
+        },
+        "host_executor": "qemu-ppc64le",
+        "loaded_gconv_modules": [],
+        "api_java_and_jar_arguments_verified": true
+      },
+      "protocol": {
+        "protocol_assertions": "passed"
+      },
+      "native": {
+        "image": "sha256:66ab62d1087636fe7107965150f6d8e69a1e61b140856048e8399b0eddaa0db4",
+        "architecture": "ppc64le",
+        "inventory": {
+          "expat": "2.10.0-1+testhub1",
+          "libuuid": "2.41.5-0+deb13u1",
+          "mount_nsenter_libmount_shell_suid_sgid_login_nscd_bzip2recover": "absent",
+          "package_file_checksums": "passed",
+          "glibc": "2.41-12+deb13u4+testhub1",
+          "freetype": "2.14.3+dfsg-3",
+          "gcc_runtime": "16.2.0-4",
+          "libstdcxx": "16.2.0-4+testhub1",
+          "jdk_freetype": "usr/lib/jvm/temurin-21-jre-ppc64el/lib/libfreetype.so",
+          "jdk_freetype_target": "/usr/lib/powerpc64le-linux-gnu/libfreetype.so.6",
+          "expat_xmlwf": "absent"
+        },
+        "native_cases": [
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "basic",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "reset",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "subparser",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "amplification",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "basic",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "reset",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "subparser",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "amplification",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+          }
+        ],
+        "compatibility": [
+          "custom encoding and input chunk compatibility: passed",
+          "custom encoding and input chunk compatibility: passed",
+          "FreeType 2.14.3 via libfreetype.so.6\nfont loading and glyph rasterization: passed",
+          "FreeType 2.14.3 via /usr/lib/jvm/temurin-21-jre-ppc64el/lib/libfreetype.so\nfont loading and glyph rasterization: passed"
+        ],
+        "runtime_checks": [
+          "runtime guard parser: 7 checks passed",
+          "C++ string ABI 1: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed",
+          "C++ string ABI 0: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed",
+          "C++ string ABI 1: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed"
+        ],
+        "cxx_loader_path": "/lib/powerpc64le-linux-gnu/libstdc++.so.6",
+        "dns_environment_cases": [
+          {
+            "case": "resolver-file",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "environment-override",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "empty-override",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "last-directive",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "ignored-directives",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "oversize-environment-rejected",
+            "exit": 78,
+            "passed": true
+          },
+          {
+            "case": "oversize-file-rejected",
+            "exit": 78,
+            "passed": true
+          },
+          {
+            "case": "multiline-environment-rejected",
+            "exit": 78,
+            "passed": true
+          }
+        ],
+        "java": [
+          "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+          "XLSX round trip passed; native Expat not loaded by XLSX",
+          "Charset CP949 uses x-IBM949 from jdk.charsets",
+          "Charset MS949 uses x-windows-949 from jdk.charsets",
+          "Charset ISO-2022-CN-EXT uses UTF-8 from java.base",
+          "Charset IBM1390 uses UTF-8 from java.base",
+          "Charset IBM1399 uses UTF-8 from java.base",
+          "Font discovery, metrics and rendering passed; runtime restrictions passed",
+          "AWT mapped libfreetype.so.6.20.6 from the verified package"
+        ],
+        "fontconfig_loader_trace": "Expat and fontconfig initialization observed",
+        "dns_network": [
+          {
+            "case": "compose",
+            "passed": true,
+            "observed": [
+              "mysql DNS and TCP check passed",
+              "redis DNS and TCP check passed",
+              "minio DNS and TCP check passed"
+            ]
+          },
+          {
+            "case": "namespace-search",
+            "passed": true,
+            "observed": [
+              "mysql-svc DNS and TCP check passed",
+              "redis-svc DNS and TCP check passed",
+              "minio-svc DNS and TCP check passed"
+            ]
+          },
+          {
+            "case": "resolver-file-reload",
+            "passed": true,
+            "validated_search_snapshot_retained": true
+          }
+        ]
+      },
+      "final_abi_recheck": {
+        "image": "sha256:66ab62d1087636fe7107965150f6d8e69a1e61b140856048e8399b0eddaa0db4",
+        "original_debian_package_sha256": "917cbd81a9038133bd58bbfe0991db889a78eb446be2080015b7804942b45ec2",
+        "final_elf_sha256": {
+          "usr/lib/powerpc64le-linux-gnu/ld64.so.2": "4ff0839d40db5c88c1e2be70f162349e7bb1f60822b7942fb447e896f8ff775e",
+          "usr/lib/powerpc64le-linux-gnu/libc.so.6": "d89e79bbcf1e0c22b071d104fe861ae2b3ea76046b9839d22dbfc00f081b85ec"
+        },
+        "abi_and_properties": [
+          "Verified 3275 versioned exports and ELF properties for libc.so.6",
+          "Verified 41 versioned exports and ELF properties for ld64.so.2"
+        ]
+      },
+      "dns_library_comparison": {
+        "image": "sha256:66ab62d1087636fe7107965150f6d8e69a1e61b140856048e8399b0eddaa0db4",
+        "architecture": "ppc64le",
+        "network": "none",
+        "core_dump_limit": 0,
+        "init_process": true,
+        "execution": "registered QEMU 10.2.3",
+        "cases": [
+          {
+            "case": "ordinary",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "ordinary",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "exact-first-boundary",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "exact-first-boundary",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "max-entries",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "max-entries",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "oversize-first",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver oversize-first: 0 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "oversize-first",
+            "library": "original Debian pair",
+            "exit": 134,
+            "expected_exit": 134,
+            "observed": "",
+            "resolver_assertion_reproduced": true
+          },
+          {
+            "case": "truncated-tail",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver truncated-tail: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "truncated-tail",
+            "library": "original Debian pair",
+            "exit": 134,
+            "expected_exit": 134,
+            "observed": "",
+            "resolver_assertion_reproduced": true
+          }
+        ]
+      },
+      "isolated_backend_acceptance": {
+        "image": "sha256:66ab62d1087636fe7107965150f6d8e69a1e61b140856048e8399b0eddaa0db4",
+        "readiness": "passed",
+        "mysql_metadata_and_audit": "passed",
+        "redis_session_across_api_restart_and_logout": "passed",
+        "s3_signed_read_and_deletion": "passed",
+        "api_download_byte_compare": "passed",
+        "owned_project_cleanup": "passed"
+      },
+      "scan": {
+        "image": "sha256:66ab62d1087636fe7107965150f6d8e69a1e61b140856048e8399b0eddaa0db4",
+        "records": 72,
+        "unique_cves": 45,
+        "by_severity": {
+          "MEDIUM": 34,
+          "LOW": 22,
+          "UNKNOWN": 8,
+          "HIGH": 8
+        },
+        "jar_records": 0,
+        "full_report_sha256": "23addf3f6dc0dc96a4f21cc92c93f36119d4258d756a360c8b137992c023a729",
+        "fixable_high_critical_gate_exit": 0,
+        "records_detail": [
+          {
+            "VulnerabilityID": "CVE-2026-42250",
+            "PkgName": "libbz2-1.0",
+            "InstalledVersion": "1.0.8-6",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115819",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-18374",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19499",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19542",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-5435",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6238",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6368",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6791",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-77117",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-80489",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-84243",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-8674",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-86805",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-89092",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95818",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2010-4756",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2018-20796",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010022",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010023",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010024",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010025",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-9192",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-100290",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-97399",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121757",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121758",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124024",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115819",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-18374",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19499",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19542",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-5435",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6238",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6368",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6791",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-77117",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-80489",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-84243",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-8674",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-86805",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-89092",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95818",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2010-4756",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2018-20796",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010022",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010023",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010024",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010025",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-9192",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-100290",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-97399",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121757",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121758",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124024",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-113351",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115506",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-117610",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-118370",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2025-66382",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124317",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-128241",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95512",
+            "PkgName": "libfreetype6",
+            "InstalledVersion": "2.14.3+dfsg-3",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2025-29070",
+            "PkgName": "liblcms2-2",
+            "InstalledVersion": "2.16-2+deb13u2",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2021-4214",
+            "PkgName": "libpng16-16t64",
+            "InstalledVersion": "1.6.48-1+deb13u6",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-3713",
+            "PkgName": "libpng16-16t64",
+            "InstalledVersion": "1.6.48-1+deb13u6",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-76642",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78408",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78409",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78410",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-3184",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2022-0563",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "LOW"
+          }
+        ]
+      }
+    },
+    "riscv64": {
+      "inventory": {
+        "image": "sha256:167147897117564b5a311b1b3f5b4eb3086c61727588351a5fa740f218cf9dce",
+        "architecture": "riscv64",
+        "platform": "linux/riscv64",
+        "image_config": "nonroot runtime guard, read-only acceptance",
+        "packages": {
+          "libc6": {
+            "version": "2.41-12+deb13u4+testhub1",
+            "verified_files": 283
+          },
+          "libstdc++6": {
+            "version": "16.2.0-4+testhub1",
+            "verified_files": 6
+          },
+          "libexpat1": {
+            "version": "2.10.0-1+testhub1",
+            "verified_files": 6
+          },
+          "libfreetype6": {
+            "version": "2.14.3+dfsg-3",
+            "verified_files": 5
+          }
+        },
+        "glibc_elf_sha256": {
+          "usr/lib/riscv64-linux-gnu/ld-linux-riscv64-lp64d.so.1": "d57bb1f0a8b563c2b4575410dfcf5faa3001ed616f20d5f92a17628c85915a17",
+          "usr/lib/riscv64-linux-gnu/libc.so.6": "1047fcf15bbb9e6f5b059a64e967a223eaee61e3349a42b5e0dd1a096e9f7699"
+        },
+        "jar_sha256": "2000390f5afd0a6e42ca6d52e15a62d4ec66515277fe3e585fd929a0b0d74fa1",
+        "conditional_gconv_module_sha256": {
+          "usr/lib/riscv64-linux-gnu/gconv/IBM1390.so": "5d9b272236433031b1ca4bc34c6ed84d21d6f971c17aa23d2a046bb57f556cff",
+          "usr/lib/riscv64-linux-gnu/gconv/IBM1399.so": "9026134bf6372b45cfc15cf4810faf37d34bb71f72516b58e46e929229a49081",
+          "usr/lib/riscv64-linux-gnu/gconv/ISO-2022-CN-EXT.so": "c1314c2da9efe2fdf32cc4c9f69c3ab7572f6c928a3e8e107aa54378de1ff5c7",
+          "usr/lib/riscv64-linux-gnu/gconv/UHC.so": "222a27d5df2d4e1c0cac6137423d956d87b7d774259fc3a05b72aa12b490adf2"
+        }
+      },
+      "api_process": {
+        "mapped_elf": {
+          "usr/lib/riscv64-linux-gnu/ld-linux-riscv64-lp64d.so.1": {
+            "permissions": [
+              "r--p"
+            ],
+            "sha256": "d57bb1f0a8b563c2b4575410dfcf5faa3001ed616f20d5f92a17628c85915a17",
+            "executable_file_ranges": [
+              [
+                0,
+                130636
+              ]
+            ],
+            "mapping_mode": "qemu_file_backed_code"
+          },
+          "usr/lib/riscv64-linux-gnu/libc.so.6": {
+            "permissions": [
+              "r--p"
+            ],
+            "sha256": "1047fcf15bbb9e6f5b059a64e967a223eaee61e3349a42b5e0dd1a096e9f7699",
+            "executable_file_ranges": [
+              [
+                0,
+                1389424
+              ]
+            ],
+            "mapping_mode": "qemu_file_backed_code"
+          }
+        },
+        "host_executor": "qemu-riscv64",
+        "loaded_gconv_modules": [],
+        "api_java_and_jar_arguments_verified": true
+      },
+      "protocol": {
+        "protocol_assertions": "passed"
+      },
+      "native": {
+        "image": "sha256:167147897117564b5a311b1b3f5b4eb3086c61727588351a5fa740f218cf9dce",
+        "architecture": "riscv64",
+        "inventory": {
+          "expat": "2.10.0-1+testhub1",
+          "libuuid": "2.41.5-0+deb13u1",
+          "mount_nsenter_libmount_shell_suid_sgid_login_nscd_bzip2recover": "absent",
+          "package_file_checksums": "passed",
+          "glibc": "2.41-12+deb13u4+testhub1",
+          "freetype": "2.14.3+dfsg-3",
+          "gcc_runtime": "16.2.0-4",
+          "libstdcxx": "16.2.0-4+testhub1",
+          "jdk_freetype": "usr/lib/jvm/temurin-21-jre-riscv64/lib/libfreetype.so",
+          "jdk_freetype_target": "/usr/lib/riscv64-linux-gnu/libfreetype.so.6",
+          "expat_xmlwf": "absent"
+        },
+        "native_cases": [
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "basic",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "reset",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "subparser",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expat",
+            "case": "amplification",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "basic",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "reset",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "subparser",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+          },
+          {
+            "version": "2.10.0",
+            "library": "expatw",
+            "case": "amplification",
+            "exit": 0,
+            "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+          }
+        ],
+        "compatibility": [
+          "custom encoding and input chunk compatibility: passed",
+          "custom encoding and input chunk compatibility: passed",
+          "FreeType 2.14.3 via libfreetype.so.6\nfont loading and glyph rasterization: passed",
+          "FreeType 2.14.3 via /usr/lib/jvm/temurin-21-jre-riscv64/lib/libfreetype.so\nfont loading and glyph rasterization: passed"
+        ],
+        "runtime_checks": [
+          "runtime guard parser: 7 checks passed",
+          "C++ string ABI 1: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed",
+          "C++ string ABI 0: allocation, exceptions, threads, futures, vector, long double and narrow/wide file buffers passed"
+        ],
+        "cxx_loader_path": "/lib/riscv64-linux-gnu/libstdc++.so.6",
+        "dns_library_cases": [
+          {
+            "case": "ordinary",
+            "exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed"
+          },
+          {
+            "case": "exact-first-boundary",
+            "exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed"
+          },
+          {
+            "case": "max-entries",
+            "exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed"
+          },
+          {
+            "case": "oversize-first",
+            "exit": 0,
+            "observed": "libc resolver oversize-first: 0 legacy search entries, initialization passed"
+          },
+          {
+            "case": "truncated-tail",
+            "exit": 0,
+            "observed": "libc resolver truncated-tail: 1 legacy search entries, initialization passed"
+          }
+        ],
+        "dns_environment_cases": [
+          {
+            "case": "resolver-file",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "environment-override",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "empty-override",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "last-directive",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "ignored-directives",
+            "exit": 0,
+            "passed": true
+          },
+          {
+            "case": "oversize-environment-rejected",
+            "exit": 78,
+            "passed": true
+          },
+          {
+            "case": "oversize-file-rejected",
+            "exit": 78,
+            "passed": true
+          },
+          {
+            "case": "multiline-environment-rejected",
+            "exit": 78,
+            "passed": true
+          }
+        ],
+        "java": [
+          "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+          "XLSX round trip passed; native Expat not loaded by XLSX",
+          "Charset CP949 uses x-IBM949 from jdk.charsets",
+          "Charset MS949 uses x-windows-949 from jdk.charsets",
+          "Charset ISO-2022-CN-EXT uses UTF-8 from java.base",
+          "Charset IBM1390 uses UTF-8 from java.base",
+          "Charset IBM1399 uses UTF-8 from java.base",
+          "Font discovery, metrics and rendering passed; runtime restrictions passed",
+          "AWT mapped libfreetype.so.6.20.6 from the verified package"
+        ],
+        "fontconfig_loader_trace": "Expat and fontconfig initialization observed",
+        "dns_network": [
+          {
+            "case": "compose",
+            "passed": true,
+            "observed": [
+              "mysql DNS and TCP check passed",
+              "redis DNS and TCP check passed",
+              "minio DNS and TCP check passed"
+            ]
+          },
+          {
+            "case": "namespace-search",
+            "passed": true,
+            "observed": [
+              "mysql-svc DNS and TCP check passed",
+              "redis-svc DNS and TCP check passed",
+              "minio-svc DNS and TCP check passed"
+            ]
+          },
+          {
+            "case": "resolver-file-reload",
+            "passed": true,
+            "validated_search_snapshot_retained": true
+          }
+        ]
+      },
+      "final_abi_recheck": {
+        "image": "sha256:167147897117564b5a311b1b3f5b4eb3086c61727588351a5fa740f218cf9dce",
+        "original_debian_package_sha256": "77f0da760da3eab6318917857669ec23556b4e1ee489218cb966884a11b0d967",
+        "final_elf_sha256": {
+          "usr/lib/riscv64-linux-gnu/ld-linux-riscv64-lp64d.so.1": "d57bb1f0a8b563c2b4575410dfcf5faa3001ed616f20d5f92a17628c85915a17",
+          "usr/lib/riscv64-linux-gnu/libc.so.6": "1047fcf15bbb9e6f5b059a64e967a223eaee61e3349a42b5e0dd1a096e9f7699"
+        },
+        "abi_and_properties": [
+          "Verified 3010 versioned exports and ELF properties for libc.so.6",
+          "Verified 39 versioned exports and ELF properties for ld-linux-riscv64-lp64d.so.1"
+        ]
+      },
+      "dns_library_comparison": {
+        "image": "sha256:167147897117564b5a311b1b3f5b4eb3086c61727588351a5fa740f218cf9dce",
+        "architecture": "riscv64",
+        "network": "none",
+        "core_dump_limit": 0,
+        "init_process": true,
+        "execution": "registered QEMU 10.2.3",
+        "cases": [
+          {
+            "case": "ordinary",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "ordinary",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver ordinary: 3 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "exact-first-boundary",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "exact-first-boundary",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver exact-first-boundary: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "max-entries",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "max-entries",
+            "library": "original Debian pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver max-entries: 6 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "oversize-first",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver oversize-first: 0 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "oversize-first",
+            "library": "original Debian pair",
+            "exit": 134,
+            "expected_exit": 134,
+            "observed": "",
+            "resolver_assertion_reproduced": true
+          },
+          {
+            "case": "truncated-tail",
+            "library": "final image pair",
+            "exit": 0,
+            "expected_exit": 0,
+            "observed": "libc resolver truncated-tail: 1 legacy search entries, initialization passed",
+            "resolver_assertion_reproduced": false
+          },
+          {
+            "case": "truncated-tail",
+            "library": "original Debian pair",
+            "exit": 134,
+            "expected_exit": 134,
+            "observed": "",
+            "resolver_assertion_reproduced": true
+          }
+        ]
+      },
+      "isolated_backend_acceptance": {
+        "image": "sha256:167147897117564b5a311b1b3f5b4eb3086c61727588351a5fa740f218cf9dce",
+        "readiness": "passed",
+        "mysql_metadata_and_audit": "passed",
+        "redis_session_across_api_restart_and_logout": "passed",
+        "s3_signed_read_and_deletion": "passed",
+        "api_download_byte_compare": "passed",
+        "owned_project_cleanup": "passed"
+      },
+      "scan": {
+        "image": "sha256:167147897117564b5a311b1b3f5b4eb3086c61727588351a5fa740f218cf9dce",
+        "records": 72,
+        "unique_cves": 45,
+        "by_severity": {
+          "MEDIUM": 34,
+          "LOW": 22,
+          "UNKNOWN": 8,
+          "HIGH": 8
+        },
+        "jar_records": 0,
+        "full_report_sha256": "cac8691cb67c5c4a84ea55a5c06576384c0aabe0a1baa38c17f90aeac532a90f",
+        "fixable_high_critical_gate_exit": 0,
+        "records_detail": [
+          {
+            "VulnerabilityID": "CVE-2026-42250",
+            "PkgName": "libbz2-1.0",
+            "InstalledVersion": "1.0.8-6",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115819",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-18374",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19499",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19542",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-5435",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6238",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6368",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6791",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-77117",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-80489",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-84243",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-8674",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-86805",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-89092",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95818",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2010-4756",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2018-20796",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010022",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010023",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010024",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010025",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-9192",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-100290",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-97399",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121757",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121758",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124024",
+            "PkgName": "libc-bin",
+            "InstalledVersion": "2.41-12+deb13u4",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115819",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-18374",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19499",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-19542",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-5435",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6238",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6368",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-6791",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-77117",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-80489",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-84243",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-8674",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-86805",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-89092",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95818",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2010-4756",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2018-20796",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010022",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010023",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010024",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-1010025",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2019-9192",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-100290",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-97399",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121757",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-121758",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124024",
+            "PkgName": "libc6",
+            "InstalledVersion": "2.41-12+deb13u4+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-113351",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-115506",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-117610",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-118370",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2025-66382",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-124317",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-128241",
+            "PkgName": "libexpat1",
+            "InstalledVersion": "2.10.0-1+testhub1",
+            "Severity": "UNKNOWN"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-95512",
+            "PkgName": "libfreetype6",
+            "InstalledVersion": "2.14.3+dfsg-3",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2025-29070",
+            "PkgName": "liblcms2-2",
+            "InstalledVersion": "2.16-2+deb13u2",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2021-4214",
+            "PkgName": "libpng16-16t64",
+            "InstalledVersion": "1.6.48-1+deb13u6",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-3713",
+            "PkgName": "libpng16-16t64",
+            "InstalledVersion": "1.6.48-1+deb13u6",
+            "Severity": "LOW"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-76642",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78408",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78409",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-78410",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "HIGH"
+          },
+          {
+            "VulnerabilityID": "CVE-2026-3184",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "MEDIUM"
+          },
+          {
+            "VulnerabilityID": "CVE-2022-0563",
+            "PkgName": "libuuid1",
+            "InstalledVersion": "2.41.5-0+deb13u1",
+            "Severity": "LOW"
+          }
+        ]
+      }
+    }
+  },
+  "history_cleanup": {
+    "removed_entries": 2353,
+    "retained_scripts_and_reports": 1291,
+    "free_bytes_before": 4820533248,
+    "free_bytes_after": 54132596736,
+    "protected_disk_metadata_unchanged": true
+  },
+  "scanner": {
+    "image": "aquasec/trivy:0.65.0",
+    "image_digest": "sha256:a22415a38938a56c379387a8163fcb0ce38b10ace73e593475d3658d578b2436",
+    "os_db_updated_utc": "2026-11-19T01:05:40.842299544Z",
+    "java_db_updated_utc": "2026-11-19T00:58:12.750843023Z",
+    "official_os_layer_sha256": "79c29b23b0d51b278b3888949a04b4ed639fbe0ecd9bb3cf373832622a17b16e",
+    "official_java_layer_sha256": "2a76c6e2027e33e5a89007b82e5d68d1bac2f28f13818286958618b6dc9a9b47",
+    "snapshot_preserved_between_architectures": true,
+    "offline_local_docker_image_source_only": true
+  }
+}

@@ -1,0 +1,336 @@
+{
+  "native": {
+    "image": "sha256:f3882118ff9afc3c6f845ba79eae3efcaabaeea574300a62ca28c47ddbd73884",
+    "architecture": "arm64",
+    "inventory": {
+      "expat": "2.10.0-1",
+      "libuuid": "2.41.5-0+deb13u1",
+      "mount_nsenter_libmount_shell_suid_sgid": "absent",
+      "package_file_checksums": "passed"
+    },
+    "abi": "both SONAMEs unchanged; all old exported symbols retained",
+    "native_cases": [
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "reset",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "subparser",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "amplification",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "reset",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "subparser",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "amplification",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+      },
+      {
+        "version": "2.9.0",
+        "library": "expat",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.9.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.9.0",
+        "library": "expat",
+        "case": "reset",
+        "exit": 1,
+        "observed": "version=expat_2.9.0 case=reset\npass=0 error=1 emitted=0"
+      },
+      {
+        "version": "2.9.0",
+        "library": "expat",
+        "case": "subparser",
+        "exit": 139,
+        "observed": "version=expat_2.9.0 case=subparser"
+      },
+      {
+        "version": "2.9.0",
+        "library": "expat",
+        "case": "amplification",
+        "exit": 1,
+        "observed": "version=expat_2.9.0 case=amplification\npass=0 error=43 emitted=736"
+      },
+      {
+        "version": "2.9.0",
+        "library": "expatw",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.9.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.9.0",
+        "library": "expatw",
+        "case": "reset",
+        "exit": 1,
+        "observed": "version=expat_2.9.0 case=reset\npass=0 error=1 emitted=0"
+      },
+      {
+        "version": "2.9.0",
+        "library": "expatw",
+        "case": "subparser",
+        "exit": 139,
+        "observed": "version=expat_2.9.0 case=subparser"
+      },
+      {
+        "version": "2.9.0",
+        "library": "expatw",
+        "case": "amplification",
+        "exit": 1,
+        "observed": "version=expat_2.9.0 case=amplification\npass=0 error=43 emitted=352"
+      }
+    ],
+    "java": [
+      "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+      "XLSX round trip passed; native Expat not loaded by XLSX",
+      "Font discovery, metrics and rendering passed; runtime restrictions passed"
+    ],
+    "fontconfig_loader_trace": "Expat and fontconfig initialization observed"
+  },
+  "startup": {
+    "readiness": "UP",
+    "isolated_database": "temporary H2 in tmpfs",
+    "read_only": true,
+    "capabilities": "ALL dropped",
+    "no_new_privileges": true
+  },
+  "scan": {
+    "scanner": "Trivy 0.65.0",
+    "created_at": "2026-11-11T10:33:55.917963386Z",
+    "database": {
+      "Version": 2,
+      "NextUpdate": "2026-11-11T19:01:23.081218965Z",
+      "UpdatedAt": "2026-11-10T19:01:23.081219346Z",
+      "DownloadedAt": "2026-11-11T10:30:11.601566071Z"
+    },
+    "raw_record_counts": {
+      "MEDIUM": 47,
+      "LOW": 23,
+      "HIGH": 8,
+      "UNKNOWN": 1
+    },
+    "unique_cves": 45,
+    "java_records": 0,
+    "fixable_high_critical_gate": "passed",
+    "raw_json_sha256": "b427616bea51f4f7cebc01918263060669e313e4e3b85195d615ff946e125882",
+    "high_review": {
+      "CVE-2026-113351": {
+        "package": "libexpat1",
+        "installed_version": "2.10.0-1",
+        "scanner_severity": "HIGH",
+        "scanner_fixed_version": null,
+        "review_status": "fixed",
+        "basis": "Official Debian Expat 2.10.0-1; package checksums and targeted regression verified",
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-113351"
+      },
+      "CVE-2026-115506": {
+        "package": "libexpat1",
+        "installed_version": "2.10.0-1",
+        "scanner_severity": "HIGH",
+        "scanner_fixed_version": null,
+        "review_status": "fixed",
+        "basis": "Official Debian Expat 2.10.0-1; package checksums and targeted regression verified",
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-115506"
+      },
+      "CVE-2026-117610": {
+        "package": "libexpat1",
+        "installed_version": "2.10.0-1",
+        "scanner_severity": "HIGH",
+        "scanner_fixed_version": null,
+        "review_status": "fixed",
+        "basis": "Official Debian Expat 2.10.0-1; package checksums and targeted regression verified",
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-117610"
+      },
+      "CVE-2026-118370": {
+        "package": "libexpat1",
+        "installed_version": "2.10.0-1",
+        "scanner_severity": "HIGH",
+        "scanner_fixed_version": null,
+        "review_status": "fixed",
+        "basis": "Official Debian fixed version and upstream PR 1450; actual package verified; no multi-GiB exploit test performed",
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-118370"
+      },
+      "CVE-2026-76642": {
+        "package": "libuuid1",
+        "installed_version": "2.41.5-0+deb13u1",
+        "scanner_severity": "HIGH",
+        "scanner_fixed_version": null,
+        "review_status": "not_affected",
+        "basis": "Affected mount/libmount/nsenter code absent from actual runtime image; source package match via libuuid",
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-76642"
+      },
+      "CVE-2026-78408": {
+        "package": "libuuid1",
+        "installed_version": "2.41.5-0+deb13u1",
+        "scanner_severity": "HIGH",
+        "scanner_fixed_version": null,
+        "review_status": "not_affected",
+        "basis": "Affected mount/libmount/nsenter code absent from actual runtime image; source package match via libuuid",
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-78408"
+      },
+      "CVE-2026-78409": {
+        "package": "libuuid1",
+        "installed_version": "2.41.5-0+deb13u1",
+        "scanner_severity": "HIGH",
+        "scanner_fixed_version": null,
+        "review_status": "not_affected",
+        "basis": "Affected mount/libmount/nsenter code absent from actual runtime image; source package match via libuuid",
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-78409"
+      },
+      "CVE-2026-78410": {
+        "package": "libuuid1",
+        "installed_version": "2.41.5-0+deb13u1",
+        "scanner_severity": "HIGH",
+        "scanner_fixed_version": null,
+        "review_status": "not_affected",
+        "basis": "Affected mount/libmount/nsenter code absent from actual runtime image; source package match via libuuid",
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-78410"
+      }
+    }
+  },
+  "sbom": {
+    "tool": "Syft v1.32.0",
+    "format": "CycloneDX",
+    "component_count": 1734,
+    "libexpat1": "2.10.0-1",
+    "sha256": "0dde5c2d3287419f9224e04dda146365f84b72f823b5195bef3b7d5a20a46bfb"
+  },
+  "tests": {
+    "upstream_narrow_source_checks": 5328,
+    "upstream_narrow_source_failed": 0,
+    "business_xlsx_passed": 6,
+    "security_script_passed": 7,
+    "new_script_eslint": "passed",
+    "security_shell_syntax": "passed",
+    "diff_whitespace": "passed"
+  },
+  "limitations": [
+    "Runtime tested on Linux arm64 only",
+    "CVE-2026-118370 not dynamically reproduced",
+    "Other severity findings retained",
+    "Default Colima recovery not activated"
+  ],
+  "release_native_gate": {
+    "image": "sha256:f3882118ff9afc3c6f845ba79eae3efcaabaeea574300a62ca28c47ddbd73884",
+    "architecture": "arm64",
+    "inventory": {
+      "expat": "2.10.0-1",
+      "libuuid": "2.41.5-0+deb13u1",
+      "mount_nsenter_libmount_shell_suid_sgid": "absent",
+      "package_file_checksums": "passed"
+    },
+    "native_cases": [
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "reset",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "subparser",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "amplification",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "reset",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "subparser",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "amplification",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+      }
+    ],
+    "java": [
+      "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+      "XLSX round trip passed; native Expat not loaded by XLSX",
+      "Font discovery, metrics and rendering passed; runtime restrictions passed"
+    ],
+    "fontconfig_loader_trace": "Expat and fontconfig initialization observed"
+  },
+  "cleanup": {
+    "owned_colima_profile_and_data": "removed",
+    "owned_test_workspaces_and_raw_artifacts": "removed after sanitized summary saved",
+    "default_colima": "Stopped; not switched",
+    "original_snapshot_repaired_disks": "all retained, each 107374182400 bytes, mode 0600"
+  }
+}

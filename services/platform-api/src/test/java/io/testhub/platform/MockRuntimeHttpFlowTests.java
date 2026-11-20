@@ -53,6 +53,24 @@ class MockRuntimeHttpFlowTests {
     }
 
     @Test
+    void mockPayloadCannotSupplyActiveContentOrOverrideSecurityHeaders() throws Exception {
+        initialize("安全响应边界");
+        int index = 0;
+        for (String type : List.of("text/html", "application/javascript", "image/svg+xml", "text/xml")) {
+            String path = "/active-" + index++;
+            createRule(Map.of("httpMethod", "GET", "path", path, "responseBody", "<script>alert(1)</script>",
+                    "responseHeaders", Map.of("Content-Type", type, "Content-Security-Policy", "default-src * 'unsafe-inline'",
+                            "X-Content-Type-Options", "disabled", "Content-Disposition", "inline")));
+            var response = runtime("GET", path, "text/plain", "");
+            assertEquals(MediaType.parseMediaType("text/plain; charset=utf-8"), MediaType.parseMediaType(response.headers().firstValue("Content-Type").orElseThrow()));
+            assertEquals("nosniff", response.headers().firstValue("X-Content-Type-Options").orElseThrow());
+            assertEquals("attachment", response.headers().firstValue("Content-Disposition").orElseThrow());
+            org.junit.jupiter.api.Assertions.assertTrue(response.headers().firstValue("Content-Security-Policy").orElseThrow().startsWith("sandbox;"));
+            assertEquals("<script>alert(1)</script>", response.body());
+        }
+    }
+
+    @Test
     void matchesRawFormBodiesAndKeepsFormFieldsOutOfQueryConditions() throws Exception {
         initialize("表单正文");
         for (String method : new String[] { "POST", "PUT", "PATCH", "DELETE" }) {

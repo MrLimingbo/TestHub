@@ -20,7 +20,7 @@ Postman Runtime 是 Apache-2.0 的低层集合执行库。TestHub 不将其完�
 - `pm.sendRequest`、`pm.execution.*`、`pm.request.*`：不允许脚本发起请求、跳转或重放请求。
 - `pm.response.json/text/headers/cookies`：响应内容不传入脚本运行时。
 - `pm.cookies`、`pm.globals`、`pm.collectionVariables`、`pm.visualizer`、`pm.vault`、`pm.require`、`postman.*`：不提供跨任务状态、密钥、包加载或可视化能力。
-- 网络、文件、进程、模块、动态函数构造器、定时器和异步 API：保存阶段即拒绝，运行期仍由 `node:vm` 禁用代码生成并设置 150ms CPU 限制。
+- 网络、文件、进程、模块、动态函数构造器和定时器等宿主能力不可用。运行期禁用 `node:vm` 代码生成，CPU 与 Promise 微任务共用 150ms 限时；每段脚本运行在不继承 Runner 环境凭据的独立子进程中，V8 堆上限 48 MiB、总生命周期上限 1500ms。异步 API 不属于支持的兼容契约。
 
 ## 兼容性验收用例
 

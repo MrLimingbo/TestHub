@@ -76,6 +76,8 @@ services:
   api:
     image: ${TESTHUB_PLATFORM_IMAGE:?set TESTHUB_PLATFORM_IMAGE}
     environment:
+      # Optional operator override; unset values retain the inherited search list.
+      LOCALDOMAIN:
       TESTHUB_DB_URL: jdbc:mysql://mysql:3306/testhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
       TESTHUB_DB_USERNAME: testhub
       TESTHUB_DB_PASSWORD: ${TESTHUB_DB_PASSWORD:?set TESTHUB_DB_PASSWORD}

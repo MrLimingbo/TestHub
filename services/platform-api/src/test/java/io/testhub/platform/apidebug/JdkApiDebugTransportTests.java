@@ -21,6 +21,28 @@ import org.springframework.web.server.ResponseStatusException;
 
 class JdkApiDebugTransportTests {
     @Test
+    void bodyStallCannotOutliveTheRequestDeadline() throws Exception {
+        var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            exchange.sendResponseHeaders(200, 100);
+            exchange.getResponseBody().write(1); exchange.getResponseBody().flush();
+            try { Thread.sleep(1500); } catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); }
+            exchange.close();
+        });
+        server.start();
+        try {
+            var policy = new ApiDebugTargetPolicy(Optional::<String>empty, host -> new InetAddress[0]) {
+                @Override public void assertAllowed(URI uri) { /* Only this owned loopback server is used. */ }
+            };
+            var transport = new JdkApiDebugTransport(policy);
+            long start = System.nanoTime();
+            assertThrows(java.io.IOException.class, () -> transport.execute("GET",
+                    URI.create("http://127.0.0.1:" + server.getAddress().getPort()), List.of(), "", 200));
+            org.junit.jupiter.api.Assertions.assertTrue(java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) < 1200);
+        } finally { server.stop(0); }
+    }
+
+    @Test
     void returnsRedirectWithoutFollowingItsLocation() throws Exception {
         ApiDebugTargetPolicy policy = new ApiDebugTargetPolicy(Optional::<String>empty,
                 host -> new InetAddress[] {InetAddress.getByName("8.8.8.8")});

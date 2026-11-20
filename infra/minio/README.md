@@ -37,3 +37,8 @@ It owns a random Compose project, fresh volumes, generated credentials and
 ephemeral loopback ports, then removes them even when Maven fails. Test classes
 using `FunctionalDatabaseProfile` receive separate schemas on this owned server.
 Never run acceptance against an existing user or shared MySQL instance.
+
+The QA launcher requires 8 GiB of free workspace disk space before creating its
+infrastructure, and stops its own active work if space drops below 2 GiB while
+running. It then attempts the normal owned-project cleanup. Run large image
+builds/scans after database acceptance when local disk capacity is limited.

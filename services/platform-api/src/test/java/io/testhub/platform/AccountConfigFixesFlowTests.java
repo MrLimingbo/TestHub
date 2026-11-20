@@ -71,7 +71,9 @@ class AccountConfigFixesFlowTests {
         return principal;
     }
     UserAccountRepository.ManagedAccount create(PlatformUserPrincipal admin, String account, String email) {
-        return accounts.create(admin, account, "QA", email, null, true);
+        var created = accounts.create(admin, account, "QA", email, null, true);
+        accounts.updatePassword(admin, created.id(), "Fixture-password-2026!");
+        return users.findManagedById(created.id()).orElseThrow();
     }
     void conflict(Runnable action) {
         assertEquals(409, assertThrows(ResponseStatusException.class, action::run).getStatusCode().value());
@@ -88,6 +90,13 @@ class AccountConfigFixesFlowTests {
             assertFalse(result.getResponse().getContentAsString().contains(password));
         }
     }
+    @Test void newAccountsNeverAcceptSharedDefaultPasswords() throws Exception {
+        var admin = admin();
+        var account = accounts.create(admin, name(), "Security QA", name() + "@example.test", null, true);
+        login(account.account(), "admin", 401, null);
+        accounts.updatePassword(admin, account.id(), "Unique-review-password-2026!");
+        login(account.account(), "Unique-review-password-2026!", 200, account.id());
+    }
     @Test void rejectsBothCrossFieldDirectionsOnCreateAndUpdateWithoutChangingAccountsOrAudit() throws Exception {
         var admin = admin();
         var a = create(admin, name() + "@login.test", name() + "@example.test");
@@ -99,8 +108,8 @@ class AccountConfigFixesFlowTests {
         conflict(() -> accounts.update(admin, b.id(), b.account(), "不应保存", a.account(), null, true));
         assertEquals(b, users.findManagedById(b.id()).orElseThrow());
         assertEquals(before, jdbc.sql("SELECT COUNT(*) FROM audit_log").query(Long.class).single());
-        login(a.email(), AccountManagementService.DEFAULT_PASSWORD, 200, a.id());
-        login(a.account(), AccountManagementService.DEFAULT_PASSWORD, 200, a.id());
+        login(a.email(), "Fixture-password-2026!", 200, a.id());
+        login(a.account(), "Fixture-password-2026!", 200, a.id());
     }
     @Test void ownIdentifiersMayMatchOrSwapAndDeletedIdentifiersCanBeReused() {
         var admin = admin();
@@ -157,8 +166,8 @@ class AccountConfigFixesFlowTests {
         var admin = admin(); var a = create(admin, name(), name() + "@example.test");
         var b = create(admin, name(), name() + "@example.test");
         jdbc.sql("UPDATE user_account SET account=:account WHERE id=:id").param("account", a.email()).param("id", b.id()).update();
-        login(a.email(), AccountManagementService.DEFAULT_PASSWORD, 401, null);
-        login(a.account(), AccountManagementService.DEFAULT_PASSWORD, 200, a.id());
+        login(a.email(), "Fixture-password-2026!", 401, null);
+        login(a.account(), "Fixture-password-2026!", 200, a.id());
         // Existing ambiguous data still produces a conflict on subsequent identity writes.
         conflict(() -> create(admin, a.email(), name() + "@example.test"));
     }
@@ -182,14 +191,15 @@ class AccountConfigFixesFlowTests {
     void disabledNewLoginIs401WithNoAuthenticatedSessionForCorrectOrWrongPassword(boolean disableAfterCreate) throws Exception {
         var admin = admin(); String name = name();
         var a = accounts.create(admin, name, "QA", null, null, disableAfterCreate);
+        accounts.updatePassword(admin, a.id(), "Fixture-password-2026!");
         if (disableAfterCreate) {
-            login(a.account(), AccountManagementService.DEFAULT_PASSWORD, 200, a.id());
+            login(a.account(), "Fixture-password-2026!", 200, a.id());
             accounts.update(admin, a.id(), a.account(), a.displayName(), a.email(), null, false);
         }
-        login(a.account(), AccountManagementService.DEFAULT_PASSWORD, 401, null);
+        login(a.account(), "Fixture-password-2026!", 401, null);
         login(a.account(), password(), 401, null);
         accounts.update(admin, a.id(), a.account(), a.displayName(), a.email(), null, true);
-        login(a.account(), AccountManagementService.DEFAULT_PASSWORD, 200, a.id());
+        login(a.account(), "Fixture-password-2026!", 200, a.id());
     }
     @ParameterizedTest @ValueSource(strings = {"", " ", "\t \n", "中文😀"})
     void ordinaryConfigCanBeCreatedAndUpdatedWithEmptyOrWhitespaceValues(String value) throws Exception {

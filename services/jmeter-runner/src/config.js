@@ -90,7 +90,7 @@ export function loadConfig(env = process.env) {
   const watchdogJar = env.JMETER_WATCHDOG_JAR ? filePath(env.JMETER_WATCHDOG_JAR, 'JMETER_WATCHDOG_JAR') : undefined
   if (watchdogJar && (!javaBin || !isAbsolute(watchdogJar))) throw new Error('JMETER_WATCHDOG_JAR 需要绝对路径和内置 Java')
   return Object.freeze({
-    watchdogJar, javaBin, jmeterHome, followRedirects: !env.TESTHUB_DESKTOP_BROKER_URL,
+    watchdogJar, javaBin, jmeterHome, followRedirects: false,
     redisUrl: redisUrl(env), runnerId: value(env.RUNNER_ID ?? DEFAULTS.runnerId, 'RUNNER_ID', /^[A-Za-z0-9._-]{1,64}$/),
     runnerVersion: value(env.RUNNER_VERSION ?? DEFAULTS.runnerVersion, 'RUNNER_VERSION', /^[A-Za-z0-9._+-]{1,64}$/),
     heartbeatIntervalSeconds, heartbeatTtlSeconds, heartbeatSigningKey, jmeterExecutionEnabled,

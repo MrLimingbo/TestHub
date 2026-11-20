@@ -18,7 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AccountManagementService {
-    public static final String DEFAULT_PASSWORD = "admin";
+
     private final UserAccountRepository accounts;
     private final AccessRepository access;
     private final PasswordEncoder passwordEncoder;
@@ -130,9 +130,10 @@ public class AccountManagementService {
 
     private UserAccount createAccount(String account, String displayName, String email, String phone, boolean enabled) {
         String normalizedAccount = normalizeAccount(account);
+        // Provisioning grants no shared login credential; an administrator sets the password separately.
         UserAccount created = new UserAccount(UlidCreator.getUlid().toString(), normalizedAccount,
                 normalizeEmail(email, normalizedAccount), normalizeDisplayName(displayName, normalizedAccount),
-                passwordEncoder.encode(DEFAULT_PASSWORD), enabled);
+                passwordEncoder.encode(java.util.UUID.randomUUID().toString() + java.util.UUID.randomUUID()), enabled);
         try {
             accounts.insert(created, normalizeOptional(phone));
         } catch (DataIntegrityViolationException exception) {

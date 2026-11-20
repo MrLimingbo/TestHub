@@ -116,13 +116,14 @@ async function save(): Promise<boolean> {
   saving.value = true
   try {
     const url = id ? `/api/v1/accounts/${id}` : '/api/v1/accounts'
-    await mutate<Account>(url, id ? 'PUT' : 'POST', input)
+    const saved = await mutate<Account>(url, id ? 'PUT' : 'POST', input)
     if (disposed || sequence !== formSequence) return false
     dialogVisible.value = false
     pagination.current = 1
     await load()
     if (disposed || sequence !== formSequence) return false
-    Message.success(id ? '账号已更新' : '账号已创建，默认密码为 admin')
+    Message.success(id ? '账号已更新' : '账号已创建，请设置登录密码')
+    if (!id) openPassword(saved)
     return true
   } catch (error) {
     if (!disposed && sequence === formSequence) Message.error(error instanceof Error ? error.message : '保存账号失败')
@@ -255,7 +256,7 @@ onBeforeUnmount(() => { disposed = true; requestSequence++; formSequence++; canc
         <a-empty v-if="!loading && accounts.length === 0" description="暂无符合条件的账号" />
       </a-spin>
       <div class="account-footer">
-        <p>查看并维护当前系统全部账号。新建账号的初始密码统一为 admin，建议账号首次登录后及时修改。</p>
+        <p>查看并维护当前系统全部账号。新建账号不提供通用初始密码，请在创建后设置独立的登录密码。</p>
         <a-pagination
           :current="pagination.current"
           :page-size="pagination.pageSize"
@@ -274,7 +275,7 @@ onBeforeUnmount(() => { disposed = true; requestSequence++; formSequence++; canc
       :on-before-ok="save"
       @cancel="formSequence++"
     >
-      <a-alert v-if="!editingId" type="info" class="password-alert">账号创建后可使用默认密码 <strong>admin</strong> 登录。</a-alert>
+      <a-alert v-if="!editingId" type="info" class="password-alert">账号创建后需设置登录密码；系统不提供通用默认密码。</a-alert>
       <a-form :model="form" layout="vertical">
         <div class="form-grid">
           <a-form-item label="账号" required extra="支持大小写字母、数字、下划线及常用特殊符号，不允许空格。">

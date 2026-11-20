@@ -5,6 +5,9 @@ imagePullSecrets: []
 
 api:
   replicaCount: 2
+  # Empty inherits the pod resolver search list. "." selects the root suffix.
+  # An override must be single-line and at most 255 bytes after whitespace normalization.
+  dnsSearchDomains: ""
   image:
     repository: registry.example.com/testhub/platform-api
     tag: "0.1.0"

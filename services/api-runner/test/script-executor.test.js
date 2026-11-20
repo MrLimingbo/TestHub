@@ -52,3 +52,25 @@ test('isolated script rejects access to host capabilities and does not expose a 
     phase: 'PRE_REQUEST', source: 'while (true) {}', variables: {}, response: null,
   }), (error) => error instanceof IsolatedScriptError && error.code === 'SCRIPT_TIMEOUT')
 })
+
+for (const source of [
+  'Promise.resolve().then(() => { while (true) {} });',
+  '(async () => { await 0; while (true) {} })();',
+]) {
+  test(`bounds asynchronous scripts: ${source.slice(0, 20)}`, { timeout: 5000 }, () => {
+    const started = Date.now()
+    assert.throws(() => executeIsolatedScript({ phase: 'PRE_REQUEST', source, variables: {} }),
+      error => error instanceof IsolatedScriptError && error.code === 'SCRIPT_TIMEOUT')
+    assert.ok(Date.now() - started < 3000)
+    assert.equal(executeIsolatedScript({ phase: 'PRE_REQUEST', source: 'variables.ok = true', variables: {} }).variables.ok, 'true')
+  })
+}
+test('unhandled rejection cannot crash the Runner process', () => {
+  assert.throws(() => executeIsolatedScript({ phase: 'PRE_REQUEST', source: 'Promise.reject(new Error("test"));', variables: {} }), IsolatedScriptError)
+})
+
+test('heap exhaustion stays in the disposable script process', { timeout: 5000 }, () => {
+  assert.throws(() => executeIsolatedScript({ phase: 'PRE_REQUEST',
+    source: 'const retained = []; while (true) retained.push(new Array(100000).fill(42));', variables: {} }), IsolatedScriptError)
+  assert.equal(executeIsolatedScript({ phase: 'PRE_REQUEST', source: 'variables.alive = true', variables: {} }).variables.alive, 'true')
+})

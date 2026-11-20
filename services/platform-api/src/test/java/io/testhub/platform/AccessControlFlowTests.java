@@ -168,7 +168,7 @@ class AccessControlFlowTests {
     }
 
     @Test
-    void missingProjectMemberAccountIsCreatedWithDefaultPasswordAndAddedToProject() throws Exception {
+    void missingProjectMemberAccountRequiresPasswordSetupAndIsAddedToProject() throws Exception {
         LoginSession administrator = login("admin@testhub.local");
         String projectId = projectId(administrator);
         MvcResult csrf = mvc.perform(get("/api/v1/auth/csrf").cookie(administrator.sessionCookie()))
@@ -197,8 +197,7 @@ class AccessControlFlowTests {
                         .cookie(loginCsrf.getResponse().getCookie("XSRF-TOKEN"))
                         .header(loginCsrfData.path("headerName").asText(), loginCsrfData.path("token").asText())
                         .content("{\"account\":\"test\",\"password\":\"admin\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.account").value("test"));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

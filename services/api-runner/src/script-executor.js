@@ -1,4 +1,6 @@
 import vm from 'node:vm'
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
 const MAX_SCRIPT_LENGTH = 8 * 1024
 const MAX_VARIABLES = 100
@@ -54,16 +56,34 @@ function normalizeTestSummary(value) {
 
 /**
  * No host object or host callback enters the context. Values cross the boundary only through JSON, and all code
- * generation, module loading, timers, I/O, and asynchronous primitives are absent. Container resource limits remain
- * the outer isolation boundary; this synchronous context additionally enforces a short CPU deadline.
+ * generation, module loading, timers and I/O are disabled. Microtasks run within the VM deadline;
+ * a disposable process additionally contains heap exhaustion and unhandled rejections.
  */
-export function executeIsolatedScript({ phase, source, variables, response }) {
+export function executeIsolatedScript(input) {
+  validateIsolatedScript(input.source)
+  normalizeVariables(input.variables)
+  if (!input.source) return executeInContext(input)
+  // VM deadlines alone cannot contain asynchronous work or heap exhaustion. The
+  // disposable process receives no inherited credentials and has a hard lifetime.
+  const child = spawnSync(process.execPath, ['--max-old-space-size=48', fileURLToPath(new URL('./script-worker.js', import.meta.url))], {
+    input: JSON.stringify(input), encoding: 'utf8', env: {}, timeout: 1500,
+    killSignal: 'SIGKILL', maxBuffer: 2 * 1024 * 1024, windowsHide: true,
+  })
+  if (child.error?.code === 'ETIMEDOUT') throw new IsolatedScriptError('SCRIPT_TIMEOUT')
+  if (child.error || child.status !== 0) throw new IsolatedScriptError('SCRIPT_EXECUTION_FAILED')
+  let reply
+  try { reply = JSON.parse(child.stdout) } catch { throw new IsolatedScriptError('SCRIPT_RESULT_INVALID') }
+  if (reply.error) throw new IsolatedScriptError(reply.error)
+  return Object.freeze({ variables: normalizeVariables(reply.variables), testSummary: normalizeTestSummary(reply.testSummary) })
+}
+
+export function executeInContext({ phase, source, variables, response }) {
   validateIsolatedScript(source)
   const initialVariables = normalizeVariables(variables)
   if (!source) return Object.freeze({ variables: initialVariables, testSummary: normalizeTestSummary({ testCount: 0, passedCount: 0 }) })
   const payload = JSON.stringify({ variables: initialVariables, response: { status: response?.status ?? null } })
   const sandbox = Object.create(null)
-  const context = vm.createContext(sandbox, { codeGeneration: { strings: false, wasm: false } })
+  const context = vm.createContext(sandbox, { codeGeneration: { strings: false, wasm: false }, microtaskMode: 'afterEvaluate' })
   const wrapped = `"use strict";
 const __input = JSON.parse(${JSON.stringify(payload)});
 const variables = __input.variables;

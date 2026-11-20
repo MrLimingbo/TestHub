@@ -50,6 +50,16 @@ spec:
                 name: {{ include "testhub.apiConfigName" . }}
             - secretRef:
                 name: {{ required "api.existingSecret is required" .Values.api.existingSecret }}
+          {{- with .Values.api.dnsSearchDomains }}
+          {{- /* Match the runtime guard's C-locale whitespace and byte limit. */}}
+          {{- $normalized := regexReplaceAll "[ \t\v\f]+" . " " | trimAll " " }}
+          {{- if or (contains "\r" .) (contains "\n" .) (gt (len $normalized) 255) }}
+          {{- fail "api.dnsSearchDomains must be single-line and at most 255 bytes after whitespace normalization" }}
+          {{- end }}
+          env:
+            - name: LOCALDOMAIN
+              value: {{ . | quote }}
+          {{- end }}
           startupProbe:
             httpGet:
               path: /actuator/health/liveness

@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import ArcoVue, { Button, InputPassword, Message, Modal } from '@arco-design/web-vue'
+import ArcoVue, { Button, Input, InputPassword, Message, Modal } from '@arco-design/web-vue'
 import AccountManagementPage from '@/pages/AccountManagementPage.vue'
 import { useSessionStore } from '@/stores/session'
 
@@ -11,7 +11,7 @@ afterEach(() => { wrappers.splice(0).forEach(w => w.unmount()); vi.restoreAllMoc
 async function setup(self: boolean, fail = false) {
   vi.spyOn(Message, 'success').mockImplementation(() => ({ close: vi.fn() })); vi.spyOn(Message, 'error').mockImplementation(() => ({ close: vi.fn() }))
   const target = { id: self ? 'me' : 'other', account: 'qa-account', displayName: 'QA', email: 'qa@example.test', phone: null, enabled: true, createdAt: '2026-10-29T00:00:00Z', updatedAt: '2026-10-29T00:00:00Z' }
-  vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => new Response(JSON.stringify(init?.method === 'PUT' && fail ? { message: '受控保存失败' } : { data: url.endsWith('/csrf') ? { headerName: 'X-CSRF', token: 'fixture' } : init?.method ? {} : { items: [target], total: 1, page: 1, pageSize: 10 } }), { status: init?.method === 'PUT' && fail ? 503 : 200 })))
+  vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => new Response(JSON.stringify(init?.method === 'PUT' && fail ? { message: '受控保存失败' } : { data: url.endsWith('/csrf') ? { headerName: 'X-CSRF', token: 'fixture' } : init?.method === 'POST' ? target : init?.method ? {} : { items: [target], total: 1, page: 1, pageSize: 10 } }), { status: init?.method === 'PUT' && fail ? 503 : 200 })))
   const pinia = createPinia(), session = useSessionStore(pinia); session.signedIn = true; session.initialized = true; session.profile = { id: 'me', account: 'qa', email: 'qa@example.test', displayName: 'QA', authenticatedAt: '2026-10-29T00:00:00Z' }
   const router = createRouter({ history: createMemoryHistory(), routes: ['/accounts', '/login'].map(path => ({ path, component: { template: '<div />' } })) }); await router.push('/accounts')
   const w = mount(AccountManagementPage, { global: { plugins: [pinia, ArcoVue, router], stubs: { Modal: true }, renderStubDefaultSlot: true, config: { warnHandler: () => {} } } }); wrappers.push(w); await flushPromises()
@@ -30,4 +30,20 @@ it('[P1-U05-02][POS] resetting another account keeps the current administrator s
 it('[P1-U05-03][NEG] failed self reset does not falsely log out or close the password draft', async () => {
   const q = await setup(true, true); expect(await q.save()).toBe(false); expect(q.session.signedIn).toBe(true)
   expect(q.modal.props('visible')).toBe(true); expect(q.router.currentRoute.value.path).toBe('/accounts')
+})
+
+it('new account creation opens password setup and never advertises a shared default', async () => {
+  const q = await setup(false)
+  q.modal.vm.$emit('update:visible', false)
+  q.w.findAllComponents(Button).find(b => b.text().includes('新增账号'))!.vm.$emit('click')
+  await flushPromises()
+  const create = q.w.findAllComponents(Modal).find(m => m.props('title') === '新增账号')!
+  create.findAllComponents(Input)[0]!.vm.$emit('update:modelValue', 'qa-account')
+  await flushPromises()
+  expect(await (create.props('onBeforeOk') as () => Promise<boolean>)()).toBe(true)
+  await flushPromises()
+  expect(q.modal.props('visible')).toBe(true)
+  expect(q.modal.props('title')).toBe('修改密码 · qa-account')
+  expect(q.w.text()).not.toContain('统一为 admin')
+  expect(Message.success).toHaveBeenCalledWith('账号已创建，请设置登录密码')
 })

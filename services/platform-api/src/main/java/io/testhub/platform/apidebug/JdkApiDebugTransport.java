@@ -20,6 +20,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class JdkApiDebugTransport implements ApiDebugTransport {
     private static final int MAX_RESPONSE_BYTES = 512 * 1024;
+    private static final java.util.concurrent.ScheduledThreadPoolExecutor BODY_DEADLINES = deadlines();
+    private static java.util.concurrent.ScheduledThreadPoolExecutor deadlines() {
+        var executor = new java.util.concurrent.ScheduledThreadPoolExecutor(1, task -> {
+            Thread thread = new Thread(task, "api-debug-body-deadline"); thread.setDaemon(true); return thread;
+        });
+        executor.setRemoveOnCancelPolicy(true);
+        return executor;
+    }
     private final ApiDebugTargetPolicy targetPolicy;
     private final RequestSender sender;
 
@@ -42,6 +50,7 @@ public class JdkApiDebugTransport implements ApiDebugTransport {
     public TransportResponse execute(String method, URI url, List<Header> headers, String body, int timeoutMs)
             throws IOException, InterruptedException {
         targetPolicy.assertAllowed(url);
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(timeoutMs);
         HttpRequest.BodyPublisher publisher = body == null || body.isEmpty()
                 ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8);
         HttpRequest.Builder request = HttpRequest.newBuilder(url).timeout(Duration.ofMillis(timeoutMs)).method(method, publisher);
@@ -52,7 +61,15 @@ public class JdkApiDebugTransport implements ApiDebugTransport {
         response.headers().map().forEach((name, values) -> values.forEach(value -> responseHeaders.add(new Header(name, value))));
         Body bodyResult;
         try (InputStream stream = response.body()) {
-            bodyResult = readBody(stream, contentType(responseHeaders));
+            var expired = new java.util.concurrent.atomic.AtomicBoolean();
+            var timeout = BODY_DEADLINES.schedule(() -> {
+                expired.set(true);
+                try { stream.close(); } catch (IOException ignored) { /* Read reports the timeout below. */ }
+            }, Math.max(0, deadline - System.nanoTime()), java.util.concurrent.TimeUnit.NANOSECONDS);
+            try {
+                bodyResult = readBody(stream, contentType(responseHeaders));
+                if (expired.get() || System.nanoTime() >= deadline) throw new java.net.http.HttpTimeoutException("响应正文读取超时");
+            } finally { timeout.cancel(false); }
         }
         return new TransportResponse(response.statusCode(), statusText(response.statusCode()), responseHeaders,
                 bodyResult.value(), bodyResult.truncated());

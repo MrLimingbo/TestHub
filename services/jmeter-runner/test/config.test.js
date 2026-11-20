@@ -12,7 +12,7 @@ test('native paths accept spaces and Unicode, reject controls and require an abs
   assert.throws(() => loadConfig({ JMETER_JAVA_BIN: 'relative-java', JMETER_HOME: home }), /绝对路径/)
   assert.throws(() => loadConfig({ RUNNER_WORK_DIRECTORY: 'bad\npath' }), /格式不合法/)
 })
-test('desktop disables redirects and enterprise configuration retains defaults', () => {
-  assert.equal(loadConfig({}).followRedirects, true)
+test('all deployments disable redirects outside the approved origin', () => {
+  assert.equal(loadConfig({}).followRedirects, false)
   assert.equal(loadConfig({ TESTHUB_DESKTOP_BROKER_URL: 'http://127.0.0.1:1234' }).followRedirects, false)
 })

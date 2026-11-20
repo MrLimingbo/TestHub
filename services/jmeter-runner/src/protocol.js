@@ -293,7 +293,7 @@ export function validateRuntimeConfiguration(task, artifact, allowedTargetOrigin
     throw invalid('JMeter 运行时工件不兼容')
   }
   const groups = artifact.threadGroups.map((group) => {
-    if (group === null || typeof group !== 'object' || typeof group.name !== 'string' || group.name.length === 0 || group.name.length > 160
+    if (group === null || typeof group !== 'object' || typeof group.name !== 'string' || group.name.includes('${') || group.name.length === 0 || group.name.length > 160
       || !['RAMP_UP', 'STEADY', 'STEPPED_RAMP'].includes(group.loadModel) || !Number.isSafeInteger(group.threadCount)
       || !Number.isSafeInteger(group.rampUpSeconds) || !Number.isSafeInteger(group.durationSeconds)
       || group.threadCount < 1 || group.threadCount > 100000 || group.rampUpSeconds < 0 || group.rampUpSeconds > 86400

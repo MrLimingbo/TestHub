@@ -49,6 +49,10 @@ class P2D16PerformanceFlowTests extends P1FlowTestSupport {
         for(String field:List.of("requestHeaders","queryParameters"))for(String t:List.of("1","true","[]","{}")){String r=original.replaceAll("\""+field+"\":\\{[^}]*\\}","\""+field+"\":{\"X-Code\":"+t+"}");assertNotEquals(original,r);result.add(r);}
         for(String field:List.of("requestBody","responseContains","dataSetCsv"))for(String t:List.of("1","true","{}")){String old=field.equals("dataSetCsv")?"null":field.equals("requestBody")?"\"{}\"":"\"ok\"";String r=original.replace("\""+field+"\":"+old,"\""+field+"\":"+t);assertNotEquals(original,r);result.add(r);}return result;}
 
+    @Test void threadGroupNamesCannotExecuteJmeterFunctions() throws Exception {
+        var f = fixture(); var g = group("");
+        g.put("name", "${__groovy(17*19)}"); badGroup(f, g);
+    }
     @Test @DisplayName("TC-D16PERF-01") void threadCountExact()throws Exception{exact("threadCount");}
     @Test @DisplayName("TC-D16PERF-02") void rampUpSecondsExact()throws Exception{exact("rampUpSeconds");}
     @Test @DisplayName("TC-D16PERF-03") void durationSecondsExact()throws Exception{exact("durationSeconds");}

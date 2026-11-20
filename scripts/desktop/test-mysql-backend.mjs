@@ -5,6 +5,7 @@ import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import { spawn, execFile } from 'node:child_process'
 import { promisify } from 'node:util'
+import { assertQaDiskSpace, watchQaDiskSpace } from './qa-disk-guard.mjs'
 const execute = promisify(execFile)
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // Optional targeted acceptance keeps exactly the same exclusively owned infrastructure.
@@ -13,6 +14,7 @@ if (process.argv.length > 3 || (option !== undefined && !/^--tests=[A-Za-z0-9_.*
   throw new Error('Usage: node test-mysql-backend.mjs [--tests=ClassPattern,OtherPattern]')
 }
 const selectedTests = option?.slice('--tests='.length)
+await assertQaDiskSpace(root)
 await fs.mkdir(path.join(root, '.testhub'), { recursive: true })
 const directory = await fs.mkdtemp(path.join(root, '.testhub/backend-mysql-qa-'))
 const project = 'testhub-qa-' + crypto.randomUUID()
@@ -23,7 +25,7 @@ const services = {
     image: 'mysql:8.4', environment: { MYSQL_DATABASE: 'testhub', MYSQL_ROOT_PASSWORD: password, TZ: 'Asia/Shanghai' },
     command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_0900_ai_ci', '--transaction-isolation=READ-COMMITTED'],
     ports: ['127.0.0.1::3306'], volumes: ['mysql:/var/lib/mysql'],
-    healthcheck: { test: ['CMD-SHELL', 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqladmin ping -h localhost -u root --silent'], interval: '2s', timeout: '3s', retries: 60 },
+    healthcheck: { test: ['CMD-SHELL', 'MYSQL_PWD="$$MYSQL_ROOT_PASSWORD" mysqladmin ping -h 127.0.0.1 -u root --silent'], interval: '2s', timeout: '3s', retries: 60 },
   },
   redis: {
     image: 'redis:7.4-alpine', command: ['redis-server', '--requirepass', password], ports: ['127.0.0.1::6379'],
@@ -38,12 +40,19 @@ const services = {
     healthcheck: { test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live'], interval: '2s', timeout: '3s', retries: 30 },
   },
 }
-const compose = (...args) => execute('docker', ['compose', '--project-name', project, '--file', file, ...args], { cwd: root, maxBuffer: 20 * 1024 * 1024 })
+let infrastructureChild, cleaningUp = false
+const compose = (...args) => {
+  if (diskFailure && !cleaningUp) throw diskFailure
+  const operation = execute('docker', ['compose', '--project-name', project, '--file', file, ...args], { cwd: root, maxBuffer: 20 * 1024 * 1024 })
+  infrastructureChild = operation.child
+  return operation.finally(() => { infrastructureChild = undefined })
+}
 const env = { ...process.env }
 for (const name of Object.keys(env)) if (name.startsWith('SPRING_') || name.startsWith('TESTHUB_')) delete env[name]
-let testCode, child
-const stop = () => child?.kill('SIGTERM')
+let testCode, child, diskFailure
+const stop = () => { child?.kill('SIGTERM'); infrastructureChild?.kill('SIGTERM') }
 process.on('SIGINT', stop); process.on('SIGTERM', stop)
+const stopDiskMonitor = watchQaDiskSpace(root, error => { diskFailure = error; stop() })
 try {
   await fs.writeFile(file, JSON.stringify({ services, volumes: { mysql: {}, minio: {} } }), { mode: 0o600 })
   console.log('Starting exclusively owned MySQL, Redis and MinIO acceptance infrastructure')
@@ -68,6 +77,7 @@ try {
   })
   await fs.mkdir(env.TESTHUB_DESKTOP_DATA_DIRECTORY)
   console.log(`Running ${selectedTests ? 'selected backend tests' : 'the complete backend suite'} against isolated MySQL/Redis/S3`)
+  if (diskFailure) throw diskFailure
   const windows = process.platform === 'win32'
   const executable = windows ? path.join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe') : path.join(root, 'mvnw')
   if (windows) env.TESTHUB_BACKEND_QA_MAVEN_WRAPPER = path.join(root, 'mvnw.cmd')
@@ -78,8 +88,11 @@ try {
     : mavenArgs
   child = spawn(executable, args, { cwd: root, env, stdio: 'inherit' })
   testCode = await new Promise((resolve, reject) => { child.once('error', reject); child.once('close', code => resolve(code ?? 1)) })
+  if (diskFailure) throw diskFailure
   process.exitCode = testCode
 } finally {
+  stopDiskMonitor()
+  cleaningUp = true
   process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop)
   // Only the random project and directory exclusively created above may be removed.
   try { await compose('down', '--volumes', '--remove-orphans'); console.log('Removed owned QA containers, network and volumes') }

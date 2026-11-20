@@ -1,0 +1,1159 @@
+{
+  "image": "sha256:e5913ab9f6172be41fef1a7ff0b299e37d1c379a193a575a0d96f487c80b14e7",
+  "architecture": "arm64",
+  "native": {
+    "image": "sha256:e5913ab9f6172be41fef1a7ff0b299e37d1c379a193a575a0d96f487c80b14e7",
+    "architecture": "arm64",
+    "inventory": {
+      "expat": "2.10.0-1+testhub1",
+      "libuuid": "2.41.5-0+deb13u1",
+      "mount_nsenter_libmount_shell_suid_sgid_login_nscd_bzip2recover": "absent",
+      "package_file_checksums": "passed",
+      "freetype": "2.14.3+dfsg-3",
+      "gcc_runtime": "16.2.0-4",
+      "jdk_freetype": "usr/lib/jvm/temurin-21-jre-arm64/lib/libfreetype.so",
+      "jdk_freetype_target": "/usr/lib/aarch64-linux-gnu/libfreetype.so.6"
+    },
+    "native_cases": [
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "reset",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "subparser",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "amplification",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "reset",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "subparser",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "amplification",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+      }
+    ],
+    "compatibility": [
+      "custom encoding and input chunk compatibility: passed",
+      "custom encoding and input chunk compatibility: passed",
+      "FreeType 2.14.3 via libfreetype.so.6\nfont loading and glyph rasterization: passed",
+      "FreeType 2.14.3 via /usr/lib/jvm/temurin-21-jre-arm64/lib/libfreetype.so\nfont loading and glyph rasterization: passed"
+    ],
+    "runtime_checks": [
+      "runtime guard parser: 7 checks passed",
+      "C++ aligned allocation, exception unwinding, thread and vector compatibility passed"
+    ],
+    "dns_environment_cases": [
+      {
+        "case": "resolver-file",
+        "exit": 0,
+        "passed": true
+      },
+      {
+        "case": "environment-override",
+        "exit": 0,
+        "passed": true
+      },
+      {
+        "case": "empty-override",
+        "exit": 0,
+        "passed": true
+      },
+      {
+        "case": "last-directive",
+        "exit": 0,
+        "passed": true
+      },
+      {
+        "case": "oversize-environment-rejected",
+        "exit": 78,
+        "passed": true
+      },
+      {
+        "case": "oversize-file-rejected",
+        "exit": 78,
+        "passed": true
+      },
+      {
+        "case": "multiline-environment-rejected",
+        "exit": 78,
+        "passed": true
+      }
+    ],
+    "java": [
+      "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+      "XLSX round trip passed; native Expat not loaded by XLSX",
+      "Font discovery, metrics and rendering passed; runtime restrictions passed",
+      "AWT mapped libfreetype.so.6.20.6 from the verified package"
+    ],
+    "fontconfig_loader_trace": "Expat and fontconfig initialization observed",
+    "dns_network": [
+      {
+        "case": "compose",
+        "passed": true,
+        "observed": [
+          "mysql DNS and TCP check passed",
+          "redis DNS and TCP check passed",
+          "minio DNS and TCP check passed"
+        ]
+      },
+      {
+        "case": "namespace-search",
+        "passed": true,
+        "observed": [
+          "mysql-svc DNS and TCP check passed",
+          "redis-svc DNS and TCP check passed",
+          "minio-svc DNS and TCP check passed"
+        ]
+      },
+      {
+        "case": "resolver-file-reload",
+        "passed": true,
+        "validated_search_snapshot_retained": true
+      }
+    ]
+  },
+  "startup": {
+    "readiness": "UP",
+    "normal_image_entrypoint": true,
+    "isolated_database": "temporary H2 in tmpfs",
+    "read_only": true,
+    "capabilities": "ALL dropped",
+    "no_new_privileges": true
+  },
+  "compose_environment": {
+    "unconfigured_localdomain_preserves_inherited_resolver": true,
+    "final_image_entry_guard": true
+  },
+  "scanner": {
+    "Version": "0.65.0",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-11-13T07:01:33.828309984Z",
+      "UpdatedAt": "2026-11-12T07:01:33.828310435Z",
+      "DownloadedAt": "2026-11-12T07:35:47.543424065Z"
+    },
+    "JavaDB": {
+      "Version": 1,
+      "NextUpdate": "2026-11-15T00:58:04.308133879Z",
+      "UpdatedAt": "2026-11-12T00:58:04.30813481Z",
+      "DownloadedAt": "2026-11-12T07:38:49.37383636Z"
+    }
+  },
+  "before_scan": {
+    "created_at": "2026-11-12T07:50:17.961667855Z",
+    "counts": {
+      "MEDIUM": 47,
+      "LOW": 23,
+      "UNKNOWN": 5,
+      "HIGH": 8
+    },
+    "unique_cves": 47,
+    "java_records": 0
+  },
+  "after_scan": {
+    "created_at": "2026-11-12T07:52:31.826645336Z",
+    "counts": {
+      "MEDIUM": 32,
+      "LOW": 20,
+      "UNKNOWN": 5,
+      "HIGH": 8
+    },
+    "unique_cves": 41,
+    "java_records": 0
+  },
+  "gate": "passed",
+  "sbom": {
+    "format": "CycloneDX",
+    "components": 1733,
+    "runtime_components": [
+      [
+        "gcc-16-base",
+        "16.2.0-4"
+      ],
+      [
+        "libgcc-s1",
+        "16.2.0-4"
+      ],
+      [
+        "libstdc++6",
+        "16.2.0-4"
+      ]
+    ]
+  },
+  "artifacts_sha256": {
+    "before-scan.json": "623a609286d5afcdf8c45713cc18eb422aa2835c543a43bcb02574b4a7462437",
+    "final-scan.json": "6b934813f60cf199180f66047a3b8cbbd252dc1b821314d16df65aebd384ad46",
+    "final-sbom.cdx.json": "60208b5b02c4264fa1c93f9f3cb94149cb5ca0ab6469e32aaea668e2777f0426"
+  },
+  "tests": {
+    "security_script_passed": 16,
+    "business_xlsx_passed": 6,
+    "native_environment_invocations_passed": 21,
+    "dns_network_scenarios_passed": 3,
+    "guard_parser_checks_passed": 7,
+    "compose_and_helm": "passed"
+  },
+  "review": [
+    {
+      "cve": "CVE-2026-8674",
+      "priority": 1,
+      "status": "待 Debian 13 回补，配置暴露优先处理",
+      "mitigation": "需要修改搜索域时配置 LOCALDOMAIN 或 Helm api.dnsSearchDomains，并重启 API。启动时无效配置仍须修正，nameserver 配置继续由 resolv.conf 提供。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-8674",
+      "previous_basis": "libnet.so 实际导入 getaddrinfo，DNS 能力可达。过长搜索域来自 resolv.conf 或 LOCALDOMAIN，可能经 DHCP/VPN 配置进入。未发现 HTTP 请求修改这些配置的能力。",
+      "result": "已落实启动和重载缓解，glibc 库待回补",
+      "basis": "新启动器在 JVM 前读取有效搜索列表，规范化后最多 255 字节，超限或多行 LOCALDOMAIN 以 78 退出。校验通过后固定 LOCALDOMAIN，保留已有顺序。服务别名和搜索后缀解析、初始化后合法配置重载测试通过。",
+      "category": "mitigated"
+    },
+    {
+      "cve": "CVE-2025-66382",
+      "priority": 2,
+      "status": "上游仍未发布修复",
+      "mitigation": "保持 /etc/fonts 和 /home/nonroot 可信、只读。后续采用包含正式修复的 Expat 版本。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2025-66382",
+      "previous_basis": "Expat 2.10.0 仍受影响，上游 issue 1076 开放。fontconfig 会加载 Expat，当前业务输入未发现进入其 XML 配置的路径。",
+      "result": "已落实执行环境缓解，库待上游修复",
+      "basis": "启动器固定 FONTCONFIG_FILE/PATH、HOME、XDG_CONFIG_HOME 到镜像内只读配置路径。当前无业务字体配置导入入口，上游 issue 1076 仍开放。",
+      "category": "mitigated"
+    },
+    {
+      "cve": "CVE-2026-77117",
+      "priority": 2,
+      "status": "条件性暴露，等待匹配版本回补",
+      "mitigation": "后续采用匹配 glibc 转换模块回补，新增显式原生转换时限制编码、输入和无进展重试。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-77117",
+      "previous_basis": "SHIFT_JISX0213 gconv 模块在镜像中。部分 JDK 原生库和 libstdc++ 导入 iconv，未发现业务可控制该原生转换及其输出缓冲策略。Java Charset 路径需与 glibc iconv 区别评估。",
+      "result": "环境入口已收紧，显式 iconv 场景仍待回补",
+      "basis": "启动器将 OS locale 固定为 C.UTF-8，避免平台编码从环境切换到受影响格式。镜像仍保留对应 gconv 模块，显式 iconv_open 的风险继续跟踪，当前未发现业务输入到该原生接口的可控调用链。",
+      "category": "mitigated"
+    },
+    {
+      "cve": "CVE-2026-80489",
+      "priority": 2,
+      "status": "条件性暴露，等待匹配版本回补",
+      "mitigation": "后续采用匹配 glibc 转换模块回补，新增显式原生转换时限制编码、输入和无进展重试。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-80489",
+      "previous_basis": "EUC_JISX0213 gconv 模块在镜像中。部分 JDK 原生库和 libstdc++ 导入 iconv，未发现业务可控制该原生转换及其输出缓冲策略。Java Charset 路径需与 glibc iconv 区别评估。",
+      "result": "环境入口已收紧，显式 iconv 场景仍待回补",
+      "basis": "启动器将 OS locale 固定为 C.UTF-8，避免平台编码从环境切换到受影响格式。镜像仍保留对应 gconv 模块，显式 iconv_open 的风险继续跟踪，当前未发现业务输入到该原生接口的可控调用链。",
+      "category": "mitigated"
+    },
+    {
+      "cve": "CVE-2026-84243",
+      "priority": 2,
+      "status": "环境边界限制，尚无官方修复包",
+      "mitigation": "保留启动器和只读配置约束。新增 locale、消息目录或自定义启动入口时重新验证。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-84243",
+      "previous_basis": "fontconfig/libuuid 等导入 gettext 家族。镜像只有 C.utf8，未携带 .mo 目录文件，当前未发现请求设置 LANGUAGE/locale 的能力。",
+      "result": "已落实执行环境缓解，glibc 库待回补",
+      "basis": "启动器在 JVM 前强制 LC_ALL=C.UTF-8 并清除 LANGUAGE。镜像仅有 C.utf8，未携带 .mo 目录，已有 locale/字体兼容性回归通过。",
+      "category": "mitigated"
+    },
+    {
+      "cve": "CVE-2026-95619",
+      "priority": 2,
+      "status": "运行库保留，未发现可控调用链",
+      "mitigation": "跟随匹配的基础镜像更新，保留包身份、ABI 和实际运行回归。该结论针对运行库中的对齐 operator new。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-95619",
+      "previous_basis": "涉及 libstdc++ 对齐 operator new 的极大分配。库存在，未发现业务到该 C++ 接口的可控参数链。候选 gcc-16 运行库要求额外匹配的 gcc-16-base，当前未替换该运行库组合。",
+      "result": "已修复运行库",
+      "basis": "libstdc++6/libgcc-s1/gcc-16-base 同步更新至官方 16.2.0-4。固定 SHA-256，旧符号及符号版本全部保留，SONAME 不变，GLIBC 需求不高于现有 2.41。正常对齐分配、异常展开、线程/容器回归通过。",
+      "category": "fixed"
+    },
+    {
+      "cve": "CVE-2026-18374",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "避免把请求值拼入原生文件打开模式，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-18374",
+      "previous_basis": "fopen 的 ,ccs= 模式由攻击者控制。JDK/原生库使用文件 API，但未发现业务控制原生 mode 参数。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "fopen 的 ,ccs= 模式由攻击者控制。JDK/原生库使用文件 API，但未发现业务控制原生 mode 参数。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-19499",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "新增原生货币格式化时审查输出容量与格式来源，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-19499",
+      "previous_basis": "strfmon/strfmon_l 的宽度填充。325 个 ELF 的动态导入检查未发现该接口，Java 金额格式化使用 Java API。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "strfmon/strfmon_l 的宽度填充。325 个 ELF 的动态导入检查未发现该接口，Java 金额格式化使用 Java API。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-19542",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "新增原生树结构时限制规模并使用修复版本，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-19542",
+      "previous_basis": "tdelete 的大规模树操作。动态导入未发现 tdelete，Java 集合使用独立实现。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "tdelete 的大规模树操作。动态导入未发现 tdelete，Java 集合使用独立实现。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-6368",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "保持参数数组和独立执行边界，避免添加 Shell 展开，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-6368",
+      "previous_basis": "wordexp 加 WRDE_APPEND。动态导入未发现 wordexp，镜像也无 Shell。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "wordexp 加 WRDE_APPEND。动态导入未发现 wordexp，镜像也无 Shell。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-6791",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "限制展开输入并避免将请求交给 wordexp，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-6791",
+      "previous_basis": "wordexp 的超长波浪号用户名展开。动态导入未发现 wordexp，未发现业务原生展开路径。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "wordexp 的超长波浪号用户名展开。动态导入未发现 wordexp，未发现业务原生展开路径。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-5435",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "保持诊断代码使用受支持接口，避免引入这些打印函数，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-5435",
+      "previous_basis": "弃用的 DNS 记录打印接口写出。动态导入未发现 ns_printrr/ns_printrrf/fp_nquery，普通 DNS 解析不使用这些调试接口。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "弃用的 DNS 记录打印接口写出。动态导入未发现 ns_printrr/ns_printrrf/fp_nquery，普通 DNS 解析不使用这些调试接口。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-6238",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "新增 DNS 诊断功能时使用长度安全的解析和格式化实现，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-6238",
+      "previous_basis": "弃用的 DNS 记录打印接口读取。同类打印接口缺少业务调用证据，DNS getaddrinfo 的存在不能证明该问题可达。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "弃用的 DNS 记录打印接口读取。同类打印接口缺少业务调用证据，DNS getaddrinfo 的存在不能证明该问题可达。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-100290",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "保持内存限额并监控 OOM，新增 POSIX 正则调用时重新审查，跟随匹配的 glibc 修复。",
+      "severity": "UNKNOWN",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-100290",
+      "previous_basis": "POSIX regcomp/regexec 在特定分配失败下清理出错。原生导入未发现这两项，业务 Pattern 是 Java 正则，间接或内部调用仍有分析边界。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "POSIX regcomp/regexec 在特定分配失败下清理出错。原生导入未发现这两项，业务 Pattern 是 Java 正则，间接或内部调用仍有分析边界。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-115819",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "mitigation": "避免宽 scanf 向窄数组输出，保持目标容量与格式校验，跟随匹配的 glibc 修复。",
+      "severity": "UNKNOWN",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-115819",
+      "previous_basis": "宽 scanf 向窄字符数组输出的终止字节。导入可见的是窄 sscanf/fscanf，未发现受影响的宽 scanf 调用。",
+      "result": "未发现可控业务路径，继续等待匹配回补",
+      "basis": "宽 scanf 向窄字符数组输出的终止字节。导入可见的是窄 sscanf/fscanf，未发现受影响的宽 scanf 调用。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-102010",
+      "priority": 3,
+      "status": "涉及编译模板，尚未发现业务可达路径",
+      "mitigation": "继续跟随使用修复工具链构建的 JDK。GCC 16 上游仍列出部分相关模板问题，保留这些项目风险记录。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-102010",
+      "previous_basis": "__gnu_pbds 二叉堆 erase_if 模板。gcc-14-base 与 libgcc-s1 的同 CVE 命中属于源包关联，不能据此认定含相同缺陷代码。模板可能编入 C++ 调用方，替换共享库不足以证明修复；当前业务主要为 Java，未发现此类可控原生路径。",
+      "result": "运行库已升级，既有模板编译产物仍待确认",
+      "basis": "原 gcc-14 源包匹配记录已随真实运行库升级移除。该缺陷涉及头文件模板，已编入 JDK 等调用方的模板代码不会随共享库更新而重编译，当前仍未发现可控业务调用链。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-114690",
+      "priority": 3,
+      "status": "涉及编译模板，尚未发现业务可达路径",
+      "mitigation": "继续跟随使用修复工具链构建的 JDK。GCC 16 上游仍列出部分相关模板问题，保留这些项目风险记录。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-114690",
+      "previous_basis": "libstdc++ 并行搜索模板。gcc-14-base 与 libgcc-s1 的同 CVE 命中属于源包关联，不能据此认定含相同缺陷代码。模板可能编入 C++ 调用方，替换共享库不足以证明修复；当前业务主要为 Java，未发现此类可控原生路径。",
+      "result": "运行库已升级，既有模板编译产物仍待确认",
+      "basis": "原 gcc-14 源包匹配记录已随真实运行库升级移除。该缺陷涉及头文件模板，已编入 JDK 等调用方的模板代码不会随共享库更新而重编译，当前仍未发现可控业务调用链。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-114691",
+      "priority": 3,
+      "status": "涉及编译模板，尚未发现业务可达路径",
+      "mitigation": "继续跟随使用修复工具链构建的 JDK。GCC 16 上游仍列出部分相关模板问题，保留这些项目风险记录。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-114691",
+      "previous_basis": "vector<bool> 的超大元素计数。gcc-14-base 与 libgcc-s1 的同 CVE 命中属于源包关联，不能据此认定含相同缺陷代码。模板可能编入 C++ 调用方，替换共享库不足以证明修复；当前业务主要为 Java，未发现此类可控原生路径。",
+      "result": "运行库已升级，既有模板编译产物仍待确认",
+      "basis": "原 gcc-14 源包匹配记录已随真实运行库升级移除。该缺陷涉及头文件模板，已编入 JDK 等调用方的模板代码不会随共享库更新而重编译，当前仍未发现可控业务调用链。",
+      "category": "conditional"
+    },
+    {
+      "cve": "CVE-2026-115455",
+      "priority": 3,
+      "status": "涉及编译模板，尚未发现业务可达路径",
+      "mitigation": "继续跟随使用修复工具链构建的 JDK。GCC 16 上游仍列出部分相关模板问题，保留这些项目风险记录。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-115455",
+      "previous_basis": "宽字符流到 bitset 的模板提取。gcc-14-base 与 libgcc-s1 的同 CVE 命中属于源包关联，不能据此认定含相同缺陷代码。模板可能编入 C++ 调用方，替换共享库不足以证明修复；当前业务主要为 Java，未发现此类可控原生路径。",
+      "result": "运行库已升级，既有模板编译产物仍待确认",
+      "basis": "原 gcc-14 源包匹配记录已随真实运行库升级移除。该缺陷涉及头文件模板，已编入 JDK 等调用方的模板代码不会随共享库更新而重编译，当前仍未发现可控业务调用链。",
+      "category": "conditional"
+    }
+  ],
+  "result_counts": {
+    "mitigated": 5,
+    "fixed": 1,
+    "conditional": 13
+  },
+  "follow_up_2026_11_17": {
+    "image": "sha256:edaba7e8f2582f1e49c95c51f819321ce1f085e39b71116f57c0619f1087152c",
+    "architecture": "arm64",
+    "native": {
+      "image": "sha256:edaba7e8f2582f1e49c95c51f819321ce1f085e39b71116f57c0619f1087152c",
+      "architecture": "arm64",
+      "inventory": {
+        "expat": "2.10.0-1+testhub1",
+        "libuuid": "2.41.5-0+deb13u1",
+        "mount_nsenter_libmount_shell_suid_sgid_login_nscd_bzip2recover": "absent",
+        "package_file_checksums": "passed",
+        "freetype": "2.14.3+dfsg-3",
+        "gcc_runtime": "16.2.0-4",
+        "jdk_freetype": "usr/lib/jvm/temurin-21-jre-arm64/lib/libfreetype.so",
+        "jdk_freetype_target": "/usr/lib/aarch64-linux-gnu/libfreetype.so.6",
+        "expat_xmlwf": "absent"
+      },
+      "native_cases": [
+        {
+          "version": "2.10.0",
+          "library": "expat",
+          "case": "basic",
+          "exit": 0,
+          "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+        },
+        {
+          "version": "2.10.0",
+          "library": "expat",
+          "case": "reset",
+          "exit": 0,
+          "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+        },
+        {
+          "version": "2.10.0",
+          "library": "expat",
+          "case": "subparser",
+          "exit": 0,
+          "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+        },
+        {
+          "version": "2.10.0",
+          "library": "expat",
+          "case": "amplification",
+          "exit": 0,
+          "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+        },
+        {
+          "version": "2.10.0",
+          "library": "expatw",
+          "case": "basic",
+          "exit": 0,
+          "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+        },
+        {
+          "version": "2.10.0",
+          "library": "expatw",
+          "case": "reset",
+          "exit": 0,
+          "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+        },
+        {
+          "version": "2.10.0",
+          "library": "expatw",
+          "case": "subparser",
+          "exit": 0,
+          "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+        },
+        {
+          "version": "2.10.0",
+          "library": "expatw",
+          "case": "amplification",
+          "exit": 0,
+          "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+        }
+      ],
+      "compatibility": [
+        "custom encoding and input chunk compatibility: passed",
+        "custom encoding and input chunk compatibility: passed",
+        "FreeType 2.14.3 via libfreetype.so.6\nfont loading and glyph rasterization: passed",
+        "FreeType 2.14.3 via /usr/lib/jvm/temurin-21-jre-arm64/lib/libfreetype.so\nfont loading and glyph rasterization: passed"
+      ],
+      "runtime_checks": [
+        "runtime guard parser: 7 checks passed",
+        "C++ aligned allocation, exception unwinding, thread and vector compatibility passed"
+      ],
+      "dns_environment_cases": [
+        {
+          "case": "resolver-file",
+          "exit": 0,
+          "passed": true
+        },
+        {
+          "case": "environment-override",
+          "exit": 0,
+          "passed": true
+        },
+        {
+          "case": "empty-override",
+          "exit": 0,
+          "passed": true
+        },
+        {
+          "case": "last-directive",
+          "exit": 0,
+          "passed": true
+        },
+        {
+          "case": "ignored-directives",
+          "exit": 0,
+          "passed": true
+        },
+        {
+          "case": "oversize-environment-rejected",
+          "exit": 78,
+          "passed": true
+        },
+        {
+          "case": "oversize-file-rejected",
+          "exit": 78,
+          "passed": true
+        },
+        {
+          "case": "multiline-environment-rejected",
+          "exit": 78,
+          "passed": true
+        }
+      ],
+      "java": [
+        "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+        "XLSX round trip passed; native Expat not loaded by XLSX",
+        "Font discovery, metrics and rendering passed; runtime restrictions passed",
+        "AWT mapped libfreetype.so.6.20.6 from the verified package"
+      ],
+      "fontconfig_loader_trace": "Expat and fontconfig initialization observed",
+      "dns_network": [
+        {
+          "case": "compose",
+          "passed": true,
+          "observed": [
+            "mysql DNS and TCP check passed",
+            "redis DNS and TCP check passed",
+            "minio DNS and TCP check passed"
+          ]
+        },
+        {
+          "case": "namespace-search",
+          "passed": true,
+          "observed": [
+            "mysql-svc DNS and TCP check passed",
+            "redis-svc DNS and TCP check passed",
+            "minio-svc DNS and TCP check passed"
+          ]
+        },
+        {
+          "case": "resolver-file-reload",
+          "passed": true,
+          "validated_search_snapshot_retained": true
+        }
+      ]
+    },
+    "native_environment_invocations_passed": 22,
+    "ignored_directives_previous_image_regression": "failed as expected",
+    "compose_inherited": "passed",
+    "compose_explicit_override": "passed",
+    "helm_lint_and_render": "passed",
+    "api_readiness": {
+      "readiness": "UP",
+      "normal_image_entrypoint": true,
+      "isolated_database": "temporary H2 in tmpfs",
+      "read_only": true,
+      "capabilities": "ALL dropped",
+      "no_new_privileges": true
+    },
+    "security_script_tests_passed": 16,
+    "scanner": {
+      "Version": "0.65.0",
+      "VulnerabilityDB": {
+        "Version": 2,
+        "NextUpdate": "2026-11-18T01:05:25.260481302Z",
+        "UpdatedAt": "2026-11-17T01:05:25.260481643Z",
+        "DownloadedAt": "2026-11-17T02:04:09.381420749Z"
+      },
+      "JavaDB": {
+        "Version": 1,
+        "NextUpdate": "2026-11-20T00:59:10.407318273Z",
+        "UpdatedAt": "2026-11-17T00:59:10.407318664Z",
+        "DownloadedAt": "2026-11-17T02:08:00.919622693Z"
+      }
+    },
+    "before_scan": {
+      "image": "sha256:6f675d6f43b176b35f813ad32c19ea96ea16b169ec52d21bfd7ede0ec64fa8f1",
+      "created_at": "2026-11-17T02:08:29.15021704Z",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 8,
+        "MEDIUM": 50,
+        "LOW": 23,
+        "UNKNOWN": 6
+      },
+      "records": 87,
+      "unique_cves": 49,
+      "java_records": 0,
+      "fixed_high_critical_records": 0
+    },
+    "after_scan": {
+      "image": "sha256:edaba7e8f2582f1e49c95c51f819321ce1f085e39b71116f57c0619f1087152c",
+      "created_at": "2026-11-17T02:08:28.762077414Z",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 8,
+        "MEDIUM": 32,
+        "LOW": 20,
+        "UNKNOWN": 6
+      },
+      "records": 66,
+      "unique_cves": 42,
+      "java_records": 0,
+      "fixed_high_critical_records": 0
+    },
+    "release_gate": "passed",
+    "sbom": {
+      "format": "CycloneDX",
+      "components": 1733,
+      "runtime_components": {
+        "gcc-16-base": "16.2.0-4",
+        "libc6": "2.41-12+deb13u4",
+        "libexpat1": "2.10.0-1+testhub1",
+        "libfreetype6": "2.14.3+dfsg-3",
+        "libgcc-s1": "16.2.0-4",
+        "libstdc++6": "16.2.0-4"
+      }
+    },
+    "artifacts_sha256": {
+      "before-scan-20261117.json": "ffa135281ba6909c793385e17b6820e2b77143b46857386a8e194b27b2a56f57",
+      "rebuilt-final-scan-20261117.json": "2eb13d802e8584ef2b623fb1d39083fe07d7d9dc0c7a06778cd4bed47a812145",
+      "final-sbom-20261117.cdx.json": "c312b66f6f27650debbd6770bd0664dd7aeebe39cc1ca8802f9b1207226613da"
+    },
+    "review_scan_records": {
+      "CVE-2026-8674": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2025-66382": [
+        {
+          "package": "libexpat1",
+          "severity": "MEDIUM",
+          "version": "2.10.0-1+testhub1"
+        }
+      ],
+      "CVE-2026-77117": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-80489": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-84243": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-95619": [],
+      "CVE-2026-18374": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-19499": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-19542": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-6368": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-6791": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-5435": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-6238": [
+        {
+          "package": "libc-bin",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "MEDIUM",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-100290": [
+        {
+          "package": "libc-bin",
+          "severity": "UNKNOWN",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "UNKNOWN",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-115819": [
+        {
+          "package": "libc-bin",
+          "severity": "UNKNOWN",
+          "version": "2.41-12+deb13u4"
+        },
+        {
+          "package": "libc6",
+          "severity": "UNKNOWN",
+          "version": "2.41-12+deb13u4"
+        }
+      ],
+      "CVE-2026-102010": [],
+      "CVE-2026-114690": [],
+      "CVE-2026-114691": [],
+      "CVE-2026-115455": []
+    },
+    "new_alerts": [
+      {
+        "cve": "CVE-2026-128241",
+        "severity": "UNKNOWN",
+        "final_scan_records": 1,
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-128241",
+        "basis": "受影响的 xmlwf CLI 不在最终镜像，文件清单校验已加入回归。",
+        "mitigation": "继续仅打包 Expat 共享库。"
+      },
+      {
+        "cve": "CVE-2026-125709",
+        "severity": "MEDIUM",
+        "final_scan_records": 0,
+        "before_scan_records": 3,
+        "source": "https://security-tracker.debian.org/tracker/CVE-2026-125709",
+        "basis": "Debian 仍标记 GCC 16.2.0-4 受影响。动态符号检查未发现外部 C++ 文件流导入，内部和静态路径仍可能超出检查覆盖。",
+        "mitigation": "跟踪修复包。原生服务应检查并停止失败的文件写入。"
+      }
+    ],
+    "cxx_file_stream_import_audit": {
+      "elf_files_examined": 333,
+      "external_std_file_stream_importers": []
+    },
+    "result_counts": {
+      "mitigated": 5,
+      "fixed": 1,
+      "conditional": 13
+    },
+    "environment_cleanup": {
+      "qa_profile_removed": true,
+      "qa_workspace_moved_to_trash": true,
+      "default_colima": "Stopped",
+      "default_disk_and_two_recovery_copies_retained": true,
+      "verified_file_size_bytes_each": 107374182400,
+      "verified_file_mode_each": "0600"
+    }
+  },
+  "follow_up_2026_11_18": {
+    "original_risk_counts": {
+      "fixed": 1,
+      "mitigated": 5,
+      "conditional": 13
+    },
+    "distroless": {
+      "pinned_index": "sha256:d978eefd303c59c42f382aef811a0e41f2c68a6e5c319a23769cd3d1d5bf8e3c",
+      "latest_index": "sha256:6b60e44d652d66a9e2e584364c96adac4df7133674b2834b6f71741b7cdb1ff3",
+      "verified_package_versions": {
+        "libc6": "2.41-12+deb13u4",
+        "libfreetype6": "2.13.3+dfsg-1+deb13u1",
+        "libexpat1": "2.9.0-1~deb13u1",
+        "libuuid1": "2.41.5-0+deb13u1",
+        "libstdc++6": "14.2.0-19",
+        "libgcc-s1": "14.2.0-19",
+        "libc-bin": "2.41-12+deb13u4",
+        "temurin-21-jre": "21.0.13.0.0+9-0"
+      },
+      "temurin_release": "jdk-21.0.13+9",
+      "temurin_source_commit": "2ab10ca20c191701c3a9f3153bfc6e93d63714c1",
+      "architectures": {
+        "amd64": {
+          "pinned_manifest": "sha256:701e8f6268ea307c9406cfa4799c54d982edf3c7d46816305a4c81da65df1cdb",
+          "latest_manifest": "sha256:ec96acd01af002690fbb0bd8d7d6007515da66f3a700897823ab5f09308890d5",
+          "gcc_in_temurin_sbom": "11.3.0",
+          "jre_elf_files_per_manifest": 43,
+          "temurin_elf_fingerprints_match": true,
+          "relevant_dynamic_symbol_matches": 0
+        },
+        "arm64": {
+          "pinned_manifest": "sha256:85940e3b84228cdf5681983ab7f30fbe68c22fc644ed7038c0c47333f11ed8d0",
+          "latest_manifest": "sha256:bf53be940b3c0e3fef5d6a952955adbd3e8986f7a4477b9094fd22cf8184ee11",
+          "gcc_in_temurin_sbom": "11.3.0",
+          "jre_elf_files_per_manifest": 42,
+          "temurin_elf_fingerprints_match": true,
+          "relevant_dynamic_symbol_matches": 0
+        },
+        "ppc64le": {
+          "pinned_manifest": "sha256:bdd6a32f5884a05657cdfb47c536e1890329ff633876e85efb19953fe5dd01d6",
+          "latest_manifest": "sha256:1e03153cdc42d627cc146c60cc37c345c732aa710c44df56fdc101a069f4fa2b",
+          "gcc_in_temurin_sbom": "11.3.0",
+          "jre_elf_files_per_manifest": 40,
+          "temurin_elf_fingerprints_match": true,
+          "relevant_dynamic_symbol_matches": 0
+        },
+        "riscv64": {
+          "pinned_manifest": "sha256:f817a6cda85113746f1623bae19d9539caf3df50cc673d011bc2e66469bc511b",
+          "latest_manifest": "sha256:1e3628ed6ec561ec6c63a524417becceab6082f5d69a9c2e775148054555c0f3",
+          "gcc_in_temurin_sbom": "14.2.0",
+          "jre_elf_files_per_manifest": 40,
+          "temurin_elf_fingerprints_match": true,
+          "relevant_dynamic_symbol_matches": 0
+        },
+        "s390x": {
+          "pinned_manifest": "sha256:1ae23f708f4febf10c6c71734ae99606b72fda4019014e94471c1420fc85705e",
+          "latest_manifest": "sha256:6c78655fe77916b0b9865d77562ee6e6df929cd7d1aad2d95169209351309a47",
+          "gcc_in_temurin_sbom": "11.3.0",
+          "jre_elf_files_per_manifest": 40,
+          "temurin_elf_fingerprints_match": true,
+          "relevant_dynamic_symbol_matches": 0
+        }
+      }
+    },
+    "gcc_template_review": {
+      "installed_jre": "21.0.13+9-LTS",
+      "dynamic_symbols_and_matching_OpenJDK_source": "no relevant references found",
+      "hidden_or_inlined_code": "not established by dynamic symbols",
+      "cves": {
+        "CVE-2026-102010": "fixed in GCC 16 headers, shipped JRE remains a separate build",
+        "CVE-2026-114690": "GCC 16 Debian package still affected",
+        "CVE-2026-114691": "GCC 16 Debian package still affected",
+        "CVE-2026-115455": "GCC 16 Debian package still affected"
+      }
+    },
+    "glibc_dns": {
+      "cve": "CVE-2026-8674",
+      "helm_version": "3.17.3",
+      "helm_cases": [
+        "default inheritance",
+        "explicit override",
+        "255 normalized bytes",
+        "overlong",
+        "multibyte byte limit",
+        "multiline"
+      ],
+      "source_version": "2.41-12+deb13u4",
+      "upstream_commit": "506ea57086bfb9ce3daff1c14246a1cb532aba0a",
+      "candidate_patch_sha256": "4fb6cd7c31aac9c41379bcec30c22dc537e726dd81c349670b818db5600abaac",
+      "candidate_arm64_image": "sha256:42427ada3cafb5474006521b850835ce79766b6f01e81881f6f67d885f2b070e",
+      "arm64_candidate_only": true,
+      "libc_export_count": 3053,
+      "loader_export_count": 39,
+      "candidate_libc_sha256": "046c07e803f5379bb6c0f89a26eb9a1782e95d2797c3df7b4eab2f0647a3bde6",
+      "candidate_loader_sha256": "3a10600dca459a8bc57343b00098642e8a6fe8fb8f7921bc31aa466da48ab756",
+      "arm64_abi_and_native_probes": "passed",
+      "arm64_h2_readiness_in_current_and_candidate_images": "UP",
+      "outstanding_architectures": [
+        "amd64",
+        "s390x",
+        "ppc64le",
+        "riscv64"
+      ]
+    },
+    "additional_findings": {
+      "CVE-2026-125709": {
+        "status": "fixed in five shared library variants",
+        "snappy_release_elf_files_reproduced": 6
+      },
+      "CVE-2026-128241": {
+        "status": "xmlwf absent from final application image"
+      }
+    },
+    "arm64_scan": {
+      "image": "sha256:4c59b1b2262f51c7d7007c9896a8b5d1edaefe7029c400ce19e01ee1a97388bf",
+      "trivy": "0.65.0",
+      "database_updated_utc": "2026-11-17T19:04:24Z",
+      "java_database_updated_utc": "2026-11-18T00:58:01Z",
+      "records": 66,
+      "unique_cves": 42,
+      "by_severity": {
+        "CRITICAL": 0,
+        "HIGH": 8,
+        "MEDIUM": 32,
+        "LOW": 20,
+        "UNKNOWN": 6
+      },
+      "jar_records": 0,
+      "fixable_high_critical": 0,
+      "gate_exit": 0,
+      "report_sha256": "59d56c9ab2c208c55c2e0c421f13d31413db70e77ac17154bfc59a2048036b79"
+    },
+    "environment_cleanup": {
+      "qa_profile_and_data_removed": true,
+      "qa_workspace_removed": true,
+      "default_colima": "Stopped",
+      "default_disk_and_two_recovery_copies_retained": true,
+      "verified_file_size_bytes_each": 107374182400,
+      "verified_file_mode_each": "0600"
+    }
+  },
+  "glibc_ports_and_temurin_final_2026_11_18": {
+    "upstream_patch": "506ea57086bfb9ce3daff1c14246a1cb532aba0a",
+    "libc6_package_version": "2.41-12+deb13u4+testhub1",
+    "linux_architectures": {
+      "amd64": {
+        "libc_versioned_exports": 3141,
+        "loader_versioned_exports": 38,
+        "libc_sha256": "d26191aad4dc085f6e1e4a43352cb87e70bbdd4f601f1389f8d8be75e6dac242",
+        "loader": "ld-linux-x86-64.so.2",
+        "loader_sha256": "5cf072755094ec5f0e8bea3b13f44402796e740be0d38076be8aab5e4548740d",
+        "repacked_libc6_files_checked": 284,
+        "jvm_runtime_elf_paths": 43,
+        "temurin_matching_debug_files": 42,
+        "temurin_dwarf_inlined_dies": 2151927
+      },
+      "arm64": {
+        "libc_versioned_exports": 3053,
+        "loader_versioned_exports": 39,
+        "libc_sha256": "046c07e803f5379bb6c0f89a26eb9a1782e95d2797c3df7b4eab2f0647a3bde6",
+        "loader": "ld-linux-aarch64.so.1",
+        "loader_sha256": "3a10600dca459a8bc57343b00098642e8a6fe8fb8f7921bc31aa466da48ab756",
+        "repacked_libc6_files_checked": 284,
+        "jvm_runtime_elf_paths": 42,
+        "temurin_matching_debug_files": 41,
+        "temurin_dwarf_inlined_dies": 1678309
+      },
+      "s390x": {
+        "libc_versioned_exports": 3349,
+        "loader_versioned_exports": 39,
+        "libc_sha256": "47c7e5e6a72b561f54770b4587b3683f99dd4d3c6d62bfa9f40ad345be91c610",
+        "loader": "ld64.so.1",
+        "loader_sha256": "479e2466bb8259ce473f2f3c986e7a3105b362e4a5e233d9f3e08bf29e651f64",
+        "repacked_libc6_files_checked": 288,
+        "jvm_runtime_elf_paths": 40,
+        "temurin_matching_debug_files": 39,
+        "temurin_dwarf_inlined_dies": 1198856
+      },
+      "ppc64le": {
+        "libc_versioned_exports": 3275,
+        "loader_versioned_exports": 41,
+        "libc_sha256": "4eede8b8e9b061bacda00bbbc7129621f769093762eb8fea60e5c97ce0b3056f",
+        "loader": "ld64.so.2",
+        "loader_sha256": "bb9a2f004ebb6f1551947fb9ba607fc41156e0e052c0ee1d03c2ec2a4998fbb6",
+        "repacked_libc6_files_checked": 283,
+        "jvm_runtime_elf_paths": 40,
+        "temurin_matching_debug_files": 39,
+        "temurin_dwarf_inlined_dies": 1759720
+      },
+      "riscv64": {
+        "libc_versioned_exports": 3010,
+        "loader_versioned_exports": 39,
+        "libc_sha256": "bdfa24753597844d105364bc143a5cf428d91ccfd16f5d7c9aeb655219410d92",
+        "loader": "ld-linux-riscv64-lp64d.so.1",
+        "loader_sha256": "6a239d346dbd00913b4812f49088010e1cf59cdb866461bff42cb2a829149980",
+        "repacked_libc6_files_checked": 283,
+        "jvm_runtime_elf_paths": 40,
+        "temurin_matching_debug_files": 39,
+        "temurin_dwarf_inlined_dies": 1640463
+      }
+    },
+    "arm64_release_acceptance": {
+      "image": "sha256:25ba96576e8ee4922ab0d6c44182418dc92f82d5ebbfe27a042f7af9bfe5bcbf",
+      "readiness": "passed",
+      "mysql_metadata_and_audit": "passed",
+      "redis_session_across_api_restart_and_logout": "passed",
+      "s3_signed_read_and_deletion": "passed",
+      "api_download_byte_compare": "passed",
+      "owned_project_cleanup": "passed"
+    },
+    "arm64_release_loaded_elf": {
+      "libc.so.6": {
+        "path": "/usr/lib/aarch64-linux-gnu/libc.so.6",
+        "sha256": "046c07e803f5379bb6c0f89a26eb9a1782e95d2797c3df7b4eab2f0647a3bde6",
+        "permissions": "r-xp"
+      },
+      "ld-linux-aarch64.so.1": {
+        "path": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
+        "sha256": "3a10600dca459a8bc57343b00098642e8a6fe8fb8f7921bc31aa466da48ab756",
+        "permissions": "r-xp"
+      }
+    },
+    "arm64_release_scan": {
+      "image": "sha256:25ba96576e8ee4922ab0d6c44182418dc92f82d5ebbfe27a042f7af9bfe5bcbf",
+      "records": 66,
+      "unique_cves": 42,
+      "by_severity": {
+        "CRITICAL": 0,
+        "HIGH": 8,
+        "MEDIUM": 32,
+        "LOW": 20,
+        "UNKNOWN": 6
+      },
+      "java_jar_records": 0,
+      "fixable_high_critical_gate_exit": 0,
+      "report_sha256": "08dfc7643d974cc7bc96c5ad479a7e942d1d3c5d107512c3c2fcdae2497886e9"
+    },
+    "temurin_cves_without_matching_code_in_audited_release": [
+      "CVE-2026-102010",
+      "CVE-2026-114690",
+      "CVE-2026-114691",
+      "CVE-2026-115455"
+    ]
+  }
+}

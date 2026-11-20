@@ -21,6 +21,12 @@
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!-- MyBatis embeds OGNL; overriding ognl:ognl cannot patch the shaded copy. -->
+      <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis</artifactId>
+        <version>3.6.0</version>
+      </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>

@@ -643,7 +643,7 @@ onMounted(load)
               </div>
             </a-option>
           </a-select>
-          <template #extra><span v-if="accountLookupError">{{ accountLookupError }}；可直接输入账号。 </span>可下拉选择已有账号；输入新账号后保存，将同步创建系统账号，默认密码为 admin。</template>
+          <template #extra><span v-if="accountLookupError">{{ accountLookupError }}；可直接输入账号。 </span>可下拉选择已有账号；输入新账号后保存，将同步创建系统账号；新账号需由系统管理员设置登录密码。</template>
         </a-form-item>
         <a-form-item label="项目角色" required><a-select v-model="memberForm.roleCode"><a-option v-for="role in roles" :key="role.code" :value="role.code">{{ role.name }} · {{ role.description }}</a-option></a-select></a-form-item>
       </a-form>

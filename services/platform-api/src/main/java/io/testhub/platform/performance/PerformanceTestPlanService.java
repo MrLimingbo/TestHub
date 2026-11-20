@@ -159,6 +159,7 @@ public class PerformanceTestPlanService {
 
     private ThreadGroupPayload group(ThreadGroupInput input) {
         if (input == null) throw rejected("线程组参数不能为空");
+        if (input.name() != null && input.name().contains("${")) throw rejected("线程组名称不能包含 JMeter 表达式");
         int threadCount = range(input.threadCount(), 1, 100_000, "并发线程数");
         String loadModel = normalized(input.loadModel(), LOAD_MODELS, "负载模型", "RAMP_UP");
         int rampUpSeconds = range(input.rampUpSeconds(), 0, 86_400, "加压时长");

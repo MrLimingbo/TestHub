@@ -11,6 +11,7 @@ docker compose --env-file .env.production.example -f compose.production.yaml con
 docker build -f services/platform-api/Dockerfile -t "$platform_image" .
 docker build -f Dockerfile -t "$web_image" .
 
+python3 scripts/security/verify-native-image.py "$platform_image" > "$artifact_dir/platform-api-native.json"
 scripts/security/generate-sbom.sh "$platform_image" "$artifact_dir/platform-api.cdx.json"
 scripts/security/generate-sbom.sh "$web_image" "$artifact_dir/web.cdx.json"
 scripts/security/scan-image.sh "$platform_image"

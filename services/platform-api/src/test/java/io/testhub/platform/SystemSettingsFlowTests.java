@@ -87,7 +87,7 @@ class SystemSettingsFlowTests {
     @Test void adminAccountLifecyclePreservesHashingSelfProtectionAndScopedOptions() {
         var admin=fixture(true);var stranger=fixture(false);String name="qa-"+UUID.randomUUID();
         var created=accounts.create(admin.actor(),name,"QA",name+"@example.test","",true);
-        assertTrue(encoder.matches("admin",users.findByAccountOrEmail(name).orElseThrow().passwordHash()));
+        assertFalse(encoder.matches("admin",users.findByAccountOrEmail(name).orElseThrow().passwordHash()));
         assertEquals(1,accounts.list(admin.actor(),name,1,10).total());
         assertTrue(accounts.options(stranger.actor()).stream().noneMatch(a->a.id().equals(created.id())));
         accounts.update(admin.actor(),created.id(),name,"更新 QA",created.email(),"12345",false);

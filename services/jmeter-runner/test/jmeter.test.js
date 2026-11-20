@@ -75,9 +75,15 @@ test('aggregates JTL records into total and thread-group metric snapshots', asyn
   assert.deepEqual(metrics.errorSummaries(), [{ threadGroupName: '订单主链路', responseCode: '500', errorCount: 1 }])
 })
 
-test('desktop plans do not follow redirects while enterprise plans preserve their behavior', () => {
-  assert.match(createJmx(artifact), /HTTPSampler.follow_redirects">true/)
-  const local = createJmx(artifact, { followRedirects: false })
+test('all plans disable automatic redirects even when legacy callers request them', () => {
+  assert.match(createJmx(artifact), /HTTPSampler.follow_redirects">false/)
+  const local = createJmx(artifact, { followRedirects: true })
   assert.doesNotMatch(local, /HTTPSampler.follow_redirects">true/)
   assert.match(local, /HTTPSampler.follow_redirects">false/)
+})
+
+test('rejects executable functions in names even when called outside the runtime validator', () => {
+  for (const name of ['${__groovy(17*19)}', 'prefix-${variable}']) {
+    assert.throws(() => createJmx({ threadGroups: [{ ...artifact.threadGroups[0], name }] }), /表达式/)
+  }
 })

@@ -1,0 +1,392 @@
+{
+  "image": "sha256:e04566efd796c4e6827c970b911adf4b67e545c557d9d9b61d6582b133a9f4c2",
+  "architecture": "arm64",
+  "native": {
+    "image": "sha256:e04566efd796c4e6827c970b911adf4b67e545c557d9d9b61d6582b133a9f4c2",
+    "architecture": "arm64",
+    "inventory": {
+      "expat": "2.10.0-1+testhub1",
+      "libuuid": "2.41.5-0+deb13u1",
+      "mount_nsenter_libmount_shell_suid_sgid_login_nscd_bzip2recover": "absent",
+      "package_file_checksums": "passed",
+      "freetype": "2.14.3+dfsg-3",
+      "jdk_freetype": "usr/lib/jvm/temurin-21-jre-arm64/lib/libfreetype.so",
+      "jdk_freetype_target": "/usr/lib/aarch64-linux-gnu/libfreetype.so.6"
+    },
+    "native_cases": [
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "reset",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "subparser",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expat",
+        "case": "amplification",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "basic",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=basic\npass=1 error=0 emitted=13"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "reset",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=reset\npass=1 error=0 emitted=0"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "subparser",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=subparser\npass=1 error=0 emitted=1"
+      },
+      {
+        "version": "2.10.0",
+        "library": "expatw",
+        "case": "amplification",
+        "exit": 0,
+        "observed": "version=expat_2.10.0 case=amplification\npass=1 error=43 emitted=0"
+      }
+    ],
+    "compatibility": [
+      "custom encoding and input chunk compatibility: passed",
+      "custom encoding and input chunk compatibility: passed",
+      "FreeType 2.14.3 via libfreetype.so.6\nfont loading and glyph rasterization: passed",
+      "FreeType 2.14.3 via /usr/lib/jvm/temurin-21-jre-arm64/lib/libfreetype.so\nfont loading and glyph rasterization: passed"
+    ],
+    "java": [
+      "DOM=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl SAX=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+      "XLSX round trip passed; native Expat not loaded by XLSX",
+      "Font discovery, metrics and rendering passed; runtime restrictions passed",
+      "AWT mapped libfreetype.so.6.20.6 from the verified package"
+    ],
+    "fontconfig_loader_trace": "Expat and fontconfig initialization observed"
+  },
+  "startup": {
+    "readiness": "UP",
+    "isolated_database": "temporary H2 in tmpfs",
+    "read_only": true,
+    "capabilities": "ALL dropped",
+    "no_new_privileges": true
+  },
+  "scanner": {
+    "Version": "0.65.0",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-11-13T01:03:48.608294356Z",
+      "UpdatedAt": "2026-11-12T01:03:48.608294617Z",
+      "DownloadedAt": "2026-11-12T06:42:32.880814658Z"
+    },
+    "JavaDB": {
+      "Version": 1,
+      "NextUpdate": "2026-11-15T00:58:04.308133879Z",
+      "UpdatedAt": "2026-11-12T00:58:04.30813481Z",
+      "DownloadedAt": "2026-11-12T06:45:12.054094984Z"
+    }
+  },
+  "scan": {
+    "created_at": "2026-11-12T07:00:18.391852458Z",
+    "raw_record_counts": {
+      "MEDIUM": 47,
+      "LOW": 23,
+      "UNKNOWN": 5,
+      "HIGH": 8
+    },
+    "unique_cves": 47,
+    "medium_unknown_unique_cves": 26,
+    "java_vulnerabilities": 0,
+    "raw_sha256": "32c6130dd66da5e410fede4961ef2095f94d645c6539cf1a9faa9591115d662f",
+    "fixable_high_critical_gate": "passed"
+  },
+  "sbom": {
+    "format": "CycloneDX",
+    "components": 1733,
+    "sha256": "397c558a27c88da52469ec9efa623cf581e5698fdfc7b6c14f5560895dd92ad4"
+  },
+  "upstream_patch": {
+    "commit": "3d77567612994172f9d09b46f31bb604e16fb08d",
+    "sha256": "42caed50fae3f88186155b0c4280025a89913a83aed2a02986b545e0a8d1e7ed"
+  },
+  "freetype_abi": {
+    "old_system_public_FT_symbols": 203,
+    "old_jdk_public_FT_symbols": 186,
+    "new_public_FT_symbols": 203,
+    "removed_public_symbols": 0
+  },
+  "tests": {
+    "native_and_compatibility_passed": 12,
+    "business_xlsx_passed": 6,
+    "security_script_passed": 11
+  },
+  "review": [
+    {
+      "cve": "CVE-2026-95512",
+      "priority": 0,
+      "status": "已修复",
+      "basis": "系统 2.13.3 和 Temurin 随附 2.14.3 均纳入处理。已安装含 Debian 安全补丁的 2.14.3+dfsg-3，JDK 入口链接该库。AWT maps 确认实际加载 6.20.6，字体与字形渲染通过。 当前无用户字体导入/注册业务路径，字体目录只读。",
+      "mitigation": "保持字体目录只读，限制文件上传用途。跟随 Debian/Temurin 后续正式更新。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-95512"
+    },
+    {
+      "cve": "CVE-2026-124317",
+      "priority": 0,
+      "status": "已回补上游修复",
+      "basis": "2.10.0 加入已合并提交 3d775676 的转换边界检查，包版本为 2.10.0-1+testhub1。补丁与源码 SHA-256 固定，零模糊应用，双库 ABI 相同。自定义多字节编码和分片兼容性通过。 触发需要应用注册未知编码转换回调，fontconfig 导入检查未见该注册接口，当前未发现业务输入进入此回调的路径。",
+      "mitigation": "维持只读字体配置。后续采用包含补丁的正式发布包，移除本地源码回补。",
+      "severity": "UNKNOWN",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-124317"
+    },
+    {
+      "cve": "CVE-2026-8674",
+      "priority": 1,
+      "status": "待 Debian 13 回补，配置暴露优先处理",
+      "basis": "libnet.so 实际导入 getaddrinfo，DNS 能力可达。过长搜索域来自 resolv.conf 或 LOCALDOMAIN，可能经 DHCP/VPN 配置进入。未发现 HTTP 请求修改这些配置的能力。",
+      "mitigation": "在部署环境约束 DNS 搜索域长度和总列表，校验 DHCP/VPN 下发配置，控制 LOCALDOMAIN，配置变更后检查解析与进程健康。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-8674"
+    },
+    {
+      "cve": "CVE-2025-66382",
+      "priority": 2,
+      "status": "上游仍未发布修复",
+      "basis": "Expat 2.10.0 仍受影响，上游 issue 1076 开放。fontconfig 会加载 Expat，当前业务输入未发现进入其 XML 配置的路径。",
+      "mitigation": "保持字体配置和用户目录只读，控制 FONTCONFIG_FILE/PATH 和 XDG_CONFIG_HOME，保留进程资源限制。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2025-66382"
+    },
+    {
+      "cve": "CVE-2026-77117",
+      "priority": 2,
+      "status": "条件性暴露，等待匹配版本回补",
+      "basis": "SHIFT_JISX0213 gconv 模块在镜像中。部分 JDK 原生库和 libstdc++ 导入 iconv，未发现业务可控制该原生转换及其输出缓冲策略。Java Charset 路径需与 glibc iconv 区别评估。",
+      "mitigation": "保持运行时 locale 配置受控。新增原生字符转换时限制编码与输入，处理转换无进展并设置调用上限。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-77117"
+    },
+    {
+      "cve": "CVE-2026-80489",
+      "priority": 2,
+      "status": "条件性暴露，等待匹配版本回补",
+      "basis": "EUC_JISX0213 gconv 模块在镜像中。部分 JDK 原生库和 libstdc++ 导入 iconv，未发现业务可控制该原生转换及其输出缓冲策略。Java Charset 路径需与 glibc iconv 区别评估。",
+      "mitigation": "保持运行时 locale 配置受控。新增原生字符转换时限制编码与输入，处理转换无进展并设置调用上限。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-80489"
+    },
+    {
+      "cve": "CVE-2026-84243",
+      "priority": 2,
+      "status": "环境边界限制，尚无官方修复包",
+      "basis": "fontconfig/libuuid 等导入 gettext 家族。镜像只有 C.utf8，未携带 .mo 目录文件，当前未发现请求设置 LANGUAGE/locale 的能力。",
+      "mitigation": "保持 locale 与 LANGUAGE 由部署端控制，禁止将上传文件目录作为消息目录。新增 locale 包或环境透传时重新评估。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-84243"
+    },
+    {
+      "cve": "CVE-2026-95619",
+      "priority": 2,
+      "status": "运行库保留，未发现可控调用链",
+      "basis": "涉及 libstdc++ 对齐 operator new 的极大分配。库存在，未发现业务到该 C++ 接口的可控参数链。候选 gcc-16 运行库要求额外匹配的 gcc-16-base，当前未替换该运行库组合。",
+      "mitigation": "限制请求和进程内存，保持无用户 JNI/原生库执行入口，跟随基础镜像与 JDK 工具链安全更新。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-95619"
+    },
+    {
+      "cve": "CVE-2026-18374",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "fopen 的 ,ccs= 模式由攻击者控制。JDK/原生库使用文件 API，但未发现业务控制原生 mode 参数。",
+      "mitigation": "避免把请求值拼入原生文件打开模式，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-18374"
+    },
+    {
+      "cve": "CVE-2026-19499",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "strfmon/strfmon_l 的宽度填充。325 个 ELF 的动态导入检查未发现该接口，Java 金额格式化使用 Java API。",
+      "mitigation": "新增原生货币格式化时审查输出容量与格式来源，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-19499"
+    },
+    {
+      "cve": "CVE-2026-19542",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "tdelete 的大规模树操作。动态导入未发现 tdelete，Java 集合使用独立实现。",
+      "mitigation": "新增原生树结构时限制规模并使用修复版本，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-19542"
+    },
+    {
+      "cve": "CVE-2026-6368",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "wordexp 加 WRDE_APPEND。动态导入未发现 wordexp，镜像也无 Shell。",
+      "mitigation": "保持参数数组和独立执行边界，避免添加 Shell 展开，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-6368"
+    },
+    {
+      "cve": "CVE-2026-6791",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "wordexp 的超长波浪号用户名展开。动态导入未发现 wordexp，未发现业务原生展开路径。",
+      "mitigation": "限制展开输入并避免将请求交给 wordexp，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-6791"
+    },
+    {
+      "cve": "CVE-2026-5435",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "弃用的 DNS 记录打印接口写出。动态导入未发现 ns_printrr/ns_printrrf/fp_nquery，普通 DNS 解析不使用这些调试接口。",
+      "mitigation": "保持诊断代码使用受支持接口，避免引入这些打印函数，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-5435"
+    },
+    {
+      "cve": "CVE-2026-6238",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "弃用的 DNS 记录打印接口读取。同类打印接口缺少业务调用证据，DNS getaddrinfo 的存在不能证明该问题可达。",
+      "mitigation": "新增 DNS 诊断功能时使用长度安全的解析和格式化实现，跟随匹配的 glibc 修复。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-6238"
+    },
+    {
+      "cve": "CVE-2026-100290",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "POSIX regcomp/regexec 在特定分配失败下清理出错。原生导入未发现这两项，业务 Pattern 是 Java 正则，间接或内部调用仍有分析边界。",
+      "mitigation": "保持内存限额并监控 OOM，新增 POSIX 正则调用时重新审查，跟随匹配的 glibc 修复。",
+      "severity": "UNKNOWN",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-100290"
+    },
+    {
+      "cve": "CVE-2026-115819",
+      "priority": 3,
+      "status": "未发现业务调用，保留待回补",
+      "basis": "宽 scanf 向窄字符数组输出的终止字节。导入可见的是窄 sscanf/fscanf，未发现受影响的宽 scanf 调用。",
+      "mitigation": "避免宽 scanf 向窄数组输出，保持目标容量与格式校验，跟随匹配的 glibc 修复。",
+      "severity": "UNKNOWN",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-115819"
+    },
+    {
+      "cve": "CVE-2026-102010",
+      "priority": 3,
+      "status": "涉及编译模板，尚未发现业务可达路径",
+      "basis": "__gnu_pbds 二叉堆 erase_if 模板。gcc-14-base 与 libgcc-s1 的同 CVE 命中属于源包关联，不能据此认定含相同缺陷代码。模板可能编入 C++ 调用方，替换共享库不足以证明修复；当前业务主要为 Java，未发现此类可控原生路径。",
+      "mitigation": "保持用户原生代码隔离，跟随使用修复工具链构建的 JDK，新增 C++ 模块时检查编译器头文件及实际构建版本。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-102010"
+    },
+    {
+      "cve": "CVE-2026-114690",
+      "priority": 3,
+      "status": "涉及编译模板，尚未发现业务可达路径",
+      "basis": "libstdc++ 并行搜索模板。gcc-14-base 与 libgcc-s1 的同 CVE 命中属于源包关联，不能据此认定含相同缺陷代码。模板可能编入 C++ 调用方，替换共享库不足以证明修复；当前业务主要为 Java，未发现此类可控原生路径。",
+      "mitigation": "保持用户原生代码隔离，跟随使用修复工具链构建的 JDK，新增 C++ 模块时检查编译器头文件及实际构建版本。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-114690"
+    },
+    {
+      "cve": "CVE-2026-114691",
+      "priority": 3,
+      "status": "涉及编译模板，尚未发现业务可达路径",
+      "basis": "vector<bool> 的超大元素计数。gcc-14-base 与 libgcc-s1 的同 CVE 命中属于源包关联，不能据此认定含相同缺陷代码。模板可能编入 C++ 调用方，替换共享库不足以证明修复；当前业务主要为 Java，未发现此类可控原生路径。",
+      "mitigation": "保持用户原生代码隔离，跟随使用修复工具链构建的 JDK，新增 C++ 模块时检查编译器头文件及实际构建版本。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-114691"
+    },
+    {
+      "cve": "CVE-2026-115455",
+      "priority": 3,
+      "status": "涉及编译模板，尚未发现业务可达路径",
+      "basis": "宽字符流到 bitset 的模板提取。gcc-14-base 与 libgcc-s1 的同 CVE 命中属于源包关联，不能据此认定含相同缺陷代码。模板可能编入 C++ 调用方，替换共享库不足以证明修复；当前业务主要为 Java，未发现此类可控原生路径。",
+      "mitigation": "保持用户原生代码隔离，跟随使用修复工具链构建的 JDK，新增 C++ 模块时检查编译器头文件及实际构建版本。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-115455"
+    },
+    {
+      "cve": "CVE-2026-3184",
+      "priority": 4,
+      "status": "当前镜像触发条件缺失",
+      "basis": "缺少 login/PAM 远程主机名登录链，libuuid 不含 login 实现。",
+      "mitigation": "保持镜像精简，不增加系统登录入口。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-3184"
+    },
+    {
+      "cve": "CVE-2026-42250",
+      "priority": 4,
+      "status": "当前镜像触发条件缺失",
+      "basis": "缺少 bzip2recover，libbz2 共享库不含该命令行工具的越界写实现。",
+      "mitigation": "保持恢复工具在独立运维环境运行。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-42250"
+    },
+    {
+      "cve": "CVE-2026-89092",
+      "priority": 4,
+      "status": "当前镜像触发条件缺失",
+      "basis": "镜像缺少 nscd 服务，相关包/进程不在应用容器中。",
+      "mitigation": "若部署端使用宿主 nscd，需单独按宿主服务评估。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-89092"
+    },
+    {
+      "cve": "CVE-2026-86805",
+      "priority": 4,
+      "status": "当前镜像触发条件缺失",
+      "basis": "需要 AT_SECURE 的 SUID/SGID 程序及特定 $ORIGIN 路径竞争，实际镜像无 SUID/SGID 文件。",
+      "mitigation": "保持 UID 65532、禁止提权、只读根目录及全部 capabilities 移除。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-86805"
+    },
+    {
+      "cve": "CVE-2026-95818",
+      "priority": 4,
+      "status": "当前镜像触发条件缺失",
+      "basis": "同样依赖 AT_SECURE 的 SUID/SGID 加载器路径，运行权限条件缺失。",
+      "mitigation": "保持上述运行权限和文件清单约束，新增特权工具时重新评估。",
+      "severity": "MEDIUM",
+      "source": "https://security-tracker.debian.org/tracker/CVE-2026-95818"
+    }
+  ],
+  "checks": {
+    "eslint": "passed",
+    "bash_syntax": "passed",
+    "python_compile": "passed",
+    "diff_whitespace": "passed"
+  },
+  "cleanup": {
+    "isolated_colima_profile_and_data": "deleted",
+    "temporary_sources_packages_raw_logs_and_workspaces": "removed after sanitized evidence saved",
+    "default_colima": "Stopped; not switched",
+    "recovery_disks": "original, snapshot and repaired copy retained, each 107374182400 bytes, mode 0600"
+  }
+}

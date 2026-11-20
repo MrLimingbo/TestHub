@@ -75,7 +75,23 @@ public class MockRuntimeController {
     private ResponseEntity<String> response(MockRuntimeResponse result) {
         HttpHeaders headers = new HttpHeaders();
         result.headers().forEach(headers::add);
+        // Mock payloads share the authenticated API origin. Sandbox documents and
+        // prevent these endpoints from supplying executable same-origin scripts.
+        headers.set("Content-Security-Policy", "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
+        headers.set("X-Content-Type-Options", "nosniff");
+        headers.set("Content-Type", safeContentType(headers.getFirst("Content-Type")));
+        headers.set("Content-Disposition", "attachment");
         return ResponseEntity.status(result.status()).headers(headers).body(result.body());
+    }
+
+    private String safeContentType(String value) {
+        if (value == null) return "text/plain; charset=utf-8";
+        try {
+            MediaType type = MediaType.parseMediaType(value);
+            String subtype = type.getSubtype().toLowerCase(java.util.Locale.ROOT);
+            if (type.getType().equalsIgnoreCase("application") && (subtype.equals("json") || subtype.endsWith("+json"))) return value;
+        } catch (IllegalArgumentException ignored) { /* Untrusted Mock metadata is served as plain text. */ }
+        return "text/plain; charset=utf-8";
     }
 
     private ResponseEntity<ApiError> notFound(HttpServletRequest request) {
