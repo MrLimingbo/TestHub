@@ -1,0 +1,1849 @@
+{
+  "date": "2026-11-23",
+  "caseId": "16/P013",
+  "riskId": "OBS-XREG-SHUTDOWN",
+  "reviewStatus": "PENDING_USER_REVIEW",
+  "historicalRiskStatus": "UNCONFIRMED_RETAINED",
+  "originalRootCauseConfirmed": false,
+  "environment": {
+    "system": "macOS 26.5 (25F71)",
+    "arch": "arm64",
+    "launcherNode": "24.14.1",
+    "workspace": "isolated desktop H2",
+    "offscreen": true
+  },
+  "summary": {
+    "normalUpgradePairs": 6,
+    "successfulUnforcedShutdowns": 13,
+    "unforcedShutdownRangeMs": [
+      596.65,
+      1001.46
+    ],
+    "unforcedTimeouts": 0,
+    "controlledTimeouts": 1,
+    "controlledTimeoutMs": 30130.09,
+    "controlledTimeoutFromInspectorDetachMs": 30128.94,
+    "sequentialShutdownMechanismConfirmedUnderInjection": true
+  },
+  "buildVerification": {
+    "v50SourceRevision": "d091fcd285808237427c4fd00ae4fa7454b1c968",
+    "v50FourHashesMatchReleaseBuildInfo": true,
+    "v53ReconstructedWithV50ExecutableAndAsar": true,
+    "v57SourceRevision": "fa9b198ff80119c05dd81603b9c8b75a9e977867",
+    "allRuntimeInventoriesVerified": true,
+    "allTemporaryApplicationsPassedStrictResourceVerification": true,
+    "identicalPackagedFiles": [
+      "local-runtime.cjs",
+      "workspace-upgrade.cjs"
+    ]
+  },
+  "historicalPath": {
+    "caseId": "16/P013",
+    "from": 50,
+    "to": 53,
+    "clock": "monotonic milliseconds",
+    "builds": {
+      "baseline": {
+        "schema": 50,
+        "electron": "43.2.0",
+        "node": "24.14.1",
+        "java": "openjdk version \"21.0.12.1\" 2026-08-18 LTS",
+        "sha256": {
+          "executable": "d3c04ffa33632ef210ef908efd48b323a457b7ae851e485bc1a1b4039ef3b48b",
+          "asar": "25b29637e73e96798cf9ab49ba3275789b8553c785315199fe71c8e5a78e7d20",
+          "runtimeManifest": "2a23c4854fd5ea6513d20dd623f812ee9be19bf7cdce64a8f54c8fb1cef38597",
+          "backend": "0577abd4db42cad5828f484070a98c50ec385bc16016e66a86f153aeaf2d7a7e"
+        }
+      },
+      "candidate": {
+        "schema": 53,
+        "electron": "43.2.0",
+        "node": "24.14.1",
+        "java": "openjdk version \"21.0.12.1\" 2026-08-18 LTS",
+        "sha256": {
+          "executable": "f27435f4c6084f00b9ecc1c6a1e0bb1f513283e88ddee5a5aa77f892cdd84633",
+          "asar": "25b29637e73e96798cf9ab49ba3275789b8553c785315199fe71c8e5a78e7d20",
+          "runtimeManifest": "45c62939d0628777632701f341c73c01050f634ce70a3ea7fffc93bf72a6bb79",
+          "backend": "2dc2852688d664e250b445186d377e38a4134be5016376cc967f9f9781f04999"
+        }
+      }
+    },
+    "trials": [
+      {
+        "number": 1,
+        "mode": "trace",
+        "v50": {
+          "startupMs": 11741.92,
+          "shutdown": {
+            "mode": "trace",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.57,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 0.94,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 0.97,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 1.11,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 1.18,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 10.47,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 10.65,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 10.83,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 830.91,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 831.28,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 832.8,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 833.08,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 835.44,
+                "event": "window-closed"
+              },
+              {
+                "ms": 835.55,
+                "event": "will-quit"
+              },
+              {
+                "ms": 835.61,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 883.02,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 883.29,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 883.29,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "candidate": {
+          "startupMs": 19000.33,
+          "upgrade": {
+            "identity": true,
+            "task": true,
+            "attachmentSha256": "71ef488a1bc63a3effdba1a96902f1efbad15ed709520c28baf22497a012ca54",
+            "coldSnapshot": true,
+            "markerMatches": true,
+            "journalCleared": true
+          },
+          "shutdown": {
+            "mode": "trace",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 1.08,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 2.08,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 2.12,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 2.25,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 2.38,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 14.02,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 14.22,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 14.43,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 696.14,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 696.89,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 698.18,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 698.34,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 701.95,
+                "event": "window-closed"
+              },
+              {
+                "ms": 702.12,
+                "event": "will-quit"
+              },
+              {
+                "ms": 702.22,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 741.38,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 741.52,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 741.52,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "status": "PASS"
+      },
+      {
+        "number": 2,
+        "mode": "load",
+        "v50": {
+          "startupMs": 6842.07,
+          "shutdown": {
+            "mode": "load",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "healthRequestsCompletedBeforeQuit": 178,
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 1.49,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 1.87,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 2.03,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 4.02,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 4.39,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 29.85,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 30.03,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 30.2,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 879.24,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 879.55,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 880.71,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 880.83,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 883.36,
+                "event": "window-closed"
+              },
+              {
+                "ms": 883.48,
+                "event": "will-quit"
+              },
+              {
+                "ms": 883.54,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 929.48,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 929.6,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 929.6,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "candidate": {
+          "startupMs": 12463.81,
+          "upgrade": {
+            "identity": true,
+            "task": true,
+            "attachmentSha256": "71ef488a1bc63a3effdba1a96902f1efbad15ed709520c28baf22497a012ca54",
+            "coldSnapshot": true,
+            "markerMatches": true,
+            "journalCleared": true
+          },
+          "shutdown": {
+            "mode": "load",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "healthRequestsCompletedBeforeQuit": 123,
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 1.93,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 2.37,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 2.59,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 4.34,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 4.39,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 31.24,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 31.43,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 31.52,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 899.85,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 900.16,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 901.12,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 901.21,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 903.28,
+                "event": "window-closed"
+              },
+              {
+                "ms": 903.37,
+                "event": "will-quit"
+              },
+              {
+                "ms": 903.42,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 945.59,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 945.97,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 945.97,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "status": "PASS"
+      }
+    ]
+  },
+  "currentPath": {
+    "caseId": "16/P013",
+    "from": 50,
+    "to": 57,
+    "clock": "monotonic milliseconds",
+    "builds": {
+      "baseline": {
+        "schema": 50,
+        "electron": "43.2.0",
+        "node": "24.14.1",
+        "java": "openjdk version \"21.0.12.1\" 2026-08-18 LTS",
+        "sha256": {
+          "executable": "d3c04ffa33632ef210ef908efd48b323a457b7ae851e485bc1a1b4039ef3b48b",
+          "asar": "25b29637e73e96798cf9ab49ba3275789b8553c785315199fe71c8e5a78e7d20",
+          "runtimeManifest": "2a23c4854fd5ea6513d20dd623f812ee9be19bf7cdce64a8f54c8fb1cef38597",
+          "backend": "0577abd4db42cad5828f484070a98c50ec385bc16016e66a86f153aeaf2d7a7e"
+        }
+      },
+      "candidate": {
+        "schema": 57,
+        "electron": "43.8.7",
+        "node": "24.14.1",
+        "java": "openjdk version \"21.0.13.1\" 2026-11-17 LTS",
+        "sha256": {
+          "executable": "348df3d6f32e887ae16ac2e42c0d3f31e8e9b2a64a4a38254ad1343dc77a8290",
+          "asar": "52c535461f8d73f282dbbb7d64b8ff52639a4821674b7db5fe07873e72532385",
+          "runtimeManifest": "1216a2f93854185164187e6259f90563cb0999a4918c943c691f1f1df23177f5",
+          "backend": "4d5d1926fbd049d4fd66cb6f6649695c3719cdf86ca46fae6368ab46e2506fe5"
+        }
+      }
+    },
+    "trials": [
+      {
+        "number": 1,
+        "mode": "standard",
+        "v50": {
+          "startupMs": 7562.61,
+          "shutdown": {
+            "mode": "standard",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.96,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 2.73,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 596.37,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 596.65,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 596.65,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "candidate": {
+          "startupMs": 23644.33,
+          "upgrade": {
+            "identity": true,
+            "task": true,
+            "attachmentSha256": "71ef488a1bc63a3effdba1a96902f1efbad15ed709520c28baf22497a012ca54",
+            "coldSnapshot": true,
+            "markerMatches": true,
+            "journalCleared": true
+          },
+          "shutdown": {
+            "mode": "standard",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 4.95,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 5.03,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 841.02,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 841.15,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 841.15,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "status": "PASS"
+      },
+      {
+        "number": 2,
+        "mode": "trace",
+        "v50": {
+          "startupMs": 6516.04,
+          "shutdown": {
+            "mode": "trace",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.23,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 0.59,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 0.6,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 0.63,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 1.9,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 14.42,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 14.62,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 14.82,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 619.87,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 620.27,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 621.67,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 621.83,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 625.02,
+                "event": "window-closed"
+              },
+              {
+                "ms": 625.21,
+                "event": "will-quit"
+              },
+              {
+                "ms": 625.37,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 679.38,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 679.5,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 679.5,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "candidate": {
+          "startupMs": 15592.6,
+          "upgrade": {
+            "identity": true,
+            "task": true,
+            "attachmentSha256": "71ef488a1bc63a3effdba1a96902f1efbad15ed709520c28baf22497a012ca54",
+            "coldSnapshot": true,
+            "markerMatches": true,
+            "journalCleared": true
+          },
+          "shutdown": {
+            "mode": "trace",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.31,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 0.67,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 0.82,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 0.85,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 0.86,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 12.37,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 12.55,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 12.74,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 669.54,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 669.8,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 670.87,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 671.21,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 674.51,
+                "event": "window-closed"
+              },
+              {
+                "ms": 674.69,
+                "event": "will-quit"
+              },
+              {
+                "ms": 674.8,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 710.67,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 710.75,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 710.75,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "status": "PASS"
+      },
+      {
+        "number": 3,
+        "mode": "load",
+        "v50": {
+          "startupMs": 6797.88,
+          "shutdown": {
+            "mode": "load",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "healthRequestsCompletedBeforeQuit": 166,
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.86,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 1.39,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 1.57,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 3.33,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 5.41,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 30.68,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 30.89,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 31.15,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 806.43,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 806.7,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 808.53,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 808.63,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 811.43,
+                "event": "window-closed"
+              },
+              {
+                "ms": 811.54,
+                "event": "will-quit"
+              },
+              {
+                "ms": 811.59,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 851.21,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 851.29,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 851.29,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "candidate": {
+          "startupMs": 12516.44,
+          "upgrade": {
+            "identity": true,
+            "task": true,
+            "attachmentSha256": "71ef488a1bc63a3effdba1a96902f1efbad15ed709520c28baf22497a012ca54",
+            "coldSnapshot": true,
+            "markerMatches": true,
+            "journalCleared": true
+          },
+          "shutdown": {
+            "mode": "load",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner"
+            ],
+            "injectedStops": [],
+            "healthRequestsCompletedBeforeQuit": 242,
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.48,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 0.9,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 0.93,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 1.05,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 2.03,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 18.12,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 18.34,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 18.55,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 678.39,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 678.7,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 679.42,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 679.71,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 685.6,
+                "event": "window-closed"
+              },
+              {
+                "ms": 685.72,
+                "event": "will-quit"
+              },
+              {
+                "ms": 685.79,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 721.23,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 721.32,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 721.32,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "status": "PASS"
+      },
+      {
+        "number": 4,
+        "mode": "three-processes",
+        "v50": {
+          "startupMs": 7109.63,
+          "shutdown": {
+            "mode": "three-processes",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner",
+              "playwright-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.33,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 0.68,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 0.84,
+                "event": "child-eof",
+                "role": "playwright-runner"
+              },
+              {
+                "ms": 1.43,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 1.54,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 20.24,
+                "event": "child-exit",
+                "role": "playwright-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 20.43,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 20.6,
+                "event": "child-stdio-closed",
+                "role": "playwright-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 31.39,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 31.59,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 31.75,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 942.92,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 943.43,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 944.98,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 945.13,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 948.96,
+                "event": "window-closed"
+              },
+              {
+                "ms": 949.13,
+                "event": "will-quit"
+              },
+              {
+                "ms": 949.22,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 1001.37,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 1001.46,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 1001.46,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "candidate": {
+          "startupMs": 13744.05,
+          "upgrade": {
+            "identity": true,
+            "task": true,
+            "attachmentSha256": "71ef488a1bc63a3effdba1a96902f1efbad15ed709520c28baf22497a012ca54",
+            "coldSnapshot": true,
+            "markerMatches": true,
+            "journalCleared": true
+          },
+          "shutdown": {
+            "mode": "three-processes",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner",
+              "playwright-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.2,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 0.48,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 0.49,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 0.53,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 2.59,
+                "event": "child-eof",
+                "role": "playwright-runner"
+              },
+              {
+                "ms": 16.95,
+                "event": "child-exit",
+                "role": "playwright-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 17.14,
+                "event": "child-stdio-closed",
+                "role": "playwright-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 17.23,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 27.24,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 27.4,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 27.48,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 786.32,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 786.6,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 787.72,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 787.84,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 791.36,
+                "event": "window-closed"
+              },
+              {
+                "ms": 791.54,
+                "event": "will-quit"
+              },
+              {
+                "ms": 791.64,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 828.57,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 828.66,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 828.66,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "status": "PASS"
+      },
+      {
+        "number": 5,
+        "mode": "three-stopped-processes",
+        "v50": {
+          "startupMs": 7299.64,
+          "shutdown": {
+            "mode": "three-processes",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner",
+              "playwright-runner"
+            ],
+            "injectedStops": [],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.41,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 0.77,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 0.78,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 0.87,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 1.55,
+                "event": "child-eof",
+                "role": "playwright-runner"
+              },
+              {
+                "ms": 18.67,
+                "event": "child-exit",
+                "role": "playwright-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 18.85,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 19.04,
+                "event": "child-stdio-closed",
+                "role": "playwright-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 28.99,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 29.16,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 29.33,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 741.4,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 741.78,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 743.16,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 743.29,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 746.96,
+                "event": "window-closed"
+              },
+              {
+                "ms": 747.09,
+                "event": "will-quit"
+              },
+              {
+                "ms": 747.19,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 798.05,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 798.17,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 798.17,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "candidate": {
+          "startupMs": 12914.18,
+          "upgrade": {
+            "identity": true,
+            "task": true,
+            "attachmentSha256": "71ef488a1bc63a3effdba1a96902f1efbad15ed709520c28baf22497a012ca54",
+            "coldSnapshot": true,
+            "markerMatches": true,
+            "journalCleared": true
+          },
+          "shutdown": {
+            "mode": "three-stopped-processes",
+            "visibleViolations": 0,
+            "focusedWindows": 0,
+            "windowCreations": 2,
+            "unexpectedDialogs": 0,
+            "childRoles": [
+              "backend",
+              "api-runner",
+              "playwright-runner"
+            ],
+            "injectedStops": [
+              "backend",
+              "api-runner",
+              "playwright-runner"
+            ],
+            "processState": {
+              "exitCode": 0,
+              "signalCode": null
+            },
+            "timeline": [
+              {
+                "ms": 0,
+                "event": "request-quit"
+              },
+              {
+                "ms": 0.84,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 1.11,
+                "event": "runtime-stop"
+              },
+              {
+                "ms": 1.11,
+                "event": "quit-dispatch-finished"
+              },
+              {
+                "ms": 1.15,
+                "event": "inspector-detached"
+              },
+              {
+                "ms": 2.02,
+                "event": "child-eof",
+                "role": "playwright-runner"
+              },
+              {
+                "ms": 7517.52,
+                "event": "process-still-present",
+                "role": "electron",
+                "state": "S"
+              },
+              {
+                "ms": 7517.69,
+                "event": "process-still-present",
+                "role": "backend",
+                "state": "T"
+              },
+              {
+                "ms": 7517.74,
+                "event": "process-still-present",
+                "role": "api-runner",
+                "state": "T"
+              },
+              {
+                "ms": 7518.58,
+                "event": "process-still-present",
+                "role": "playwright-runner",
+                "state": "T"
+              },
+              {
+                "ms": 10003.73,
+                "event": "child-signal",
+                "role": "playwright-runner",
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 10024.82,
+                "event": "child-exit",
+                "role": "playwright-runner",
+                "exitCode": null,
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 10025.17,
+                "event": "child-eof",
+                "role": "api-runner"
+              },
+              {
+                "ms": 10025.62,
+                "event": "child-stdio-closed",
+                "role": "playwright-runner",
+                "exitCode": null,
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 18007.54,
+                "event": "process-still-present",
+                "role": "electron",
+                "state": "S"
+              },
+              {
+                "ms": 18007.61,
+                "event": "process-still-present",
+                "role": "backend",
+                "state": "T"
+              },
+              {
+                "ms": 18008.26,
+                "event": "process-still-present",
+                "role": "api-runner",
+                "state": "T"
+              },
+              {
+                "ms": 20027.02,
+                "event": "child-signal",
+                "role": "api-runner",
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 20038.7,
+                "event": "child-exit",
+                "role": "api-runner",
+                "exitCode": null,
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 20039.54,
+                "event": "child-eof",
+                "role": "backend"
+              },
+              {
+                "ms": 20039.97,
+                "event": "child-stdio-closed",
+                "role": "api-runner",
+                "exitCode": null,
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 28014.55,
+                "event": "process-still-present",
+                "role": "backend",
+                "state": "T"
+              },
+              {
+                "ms": 28014.57,
+                "event": "process-still-present",
+                "role": "electron",
+                "state": "S"
+              },
+              {
+                "ms": 30000.9,
+                "event": "threshold-exceeded"
+              },
+              {
+                "ms": 30040.45,
+                "event": "child-signal",
+                "role": "backend",
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 30084.21,
+                "event": "child-exit",
+                "role": "backend",
+                "exitCode": null,
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 30084.47,
+                "event": "child-stdio-closed",
+                "role": "backend",
+                "exitCode": null,
+                "signal": "SIGKILL"
+              },
+              {
+                "ms": 30085.41,
+                "event": "runtime-stopped"
+              },
+              {
+                "ms": 30085.55,
+                "event": "before-quit",
+                "prevented": false
+              },
+              {
+                "ms": 30093.97,
+                "event": "window-closed"
+              },
+              {
+                "ms": 30094.14,
+                "event": "will-quit"
+              },
+              {
+                "ms": 30094.21,
+                "event": "quit",
+                "exitCode": 0
+              },
+              {
+                "ms": 30129.95,
+                "event": "electron-exit",
+                "exitCode": 0,
+                "signal": null
+              },
+              {
+                "ms": 30130.09,
+                "event": "stdio-closed",
+                "exitCode": 0,
+                "signal": null
+              }
+            ],
+            "totalMs": 30130.09,
+            "ownedChildrenRemaining": []
+          }
+        },
+        "status": "EXPECTED_INJECTED_TIMEOUT"
+      }
+    ]
+  }
+}

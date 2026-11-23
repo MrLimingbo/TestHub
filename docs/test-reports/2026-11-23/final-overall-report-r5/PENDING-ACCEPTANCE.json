@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-23",
+  "basis": "F016 通过用户审核，其余项目继续跳过。",
+  "historicalLedger": "../../2026-11-05/final-overall-report-r1/SKIPPED-WORK.json",
+  "summary": {
+    "environmentCases": 12,
+    "environmentPassed": 1,
+    "environmentSkipped": 11,
+    "d26Skipped": 2
+  },
+  "records": [
+    {
+      "id": "OBS-16-E001",
+      "kind": "D26_BASELINE",
+      "status": "SKIPPED_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "OBS-16-E002",
+      "kind": "D26_BASELINE",
+      "status": "SKIPPED_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-12-D001",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-12-D002",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-12-D003",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-12-D004",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-15-F016",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "PASS",
+      "countsAsPassed": true,
+      "caseId": "15/F016",
+      "reviewStatus": "APPROVED",
+      "approval": {
+        "by": "user",
+        "date": "2026-11-23",
+        "decision": "F016 审核通过。"
+      },
+      "evidence": "../f016-case-sensitive-fs-r1/TEST-REPORT.md"
+    },
+    {
+      "id": "BLOCK-15-X001",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-15-X002",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-15-X003",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-16-Z001",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-16-Z002",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-16-Z003",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    },
+    {
+      "id": "BLOCK-16-Z004",
+      "kind": "ENVIRONMENT_CASE",
+      "status": "SKIPPED_THIS_ROUND_BY_USER",
+      "countsAsPassed": false
+    }
+  ],
+  "independentRisk": {
+    "id": "OBS-XREG-SHUTDOWN",
+    "status": "UNCONFIRMED_RETAINED",
+    "evidence": "../../2026-11-05/final-overall-report-r1/UNCONFIRMED-RISK.json"
+  }
+}

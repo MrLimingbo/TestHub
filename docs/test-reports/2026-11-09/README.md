@@ -1,5 +1,7 @@
 # 2026-11-09最终整体测试报告更新
 
+**2026-11-23 更新**。F016 大小写重名拒绝补验已通过并获用户审核。原 12 项环境补验中，其余 11 项继续跳过。 [最终整体测试报告 R5](../2026-11-23/final-overall-report-r5/OVERALL-TEST-REPORT.md) · [当前待验收台账](../2026-11-23/final-overall-report-r5/PENDING-ACCEPTANCE.json)
+
 **2026-11-20 更新**。接口调试历史同步夹具修复和隔离 H2、MySQL／Redis／S3 全量回归结果已补入 [最终整体测试报告 R4](../2026-11-20/final-overall-report-r4/OVERALL-TEST-REPORT.md)。H2 跳过的 3 项均已在隔离 MySQL／Redis／S3 环境实际执行并通过。
 
 [最终整体报告R3](final-overall-report-r3/OVERALL-TEST-REPORT.md)已纳入用户审核通过的5f0fd9b CI结果，按授权提交推送主分支。
