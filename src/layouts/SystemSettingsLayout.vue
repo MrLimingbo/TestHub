@@ -6,7 +6,10 @@ const route = useRoute(), router = useRouter()
 const ready = ref(false), allowed = ref(false), error = ref('')
 let sequence = 0, disposed = false
 const menus = computed(() => [
-  ...(allowed.value ? [{ path: '/system-settings/accounts', label: '账号管理', icon: 'IconUserGroup' }] : []),
+  ...(allowed.value ? [
+    { path: '/system-settings/accounts', label: '账号管理', icon: 'IconUserGroup' },
+    { path: '/system-settings/models', label: '模型配置', icon: 'IconRobot' },
+  ] : []),
   { path: '/system-settings/environments', label: '环境管理', icon: 'IconCloud' },
   ...(allowed.value ? [{ path: '/system-settings/parameters', label: '系统参数', icon: 'IconSettings' }] : []),
 ])
@@ -48,7 +51,7 @@ onMounted(load)
       <a-alert v-if="error" type="error">{{ error }} <a-button type="text" @click="load">重试</a-button></a-alert>
       <a-spin v-else-if="!ready" :loading="true" tip="正在读取设置权限" />
       <router-view v-else-if="accessible" />
-      <a-result v-else status="403" title="此设置由系统管理员维护" subtitle="当前账号可以管理有权限项目的环境；账号列表与系统参数只向系统管理员开放。">
+      <a-result v-else status="403" title="此设置由系统管理员维护" subtitle="当前账号可以管理有权限项目的环境。账号管理、模型配置和系统参数仅向系统管理员开放。">
         <template #extra><a-button type="primary" @click="router.replace('/system-settings/environments')">管理项目环境</a-button></template>
       </a-result>
     </main>
@@ -67,5 +70,5 @@ nav a:hover{background:var(--color-fill-2)}
 nav a.router-link-active{background:rgb(var(--primary-1));color:rgb(var(--primary-6));font-weight:600}
 nav a svg:last-child{font-size:12px;color:var(--color-text-3)}
 .system-settings__content{min-width:0}
-@media(max-width:800px){.system-settings{grid-template-columns:1fr}.system-settings__rail{padding:12px;border-right:0;border-bottom:1px solid var(--color-border-2)}.rail-title{display:none}nav{grid-template-columns:repeat(3,1fr);padding:0}}
+@media(max-width:800px){.system-settings{grid-template-columns:1fr}.system-settings__rail{padding:12px;border-right:0;border-bottom:1px solid var(--color-border-2)}.rail-title{display:none}nav{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));padding:0}}
 </style>

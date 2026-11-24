@@ -53,8 +53,10 @@ describe('system settings capability gate', () => {
     const { wrapper } = await setup(SystemSettingsLayout)
     expect(replace).toHaveBeenCalledWith('/system-settings/environments'); expect(wrapper.find('[data-child]').exists()).toBe(true)
     expect(wrapper.find('a[href="/system-settings/accounts"]').exists()).toBe(false); expect(wrapper.find('a[href="/system-settings/parameters"]').exists()).toBe(false)
+    expect(wrapper.find('a[href="/system-settings/models"]').exists()).toBe(false)
   })
   it('direct privileged route never mounts its child for ordinary accounts', async () => {
+    route.path = '/system-settings/models'
     const { wrapper } = await setup(SystemSettingsLayout)
     expect(wrapper.find('[data-child]').exists()).toBe(false); expect(wrapper.text()).toContain('此设置由系统管理员维护')
     expect(vi.mocked(fetch).mock.calls).toHaveLength(1)
@@ -62,6 +64,7 @@ describe('system settings capability gate', () => {
   it('admin can mount accounts with all navigation choices', async () => {
     const { wrapper } = await setup(SystemSettingsLayout, () => ({ systemAdministration: true }))
     expect(wrapper.find('[data-child]').exists()).toBe(true); expect(wrapper.find('a[href="/system-settings/parameters"]').exists()).toBe(true)
+    expect(wrapper.get('a[href="/system-settings/models"]').text()).toBe('模型配置')
   })
   it('capability failure exposes retry and mounts no management page', async () => {
     let rejected = true

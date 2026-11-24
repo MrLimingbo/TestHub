@@ -11,7 +11,7 @@ import { setTimeout as timer, clearTimeout } from 'node:timers'
 import { chromium } from '../../services/playwright-runner/node_modules/playwright/index.mjs'
 const run = promisify(execFile)
 const args = process.argv.slice(2), value = key => args[args.indexOf(key) + 1]
-if (!args.includes('--app') || !args.includes('--output')) throw new Error('Usage: smoke-packaged.mjs --app <TestHub.app|TestHub.exe> --output <summary.json>')
+if (!args.includes('--app') || !args.includes('--output')) throw new Error('Usage: smoke-packaged.mjs --app <TestHub.app|TestHub.exe> --output <summary.json> [--require-model-configuration]')
 const restartChecks = args.includes('--restart-checks') ? Number(value('--restart-checks')) : 1
 assert.ok(Number.isInteger(restartChecks) && restartChecks >= 1 && restartChecks <= 8, 'Restart checks must be between 1 and 8')
 const appPath = await fs.realpath(path.resolve(value('--app'))), output = path.resolve(value('--output'))
@@ -248,6 +248,24 @@ async function request(page, route, body) {
     if (!response.ok) throw new Error(value.message); return value.data
   }, { route, body })
 }
+async function savePackagedModelProvider(page) {
+  const route = '/api/v1/model-providers'
+  const displayName = `打包验收模型 ${crypto.randomUUID()}`
+  const apiBaseUrl = 'https://models.example.test/v1'
+  await page.goto(new URL('/system-settings/models', page.url()).href)
+  await page.getByRole('heading', { name: '模型配置', exact: true }).waitFor()
+  await page.getByRole('button', { name: '添加模型提供商', exact: true }).click()
+  await page.getByRole('textbox', { name: '显示名称', exact: true }).fill(displayName)
+  await page.getByRole('textbox', { name: 'API 地址', exact: true }).fill(apiBaseUrl)
+  await page.getByRole('button', { name: '保存配置', exact: true }).click()
+  await page.getByRole('heading', { name: displayName, exact: true }).waitFor()
+  const provider = (await request(page, route)).find(item => item.displayName === displayName)
+  assert.ok(provider?.id)
+  assert.equal(provider.apiBaseUrl, apiBaseUrl)
+  assert.equal(provider.protocol, 'CHAT_COMPLETIONS')
+  assert.equal(provider.apiKeyConfigured, false)
+  return provider
+}
 try {
   let page = await launch()
   const identity = await request(page, '/api/v1/auth/me'), context = await request(page, '/api/v1/access/context'), project = context.projects[context.organizations[0].id][0].id
@@ -271,13 +289,19 @@ try {
     const folder = await request(page, base + '/catalogs', { scope: 'REQUIREMENTS', name: '包首启验收', parentId: null, sortOrder: 0 })
     requirement = await request(page, base + '/requirements', { catalogId: folder.id, requirementCode: 'REQ-PACKAGED', title: '真实包持久化', priority: 'P1', status: 'APPROVED', description: '离线本地数据\n升级验收 UTF-8' })
   }
+  const modelProvider = manifest.desktopSchemaVersion >= 58 || args.includes('--require-model-configuration')
+    ? await savePackagedModelProvider(page) : undefined
   assert.ok(identity.id); await hidden(); pass(`unmodified packaged executable uses isPackaged resources and starts native V${manifest.desktopSchemaVersion} workspace with no external development commands`)
   for (let restart = 0; restart < restartChecks; restart++) {
     await close(); page = await launch()
     assert.equal((await request(page, '/api/v1/auth/me')).id, identity.id)
     assert.deepEqual((await request(page, base + '/requirements')).find(row => row.id === requirement.id), requirement)
+    if (modelProvider) {
+      assert.deepEqual((await request(page, '/api/v1/model-providers')).find(item => item.id === modelProvider.id), modelProvider)
+    }
     await hidden()
   }
+  if (modelProvider) pass('packaged model configuration page saves to the embedded API and persists after restart')
   pass(`${restartChecks} genuine packaged restart(s) preserve encrypted identity and exact business record`)
   await close(); pass(`${launches.length} genuine packaged launches stay hidden offscreen unfocused and shut down owned runtime processes`)
   const sanitized = launches.map(launch => { const result = { ...launch }; delete result.resources; delete result.executable; delete result.data; return result })

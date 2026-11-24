@@ -19,7 +19,7 @@ public class DesktopApiDebugTargetPolicy {
         origins = environment.getProperty("testhub.desktop.allowed-origins", "");
     }
 
-    boolean permits(URI target, boolean tls, InetAddress[] addresses) {
+    public boolean permits(URI target, boolean tls, InetAddress[] addresses) {
         if (!desktop || addresses.length == 0 || Arrays.stream(addresses).anyMatch(this::alwaysBlocked)) return false;
         String host = target.getHost();
         if (!host.equalsIgnoreCase("localhost") && !host.matches("[0-9.]+") && !host.contains(":")) return false;

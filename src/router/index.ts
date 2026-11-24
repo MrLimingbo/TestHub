@@ -67,6 +67,7 @@ const router = createRouter({
           children: [
             { path: '', redirect: '/system-settings/accounts' },
             { path: 'accounts', component: () => import('@/pages/AccountManagementPage.vue') },
+            { path: 'models', component: () => import('@/pages/ModelConfigurationPage.vue') },
             { path: 'environments', component: () => import('@/pages/EnvironmentManagementPage.vue') },
             { path: 'parameters', component: () => import('@/pages/SystemSettingsPage.vue') },
           ],

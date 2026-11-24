@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -63,6 +64,11 @@ public class ApiDebugTargetPolicy {
 
     /** Re-check immediately before the real transport sends the request. */
     public void assertAllowed(URI target) {
+        resolveAllowed(target);
+    }
+
+    /** Returns the validated addresses for transports that pin DNS for the outbound connection. */
+    public List<InetAddress> resolveAllowed(URI target) {
         if (target == null || target.getScheme() == null
                 || !("http".equalsIgnoreCase(target.getScheme()) || "https".equalsIgnoreCase(target.getScheme()))
                 || target.getHost() == null || target.getHost().isBlank() || target.getUserInfo() != null
@@ -77,13 +83,13 @@ public class ApiDebugTargetPolicy {
             if (alwaysBlocked(address)) throw permanentlyBlocked(address);
             privateAddress |= isAllowlistEligiblePrivate(address);
         }
-        if (!privateAddress) return;
+        if (!privateAddress) return List.of(addresses);
 
         if (configuredPrivateTargetsAllowed()) {
             if (ipLiteral(target.getHost()).isEmpty()) {
                 throw rejected("任意私网目标模式仅允许请求 URL 使用私网 IP；为避免 DNS 重绑定，在线调试不放行解析到私网的域名");
             }
-            return;
+            return List.of(addresses);
         }
 
         Origin origin = targetOrigin(target);
@@ -92,6 +98,7 @@ public class ApiDebugTargetPolicy {
                     + ALLOWED_PRIVATE_ORIGINS_CONFIG + " 中添加该精确 Origin，或启用 "
                     + ALLOW_CONFIGURED_PRIVATE_TARGETS_CONFIG + "（仅支持私网 IP；回环、链路本地和保留地址始终禁止）");
         }
+        return List.of(addresses);
     }
 
     public URI normalizeWithoutNetworkPolicy(String value) {

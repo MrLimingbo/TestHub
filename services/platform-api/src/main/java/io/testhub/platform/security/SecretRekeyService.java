@@ -50,6 +50,7 @@ public class SecretRekeyService {
                 "signing_secret_ciphertext IS NOT NULL AND signing_secret_ciphertext <> ''"));
         updated.put("notification_delivery", rekeyColumn("notification_delivery", "signing_secret_ciphertext", "TRUE"));
         updated.put("enterprise_adapter_configuration", rekeyColumn("enterprise_adapter_configuration", "configuration_ciphertext", "TRUE"));
+        updated.put("model_provider", rekeyColumn("model_provider", "api_key_ciphertext", "api_key_ciphertext IS NOT NULL"));
         int total = updated.values().stream().mapToInt(Integer::intValue).sum();
         RekeySummary summary = new RekeySummary(cipher.activeKeyId(), total, Map.copyOf(updated));
         audit.record(principal, null, null, "PERSISTED_SECRETS_REKEYED", "PLATFORM_SECURITY", cipher.activeKeyId(),
@@ -64,8 +65,8 @@ public class SecretRekeyService {
         for (EncryptedRow row : rows) {
             if (cipher.isEncryptedWithActiveKey(row.ciphertext())) continue;
             String replacement = cipher.encrypt(cipher.decrypt(row.ciphertext()));
-            updated += jdbc.sql("UPDATE " + table + " SET " + column + " = :ciphertext WHERE id = :id")
-                    .param("ciphertext", replacement).param("id", row.id()).update();
+            updated += jdbc.sql("UPDATE " + table + " SET " + column + " = :ciphertext WHERE id = :id AND " + column + " = :previous")
+                    .param("ciphertext", replacement).param("id", row.id()).param("previous", row.ciphertext()).update();
         }
         return updated;
     }
