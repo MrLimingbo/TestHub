@@ -52,6 +52,15 @@ const router = createRouter({
           meta: { projectRequired: true },
         },
         { path: 'api-automation', component: () => import('@/pages/AutomationPage.vue'), meta: { projectRequired: true } },
+        {
+          path: 'ai-testing',
+          component: () => import('@/layouts/AiTestingLayout.vue'),
+          meta: { projectRequired: true },
+          children: [
+            { path: '', redirect: '/ai-testing/agents' },
+            { path: 'agents', component: () => import('@/pages/AiAgentsPage.vue') },
+          ],
+        },
         { path: 'performance', component: () => import('@/pages/PerformancePage.vue'), meta: { projectRequired: true } },
         { path: 'reports', component: () => import('@/pages/ReportsPage.vue'), meta: { projectRequired: true } },
         { path: 'project-settings', component: () => import('@/pages/ProjectSettingsPage.vue') },

@@ -6,12 +6,15 @@ import io.testhub.platform.audit.AuditService;
 import io.testhub.platform.model.ModelProviderRepository.StoredProvider;
 import io.testhub.platform.security.AuthenticatedPrincipal;
 import io.testhub.platform.security.SecretCipher;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,12 +86,56 @@ public class ModelProviderService {
         StoredProvider stored = requireProvider(id);
         Model model = stored.provider().models().stream().filter(entry -> entry.id().equals(input.modelId())).findFirst()
                 .orElseThrow(() -> rejected("请从已保存的模型目录中选择测试模型"));
-        String effort = input.reasoningLevel() == null ? null : model.reasoningOptions().stream()
-                .filter(option -> option.level() == input.reasoningLevel()).findFirst().map(ReasoningOption::apiValue)
-                .orElseThrow(() -> rejected("当前模型没有配置该推理等级"));
+        String effort = reasoningValue(model, input.reasoningLevel());
         long started = System.nanoTime();
         String reply = gateway.test(stored.provider(), decrypt(stored), model, effort);
         return new TestResult(model.id(), reply, TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started));
+    }
+
+    public List<ChatProvider> chatCatalog() {
+        return providers.list().stream().filter(provider -> !provider.models().isEmpty())
+                .map(provider -> new ChatProvider(provider.id(), provider.displayName(), provider.models().stream()
+                        .map(model -> new ChatModel(model.id(), model.displayName(), model.reasoningOptions().stream()
+                                .map(ReasoningOption::level).toList())).toList())).toList();
+    }
+
+    public ChatModelAccess chatModel(ChatSelection selection) {
+        StoredProvider stored = requireProvider(selection.providerId());
+        Model model = stored.provider().models().stream()
+                .filter(entry -> entry.id().equals(selection.modelId())).findFirst()
+                .orElseThrow(() -> rejected("所选模型已从模型配置中移除，请重新选择"));
+        String effort = reasoningValue(model, selection.reasoningLevel());
+        return new ChatModelAccess(stored, model, effort);
+    }
+
+    public final class ChatModelAccess {
+        private final StoredProvider stored;
+        private final Model model;
+        private final String effort;
+
+        private ChatModelAccess(StoredProvider stored, Model model, String effort) {
+            this.stored = stored;
+            this.model = model;
+            this.effort = effort;
+        }
+
+        public Integer contextWindow() { return model.contextWindow(); }
+
+        public void stream(List<ChatLine> messages, ModelChatCancellation cancellation, Consumer<String> delta) {
+            gateway.stream(stored.provider(), decrypt(stored), model, effort, messages, cancellation, delta);
+        }
+    }
+
+    public record ChatSelection(@NotBlank @Size(max = 26) String providerId,
+                                @NotBlank @Size(max = 200) String modelId, ReasoningLevel reasoningLevel) { }
+    public record ChatProvider(String id, String displayName, List<ChatModel> models) { }
+    public record ChatModel(String id, String displayName, List<ReasoningLevel> reasoningLevels) { }
+    public record ChatLine(String role, String content) { }
+
+    private String reasoningValue(Model model, ReasoningLevel level) {
+        return level == null ? null : model.reasoningOptions().stream()
+                .filter(option -> option.level() == level).findFirst().map(ReasoningOption::apiValue)
+                .orElseThrow(() -> rejected("当前模型没有配置该推理等级"));
     }
 
     private List<Model> normalizeModels(List<Model> models) {

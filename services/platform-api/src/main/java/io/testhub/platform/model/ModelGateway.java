@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.testhub.platform.apidebug.ApiDebugTargetPolicy;
 import io.testhub.platform.apidebug.DesktopApiDebugTargetPolicy;
+import io.testhub.platform.model.ModelProviderService.ChatLine;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import okhttp3.HttpUrl;
@@ -24,6 +27,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.BufferedSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,6 +39,7 @@ class ModelGateway {
     private static final MediaType JSON = MediaType.get("application/json");
     private static final int RESPONSE_LIMIT = 512 * 1024;
     private static final int PROBE_OUTPUT_TOKENS = 256;
+    private static final int CHAT_OUTPUT_TOKENS = 8192;
     private static final String PROBE_PROMPT = "This is a connection test. Reply with only: TestHub OK";
     private static final Set<Integer> RETRYABLE = Set.of(429, 502, 503, 504);
     private static final Set<String> LOOPBACK_HOSTS = Set.of("localhost", "127.0.0.1", "::1");
@@ -109,16 +114,149 @@ class ModelGateway {
             payload.put("store", false);
             if (effort != null) payload.put("reasoning", Map.of("effort", effort));
             response = request(provider.apiBaseUrl(), "/responses", key, provider.retryPolicy(), payload, false);
-            reply = StreamSupport.stream(response.path("output").spliterator(), false)
-                    .filter(item -> "message".equals(text(item.path("type"))))
-                    .flatMap(item -> StreamSupport.stream(item.path("content").spliterator(), false))
-                    .filter(item -> "output_text".equals(text(item.path("type"))))
-                    .map(item -> text(item.path("text")))
-                    .collect(Collectors.joining("\n"));
+            reply = responsesText(response);
         }
         if (reply.isBlank()) throw upstream("提供商没有返回文本回复，请检查模型是否支持所选协议");
         String redacted = (key == null ? reply : reply.replace(key, "[已隐藏]")).strip();
         return redacted.substring(0, Math.min(1000, redacted.length()));
+    }
+
+    void stream(Provider provider, String key, Model model, String effort, List<ChatLine> messages,
+                ModelChatCancellation cancellation, Consumer<String> delta) {
+        boolean chat = provider.protocol() == Protocol.CHAT_COMPLETIONS;
+        String endpoint = chat ? "/chat/completions" : "/responses";
+        int maxTokens = model.maxOutputTokens() == null ? CHAT_OUTPUT_TOKENS
+                : Math.min(model.maxOutputTokens(), CHAT_OUTPUT_TOKENS);
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("model", model.id());
+        payload.put("stream", true);
+        payload.put(chat ? "messages" : "input", messages);
+        payload.put(chat ? "max_tokens" : "max_output_tokens", maxTokens);
+        if (!chat) payload.put("store", false);
+        if (effort != null) {
+            payload.put(chat ? "reasoning_effort" : "reasoning", chat ? effort : Map.of("effort", effort));
+        }
+
+        StreamReply reply = new StreamReply(key, delta);
+        ReplyReader<Boolean> reader = (response) -> {
+            if (!response.isSuccessful()) {
+                if (chat && response.code() == 400 && payload.containsKey("max_tokens")
+                        && unsupportedLegacyTokenParameter(readJson(response))) return false;
+                throw upstreamStatus(response.code(), endpoint);
+            }
+            if (response.body() == null) throw upstream("模型提供商返回了空响应");
+            String contentType = response.header("Content-Type", "");
+            if (contentType.toLowerCase(Locale.ROOT).startsWith("text/event-stream")) {
+                readStream(response.body().source(), chat, reply, cancellation);
+            } else {
+                JsonNode body = readJson(response);
+                reply.add(chat ? text(body.path("choices").path(0).path("message").path("content")) : responsesText(body));
+            }
+            return true;
+        };
+        if (!exchange(provider.apiBaseUrl(), endpoint, key, provider.retryPolicy(), payload, cancellation, reader)) {
+            payload.remove("max_tokens");
+            payload.put("max_completion_tokens", maxTokens);
+            exchange(provider.apiBaseUrl(), endpoint, key, provider.retryPolicy(), payload, cancellation, reader);
+        }
+        reply.finish();
+    }
+
+    private void readStream(BufferedSource source, boolean chat, StreamReply reply,
+                            ModelChatCancellation cancellation) throws IOException {
+        boolean finished = false;
+        int total = 0;
+        StringBuilder data = new StringBuilder();
+        while (!source.exhausted()) {
+            cancellation.check();
+            String line = source.readUtf8LineStrict(RESPONSE_LIMIT);
+            total += line.length() + 1;
+            if (total > 8 * RESPONSE_LIMIT) throw upstream("模型提供商响应超过大小限制");
+            if (line.startsWith("data:")) {
+                if (!data.isEmpty()) data.append('\n');
+                data.append(line.substring(5).stripLeading());
+            } else if (line.isEmpty() && !data.isEmpty()) {
+                if ("[DONE]".contentEquals(data)) return;
+                JsonNode event = json.readTree(data.toString());
+                data.setLength(0);
+                if (event == null || !event.isObject() || event.hasNonNull("error")) {
+                    throw upstream("模型提供商返回了流式错误");
+                }
+                if (chat) {
+                    JsonNode choice = event.path("choices").path(0);
+                    reply.add(text(choice.path("delta").path("content")));
+                    finished |= choice.hasNonNull("finish_reason");
+                } else {
+                    switch (text(event.path("type"))) {
+                        case "response.output_text.delta" -> reply.add(text(event.path("delta")));
+                        case "response.completed" -> {
+                            if (!reply.hasText()) reply.add(responsesText(event.path("response")));
+                            return;
+                        }
+                        case "response.incomplete" -> { return; }
+                        case "response.failed", "error" -> throw upstream("模型提供商未能完成回复");
+                        default -> { }
+                    }
+                }
+            }
+        }
+        if (!finished) throw new EOFException("Unfinished model response");
+    }
+
+    private static String responsesText(JsonNode response) {
+        return StreamSupport.stream(response.path("output").spliterator(), false)
+                .filter(item -> "message".equals(text(item.path("type"))))
+                .flatMap(item -> StreamSupport.stream(item.path("content").spliterator(), false))
+                .filter(item -> "output_text".equals(text(item.path("type"))))
+                .map(item -> text(item.path("text")))
+                .collect(Collectors.joining("\n"));
+    }
+
+    private static final class StreamReply {
+        private final String key;
+        private final Consumer<String> sink;
+        private String pending = "";
+        private int length;
+        private boolean hasText;
+
+        private StreamReply(String key, Consumer<String> sink) {
+            this.key = key;
+            this.sink = sink;
+        }
+
+        void add(String delta) {
+            if (delta.isEmpty()) return;
+            if (key == null) {
+                emit(delta);
+                return;
+            }
+            String data = pending + delta;
+            int start = 0;
+            for (int match = data.indexOf(key); match >= 0; match = data.indexOf(key, start)) {
+                emit(data.substring(start, match) + "[已隐藏]");
+                start = match + key.length();
+            }
+            int keep = Math.min(key.length() - 1, data.length() - start);
+            while (keep > 0 && !key.regionMatches(0, data, data.length() - keep, keep)) keep--;
+            int boundary = data.length() - keep;
+            emit(data.substring(start, boundary));
+            pending = data.substring(boundary);
+        }
+
+        void finish() {
+            emit(pending);
+            if (!hasText) throw upstream("提供商没有返回文本回复，请检查模型是否支持所选协议");
+        }
+
+        boolean hasText() { return hasText || !pending.isBlank(); }
+
+        private void emit(String value) {
+            if (value.isEmpty()) return;
+            length += value.length();
+            if (length > 64000) throw upstream("模型文本回复超过大小限制");
+            hasText |= !value.isBlank();
+            sink.accept(value);
+        }
     }
 
     static boolean validModelId(String id) {
@@ -127,6 +265,19 @@ class ModelGateway {
 
     private JsonNode request(String baseUrl, String endpoint, String key, RetryPolicy retry, Map<String, Object> payload,
                              boolean checkChatTokenParameter) {
+        return exchange(baseUrl, endpoint, key, retry, payload, null, response -> {
+            if (response.isSuccessful()) return readJson(response);
+            if (checkChatTokenParameter && response.code() == 400) {
+                JsonNode body = readJson(response);
+                if (unsupportedLegacyTokenParameter(body)) return body;
+            }
+            throw upstreamStatus(response.code(), endpoint);
+        });
+    }
+
+    private <T> T exchange(String baseUrl, String endpoint, String key, RetryPolicy retry, Map<String, Object> payload,
+                           ModelChatCancellation cancellation, ReplyReader<T> reader) {
+        if (cancellation != null) cancellation.check();
         HttpUrl url = HttpUrl.get(baseUrl + endpoint);
         List<InetAddress> addresses = desktopLoopback(url);
         if (addresses.isEmpty()) {
@@ -134,34 +285,41 @@ class ModelGateway {
             addresses = targets.resolveAllowed(url.uri());
         }
         List<InetAddress> pinned = addresses;
-        OkHttpClient client = http.newBuilder().dns(host -> {
+        OkHttpClient.Builder clientBuilder = http.newBuilder().dns(host -> {
             if (!url.host().equalsIgnoreCase(host)) throw new UnknownHostException("Unexpected model API host");
             return pinned;
-        }).build();
+        });
+        if (cancellation != null) clientBuilder.callTimeout(Duration.ofSeconds(110)).readTimeout(Duration.ofSeconds(90));
+        OkHttpClient client = clientBuilder.build();
 
-        Request.Builder outgoing = new Request.Builder().url(url).header("Accept", "application/json");
+        Request.Builder outgoing = new Request.Builder().url(url)
+                .header("Accept", cancellation == null ? "application/json" : "text/event-stream, application/json");
         if (key != null) outgoing.header("Authorization", "Bearer " + key);
         try {
             if (payload != null) outgoing.post(RequestBody.create(json.writeValueAsBytes(payload), JSON));
             Request request = outgoing.build();
             for (int attempt = 0; ; attempt++) {
-                try (Response response = client.newCall(request).execute()) {
+                var call = client.newCall(request);
+                if (cancellation != null) cancellation.bind(call);
+                try (Response response = call.execute()) {
                     if (attempt == 0 && retry == RetryPolicy.TRANSIENT_ERRORS && RETRYABLE.contains(response.code())
                             && (response.header("Retry-After") == null || "0".equals(response.header("Retry-After")))) continue;
-                    if (response.isSuccessful()) return readJson(response);
-                    if (checkChatTokenParameter && response.code() == 400) {
-                        JsonNode body = readJson(response);
-                        if (unsupportedLegacyTokenParameter(body)) return body;
-                    }
-                    throw upstreamStatus(response.code(), endpoint);
+                    return reader.read(response);
                 }
             }
         } catch (InterruptedIOException exception) {
+            if (cancellation != null) cancellation.check();
             throw new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "请求模型提供商超时，请稍后重试");
         } catch (IOException exception) {
+            if (cancellation != null) cancellation.check();
             throw upstream("无法读取模型提供商响应，请检查地址、网络和 TLS 证书");
+        } finally {
+            if (cancellation != null) cancellation.bind(null);
         }
     }
+
+    @FunctionalInterface
+    private interface ReplyReader<T> { T read(Response response) throws IOException; }
 
     private List<InetAddress> desktopLoopback(HttpUrl url) {
         if (!LOOPBACK_HOSTS.contains(url.host().toLowerCase(Locale.ROOT))) return List.of();

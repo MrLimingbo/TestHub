@@ -5,6 +5,8 @@ import crypto from 'node:crypto'
 import installationQA from '../../apps/desktop/build/installation-qa.cjs'
 import assert from 'node:assert/strict'
 import { spawn, execFile } from 'node:child_process'
+import { createServer } from 'node:http'
+import { Buffer } from 'node:buffer'
 import { promisify } from 'node:util'
 import { setTimeout as delay } from 'node:timers/promises'
 import { setTimeout as timer, clearTimeout } from 'node:timers'
@@ -39,6 +41,7 @@ if (statePath && lifecycleStage === 'seed') {
   catch (error) { await installationQA.removeSession(ownership); await fs.rm(statePath); throw error }
 }
 let child, finished, inspector, browser, transcript = '', summary, cleanupError, rendererEvents = []
+let modelFixture
 const pass = message => { checks.push(message); console.log('PASS ' + message) }
 class Inspector {
   constructor(socket) {
@@ -266,7 +269,67 @@ async function savePackagedModelProvider(page) {
   assert.equal(provider.apiKeyConfigured, false)
   return provider
 }
+
+async function startPackagedAgentFixture() {
+  const requests = []
+  const server = createServer(async (request, response) => {
+    const chunks = []
+    for await (const chunk of request) chunks.push(chunk)
+    if (request.url !== '/v1/chat/completions' || request.method !== 'POST') {
+      response.writeHead(404).end()
+      return
+    }
+    const body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
+    requests.push(body)
+    const text = requests.length === 1 ? '包内对话第一轮' : JSON.stringify({ cases: [{
+      title: '包内生成的测试用例', priority: 'P1', precondition: '', steps: '提交一次', expectedResult: '返回成功',
+    }] })
+    response.writeHead(200, { 'Content-Type': 'text/event-stream' })
+    response.end('data: ' + JSON.stringify({ choices: [{ delta: { content: text }, finish_reason: 'stop' }] }) +
+      '\n\ndata: [DONE]\n\n')
+  })
+  await new Promise((resolve, reject) => server.once('error', reject).listen(0, '127.0.0.1', resolve))
+  modelFixture = server
+  const origin = 'http://127.0.0.1:' + server.address().port
+  // Only the owned QA profile gets access to this ephemeral loopback fixture.
+  await fs.writeFile(path.join(directory, 'local-execution.json'),
+    JSON.stringify({ version: 1, allowedOrigins: [origin], appiumServerUrl: '' }), { mode: 0o600 })
+  return { origin, requests }
+}
+
+async function exercisePackagedAgent(page, project, fixture) {
+  const name = '包验收智能体 ' + crypto.randomUUID()
+  const provider = await request(page, '/api/v1/model-providers', { displayName: '包内对话验收', apiBaseUrl: fixture.origin + '/v1',
+    protocol: 'CHAT_COMPLETIONS', retryPolicy: 'DISABLED', models: [{ id: 'packaged-qa-model' }] })
+  const base = '/api/v1/projects/' + project
+  const folder = await request(page, base + '/functional/catalogs', { scope: 'CASES', name, sortOrder: 0 })
+  await page.getByRole('link', { name: 'AI测试', exact: true }).click()
+  await page.getByRole('button', { name: '新建 AI 工作区', exact: true }).click()
+  await page.getByLabel('工作区名称', { exact: true }).fill(name)
+  await page.getByRole('button', { name: '保存工作区', exact: true }).click()
+  await page.getByRole('button', { name: '新建智能体', exact: true }).click()
+  await page.getByLabel('智能体名称', { exact: true }).fill(name)
+  await page.getByRole('combobox', { name: '默认模型', exact: true }).selectOption(JSON.stringify([provider.id, 'packaged-qa-model']))
+  await page.getByRole('button', { name: '保存智能体', exact: true }).click()
+  await page.locator('input[type=file]').setInputFiles({ name: 'package.txt', mimeType: 'text/plain', buffer: Buffer.from('包内附件') })
+  await page.getByText('package.txt', { exact: true }).waitFor()
+  await page.getByRole('textbox', { name: '消息', exact: true }).fill('第一轮')
+  await page.getByRole('button', { name: '发送', exact: true }).click()
+  await page.getByText('包内对话第一轮', { exact: true }).waitFor()
+  await page.getByRole('button', { name: '生成用例草稿', exact: true }).click()
+  await page.getByRole('button', { name: '审核并写入用例库', exact: true }).click()
+  await page.getByRole('combobox', { name: '写入用例目录', exact: true }).selectOption(folder.id)
+  await page.getByRole('button', { name: '确认写入 1 条草稿', exact: true }).click()
+  await page.getByText('已写入 1 条用例草稿', { exact: true }).waitFor()
+  assert.match(fixture.requests[0].messages.at(-1).content, /包内附件/)
+  assert.ok(fixture.requests[1].messages.some(message => message.role === 'assistant' && message.content === '包内对话第一轮'))
+  const conversation = new URL(page.url()).searchParams.get('conversation')
+  assert.ok(conversation)
+  return { path: base + '/ai-testing/conversations/' + conversation, cases: base + '/functional/cases?catalogId=' + folder.id }
+}
+
 try {
+  const agentFixture = manifest.desktopSchemaVersion >= 59 ? await startPackagedAgentFixture() : null
   let page = await launch()
   const identity = await request(page, '/api/v1/auth/me'), context = await request(page, '/api/v1/access/context'), project = context.projects[context.organizations[0].id][0].id
   assert.equal((await request(page, '/api/v1/operations/overview')).dataProtection.migrationVersion, 'V' + manifest.desktopSchemaVersion)
@@ -291,6 +354,7 @@ try {
   }
   const modelProvider = manifest.desktopSchemaVersion >= 58 || args.includes('--require-model-configuration')
     ? await savePackagedModelProvider(page) : undefined
+  const agentResult = agentFixture ? await exercisePackagedAgent(page, project, agentFixture) : null
   assert.ok(identity.id); await hidden(); pass(`unmodified packaged executable uses isPackaged resources and starts native V${manifest.desktopSchemaVersion} workspace with no external development commands`)
   for (let restart = 0; restart < restartChecks; restart++) {
     await close(); page = await launch()
@@ -299,9 +363,17 @@ try {
     if (modelProvider) {
       assert.deepEqual((await request(page, '/api/v1/model-providers')).find(item => item.id === modelProvider.id), modelProvider)
     }
+    if (agentResult) {
+      const detail = await request(page, agentResult.path)
+      assert.equal(detail.turns.length, 2)
+      assert.ok(detail.turns.every(turn => turn.status === 'COMPLETED'))
+      const cases = await request(page, agentResult.cases)
+      assert.equal(cases.find(row => row.title === '包内生成的测试用例')?.status, 'DRAFT')
+    }
     await hidden()
   }
   if (modelProvider) pass('packaged model configuration page saves to the embedded API and persists after restart')
+  if (agentResult) pass('packaged AI agent streams multi-turn replies with attachments, writes reviewed drafts, and persists after restart')
   pass(`${restartChecks} genuine packaged restart(s) preserve encrypted identity and exact business record`)
   await close(); pass(`${launches.length} genuine packaged launches stay hidden offscreen unfocused and shut down owned runtime processes`)
   const sanitized = launches.map(launch => { const result = { ...launch }; delete result.resources; delete result.executable; delete result.data; return result })
@@ -321,6 +393,7 @@ try {
 } finally {
   await close().catch(() => {})
   if (child && child.exitCode === null) { child.kill('SIGTERM'); await finished }
+  if (modelFixture) await new Promise(resolve => modelFixture.close(resolve))
   const retain = statePath && summary?.passed
   if (!retain) {
     if (ownership) await installationQA.removeSession(ownership)

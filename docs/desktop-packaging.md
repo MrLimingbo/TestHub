@@ -48,6 +48,8 @@ Mac 的 JDK／Node 不得依赖 Homebrew 等包外运行库。准备脚本保持
 
 发行 CI 启用 `--require-model-configuration`。验收从安装包内的「模型配置」页面保存测试提供商，经内置 API 读取，并在重启后核对保存结果。服务模式的模型配置由所连接的后端管理，随该服务的数据保存。
 
+桌面数据库 V59 起，安装包验收还会在隔离项目通过「AI测试 → 智能体」创建工作区和智能体，用临时本机模型端点检查附件、多轮对话和确认写入用例草稿。重启后重新读取会话及用例，验证内置后端的数据持久化。真实提供商由部署或本地工作区的管理员单独配置。
+
 默认 `desktop:package:mac` 仍生成 universal `release/desktop/TestHub.dmg`，必须预先准备 arm64 与 x64 两份验证后的运行时。原生 CI 分架构构建和验收，避免用单一架构的测试替代另一架构。Windows 安装器必须在原生 Windows x64 环境执行 `desktop:package:win`。构建产物和运行时不提交 Git。
 
 安装器图标由 `apps/desktop/build/icon.svg` 生成。修改 SVG 后，在 macOS 执行 `scripts/desktop/generate-icons.sh`，并提交生成的 `icon.icns` 和 `icon.ico`，确保 Windows 原生构建不依赖 macOS 工具。

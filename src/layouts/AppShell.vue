@@ -18,6 +18,7 @@ const sections = [
     { path: '/functional', label: '功能测试', icon: 'IconSafe' },
     { path: '/api-testing', label: '接口测试', icon: 'IconThunderbolt' },
     { path: '/api-automation', label: '接口自动化', icon: 'IconCode' },
+    { path: '/ai-testing', label: 'AI测试', icon: 'IconRobot' },
     { path: '/mock', label: 'Mock 服务', icon: 'IconCloud' },
     { path: '/performance', label: '性能测试', icon: 'IconFire' },
     { path: '/ui-automation', label: 'Web UI 自动化', icon: 'IconComputer' },

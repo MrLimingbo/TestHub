@@ -121,6 +121,11 @@ public class AccessService {
         return requireProjectAccess(principal, projectId, false);
     }
 
+    public boolean hasProjectRole(AuthenticatedPrincipal principal, ProjectSummary project, Set<String> permittedRoles) {
+        return access.findRoles(principal.userId(), project.organizationId(), project.id()).stream()
+                .anyMatch(permittedRoles::contains);
+    }
+
     public ProjectSummary requireProjectParameterWrite(AuthenticatedPrincipal principal, String projectId,
                                                         Set<String> permittedRoles) {
         ProjectSummary project = access.findProject(projectId)
@@ -131,8 +136,7 @@ public class AccessService {
         if (principal instanceof ApiTokenPrincipal tokenPrincipal && !tokenPrincipal.scopes().contains("project:write")) {
             throw new AccessDeniedException("令牌没有项目写入权限范围");
         }
-        List<String> roles = access.findRoles(principal.userId(), project.organizationId(), projectId);
-        if (roles.stream().noneMatch(permittedRoles::contains)) {
+        if (!hasProjectRole(principal, project, permittedRoles)) {
             throw new AccessDeniedException("没有修改项目参数的权限");
         }
         return project;

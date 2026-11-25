@@ -110,6 +110,12 @@ public class FunctionalAssetService {
         return requirements.findByProject(projectId, blankToNull(catalogId));
     }
 
+    public FunctionalRequirement getRequirement(AuthenticatedPrincipal principal, String projectId, String id) {
+        access.requireProjectRead(principal, projectId);
+        return requirements.findById(projectId, id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "需求不存在"));
+    }
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public FunctionalRequirement createRequirement(AuthenticatedPrincipal principal, String projectId, RequirementInput input) {
         ProjectSummary project = writeAccess(principal, projectId);
@@ -163,6 +169,12 @@ public class FunctionalAssetService {
         access.requireProjectRead(principal, projectId);
         if (catalogId != null && !catalogId.isBlank()) requireCatalog(projectId, catalogId, "CASES");
         return cases.findByProject(projectId, blankToNull(catalogId));
+    }
+
+    public FunctionalCase getCase(AuthenticatedPrincipal principal, String projectId, String id) {
+        access.requireProjectRead(principal, projectId);
+        return cases.findById(projectId, id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "用例不存在"));
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
