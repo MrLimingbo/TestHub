@@ -5,6 +5,7 @@ import { createPinia } from 'pinia'
 import ArcoVue, { Button, Input, InputPassword, InputSearch, Modal, Textarea } from '@arco-design/web-vue'
 import AccountManagementPage from '@/pages/AccountManagementPage.vue'
 import EnvironmentManagementPage from '@/pages/EnvironmentManagementPage.vue'
+import ModelConfigurationPage from '@/pages/ModelConfigurationPage.vue'
 import SystemSettingsPage from '@/pages/SystemSettingsPage.vue'
 import SystemSettingsLayout from '@/layouts/SystemSettingsLayout.vue'
 import { useSessionStore } from '@/stores/session'
@@ -20,7 +21,7 @@ afterEach(() => {
   route.path = '/system-settings/accounts'; delete route.redirectedFrom; replace.mockClear()
   delete (window as Window & { testhubDesktop?: unknown }).testhubDesktop
 })
-async function setup(component: typeof AccountManagementPage | typeof EnvironmentManagementPage | typeof SystemSettingsPage | typeof SystemSettingsLayout, override?: (url: string, init?: RequestInit) => unknown) {
+async function setup(component: typeof AccountManagementPage | typeof EnvironmentManagementPage | typeof ModelConfigurationPage | typeof SystemSettingsPage | typeof SystemSettingsLayout, override?: (url: string, init?: RequestInit) => unknown) {
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
     const custom = await override?.(url, init)
     if (custom && typeof custom === 'object' && 'ok' in custom) return custom
@@ -71,6 +72,99 @@ describe('system settings capability gate', () => {
     const { wrapper } = await setup(SystemSettingsLayout, () => rejected ? failed : { systemAdministration: true })
     expect(wrapper.text()).toContain('服务暂不可用'); expect(wrapper.find('[data-child]').exists()).toBe(false)
     rejected = false; button(wrapper, '重试').vm.$emit('click'); await flushPromises(); expect(wrapper.find('[data-child]').exists()).toBe(true)
+  })
+})
+
+describe('model provider editor', () => {
+  async function editProvider(apiKeyConfigured = true, editingId = 'model-provider') {
+    const provider = {
+      id: 'model-provider', displayName: 'Fixture Provider', apiBaseUrl: 'https://example.test/v1',
+      protocol: 'CHAT_COMPLETIONS', retryPolicy: 'TRANSIENT_ERRORS', apiKeyConfigured, models: [], version: 1,
+    }
+    const otherProvider = { ...provider, id: 'other-provider', displayName: 'Other Provider' }
+    const { wrapper } = await setup(ModelConfigurationPage, (url, init) => {
+      if (url.endsWith('/model-providers')) return [provider, otherProvider]
+      if (init?.method === 'PUT') return provider
+    })
+    const card = wrapper.get(`article[aria-labelledby="model-provider-${editingId}"]`)
+    await card.findAll('button').find(action => action.text() === '编辑')!.trigger('click')
+    await flushPromises()
+    return { wrapper, key: wrapper.get<HTMLInputElement>('#model-provider-api-key') }
+  }
+
+  it('puts the provider name at the top of the form and hides only its duplicate card during editing', async () => {
+    const { wrapper } = await editProvider()
+    expect(wrapper.get('form').element.firstElementChild?.textContent?.trim()).toBe('编辑 Fixture Provider')
+    expect(wrapper.find('#model-provider-model-provider').exists()).toBe(false)
+    expect(wrapper.findAll('form.editor, article.provider').map(row => row.get('h2').text())).toEqual(['编辑 Fixture Provider', 'Other Provider'])
+    expect(wrapper.find('.provider--pinned').exists()).toBe(false)
+    button(wrapper, '取消').vm.$emit('click')
+    await flushPromises()
+    expect(wrapper.get('#model-provider-model-provider').text()).toBe('Fixture Provider')
+  })
+
+  it('keeps the second provider editor below the pinned first card and restores the list on cancel', async () => {
+    const { wrapper } = await editProvider(true, 'other-provider')
+    expect(wrapper.findAll('form.editor, article.provider').map(row => row.get('h2').text())).toEqual(['Fixture Provider', '编辑 Other Provider'])
+    expect(wrapper.get('.provider--pinned h2').text()).toBe('Fixture Provider')
+    expect(wrapper.find('#model-provider-other-provider').exists()).toBe(false)
+    button(wrapper, '取消').vm.$emit('click')
+    await flushPromises()
+    expect(wrapper.findAll('article.provider h2').map(heading => heading.text())).toEqual(['Fixture Provider', 'Other Provider'])
+    expect(wrapper.find('.provider--pinned').exists()).toBe(false)
+  })
+
+  it('opens the add-provider form when the list is empty', async () => {
+    const { wrapper } = await setup(ModelConfigurationPage)
+    button(wrapper, '添加模型提供商').vm.$emit('click')
+    await flushPromises()
+    expect(wrapper.get('form.editor h2').text()).toBe('添加模型提供商')
+    expect(wrapper.find('.provider--pinned').exists()).toBe(false)
+  })
+
+  it('shows a fixed mask for the saved key and keeps it out of discovery and save requests', async () => {
+    const { wrapper, key } = await editProvider()
+    expect(key.attributes('placeholder')).toBe('••••••••••••')
+    expect(key.element.value).toBe('')
+    expect(wrapper.get('#model-provider-api-key-status').text()).toContain('已保存密钥')
+    button(wrapper, '获取可用模型').vm.$emit('click')
+    await flushPromises()
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(mutation().map(([url, init]) => ({ url, ...JSON.parse(String(init?.body)) }))).toMatchObject([
+      { url: '/api/v1/model-providers/discover', apiKey: '', clearApiKey: false },
+      { url: '/api/v1/model-providers/model-provider', apiKey: '', clearApiKey: false },
+    ])
+    expect(wrapper.get('#model-provider-model-provider').text()).toBe('Fixture Provider')
+  })
+
+  it('keeps newly entered keys masked and sends the typed value when saving a replacement', async () => {
+    const { wrapper, key } = await editProvider()
+    await key.setValue('fixture-replacement')
+    expect(key.attributes('type')).toBe('password')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(JSON.parse(String(mutation()[0]?.[1]?.body))).toMatchObject({ apiKey: 'fixture-replacement', clearApiKey: false })
+  })
+
+  it('hides the mask while clearing the saved key and sends no replacement', async () => {
+    const { wrapper, key } = await editProvider()
+    await key.setValue('fixture-replacement')
+    await wrapper.get('input[type="checkbox"]').setValue(true)
+    expect(key.element.disabled).toBe(true)
+    expect(key.attributes('placeholder')).toBeUndefined()
+    expect(wrapper.get('#model-provider-api-key-status').text()).toContain('保存后清除')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    const payload = JSON.parse(String(mutation()[0]?.[1]?.body))
+    expect(payload.clearApiKey).toBe(true)
+    expect(payload).not.toHaveProperty('apiKey')
+  })
+
+  it('shows the normal input hint when the provider has no saved key', async () => {
+    const { wrapper, key } = await editProvider(false)
+    expect(key.attributes('placeholder')).toBe('输入提供商的 API 密钥（如需）')
+    expect(wrapper.find('#model-provider-api-key-status').exists()).toBe(false)
   })
 })
 
