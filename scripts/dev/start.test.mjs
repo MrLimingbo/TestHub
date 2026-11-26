@@ -67,9 +67,12 @@ async function fixture(t) {
   await write('bin/npx', '#!/usr/bin/env bash\nprintf "%s\\n" "$*" >> .testhub/installs\n[[ "${QA_INSTALL_FAIL:-}" != 1 ]]\n')
   await write('bin/docker', `#!/usr/bin/env node
 import fs from 'node:fs'
-const args = process.argv.slice(2)
-fs.appendFileSync('.testhub/docker-calls', JSON.stringify(args) + '\\n')
+const invocation = process.argv.slice(2)
+const args = invocation[0] === '--context' ? invocation.slice(2) : invocation
+fs.appendFileSync('.testhub/docker-calls', JSON.stringify(invocation) + '\\n')
 if (args[0] === 'info' && process.env.QA_DOCKER_DOWN) process.exit(1)
+if (args[0] === 'info' && process.env.QA_COLIMA_REQUIRED && !fs.existsSync('.testhub/colima-started')) process.exit(1)
+if (args.join(' ') === 'context show') console.log(process.env.DOCKER_CONTEXT || 'default')
 if (args.includes('config') && args.includes('--format')) console.log(JSON.stringify({ name: 'qa', services: {
   mysql: { image: 'mysql:8.4' }, redis: { image: 'redis:7.4-alpine' }, minio: { image: 'qa/minio', build: {} }, 'api-runner': { build: {} }
 } }))
@@ -77,12 +80,27 @@ if (args[0] === 'image' && process.env.QA_MISSING_IMAGE) process.exit(1)
 if (args[0] === 'buildx' && process.env.QA_NO_BUILDX) process.exit(1)
 if (args.includes('ps')) console.log(fs.existsSync('.testhub/compose-attempt') ? 'existing-container\\nnew-container' : 'existing-container')
 if (args.includes('up') && process.env.QA_COMPOSE_FAIL) { fs.writeFileSync('.testhub/compose-attempt', '1'); process.exit(1) }
+if (args[0] === 'compose' && args[1] === 'stop') {
+  if (['platform-api', 'web'].some(name => fs.existsSync('.testhub/' + name + '.pid'))) process.exit(1)
+  fs.appendFileSync('.testhub/shutdown-calls', JSON.stringify(['docker', ...invocation]) + '\\n')
+}
+`)
+  await write('bin/colima', `#!/usr/bin/env node
+import fs from 'node:fs'
+const args = process.argv.slice(2)
+fs.appendFileSync('.testhub/colima-calls', JSON.stringify(args) + '\\n')
+if (args[0] === 'status') process.exit(fs.existsSync('.testhub/colima-started') ? 0 : 1)
+if (args[0] === 'start') fs.writeFileSync('.testhub/colima-started', '1')
+if (args[0] === 'stop') {
+  fs.appendFileSync('.testhub/shutdown-calls', JSON.stringify(['colima', ...args]) + '\\n')
+  fs.rmSync('.testhub/colima-started', { force: true })
+}
 `)
   const mysql = net.createServer(socket => { socket.on('error', () => {}); socket.end(new Uint8Array([1, 0, 0, 0, 10])) })
   const redis = net.createServer(socket => { socket.on('error', () => {}); socket.on('data', () => socket.write('+OK\r\n+PONG\r\n')) })
   const minio = http.createServer((req, res) => res.end('OK'))
   const env = { ...process.env }
-  for (const key of Object.keys(env)) if (/^(TESTHUB_|SPRING_|SERVER_|COMPOSE_)/.test(key)) delete env[key]
+  for (const key of Object.keys(env)) if (/^(TESTHUB_|SPRING_|SERVER_|COMPOSE_|DOCKER_)/.test(key)) delete env[key]
   Object.assign(env, {
     PATH: `${directory}/bin:${process.env.PATH}`, JAVA_HOME: `${directory}/jdk`,
     COMPOSE_FILE: 'compose-qa.json',
@@ -111,6 +129,87 @@ if (args.includes('up') && process.env.QA_COMPOSE_FAIL) { fs.writeFileSync('.tes
 }
 
 const passed = result => assert.equal(result.code, 0, result.stdout + result.stderr)
+
+test('local lifecycle starts and stops only the matching Colima profile', async t => {
+  const f = await fixture(t)
+  await f.write('.testhub/local-web-config.sh', [
+    'export TESTHUB_START_COLIMA_PROFILE=testhub-fixture',
+    'export DOCKER_CONTEXT="${DOCKER_CONTEXT:-colima-testhub-fixture}"',
+    'export TESTHUB_REGISTRATION_ENABLED=true',
+  ].join('\n'))
+  const cold = { QA_COLIMA_REQUIRED: '1' }
+  const callsFile = `${f.directory}/.testhub/colima-calls`
+  passed(await f.run(['--help'], cold))
+  assert.equal((await f.run(['status'], cold)).code, 1)
+  assert.equal((await f.run(['doctor'], {
+    ...cold, TESTHUB_MINIO_ENDPOINT: `http://127.0.0.1:${await freePort()}`,
+  })).code, 1)
+  assert.equal((await f.run([], { ...cold, DOCKER_CONTEXT: 'other' })).code, 1)
+  assert.equal(await exists(callsFile), false)
+
+  passed(await f.run([], cold))
+  passed(await f.run(['status'], cold))
+  const calls = (await fs.readFile(callsFile, 'utf8')).trim().split('\n').map(JSON.parse)
+  assert.deepEqual(calls, [
+    ['status', '--profile', 'testhub-fixture'],
+    ['start', '--profile', 'testhub-fixture', '--activate=false'],
+  ])
+  const launches = (await fs.readFile(`${f.directory}/.testhub/launches`, 'utf8')).trim().split('\n').map(JSON.parse)
+  assert.equal(launches.length, 2)
+  assert.ok(launches.every(launch => launch.host === '127.0.0.1'))
+
+  const pids = await f.pids()
+  for (const action of ['start', 'restart', 'stop']) {
+    const wrongContext = await f.run([action], { ...cold, DOCKER_CONTEXT: 'other' })
+    assert.equal(wrongContext.code, 1)
+    assert.match(wrongContext.stderr, /does not match Colima profile/)
+  }
+  assert.deepEqual(await f.pids(), pids)
+  const shutdownFile = `${f.directory}/.testhub/shutdown-calls`
+  assert.equal(await exists(shutdownFile), false)
+
+  passed(await f.run(['stop'], cold))
+  assert.equal((await f.run(['status'], cold)).code, 1)
+  assert.equal(await exists(`${f.directory}/.testhub/colima-started`), false)
+  passed(await f.run(['stop'], cold))
+  assert.deepEqual((await fs.readFile(shutdownFile, 'utf8')).trim().split('\n').map(JSON.parse), [
+    ['docker', '--context', 'colima-testhub-fixture', 'compose', 'stop', '--timeout', '45', 'mysql', 'redis', 'minio'],
+    ['colima', 'stop', '--profile', 'testhub-fixture'],
+    ['colima', 'stop', '--profile', 'testhub-fixture'],
+  ])
+  const dockerCalls = (await fs.readFile(`${f.directory}/.testhub/docker-calls`, 'utf8')).trim().split('\n').map(JSON.parse)
+  const daemonCalls = dockerCalls.filter(args => args[0] !== 'context')
+  assert.ok(daemonCalls.some(args => args[2] === 'compose' && args[3] === 'up'))
+  for (const args of daemonCalls) assert.deepEqual(args.slice(0, 2), ['--context', 'colima-testhub-fixture'])
+})
+
+test('a reachable Docker context mismatch blocks lifecycle commands before they change anything', async t => {
+  const f = await fixture(t)
+  await f.write('.testhub/local-web-config.sh', [
+    'export TESTHUB_START_COLIMA_PROFILE=testhub-fixture',
+    'export DOCKER_CONTEXT="${DOCKER_CONTEXT:-colima-testhub-fixture}"',
+  ].join('\n'))
+  await f.write('.testhub/colima-started', '1')
+  const env = {
+    DOCKER_CONTEXT: 'other',
+    QA_COLIMA_REQUIRED: '1',
+    QA_COMPOSE_FAIL: '1',
+    TESTHUB_MINIO_ENDPOINT: `http://127.0.0.1:${await freePort()}`,
+  }
+  await execute('docker', ['info'], { cwd: f.directory, env: { ...f.env, ...env } })
+
+  const actions = ['start', 'restart', 'stop', 'doctor']
+  for (const action of actions) {
+    const result = await f.run([action], env)
+    assert.equal(result.code, 1, result.stdout + result.stderr)
+    assert.match(result.stderr, /Docker context does not match Colima profile/)
+  }
+  const dockerCalls = (await fs.readFile(`${f.directory}/.testhub/docker-calls`, 'utf8')).trim().split('\n').map(JSON.parse)
+  assert.deepEqual(dockerCalls, [['info'], ...actions.map(() => ['context', 'show'])])
+  assert.equal(await exists(`${f.directory}/.testhub/colima-calls`), false)
+  assert.equal(await exists(`${f.directory}/.testhub/launches`), false)
+  assert.equal(await exists(`${f.directory}/.testhub/installs`), false)
+})
 
 test('dependency fingerprints track workspace manifests and lockfile; config never returns secrets', async t => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'testhub-metadata-'))

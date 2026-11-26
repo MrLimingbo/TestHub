@@ -23,13 +23,17 @@ macOS 使用默认 Colima 实例时，可显式允许启动已停止的实例：
 
 这不会打开桌面窗口，也不会自动重启运行中的 Colima、修改磁盘容量配置或删除 Docker 数据。若虚拟机本身启动失败，需要先处理 Colima 的错误。
 
+本机可在启动状态目录（默认为 `.testhub/`）中放置私有的 `local-web-config.sh`，为 `./start.sh` 配置端口、Compose 和 Docker context。将 `TESTHUB_START_COLIMA_PROFILE` 设为本仓库专用的非默认实例名，并选用对应的 `colima-<实例名>` Docker context。直接运行 `./start.sh` 会在需要时启动该实例。
+
+配置专用实例后，`start`、`restart`、`stop` 和 `doctor` 都先校验当前 Docker context。即使 Docker 已在线，context 不匹配也会立即退出。校验通过后，Docker 和 Compose 命令显式使用该 context，包括启动失败后的清理。`status` 只检查 API 和 Web 状态，无需访问 Docker。
+
 ## 生命周期
 
 | 命令 | 行为 |
 | --- | --- |
 | `./start.sh` 或 `./start.sh start` | 启动缺失的服务；复用选项相同、依赖未变且健康的已有服务 |
 | `./start.sh restart --with-registration` | 完成环境、端口、依赖和基础设施准备，再重启本仓库的 API／Web |
-| `./start.sh stop` | 停止本仓库 API／Web；保留基础设施、Runner、数据库和文件 |
+| `./start.sh stop` | 停止本仓库 API／Web。配置了前述本机 Colima 实例时，也依次停止 MySQL、Redis、MinIO 和该实例，保留镜像和数据卷 |
 | `./start.sh status` | 检查进程归属、API 健康状态、网页及 CSRF 代理；全部就绪返回 0，否则返回非零 |
 | `./start.sh doctor --with-registration` | 只做预检；不安装依赖、不拉取镜像、不启动服务、不改变已有服务 |
 
@@ -86,7 +90,7 @@ bash -n start.sh
 npx pnpm@10.13.1 test:startup
 ```
 
-启动回归会创建临时仓库、随机回环端口和进程，覆盖健康复用、依赖更新、端口冲突、Docker／Buildx 预检、部分容器启动失败、进程回滚和启停锁，结束后删除测试目录。该检查已接入 `verify` 工作流的 Web 作业。
+启动回归会创建临时仓库、随机回环端口和进程，覆盖健康复用、依赖更新、端口冲突、Docker／Buildx 预检、Colima context 错配、部分容器启动失败、进程回滚和启停锁，结束后删除测试目录。该检查已接入 `verify` 工作流的 Web 作业。
 
 真实 Web 启停验收可使用本机 MySQL 8.4 和 Redis 7.4 二进制：
 

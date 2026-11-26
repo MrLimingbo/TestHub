@@ -6,6 +6,12 @@ umask 077
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 state_dir="${TESTHUB_START_STATE_DIR:-$root_dir/.testhub}"
 [[ "$state_dir" == /* ]] || state_dir="$root_dir/$state_dir"
+# Optional machine-local defaults, separate from the Compose .env file.
+if [[ -f "$state_dir/local-web-config.sh" ]]; then
+  source "$state_dir/local-web-config.sh"
+fi
+colima_profile="${TESTHUB_START_COLIMA_PROFILE:-}"
+docker_command=(docker)
 api_port="${TESTHUB_START_API_PORT:-8080}"
 web_port="${TESTHUB_START_WEB_PORT:-5173}"
 api_log="$state_dir/platform-api.log"
@@ -36,7 +42,7 @@ Usage: ./start.sh [start|restart|stop|status|doctor] [options]
 
   start    Start missing services; reuse healthy services (default).
   restart  Preflight dependencies, then restart this checkout's API and Web UI.
-  stop     Stop this checkout's API and Web UI; keep infrastructure and data.
+  stop     Stop API/Web and any configured local Colima profile; keep images and volumes.
   status   Report process ownership and HTTP/CSRF health; exit 1 if not ready.
   doctor   Read-only environment, port, dependency and Docker checks.
 
@@ -76,6 +82,15 @@ api_url="http://127.0.0.1:$api_port"
 web_url="http://127.0.0.1:$web_port"
 
 require_command() { command -v "$1" >/dev/null 2>&1 || fail "$1 is required"; }
+validate_colima_context() {
+  [[ -n "$colima_profile" ]] || return 0
+  local expected_context="colima-$colima_profile"
+  require_command docker
+  [[ "$(docker context show 2>/dev/null)" == "$expected_context" ]] \
+    || fail "Docker context does not match Colima profile $colima_profile; expected $expected_context"
+  docker_command+=(--context "$expected_context")
+}
+
 process_alive() {
   [[ "$1" =~ ^[1-9][0-9]*$ ]] && kill -0 "$1" 2>/dev/null \
     && [[ "$(ps -p "$1" -o stat= 2>/dev/null)" != *Z* ]]
@@ -172,9 +187,9 @@ finish() {
     fi
     if [[ "$containers_tracked" == true ]]; then
       # Stop only containers started by this attempt; retain their volumes/data.
-      for pid in $(docker compose --profile runner ps --status running -q mysql redis minio api-runner 2>/dev/null); do
+      for pid in $("${docker_command[@]}" compose --profile runner ps --status running -q mysql redis minio api-runner 2>/dev/null); do
         if ! printf '%s\n' "$containers_before" | grep -Fxq "$pid"; then
-          docker stop "$pid" >>"$docker_log" 2>&1 || warn "could not stop newly started container $pid"
+          "${docker_command[@]}" stop "$pid" >>"$docker_log" 2>&1 || warn "could not stop newly started container $pid"
         fi
       done
     fi
@@ -235,35 +250,42 @@ check_docker() {
     fail "configured external infrastructure is unavailable (or a Runner was requested); start it separately, or supply a matching COMPOSE_FILE"
   fi
   require_command docker
-  docker compose version >/dev/null 2>&1 || fail "Docker Compose v2 is required"
-  if ! docker info >/dev/null 2>&1; then
-    if [[ "$action" != doctor && "$start_colima" == true ]] \
+  "${docker_command[@]}" compose version >/dev/null 2>&1 || fail "Docker Compose v2 is required"
+  if ! "${docker_command[@]}" info >/dev/null 2>&1; then
+    if [[ "$action" != doctor && -n "$colima_profile" ]]; then
+      require_command colima
+      colima status --profile "$colima_profile" >/dev/null 2>&1 \
+        && fail "Colima profile $colima_profile is running but Docker is unavailable; inspect it without restarting shared services"
+      note "Starting Colima profile $colima_profile..."
+      colima start --profile "$colima_profile" --activate=false >>"$docker_log" 2>&1 \
+        || fail "Colima profile $colima_profile failed to start; see $docker_log"
+    elif [[ "$action" != doctor && "$start_colima" == true ]] \
       && [[ "$(docker context show 2>/dev/null)" == colima ]] && command -v colima >/dev/null 2>&1; then
       colima status >/dev/null 2>&1 && fail "Colima is running but Docker is unavailable; inspect Colima without restarting shared services"
       note "Starting Colima in the background..."
       colima start >>"$docker_log" 2>&1 || fail "Colima failed to start; see $docker_log (no VM configuration was changed by this script)"
     fi
-    docker info >/dev/null 2>&1 || fail "Docker daemon is unavailable; start Docker or run colima start (or use --start-colima)"
+    "${docker_command[@]}" info >/dev/null 2>&1 || fail "Docker daemon is unavailable; start Docker or run colima start (or use --start-colima)"
   fi
-  docker compose --profile runner config --quiet || fail "invalid Compose configuration"
-  image_plan="$(docker compose --profile runner config --format json | node "$metadata" images)"
+  "${docker_command[@]}" compose --profile runner config --quiet || fail "invalid Compose configuration"
+  image_plan="$("${docker_command[@]}" compose --profile runner config --format json | node "$metadata" images)"
 }
 prepare_images() {
   local service image build
   while IFS=$'\t' read -r service image build; do
     [[ "$service" != api-runner || "$with_api_runner" == true ]] || continue
-    if ! docker image inspect "$image" >/dev/null 2>&1; then
+    if ! "${docker_command[@]}" image inspect "$image" >/dev/null 2>&1; then
       if [[ "$build" == true ]]; then
-        docker buildx version >/dev/null 2>&1 || fail "Docker Buildx is required to build $service; install the Docker Buildx plugin"
+        "${docker_command[@]}" buildx version >/dev/null 2>&1 || fail "Docker Buildx is required to build $service; install the Docker Buildx plugin"
       fi
       if [[ "$action" == doctor ]]; then
         note "$service image missing; start will prepare it (network access may be needed)."
       else
         note "Preparing $service image before changing any running services..."
         if [[ "$build" == true ]]; then
-          docker compose --profile runner build "$service" >>"$docker_log" 2>&1 || fail "$service image build failed; see $docker_log"
+          "${docker_command[@]}" compose --profile runner build "$service" >>"$docker_log" 2>&1 || fail "$service image build failed; see $docker_log"
         else
-          docker compose pull "$service" >>"$docker_log" 2>&1 || fail "$service image pull failed; see $docker_log"
+          "${docker_command[@]}" compose pull "$service" >>"$docker_log" 2>&1 || fail "$service image pull failed; see $docker_log"
         fi
       fi
     fi
@@ -271,15 +293,16 @@ prepare_images() {
 }
 ensure_infrastructure() {
   local deadline
-  if infrastructure_ready && [[ "$with_api_runner" == false ]]; then
+  if [[ "$with_api_runner" == false ]] && infrastructure_ready \
+    && { [[ -z "$colima_profile" ]] || "${docker_command[@]}" info >/dev/null 2>&1; }; then
     note "Healthy configured infrastructure reused."
     return
   fi
   check_docker
   prepare_images
-  containers_before="$(docker compose --profile runner ps --status running -q mysql redis minio api-runner)"
+  containers_before="$("${docker_command[@]}" compose --profile runner ps --status running -q mysql redis minio api-runner)"
   containers_tracked=true
-  docker compose up -d --no-recreate --no-build --pull never mysql redis minio >>"$docker_log" 2>&1 \
+  "${docker_command[@]}" compose up -d --no-recreate --no-build --pull never mysql redis minio >>"$docker_log" 2>&1 \
     || fail "infrastructure startup failed; see $docker_log"
   deadline=$((SECONDS + 120))
   until infrastructure_ready; do
@@ -287,7 +310,7 @@ ensure_infrastructure() {
     sleep 2
   done
   if [[ "$with_api_runner" == true ]]; then
-    docker compose --profile runner up -d --no-recreate --no-build --pull never api-runner >>"$docker_log" 2>&1 \
+    "${docker_command[@]}" compose --profile runner up -d --no-recreate --no-build --pull never api-runner >>"$docker_log" 2>&1 \
       || fail "requested API Runner could not start; see $docker_log"
     note "API Runner container started; real execution still requires explicit configuration and target authorization."
   fi
@@ -327,7 +350,11 @@ cd "$root_dir"
 require_command lsof
 require_command pgrep
 require_command ps
+if [[ "$action" != status ]]; then
+  validate_colima_context
+fi
 if [[ "$action" == stop ]]; then
+  if [[ -n "$colima_profile" ]]; then require_command colima; fi
   acquire_lock
   trap finish EXIT
   trap 'exit 130' INT
@@ -336,8 +363,16 @@ if [[ "$action" == stop ]]; then
   stop_service "Web UI" web "$web_port" "$web_pid_file"
   stop_service "Platform API" api "$api_port" "$api_pid_file"
   rm -f "$config_file"
+  if [[ -n "$colima_profile" ]]; then
+    if "${docker_command[@]}" info >/dev/null 2>&1; then
+      "${docker_command[@]}" compose stop --timeout 45 mysql redis minio
+    fi
+    colima stop --profile "$colima_profile"
+    note "API/Web and Colima profile $colima_profile stopped. Docker images and volumes were retained."
+  else
+    note "API/Web stopped. Infrastructure, Runner containers and all workspace data were retained."
+  fi
   success=true
-  note "API/Web stopped. Infrastructure, Runner containers and all workspace data were retained."
   exit 0
 fi
 require_command node
