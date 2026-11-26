@@ -2,11 +2,12 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AiCaseDraftDialog from '@/components/AiCaseDraftDialog.vue'
+import AiConversationSidebar from '@/components/AiConversationSidebar.vue'
 import AiModelPicker from '@/components/AiModelPicker.vue'
 import { useSessionStore } from '@/stores/session'
 import {
   aiTestingApi, draftInstruction, parseCaseDrafts,
-  type AiAgent, type AiOverview, type AiWorkspace, type Attachment, type CaseDraft, type Conversation,
+  type AiOverview, type AiWorkspace, type Attachment, type CaseDraft, type Conversation,
   type ConversationDetail, type ModelSelection, type ProjectAsset, type SavedCase, type Turn,
 } from '@/utils/aiTesting'
 
@@ -20,7 +21,7 @@ const loading = ref(true)
 const loadError = ref('')
 const error = ref('')
 const workspaceId = ref('')
-const agentId = ref('')
+const expanded = ref<string[]>([])
 const conversations = ref<Conversation[]>([])
 const conversation = ref<Conversation | null>(null)
 const turns = ref<Turn[]>([])
@@ -34,32 +35,37 @@ const assetDialog = ref(false)
 const assetLoading = ref(false)
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement>()
+const messageInput = ref<HTMLTextAreaElement>()
 const transcript = ref<HTMLElement>()
 const draftReview = ref<CaseDraft[] | null>(null)
 const draftRequirementId = ref<string | null>(null)
 const savedCases = ref<SavedCase[]>([])
 const working = ref(false)
 const navigating = ref(false)
+const detailFailed = ref(false)
 const stopping = ref(false)
 const running = ref<AbortController | null>(null)
 const showArchived = ref(false)
 const formError = ref('')
 const saving = ref(false)
 const workspaceForm = ref<{ original?: AiWorkspace; name: string } | null>(null)
-const agentForm = ref<{ original?: AiAgent; workspaceId: string; name: string; description: string;
-  systemPrompt: string; model: ModelSelection | null } | null>(null)
+const conversationForm = ref<{ original: Conversation; workspaceId: string; title: string } | null>(null)
 let selection = 0
 
 const workspaces = computed(() => overview.value?.workspaces ?? [])
 const providers = computed(() => overview.value?.modelProviders ?? [])
+const defaultModel = computed<ModelSelection | null>(() => {
+  const provider = providers.value.find(row => row.models.length)
+  return provider ? { providerId: provider.id, modelId: provider.models[0].id, reasoningLevel: null } : null
+})
 const workspace = computed(() => workspaces.value.find(row => row.id === workspaceId.value))
-const agents = computed(() => (overview.value?.agents ?? []).filter(row => row.workspaceId === workspaceId.value))
-const agent = computed(() => agents.value.find(row => row.id === agentId.value))
-const active = computed(() => Boolean(agent.value && !agent.value.archived && !workspace.value?.archived))
+const archived = computed(() => Boolean(conversation.value?.archived || workspace.value?.archived))
 const latest = computed(() => turns.value.at(-1))
 const streaming = computed(() => Boolean(running.value) || latest.value?.status === 'RUNNING')
-const canChat = computed(() => Boolean(overview.value?.canManage && active.value))
-const chatReady = computed(() => canChat.value && validModel(selectedModel.value) && !streaming.value && !working.value && !navigating.value && !uploading.value)
+const canChat = computed(() => Boolean(overview.value?.canManage && conversation.value && !archived.value))
+const sidebarBusy = computed(() => Boolean(running.value || stopping.value || working.value || uploading.value || saving.value))
+const composeBusy = computed(() => streaming.value || navigating.value || sidebarBusy.value)
+const chatReady = computed(() => canChat.value && validModel(selectedModel.value) && !composeBusy.value && !detailFailed.value)
 const filteredAssets = computed(() => {
   const term = assetSearch.value.trim().toLowerCase()
   return assetList.value.filter(row => row.name.toLowerCase().includes(term)).slice(0, 100)
@@ -83,78 +89,76 @@ function modelLabel(model: ModelSelection) {
 }
 
 function updateLocation() {
-  void router.replace({ query: { workspace: workspaceId.value || undefined, agent: agentId.value || undefined,
+  void router.replace({ query: { workspace: workspaceId.value || undefined,
     conversation: conversation.value?.id || undefined } })
+}
+
+function reveal(folderId: string) {
+  if (!expanded.value.includes(folderId)) expanded.value.push(folderId)
+}
+
+function place(row: Conversation) {
+  workspaceId.value = row.workspaceId
+  reveal(row.workspaceId)
+  if (archived.value) showArchived.value = true
 }
 
 async function load() {
   loading.value = true
   loadError.value = ''
   try {
-    overview.value = await api.read<AiOverview>('')
-    const first = workspaces.value.find(row => row.id === route.query.workspace) ?? workspaces.value.find(row => !row.archived)
-    if (first) await openWorkspace(first.id, String(route.query.agent ?? ''), String(route.query.conversation ?? ''))
+    const [data, rows] = await Promise.all([api.read<AiOverview>(''), api.read<Conversation[]>('/conversations')])
+    overview.value = data
+    conversations.value = rows
+    const folder = workspaces.value.find(row => row.id === route.query.workspace) ?? workspaces.value.find(row => !row.archived)
+    const selected = rows.find(row => row.id === route.query.conversation)
+      ?? rows.find(row => row.workspaceId === folder?.id && row.agentId === route.query.agent && !row.archived)
+      ?? rows.find(row => row.workspaceId === folder?.id && !row.archived)
+    if (selected) await openConversation(selected)
+    else if (folder) {
+      workspaceId.value = folder.id
+      reveal(folder.id)
+      if (folder.archived) showArchived.value = true
+    }
   } catch (value) {
     if (!page.signal.aborted) loadError.value = describe(value)
   } finally {
     loading.value = false
+    void scrollDown()
   }
 }
 
-async function openWorkspace(id: string, preferredAgent = '', preferredConversation = '') {
-  workspaceId.value = id
-  if (workspace.value?.archived) showArchived.value = true
-  const selected = agents.value.find(row => row.id === preferredAgent) ?? agents.value.find(row => !row.archived)
-  if (selected?.archived) showArchived.value = true
-  await openAgent(selected?.id ?? '', preferredConversation)
-}
-
-async function openAgent(id: string, preferredConversation = '') {
-  const request = ++selection
-  agentId.value = id
+function selectConversation(row: Conversation) {
+  resetComposer()
   savedCases.value = []
   draftRequirementId.value = null
-  conversations.value = []
-  resetComposer()
-  conversation.value = null
-  turns.value = []
-  selectedModel.value = agent.value?.model ?? null
-  error.value = ''
-  navigating.value = Boolean(id)
-  if (!id) { updateLocation(); return }
-  try {
-    const rows = await api.read<Conversation[]>(`/agents/${id}/conversations`)
-    if (request !== selection || page.signal.aborted) return
-    conversations.value = rows
-    const selected = rows.find(row => row.id === preferredConversation) ?? rows[0]
-    if (selected) await openConversation(selected)
-    else updateLocation()
-  } catch (value) {
-    if (request === selection && !page.signal.aborted) error.value = describe(value)
-  } finally {
-    if (request === selection) navigating.value = false
-  }
+  detailFailed.value = false
+  conversation.value = row
+  place(row)
+  const legacyModel = overview.value?.agents.find(agent => agent.id === row.agentId)?.model
+  selectedModel.value = legacyModel && validModel(legacyModel) ? legacyModel : defaultModel.value
 }
 
 async function openConversation(row: Conversation) {
+  if (sidebarBusy.value || (row.id === conversation.value?.id && !error.value)) return
   const request = ++selection
-  resetComposer()
-  savedCases.value = []
-  draftRequirementId.value = null
-  conversation.value = row
+  selectConversation(row)
   turns.value = []
   error.value = ''
   navigating.value = true
+  updateLocation()
   try {
     const detail = await api.read<ConversationDetail>(`/conversations/${row.id}`)
     if (request !== selection || page.signal.aborted) return
     setDetail(detail)
     const previous = latest.value?.model
-    selectedModel.value = previous && validModel(previous) ? previous : agent.value?.model ?? null
-    updateLocation()
+    if (previous && validModel(previous)) selectedModel.value = previous
     await scrollDown()
   } catch (value) {
-    if (request === selection && !page.signal.aborted) error.value = describe(value)
+    if (request === selection && !page.signal.aborted) {
+      detailFailed.value = true
+      error.value = describe(value)
+    }
   } finally {
     if (request === selection) navigating.value = false
   }
@@ -163,8 +167,16 @@ async function openConversation(row: Conversation) {
 function setDetail(detail: ConversationDetail) {
   conversation.value = detail.conversation
   turns.value = detail.turns
-  conversations.value = conversations.value.map(row => row.id === detail.conversation.id ? detail.conversation : row)
-    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+  if (workspaceId.value !== detail.conversation.workspaceId || archived.value) {
+    place(detail.conversation)
+    updateLocation()
+  }
+  updateConversationRow(detail.conversation)
+}
+
+function updateConversationRow(row: Conversation) {
+  conversations.value = [row, ...conversations.value.filter(item => item.id !== row.id)]
+    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt) || right.id.localeCompare(left.id))
 }
 
 async function refreshConversation() {
@@ -184,35 +196,31 @@ function resetComposer() {
   references.value = []
 }
 
-async function createConversation() {
-  const row = await api.save<Conversation>(`/agents/${agentId.value}/conversations`, {})
-  conversations.value = [row, ...conversations.value]
-  conversation.value = row
-  turns.value = []
-  savedCases.value = []
-  draftRequirementId.value = null
-  updateLocation()
-  return row
-}
-
-async function newConversation() {
-  if (!canChat.value || streaming.value || working.value) return
+async function newConversation(folder?: AiWorkspace) {
+  if (!folder || folder.archived || !overview.value?.canManage || sidebarBusy.value) return
   working.value = true
   error.value = ''
   try {
-    await createConversation()
-    resetComposer()
-    selectedModel.value = agent.value?.model ?? null
+    const row = await api.save<Conversation>(`/workspaces/${folder.id}/conversations`, {})
+    ++selection
+    navigating.value = false
+    updateConversationRow(row)
+    selectConversation(row)
+    turns.value = []
+    updateLocation()
   } catch (value) {
     if (!page.signal.aborted) error.value = describe(value)
   } finally {
     working.value = false
   }
+  await nextTick()
+  messageInput.value?.focus()
 }
 
 async function send(retry = false, generateDrafts = false) {
   const model = selectedModel.value
-  if (!chatReady.value || !model) return
+  const row = conversation.value
+  if (!chatReady.value || !model || !row) return
   const content = generateDrafts ? [message.value.trim(), draftInstruction].filter(Boolean).join('\n\n') : message.value.trim()
   if (!retry && !content) return
   if (content.length > 12000) { error.value = '消息长度不能超过 12000 个字符'; return }
@@ -220,7 +228,6 @@ async function send(retry = false, generateDrafts = false) {
   running.value = controller
   error.value = ''
   try {
-    const row = conversation.value ?? await createConversation()
     const last = latest.value
     await api.send(row.id, {
       text: retry ? null : content, previousTurnId: last?.id ?? null, retryTurnId: retry ? last?.id ?? null : null,
@@ -286,7 +293,12 @@ async function saveWorkspace(archived?: boolean) {
     }, Boolean(form.original))
     overview.value.workspaces = replaceRow(overview.value.workspaces, saved)
     workspaceForm.value = null
-    await openWorkspace(saved.id, agentId.value, conversation.value?.id)
+    reveal(saved.id)
+    if (saved.archived) showArchived.value = true
+    if (!conversation.value) {
+      workspaceId.value = saved.id
+      updateLocation()
+    }
   } catch (value) {
     if (!page.signal.aborted) formError.value = describe(value)
   } finally {
@@ -294,27 +306,31 @@ async function saveWorkspace(archived?: boolean) {
   }
 }
 
-function editAgent(original?: AiAgent) {
+function editConversation(original: Conversation) {
   formError.value = ''
-  agentForm.value = {
-    original, workspaceId: original?.workspaceId ?? workspaceId.value, name: original?.name ?? '',
-    description: original?.description ?? '', systemPrompt: original?.systemPrompt ?? '', model: original?.model ?? null,
-  }
+  conversationForm.value = { original, workspaceId: original.workspaceId, title: original.title }
 }
 
-async function saveAgent(archived?: boolean) {
-  const form = agentForm.value
-  if (!form || !form.model || saving.value || !overview.value) return
+async function saveConversation(archive?: boolean) {
+  const form = conversationForm.value
+  if (!form || saving.value) return
   saving.value = true
   formError.value = ''
   try {
-    const { original, ...fields } = form
-    const saved = await api.save<AiAgent>(original ? `/agents/${original.id}` : '/agents', {
-      ...fields, archived: archived ?? original?.archived ?? false, version: original?.version ?? null,
-    }, Boolean(original))
-    overview.value.agents = replaceRow(overview.value.agents, saved)
-    agentForm.value = null
-    await openWorkspace(saved.workspaceId, saved.id, original ? conversation.value?.id : undefined)
+    const { original } = form
+    const saved = await api.save<Conversation>(`/conversations/${original.id}`, {
+      workspaceId: form.workspaceId, title: form.title.trim() === original.title ? null : form.title.trim(),
+      archived: archive ?? original.archived, version: original.version,
+    }, true)
+    updateConversationRow(saved)
+    reveal(saved.workspaceId)
+    if (saved.archived) showArchived.value = true
+    if (conversation.value?.id === saved.id) {
+      conversation.value = saved
+      place(saved)
+      updateLocation()
+    }
+    conversationForm.value = null
   } catch (value) {
     if (!page.signal.aborted) formError.value = describe(value)
   } finally {
@@ -377,81 +393,53 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="ai-agent-page">
-    <header class="page-heading">
-      <div><h1>智能体</h1><p>{{ session.currentProject?.name }} · 按工作区管理智能体和会话</p></div>
-      <a-button v-if="overview?.canManage" type="primary" :disabled="streaming || working" @click="editWorkspace()">
-        <template #icon><icon-plus /></template>新建 AI 工作区
-      </a-button>
-    </header>
-    <a-alert v-if="loadError" type="error">{{ loadError }} <a-button type="text" @click="load">重试</a-button></a-alert>
-    <a-spin v-else-if="loading" :loading="true" tip="正在加载智能体" />
+  <section class="ai-agent-page" aria-label="智能体会话">
+    <a-alert v-if="loadError" type="error" class="page-state">{{ loadError }}
+      <a-button type="text" @click="load">重试</a-button>
+    </a-alert>
+    <a-spin v-else-if="loading" class="page-state" :loading="true" tip="正在加载工作区" />
     <div v-else class="agent-workbench">
-      <aside aria-label="工作区、智能体和会话" class="agent-sidebar">
-        <section>
-          <header><strong>AI 工作区</strong><a-button
-            v-if="overview?.canManage && workspace" size="mini" type="text"
-            :disabled="streaming || working" @click="editWorkspace(workspace)"
-          >管理</a-button></header>
-          <select
-            aria-label="AI 工作区" :value="workspaceId" :disabled="streaming || working || uploading"
-            @change="openWorkspace(($event.target as HTMLSelectElement).value)"
-          >
-            <option v-if="!workspaceId" value="">请选择工作区</option>
-            <option v-for="item in workspaces.filter(row => showArchived || !row.archived)" :key="item.id" :value="item.id">
-              {{ item.name }}{{ item.archived ? '（已归档）' : '' }}
-            </option>
-          </select>
-          <label v-if="overview?.workspaces.some(row => row.archived) || overview?.agents.some(row => row.archived)" class="archived-option">
-            <input v-model="showArchived" type="checkbox" :disabled="workspace?.archived || agent?.archived">显示已归档
-          </label>
-        </section>
-        <section v-if="workspace" class="agent-rail">
-          <header><strong>智能体</strong><a-button
-            v-if="overview?.canManage && !workspace.archived" size="mini" type="text"
-            :disabled="streaming || working" @click="editAgent()"
-          >新建智能体</a-button></header>
-          <p v-if="!agents.filter(row => showArchived || !row.archived).length">工作区暂无智能体</p>
-          <button
-            v-for="item in agents.filter(row => showArchived || !row.archived)" :key="item.id" class="rail-item"
-            :class="{ selected: item.id === agentId }" :aria-pressed="item.id === agentId"
-            :disabled="streaming || working || uploading" @click="openAgent(item.id)"
-          >
-            <icon-robot /><span>{{ item.name }}{{ item.archived ? '（已归档）' : '' }}</span>
-          </button>
-        </section>
-        <section v-if="agent" class="conversation-rail">
-          <header><strong>我的会话</strong><a-button
-            v-if="canChat" size="mini" type="text"
-            :disabled="streaming || working || navigating || uploading" @click="newConversation"
-          >新建会话</a-button></header>
-          <p v-if="!conversations.length">暂无会话</p>
-          <button
-            v-for="row in conversations" :key="row.id" class="rail-item" :title="row.title"
-            :class="{ selected: row.id === conversation?.id }" :aria-pressed="row.id === conversation?.id"
-            :disabled="streaming || working || uploading" @click="openConversation(row)"
-          >
-            <icon-message /><span>{{ row.title }}</span>
-          </button>
-        </section>
-      </aside>
+      <AiConversationSidebar
+        v-model:expanded="expanded" v-model:show-archived="showArchived"
+        :workspaces="workspaces" :conversations="conversations" :workspace-id="workspaceId"
+        :conversation-id="conversation?.id" :can-manage="Boolean(overview?.canManage)" :busy="sidebarBusy"
+        @create="newConversation" @workspace="editWorkspace" @select="openConversation" @edit="editConversation"
+      />
 
       <div class="chat-panel">
-        <a-alert v-if="error" type="error" class="chat-error" closable @close="error = ''">{{ error }}</a-alert>
-        <template v-if="agent">
-          <header class="chat-heading">
-            <span class="agent-icon"><icon-robot /></span>
-            <div><h2>{{ agent.name }}</h2><p v-if="agent.description">{{ agent.description }}</p></div>
-            <a-button v-if="overview?.canManage" size="small" :disabled="streaming || working" @click="editAgent(agent)">编辑智能体</a-button>
-          </header>
+        <header v-if="conversation" class="chat-heading">
+          <div>
+            <span class="chat-folder"><icon-folder /><span>{{ workspace?.name }}</span></span>
+            <h1 :title="conversation.title">{{ conversation.title }}</h1>
+          </div>
+          <a-tag v-if="archived">已归档</a-tag>
+          <a-button
+            v-if="overview?.canManage" type="text" aria-label="管理当前会话" title="管理会话"
+            :disabled="sidebarBusy" @click="editConversation(conversation)"
+          ><icon-more /></a-button>
+        </header>
+        <a-alert v-if="error" type="error" class="chat-error" closable @close="error = ''">
+          {{ error }}
+          <a-button
+            v-if="conversation && !turns.length && !streaming" type="text" size="mini"
+            @click="openConversation(conversation)"
+          >重新读取</a-button>
+        </a-alert>
+        <template v-if="conversation">
           <div ref="transcript" class="transcript" aria-label="对话记录">
-            <a-spin v-if="navigating" :loading="true" tip="正在读取会话" />
-            <div v-else-if="!turns.length" class="chat-empty"><icon-message /><strong>{{ active ? '开始一段对话' : '已归档的智能体' }}</strong>
-              <p>{{ active ? '发送文字，也可以引用附件、需求或已有用例。' : '可以查看已有会话。' }}</p></div>
+            <div v-if="navigating" class="chat-empty"><a-spin :loading="true" tip="正在读取会话" /></div>
+            <div v-else-if="!turns.length" class="chat-empty">
+              <span class="empty-icon"><icon-message /></span>
+              <h2>{{ archived ? '这段会话已归档' : '开始一段对话' }}</h2>
+              <p v-if="canChat">输入消息，或添加附件与测试资产。</p>
+            </div>
             <article v-for="turn in turns" :key="turn.id" class="turn">
-              <div class="turn-user"><span>你</span><p>{{ turn.userText }}</p><small v-if="turn.sourceSummary">引用资料 · {{ turn.sourceSummary }}</small></div>
+              <div class="turn-user">
+                <span>你</span><p>{{ turn.userText }}</p>
+                <small v-if="turn.sourceSummary">引用资料 · {{ turn.sourceSummary }}</small>
+              </div>
               <div class="turn-reply">
-                <span>{{ modelLabel(turn.model) }}</span>
+                <span class="reply-model"><icon-robot />{{ modelLabel(turn.model) }}</span>
                 <p v-if="turn.reply">{{ turn.reply }}</p>
                 <small v-if="turn.status === 'RUNNING'">{{ turn.reply ? '正在生成…' : '正在等待模型回复…' }}</small>
                 <small v-else-if="turn.status === 'STOPPED'">已停止生成</small>
@@ -468,43 +456,79 @@ onBeforeUnmount(() => {
               <router-link to="/functional/cases">打开用例库</router-link>
             </div>
           </div>
-          <form v-if="canChat" class="chat-compose" @submit.prevent="send()">
-            <a-alert v-if="!providers.length" type="warning">当前服务暂无模型，请联系系统管理员在「模型配置」维护。</a-alert>
-            <div class="compose-models">
-              <AiModelPicker v-model="selectedModel" :providers="providers" label="对话模型" :disabled="streaming || working || navigating" />
-              <a-button v-if="!running && latest?.status === 'RUNNING'" type="text" @click="refreshConversation">刷新会话</a-button>
-            </div>
-            <label class="message-field"><span>消息</span><textarea
-              v-model="message" rows="3" maxlength="12000"
-              :disabled="streaming || working || navigating" placeholder="输入消息，或选择资料后生成用例草稿"
-              @keydown.ctrl.enter.prevent="send()" @keydown.meta.enter.prevent="send()"
-            /></label>
-            <div v-if="attachments.length || references.length" class="references">
-              <a-tag v-for="(file, index) in attachments" :key="index" :closable="!streaming" @close="attachments.splice(index, 1)">
-                {{ file.name }}{{ file.truncated ? '（截取前 10000 字符）' : '' }}</a-tag>
-              <a-tag v-for="item in references" :key="item.kind + item.id" :closable="!streaming" @close="toggleAsset(item)">{{ item.name }}</a-tag>
-            </div>
-            <div class="compose-tools">
-              <input ref="fileInput" type="file" hidden multiple accept=".docx,.txt,.md,.csv,.json,.log" @change="upload">
-              <a-button size="small" :disabled="streaming || working || navigating || uploading || attachments.length >= 3" @click="fileInput?.click()">添加附件</a-button>
-              <a-button size="small" :disabled="streaming || working || navigating || uploading" @click="openAssets">引用测试资产</a-button>
-              <a-button size="small" :disabled="!chatReady" @click="send(false, true)">生成用例草稿</a-button>
+          <div v-if="canChat" class="compose-area">
+            <div v-if="draftCandidate.length && !savedCases.length || !running && latest?.status === 'RUNNING'" class="chat-actions">
               <a-button
-                v-if="draftCandidate.length && !savedCases.length" size="small" type="outline" :disabled="working || streaming"
-                @click="draftReview = draftCandidate"
+                v-if="!running && latest?.status === 'RUNNING'" type="text" size="small"
+                @click="refreshConversation"
+              >刷新会话</a-button>
+              <a-button
+                v-if="draftCandidate.length && !savedCases.length" size="small" type="outline"
+                :disabled="composeBusy" @click="draftReview = draftCandidate"
               >审核并写入用例库</a-button>
-              <span class="compose-spacer"></span>
-              <a-button v-if="streaming" size="small" :loading="stopping" :disabled="latest?.status !== 'RUNNING'" @click="stop">停止生成</a-button>
-              <a-button v-else size="small" type="primary" html-type="submit" :disabled="!chatReady || !message.trim()">发送</a-button>
             </div>
-          </form>
+            <a-alert v-if="!defaultModel" type="warning">当前服务暂无模型，请联系系统管理员在「模型配置」维护。</a-alert>
+            <form class="chat-compose" @submit.prevent="send()">
+              <div v-if="attachments.length || references.length || uploading" class="references">
+                <a-tag v-for="(file, index) in attachments" :key="index" :closable="!composeBusy" @close="attachments.splice(index, 1)">
+                  {{ file.name }}{{ file.truncated ? '（截取前 10000 字符）' : '' }}
+                </a-tag>
+                <a-tag v-for="item in references" :key="item.kind + item.id" :closable="!composeBusy" @close="toggleAsset(item)">
+                  {{ item.name }}
+                </a-tag>
+                <small v-if="uploading" role="status">正在读取附件…</small>
+              </div>
+              <textarea
+                ref="messageInput" v-model="message" class="message-input" rows="2" maxlength="12000" aria-label="消息"
+                :disabled="composeBusy && !uploading" placeholder="输入消息"
+                @keydown.ctrl.enter.prevent="send()" @keydown.meta.enter.prevent="send()"
+              />
+              <div class="compose-tools">
+                <input ref="fileInput" type="file" hidden multiple accept=".docx,.txt,.md,.csv,.json,.log" @change="upload">
+                <a-dropdown trigger="click" position="tl">
+                  <a-button
+                    type="text" shape="circle" title="添加附件或资料" aria-label="添加附件或资料"
+                    :disabled="composeBusy"
+                  ><icon-plus /></a-button>
+                  <template #content>
+                    <a-doption :disabled="composeBusy || attachments.length >= 3" @click="fileInput?.click()">
+                      <icon-attachment /> 添加附件
+                    </a-doption>
+                    <a-doption :disabled="composeBusy" @click="openAssets"><icon-file /> 引用测试资产</a-doption>
+                    <a-doption :disabled="!chatReady" @click="send(false, true)"><icon-edit /> 生成用例草稿</a-doption>
+                  </template>
+                </a-dropdown>
+                <div class="compose-spacer"></div>
+                <a-popover trigger="click" position="tr">
+                  <button
+                    type="button" class="model-trigger" aria-label="选择对话模型"
+                    :title="selectedModel ? modelLabel(selectedModel) : '选择模型'" :disabled="composeBusy || !defaultModel"
+                  >
+                    <span>{{ selectedModel ? modelLabel(selectedModel) : '选择模型' }}</span>
+                    <small v-if="selectedModel?.reasoningLevel">{{ selectedModel.reasoningLevel }}</small>
+                    <icon-down />
+                  </button>
+                  <template #content><AiModelPicker v-model="selectedModel" :providers="providers" label="对话模型" :disabled="composeBusy" /></template>
+                </a-popover>
+                <a-button v-if="streaming" :loading="stopping" :disabled="latest?.status !== 'RUNNING'" @click="stop">停止生成</a-button>
+                <a-button
+                  v-else type="primary" shape="circle" html-type="submit" title="发送消息" aria-label="发送消息"
+                  :disabled="!chatReady || !message.trim()"
+                ><icon-arrow-up /></a-button>
+              </div>
+            </form>
+          </div>
         </template>
-        <div v-else class="chat-empty"><icon-robot /><strong>{{ workspace ? '请选择或创建智能体' : '请选择或创建 AI 工作区' }}</strong></div>
+        <div v-else class="chat-empty">
+          <span class="empty-icon"><icon-message /></span>
+          <h1>智能体会话</h1>
+          <p>{{ workspaces.length ? '从左侧打开会话，或在工作区中新建。' : '创建工作区后，即可开始新会话。' }}</p>
+        </div>
       </div>
     </div>
 
     <a-modal
-      v-if="workspaceForm" :visible="true" :title="workspaceForm.original ? '管理 AI 工作区' : '新建 AI 工作区'" :footer="false"
+      v-if="workspaceForm" :visible="true" :title="workspaceForm.original ? '管理工作区' : '新建工作区'" :footer="false"
       :mask-closable="false" :closable="!saving" @cancel="!saving && (workspaceForm = null)"
     >
       <form class="edit-form" @submit.prevent="saveWorkspace()">
@@ -522,33 +546,29 @@ onBeforeUnmount(() => {
     </a-modal>
 
     <a-modal
-      v-if="agentForm" :visible="true" :title="agentForm.original ? '编辑智能体' : '新建智能体'" :footer="false"
-      :mask-closable="false" :closable="!saving" @cancel="!saving && (agentForm = null)"
+      v-if="conversationForm" :visible="true" title="管理会话" :footer="false"
+      :mask-closable="false" :closable="!saving" @cancel="!saving && (conversationForm = null)"
     >
-      <form class="edit-form" @submit.prevent="saveAgent()">
+      <form class="edit-form" @submit.prevent="saveConversation()">
         <a-alert v-if="formError" type="error">{{ formError }}</a-alert>
-        <label>智能体名称<input v-model="agentForm.name" maxlength="120" required></label>
-        <label>所属工作区<select v-model="agentForm.workspaceId">
+        <label>会话名称<input v-model="conversationForm.title" maxlength="120" required></label>
+        <label>所属工作区<select v-model="conversationForm.workspaceId">
           <option
-            v-for="row in workspaces.filter(item => !item.archived || item.id === agentForm?.workspaceId)"
+            v-for="row in workspaces.filter(item => !item.archived || item.id === conversationForm?.original.workspaceId)"
             :key="row.id" :value="row.id"
-          >{{ row.name }}</option>
+          >{{ row.name }}{{ row.archived ? '（已归档）' : '' }}</option>
         </select></label>
-        <label>说明<textarea v-model="agentForm.description" rows="2" maxlength="500" /></label>
-        <label>系统提示词<textarea v-model="agentForm.systemPrompt" rows="4" maxlength="8000" /></label>
-        <AiModelPicker v-model="agentForm.model" :providers="providers" label="默认模型" :disabled="saving" />
-        <a-alert v-if="!providers.length" type="warning">请先在「模型配置」维护至少一个模型。</a-alert>
         <footer>
           <a-button
-            v-if="agentForm.original" type="text"
-            :disabled="saving || !agentForm.name.trim() || (agentForm.original.archived && !validModel(agentForm.model))"
-            @click="saveAgent(!agentForm.original.archived)"
-          >{{ agentForm.original.archived ? '恢复智能体' : '归档智能体' }}</a-button>
-          <a-button :disabled="saving" @click="agentForm = null">取消</a-button>
+            type="text" :disabled="saving || !conversationForm.title.trim() ||
+              (conversationForm.original.archived && workspaces.some(row => row.id === conversationForm?.workspaceId && row.archived))"
+            @click="saveConversation(!conversationForm.original.archived)"
+          >{{ conversationForm.original.archived ? '恢复会话' : '归档会话' }}</a-button>
+          <a-button :disabled="saving" @click="conversationForm = null">取消</a-button>
           <a-button
             type="primary" html-type="submit" :loading="saving"
-            :disabled="!agentForm.name.trim() || (!agentForm.original?.archived && !validModel(agentForm.model))"
-          >保存智能体</a-button>
+            :disabled="!conversationForm.title.trim()"
+          >保存会话</a-button>
         </footer>
       </form>
     </a-modal>
@@ -580,38 +600,54 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.ai-agent-page{height:calc(100dvh - 111px);min-height:600px;display:flex;flex-direction:column;padding:20px 24px 22px;gap:16px}
-.page-heading,.agent-sidebar section>header,.chat-heading,.compose-tools,.compose-models,.edit-form footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.page-heading h1{margin:0 0 3px;font-size:25px;color:var(--color-text-1)}
-.page-heading p,.chat-heading p,.agent-sidebar section>p,.chat-empty p{margin:0;color:var(--color-text-3);font-size:13px}
-.agent-workbench{flex:1;min-height:0;display:grid;grid-template-columns:248px minmax(0,1fr);overflow:hidden;border:1px solid var(--color-border-2);border-radius:12px;background:var(--color-bg-2)}
-.agent-sidebar{display:flex;flex-direction:column;gap:14px;overflow:auto;border-right:1px solid var(--color-border-2);padding:14px;background:var(--color-fill-1)}
-.agent-sidebar section>header{margin-bottom:8px;font-size:13px;min-height:24px}
-.agent-sidebar section+section{padding-top:12px;border-top:1px solid var(--color-border-2)}
-.agent-sidebar select{width:100%}.archived-option{margin-top:7px;display:flex;align-items:center;gap:6px;color:var(--color-text-3);font-size:12px}
-.rail-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px;border:0;border-radius:6px;background:transparent;color:var(--color-text-2);cursor:pointer}
-.rail-item:disabled{cursor:default}.rail-item svg{flex-shrink:0}.rail-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rail-item:hover:not(:disabled),.rail-item.selected{background:rgb(var(--primary-1));color:rgb(var(--primary-6))}
-.chat-panel{display:flex;flex-direction:column;min-width:0;min-height:0}
-.chat-heading{justify-content:start;padding:13px 18px;border-bottom:1px solid var(--color-border-2)}
-.chat-heading>div{flex:1;min-width:0}.chat-heading h2{font-size:17px;margin:0}.chat-heading p{overflow-wrap:anywhere}
-.agent-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:rgb(var(--primary-1));color:rgb(var(--primary-6));font-size:18px}
-.chat-error{margin:9px 14px 0;flex-shrink:0}
-.transcript{flex:1;min-height:0;overflow:auto;padding:16px 18px}
-.chat-empty{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--color-text-2)}
-.chat-empty>svg{font-size:29px;color:rgb(var(--primary-6))}
-.turn{width:min(100%,840px);margin:0 auto 18px;display:grid;gap:10px}
-.turn-user,.turn-reply{width:fit-content;max-width:100%;min-width:0;border-radius:10px;padding:10px 13px}
-.turn-user{justify-self:end;background:rgb(var(--primary-1))}.turn-reply{background:var(--color-fill-1);border:1px solid var(--color-border-2)}
-.turn span,.turn small{font-size:12px;color:var(--color-text-3)}.turn p{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0 0;line-height:1.65}
-.turn small{display:block;margin-top:6px}.saved-cases{padding:10px;border:1px solid var(--color-border-2);border-radius:8px}
-.chat-compose{padding:12px 15px;border-top:1px solid var(--color-border-2);display:grid;gap:8px}
-.compose-tools{justify-content:flex-start;flex-wrap:wrap}.compose-spacer{flex:1}
-.message-field,.edit-form,.edit-form>label{display:grid;gap:6px;font-size:13px}
-textarea,select,.edit-form input:not([type=checkbox]){min-width:0;padding:7px 9px;border:1px solid var(--color-border-2);border-radius:5px;background:var(--color-bg-2);color:var(--color-text-1);font:inherit}
-textarea{resize:vertical;max-height:24dvh}.references{display:flex;flex-wrap:wrap;gap:6px}
-.edit-form{gap:12px}.edit-form footer{justify-content:end}
-.asset-choices{display:grid;gap:8px;max-height:340px;overflow:auto}
-.asset-choices label{display:flex;align-items:flex-start;gap:7px;overflow-wrap:anywhere}
-@media(max-width:1250px){.agent-workbench{grid-template-columns:210px minmax(0,1fr)}.ai-agent-page{padding-inline:16px}}
+.ai-agent-page { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 16px 20px 20px; }
+.page-state { margin: 10px; align-self: center; }
+.agent-workbench { flex: 1; min-height: 0; display: grid; grid-template-columns: clamp(205px, 22vw, 276px) minmax(0, 1fr); overflow: hidden; border: 1px solid var(--color-border-2); border-radius: 12px; background: var(--color-bg-2); }
+.chat-panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.chat-heading, .compose-tools, .edit-form footer { display: flex; align-items: center; gap: 10px; }
+.chat-heading { padding: 12px clamp(14px, 2vw, 30px); border-bottom: 1px solid var(--color-border-2); }
+.chat-heading > div { flex: 1; min-width: 0; }
+.chat-heading h1 { margin: 3px 0 0; font-size: 19px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-folder, .reply-model { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-2); }
+.chat-folder svg { flex-shrink: 0; }
+.chat-folder > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-error { margin: 8px 14px 0; flex-shrink: 0; }
+.transcript { flex: 1; min-height: 0; overflow: auto; padding: 22px clamp(16px, 4vw, 48px); }
+.chat-empty { flex: 1; min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 14px; text-align: center; }
+.chat-panel > .chat-empty { min-height: 0; }
+.chat-empty h1, .chat-empty h2 { margin: 1px 0 0; font-size: 21px; }
+.chat-empty p { margin: 0; color: var(--color-text-2); font-size: 13px; }
+.empty-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 13px; background: rgb(var(--primary-1)); color: rgb(var(--primary-6)); font-size: 23px; }
+.turn { width: min(100%, 860px); margin: 0 auto 24px; display: grid; gap: 16px; }
+.turn-user { justify-self: end; width: fit-content; max-width: 85%; min-width: 0; padding: 10px 14px; border-radius: 12px 12px 4px 12px; background: rgb(var(--primary-1)); }
+.turn-reply { min-width: 0; padding: 2px 4px 10px; border-bottom: 1px solid var(--color-border-1); }
+.reply-model { color: var(--color-text-2); font-weight: 600; }
+.turn span, .turn small { font-size: 12px; }
+.turn p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0 0; line-height: 1.7; }
+.turn small { display: block; margin-top: 6px; color: var(--color-text-2); }
+.saved-cases { width: min(100%, 860px); margin: auto; padding: 10px 14px; border: 1px solid var(--color-border-2); border-radius: 8px; }
+.compose-area { display: grid; gap: 7px; width: min(100%, 924px); align-self: center; padding: 0 clamp(16px, 2.5vw, 32px) 14px; }
+.chat-actions { display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+.chat-compose { display: grid; gap: 4px; padding: 9px 11px; border: 1px solid var(--color-border-3); border-radius: 15px; background: var(--color-bg-2); }
+.chat-compose:focus-within { border-color: rgb(var(--primary-5)); box-shadow: 0 0 0 2px rgb(var(--primary-1)); }
+.message-input { width: 100%; min-width: 0; min-height: 48px; max-height: 24dvh; padding: 5px 3px; resize: vertical; border: 0; outline: none; color: var(--color-text-1); background: transparent; font: inherit; line-height: 1.6; }
+.message-input::placeholder { color: var(--color-text-3); }
+.compose-tools { min-width: 0; gap: 6px; }
+.compose-spacer { flex: 1; }
+.model-trigger { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: min(100%, 360px); padding: 6px 9px; border: 0; border-radius: 6px; color: var(--color-text-2); background: var(--color-fill-1); font: inherit; cursor: pointer; }
+.model-trigger:hover:not(:disabled) { color: rgb(var(--primary-6)); background: rgb(var(--primary-1)); }
+.model-trigger:disabled { cursor: default; opacity: .65; }
+.model-trigger span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.model-trigger svg, .model-trigger small { flex-shrink: 0; }
+.references { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; max-height: 88px; overflow: auto; }
+.references :deep(.arco-tag) { max-width: 100%; }
+.references :deep(.arco-tag-content) { overflow: hidden; text-overflow: ellipsis; }
+.edit-form, .edit-form > label { display: grid; gap: 6px; font-size: 13px; }
+.edit-form { gap: 12px; }
+.edit-form input:not([type=checkbox]), .edit-form select { min-width: 0; padding: 7px 9px; border: 1px solid var(--color-border-2); border-radius: 5px; background: var(--color-bg-2); color: var(--color-text-1); font: inherit; }
+.edit-form footer { justify-content: end; flex-wrap: wrap; }
+.asset-choices { display: grid; gap: 8px; max-height: 340px; overflow: auto; }
+.asset-choices label { display: flex; align-items: flex-start; gap: 7px; overflow-wrap: anywhere; }
+@media (max-width: 1250px) { .ai-agent-page { padding-inline: 12px; } .agent-workbench { grid-template-columns: 222px minmax(0, 1fr); } }
+@media (max-height: 530px) { .ai-agent-page { padding-block: 6px; } .chat-heading { padding-block: 5px; } .compose-area { padding-bottom: 6px; } }
 </style>

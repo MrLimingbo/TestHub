@@ -78,6 +78,25 @@ public class AiAgentController {
         return ApiResponse.of(agents.createConversation(actor, projectId, agentId));
     }
 
+    @GetMapping("/conversations")
+    ApiResponse<List<Conversation>> workspaceConversations(@AuthenticationPrincipal AuthenticatedPrincipal actor,
+                                                            @PathVariable String projectId) {
+        return ApiResponse.of(agents.workspaceConversations(actor, projectId));
+    }
+
+    @PostMapping("/workspaces/{workspaceId}/conversations")
+    ApiResponse<Conversation> createWorkspaceConversation(@AuthenticationPrincipal AuthenticatedPrincipal actor,
+                                                           @PathVariable String projectId, @PathVariable String workspaceId) {
+        return ApiResponse.of(agents.createWorkspaceConversation(actor, projectId, workspaceId));
+    }
+
+    @PutMapping("/conversations/{conversationId}")
+    ApiResponse<Conversation> updateConversation(@AuthenticationPrincipal AuthenticatedPrincipal actor,
+                                                  @PathVariable String projectId, @PathVariable String conversationId,
+                                                  @Valid @RequestBody ConversationInput input) {
+        return ApiResponse.of(agents.updateConversation(actor, projectId, conversationId, input));
+    }
+
     @GetMapping("/conversations/{conversationId}")
     ApiResponse<ConversationDetail> detail(@AuthenticationPrincipal AuthenticatedPrincipal actor,
                                             @PathVariable String projectId, @PathVariable String conversationId) {

@@ -81,18 +81,48 @@ class AiAgentService {
         return repository.conversations(scope, agentId);
     }
 
+    List<Conversation> workspaceConversations(AuthenticatedPrincipal actor, String projectId) {
+        return repository.workspaceConversations(readScope(actor, projectId));
+    }
+
     @Transactional
     public Conversation createConversation(AuthenticatedPrincipal actor, String projectId, String agentId) {
         Scope scope = writeScope(actor, projectId);
-        activeAgent(scope, agentId);
+        Agent agent = agent(scope, agentId);
+        if (agent.archived()) throw badRequest("智能体或工作区已归档");
+        requireActiveWorkspace(scope, agent.workspaceId());
         String conversationId = id();
-        repository.createConversation(scope, conversationId, agentId);
+        repository.createConversation(scope, conversationId, agentId, null);
+        return withPlacement(conversation(scope, conversationId, false), agent);
+    }
+
+    @Transactional
+    public Conversation createWorkspaceConversation(AuthenticatedPrincipal actor, String projectId, String workspaceId) {
+        Scope scope = writeScope(actor, projectId);
+        requireActiveWorkspace(scope, workspaceId);
+        String conversationId = id();
+        repository.createConversation(scope, conversationId, null, workspaceId);
+        return conversation(scope, conversationId, false);
+    }
+
+    @Transactional
+    public Conversation updateConversation(AuthenticatedPrincipal actor, String projectId, String conversationId,
+                                           ConversationInput input) {
+        Scope scope = writeScope(actor, projectId);
+        Conversation current = placedConversation(scope, conversation(scope, conversationId, true));
+        long version = nextVersion(input.version(), current.version());
+        Workspace target = workspace(scope, input.workspaceId(), true);
+        if (target.archived() && (!target.id().equals(current.workspaceId()) || (current.archived() && !input.archived()))) {
+            throw badRequest("请选择未归档的 AI 工作区");
+        }
+        if (input.title() != null && input.title().isBlank()) throw badRequest("请输入会话名称");
+        repository.updateConversation(scope, conversationId, input, version);
         return conversation(scope, conversationId, false);
     }
 
     ConversationDetail detail(AuthenticatedPrincipal actor, String projectId, String conversationId) {
         Scope scope = readScope(actor, projectId);
-        Conversation conversation = conversation(scope, conversationId, false);
+        Conversation conversation = placedConversation(scope, conversation(scope, conversationId, false));
         var turns = repository.turns(scope, conversationId).stream().map(turn ->
                 turn.status() == TurnStatus.RUNNING && turn.startedAt().isBefore(Instant.now().minus(TURN_LEASE))
                         ? new Turn(turn.id(), turn.number(), turn.attemptId(), turn.model(), turn.userText(), null,
@@ -110,8 +140,11 @@ class AiAgentService {
 
     @Transactional
     public Inference begin(Scope scope, String conversationId, SendInput input, AiContextService.Context sources) {
-        Conversation conversation = conversation(scope, conversationId, true);
-        Agent agent = activeAgent(scope, conversation.agentId());
+        Conversation stored = conversation(scope, conversationId, true);
+        Agent agent = stored.agentId() == null ? null : agent(scope, stored.agentId());
+        Conversation conversation = withPlacement(stored, agent);
+        if (conversation.archived()) throw badRequest("会话已归档");
+        requireActiveWorkspace(scope, conversation.workspaceId());
         ChatModelAccess model = providers.chatModel(input.model());
         Instant now = Instant.now();
         repository.expireTurns(scope, conversationId, now.minus(TURN_LEASE));
@@ -134,7 +167,8 @@ class AiAgentService {
 
         String promptContext = retry ? last.promptContext() : sources.text();
         String summary = retry ? last.sourceSummary() : sources.summary();
-        List<ChatLine> context = context(agent.systemPrompt(), turns, withSources(message.strip(), promptContext), model.contextWindow());
+        List<ChatLine> context = context(agent == null ? "" : agent.systemPrompt(), turns,
+                withSources(message.strip(), promptContext), model.contextWindow());
         Turn turn = new Turn(retry ? last.id() : id(), retry ? last.number() : turns.size() + 1, id(), input.model(),
                 message.strip(), null, TurnStatus.RUNNING, null, now, summary, promptContext);
         if (retry) repository.retryTurn(scope, turn);
@@ -195,12 +229,18 @@ class AiAgentService {
         return repository.agent(scope, id).orElseThrow(() -> notFound("智能体不存在"));
     }
 
-    private Agent activeAgent(Scope scope, String id) {
-        Agent agent = agent(scope, id);
-        if (agent.archived() || workspace(scope, agent.workspaceId(), true).archived()) {
-            throw badRequest("智能体或工作区已归档");
-        }
-        return agent;
+    private void requireActiveWorkspace(Scope scope, String id) {
+        if (workspace(scope, id, true).archived()) throw badRequest("AI 工作区已归档");
+    }
+
+    private Conversation placedConversation(Scope scope, Conversation row) {
+        return row.workspaceId() == null ? withPlacement(row, agent(scope, row.agentId())) : row;
+    }
+
+    private static Conversation withPlacement(Conversation row, Agent agent) {
+        if (row.workspaceId() != null) return row;
+        return new Conversation(row.id(), row.agentId(), row.title(), row.updatedAt(), agent.workspaceId(),
+                agent.archived(), row.version());
     }
 
     private Conversation conversation(Scope scope, String id, boolean lock) {

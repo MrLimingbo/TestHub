@@ -76,22 +76,48 @@ class AiAgentRepository {
                 .param("owner", scope.userId()).param("agent", agentId).query(this::conversation).list();
     }
 
+    List<Conversation> workspaceConversations(Scope scope) {
+        return scoped("""
+                SELECT c.id, c.agent_id, c.title, c.updated_at, c.version,
+                       COALESCE(c.workspace_id, a.workspace_id) AS workspace_id,
+                       CASE WHEN c.workspace_id IS NULL THEN a.archived ELSE c.archived END AS archived
+                FROM ai_conversation c LEFT JOIN ai_agent a
+                    ON a.id = c.agent_id AND a.organization_id = c.organization_id AND a.project_id = c.project_id
+                WHERE c.organization_id = :org AND c.project_id = :project AND c.owner_id = :owner
+                ORDER BY c.updated_at DESC, c.id DESC
+                """, scope).param("owner", scope.userId()).query(this::conversation).list();
+    }
+
     Optional<Conversation> conversation(Scope scope, String id, boolean lock) {
         return scoped("SELECT * FROM ai_conversation WHERE " + SCOPE + " AND owner_id = :owner AND id = :id"
                         + (lock ? " FOR UPDATE" : ""), scope)
                 .param("owner", scope.userId()).param("id", id).query(this::conversation).optional();
     }
 
-    void createConversation(Scope scope, String id, String agentId) {
+    void createConversation(Scope scope, String id, String agentId, String workspaceId) {
         scoped("""
-                INSERT INTO ai_conversation (id, organization_id, project_id, agent_id, owner_id, title)
-                VALUES (:id, :org, :project, :agent, :owner, :title)
-                """, scope).param("id", id).param("agent", agentId).param("owner", scope.userId())
+                INSERT INTO ai_conversation (id, organization_id, project_id, agent_id, workspace_id, owner_id, title)
+                VALUES (:id, :org, :project, :agent, :workspace, :owner, :title)
+                """, scope).param("id", id).param("agent", agentId, Types.CHAR)
+                .param("workspace", workspaceId, Types.CHAR).param("owner", scope.userId())
                 .param("title", "新会话").update();
     }
 
+    void updateConversation(Scope scope, String id, ConversationInput input, long version) {
+        scoped("""
+                UPDATE ai_conversation SET workspace_id = :workspace, archived = :archived, version = :version,
+                    custom_title = CASE WHEN :title IS NULL THEN custom_title ELSE TRUE END,
+                    title = COALESCE(:title, title)
+                WHERE
+                """ + SCOPE + " AND owner_id = :owner AND id = :id", scope)
+                .param("id", id).param("owner", scope.userId()).param("workspace", input.workspaceId())
+                .param("archived", input.archived()).param("version", version)
+                .param("title", input.title() == null ? null : input.title().strip(), Types.VARCHAR).update();
+    }
+
     void touchConversation(Scope scope, String id, String title) {
-        scoped("UPDATE ai_conversation SET title = COALESCE(:title, title), updated_at = CURRENT_TIMESTAMP WHERE "
+        scoped("UPDATE ai_conversation SET title = CASE WHEN custom_title THEN title ELSE COALESCE(:title, title) END, "
+                        + "updated_at = CURRENT_TIMESTAMP WHERE "
                         + SCOPE + " AND owner_id = :owner AND id = :id", scope)
                 .param("id", id).param("owner", scope.userId()).param("title", title, Types.VARCHAR).update();
     }
@@ -159,7 +185,8 @@ class AiAgentRepository {
 
     private Conversation conversation(ResultSet row, int index) throws SQLException {
         return new Conversation(row.getString("id"), row.getString("agent_id"), row.getString("title"),
-                row.getTimestamp("updated_at").toInstant());
+                row.getTimestamp("updated_at").toInstant(), row.getString("workspace_id"),
+                row.getBoolean("archived"), row.getLong("version"));
     }
 
     private Turn turn(ResultSet row, int index) throws SQLException {

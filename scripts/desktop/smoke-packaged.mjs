@@ -298,25 +298,35 @@ async function startPackagedAgentFixture() {
 }
 
 async function exercisePackagedAgent(page, project, fixture) {
-  const name = '包验收智能体 ' + crypto.randomUUID()
+  const name = '包验收会话 ' + crypto.randomUUID()
+  const directConversation = manifest.desktopSchemaVersion >= 60
   const provider = await request(page, '/api/v1/model-providers', { displayName: '包内对话验收', apiBaseUrl: fixture.origin + '/v1',
     protocol: 'CHAT_COMPLETIONS', retryPolicy: 'DISABLED', models: [{ id: 'packaged-qa-model' }] })
   const base = '/api/v1/projects/' + project
   const folder = await request(page, base + '/functional/catalogs', { scope: 'CASES', name, sortOrder: 0 })
   await page.getByRole('link', { name: 'AI测试', exact: true }).click()
-  await page.getByRole('button', { name: '新建 AI 工作区', exact: true }).click()
+  await page.getByRole('button', { name: directConversation ? '新建工作区' : '新建 AI 工作区', exact: true }).click()
   await page.getByLabel('工作区名称', { exact: true }).fill(name)
   await page.getByRole('button', { name: '保存工作区', exact: true }).click()
-  await page.getByRole('button', { name: '新建智能体', exact: true }).click()
-  await page.getByLabel('智能体名称', { exact: true }).fill(name)
-  await page.getByRole('combobox', { name: '默认模型', exact: true }).selectOption(JSON.stringify([provider.id, 'packaged-qa-model']))
-  await page.getByRole('button', { name: '保存智能体', exact: true }).click()
+  if (directConversation) {
+    await page.getByRole('button', { name: '在 ' + name + ' 新建会话', exact: true }).click()
+    await page.getByRole('button', { name: '选择对话模型', exact: true }).click()
+    await page.getByRole('combobox', { name: '对话模型', exact: true }).selectOption(JSON.stringify([provider.id, 'packaged-qa-model']))
+  } else {
+    await page.getByRole('button', { name: '新建智能体', exact: true }).click()
+    await page.getByLabel('智能体名称', { exact: true }).fill(name)
+    await page.getByRole('combobox', { name: '默认模型', exact: true }).selectOption(JSON.stringify([provider.id, 'packaged-qa-model']))
+    await page.getByRole('button', { name: '保存智能体', exact: true }).click()
+  }
   await page.locator('input[type=file]').setInputFiles({ name: 'package.txt', mimeType: 'text/plain', buffer: Buffer.from('包内附件') })
   await page.getByText('package.txt', { exact: true }).waitFor()
   await page.getByRole('textbox', { name: '消息', exact: true }).fill('第一轮')
-  await page.getByRole('button', { name: '发送', exact: true }).click()
+  await page.getByRole('button', { name: directConversation ? '发送消息' : '发送', exact: true }).click()
   await page.getByText('包内对话第一轮', { exact: true }).waitFor()
-  await page.getByRole('button', { name: '生成用例草稿', exact: true }).click()
+  if (directConversation) {
+    await page.getByRole('button', { name: '添加附件或资料', exact: true }).click()
+  }
+  await page.getByText('生成用例草稿', { exact: true }).click()
   await page.getByRole('button', { name: '审核并写入用例库', exact: true }).click()
   await page.getByRole('combobox', { name: '写入用例目录', exact: true }).selectOption(folder.id)
   await page.getByRole('button', { name: '确认写入 1 条草稿', exact: true }).click()

@@ -27,7 +27,11 @@ public final class AiAgentModels {
                              @NotNull @Size(max = 500) String description, @NotNull @Size(max = 8000) String systemPrompt,
                              @NotNull @Valid ChatSelection model, boolean archived, @Positive Long version) { }
 
-    public record Conversation(String id, String agentId, String title, Instant updatedAt) { }
+    public record Conversation(String id, String agentId, String title, Instant updatedAt, String workspaceId,
+                               boolean archived, long version) { }
+
+    public record ConversationInput(@NotBlank @Size(max = 26) String workspaceId, @Size(max = 120) String title,
+                                    boolean archived, @NotNull @Positive Long version) { }
 
     public record Turn(String id, int number, String attemptId, ChatSelection model, String userText, String reply,
                        TurnStatus status, String failureMessage, Instant startedAt, String sourceSummary,

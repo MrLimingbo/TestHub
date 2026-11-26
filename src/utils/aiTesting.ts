@@ -13,7 +13,15 @@ export interface AiAgent {
   archived: boolean
   version: number
 }
-export interface Conversation { id: string; agentId: string; title: string; updatedAt: string }
+export interface Conversation {
+  id: string
+  agentId: string | null
+  workspaceId: string
+  title: string
+  updatedAt: string
+  archived: boolean
+  version: number
+}
 export type TurnStatus = 'RUNNING' | 'COMPLETED' | 'STOPPED' | 'FAILED'
 export interface Turn {
   id: string
